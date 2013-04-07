@@ -1,15 +1,4 @@
-# #########################################################
-# this makefile allows building and cleaning the toggle demo
-#
-# Copyright (c) 2011 Steve Denson
-# MIT Licensed
-# #########################################################
-
 CFLAGS = -Os
-
-#
-# objects for this program
-#
 
 PRJ = SPI_Demo
 
