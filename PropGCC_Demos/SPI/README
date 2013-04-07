@@ -1,2 +1,7 @@
 PropGCC SPI Demo - README
 
+NOTE: To compile this demo, you must either copy the files or create symbolic
+links to the following files:
+	- spi.c
+	- spi.h		(see note in common.mk for reasoning why this must be included)
+	- spi_as.S

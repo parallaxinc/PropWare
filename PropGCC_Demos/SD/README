@@ -1,0 +1,10 @@
+PropGCC SD Demo - README
+
+NOTE: To compile this demo, you must either copy or create symbolic
+links to the following files:
+	- spi.c
+	- spi.h		(see note in common.mk for reasoning why this must be included)
+	- spi_as.S
+	- sd.c
+	- sd.h		(see note in common.mk for reasoning why this must be included)
+
