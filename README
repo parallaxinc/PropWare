@@ -2,4 +2,15 @@ PropWare - README
 Author:	 David Zemon
 Purpose: Generic C library files for the Parallax Propeller Microcontroller
 
+TODO:
+	- Finish SD routine
+	- Created shared library file(s)
+	- Re-create SPI library to use inline assembly and FCACHE instead of
+	  a second cog
+	- Add "SPIShiftOut_Fast" and "SPIShiftIn_Fast" functions that do not use
+	  a delay in for the clock - useful for SD card read
+	- Add "SPIShiftIn_Multi", which will repeatedly shift in values and allow
+	  for the selection between *_Fast or normal using a parameter
+
 Further description will come soon...
+
