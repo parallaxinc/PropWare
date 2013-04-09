@@ -5,7 +5,7 @@ PRJ = SD_Demo
 NAME = $(PRJ)
 OBJS = $(PRJ).o sd.o spi.o spi_as.o
 BOARD = QUICKSTART
-MODEL = lmm
+MODEL = cmm
 
 all: $(NAME).elf
 

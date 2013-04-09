@@ -24,6 +24,8 @@
 #define SD_INVALID_NUM_BYTES	SD_ERRORS_BASE + 2
 #define SD_INVALID_RESPONSE		SD_ERRORS_BASE + 3
 #define SD_INVALID_INIT			SD_ERRORS_BASE + 4
+#define SD_INVALID_FILESYSTEM	SD_ERRORS_BASE + 5
+#define SD_INVALID_DAT_STRT_ID	SD_ERRORS_BASE + 6
 
 /* @Brief: Initialize SD card communication over SPI for 3.3V configuration
  *
@@ -46,19 +48,6 @@ uint8 SDMount (void);
  * @return		Returns 0 upon success, error code otherwise
  */
 uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
-#endif
-
-#ifdef SD_DEBUG
-#include <stdio.h>
-#include <stdarg.h>
-/* Brief: Print an error through UART string followed by entering an infinite loop
- *
- * @param	err		Error number used to determine error string
- */
-void SDError (const uint8 err, ...);
-#else
-// Exit calling function by returning 'err'
-#define SDError(err, ...)				return err
 #endif
 
 #endif /* SD_H_ */
