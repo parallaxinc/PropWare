@@ -14,13 +14,22 @@ void main (void) {
 
 	if (err = SDStart(MOSI, MISO, SCLK, CS))
 		error(err);
+	__simple_printf("SD routine started. Mounting now...\n");
 	if (err = SDMount())
+		error(err);
+	__simple_printf("FAT partition mounted!\n");
+
+	__simple_printf("\nPrinting root directory\n");
+	if (err = SD_Shell_ls())
+		error(err);
+
+	if (err = SD_Shell_cat("TEST.DAT"))
 		error(err);
 
 	GPIODirModeSet(BIT_16, GPIO_DIR_OUT);
+	__simple_printf("Done!!!\n");
 	while (1) {
 		GPIOPinToggle(BIT_16);
-		__simple_printf("It's working!!!\n");
 		waitcnt(CLKFREQ + CNT);
 	}
 }

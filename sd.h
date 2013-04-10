@@ -11,8 +11,10 @@
 #include <gpio.h>
 #include <spi.h>
 
-#define SD_DEBUG
-#define SD_VERBOSE
+//#define SD_DEBUG
+//#define SD_VERBOSE
+//#define SD_VERBOSE_BLOCKS
+#define SD_SHELL
 
 #define SD_LINE_SIZE			16
 
@@ -26,6 +28,7 @@
 #define SD_INVALID_INIT			SD_ERRORS_BASE + 4
 #define SD_INVALID_FILESYSTEM	SD_ERRORS_BASE + 5
 #define SD_INVALID_DAT_STRT_ID	SD_ERRORS_BASE + 6
+#define SD_FILENAME_NOT_FOUND	SD_ERRORS_BASE + 7
 
 /* @Brief: Initialize SD card communication over SPI for 3.3V configuration
  *
@@ -39,16 +42,24 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
  */
 uint8 SDMount (void);
 
-#ifdef SD_VERBOSE
-/* @Brief: Print a block of data in hex format to the screen in 8-byte lines
+#ifdef SD_SHELL
+#include <stdio.h>
+/* @Brief: List the contents of a directory on the screen (similar to 'ls .')
  *
- * @param	*dat		Pointer to the beginning of the data
- * @param	bytes		Number of bytes to print
+ * @param	*absPath	Absolute path of the directory to be printed
  *
  * @return		Returns 0 upon success, error code otherwise
  */
-uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
+// NOTE: Beginning work by reading only root directory
+uint8 SD_Shell_ls (void);
+
+/* @Brief: Dump the contents of a file to the screen (similar to 'cat f')
+ *
+ * @param	*f			Short filename of file to print
+ *
+ * @return		Returns 0 upon success, error code otherwise
+ */
+uint8 SD_Shell_cat (const char *f);
 #endif
 
 #endif /* SD_H_ */
-
