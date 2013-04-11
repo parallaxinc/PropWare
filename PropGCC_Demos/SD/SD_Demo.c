@@ -23,7 +23,13 @@ void main (void) {
 	if (err = SD_Shell_ls())
 		error(err);
 
-	if (err = SD_Shell_cat("TEST.DAT"))
+	if (err = SD_Shell_cat("SD.C"))
+		error(err);
+
+	if (err = SD_Shell_cat("PROFILE.TXT"))
+		error(err);
+
+	if (err = SD_Shell_ls())
 		error(err);
 
 	GPIODirModeSet(BIT_16, GPIO_DIR_OUT);
