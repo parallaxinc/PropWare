@@ -108,13 +108,15 @@ enum cluster_types {
 #define SD_EOF						-1					// System dependent - may need to be defined elsewhere
 #endif
 
-// Global variable declarations
+/*** Global variable declarations ***/
 // Initialization variables
-uint32 g_sd_cs;
-uint8 g_sd_filesystem;
-uint8 g_sd_sectorsPerCluster_shift;
-uint32 g_sd_rootDirSectors;
-uint32 g_sd_fatStart, g_sd_rootAddr, g_sd_firstDataAddr;
+uint32 g_sd_cs;											// Chip select pin mask
+uint8 g_sd_filesystem;					// Filesystem type - one of SD_FAT_16 or SD_FAT_32
+uint8 g_sd_sectorsPerCluster_shift;	// Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
+uint32 g_sd_rootDirSectors;					// Number of sectors for the root directory
+uint32 g_sd_fatStart;								// Starting block address of the FAT
+uint32 g_sd_rootAddr;					// Starting block address of the root directory
+uint32 g_sd_firstDataAddr;			// Starting block address of the first data cluster
 
 // FAT filesystem variables
 uint8 g_sd_buf[SD_SECTOR_SIZE]; // Buffer for initialization & directory contents; if not set for speed optimization, file contents will also be dumped here
@@ -132,12 +134,12 @@ uint8 g_sd_curSectorOffset;	// Store the current sector offset from the beginnin
 uint32 g_sd_fseek;
 uint32 g_sd_ftell;
 
-// Special global variables for speed optimization
+// Special global variables used onnly if speed optimization is enabled
 #ifdef SD_SPEED_OVER_SPACE
 uint8 g_sd_file[SD_SECTOR_SIZE];							// Buffer for file contents
-uint32 g_sd_curAllocUnit_file;// Store the current allocation unit
+uint32 g_sd_curAllocUnit_file;						// Store the current allocation unit
 uint32 g_sd_curClusterStartAddr_file;// Store the current cluster's starting sector number
-uint32 g_sd_nextAllocUnit_file;// Look-ahead at the next FAT entry used by the next file
+uint32 g_sd_nextAllocUnit_file;	// Look-ahead at the next FAT entry used by the next file
 uint8 g_sd_curSectorOffset_file;// Store the current sector offset from the beginning of the cluster
 #endif
 
@@ -184,15 +186,89 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat);
  */
 uint8 SDReadDataBlock (uint32 address, uint8 *dat);
 
-// TODO: Document these prototypes
+/* @Brief: Read the standard length name of a file entry. If an extension exists, a period will be
+ *         inserted before the extension. A null-terminator is always appended to the end
+ *
+ * @param	*buf		First byte in local memory containing a FAT entry
+ * @param	*filename	Address in memory where the filename string will be stored
+ *
+ * @Pre: *buf must point to the first byte in a FAT entry - no error checking is executed on buf
+ * @Pre: Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of memory are not allocated for filename
+ *
+ * @return
+ */
 void SDGetFilename (const uint8 *buf, uint8 *filename);
+
+/* @Brief: Return byte-reversed 16-bit variable (SD cards store bytes little-endian therefore we must
+ * 		   reverse them to use multi-byte variables)
+ *
+ * @param	dat[]		Address of first byte of data
+ *
+ * @return		Returns a normal (big-endian) 16-bit word
+ */
 uint16 SDConvertDat16 (const uint8 dat[]);
+
+/* @Brief: Return byte-reversed 32-bit variable (SD cards store bytes little-endian therefore we must
+ * 		   reverse them to use multi-byte variables)
+ *
+ * @param	dat[]		Address of first byte of data
+ *
+ * @return	Returns a normal (big-endian) 32-bit word
+ */
 uint32 SDConvertDat32 (const uint8 dat[]);
+
+/* @Brief: Find and return the starting sector's address for a directory path given in a c-string. Use
+ *         Unix-style path names (like /foo/bar/)
+ *
+ * @param	*path		C-string representing Unix-style path
+ *
+ * @return		Returns sector address of desired path
+ */
+// TODO: Implement minimalist error checking (-1 or 0 would be valid error codes)
+// TODO: Allow for paths outside the current directory
 uint32 SDGetSectorFromPath (const char *path);
+
+/* @Brief: Find and return the starting sector's address for a given allocation unit (note - not cluster)
+ *
+ * @param	allocUnit	Allocation unit in FAT filesystem
+ *
+ * @return		Returns sector address of desired allocation unit
+ */
 uint32 SDGetSectorFromAlloc (const uint32 allocUnit);
+
+/* @Brief: Find the next sector in the FAT, directory, or file. When it is found, load it into the
+ *         appropriate global buffer
+ *
+ * @param	*buf		Array of SD_SECTOR_SIZE bytes that can be filled with the requested sector
+ *
+ * @return		Returns 0 upon success, otherwise error code
+ */
 uint8 SDLoadNextSector (uint8 *buf);
+
+/* @Brief: When the final sector of a cluster is finished, SDIncCluster can be called. The appropriate
+ *         global variables will be set according (incremented or set by the FAT) and the first sector
+ *         of the next cluster will be read into the desired buffer.
+ *
+ * @param	*curSectorOffset		Address of current sector offset variable
+ * @param	*nextAllocUnit			Address of the next allocation unit variable
+ * @param	*curAllocUnit			Address of the current allocation unit variable
+ * @param	*curClusterStartAddr	Address of the current clutser's starting address variable
+ * @param	*buf					Array of SD_SECTOR_SIZE bytes used to hold a sector from the SD card
+ *
+ * @return
+ */
 uint8 SDIncCluster (uint8 *curSectorOffset, uint32 *nextAllocUnit, uint32 *curAllocUnit,
 		uint32 *curClusterStartAddr, uint8 *buf);
+
+/* @Brief: Load the first sector of a file (note - not directory) and initialize global variables dealing
+ *         with files (seek/tell pointers)
+ *
+ * @param	filePtr		Offset amount from the beginning of the currently loaded sector; Used to read
+ * 						file parameters such as allocation unit and size
+ * @param	*fileLen	Length of the file in bytes will be stored into this address
+ *
+ * @return		Returns 0 upon success, else error code
+ */
 uint8 SDOpenFile_ptr (const uint16 filePtr, uint32 *fileLen);
 
 #ifdef SD_SHELL
@@ -509,17 +585,17 @@ uint8 SDLoadNextSector (uint8 *buf) {
 #ifdef SD_SPEED_OVER_SPACE
 	if (buf == g_sd_buf) {
 #endif
-	curSectorOffset = &g_sd_curSectorOffset;
-	nextAllocUnit = &g_sd_nextAllocUnit;
-	curAllocUnit = &g_sd_curAllocUnit;
-	curClusterStartAddr = &g_sd_curClusterStartAddr;
+		curSectorOffset = &g_sd_curSectorOffset;
+		nextAllocUnit = &g_sd_nextAllocUnit;
+		curAllocUnit = &g_sd_curAllocUnit;
+		curClusterStartAddr = &g_sd_curClusterStartAddr;
 #ifdef SD_SPEED_OVER_SPACE
-} else {
-	curSectorOffset = &g_sd_curSectorOffset_file;
-	nextAllocUnit = &g_sd_nextAllocUnit_file;
-	curAllocUnit = &g_sd_curAllocUnit_file;
-	curClusterStartAddr = &g_sd_curClusterStartAddr_file;
-}
+	} else {
+		curSectorOffset = &g_sd_curSectorOffset_file;
+		nextAllocUnit = &g_sd_nextAllocUnit_file;
+		curAllocUnit = &g_sd_curAllocUnit_file;
+		curClusterStartAddr = &g_sd_curClusterStartAddr_file;
+	}
 #endif
 
 	// Are we looking at the root directory of a FAT16 system?

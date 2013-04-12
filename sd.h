@@ -15,12 +15,24 @@
 // un-comment the following line and set accordingly
 //#define SD_EOF
 
-// Extra code options: un-comment as desired to enable extra features
+/* @Brief: Extra code options - Uncomment to enable features
+ *
+ * @option	SD_DEBUG			Enables thorough debugging features similar to exceptions; Errors
+ * 								will be caught the program will enter an infinite loop
+ * @option	SD_VERBOSE			Verbose functions will be enabled (such as SDPrintHexBlock) and
+ * 								error checking will display more information through UART
+ * @option	SD_VERBOSE_BLOCKS	Select data blocks/sectors will be display via UART for
+ * 								debugging purposes
+ * @option	SD_SHELL			Unix-like command-line arguments will be defined and available
+ * @option	SD_SPEED_OVER_SPACE	Extra RAM will be used to keep file and directory sectors separate;
+ * 								This saves time and does not force the chip to reload directory
+ * 								contents with each file-switch
+ */
 #define SD_DEBUG
 #define SD_VERBOSE
-//#define SD_VERBOSE_BLOCKS
+#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
-//#define SD_SPEED_OVER_SPACE
+#define SD_SPEED_OVER_SPACE
 
 #define SD_LINE_SIZE			16
 
@@ -40,11 +52,16 @@
 
 /* @Brief: Initialize SD card communication over SPI for 3.3V configuration
  *
- * @param	mosi
+ * @param	mosi		Pin mask for MOSI pin
+ * @param	miso		Pin mask for MISO pin
+ * @param	sclk		Pin mask for SCLK pin
+ * @param	cs			Pin mask for CS pin
+ *
+ * @return		Returns 0 upon success, otherwise error code
  */
 uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs);
 
-/* @Brief: Mount filesystem
+/* @Brief: Mount either FAT16 or FAT32 filesystem
  *
  * @return		Returns 0 upon success, error code otherwise
  */
@@ -53,7 +70,7 @@ uint8 SDMount (void);
 /* @Brief: Load the first sector of a file into the file buffer; Initialize global
  * 		   character pointers (seek and tell)
  *
- * @param *filename		C-string containing the filename to open
+ * @param	*filename		C-string containing the filename to open
  *
  * @return 		Returns 0 upon success, error code otherwise
  */
