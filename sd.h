@@ -19,18 +19,23 @@
  *
  * @option	SD_DEBUG			Enables thorough debugging features similar to exceptions; Errors
  * 								will be caught the program will enter an infinite loop
+ * 								DEFAULT: OFF
  * @option	SD_VERBOSE			Verbose functions will be enabled (such as SDPrintHexBlock) and
  * 								error checking will display more information through UART
+ * 								DEFAULT: ON
  * @option	SD_VERBOSE_BLOCKS	Select data blocks/sectors will be display via UART for
  * 								debugging purposes
+ * 								DEFAULT: OFF
  * @option	SD_SHELL			Unix-like command-line arguments will be defined and available
+ * 								DEFAULT: ON
  * @option	SD_SPEED_OVER_SPACE	Extra RAM will be used to keep file and directory sectors separate;
  * 								This saves time and does not force the chip to reload directory
  * 								contents with each file-switch
+ * 								DEFAULT: ON
  */
-#define SD_DEBUG
+//#define SD_DEBUG
 #define SD_VERBOSE
-#define SD_VERBOSE_BLOCKS
+//#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
 #define SD_SPEED_OVER_SPACE
 

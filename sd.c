@@ -7,8 +7,8 @@
 #include <sd.h>
 
 // SPI config
-#define SD_SPI_INIT_FREQ			400000					// Run SD initialization at 200 kHz
-#define SD_SPI_FINAL_FREQ			1900000					// Speed clock to 1.8 MHz after initialization; TODO: implement a custom send/receive command that does not use waitcnt instructions
+#define SD_SPI_INIT_FREQ			200000					// Run SD initialization at 200 kHz
+#define SD_SPI_FINAL_FREQ			1900000					// Speed clock to 1.9 MHz after initialization
 #define SD_SPI_POLARITY				SPI_POLARITY_LOW		// SD cards like low polarity
 #define SD_SPI_MODE_OUT				SPI_MSB_FIRST
 #define SD_SPI_MODE_IN				SPI_MSB_PRE
@@ -144,7 +144,7 @@ uint8 g_sd_curSectorOffset_file;// Store the current sector offset from the begi
 #endif
 
 #ifdef SD_DEBUG
-uint8 g_sd_sd_invalidResponse;
+uint8 g_sd_invalidResponse;
 #endif
 
 /***********************************
@@ -725,7 +725,7 @@ uint8 SDGetResponse (uint8 bytes, uint8 *dat) {
 				return err;
 	} else {
 #ifdef SD_DEBUG
-		g_sd_sd_invalidResponse = *dat;
+		g_sd_invalidResponse = *dat;
 #endif
 		return SD_INVALID_RESPONSE;
 	}
@@ -755,7 +755,9 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat) {
 
 // Ensure this response is "active"
 	if (SD_RESPONSE_ACTIVE == *dat) {
-		//++dat;			// Commented out to write over this byte later (uncomment for debugging purposes only)
+#ifdef SD_DEBUG_VERBOSE
+		++dat;	// Allowing this line to run will increase the response length by 1
+#endif
 
 		// Ignore blank data again
 		timeout = SD_RESPONSE_TIMEOUT + CNT;
@@ -770,12 +772,16 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat) {
 
 		// Check for the data start identifier and continue reading data
 		if (SD_DATA_START_ID == *dat) {
-			//++dat;			// Commented out to write over this byte later (uncomment for debugging purposes only)
+#ifdef SD_DEBUG_VERBOSE
+			++dat;	// Allowing this line to run will increase the response length by 1
+#endif
 			// Read in requested data bytes
 			while (bytes--) {
-#ifdef SD_DEBUG
+#if (defined SD_DEBUG)
 				if (err = SPIShiftIn(8, SD_SPI_MODE_IN, dat++, SD_SPI_BYTE_IN_SZ))
 					return err;
+#elif (defined SPI_FAST)
+				SPIShiftIn_fast(8, SD_SPI_MODE_IN, dat++, SD_SPI_BYTE_IN_SZ);
 #else
 				SPIShiftIn(8, SD_SPI_MODE_IN, dat++, SD_SPI_BYTE_IN_SZ);
 #endif
@@ -799,13 +805,13 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat) {
 				return err;
 		} else {
 #ifdef SD_DEBUG
-			g_sd_sd_invalidResponse = *dat;
+			g_sd_invalidResponse = *dat;
 #endif
 			return SD_INVALID_DAT_STRT_ID;
 		}
 	} else {
 #ifdef SD_DEBUG
-		g_sd_sd_invalidResponse = *dat;
+		g_sd_invalidResponse = *dat;
 #endif
 		return SD_INVALID_RESPONSE;
 	}
@@ -1096,20 +1102,20 @@ void SDError (const uint8 err, ...) {
 #ifdef SD_VERBOSE
 			printf("SD Error %u: %s0x%02X\nThe following bits are set:\n",
 					(err - SD_ERRORS_BASE), "Invalid first-byte response\n\tReceived: ",
-					g_sd_sd_invalidResponse);
+					g_sd_invalidResponse);
 #else
 			__simple_printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
-					"Invalid first-byte response\n\tReceived: ", g_sd_sd_invalidResponse);
+					"Invalid first-byte response\n\tReceived: ", g_sd_invalidResponse);
 #endif
-			SDFirstByteExpansion(g_sd_sd_invalidResponse);
+			SDFirstByteExpansion(g_sd_invalidResponse);
 			break;
 		case SD_INVALID_DAT_STRT_ID:
 #ifdef SD_VERBOSE
 			printf("SD Error %u: %s0x%02X\n", (err - SD_ERRORS_BASE),
-					"Invalid data-start ID\n\tReceived: ", g_sd_sd_invalidResponse);
+					"Invalid data-start ID\n\tReceived: ", g_sd_invalidResponse);
 #else
 			__simple_printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
-					"Invalid data-start ID\n\tReceived: ", g_sd_sd_invalidResponse);
+					"Invalid data-start ID\n\tReceived: ", g_sd_invalidResponse);
 #endif
 			break;
 		case SD_INVALID_INIT:

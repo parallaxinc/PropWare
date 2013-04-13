@@ -14,6 +14,8 @@
 #define SPI_FUNC_SEND			0
 #define	SPI_FUNC_READ			1
 #define SPI_FUNC_CLK			2
+#define SPI_FUNC_SEND_FAST		3
+#define SPI_FUNC_READ_FAST		4
 
 #define SPI_BITS_OFFSET			8
 #define SPI_MODE_OFFSET			16
@@ -56,6 +58,8 @@ entry					call #READ_CMD					'' Read in the pin mask MOSI
 						or dira, sclk
 						andn dira, miso
 
+						// Followed by preparing the counter module for fast reading/writing
+
 /*** MAIN LOOP ***/
 LOOP					// Retrieve a command
 						call #READ_CMD
@@ -67,13 +71,21 @@ LOOP					// Retrieve a command
 						cmp temp, #SPI_FUNC_SEND wz
 		if_z			jmp #SEND
 
-						// If command is "Read", call function
+						// If command is "Read"
 						cmp temp, #SPI_FUNC_READ wz
 		if_z			jmp #READ
 
-						// If command is "Set clock", call function
+						// If command is "Set clock"
 						cmp temp, #SPI_FUNC_CLK wz
 		if_z			jmp #SET_CLOCK
+
+						// If command is "Send fast"
+						cmp temp, #SPI_FUNC_SEND_FAST wz
+		if_z			jmp #SEND_fast
+
+						// If command is "Read fast"
+						cmp temp, #SPI_FUNC_READ_FAST wz
+		if_z			jmp #READ_fast
 
 						// Default: Return to loop
 						jmp #LOOP
@@ -199,6 +211,134 @@ lsb_post				// Read in a value LSB-first with data valid after the clock
 						shr data, temp
 lsb_post_ret			ret
 
+/* FUNCTION: SPIShiftOut_fast() */
+SEND_fast				// Interpret the bit count and mode of output for this send command
+						mov bitCount, mailbox			'' Initialize 'bitCount' register
+						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
+						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
+						mov mode, mailbox				'' Initialize 'mode' register
+						and mode, spiModeBits			'' Mask off all bits except the mode
+
+SEND_rd_data_fast		rdlong mailbox, par
+						test mailbox, dataMask wz		'' Is BIT_31 cleared? (Implying data vs command)
+		if_nz			jmp #SEND_rd_data				'' If not z, value is not data. Try again
+
+						mov data, mailbox				'' Initialize 'data' register
+
+						mov clock, cnt					'' \__Prepare a register with the system counter for use in the *_CLOCK functions
+						add clock, clkDelay				'' /
+						cmp mode, spiMSBFirst wz		'' Is mode MSB first or LSB first?
+		if_z			jmp #msb_first
+
+						// LSB_FIRST Initialization
+						mov loopIdx, negOne
+						sub bitCount, #1
+						jmp #lsb_first
+
+msb_first_fast			// MSB_FIRST Routine
+						sub bitCount, #1 wz
+						mov temp, data
+						shr temp, bitCount
+						test temp, #BIT_0 wc
+						muxc outa, mosi
+						xor outa, sclk
+						xor outa, sclk
+		if_nz			jmp #msb_first
+
+						// SEND complete, return to loop
+						jmp #SEND_complete
+
+lsb_first_fast			// LSB_FIRST Routine
+						add loopIdx, #1
+						mov temp, data
+						shr temp, loopIdx
+						test temp, #BIT_0 wc
+						muxc outa, mosi
+						xor outa, sclk
+						xor outa, sclk
+						cmp bitCount, loopIdx wz
+		if_nz			jmp #lsb_first
+
+						// SEND complete, return to loop
+SEND_complete_fast		wrlong negOne, par				'' Indicate that send is complete and C-cog can continue execution
+						jmp #LOOP
+
+/* FUNCTION: SPIShiftIn_fast() */
+READ_fast				// Interpret the bit count and mode of output for this read command
+						mov bitCount, mailbox			'' Initialize 'bitCount' register
+						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
+						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
+						mov loopIdx, bitCount			'' Create a second storage register for the bit count - used in LSB modes
+						mov mode, mailbox				'' Initialize 'mode' register
+						and mode, spiModeBits			'' Mask off all bits except the mode
+						mov data, #0					'' Clear our the data register, ready for input
+
+						mov clock, cnt
+						add clock, clkDelay
+
+						cmp mode, spiMSBPre wz
+		if_z			call #msb_pre
+						cmp mode, spiLSBPre wz
+		if_z			call #lsb_pre
+						cmp mode, spiMSBPost wz
+		if_z			call #msb_post
+						cmp mode, spiLSBPost wz
+		if_z			call #lsb_post
+
+						call #WRITE_DATA
+						jmp #LOOP
+
+msb_pre_fast				// Read in a value MSB-first with data valid before the clock
+						test miso, ina wc
+						muxc data, #BIT_0
+						shl data, #1
+						xor outa, sclk
+						xor outa, sclk
+						djnz bitCount, #msb_pre
+
+						shr data, #1
+msb_pre_fast_ret		ret
+
+lsb_pre_fast			// Read in a value LSB-first with data valid before the clock
+						test miso, ina wc
+						muxc data, dataMask				'' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
+						shr data, #1 wc					'' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+						xor outa, sclk
+						xor outa, sclk
+						djnz loopIdx, #lsb_pre
+
+						rcl data, #1					'' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
+						mov temp, #32
+						sub temp, bitCount
+						shr data, temp
+lsb_pre_fast_ret		ret
+
+msb_post_fast			// Read in a value MSB-first with data valid after the clock
+						xor outa, sclk
+						xor outa, sclk
+						test miso, ina wc
+						muxc data, #BIT_0
+						shl data, #1
+						djnz bitCount, #msb_post
+
+						shr data, #1
+msb_post_fast_ret		ret
+
+lsb_post_fast			// Read in a value LSB-first with data valid after the clock
+						xor outa, sclk
+						xor outa, sclk
+						test miso, ina wc
+						muxc data, dataMask				'' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
+						shr data, #1 wc					'' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+						djnz loopIdx, #lsb_post
+
+						rcl data, #1					'' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
+						mov temp, #32
+						sub temp, bitCount
+						shr data, temp
+lsb_post_fast_ret		ret
+
+/* FUNCTION: SPISetClock() */
 SET_CLOCK				call #READ_CMD					'' Using READ_CMD instead of READ_DATA because -1 is not a valid clock signal
 						mov clkDelay, mailbox
 						jmp #LOOP

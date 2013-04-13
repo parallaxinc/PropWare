@@ -6,24 +6,12 @@
 // Includes
 #include <spi.h>
 
-// Private Definitions
-#define	SPI_TIMEOUT_WIGGLE_ROOM		300
-#define SPI_FUNC_SEND				0
-#define	SPI_FUNC_READ				1
-#define SPI_FUNC_CLK				2
-#define SPI_BITS_OFFSET				8
-#define SPI_MODE_OFFSET				16
-
+// Global variables
 extern uint32 _load_start_spi_as_cog[];
 static uint32 g_mailbox = -1;
 uint8 g_spiCog = -1;
 
-// Private Function Declarations
-inline uint8 SPIPassPar (const uint32 par);
-inline uint8 SPIReadPar (void *par, const uint8 bytes);
-uint8 SPICountBits (uint32 par);
-uint8 SPIGetPinNum (const uint32 pinMask);
-
+// Function definitions
 uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 		const uint32 frequency, const uint8 polarity) {
 	uint8 err;
@@ -33,6 +21,7 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 	if (((uint8) -1) != g_spiCog)
 		return 0;
 
+#ifdef SPI_DEBUG_PARAMS
 	// Ensure all pin-mask parameters have exactly 1 set bit
 	if (1 != SPICountBits(mosi))
 		SPIError(SPI_INVALID_PIN_MASK);
@@ -44,6 +33,7 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 	// Check clock frequency
 	if (CLKFREQ / 4 <= frequency)
 		SPIError(SPI_INVALID_FREQ);
+#endif
 
 	// Start GAS cog
 	g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
@@ -51,26 +41,34 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 		SPIError(SPI_COG_NOT_STARTED);
 
 	// Pass in all parameters
-	if (err = SPIPassPar(mosi))
+	if (err = SPIWait())
 		SPIError(err, str);
-	if (err = SPIPassPar(SPIGetPinNum(mosi)))
+	g_mailbox = mosi;
+	if (err = SPIWait())
 		SPIError(err, str);
-	if (err = SPIPassPar(miso))
+	g_mailbox = SPIGetPinNum(mosi);
+	if (err = SPIWait())
 		SPIError(err, str);
-	if (err = SPIPassPar(SPIGetPinNum(miso)))
+	g_mailbox = miso;
+	if (err = SPIWait())
 		SPIError(err, str);
-	if (err = SPIPassPar(sclk))
+	g_mailbox = SPIGetPinNum(miso);
+	if (err = SPIWait())
 		SPIError(err, str);
-	if (err = SPIPassPar(CLKFREQ / frequency))
+	g_mailbox = sclk;
+	if (err = SPIWait())
 		SPIError(err, str);
+	g_mailbox = CLKFREQ / frequency;
 	switch (polarity) {							// Assign clock polarity
 		case SPI_POLARITY_HIGH:
-			if (err = SPIPassPar(sclk))
+			if (err = SPIWait())
 				SPIError(err, str);
+			g_mailbox = sclk;
 			break;
 		case SPI_POLARITY_LOW:
-			if (err = SPIPassPar(0))
+			if (err = SPIWait())
 				SPIError(err, str);
+			g_mailbox = 0;
 			break;
 		default:
 			SPIError(SPI_INVALID_CLOCK_INIT);
@@ -91,10 +89,9 @@ uint8 SPIStop (void) {
 	return 0;
 }
 
-inline uint8 SPIPassPar (const uint32 par) {
+static inline uint8 SPIWait (void) {
 	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	g_mailbox = par;					// Pass parameter in
 	while (-1 != g_mailbox) {			// Wait for GAS cog to read in value and write -1
 		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
@@ -105,11 +102,11 @@ inline uint8 SPIPassPar (const uint32 par) {
 	return 0;
 }
 
-inline uint8 SPIReadPar (void *par, const uint8 bytes) {
+static inline uint8 SPIReadPar (void *par, const uint8 bytes) {
 	uint8 *par8;
 	uint16 *par16;
 	uint32 *par32;
-	const uint32 timeoutCnt = SPI_RD_TIMEOUT_VAL + CNT;
+	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
 	// Wait for a value to be written
 	while (-1 == g_mailbox) {
@@ -144,7 +141,7 @@ inline uint8 SPIReadPar (void *par, const uint8 bytes) {
 	return 0;
 }
 
-uint8 SPICountBits (uint32 par) {
+static uint8 SPICountBits (uint32 par) {
 	/* Brian Kernighan's method for counting set bits in a variable */
 	uint32 c;					// c accumulates the total bits set in par
 	for (c = 0; par; ++c)
@@ -153,7 +150,7 @@ uint8 SPICountBits (uint32 par) {
 	return c;
 }
 
-uint8 SPIGetPinNum (const uint32 pinMask) {
+static uint8 SPIGetPinNum (const uint32 pinMask) {
 	uint8 temp = 0;
 	while (!(0x01 & (pinMask >> temp++)))
 		;
@@ -164,6 +161,7 @@ uint8 SPIShiftOut (uint8 bits, uint32 value, const uint8 mode) {
 	uint8 err;
 	const char str[] = "SPIShiftOut()";
 
+#ifdef SPI_DEBUG_PARAMS
 	// Check for errors
 	if (8 <= g_spiCog)
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -171,23 +169,42 @@ uint8 SPIShiftOut (uint8 bits, uint32 value, const uint8 mode) {
 		SPIError(SPI_TOO_MANY_BITS);
 	if ((SPI_LSB_FIRST != mode) && (SPI_MSB_FIRST != mode))
 		SPIError(SPI_INVALID_MODE);
+#endif
+
+	// Wait to ensure the SPI cog is in its idle state
+	if (err = SPIWait())
+		SPIError(err);
 
 	// Call GAS function
-	if (err = SPIPassPar(
-			SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET) | (mode << SPI_MODE_OFFSET)))
-		SPIError(err, str);
-	if (err = SPIPassPar(value & (~BIT_31)))// Bit 31 is cleared to indicate data is being sent. Without this
-		SPIError(err, str);	// limitation, who's to say the value being passed is not -1?
+	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET) | (mode << SPI_MODE_OFFSET);
+	if (err = SPIWait())
+		SPIError(err);
+
+	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
+	g_mailbox = value & (~BIT_31);
 
 	return 0;
 }
 
-uint8 SPIShiftIn (uint8 bits, const uint8 mode, void *data, const uint8 bytes) {
+void SPIShiftOut_fast (uint8 bits, uint32 value, const uint8 mode) {
+	// Wait to ensure the SPI cog is in its idle state
+	SPIWait();
+
+	// Call GAS function
+	g_mailbox = SPI_FUNC_SEND_FAST | (bits << SPI_BITS_OFFSET)
+			| (mode << SPI_MODE_OFFSET);
+	SPIWait();
+
+	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
+	g_mailbox = value & (~BIT_31);
+}
+
+uint8 SPIShiftIn (const uint8 bits, const uint8 mode, void *data, const uint8 bytes) {
 	uint8 err;
-	uint32 retVal;
 	const char str[] = "SPIShiftIn()";
 
 	// Check for errors
+#ifdef SPI_DEBUG_PARAMS
 	if (8 <= g_spiCog)
 		SPIError(SPI_MODULE_NOT_RUNNING);
 	if (SPI_MAX_PAR_BITS < bits)
@@ -197,11 +214,14 @@ uint8 SPIShiftIn (uint8 bits, const uint8 mode, void *data, const uint8 bytes) {
 		SPIError(SPI_INVALID_MODE);
 	if ((4 == bytes && ((uint32) data) % 4) || (2 == bytes && ((uint32) data) % 2))
 		SPIError(SPI_ADDR_MISALIGN);
+#endif
+
+	// Ensure SPI module is not busy
+	if (err = SPIWait())
+		SPIError(err);
 
 	// Call GAS function
-	if (err = SPIPassPar(
-			SPI_FUNC_READ | (bits << SPI_BITS_OFFSET) | (mode << SPI_MODE_OFFSET)))
-		SPIError(err, str);
+	g_mailbox = SPI_FUNC_READ | (bits << SPI_BITS_OFFSET) | (mode << SPI_MODE_OFFSET);
 
 	// Read in parameter
 	if (err = SPIReadPar(data, bytes))
@@ -210,18 +230,67 @@ uint8 SPIShiftIn (uint8 bits, const uint8 mode, void *data, const uint8 bytes) {
 	return 0;
 }
 
+#ifdef SPI_FAST
+void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint8 bytes) {
+	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
+	uint8 *par8;
+	uint16 *par16;
+	uint32 *par32;
+
+	// Wait until idle state, then send function and mode bits
+	SPIWait();
+	g_mailbox = SPI_FUNC_READ_FAST | (bits << SPI_BITS_OFFSET)
+			| (mode << SPI_MODE_OFFSET);
+
+	// Wait for a value to be written
+	while (-1 == g_mailbox) {
+		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
+	}
+
+	// Determine if output variable is char, short or long and write data to that location
+	switch (bytes) {
+		case 1:
+			par8 = data;
+			*par8 = g_mailbox;
+			break;
+		case 2:
+			par16 = data;
+			*par16 = g_mailbox;
+			break;
+		case 4:
+			par32 = data;
+			*par32 = g_mailbox;
+			break;
+		default:
+			SPIError(SPI_INVALID_BYTE_SIZE);
+			break;
+	}
+
+	// Signal that value is saved and GAS cog can continue execution
+	g_mailbox = -1;
+}
+#endif
+
 uint8 SPISetClock (const uint32 frequency) {
 	uint8 err;
 
 	if (8 <= g_spiCog)
 		SPIError(SPI_MODULE_NOT_RUNNING);
+#ifdef SPI_DEBUG_PARAMS
 	if (CLKFREQ / 4 <= frequency)
 		SPIError(SPI_INVALID_FREQ);
+#endif
 
-	if (err = SPIPassPar(SPI_FUNC_CLK))
+	// Wait for SPI cog to go idle
+	if (err = SPIWait())
 		SPIError(err);
-	if (err = SPIPassPar(CLKFREQ / frequency))
+	// Prepare cog for clock frequency change
+	g_mailbox = SPI_FUNC_CLK;
+	// Wait for the ready command
+	if (err = SPIWait())
 		SPIError(err);
+	// Send new frequency
+	g_mailbox = CLKFREQ / frequency;
 
 	return 0;
 }
