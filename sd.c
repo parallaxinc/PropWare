@@ -505,7 +505,9 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat) {
 
 // Ensure this response is "active"
 	if (SD_RESPONSE_ACTIVE == *dat) {
-		//++dat;			// Commented out to write over this byte later (uncomment for debugging purposes only)
+#ifdef SD_DEBUG_VERBOSE
+		++dat;	// Allowing this line to run will increase the response length by 1
+#endif
 
 		// Ignore blank data again
 		timeout = SD_RESPONSE_TIMEOUT + CNT;
@@ -520,12 +522,16 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat) {
 
 		// Check for the data start identifier and continue reading data
 		if (SD_DATA_START_ID == *dat) {
-			//++dat;			// Commented out to write over this byte later (uncomment for debugging purposes only)
+#ifdef SD_DEBUG_VERBOSE
+			++dat;	// Allowing this line to run will increase the response length by 1
+#endif
 			// Read in requested data bytes
 			while (bytes--) {
-#ifdef SD_DEBUG
+#if (defined SD_DEBUG)
 				if (err = SPIShiftIn(8, SD_SPI_MODE_IN, dat++, SD_SPI_BYTE_IN_SZ))
 					return err;
+#elif (defined SPI_FAST)
+				SPIShiftIn_fast(8, SD_SPI_MODE_IN, dat++, SD_SPI_BYTE_IN_SZ);
 #else
 				SPIShiftIn(8, SD_SPI_MODE_IN, dat++, SD_SPI_BYTE_IN_SZ);
 #endif
@@ -849,7 +855,7 @@ void SDError (const uint8 err, ...) {
 					g_sd_invalidResponse);
 #else
 			__simple_printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
-					"Invalid first-byte response\n\tReceived: ", g_sd_sd_invalidResponse);
+					"Invalid first-byte response\n\tReceived: ", g_sd_invalidResponse);
 #endif
 			SDFirstByteExpansion(g_sd_invalidResponse);
 			break;
@@ -859,7 +865,7 @@ void SDError (const uint8 err, ...) {
 					"Invalid data-start ID\n\tReceived: ", g_sd_invalidResponse);
 #else
 			__simple_printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
-					"Invalid data-start ID\n\tReceived: ", g_sd_sd_invalidResponse);
+					"Invalid data-start ID\n\tReceived: ", g_sd_invalidResponse);
 #endif
 			break;
 		case SD_INVALID_INIT:

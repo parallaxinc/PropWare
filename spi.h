@@ -12,7 +12,23 @@
 #include <gpio.h>
 #include <types.h>
 
-//#define SPI_DEBUG
+/* @Brief: Extra code options - Uncomment to enable features
+ *
+ * @option	SPI_DEBUG			Debugging features similar to exceptions; Errors
+ * 								will be caught the program will enter an infinite loop
+ * 								DEFAULT: OFF
+ * @option	SPI_DEBUG_PARAMS	Parameter checking within each function call. I
+ * 								recommended you leave this option enabled unless speed
+ * 								is critical
+ * 								DEFAULT: OFF
+ * @option	SPI_FAST			Allows for fast send and receive routines without error checking
+ * 								or timing delays; Normal routines still available when enabled
+ * 								DEFAULT: ENABLED
+ * 								TODO: Use the counter module instead of "xor clkPin, clkPin"
+ */
+#define SPI_DEBUG
+#define SPI_DEBUG_PARAMS
+#define SPI_FAST
 
 #define	SPI_POLARITY_LOW			0
 #define SPI_POLARITY_HIGH			1
@@ -60,13 +76,10 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 
 /* @Brief: Stop a running SPI cog
  *
- * @return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED if no cog has previously been started)
+ * @return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED if no
+ * 				cog has previously been started)
  */
 uint8 SPIStop (void);
-
-/* @Brief: Change the clock for the already running SPI module
- *
- */
 
 /* @Brief: Send a value out to a peripheral device
  *
@@ -81,16 +94,34 @@ uint8 SPIShiftOut (uint8 bits, uint32 value, const uint8 mode);
 /* @Brief: Receive a value in from a peripheral device
  *
  * @param	bits		Number of bits to be shifted in
- * @param	mode		Controls whether the MSB or LSB is sent first and whether data is valid before or after the
- * 						clock pulse; Must be one of SPI_MSB_PRE, SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
+ * @param	mode		Controls whether the MSB or LSB is sent first and whether data is valid before
+ * 						or after the clock pulse; Must be one of SPI_MSB_PRE, SPI_LSB_PRE, SPI_MSB_POST,
+ * 						or SPI_LSB_POST
  * @param	*data		Received data will be stored at this address
- * @param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4 (is *data a pointer to char, short or int?)
+ * @param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4 (is *data a pointer
+ * 						to char, short or int?)
  *
  * @return		Returns 0 upon success, otherwise error code
  */
-uint8 SPIShiftIn (uint8 bits, const uint8 mode, void *data, const uint8 bytes);
+uint8 SPIShiftIn (const uint8 bits, const uint8 mode, void *data, const uint8 bytes);
 
-/* @Brief: Change the SPI module's clock frquency
+#ifdef SPI_FAST
+/* @Brief: Receive a value in from a peripheral device; Optimized for fastest possible clock speed;
+ *         No error checking is performed; 'Timeout' event will never be thrown and possible infinite
+ *         loop can happen
+ *
+ * @param	bits		Number of bits to be shifted in
+ * @param	mode		Controls whether the MSB or LSB is sent first and whether data is valid before
+ * 						or after the clock pulse; Must be one of SPI_MSB_PRE, SPI_LSB_PRE, SPI_MSB_POST,
+ * 						or SPI_LSB_POST
+ * @param	*data		Received data will be stored at this address
+ * @param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4 (is *data a pointer
+ * 						to char, short or int?)
+ */
+void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint8 bytes);
+#endif
+
+/* @Brief: Change the SPI module's clock frequency
  *
  * @param	frequency	Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
  *
@@ -110,5 +141,52 @@ void SPIError (const uint8 err, ...);
 // Exit calling function by returning 'err'
 #define SPIError(err, ...)				return err
 #endif
+
+/*** Private definitions and Declarations ***/
+// Defintions
+#define	SPI_TIMEOUT_WIGGLE_ROOM		300
+#define SPI_FUNC_SEND				0
+#define	SPI_FUNC_READ				1
+#define SPI_FUNC_CLK				2
+#define SPI_FUNC_SEND_FAST			3
+#define SPI_FUNC_READ_FAST			4
+#define SPI_BITS_OFFSET				8
+#define SPI_MODE_OFFSET				16
+
+// Function prototypes
+/* @Brief: Wait for the SPI cog to signal that it is in the idle state
+ *
+ * @return		May return non-zero error code when a timeout occurs
+ */
+static inline uint8 SPIWait (void);
+
+/* @Brief: Read the value that the SPI cog just shifted in
+ *
+ * @param	*par	Address to store the parameter
+ * @param	bytes	Byte-width of the desired value
+ *
+ * @return		Returns 0 upon success, error code otherwise
+ */
+static inline uint8 SPIReadPar (void *par, const uint8 bytes);
+
+/* @Brief: Count the number of set bits in a variable
+ *
+ * @param	par		Variable to count the bits in
+ *
+ * @return		Number of bits in the parameter par (no error checking)
+ */
+static uint8 SPICountBits (uint32 par);
+
+/* @Brief: Retrieve the pin number from a pin mask; i.e., if pinMask is 0x01,
+ *         return 0; if pinMask is 0x40, return 6
+ *
+ * @Pre: Only 1 bit is set in pinMask (if more than one is set, the return value will
+ *       be related to the least significant set bit)
+ *
+ * @param	pinMask		The bit number of the set bit in this variable will be returned
+ *
+ * @return		Returns the pin number of pinMask (no error checking)
+ */
+static uint8 SPIGetPinNum (const uint32 pinMask);
 
 #endif /* SPI_H_ */
