@@ -49,7 +49,7 @@ uint8 g_sd_invalidResponse;
  *** Function Definitions ***
  ****************************/
 uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs) {
-	uint16 i, err;
+	uint8 i, j, k, err;
 	uint8 response[16];
 
 	// Set CS for output and initialize high
@@ -61,42 +61,60 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
 	if (err = SPIStart(mosi, miso, sclk, SD_SPI_INIT_FREQ, SD_SPI_POLARITY))
 		SDError(err);
 
-	for (i = 0; i < 10; ++i) {
-		waitcnt(CLKFREQ/2 + CNT);
-		// Send at least 72 clock cycles to enable the SD card
-		GPIOPinSet(cs);
-		for (i = 0; i < 5; ++i)
-			SPIShiftOut(16, -1, SD_SPI_MODE_OUT);
-
-		GPIOPinClear(cs);
-		// Send SD into idle state, retrieve a response and ensure it is the "idle" response
-		if (err = SDSendCommand(SD_CMD_IDLE, 0, SD_CRC_IDLE))
-			SDError(err);
-		SDGetResponse(SD_RESPONSE_LEN_R1, response);
-		if (SD_RESPONSE_IDLE == response[0])
-			i = 10;
-	}
-	if (SD_RESPONSE_IDLE != response[0])
-		SDError(SD_INVALID_INIT, response[0]);
-
 #if (defined SD_VERBOSE && defined SD_DEBUG)
-	__simple_printf("Sending CMD8...\n");
+	__simple_printf("Starting SD card...\n");
 #endif
 
-	// Set voltage to 3.3V and ensure response is R7
-	if (err = SDSendCommand(SD_CMD_SDHC, SD_CMD_VOLT_ARG, SD_CRC_SDHC))
-		SDError(err);
-	if (err = SDGetResponse(SD_RESPONSE_LEN_R7, response))
-		SDError(err);
-	if ((SD_RESPONSE_IDLE != response[0]) || (0x01 != response[3])
-			|| (0xAA != response[4]))
-		SDError(SD_INVALID_INIT, response[0]);
+	for (i = 0; i < 10; ++i) {
+		// Initialization loop (reset SD card)
+		for (j = 0; j < 10; ++j) {
+			GPIOPinSet(cs);
+			waitcnt(CLKFREQ/10 + CNT);
+
+			// Send at least 72 clock cycles to enable the SD card
+			for (k = 0; k < 5; ++k)
+				SPIShiftOut(16, -1, SD_SPI_MODE_OUT);
+			GPIOPinClear(cs);
+
+			// Send SD into idle state, retrieve a response and ensure it is the "idle" response
+			if (err = SDSendCommand(SD_CMD_IDLE, 0, SD_CRC_IDLE))
+				SDError(err);
+			SDGetResponse(SD_RESPONSE_LEN_R1, response);
+			if (SD_RESPONSE_IDLE == response[0])
+				j = 10;
+#if (defined SD_VERBOSE && defined SD_DEBUG)
+			else
+				printf("Failed attempt with response: 0x%02X\n", response[0]);
+#endif
+		}
+		if (SD_RESPONSE_IDLE != response[0]) {
+			g_sd_invalidResponse = response[0];
+			SDError(SD_INVALID_INIT);
+		}
+
+#if (defined SD_VERBOSE && defined SD_DEBUG)
+		__simple_printf("SD card in idle state. Now sending CMD8...\n");
+#endif
+
+		// Set voltage to 3.3V and ensure response is R7
+		if (err = SDSendCommand(SD_CMD_SDHC, SD_CMD_VOLT_ARG, SD_CRC_SDHC))
+			SDError(err);
+		if (err = SDGetResponse(SD_RESPONSE_LEN_R7, response))
+			SDError(err);
+		if ((SD_RESPONSE_IDLE == response[0]) && (0x01 == response[3])
+				&& (0xAA == response[4]))
+			i = 10;
+#if (defined SD_VERBOSE && defined SD_DEBUG)
+		else
+			__simple_printf("Failed attempt at CMD8\n");
+#endif
+	}
 
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 	__simple_printf("CMD8 succeeded. Requesting operating conditions...\n");
 #endif
 
-	// Request operating conditions register and ensure response begins with R1
+// Request operating conditions register and ensure response begins with R1
 	if (err = SDSendCommand(SD_CMD_READ_OCR, 0, SD_CRC_OTHER))
 		SDError(err);
 	if (err = SDGetResponse(SD_RESPONSE_LEN_R3, response))
@@ -104,14 +122,17 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 	SDPrintHexBlock(response, SD_RESPONSE_LEN_R3);
 #endif
-	if (SD_RESPONSE_IDLE != response[0])
-		SDError(SD_INVALID_INIT, response[0]);
+	if (SD_RESPONSE_IDLE != response[0]) {
+		g_sd_invalidResponse = response[0];
+		SDError(SD_INVALID_INIT);
+	}
 
-	// Spin up the card and bring to active state
+// Spin up the card and bring to active state
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 	__simple_printf("OCR read successfully. Sending into active state...\n");
 #endif
 	for (i = 0; i < 8; ++i) {
+		waitcnt(CLKFREQ/10 + CNT);
 		if (err = SDSendCommand(SD_CMD_APP, 0, SD_CRC_OTHER))
 			SDError(err);
 		if (err = SDGetResponse(1, response))
@@ -121,17 +142,23 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
 		SDGetResponse(1, response);
 		if (SD_RESPONSE_ACTIVE == response[0])
 			break;
+#if (defined SD_VERBOSE && defined SD_DEBUG)
+		else
+			printf("Failed attempt at active state: 0x%02X\n", response[0]);
+#endif
 	}
-	if (SD_RESPONSE_ACTIVE != response[0])
-		SDError(SD_INVALID_RESPONSE, response[0]);
+	if (SD_RESPONSE_ACTIVE != response[0]) {
+		g_sd_invalidResponse = response[0];
+		SDError(SD_INVALID_RESPONSE);
+	}
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 	__simple_printf("Activated!\n");
 #endif
 
-	// Initialization nearly complete, increase clock
+// Initialization nearly complete, increase clock
 	SPISetClock(SD_SPI_FINAL_FREQ);
 
-	// If debugging requested, print to the screen CSD and CID registers from SD card
+// If debugging requested, print to the screen CSD and CID registers from SD card
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 	__simple_printf("Requesting CSD...\n");
 	if (err = SDSendCommand(SD_CMD_RD_CSD, 0, SD_CRC_OTHER))
@@ -153,37 +180,37 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
 #endif
 	GPIOPinSet(cs);
 
-	// Initialization complete
+// Initialization complete
 	return 0;
 }
 
 uint8 SDMount (void) {
 	uint8 err, temp;
 
-	// FAT system determination variables:
+// FAT system determination variables:
 	uint32 rsvdSectorCount, numFATs, rootEntryCount, totalSectors, FATSize, rootCluster,
 			dataSectors;
 	uint32 bootSector = 0;
 	uint32 clusterCount;
 
-	// Read in first sector
+// Read in first sector
 	if (err = SDReadDataBlock(bootSector, g_sd_buf))
 		SDError(err);
-	// Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector
+// Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector
 	if (SD_BOOT_SECTOR_ID != g_sd_buf[SD_BOOT_SECTOR_ID_ADDR]) {
 		bootSector = SDConvertDat32(&(g_sd_buf[SD_BOOT_SECTOR_BACKUP]));
 		if (err = SDReadDataBlock(bootSector, g_sd_buf))
 			SDError(err);
 	}
 
-	// Print the boot sector if requested
+// Print the boot sector if requested
 #if (defined SD_VERBOSE && defined SD_DEBUG && defined SD_VERBOSE_BLOCKS)
 	__simple_printf("***BOOT SECTOR***\n");
 	SDPrintHexBlock(g_sd_buf, SD_SECTOR_SIZE);
 	putchar('\n');
 #endif
 
-	// Do this whether it is FAT16 or FAT32
+// Do this whether it is FAT16 or FAT32
 	temp = g_sd_buf[SD_CLUSTER_SIZE_ADDR];
 	while (temp) {
 		temp >>= 1;
@@ -194,17 +221,17 @@ uint8 SDMount (void) {
 	numFATs = g_sd_buf[SD_NUM_FATS_ADDR];
 	rootEntryCount = SDConvertDat16(&g_sd_buf[SD_ROOT_ENTRY_CNT_ADDR]);
 
-	// Check if FAT size is valid in 16- or 32-bit location
+// Check if FAT size is valid in 16- or 32-bit location
 	FATSize = SDConvertDat16(&g_sd_buf[SD_FAT_SIZE_ADDR]);
 	if (!FATSize)
 		FATSize = g_sd_buf[SD_FAT_SIZE_32_ADDR];
 
-	// Check if FAT16 total sectors is valid
+// Check if FAT16 total sectors is valid
 	totalSectors = SDConvertDat16(&g_sd_buf[SD_TOT_SCTR_16_ADDR]);
 	if (!totalSectors)
 		totalSectors = SDConvertDat32(&g_sd_buf[SD_TOT_SCTR_32_ADDR]);
 
-	// Compute necessary numbers to determine FAT type (12/16/32)
+// Compute necessary numbers to determine FAT type (12/16/32)
 	g_sd_rootDirSectors = rootEntryCount * 32 / SD_SECTOR_SIZE;
 	dataSectors = totalSectors - (rsvdSectorCount + numFATs * FATSize + rootEntryCount);
 	clusterCount = dataSectors >> g_sd_sectorsPerCluster_shift;
@@ -222,7 +249,7 @@ uint8 SDMount (void) {
 	printf("Reserved sector count: 0x%08X / %u\n", rsvdSectorCount, rsvdSectorCount);
 #endif
 
-	// Determine and store FAT type
+// Determine and store FAT type
 	if (SD_FAT12_CLSTR_CNT > clusterCount)
 		SDError(SD_INVALID_FILESYSTEM);
 	else if (SD_FAT16_CLSTR_CNT > clusterCount) {
@@ -238,11 +265,11 @@ uint8 SDMount (void) {
 		--g_sd_entriesPerFatSector_Shift;
 	}
 
-	// Find start of FAT
+// Find start of FAT
 	g_sd_fatStart = bootSector + rsvdSectorCount;
 
 //	g_sd_filesystem = SD_FAT_16;
-	// Find root directory address
+// Find root directory address
 	switch (g_sd_filesystem) {
 		case SD_FAT_16:
 			g_sd_rootAddr = FATSize * numFATs + g_sd_fatStart;
@@ -261,19 +288,19 @@ uint8 SDMount (void) {
 	printf("First data sector: 0x%08X\n", g_sd_firstDataAddr);
 #endif
 
-	// Store the first sector of the FAT
+// Store the first sector of the FAT
 	if (err = SDReadDataBlock(g_sd_fatStart, g_sd_fat))
 		SDError(err);
 	g_sd_curFatSector = 0;
 
-	// Print FAT if desired
+// Print FAT if desired
 #if (defined SD_VERBOSE && defined SD_DEBUG && defined SD_VERBOSE_BLOCKS)
 	__simple_printf("\n***First File Allocation Table***\n");
 	SDPrintHexBlock(g_sd_fat, SD_SECTOR_SIZE);
 	putchar('\n');
 #endif
 
-	// Read in the root directory, set root as current
+// Read in the root directory, set root as current
 	if (err = SDReadDataBlock(g_sd_rootAddr, g_sd_buf))
 		SDError(err);
 	g_sd_curDirStartAddr = g_sd_rootAddr;
@@ -283,7 +310,7 @@ uint8 SDMount (void) {
 	g_sd_curFatSector = -1;
 	g_sd_curSectorOffset = 0;
 
-	// Print root directory
+// Print root directory
 #if (defined SD_VERBOSE && defined SD_DEBUG && defined SD_VERBOSE_BLOCKS)
 	__simple_printf("***Root directory***\n");
 	SDPrintHexBlock(g_sd_buf, SD_SECTOR_SIZE);
@@ -296,7 +323,7 @@ uint8 SDMount (void) {
 void SDGetFilename (const uint8 *buf, uint8 *filename) {
 	uint8 i, j = 0;
 
-	// Read in the first 8 characters - stop when a space is reached or 8 characters have been read, whichever comes first
+// Read in the first 8 characters - stop when a space is reached or 8 characters have been read, whichever comes first
 	for (i = 0; i < SD_FILE_NAME_LEN; ++i) {
 		if (0x05 == buf[i])
 			filename[j++] = 0xe5;
@@ -304,7 +331,7 @@ void SDGetFilename (const uint8 *buf, uint8 *filename) {
 			filename[j++] = buf[i];
 	}
 
-	// Determine if there is more past the first 8 - Again, stop when a space is reached
+// Determine if there is more past the first 8 - Again, stop when a space is reached
 	if (' ' != buf[SD_FILE_NAME_LEN]) {
 		filename[j++] = '.';
 		for (i = SD_FILE_NAME_LEN; i < SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN; ++i) {
@@ -313,7 +340,7 @@ void SDGetFilename (const uint8 *buf, uint8 *filename) {
 		}
 	}
 
-	// Insert null-terminator
+// Insert null-terminator
 	filename[j] = 0;
 }
 
@@ -330,8 +357,8 @@ uint8 SDLoadNextSector (uint8 *buf) {
 	__simple_printf("Loading next sector...\n");
 #endif
 
-	// Depending on optimization level and passed in parameter, set local variable to either generic
-	// buffer or file-specific buffer
+// Depending on optimization level and passed in parameter, set local variable to either generic
+// buffer or file-specific buffer
 #ifdef SD_SPEED_OVER_SPACE
 	if (buf == g_sd_buf) {
 #endif
@@ -348,7 +375,7 @@ uint8 SDLoadNextSector (uint8 *buf) {
 	}
 #endif
 
-	// Are we looking at the root directory of a FAT16 system?
+// Are we looking at the root directory of a FAT16 system?
 	if (SD_FAT_16 == g_sd_filesystem && g_sd_rootAddr == (*curClusterStartAddr)) {
 		// Root dir of FAT16; Is it the last sector in the root directory?
 		if (g_sd_rootDirSectors == (*curSectorOffset))
@@ -357,7 +384,7 @@ uint8 SDLoadNextSector (uint8 *buf) {
 		else
 			return SDReadDataBlock(++(*curSectorOffset), buf); // Any error from reading the data block will be returned to calling function
 	}
-	// We are looking at a generic data cluster.
+// We are looking at a generic data cluster.
 	else {
 		// Gen. data cluster; Have we reached the end of the cluster?
 		if (((1 << g_sd_sectorsPerCluster_shift) - 1) > (*curSectorOffset)) {
@@ -415,13 +442,13 @@ uint8 SDLoadNextSector (uint8 *buf) {
 
 uint8 SDIncCluster (uint8 *curSectorOffset, uint32 *nextAllocUnit, uint32 *curAllocUnit,
 		uint32 *curClusterStartAddr, uint8 *buf) {
-	// Update g_sd_cur*
+// Update g_sd_cur*
 	*curAllocUnit = *nextAllocUnit;
 	*curClusterStartAddr = (*curAllocUnit - 2)
 			<< g_sd_sectorsPerCluster_shift + g_sd_firstDataAddr;
 	*curSectorOffset = 0;
 
-	// Retrieve the next allocation unit number
+// Retrieve the next allocation unit number
 	*nextAllocUnit =
 			SDConvertDat16(
 					&g_sd_fat[(*curAllocUnit - g_sd_curFatSector
@@ -609,7 +636,7 @@ uint8 SDOpenFile_ptr (const uint16 filePtr, uint32 *fileLen) {
 	g_sd_curSectorOffset_file = 0;
 	SDReadDataBlock(g_sd_curClusterStartAddr_file, g_sd_file);
 
-	// TODO: These debug lines only work if optimization is turn on. FIX IT!
+// TODO: These debug lines only work if optimization is turn on. FIX IT!
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 	printf("Opening file from...\n");
 	printf("\tAllocation unit 0x%08X\n", g_sd_curAllocUnit_file);
@@ -649,7 +676,7 @@ uint8 SD_Shell_ls (void) {
 	uint16 rootIdx = 0, filePtr = 0;
 	char string[SD_FILENAME_STR_LEN];			// Allocate space for a filename string
 
-	// If we aren't looking at the beginning of a cluster, we must backtrack to the beginning and then begin listing files
+// If we aren't looking at the beginning of a cluster, we must backtrack to the beginning and then begin listing files
 	if (g_sd_curSectorOffset || g_sd_curDirStartAddr != g_sd_curClusterStartAddr) {
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 		__simple_printf(
@@ -663,7 +690,7 @@ uint8 SD_Shell_ls (void) {
 			SDError(err);
 	}
 
-	// stuff..
+// stuff..
 	while (g_sd_buf[filePtr]) {
 		// If the file exists, print its name and attributes
 		if (SD_DELETED_FILE_MARK != g_sd_buf[filePtr])
@@ -690,7 +717,7 @@ uint8 SD_Shell_cat (const char *f) {
 	uint32 fileLen;
 	char readFilename[SD_FILENAME_STR_LEN];
 
-	// If we aren't looking at the beginning of a cluster, we must backtrack to the beginning and then begin listing files
+// If we aren't looking at the beginning of a cluster, we must backtrack to the beginning and then begin listing files
 	if (g_sd_curSectorOffset || (g_sd_curDirStartAddr != g_sd_curClusterStartAddr)) {
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 		__simple_printf(
@@ -704,7 +731,7 @@ uint8 SD_Shell_cat (const char *f) {
 			SDError(err);
 	}
 
-	// Loop through all files in the current directory until we find the correct one
+// Loop through all files in the current directory until we find the correct one
 	while (g_sd_buf[filePtr]) {
 		// Check if file is valid, retrieve the name if it is
 		if (!(SD_DELETED_FILE_MARK == g_sd_buf[filePtr])) {
@@ -721,11 +748,11 @@ uint8 SD_Shell_cat (const char *f) {
 			SDLoadNextSector(g_sd_buf);
 	}
 
-	// Did the find loop quit without finding the file?
+// Did the find loop quit without finding the file?
 	if (!(g_sd_buf[filePtr]))
 		// Find loop quit without finding the file; Report error
 		__simple_printf("\tError: File not found\n");
-	// File was found, let's print it to the screen now...
+// File was found, let's print it to the screen now...
 	else {
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 		printf("%s found at offset 0x%04X from address 0x%08X\n", readFilename, filePtr,
@@ -834,7 +861,7 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes) {
 #endif
 
 #ifdef SD_DEBUG
-void SDError (const uint8 err, ...) {
+void SDError (const uint8 err) {
 	va_list list;
 	char str[] = "SD Error %u: %s\n";
 

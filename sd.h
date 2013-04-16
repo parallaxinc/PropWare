@@ -29,7 +29,7 @@
  * 								contents with each file-switch
  * 								DEFAULT: ON
  */
-//#define SD_DEBUG
+#define SD_DEBUG
 #define SD_VERBOSE
 //#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
@@ -348,12 +348,11 @@ static void SDPrintFileAttributes (const uint8 flag);
 
 #ifdef SD_DEBUG
 #include <stdio.h>
-#include <stdarg.h>
 /* Brief: Print an error through UART string followed by entering an infinite loop
  *
  * @param	err		Error number used to determine error string
  */
-static void SDError (const uint8 err, ...);
+static void SDError (const uint8 err);
 
 /* @Brief: Print to screen each status bit individually with human-readable descriptions
  *
@@ -362,7 +361,7 @@ static void SDError (const uint8 err, ...);
 static void SDFirstByteExpansion (const uint8 response);
 #else
 // Exit calling function by returning 'err'
-#define SDError(err, ...)				return err
+#define SDError(err)				return err
 #endif
 
 #endif /* SD_H_ */
