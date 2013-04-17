@@ -29,8 +29,8 @@
  * 								contents with each file-switch
  * 								DEFAULT: ON
  */
-#define SD_DEBUG
-#define SD_VERBOSE
+//#define SD_DEBUG
+//#define SD_VERBOSE
 //#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
 #define SD_SPEED_OVER_SPACE
@@ -194,6 +194,7 @@ enum cluster_types {
 #define SD_DELETED_FILE_MARK		0xe5				// Marks that a file has been deleted here, continue to the next entry
 #define SD_FILE_ATTRIBUTE_OFFSET	11					// Byte of a file entry to store attribute flags
 #define SD_FILE_START_CLSTR_OFFSET	0x1a				// Starting cluster number
+#define SD_FILE_START_CLSTR_HIGH	0x14				// High word (16-bits) of the starting cluster number (FAT32 only)
 #define SD_FILE_LEN_OFFSET			0x1c				// Length of a file in bytes
 #define SD_FILE_NAME_LEN			8					// 8 characters in the standard file name
 #define SD_FILE_EXTENSION_LEN		3					// 3 character file name extension
@@ -329,6 +330,15 @@ static uint32 SDGetSectorFromPath (const char *path);
  */
 static uint32 SDGetSectorFromAlloc (const uint32 allocUnit);
 
+/* @Brief: Read an entry from the FAT
+ *
+ * @param	fatEntry		Entry number (allocation unit) to read in the FAT
+ * @param	*value			Address to store the value into (the next allocation unit)
+ *
+ * @return		Returns 0 upon success, error code otherwise
+ */
+static uint8 SDGetFATValue (const uint32 fatEntry, uint32 *value);
+
 /* @Brief: Find the next sector in the FAT, directory, or file. When it is found, load it into the
  *         appropriate global buffer
  *
@@ -348,7 +358,7 @@ static uint8 SDLoadNextSector (uint8 *buf);
  * @param	*curClusterStartAddr	Address of the current clutser's starting address variable
  * @param	*buf					Array of SD_SECTOR_SIZE bytes used to hold a sector from the SD card
  *
- * @return
+ * @return		Returns 0 upon success, error code otherwise
  */
 static uint8 SDIncCluster (uint8 *curSectorOffset, uint32 *nextAllocUnit, uint32 *curAllocUnit,
 		uint32 *curClusterStartAddr, uint8 *buf);

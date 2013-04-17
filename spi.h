@@ -26,8 +26,8 @@
  * 								DEFAULT: ENABLED
  * 								TODO: Use the counter module instead of "xor clkPin, clkPin"
  */
-#define SPI_DEBUG
-#define SPI_DEBUG_PARAMS
+//#define SPI_DEBUG
+//#define SPI_DEBUG_PARAMS
 #define SPI_FAST
 
 #define	SPI_POLARITY_LOW			0
