@@ -19,18 +19,7 @@ void main (void) {
 		error(err);
 	__simple_printf("FAT partition mounted!\n");
 
-	__simple_printf("\nPrinting root directory\n");
-	if (err = SD_Shell_ls())
-		error(err);
-
-	if (err = SD_Shell_cat("SD.C"))
-		error(err);
-
-	if (err = SD_Shell_cat("PROFILE.TXT"))
-		error(err);
-
-	if (err = SD_Shell_ls())
-		error(err);
+	SD_Shell();
 
 	GPIODirModeSet(BIT_16, GPIO_DIR_OUT);
 	__simple_printf("Done!!!\n");

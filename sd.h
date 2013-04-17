@@ -80,13 +80,19 @@ uint8 SDOpen (const char *filename);
 
 #ifdef SD_SHELL
 #include <stdio.h>
+/* @Brief: Provide the user with a very basic unix-like shell. The following commands
+ *         are available to the user: ls, cat, cd.
+ *
+ * @return		Returns 0 upon success, error code otherwise
+ */
+uint8 SD_Shell (void);
+
 /* @Brief: List the contents of a directory on the screen (similar to 'ls .')
  *
  * @param	*absPath	Absolute path of the directory to be printed
  *
  * @return		Returns 0 upon success, error code otherwise
  */
-// NOTE: Beginning work by reading only root directory
 uint8 SD_Shell_ls (void);
 
 /* @Brief: Dump the contents of a file to the screen (similar to 'cat f');
@@ -98,6 +104,14 @@ uint8 SD_Shell_ls (void);
  * @return		Returns 0 upon success, error code otherwise
  */
 uint8 SD_Shell_cat (const char *f);
+
+/* @Brief: Change the current working directory to *f (similar to 'cd f');
+ *
+ * @param	*d			Short filename of directory to change to
+ *
+ * @return		Returns 0 upon success, error code otherwise
+ */
+uint8 SD_Shell_cd (const char *d);
 #endif
 
 #ifdef SD_VERBOSE
@@ -165,7 +179,7 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 #define SD_NUM_FATS_ADDR			0x10
 #define SD_ROOT_ENTRY_CNT_ADDR		0x11
 #define SD_TOT_SCTR_16_ADDR			0x13
-#define SD_FAT_SIZE_ADDR			0x16
+#define SD_FAT_SIZE_16_ADDR			0x16
 #define SD_TOT_SCTR_32_ADDR			0x20
 #define SD_FAT_SIZE_32_ADDR			0x24
 #define SD_ROOT_CLUSTER_ADDR		0x2c
@@ -210,6 +224,15 @@ enum cluster_types {
 #define SD_ARCHIVE					BIT_5
 #define SD_ARCHIVE_CHAR				'a'
 #define SD_ARCHIVE_CHAR_			'.'
+
+// Shell definitions
+#define SD_SHELL_INPUT_LEN			64
+#define SD_SHELL_CMD_LEN			8
+#define SD_SHELL_ARG_LEN			32
+#define SD_SHELL_EXIT				("exit")
+#define SD_SHELL_LS					("ls")
+#define SD_SHELL_CAT				("cat")
+#define SD_SHELL_CD					("cd")
 
 // File constants
 #ifndef SD_EOF
@@ -333,13 +356,23 @@ static uint8 SDIncCluster (uint8 *curSectorOffset, uint32 *nextAllocUnit, uint32
 /* @Brief: Load the first sector of a file (note - not directory) and initialize global variables dealing
  *         with files (seek/tell pointers)
  *
- * @param	filePtr		Offset amount from the beginning of the currently loaded sector; Used to read
- * 						file parameters such as allocation unit and size
- * @param	*fileLen	Length of the file in bytes will be stored into this address
+ * @param	fileEntryOffset		Offset amount from the beginning of the currently loaded sector; Used to read
+ * 								file parameters such as allocation unit and size
+ * @param	*fileLen			Length of the file in bytes will be stored into this address
  *
  * @return		Returns 0 upon success, else error code
  */
-static uint8 SDOpenFile_ptr (const uint16 filePtr, uint32 *fileLen);
+static uint8 SDOpenFile_ptr (const uint16 fileEntryOffset, uint32 *fileLen);
+
+/* @Brief: Load the first sector of a file (note - not directory) and initialize global variables dealing
+ *         with files (seek/tell pointers)
+ *
+ * @param	fileEntryOffset		Offset amount from the beginning of the currently loaded sector; Used to read
+ * 								file parameters such as allocation unit and size
+ *
+ * @return		Returns 0 upon success, else error code
+ */
+static uint8 SDOpenDir_ptr (const uint16 fileEntryOffset);
 
 #ifdef SD_SHELL
 static inline void SDPrintFileEntry (const uint8 *file, uint8 filename[]);
