@@ -79,7 +79,7 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 }
 
 uint8 SPIStop (void) {
-	if (-1 == g_spiCog)
+	if ((uint8) -1 == g_spiCog)
 		SPIError(SPI_COG_NOT_STARTED);
 
 	cogstop(g_spiCog);
@@ -92,7 +92,7 @@ uint8 SPIStop (void) {
 static inline uint8 SPIWait (void) {
 	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	while (-1 != g_mailbox) {			// Wait for GAS cog to read in value and write -1
+	while ((uint32) -1 != g_mailbox) {			// Wait for GAS cog to read in value and write -1
 		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
 		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
@@ -109,7 +109,7 @@ static inline uint8 SPIReadPar (void *par, const uint8 bytes) {
 	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
 	// Wait for a value to be written
-	while (-1 == g_mailbox) {
+	while ((uint32) -1 == g_mailbox) {
 		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
 		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
@@ -243,7 +243,7 @@ void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint
 			| (mode << SPI_MODE_OFFSET);
 
 	// Wait for a value to be written
-	while (-1 == g_mailbox) {
+	while ((uint32) -1 == g_mailbox) {
 		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 	}
 
@@ -262,7 +262,11 @@ void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint
 			*par32 = g_mailbox;
 			break;
 		default:
+#ifdef SPI_DEBUG
 			SPIError(SPI_INVALID_BYTE_SIZE);
+#else
+			return;
+#endif
 			break;
 	}
 

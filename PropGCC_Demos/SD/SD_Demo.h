@@ -7,6 +7,8 @@
 #ifndef SD_DEMO_H_
 #define SD_DEMO_H_
 
+#define DEBUG
+
 // Includes
 #include <propeller.h>
 #include <gpio.h>

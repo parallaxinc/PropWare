@@ -78,6 +78,17 @@ uint8 SDMount (void);
 // TODO: Implement this
 uint8 SDOpen (const char *filename);
 
+/* @Brief: In terms of buffer offset, find a file that matches the name in *filename in the current
+ *         directory.
+ *
+ * @param	*filename			C-string representing the short (standard) filename
+ * @param	*fileEntryOffset	The buffer offset will be returned via this address if the file is found
+ *
+ * @return		Returns 0 upon success, error code otherwise (common error code is SD_EOC_END for
+ *              end-of-chain marker)
+ */
+uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
+
 #ifdef SD_SHELL
 #include <stdio.h>
 /* @Brief: Provide the user with a very basic unix-like shell. The following commands
@@ -290,7 +301,7 @@ static uint8 SDReadDataBlock (uint32 address, uint8 *dat);
  *
  * @return
  */
-static void SDGetFilename (const uint8 *buf, uint8 *filename);
+static void SDGetFilename (const uint8 *buf, char *filename);
 
 /* @Brief: Return byte-reversed 16-bit variable (SD cards store bytes little-endian therefore we must
  * 		   reverse them to use multi-byte variables)
@@ -328,7 +339,7 @@ static uint32 SDGetSectorFromPath (const char *path);
  *
  * @return		Returns sector address of desired allocation unit
  */
-static uint32 SDGetSectorFromAlloc (const uint32 allocUnit);
+static uint32 SDGetSectorFromAlloc (uint32 allocUnit);
 
 /* @Brief: Read an entry from the FAT
  *
@@ -385,7 +396,7 @@ static uint8 SDOpenFile_ptr (const uint16 fileEntryOffset, uint32 *fileLen);
 static uint8 SDOpenDir_ptr (const uint16 fileEntryOffset);
 
 #ifdef SD_SHELL
-static inline void SDPrintFileEntry (const uint8 *file, uint8 filename[]);
+static inline void SDPrintFileEntry (const uint8 *file, char filename[]);
 static void SDPrintFileAttributes (const uint8 flag);
 #endif
 

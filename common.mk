@@ -51,7 +51,7 @@ BOARDFLAG=-b$(BOARD)
 endif
 
 CFLAGS_NO_MODEL := $(CFLAGS)
-CFLAGS += -m$(MODEL)
+CFLAGS += -Wextra -m$(MODEL)
 CXXFLAGS += $(CFLAGS)
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 INC += -I/mnt/win-7/Users/Public/Kits/Embedded/Parallax/Library -I/opt/parallax/include 
