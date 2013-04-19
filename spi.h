@@ -20,14 +20,14 @@
  * @option	SPI_DEBUG_PARAMS	Parameter checking within each function call. I
  * 								recommended you leave this option enabled unless speed
  * 								is critical
- * 								DEFAULT: OFF
+ * 								DEFAULT: ON
  * @option	SPI_FAST			Allows for fast send and receive routines without error checking
  * 								or timing delays; Normal routines still available when enabled
- * 								DEFAULT: ENABLED
+ * 								DEFAULT: ON
  * 								TODO: Use the counter module instead of "xor clkPin, clkPin"
  */
 //#define SPI_DEBUG
-//#define SPI_DEBUG_PARAMS
+#define SPI_DEBUG_PARAMS
 #define SPI_FAST
 
 #define	SPI_POLARITY_LOW			0
