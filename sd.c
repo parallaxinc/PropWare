@@ -25,9 +25,6 @@ uint32 g_sd_curFatSector;			// Store the current FAT sector loaded into g_sd_fat
 uint32 g_sd_dir_firstAllocUnit; // Store the current directory's starting allocation unit
 
 sd_buffer g_sd_buf;
-#ifdef SD_SPEED_OVER_SPACE
-sd_buffer g_sd_fileBuf;
-#endif
 
 // First byte response receives special treatment to allow for proper debugging
 uint8 g_sd_firstByteResponse;
@@ -839,17 +836,11 @@ uint8 SDGetFATValue (const uint32 fatEntry, uint32 *value) {
 }
 
 #ifdef SD_SHELL
-uint8 SD_Shell (void) {
+uint8 SD_Shell (sd_file *f) {
 	char usrInput[SD_SHELL_INPUT_LEN] = "";
 	char cmd[SD_SHELL_CMD_LEN] = "";
 	char arg[SD_SHELL_ARG_LEN] = "";
 	uint8 i, j, err;
-	sd_file f;
-#ifdef SD_SPEED_OVER_SPACE
-	f.buf = &g_sd_fileBuf;
-#else
-	f.buf = &g_sd_buf;
-#endif
 
 	printf("Welcome to David's quick shell! There is no help, nor much to do.\n");
 	printf("Have fun...\n");
@@ -887,7 +878,7 @@ uint8 SD_Shell (void) {
 		if (!strcmp(cmd, SD_SHELL_LS))
 			err = SD_Shell_ls();
 		else if (!strcmp(cmd, SD_SHELL_CAT))
-			err = SD_Shell_cat(arg, &f);
+			err = SD_Shell_cat(arg, f);
 		else if (!strcmp(cmd, SD_SHELL_CD))
 			err = SDchdir(arg);
 		else if (!strcmp(cmd, SD_SHELL_EXIT))
@@ -979,6 +970,7 @@ uint8 SD_Shell_cat (const char *name, sd_file *f) {
 		while (!SDfeof(f)) {
 			putchar(SDfgetc(f));
 		}
+		putchar('\n');
 	}
 
 	return 0;

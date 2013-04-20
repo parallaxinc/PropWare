@@ -13,6 +13,29 @@ void main (void) {
 	uint32 len;
 	char str[128];
 
+	sd_file f;
+
+#ifndef LOW_RAM_MODE
+	/* Option 1: Create a new sd_buffer variable
+	 *
+	 * An extra 525 bytes of memory are required to create a new sd_buffer
+	 * for the file variable, but speed will be increased if files are
+	 * being switched often. Using this option will allow the directory
+	 * contents to be kept in RAM while a file is loaded.
+	 *
+	 */
+	sd_buffer fileBuf;	// If extra RAM is available
+	f.buf = &fileBuf;
+#else
+	/* Option 2: Use the generic buffer, g_sd_buf, as the buffer
+	 *
+	 * Good for low-RAM situations due to the re-use of g_sd_buf. Speed is
+	 * decreased when multiple files are used often.
+	 *
+	 */
+	f.buf = &g_sd_buf;
+#endif
+
 #ifdef DEBUG
 	__simple_printf("Beginning SD card initialization...\n");
 #endif
@@ -29,9 +52,13 @@ void main (void) {
 #endif
 
 #ifdef SD_SHELL
-	SD_Shell();
+	SD_Shell(&f);
 #else
-	SDFind("SPI.H", &temp);
+	SDfopen("SPI_AS.S", &f);
+	while (!SDfeof(&f)) {
+		SDfgets(str, 128, &f);
+		__simple_printf("%s", str);
+	}
 #endif
 
 	GPIODirModeSet(BIT_16, GPIO_DIR_OUT);

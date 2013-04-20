@@ -24,19 +24,14 @@
  * 								DEFAULT: OFF
  * @option	SD_SHELL			Unix-like command-line arguments will be defined and available
  * 								DEFAULT: ON
- * @option	SD_SPEED_OVER_SPACE	Extra RAM will be used to keep file and directory sectors separate;
- * 								This saves time and does not force the chip to reload directory
- * 								contents with each file-switch
- * 								DEFAULT: ON
  */
 //#define SD_DEBUG
 //#define SD_VERBOSE
 //#define SD_VERBOSE_BLOCKS
-#define SD_SHELL
-#define SD_SPEED_OVER_SPACE
+//#define SD_SHELL
 
 #define SD_LINE_SIZE			16
-#define SD_SECTOR_SIZE				512
+#define SD_SECTOR_SIZE			512
 
 // Error codes - preceded by SPI
 #define SD_ERRORS_BASE			16
@@ -69,6 +64,9 @@ typedef struct {
 	uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
 	uint32 curCluster; // like curSector, but for allocation units
 } sd_file;
+
+// If the system is low on RAM, allow the external program to access the generic buffer.
+extern sd_buffer g_sd_buf;
 
 /* @Brief: Initialize SD card communication over SPI for 3.3V configuration
  *
@@ -110,8 +108,9 @@ uint8 SDchdir (const char *d);
 /* @Brief: Load the first sector of a file into the file buffer; Initialize global
  * 		   character pointers (seek and tell)
  *
- * @param	*filename		C-string containing the filename to open
- * @param	*fileLen		Length of the file in bytes will be stored into this address
+ * @param	*name		C-string containing the filename to open
+ * @param	*f			Address where file information (such as the first allocation unit) can be
+ * 						stored. Multiple files opened simultaneously is allowed.
  *
  * @return 		Returns 0 upon success, error code otherwise
  */
@@ -120,7 +119,10 @@ uint8 SDfopen (const char *name, sd_file *f);
 /* @Brief: Read one character from the currently opened file.
  *         NOTE: This function does not include error checking
  *
- * @Pre: A file must be opened
+ * @Pre: *f must point to a currently opened and valid file
+ *
+ * @param	*f		Address where file information (such as the first allocation unit) can be
+ * 					stored.
  *
  * @return		Returns the character pointed to by the g_sd_rPtr pointer
  */
@@ -130,16 +132,19 @@ char SDfgetc (sd_file *f);
  *         Parameters should match stdio.h's fgets except for the file pointer
  *         NOTE: This function does not include error checking
  *
- * @Pre: A file must be opened
+ * @Pre: *f must point to a currently opened and valid file
  *
  * @param	s[]		Character array to store file characters
  * @param	size	Maximum number of characters to read from the file
+ * @param	*f		Address with the currently opened file
  */
 char * SDfgets (char s[], uint32 size, sd_file *f);
 
 /* @Brief: Determine whether the read pointer has reached the end of the file
  *
- * @Pre: A file must be opened
+ * @Pre: *f must point to a currently opened and valid file
+ *
+ * @param	*f		Address of the requested file
  *
  * @return		Returns true if the read pointer points to the end of the file, false otherwise
  */
@@ -150,9 +155,12 @@ inline uint8 SDfeof (sd_file *f);
 /* @Brief: Provide the user with a very basic unix-like shell. The following commands
  *         are available to the user: ls, cat, cd.
  *
+ * @param	*f		If a file is opened via a command such as 'cat', its information will
+ * 					be stored at this address
+ *
  * @return		Returns 0 upon success, error code otherwise
  */
-uint8 SD_Shell (void);
+uint8 SD_Shell (sd_file *f);
 
 /* @Brief: List the contents of a directory on the screen (similar to 'ls .')
  *

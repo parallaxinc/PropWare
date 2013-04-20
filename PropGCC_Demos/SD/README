@@ -1,7 +1,23 @@
-PropGCC SD Demo - README
+###############################
+#
+# PropGCC SD Demo - README
+#
+###############################
 
-NOTE: To compile this demo, you must either copy or create symbolic
-links to the following files:
+### CODE SPACE ###
+As of 4/19/2013, SD demo requires the following code space:
+Enabled Code Options						CMM Mode		LMM Mode
+None										7124			11340
+SD_DEBUG									10480			17048
+SD_DEBUG, SD_VERBOSE						17492			29628
+SD_DEBUG, SD_VERBOSE, SD_VERBOSE_BLOCKS		17816			30196
+SD_DEBUG, SD_SHELL							15708			27508
+SD_SHELL									14624			25904
+All											19220			Overflowed by 1760
+
+### NOTE ###
+To compile this demo, you must either copy into the working directory or 
+create symbolic links to the following files:
 	- spi.c
 	- spi.h		(see note in common.mk for reasoning why this must be included)
 	- spi_as.S
