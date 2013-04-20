@@ -11,6 +11,7 @@ void main (void) {
 	uint8 err, i;
 	uint16 temp = 0;
 	uint32 len;
+	char str[128];
 
 #ifdef DEBUG
 	__simple_printf("Beginning SD card initialization...\n");
@@ -29,10 +30,9 @@ void main (void) {
 
 #ifdef SD_SHELL
 	SD_Shell();
+#else
+	SDFind("SPI.H", &temp);
 #endif
-
-//	SDFind("SPI.H", &temp);
-
 
 	GPIODirModeSet(BIT_16, GPIO_DIR_OUT);
 //	__simple_printf("Done!!!\n");

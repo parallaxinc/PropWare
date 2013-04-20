@@ -6,7 +6,6 @@ NAME = $(PRJ)
 OBJS = $(PRJ).o sd.o spi.o spi_as.o
 BOARD = QUICKSTART
 MODEL = cmm
-CFLAGS = 
 
 all: $(NAME).elf
 

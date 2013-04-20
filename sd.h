@@ -36,6 +36,7 @@
 #define SD_SPEED_OVER_SPACE
 
 #define SD_LINE_SIZE			16
+#define SD_SECTOR_SIZE				512
 
 // Error codes - preceded by SPI
 #define SD_ERRORS_BASE			16
@@ -50,6 +51,24 @@
 #define SD_FILENAME_NOT_FOUND	SD_ERRORS_BASE + 7
 #define SD_EMPTY_FAT_ENTRY		SD_ERRORS_BASE + 8
 #define SD_CORRUPT_CLUSTER		SD_ERRORS_BASE + 9
+
+typedef struct {
+	uint8 buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
+	uint32 curClusterStartAddr;		// Store the current cluster's starting sector number
+	uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
+	uint32 curAllocUnit;					// Store the current allocation unit
+	uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
+} sd_buffer;
+
+typedef struct {
+	sd_buffer *buf;
+	uint32 wPtr;
+	uint32 rPtr;
+	uint32 length;
+	uint32 firstAllocUnit; // File's starting allocation unit
+	uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
+	uint32 curCluster; // like curSector, but for allocation units
+} sd_file;
 
 /* @Brief: Initialize SD card communication over SPI for 3.3V configuration
  *
@@ -96,14 +115,35 @@ uint8 SDchdir (const char *d);
  *
  * @return 		Returns 0 upon success, error code otherwise
  */
-uint8 SDfopen (const char *filename, uint32 *fileLen);
+uint8 SDfopen (const char *name, sd_file *f);
 
 /* @Brief: Read one character from the currently opened file.
  *         NOTE: This function does not include error checking
  *
+ * @Pre: A file must be opened
+ *
  * @return		Returns the character pointed to by the g_sd_rPtr pointer
  */
-char SDfgetc (void);
+char SDfgetc (sd_file *f);
+
+/* @Brief: Read a line from a file until either 'size' characters have been read or a newline is found
+ *         Parameters should match stdio.h's fgets except for the file pointer
+ *         NOTE: This function does not include error checking
+ *
+ * @Pre: A file must be opened
+ *
+ * @param	s[]		Character array to store file characters
+ * @param	size	Maximum number of characters to read from the file
+ */
+char * SDfgets (char s[], uint32 size, sd_file *f);
+
+/* @Brief: Determine whether the read pointer has reached the end of the file
+ *
+ * @Pre: A file must be opened
+ *
+ * @return		Returns true if the read pointer points to the end of the file, false otherwise
+ */
+inline uint8 SDfeof (sd_file *f);
 
 #ifdef SD_SHELL
 #include <stdio.h>
@@ -130,7 +170,7 @@ uint8 SD_Shell_ls (void);
  *
  * @return		Returns 0 upon success, error code otherwise
  */
-uint8 SD_Shell_cat (const char *f);
+uint8 SD_Shell_cat (const char *name, sd_file *f);
 
 /* @Brief: Change the current working directory to *f (similar to 'cd f');
  *
@@ -166,7 +206,6 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 // Misc. SD Definitions
 #define SD_WIGGLE_ROOM				10000
 #define SD_RESPONSE_TIMEOUT			CLKFREQ/10				// Wait 0.1 seconds for a response before timing out
-#define SD_SECTOR_SIZE				512
 #define SD_SECTOR_SIZE_SHIFT		9
 
 // SD Commands
@@ -265,16 +304,8 @@ enum cluster_types {
 
 // File constants
 #ifndef SD_EOF
-#define SD_EOF						-1						// System dependent - may need to be defined elsewhere
+#define SD_EOF						((uint8) -1)						// System dependent - may need to be defined elsewhere
 #endif
-
-typedef struct {
-	uint8 buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
-	uint32 curClusterStartAddr;		// Store the current cluster's starting sector number
-	uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
-	uint32 curAllocUnit;					// Store the current allocation unit
-	uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
-} sd_buffer;
 
 /***********************************
  *** Private Function Prototypes ***
@@ -392,7 +423,7 @@ static uint8 SDLoadNextSector (sd_buffer *buf);
  * @param	offset		How many sectors past the first one should be skipped (sector number of the file)
  *
  */
-uint8 SDLoadSectorFromOffset (sd_buffer *buf, const uint32 offset);
+uint8 SDLoadSectorFromOffset (sd_file *f, const uint32 offset);
 
 /* @Brief: When the final sector of a cluster is finished, SDIncCluster can be called. The appropriate
  *         global variables will be set according (incremented or set by the FAT) and the first sector
