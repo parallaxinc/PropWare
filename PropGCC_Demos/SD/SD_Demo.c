@@ -13,7 +13,7 @@ void main (void) {
 	uint32 len;
 	char str[128];
 
-	sd_file f;
+	sd_file f, f2;
 
 #ifndef LOW_RAM_MODE
 	/* Option 1: Create a new sd_buffer variable
@@ -25,7 +25,9 @@ void main (void) {
 	 *
 	 */
 	sd_buffer fileBuf;	// If extra RAM is available
+	sd_buffer fileBuf2;
 	f.buf = &fileBuf;
+	f2.buf = &fileBuf2;
 #else
 	/* Option 2: Use the generic buffer, g_sd_buf, as the buffer
 	 *
@@ -34,44 +36,58 @@ void main (void) {
 	 *
 	 */
 	f.buf = &g_sd_buf;
+	f2.buf = &g_sd_buf;
 #endif
 
 #ifdef DEBUG
-	__simple_printf("Beginning SD card initialization...\n");
+	printf("Beginning SD card initialization...\n");
 #endif
 
 	if (err = SDStart(MOSI, MISO, SCLK, CS))
 		error(err);
 #ifdef DEBUG
-	__simple_printf("SD routine started. Mounting now...\n");
+	printf("SD routine started. Mounting now...\n");
 #endif
 	if (err = SDMount())
 		error(err);
 #ifdef DEBUG
-	__simple_printf("FAT partition mounted!\n");
+	printf("FAT partition mounted!\n");
 #endif
 
 #ifdef SD_SHELL
 	SD_Shell(&f);
 #else
-	SDfopen("SPI_AS.S", &f);
-	while (!SDfeof(&f)) {
-		SDfgets(str, 128, &f);
-		__simple_printf("%s", str);
+	// Copy the contents of SD.H into SD.C (SD.H -> SD.C as opposed to SD.C -> SD.H
+	// because this will not increase the file size. Increasing file size is not implemented)
+	SDfopen("SD.C", &f);
+	SDfopen("SD.H", &f2);
+
+	while (!SDfeof(&f2)) {
+		SDfgets(str, 128, &f2);
+		SDfputs(str, &f);
 	}
+
+//	// Re-open the file and print the (hopefully) new contents to the screenSDfopen("SPI_AS.S", &f);
+//	while (!SDfeof(&f)) {
+//		SDfgets(str, 128, &f);
+//		printf("%s", str);
+//	}
+#endif
+
+#ifdef DEBUG
+	printf("Execution complete!\n");
 #endif
 
 	GPIODirModeSet(BIT_16, GPIO_DIR_OUT);
-//	__simple_printf("Done!!!\n");
 	while (1) {
 		GPIOPinToggle(BIT_16);
-		waitcnt(CLKFREQ + CNT);
+		waitcnt(CLKFREQ/2 + CNT);
 	}
 }
 
 void error (const uint8 err) {
 #ifdef DEBUG
-	__simple_printf("Unknown error %u\n", err);
+	printf("Unknown error %u\n", err);
 #endif
 	while (1)
 		;

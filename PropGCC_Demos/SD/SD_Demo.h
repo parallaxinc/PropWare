@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include <sd.h>
 
+#if (!(defined SD_VERBOSE) && !(defined SD_VERBOSE_BLOCKS))
+#define printf		__simple_printf
+#endif
+
 #define CS						BIT_0
 #define MOSI					BIT_1
 #define SCLK					BIT_2
