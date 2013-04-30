@@ -11,14 +11,15 @@ void main (void) {
 	uint8 err, i;
 	uint16 temp = 0;
 	uint32 len;
+	char c;
 	char str[128];
 
 	sd_file f, f2;
 
 #ifndef LOW_RAM_MODE
-	/* Option 1: Create a new sd_buffer variable
+	/* Option 1: Create at least one new sd_buffer variable
 	 *
-	 * An extra 525 bytes of memory are required to create a new sd_buffer
+	 * An extra 526 bytes of memory are required to create a new sd_buffer
 	 * for the file variable, but speed will be increased if files are
 	 * being switched often. Using this option will allow the directory
 	 * contents to be kept in RAM while a file is loaded.
@@ -56,22 +57,36 @@ void main (void) {
 
 #ifdef SD_SHELL
 	SD_Shell(&f);
-#else
-	// Copy the contents of SD.H into SD.C (SD.H -> SD.C as opposed to SD.C -> SD.H
-	// because this will not increase the file size. Increasing file size is not implemented)
-	SDfopen("SD.C", &f);
-	SDfopen("SD.H", &f2);
+#elif (defined SD_FILE_WRITE)
+	// Create a blank file and copy the contents of STUFF.TXT into it
+	printf("Changing into /STUFF/\n");
+	SDchdir("STUFF");
+	SDfopen("SOME.TXT", &f, SD_FILE_MODE_R);
+	SDfopen("NEW.BAK", &f2, SD_FILE_MODE_R_PLUS);
 
-	while (!SDfeof(&f2)) {
-		SDfgets(str, 128, &f2);
-		SDfputs(str, &f);
+	printf("Both files opened...\n");
+
+	while (!SDfeof(&f)) {
+		c = SDfgetc(&f);
+		SDfputc(c, &f2);
+#ifdef _STDIO_H
+		putchar(SDfgetc(&f2));
+#endif
 	}
 
-//	// Re-open the file and print the (hopefully) new contents to the screenSDfopen("SPI_AS.S", &f);
-//	while (!SDfeof(&f)) {
-//		SDfgets(str, 128, &f);
-//		printf("%s", str);
-//	}
+	printf("\nFile printed...\n");
+
+	SDfclose(&f);
+	SDfclose(&f2);
+
+	printf("Files closed...\n");
+
+	SDfopen("NEW.BAK", &f2, SD_FILE_MODE_R);
+	while (!SDfeof(&f2))
+		putchar(SDfgetc(&f));
+	SDfclose(&f2);
+#else
+
 #endif
 
 #ifdef DEBUG

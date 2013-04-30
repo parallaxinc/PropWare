@@ -7,14 +7,17 @@
 #ifndef SD_DEMO_H_
 #define SD_DEMO_H_
 
-//#define DEBUG
+#define DEBUG
 //#define LOW_RAM_MODE
 
 // Includes
 #include <propeller.h>
 #include <gpio.h>
-#include <stdio.h>
 #include <sd.h>
+
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 
 #if (!(defined SD_VERBOSE) && !(defined SD_VERBOSE_BLOCKS))
 #define printf		__simple_printf

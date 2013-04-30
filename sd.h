@@ -1,6 +1,10 @@
-/* File:   sd.h
- * 
- * Author:  David Zemon
+/**
+ *  \brief     SDHC driver for FAT16 and FAT32 for Parallax Propeller
+ *  \author    David Zemon
+ *  \date      Spring 2013
+ *  \pre       The SD card must be SDHC v2 and must be formatted to FAT16 or FAT32
+ *  \warning   Unknown condition if card is not SDHC v2
+ *  \copyright MIT license
  */
 
 #ifndef SD_H_
@@ -10,33 +14,63 @@
 #include <types.h>
 #include <gpio.h>
 #include <spi.h>
-#include <stdio.h>
+#include <string.h>
 
-/* @Brief: Extra code options - Uncomment to enable features
+/**
+ * \brief	Extra code options - Uncomment definitions to enable features
  *
- * @option	SD_DEBUG			Enables thorough debugging features similar to exceptions; Errors
- * 								will be caught the program will enter an infinite loop
+ * \param	SD_DEBUG			Enables thorough debugging features similar to exceptions;
+ * 								Errors will be caught the program will enter an infinite
+ * 								loop
  * 								DEFAULT: OFF
- * @option	SD_VERBOSE			Verbose functions will be enabled (such as SDPrintHexBlock) and
- * 								error checking will display pertinent information through UART
+ * \param	SD_VERBOSE			Verbose functions will be enabled (such as SDPrintHexBlock)
+ * 								and error checking will display pertinent information
+ * 								through UART
  * 								DEFAULT: OFF
- * @option	SD_VERBOSE_BLOCKS	Select data blocks/sectors will be display via UART for
+ * \param	SD_VERBOSE_BLOCKS	Select data blocks/sectors will be display via UART for
  * 								debugging purposes
  * 								DEFAULT: OFF
- * @option	SD_SHELL			Unix-like command-line arguments will be defined and available
+ * \param	SD_SHELL			Unix-like command-line arguments will be defined and
+ * 								available
+ * 								DEFAULT: ON
+ * \param	SD_FILE_WRITE		Allows for files to be created and written to - adds
+ * 								noticeable code size
+ * 								NOTE: Work-in-progress, code size is not necessarily at
+ * 								a minimum, nor is RAM usage
  * 								DEFAULT: ON
  */
 //#define SD_DEBUG
-//#define SD_VERBOSE
-//#define SD_VERBOSE_BLOCKS
+#define SD_VERBOSE
+#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
+#define SD_FILE_WRITE
+
+// DANGEROUS, BAD HACK!!! FOR ADVANCED DEBUGGING ONLY
+// To set all private functions to public, ensure the following line is uncommented
+//#define static
 
 #define SD_LINE_SIZE			16
 #define SD_SECTOR_SIZE			512
 
+// File modes
+typedef enum _sd_file_mode sd_file_mode;
+enum _sd_file_mode {
+	SD_FILE_MODE_R,
+#ifdef SD_FILE_WRITE
+	SD_FILE_MODE_R_PLUS, SD_FILE_MODE_A, SD_FILE_MODE_A_PLUS,
+#endif
+	SD_FILE_MODES
+};
+
+#ifndef SEEK_SET
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+#endif
+
 // Error codes - preceded by SPI
 #define SD_ERRORS_BASE			16
-#define SD_ERRORS_LIMIT			16
+#define SD_ERRORS_LIMIT			32
 #define SD_INVALID_CMD			SD_ERRORS_BASE + 0
 #define SD_READ_TIMEOUT			SD_ERRORS_BASE + 1
 #define SD_INVALID_NUM_BYTES	SD_ERRORS_BASE + 2
@@ -49,194 +83,261 @@
 #define SD_CORRUPT_CLUSTER		SD_ERRORS_BASE + 9
 #define SD_INVALID_PTR_ORIGIN	SD_ERRORS_BASE + 10
 #define SD_ENTRY_NOT_FILE		SD_ERRORS_BASE + 11
+#define SD_INVALID_FILENAME		SD_ERRORS_BASE + 12
+#define SD_INVALID_FAT_APPEND	SD_ERRORS_BASE + 13
+#define SD_FILE_ALREADY_EXISTS	SD_ERRORS_BASE + 14
+#define SD_INVALID_FILE_MODE	SD_ERRORS_BASE + 15
+#define SD_TOO_MANY_FATS		SD_ERRORS_BASE + 16
 
-typedef struct sd_buffer sd_buffer;
-typedef struct sd_file sd_file;
+typedef struct _sd_buffer sd_buffer;
+typedef struct _sd_file sd_file;
 
 // If the system is low on RAM, allow the external program to access the generic buffer.
 extern sd_buffer g_sd_buf;
 
-/* @Brief: Initialize SD card communication over SPI for 3.3V configuration
+/**
+ * \brief	Initialize SD card communication over SPI for 3.3V configuration
  *
- * @param	mosi		Pin mask for MOSI pin
- * @param	miso		Pin mask for MISO pin
- * @param	sclk		Pin mask for SCLK pin
- * @param	cs			Pin mask for CS pin
+ * \param	mosi		Pin mask for MOSI pin
+ * \param	miso		Pin mask for MISO pin
+ * \param	sclk		Pin mask for SCLK pin
+ * \param	cs			Pin mask for CS pin
  *
- * @return		Returns 0 upon success, otherwise error code
+ * \return		Returns 0 upon success, otherwise error code
  */
 uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs);
 
-/* @Brief: Mount either FAT16 or FAT32 filesystem
+/**
+ * \brief	Mount either FAT16 or FAT32 filesystem
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDMount (void);
 
-/* @Brief: Find a file entry (file or sub-directory) that matches the name in *filename
- *         in the current directory; its relative location is communicated by placing it
- *         in the address of *fileEntryOffset
+/**
+ * \brief	Change the current working directory to *f (similar to 'cd f')
  *
- * @param	*filename			C-string representing the short (standard) filename
- * @param	*fileEntryOffset	The buffer offset will be returned via this address if the file
- * 								is found
+ * \param	*d			Short filename of directory to change to
  *
- * @return		Returns 0 upon success, error code otherwise (common error code is SD_EOC_END for
- *              end-of-chain or file-not-found marker)
- */
-uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
-
-/* @Brief: Change the current working directory to *f (similar to 'cd f');
- *
- * @param	*d			Short filename of directory to change to
- *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDchdir (const char *d);
 
-/* @Brief: Load the first sector of a file into the file buffer; Initialize global
- * 		   character pointers; NOTE: currently, only one file mode is supported and is best
- * 		   described as "r+"; NOTE: two position pointers are used, one for writing and one for
- * 		   reading, this may be changed later to comply with POSIX standards but is useful for
- * 		   my own purposes at the moment
+/**
+ * \brief	Open a file with a given name and load its information into the file pointer
  *
- * @param	*name		C-string containing the filename to open
- * @param	*f			Address where file information (such as the first allocation unit) can be
- * 						stored. Multiple files opened simultaneously is allowed.
+ * \detailed	Load the first sector of a file into the file buffer; Initialize global
+ *				character pointers; NOTE: currently, only one file mode is supported and
+ *				is best described as "r+"; NOTE: two position pointers are used, one for
+ *				writing and one for reading, this may be changed later to comply with
+ *				POSIX standards but is useful for my own purposes at the moment
+ *				NOTE: This driver does not include any provision for timestamps; Niether
+ *				file modification or creation will changed file's timestamp data (creation
+ *				times are random and uninitialized)
  *
- * @return 		Returns 0 upon success, error code otherwise
+ * \pre		Files cannot be created in the root directory of a FAT16 filesystem
+ *
+ * \param	*name	C-string containing the filename to open
+ * \param	*f		Address where file information (such as the first allocation unit) can
+ * 					be stored. Multiple files opened simultaneously is allowed.
+ *
+ * \return 		Returns 0 upon success, error code otherwise
  */
-uint8 SDfopen (const char *name, sd_file *f);
+uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
 
+/**
+ * \brief	Close a given file
+ *
+ * \param	*f		Address of the file object to close
+ *
+ * \return		Returns 0 upon success, error code otherwise
+ */
 uint8 SDfclose (sd_file *f);
 
+#ifdef SD_FILE_WRITE
+/**
+ * \brief	Insert a character into a given file
+ *
+ * \detailed	Insert 'c' at the location pointed to by the file's write pointer; Note: the read and
+ * 				write pointers may be merged into one at a later date
+ *
+ * \param	c		Character to be inserted
+ * \param	*f		Address of the desired file object
+ *
+ * \return
+ */
 uint8 SDfputc (const char c, sd_file *f);
 
+/**
+ * \brief	Insert a c-string into a file
+ *
+ * \detailed	Insert an array of bytes into the file oject pointed to by 'f' beginning at address
+ * 				's' until the value 0 is reached
+ *
+ * \param	*s		C-string to be inserted
+ * \param	*f		Address of file object
+ *
+ * \return		Returns 0 upon success, otherwise error code
+ */
 uint8 SDfputs (char *s, sd_file *f);
+#endif
 
-/* @Brief: Read one character from the currently opened file.
- *         NOTE: This function does not include error checking
+/**
+ * \brief	Read one character from the currently opened file.
  *
- * @Pre: *f must point to a currently opened and valid file
+ * \detailed	NOTE: This function does not include error checking
  *
- * @param	*f		Address where file information (such as the first allocation unit) can be
+ * \Pre: *f must point to a currently opened and valid file
+ *
+ * \param	*f		Address where file information (such as the first allocation unit) can be
  * 					stored.
  *
- * @return		Returns the character pointed to by the g_sd_rPtr pointer
+ * \return		Returns the character pointed to by the g_sd_rPtr pointer
  */
 char SDfgetc (sd_file *f);
 
-/* @Brief: Read a line from a file until either 'size' characters have been read or a newline is found
- *         Parameters should match stdio.h's fgets except for the file pointer
- *         NOTE: This function does not include error checking
+/**
+ * \brief	Read a line from a file until either 'size' characters have been read or a
+ * 			newline is found; Parameters should match stdio.h's fgets except for the file
+ * 			pointer
+ * 			NOTE: This function does not include error checking
  *
- * @Pre: *f must point to a currently opened and valid file
+ * \pre		*f must point to a currently opened and valid file
  *
- * @param	s[]		Character array to store file characters
- * @param	size	Maximum number of characters to read from the file
- * @param	*f		Address with the currently opened file
+ * \param	s[]		Character array to store file characters
+ * \param	size	Maximum number of characters to read from the file
+ * \param	*f		Address with the currently opened file
  */
 char * SDfgets (char s[], uint32 size, sd_file *f);
 
-/* @Brief: Determine whether the read pointer has reached the end of the file
+/**
+ * \brief	Determine whether the read pointer has reached the end of the file
  *
- * @Pre: *f must point to a currently opened and valid file
+ * \Pre: *f must point to a currently opened and valid file
  *
- * @param	*f		Address of the requested file
+ * \param	*f		Address of the requested file
  *
- * @return		Returns true if the read pointer points to the end of the file, false otherwise
+ * \return		Returns true if the read pointer points to the end of the file, false otherwise
  */
 inline uint8 SDfeof (sd_file *f);
 
-/* @Brief: Set the read pointer for a given file to the position 'origin + offset'
+/**
+ * \brief	Set the read pointer for a given file to the position 'origin + offset'
  *
- * @Pre: *f must be an opened file
+ * \Pre: *f must be an opened file
  *
- * @param	*f		Address of the file object being referenced
- * @param	offset	Bytes beyond 'origin' to set the pointer to
- * @param	origin	Gives a reference to the offset; can be one of SEEK_SET, SEEK_CUR, SEEK_END
+ * \param	*f		Address of the file object being referenced
+ * \param	offset	Bytes beyond 'origin' to set the pointer to
+ * \param	origin	Gives a reference to the offset; can be one of SEEK_SET, SEEK_CUR, SEEK_END
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDfseekr (sd_file *f, const int32 offset, const uint8 origin);
 
-/* @Brief: Set the write pointer for a given file to the position 'origin + offset'
+/**
+ * \brief	Set the write pointer for a given file to the position 'origin + offset'
  *
- * @Pre: *f must be an opened file
+ * \Pre: *f must be an opened file
  *
- * @param	*f		Address of the file object being referenced
- * @param	offset	Bytes beyond 'origin' to set the pointer to
- * @param	origin	Gives a reference to the offset; can be one of SEEK_SET, SEEK_CUR, SEEK_END
+ * \param	*f		Address of the file object being referenced
+ * \param	offset	Bytes beyond 'origin' to set the pointer to
+ * \param	origin	Gives a reference to the offset; can be one of SEEK_SET, SEEK_CUR, SEEK_END
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDfseekw (sd_file *f, const int32 offset, const uint8 origin);
 
-/* @Brief: Retrieve the current position of the read pointer
+/**
+ * \brief	Retrieve the current position of the read pointer
  *
- * @Pre: *f must be an opened file
+ * \Pre: *f must be an opened file
  *
- * @param	*f		Address of the file object being referenced
+ * \param	*f		Address of the file object being referenced
  *
- * @return		Returns the byte offset (from beginning) of the read pointer
+ * \return		Returns the byte offset (from beginning) of the read pointer
  */
 inline uint32 SDftellr (const sd_file *f);
 
-/* @Brief: Retrieve the current position of the write pointer
+/**
+ * \brief	Retrieve the current position of the write pointer
  *
- * @Pre: *f must be an opened file
+ * \Pre: *f must be an opened file
  *
- * @param	*f		Address of the file object being referenced
+ * \param	*f		Address of the file object being referenced
  *
- * @return		Returns the byte offset (from beginning) of the write pointer
+ * \return		Returns the byte offset (from beginning) of the write pointer
  */
 inline uint32 SDftellw (const sd_file *f);
 
 #ifdef SD_SHELL
-/* @Brief: Provide the user with a very basic unix-like shell. The following commands
+// Shell definitions
+#define SD_SHELL_INPUT_LEN			64
+#define SD_SHELL_CMD_LEN			8
+#define SD_SHELL_ARG_LEN			32
+#define SD_SHELL_EXIT				("exit")
+#define SD_SHELL_LS					("ls")
+#define SD_SHELL_CAT				("cat")
+#define SD_SHELL_CD					("cd")
+#define SD_SHELL_TOUCH				("touch")
+
+/**
+ * \brief	Provide the user with a very basic unix-like shell. The following commands
  *         are available to the user: ls, cat, cd.
  *
- * @param	*f		If a file is opened via a command such as 'cat', its information will
+ * \param	*f		If a file is opened via a command such as 'cat', its information will
  * 					be stored at this address
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SD_Shell (sd_file *f);
 
-/* @Brief: List the contents of a directory on the screen (similar to 'ls .')
+/**
+ * \brief	List the contents of a directory on the screen (similar to 'ls .')
  *
- * @param	*absPath	Absolute path of the directory to be printed
+ * \param	*absPath	Absolute path of the directory to be printed
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SD_Shell_ls (void);
 
-/* @Brief: Dump the contents of a file to the screen (similar to 'cat f');
+/**
+ * \brief	Dump the contents of a file to the screen (similar to 'cat f');
  *
- * @Note: Does not currently follow paths
+ * \Note: Does not currently follow paths
  *
- * @param	*f			Short filename of file to print
+ * \param	*f			Short filename of file to print
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SD_Shell_cat (const char *name, sd_file *f);
 
-/* @Brief: Change the current working directory to *f (similar to 'cd f');
+/**
+ * \brief	Change the current working directory to *f (similar to 'cd f');
  *
- * @param	*d			Short filename of directory to change to
+ * \param	*d			Short filename of directory to change to
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SD_Shell_cd (const char *d);
+
+#ifdef SD_FILE_WRITE
+/**
+ * \brief	Create a new file, do not open it
+ *
+ * \param	*name		C-string name for the file to be created
+ */
+uint8 SD_Shell_touch (const char name[]);
+#endif
 #endif
 
 #if (defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS)
-/* @Brief: Print a block of data in hex format to the screen in SD_LINE_SIZE-byte lines
+/**
+ * \brief	Print a block of data in hex format to the screen in SD_LINE_SIZE-byte lines
  *
- * @param	*dat		Pointer to the beginning of the data
- * @param	bytes		Number of bytes to print
+ * \param	*dat		Pointer to the beginning of the data
+ * \param	bytes		Number of bytes to print
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 #endif
@@ -246,6 +347,10 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
  *******************************************/
 #if (!(defined SD_VERBOSE) && !(defined SD_VERBOSE_BLOCKS))
 #define printf						__simple_printf
+#endif
+
+#if (defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS || defined SD_SHELL)
+#include <stdio.h>
 #endif
 
 // SPI config
@@ -314,20 +419,20 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 // FAT file/directory values
 #define SD_FILE_ENTRY_LENGTH		32						// An entry in a directory uses 32 bytes
 #define SD_DELETED_FILE_MARK		0xe5					// Marks that a file has been deleted here, continue to the next entry
-#define SD_FILE_ATTRIBUTE_OFFSET	11						// Byte of a file entry to store attribute flags
-#define SD_FILE_START_CLSTR_OFFSET	0x1a					// Starting cluster number
-#define SD_FILE_START_CLSTR_HIGH	0x14					// High word (16-bits) of the starting cluster number (FAT32 only)
-#define SD_FILE_LEN_OFFSET			0x1c					// Length of a file in bytes
 #define SD_FILE_NAME_LEN			8						// 8 characters in the standard file name
 #define SD_FILE_EXTENSION_LEN		3						// 3 character file name extension
 #define SD_FILENAME_STR_LEN			SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2
+#define SD_FILE_ATTRIBUTE_OFFSET	0x0B					// Byte of a file entry to store attribute flags
+#define SD_FILE_START_CLSTR_LOW		0x1a					// Starting cluster number
+#define SD_FILE_START_CLSTR_HIGH	0x14					// High word (16-bits) of the starting cluster number (FAT32 only)
+#define SD_FILE_LEN_OFFSET			0x1c					// Length of a file in bytes
 #define SD_FREE_CLUSTER				0						// Cluster is unused
 #define SD_RESERVED_CLUSTER			1
 #define SD_RSVD_CLSTR_VAL_BEG		-15						// First reserved cluster value
 #define SD_RSVD_CLSTR_VAL_END		-9						// Last reserved cluster value
 #define SD_BAD_CLUSTER				-8						// Cluster is corrupt
-#define SD_EOC_BEG					-7						// Last marker for end-of-chain (end of file entry within FAT)
-#define SD_EOC_END					-1						// First marker for end-of-chain
+#define SD_EOC_BEG					-7						// First marker for end-of-chain (end of file entry within FAT)
+#define SD_EOC_END					-1						// Last marker for end-of-chain
 // FAT file attributes (definitions with trailing underscore represent character for a cleared attribute flag)
 #define SD_READ_ONLY				BIT_0
 #define SD_READ_ONLY_CHAR			'r'
@@ -348,35 +453,33 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 #define SD_ARCHIVE_CHAR				'a'
 #define SD_ARCHIVE_CHAR_			'.'
 
-// Shell definitions
-#define SD_SHELL_INPUT_LEN			64
-#define SD_SHELL_CMD_LEN			8
-#define SD_SHELL_ARG_LEN			32
-#define SD_SHELL_EXIT				("exit")
-#define SD_SHELL_LS					("ls")
-#define SD_SHELL_CAT				("cat")
-#define SD_SHELL_CD					("cd")
-
 // File constants
 #ifndef SD_EOF
 #define SD_EOF						((uint8) -1)						// System dependent - may need to be defined elsewhere
 #endif
 
-struct sd_buffer {
+#define SD_FOLDER_ID				((uint8) -1)
+
+struct _sd_buffer {
 	uint8 buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
+	uint8 id;						// Buffer ID - determine who owns the current information
 	uint32 curClusterStartAddr;		// Store the current cluster's starting sector number
 	uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
 	uint32 curAllocUnit;					// Store the current allocation unit
 	uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
 	uint8 modified;	// If set, the currently loaded sector has been modified
+#ifdef SD_FILE_WRITE
+	uint8 mod;		// When set, the currently loaded sector has been modified since it was read from
+					// the SD card
+#endif
 };
 
-struct sd_file {
+struct _sd_file {
 	sd_buffer *buf;
+	uint8 id;	// determine if the buffer is owned by this file
 	uint32 wPtr;
 	uint32 rPtr;
-	uint8 mod;// When set, the currently loaded sector has been modified since it was read from
-			  // the SD card
+	sd_file_mode mode;
 	uint32 length;
 	uint32 firstAllocUnit; // File's starting allocation unit
 	uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
@@ -386,157 +489,266 @@ struct sd_file {
 /***********************************
  *** Private Function Prototypes ***
  ***********************************/
-/* @Brief: Send a command and argument over SPI to the SD card
+/**
+ * \brief	Send a command and argument over SPI to the SD card
  *
- * @param    command       6-bit value representing the command sent to the SD card
+ * \param    command       6-bit value representing the command sent to the SD card
  *
- * @return
+ * \return
  */
 static uint8 SDSendCommand (const uint8 cmd, const uint32 arg, const uint8 crc);
 
-/* Brief: Receive response and data from SD card over SPI
+/* brief	Receive response and data from SD card over SPI
  *
- * @param	bytes		Number of bytes to receive
- * @param	*data		Location in memory with enough space to store 'bytes' bytes of data
+ * \param	bytes		Number of bytes to receive
+ * \param	*data		Location in memory with enough space to store 'bytes' bytes of data
  *
- * @return		Returns 0 for success, else error code
+ * \return		Returns 0 for success, else error code
  */
 static uint8 SDGetResponse (const uint8 numBytes, uint8 *dat);
 
-/* @Brief: Receive data from SD card via SPI
+/**
+ * \brief	Receive data from SD card via SPI
  *
- * @param	bytes		Number of bytes to receive
- * @param	*data		Location in memory with enough space to store 'bytes' bytes of data
- * @param	address		Address for the SD card from which data should be read
+ * \param	bytes		Number of bytes to receive
+ * \param	*data		Location in memory with enough space to store 'bytes' bytes of data
  *
- * @return		Returns 0 for success, else error code
+ * \return		Returns 0 for success, else error code
  */
 static uint8 SDReadBlock (uint16 bytes, uint8 *dat);
 
-/* @Brief: Read SD_SECTOR_SIZE-byte data block from SD card
+/**
+ * \brief	Write data to SD card via SPI
  *
- * @param	address		Block address to read from SD card
- * @param	*dat		Location in chip memory to store data block
+ * \param	bytes		Block address to read from SD card
+ * \param	*dat		Location in memory where data resides
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
+ */
+static uint8 SDWriteBlock (uint16 bytes, uint8 *dat);
+
+/**
+ * \brief	Read SD_SECTOR_SIZE-byte data block from SD card
+ *
+ * \param	address		Number of bytes to send
+ * \param	*dat		Location in chip memory to store data block
+ *
+ * \return		Returns 0 upon success, error code otherwise
  */
 static uint8 SDReadDataBlock (uint32 address, uint8 *dat);
 
-/* @Brief: Write SD_SECTOR_SIZE-byte data block to SD card
+/**
+ * \brief	Write SD_SECTOR_SIZE-byte data block to SD card
  *
- * @param	address		Block address to write to SD card
- * @param	*dat		Location in chip memory to read data block
+ * \param	address		Block address to write to SD card
+ * \param	*dat		Location in chip memory to read data block
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 static uint8 SDWriteDataBlock (uint32 address, uint8 *dat);
 
-/* @Brief: Read the standard length name of a file entry. If an extension exists, a period will be
- *         inserted before the extension. A null-terminator is always appended to the end
- *
- * @param	*buf		First byte in local memory containing a FAT entry
- * @param	*filename	Address in memory where the filename string will be stored
- *
- * @Pre: *buf must point to the first byte in a FAT entry - no error checking is executed on buf
- * @Pre: Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of memory are not allocated for filename
- *
- * @return
- */
-static void SDGetFilename (const uint8 *buf, char *filename);
-
-/* @Brief: Return byte-reversed 16-bit variable (SD cards store bytes little-endian therefore we must
+/**
+ * \brief	Return byte-reversed 16-bit variable (SD cards store bytes little-endian therefore we must
  * 		   reverse them to use multi-byte variables)
  *
- * @param	dat[]		Address of first byte of data
+ * \param	buf[]		Address of first byte of data
  *
- * @return		Returns a normal (big-endian) 16-bit word
+ * \return		Returns a normal (big-endian) 16-bit word
  */
-static uint16 SDConvertDat16 (const uint8 dat[]);
+static uint16 SDReadDat16 (const uint8 buf[]);
 
-/* @Brief: Return byte-reversed 32-bit variable (SD cards store bytes little-endian therefore we must
+/**
+ * \brief	Return byte-reversed 32-bit variable (SD cards store bytes little-endian therefore we must
  * 		   reverse them to use multi-byte variables)
  *
- * @param	dat[]		Address of first byte of data
+ * \param	buf[]		Address of first byte of data
  *
- * @return	Returns a normal (big-endian) 32-bit word
+ * \return	Returns a normal (big-endian) 32-bit word
  */
-static uint32 SDConvertDat32 (const uint8 dat[]);
+static uint32 SDReadDat32 (const uint8 buf[]);
 
-/* @Brief: Find and return the starting sector's address for a directory path given in a c-string. Use
+#ifdef SD_FILE_WRITE
+/**
+ * \brief	Write a byte-reversed 16-bit variable (SD cards store bytes little-endian therefore we must
+ *			reverse them to use multi-byte variables)
+ *
+ * \param	buf[]		Address to store the first byte of data
+ * \param	dat			Normal, 16-bit variable to be written to RAM in reverse endian
+ */
+void SDWriteDat16 (uint8 buf[], const uint16 dat);
+
+/**
+ * \brief	Write a byte-reversed 32-bit variable (SD cards store bytes little-endian therefore we must
+ *			reverse them to use multi-byte variables)
+ *
+ * \param	buf[]		Address to store the first byte of data
+ * \param	dat			Normal, 32-bit variable to be written to RAM in reverse endian
+ */
+void SDWriteDat32 (uint8 buf[], const uint32 dat);
+#endif
+
+/**
+ * \brief	Find and return the starting sector's address for a directory path given in a c-string. Use
  *         Unix-style path names (like /foo/bar/)
  *
- * @param	*path		C-string representing Unix-style path
+ * \param	*path		C-string representing Unix-style path
  *
- * @return		Returns sector address of desired path
+ * \return		Returns sector address of desired path
  */
 // TODO: Implement this (more than simply returning root directory)
 // TODO: Implement minimalist error checking (-1 or 0 would be valid error codes)
 // TODO: Allow for paths outside the current directory
 static uint32 SDGetSectorFromPath (const char *path);
 
-/* @Brief: Find and return the starting sector's address for a given allocation unit (note - not cluster)
+/**
+ * \brief	Find and return the starting sector's address for a given allocation unit (note - not cluster)
  *
- * @param	allocUnit	Allocation unit in FAT filesystem
+ * \param	allocUnit	Allocation unit in FAT filesystem
  *
- * @return		Returns sector address of desired allocation unit
+ * \return		Returns sector address of desired allocation unit
  */
 static uint32 SDGetSectorFromAlloc (uint32 allocUnit);
 
-/* @Brief: Read an entry from the FAT
+/**
+ * \brief	Read an entry from the FAT
  *
- * @param	fatEntry		Entry number (allocation unit) to read in the FAT
- * @param	*value			Address to store the value into (the next allocation unit)
+ * \param	fatEntry		Entry number (allocation unit) to read in the FAT
+ * \param	*value			Address to store the value into (the next allocation unit)
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 static uint8 SDGetFATValue (const uint32 fatEntry, uint32 *value);
 
-/* @Brief: Find the next sector in the FAT, directory, or file. When it is found, load it into the
+/**
+ * \brief	Find the next sector in the FAT, directory, or file. When it is found, load it into the
  *         appropriate global buffer
  *
- * @param	*buf		Array of SD_SECTOR_SIZE bytes that can be filled with the requested sector
+ * \param	*buf		Array of SD_SECTOR_SIZE bytes that can be filled with the requested sector
  *
- * @return		Returns 0 upon success, otherwise error code
+ * \return		Returns 0 upon success, otherwise error code
  */
 static uint8 SDLoadNextSector (sd_buffer *buf);
 
-/* @Brief: Load a requested sector into the buffer independent of the current sector or cluster
+/**
+ * \brief	Load a requested sector into the buffer independent of the current sector or cluster
  *
- * @Pre: *buf must point to a file entry (g_sd_file_
+ * \Pre: *buf must point to a file entry (g_sd_file_
  *
- * @param	*buf		Address of the sd_buffer object to be updated
- * @param	offset		How many sectors past the first one should be skipped (sector number of the file)
+ * \param	*buf		Address of the sd_buffer object to be updated
+ * \param	offset		How many sectors past the first one should be skipped (sector number of the file)
  *
  */
-uint8 SDLoadSectorFromOffset (sd_file *f, const uint32 offset);
+static uint8 SDLoadSectorFromOffset (sd_file *f, const uint32 offset);
 
-/* @Brief: When the final sector of a cluster is finished, SDIncCluster can be called. The appropriate
+/**
+ * \brief	When the final sector of a cluster is finished, SDIncCluster can be called. The appropriate
  *         global variables will be set according (incremented or set by the FAT) and the first sector
  *         of the next cluster will be read into the desired buffer.
  *
- * @param	*curSectorOffset		Address of current sector offset variable
- * @param	*nextAllocUnit			Address of the next allocation unit variable
- * @param	*curAllocUnit			Address of the current allocation unit variable
- * @param	*curClusterStartAddr	Address of the current clutser's starting address variable
- * @param	*buf					Array of SD_SECTOR_SIZE bytes used to hold a sector from the SD card
+ * \param	*buf		Array of SD_SECTOR_SIZE bytes used to hold a sector from the SD card
  *
- * @return		Returns 0 upon success, error code otherwise
+ * \return		Returns 0 upon success, error code otherwise
  */
 static uint8 SDIncCluster (sd_buffer *buf);
 
+/**
+ * \brief	Reload the sector currently in use by a given file
+ *
+ * \param	*f		Address of the file object requested
+ *
+ * \return		Returns 0 upon success, error code otherwise
+ */
+uint8 SDReloadBuf (sd_file *f);
+
+/**
+ * \brief	Read the standard length name of a file entry. If an extension exists, a period will be
+ *         inserted before the extension. A null-terminator is always appended to the end
+ *
+ * \param	*buf		First byte in local memory containing a FAT entry
+ * \param	*filename	Address in memory where the filename string will be stored
+ *
+ * \Pre: *buf must point to the first byte in a FAT entry - no error checking is executed on buf
+ * \Pre: Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of memory are not allocated for filename
+ *
+ * \return
+ */
+static void SDGetFilename (const uint8 *buf, char *filename);
+
+/**
+ * \brief	Find a file entry (file or sub-directory)
+ *
+ * \detailed	Find a file or directory that matches the name in *filename in the current directory;
+ *         its relative location is communicated by placing it in the address of *fileEntryOffset
+ *
+ * \param	*filename			C-string representing the short (standard) filename
+ * \param	*fileEntryOffset	The buffer offset will be returned via this address if the file
+ * 								is found
+ *
+ * \return		Returns 0 upon success, error code otherwise (common error code is SD_EOC_END for
+ *              end-of-chain or file-not-found marker)
+ */
+static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
+
+#ifdef SD_FILE_WRITE
+/**
+ * \brief		Find the first empty allocation unit in the FAT
+ *
+ * \detailed	The first empty allocation unit is returned and it's value will contain
+ *				the end-of-chain marker, SD_EOC_END. NOTE: It is important to realize that,
+ *				though the new entry has been modified with SD_EOC_END, this function
+ *				does not know what cluster is being extended and therefore the calling
+ *				function must modify it to point to the returned value;
+ *
+ * \param	restore		If non-zero, the original fat-sector will be restored to g_sd_fat
+ * 						before returning; if zero, the last-used sector will remain loaded
+ *
+ * \return		Returns the number of the first unused allocation unit
+ */
+static uint32 SDFindEmptySpace (const uint8 restore);
+
+/**
+ * TODO: Needs implementation
+ */
+/**
+ * \brief	Enlarge a file or directory by one cluster
+ *
+ * \param	*buf		Address of the buffer (containing information for a file or directory)
+ * 						to be enlarged
+ *
+ * \return		Returns 0 upon success, error code otherwise
+ */
+static uint8 SDExtendFAT (const sd_buffer *buf);
+
+/**
+ * \brief	Allocate space for a new file
+ *
+ * \param	*name				Character array for the new file
+ * \param	*f					File buffer to open the new file; TODO: Does this really need to be here or can the calling function take care of it?
+ * \param	*fileEntryOffset	Offset from the currently loaded directory entry where
+ * 								the file's metadata should be written
+ */
+static uint8 SDCreateFile (const char *name, const uint16 *fileEntryOffset);
+#endif
+
+#if (defined SD_SHELL || defined SD_VERBOSE)
+// TODO: Document this
 static inline void SDPrintFileEntry (const uint8 *file, char filename[]);
+
+// TODO: Document this
 static void SDPrintFileAttributes (const uint8 flag);
+#endif
 
 #ifdef SD_DEBUG
-/* Brief: Print an error through UART string followed by entering an infinite loop
+/* \brief	Print an error through UART string followed by entering an infinite loop
  *
- * @param	err		Error number used to determine error string
+ * \param	err		Error number used to determine error string
  */
 static void SDError (const uint8 err);
 
-/* @Brief: Print to screen each status bit individually with human-readable descriptions
+/**
+ * \brief	Print to screen each status bit individually with human-readable descriptions
  *
- * @param	response		first-byte response from the SD card
+ * \param	response		first-byte response from the SD card
  */
 static void SDFirstByteExpansion (const uint8 response);
 #else

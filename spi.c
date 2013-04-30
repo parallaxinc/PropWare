@@ -92,11 +92,11 @@ uint8 SPIStop (void) {
 static inline uint8 SPIWait (void) {
 	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	while ((uint32) -1 != g_mailbox) {			// Wait for GAS cog to read in value and write -1
+	while ((uint32) -1 != g_mailbox) {	// Wait for GAS cog to read in value and write -1
 		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
 		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-			return SPI_TIMEOUT_WR;// Always use return instead of SPIError() for private functions
+			return SPI_TIMEOUT;	// Always use return instead of SPIError() for private functions
 	}
 
 	return 0;
@@ -273,6 +273,15 @@ void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint
 	// Signal that value is saved and GAS cog can continue execution
 	g_mailbox = -1;
 }
+
+void SPIShiftIn_sector (const uint8 addr[], const uint8 blocking) {
+	SPIWait();
+	g_mailbox = SPI_FUNC_READ_SECTOR;
+	SPIWait();
+	g_mailbox = (uint32) addr;
+	if (blocking)
+		SPIWait();
+}
 #endif
 
 uint8 SPISetClock (const uint32 frequency) {
@@ -322,7 +331,7 @@ void SPIError (const uint8 err, ...) {
 			__simple_printf(str, (err - SPI_ERRORS_BASE),
 					"Incapable of handling so many bits in an argument");
 			break;
-		case SPI_TIMEOUT_WR:
+		case SPI_TIMEOUT:
 			va_start(list, 1);
 			__simple_printf("SPI Error %u: %s\n\tCalling function was %s\n",
 					(err - SPI_ERRORS_BASE), "Timed out during parameter passing",

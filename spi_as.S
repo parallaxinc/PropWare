@@ -16,6 +16,7 @@
 #define SPI_FUNC_CLK			2
 #define SPI_FUNC_SEND_FAST		3
 #define SPI_FUNC_READ_FAST		4
+#define SPI_FUNC_READ_SECTOR	5
 
 #define SPI_BITS_OFFSET			8
 #define SPI_MODE_OFFSET			16
@@ -30,6 +31,8 @@
 #define SPI_LSB_POST			(3 << SPI_MODE_OFFSET)
 #define SPI_LSB_FIRST			(4 << SPI_MODE_OFFSET)
 #define	SPI_MSB_FIRST			(5 << SPI_MODE_OFFSET)
+
+#define SD_SECTOR_SIZE			512
 
 						.section spi_as.cog, "ax"
 						.cog_ram
@@ -86,6 +89,10 @@ LOOP					// Retrieve a command
 						// If command is "Read fast"
 						cmp temp, #SPI_FUNC_READ_FAST wz
 		if_z			jmp #READ_fast
+
+						// If command is "Read sector"
+						cmp temp, #SPI_FUNC_READ_SECTOR
+		if_z			jmp #read_sector
 
 						// Default: Return to loop
 						jmp #LOOP
@@ -338,6 +345,81 @@ lsb_post_fast			// Read in a value LSB-first with data valid after the clock
 						shr data, temp
 lsb_post_fast_ret		ret
 
+/* FUNCTION: SPIReadSDSector() */
+read_sector				// Read an entire sector from the SD card as quickly as possible; write values to the mailbox
+read_sector_addr		rdlong mailbox, par				'' Read in hub address to store the data
+						cmp mailbox, negOne wz			'' Are we reading a valid parameter?
+		if_z			jmp #read_sector_addr			'' If not valid, read in a new value
+						// Do not write -1 back to global mailbox until the entire read has completed
+
+						mov loopIdx, sdSectorSize		'' Load the index counter
+
+						// TODO TODO TODO: enable the counter module to do the clock for you!!!
+beginSectorRead			mov bitCount, #8
+/*						// Bit 7
+						test miso, ina wc
+						muxc data, #BIT_7
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 6
+						test miso, ina wc
+						muxc data, #BIT_6
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 5
+						test miso, ina wc
+						muxc data, #BIT_5
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 4
+						test miso, ina wc
+						muxc data, #BIT_4
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 3
+						test miso, ina wc
+						muxc data, #BIT_3
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 2
+						test miso, ina wc
+						muxc data, #BIT_2
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 1
+						test miso, ina wc
+						muxc data, #BIT_1
+						xor outa, sclk
+						xor outa, sclk
+
+						// Bit 0
+						test miso, ina wc
+						muxc data, #BIT_0
+						xor outa, sclk
+						xor outa, sclk
+*/
+read_byte				test miso, ina wc
+						muxc data, #BIT_0
+						shl data, #1
+						call #POST_CLOCK
+						djnz bitCount, #read_byte
+
+						shr data, #1
+
+						// Shift the data one more time and write it to HUB
+						wrbyte data, mailbox
+						add mailbox, #1					'' Increase the address to the next byte in HUB RAM
+
+						djnz loopIdx, #beginSectorRead	'' Continue looping for SD_SECTOR_SIZE bytes
+						wrlong negOne, par
+						jmp #LOOP
+
 /* FUNCTION: SPISetClock() */
 SET_CLOCK				call #READ_CMD					'' Using READ_CMD instead of READ_DATA because -1 is not a valid clock signal
 						mov clkDelay, mailbox
@@ -389,6 +471,7 @@ spiMSBPost				long	SPI_MSB_POST
 spiLSBPost				long	SPI_LSB_POST
 spiLSBFirst				long	SPI_LSB_FIRST
 spiMSBFirst				long	SPI_MSB_FIRST
+sdSectorSize			long	SD_SECTOR_SIZE
 
 // DEBUG: The following set is used only for debugging purposes
 testLEDs				long	BYTE_2
