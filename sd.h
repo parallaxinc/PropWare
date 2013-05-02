@@ -40,9 +40,9 @@
  * 								DEFAULT: ON
  */
 //#define SD_DEBUG
-#define SD_VERBOSE
-#define SD_VERBOSE_BLOCKS
-#define SD_SHELL
+//#define SD_VERBOSE
+//#define SD_VERBOSE_BLOCKS
+//#define SD_SHELL
 #define SD_FILE_WRITE
 
 // DANGEROUS, BAD HACK!!! FOR ADVANCED DEBUGGING ONLY
@@ -88,6 +88,7 @@ enum _sd_file_mode {
 #define SD_FILE_ALREADY_EXISTS	SD_ERRORS_BASE + 14
 #define SD_INVALID_FILE_MODE	SD_ERRORS_BASE + 15
 #define SD_TOO_MANY_FATS		SD_ERRORS_BASE + 16
+#define SD_READING_PAST_EOC		SD_ERRORS_BASE + 17
 
 typedef struct _sd_buffer sd_buffer;
 typedef struct _sd_file sd_file;
@@ -113,6 +114,17 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
  * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDMount (void);
+
+#ifdef SD_FILE_WRITE
+/**
+ * \brief	Stop all SD activities and write any modified buffers
+ *
+ * \pre		All files must be explicitely closed before
+ *
+ * \return		Returns 0 upon success, error code otherwise
+ */
+uint8 SDUnmount (void);
+#endif
 
 /**
  * \brief	Change the current working directory to *f (similar to 'cd f')
@@ -145,6 +157,7 @@ uint8 SDchdir (const char *d);
  */
 uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
 
+#ifdef SD_FILE_WRITE
 /**
  * \brief	Close a given file
  *
@@ -153,6 +166,7 @@ uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
  * \return		Returns 0 upon success, error code otherwise
  */
 uint8 SDfclose (sd_file *f);
+#endif
 
 #ifdef SD_FILE_WRITE
 /**
@@ -481,9 +495,13 @@ struct _sd_file {
 	uint32 rPtr;
 	sd_file_mode mode;
 	uint32 length;
+	uint8 mod;	// When the length of a file is changed, this variable will be set
 	uint32 firstAllocUnit; // File's starting allocation unit
 	uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
 	uint32 curCluster; // like curSector, but for allocation units
+
+	uint32 dirSectorAddr;	// Which sector of the SD card contains this file's meta-data
+	uint16 fileEntryOffset;
 };
 
 /***********************************
@@ -652,15 +670,6 @@ static uint8 SDLoadSectorFromOffset (sd_file *f, const uint32 offset);
 static uint8 SDIncCluster (sd_buffer *buf);
 
 /**
- * \brief	Reload the sector currently in use by a given file
- *
- * \param	*f		Address of the file object requested
- *
- * \return		Returns 0 upon success, error code otherwise
- */
-uint8 SDReloadBuf (sd_file *f);
-
-/**
  * \brief	Read the standard length name of a file entry. If an extension exists, a period will be
  *         inserted before the extension. A null-terminator is always appended to the end
  *
@@ -691,13 +700,22 @@ static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
 
 #ifdef SD_FILE_WRITE
 /**
+ * \brief	Reload the sector currently in use by a given file
+ *
+ * \param	*f		Address of the file object requested
+ *
+ * \return		Returns 0 upon success, error code otherwise
+ */
+static uint8 SDReloadBuf (sd_file *f);
+
+/**
  * \brief		Find the first empty allocation unit in the FAT
  *
- * \detailed	The first empty allocation unit is returned and it's value will contain
- *				the end-of-chain marker, SD_EOC_END. NOTE: It is important to realize that,
- *				though the new entry has been modified with SD_EOC_END, this function
- *				does not know what cluster is being extended and therefore the calling
- *				function must modify it to point to the returned value;
+ * \detailed	The value of the first empty allocation unit is returned and its location
+ *				will contain the end-of-chain marker, SD_EOC_END. NOTE: It is important
+ *				to realize that, though the new entry now contains an EOC marker, this
+ *				function does not know what cluster is being extended and therefore the
+ *				calling function must modify the previous EOC to contain the return value
  *
  * \param	restore		If non-zero, the original fat-sector will be restored to g_sd_fat
  * 						before returning; if zero, the last-used sector will remain loaded
@@ -706,11 +724,9 @@ static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
  */
 static uint32 SDFindEmptySpace (const uint8 restore);
 
-/**
- * TODO: Needs implementation
- */
-/**
- * \brief	Enlarge a file or directory by one cluster
+/* \brief	Enlarge a file or directory by one cluster
+ *
+ * \pre
  *
  * \param	*buf		Address of the buffer (containing information for a file or directory)
  * 						to be enlarged

@@ -16,15 +16,15 @@
 /**
  * \brief	Extra code options - Uncomment definitions to enable features
  *
- * \param	SPI_DEBUG			Debugging features similar to exceptions; Errors
- * 								will be caught the program will enter an infinite loop
+ * \param	SPI_DEBUG			Debugging features similar to exceptions; Errors will be
+ * 								caught the program will enter an infinite loop
  * 								DEFAULT: OFF
- * \param	SPI_DEBUG_PARAMS	Parameter checking within each function call. I
- * 								recommended you leave this option enabled unless speed
- * 								is critical
+ * \param	SPI_DEBUG_PARAMS	Parameter checking within each function call. I recommend
+ * 								you leave this option enabled unless speed is critical
  * 								DEFAULT: ON
- * \param	SPI_FAST			Allows for fast send and receive routines without error checking
- * 								or timing delays; Normal routines still available when enabled
+ * \param	SPI_FAST			Allows for fast send and receive routines without error
+ * 								checking or timing delays; Normal routines still available
+ * 								when enabled
  * 								DEFAULT: ON
  * 								TODO: Use the counter module instead of "xor clkPin, clkPin"
  * \param	SPI_FAST_SECTOR		TODO: Figure out why this doesn't work... :(
@@ -45,7 +45,8 @@
 #define SPI_LSB_FIRST				4
 #define	SPI_MSB_FIRST				5
 
-#define SPI_WR_TIMEOUT_VAL			CLKFREQ/10			// (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
+// (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
+#define SPI_WR_TIMEOUT_VAL			CLKFREQ/10
 #define SPI_RD_TIMEOUT_VAL			CLKFREQ/10
 #define SPI_MAX_PAR_BITS			31
 
@@ -73,7 +74,8 @@
  * \param	miso		Pin mask for MISO
  * \param	sclk		Pin mask for SCLK
  * \param	frequency	Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
- * \param	polarity	Polarity of the clock - idle low or high; must be one of SPI_POLARITY_LOW or SPI_POLARITY_HIGH
+ * \param	polarity	Polarity of the clock - idle low or high; must be one of
+ * 						SPI_POLARITY_LOW or SPI_POLARITY_HIGH
  *
  * \return		Returns 0 upon success, otherwise error code
  */
@@ -83,17 +85,30 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
 /**
  * \brief	Stop a running SPI cog
  *
- * \return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED if no
- * 				cog has previously been started)
+ * \return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED
+ * 				if no cog has previously been started)
  */
 uint8 SPIStop (void);
 
 /**
- * \brief	Send a value out to a peripheral device
+ * \brief	Wait for the SPI cog to signal that it is in the idle state
+ *
+ * \return		May return non-zero error code when a timeout occurs
+ */
+inline uint8 SPIWait (void);
+
+/**
+ * \brief		Send a value out to a peripheral device
+ *
+ * \detailed	Send pass a value and mode into the assembly cog to be sent out to the
+ * 				peripheral; NOTE: this function is non-blocking and chip-select should
+ * 				not be set inactive immediately after the return (you should call SPIWait()
+ * 				before setting chip-select inactive)
  *
  * \param	bits		Number of bits to be shifted out
  * \param	value		The value to be shifted out
- * \param	mode		Controls whether the MSB or LSB is sent first; Must be one of SPI_LSB_FIRST or SPI_MSB_FIRST
+ * \param	mode		Controls whether the MSB or LSB is sent first; Must be one of
+ * 						SPI_LSB_FIRST or SPI_MSB_FIRST
  *
  * \return		Returns 0 upon success, otherwise error code
  */
@@ -103,12 +118,12 @@ uint8 SPIShiftOut (uint8 bits, uint32 value, const uint8 mode);
  * \brief	Receive a value in from a peripheral device
  *
  * \param	bits		Number of bits to be shifted in
- * \param	mode		Controls whether the MSB or LSB is sent first and whether data is valid before
- * 						or after the clock pulse; Must be one of SPI_MSB_PRE, SPI_LSB_PRE, SPI_MSB_POST,
- * 						or SPI_LSB_POST
+ * \param	mode		Controls whether the MSB or LSB is sent first and whether data is
+ * 						valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
+ * 						SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
  * \param	*data		Received data will be stored at this address
- * \param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4 (is *data a pointer
- * 						to char, short or int?)
+ * \param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4
+ * 						(is *data a pointer	to char, short or int?)
  *
  * \return		Returns 0 upon success, otherwise error code
  */
@@ -116,14 +131,14 @@ uint8 SPIShiftIn (const uint8 bits, const uint8 mode, void *data, const uint8 by
 
 #ifdef SPI_FAST
 /**
- * \brief	Receive a value in from a peripheral device; Optimized for fastest possible clock speed;
- *			No error checking is performed; 'Timeout' event will never be thrown and possible infinite
- *			loop can happen
+ * \brief	Receive a value in from a peripheral device; Optimized for fastest possible
+ * 			clock speed; No error checking is performed; 'Timeout' event will never be
+ * 			thrown and possible infinite loop can happen
  *
  * \param	bits		Number of bits to be shifted in
- * \param	mode		Controls whether the MSB or LSB is sent first and whether data is valid before
- * 						or after the clock pulse; Must be one of SPI_MSB_PRE, SPI_LSB_PRE, SPI_MSB_POST,
- * 						or SPI_LSB_POST
+ * \param	mode		Controls whether the MSB or LSB is sent first and whether data is
+ * 						valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
+ * 						SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
  * \param	*data		Received data will be stored at this address
  * \param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4
  * 						(is *data a pointer	to char, short or int?)
@@ -177,13 +192,6 @@ void SPIError (const uint8 err, ...);
 
 // Function prototypes
 /**
- * \brief	Wait for the SPI cog to signal that it is in the idle state
- *
- * \return		May return non-zero error code when a timeout occurs
- */
-static inline uint8 SPIWait (void);
-
-/**
  * \brief	Read the value that the SPI cog just shifted in
  *
  * \param	*par	Address to store the parameter
@@ -204,10 +212,10 @@ static uint8 SPICountBits (uint32 par);
 
 /**
  * \brief	Retrieve the pin number from a pin mask; i.e., if pinMask is 0x01,
- *         return 0; if pinMask is 0x40, return 6
+ *			return 0; if pinMask is 0x40, return 6
  *
- * \pre	Only 1 bit is set in pinMask (if more than one is set, the return value will
- *       be related to the least significant set bit)
+ * \pre		Only 1 bit is set in pinMask (if more than one is set, the return value will
+ *			be related to the least significant set bit)
  *
  * \param	pinMask		The bit number of the set bit in this variable will be returned
  *

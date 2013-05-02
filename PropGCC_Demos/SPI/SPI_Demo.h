@@ -14,12 +14,11 @@
 #include <spi.h>
 
 // Constants
-#define CS						BIT_0
+#define CS						BIT_6
 #define MOSI					BIT_1
 #define SCLK					BIT_2
 #define MISO					BIT_3
 
-#define FREQ					100000
-#define POLARITY				SPI_POLARITY_HIGH		// "HIGH" indicates that the clock line will be held high when not in use
-
+#define FREQ					1000
+#define POLARITY				SPI_POLARITY_LOW		// "HIGH" indicates that the clock line will be held high when not in use
 #endif /* SPI_DEMO_H_ */

@@ -89,7 +89,7 @@ uint8 SPIStop (void) {
 	return 0;
 }
 
-static inline uint8 SPIWait (void) {
+inline uint8 SPIWait (void) {
 	const uint32 timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
 	while ((uint32) -1 != g_mailbox) {	// Wait for GAS cog to read in value and write -1

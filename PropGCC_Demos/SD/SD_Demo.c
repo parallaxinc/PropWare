@@ -59,12 +59,14 @@ void main (void) {
 	SD_Shell(&f);
 #elif (defined SD_FILE_WRITE)
 	// Create a blank file and copy the contents of STUFF.TXT into it
-	printf("Changing into /STUFF/\n");
-	SDchdir("STUFF");
-	SDfopen("SOME.TXT", &f, SD_FILE_MODE_R);
-	SDfopen("NEW.BAK", &f2, SD_FILE_MODE_R_PLUS);
+	printf("Changing into /JAZZ/\n");
+	SDchdir("JAZZ");
+	SDfopen("DESKTOP.INI", &f, SD_FILE_MODE_R);
+	SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R_PLUS);
 
+#ifdef DEBUG
 	printf("Both files opened...\n");
+#endif
 
 	while (!SDfeof(&f)) {
 		c = SDfgetc(&f);
@@ -74,19 +76,36 @@ void main (void) {
 #endif
 	}
 
+#ifdef DEBUG
 	printf("\nFile printed...\n");
 
+	printf("Now closing read-only file!\n");
+#endif
 	SDfclose(&f);
+#ifdef DEBUG
+	printf("***Now closing the modified file!***\n");
+#endif
 	SDfclose(&f2);
 
+#ifdef DEBUG
 	printf("Files closed...\n");
 
-	SDfopen("NEW.BAK", &f2, SD_FILE_MODE_R);
+	SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R);
+	printf("File opened for a second time, now printing new contents...\n");
 	while (!SDfeof(&f2))
-		putchar(SDfgetc(&f));
+		putchar(SDfgetc(&f2));
 	SDfclose(&f2);
-#else
+#endif
 
+	SDUnmount();
+#else
+	SDchdir("JAZZ");
+	SDfopen("DESKTOP.INI", &f, SD_FILE_MODE_R);
+
+	while (!SDfeof(&f))
+#ifdef DEBUG
+		putchar(SDfgetc(&f));
+#endif
 #endif
 
 #ifdef DEBUG
@@ -102,7 +121,10 @@ void main (void) {
 
 void error (const uint8 err) {
 #ifdef DEBUG
-	printf("Unknown error %u\n", err);
+	if (SD_ERRORS_BASE <= err && err < SD_ERRORS_LIMIT)
+		printf("SD error %u\n", err - SD_ERRORS_BASE);
+	else
+		printf("Unknown error %u\n", err);
 #endif
 	while (1)
 		;

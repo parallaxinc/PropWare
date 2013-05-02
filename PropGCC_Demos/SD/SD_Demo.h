@@ -28,6 +28,8 @@
 #define SCLK					BIT_2
 #define MISO					BIT_3
 
+#define NEW_FILE				"POOP.TIT"
+
 void error (const uint8 err);
 
 #endif /* SD_DEMO_H_ */
