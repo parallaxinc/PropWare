@@ -7,6 +7,13 @@
  *  \copyright MIT license
  */
 
+/**
+ * TODO:	Re-arrange errors in order of impact level; Allows the user to do something like:
+ *	  		if ((SD_ERRORS_BASE + 6) < (err = SDFoo()))
+ *	 			throw(err);
+ * 			which would ignore any error less than 6
+ */
+
 #ifndef SD_H_
 #define SD_H_
 
@@ -201,7 +208,10 @@ uint8 SDfputs (char *s, sd_file *f);
  *
  * \detailed	NOTE: This function does not include error checking
  *
- * \Pre: *f must point to a currently opened and valid file
+ * \pre		*f must point to a currently opened and valid file
+ * \pre		The file must have at least one byte left - no error checking is performed to
+ * 			stop the user from reading past the end of a file (call SDfeof() for end-of-file
+ * 			check)
  *
  * \param	*f		Address where file information (such as the first allocation unit) can be
  * 					stored.
@@ -481,7 +491,6 @@ struct _sd_buffer {
 	uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
 	uint32 curAllocUnit;					// Store the current allocation unit
 	uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
-	uint8 modified;	// If set, the currently loaded sector has been modified
 #ifdef SD_FILE_WRITE
 	uint8 mod;		// When set, the currently loaded sector has been modified since it was read from
 					// the SD card
@@ -495,6 +504,7 @@ struct _sd_file {
 	uint32 rPtr;
 	sd_file_mode mode;
 	uint32 length;
+	uint32 maxSectors;	// Maximum number of sectors currently allocated to a file
 	uint8 mod;	// When the length of a file is changed, this variable will be set
 	uint32 firstAllocUnit; // File's starting allocation unit
 	uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
@@ -698,7 +708,6 @@ static void SDGetFilename (const uint8 *buf, char *filename);
  */
 static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
 
-#ifdef SD_FILE_WRITE
 /**
  * \brief	Reload the sector currently in use by a given file
  *
@@ -708,6 +717,7 @@ static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
  */
 static uint8 SDReloadBuf (sd_file *f);
 
+#ifdef SD_FILE_WRITE
 /**
  * \brief		Find the first empty allocation unit in the FAT
  *
@@ -733,7 +743,7 @@ static uint32 SDFindEmptySpace (const uint8 restore);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDExtendFAT (const sd_buffer *buf);
+static uint8 SDExtendFAT (sd_buffer *buf);
 
 /**
  * \brief	Allocate space for a new file

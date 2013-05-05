@@ -59,9 +59,7 @@ void main (void) {
 	SD_Shell(&f);
 #elif (defined SD_FILE_WRITE)
 	// Create a blank file and copy the contents of STUFF.TXT into it
-	printf("Changing into /JAZZ/\n");
-	SDchdir("JAZZ");
-	SDfopen("DESKTOP.INI", &f, SD_FILE_MODE_R);
+	SDfopen("STUFF.TXT", &f, SD_FILE_MODE_R);
 	SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R_PLUS);
 
 #ifdef DEBUG
@@ -73,6 +71,7 @@ void main (void) {
 		SDfputc(c, &f2);
 #ifdef _STDIO_H
 		putchar(SDfgetc(&f2));
+//		putchar(c);
 #endif
 	}
 

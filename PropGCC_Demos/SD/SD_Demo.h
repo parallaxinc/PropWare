@@ -28,7 +28,7 @@
 #define SCLK					BIT_2
 #define MISO					BIT_3
 
-#define NEW_FILE				"POOP.TIT"
+#define NEW_FILE				"TEST.TXT"
 
 void error (const uint8 err);
 
