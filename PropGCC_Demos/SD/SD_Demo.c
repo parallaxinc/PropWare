@@ -44,7 +44,7 @@ void main (void) {
 	printf("Beginning SD card initialization...\n");
 #endif
 
-	if (err = SDStart(MOSI, MISO, SCLK, CS))
+	if (err = SDStart(MOSI, MISO, SCLK, CS, SD_DEFAULT_SPI_FREQ))
 		error(err);
 #ifdef DEBUG
 	printf("SD routine started. Mounting now...\n");

@@ -55,9 +55,9 @@
 // DANGEROUS, BAD HACK!!! FOR ADVANCED DEBUGGING ONLY
 // To set all private functions to public, ensure the following line is uncommented
 //#define static
-
 #define SD_LINE_SIZE			16
 #define SD_SECTOR_SIZE			512
+#define SD_DEFAULT_SPI_FREQ		1800000
 
 // File modes
 typedef enum _sd_file_mode sd_file_mode;
@@ -69,12 +69,9 @@ enum _sd_file_mode {
 	SD_FILE_MODES
 };
 
-#ifndef SEEK_SET
-#define SEEK_SET 0
-#define SEEK_CUR 1
-#define SEEK_END 2
-#endif
-
+#define SEEK_SET				0		// Beginning of the file
+#define SEEK_CUR				1		// Current position in the file
+#define SEEK_END				2		// End of the file
 // Error codes - preceded by SPI
 #define SD_ERRORS_BASE			16
 #define SD_ERRORS_LIMIT			32
@@ -96,6 +93,7 @@ enum _sd_file_mode {
 #define SD_INVALID_FILE_MODE	SD_ERRORS_BASE + 15
 #define SD_TOO_MANY_FATS		SD_ERRORS_BASE + 16
 #define SD_READING_PAST_EOC		SD_ERRORS_BASE + 17
+#define SD_FILE_WITHOUT_BUFFER	SD_ERRORS_BASE + 18
 
 typedef struct _sd_buffer sd_buffer;
 typedef struct _sd_file sd_file;
@@ -104,16 +102,22 @@ typedef struct _sd_file sd_file;
 extern sd_buffer g_sd_buf;
 
 /**
- * \brief	Initialize SD card communication over SPI for 3.3V configuration
+ * \brief		Initialize SD card communication over SPI for 3.3V configuration
+ *
+ * \detailed	Starts an SPI cog IFF an SPI cog has not already been started; If one has
+ * 				been started, only the cs parameter will have effect
  *
  * \param	mosi		Pin mask for MOSI pin
  * \param	miso		Pin mask for MISO pin
  * \param	sclk		Pin mask for SCLK pin
  * \param	cs			Pin mask for CS pin
+ * \param	freq		Frequency to run the clock after initialization IFF SPI_FAST is
+ * 						disabled in spi.h; if (-1) is used, a system default will be used
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs);
+uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs,
+		const uint32 freq);
 
 /**
  * \brief	Mount either FAT16 or FAT32 filesystem
@@ -155,6 +159,7 @@ uint8 SDchdir (const char *d);
  *				times are random and uninitialized)
  *
  * \pre		Files cannot be created in the root directory of a FAT16 filesystem
+ * 			TODO: Fix this
  *
  * \param	*name	C-string containing the filename to open
  * \param	*f		Address where file information (such as the first allocation unit) can
@@ -369,11 +374,7 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 /*******************************************
  *** Private SD Definitions & Prototypes ***
  *******************************************/
-#if (!(defined SD_VERBOSE) && !(defined SD_VERBOSE_BLOCKS))
-#define printf						__simple_printf
-#endif
-
-#if (defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS || defined SD_SHELL)
+#if (defined SD_DEBUG || defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS || defined SD_SHELL)
 #include <stdio.h>
 #endif
 
@@ -485,33 +486,33 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 #define SD_FOLDER_ID				((uint8) -1)
 
 struct _sd_buffer {
-	uint8 buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
-	uint8 id;						// Buffer ID - determine who owns the current information
-	uint32 curClusterStartAddr;		// Store the current cluster's starting sector number
-	uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
-	uint32 curAllocUnit;					// Store the current allocation unit
-	uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
+		uint8 buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
+		uint8 id;				// Buffer ID - determine who owns the current information
+		uint32 curClusterStartAddr;	// Store the current cluster's starting sector number
+		uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
+		uint32 curAllocUnit;					// Store the current allocation unit
+		uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
 #ifdef SD_FILE_WRITE
-	uint8 mod;		// When set, the currently loaded sector has been modified since it was read from
-					// the SD card
+		uint8 mod;// When set, the currently loaded sector has been modified since it was read from
+				  // the SD card
 #endif
 };
 
 struct _sd_file {
-	sd_buffer *buf;
-	uint8 id;	// determine if the buffer is owned by this file
-	uint32 wPtr;
-	uint32 rPtr;
-	sd_file_mode mode;
-	uint32 length;
-	uint32 maxSectors;	// Maximum number of sectors currently allocated to a file
-	uint8 mod;	// When the length of a file is changed, this variable will be set
-	uint32 firstAllocUnit; // File's starting allocation unit
-	uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
-	uint32 curCluster; // like curSector, but for allocation units
+		sd_buffer *buf;
+		uint8 id;	// determine if the buffer is owned by this file
+		uint32 wPtr;
+		uint32 rPtr;
+		sd_file_mode mode;
+		uint32 length;
+		uint32 maxSectors;	// Maximum number of sectors currently allocated to a file
+		uint8 mod;	// When the length of a file is changed, this variable will be set
+		uint32 firstAllocUnit; // File's starting allocation unit
+		uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
+		uint32 curCluster; // like curSector, but for allocation units
 
-	uint32 dirSectorAddr;	// Which sector of the SD card contains this file's meta-data
-	uint16 fileEntryOffset;
+		uint32 dirSectorAddr; // Which sector of the SD card contains this file's meta-data
+		uint16 fileEntryOffset;
 };
 
 /***********************************

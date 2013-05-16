@@ -46,7 +46,7 @@ uint32 g_sd_sectorRdAddress;
 /***********************************
  *** Public Function Definitions ***
  ***********************************/
-uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs) {
+uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs, const uint32 freq) {
 	uint8 i, j, k, err;
 	uint8 response[16];
 
@@ -56,7 +56,7 @@ uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const ui
 	GPIOPinSet(cs);
 
 	// Start SPI module
-	if (err = SPIStart(mosi, miso, sclk, SD_SPI_INIT_FREQ, SD_SPI_POLARITY))
+	if (err = SPIStart(mosi, miso, sclk, freq, SD_SPI_POLARITY))
 		SDError(err);
 
 #if (defined SD_VERBOSE && defined SD_DEBUG)
@@ -422,6 +422,9 @@ uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode) {
 	printf("Attempting to open %s\n", name);
 #endif
 
+	if (NULL == f->buf)
+		SDError(SD_FILE_WITHOUT_BUFFER);
+
 	f->id = g_sd_fileID++;
 	f->rPtr = 0;
 	f->wPtr = 0;
@@ -435,15 +438,21 @@ uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode) {
 	// Attempt to find the file
 	if (err = SDFind(name, &fileEntryOffset)) {
 #ifdef SD_FILE_WRITE
+		// If the file mode did not include read privileges, return the error
+		if (SD_FILE_MODE_R == mode)
+			return err;
+
 		// Find returned an error, ensure it was either file-not-found or EOC and then
 		// create the file
-		if ((SD_EOC_END == err) && (SD_FILE_MODE_R != f->mode)) {
+		if (SD_EOC_END == err) {
 			// File wasn't found and the cluster is full; add another to the directory
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 			printf("Directory cluster was full, adding another...\n");
 #endif
-			SDExtendFAT(&g_sd_buf);
-			SDLoadNextSector(&g_sd_buf);
+			if (err = SDExtendFAT(&g_sd_buf))
+				SDError(err);
+			if (err = SDLoadNextSector(&g_sd_buf))
+				SDError(err);
 		}
 		if (SD_EOC_END == err || SD_FILENAME_NOT_FOUND == err) {
 			// File wasn't found, but there is still room in this cluster (or a new cluster
@@ -451,7 +460,8 @@ uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode) {
 #if (defined SD_VERBOSE && defined SD_DEBUG)
 			printf("Creating a new directory entry...\n");
 #endif
-			SDCreateFile(name, &fileEntryOffset);
+			if (err = SDCreateFile(name, &fileEntryOffset))
+				SDError(err);
 		} else
 #endif
 			// SDFind returned unknown error - throw it
@@ -575,7 +585,8 @@ uint8 SDfputc (const char c, sd_file *f) {
 
 	// Determine if the correct sector is loaded
 	if (f->buf->id != f->id)
-		SDReloadBuf(f);
+		if (err = SDReloadBuf(f))
+			SDError(err);
 
 	// Even the the buffer was just reloaded, this snippet needs to be called in order to
 	// extend the FAT if needed
@@ -589,7 +600,8 @@ uint8 SDfputc (const char c, sd_file *f) {
 
 		// If the sector needed exceeds the available sectors, extend the file
 		if (f->maxSectors == sectorOffset) {
-			SDExtendFAT(f->buf);
+			if (err = SDExtendFAT(f->buf))
+				SDError(err);
 			f->maxSectors += 1 << g_sd_sectorsPerCluster_shift;
 		}
 
@@ -599,7 +611,8 @@ uint8 SDfputc (const char c, sd_file *f) {
 #endif
 		// SDLoadSectorFromOffset() will ensure that, if the current buffer has been
 		// modified, it is written back to the SD card before loading a new one
-		SDLoadSectorFromOffset(f, sectorOffset);
+		if (err = SDLoadSectorFromOffset(f, sectorOffset))
+			SDError(err);
 	}
 
 	if (++(f->wPtr) > f->length) {
@@ -617,7 +630,7 @@ uint8 SDfputs (char *s, sd_file *f) {
 
 	while (*s)
 		if (err = SDfputc(*(s++), f))
-			return err;
+			SDError(err);
 
 	return 0;
 }
@@ -1056,7 +1069,6 @@ uint8 SDReadBlock (uint16 bytes, uint8 *dat) {
 			if (err = SPIShiftOut(8, 0xff, SD_SPI_MODE_OUT))
 				return err;
 		} else {
-			printf("Invalid start ID: 0x%02X\n", *dat);
 			return SD_INVALID_DAT_STRT_ID;
 		}
 	} else
@@ -1207,7 +1219,7 @@ uint32 SDGetSectorFromAlloc (uint32 allocUnit) {
 		allocUnit -= g_sd_rootAllocUnit;
 	else
 		allocUnit -= 2;
-	allocUnit *= 8;
+	allocUnit <<= g_sd_sectorsPerCluster_shift;
 	allocUnit += g_sd_firstDataAddr;
 	return allocUnit;
 }
@@ -1932,9 +1944,12 @@ void SDError (const uint8 err) {
 			printf(str, (err - SD_ERRORS_BASE), "Invalid file mode");
 			break;
 		case SD_TOO_MANY_FATS:
-			printf(str, (err - SD_ERRORS_BASE),
-					"This driver is only capable of writing files on FAT partitions with "
-							"two (2) copies of the FAT");
+			printf(str, (err - SD_ERRORS_BASE), "This driver is only capable of writing "
+					"files on FAT partitions with two (2) copies of the FAT");
+			break;
+		case SD_FILE_WITHOUT_BUFFER:
+			printf(str, (err - SD_ERRORS_BASE), "SDfopen() was passed a file struct with "
+					"an uninitialized buffer");
 			break;
 		default:
 // Is the error an SPI error?
