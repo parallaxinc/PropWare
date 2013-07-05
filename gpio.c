@@ -3,7 +3,7 @@
  * Author:  David Zemon
  */
 
-#include "gpio.h"
+#include <gpio.h>
 
 uint8 GPIOSwitchRead_Low (uint32 pin) {
 	DIRA &= ~pin; // Set the pin as input

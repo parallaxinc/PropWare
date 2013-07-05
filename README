@@ -1,22 +1,55 @@
 PropWare - README
-Author:	 David Zemon
-Purpose: Generic C library files for the Parallax Propeller Microcontroller
+Author:   David Zemon
+Purpose:  Generic C library files for the Parallax Propeller Microcontroller
+
+Getting Started:
+    At the Terminal:
+        - Create a project directory and your source files
+            - *All C/C++ files must have an accompanying file with a similar name;
+              (i.e., if you have a file main.c, you must have main.h as well)
+        - Create links to or copy all source files from PropWare into your project
+          directory (compiling the library every time allows for pre-processor
+          optimizations)
+        - Create a Makefile for the project (very simple, see any of the Demo
+          projects for examples)
+        - Create a "Debug" folder in the project directory and cd into it
+        - type "make -f ../Makefile" and watch the magic happen
+
+    From Eclipse (recommended):
+        - Install Eclipse and the CDT plugin
+        - Create a C/C++ project; Select cross compiler (No need to set the
+          compiler or path, we'll use a Makefile still)
+        - Once the project is created and you've exited the dialog box, right-click
+          on the project in the Project Pane and choose "Properties"
+        - Click on "C/C++ Build" menu option to the left and then find the
+          "Builder Settings" tab
+        - Uncheck "Use default build command" and ensure the "Build command"
+          text box reads "make -f ../Makefile"
+        - In the left-pane, expand the "C/C++ Build" menu and select "Settings"
+        - In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes"
+          beneath that. Add two lines to "Include paths (-l)", one should be
+          the path to PropWare, and another should be the path to PropGCC's
+          include folder (on Linux, /opt/parallax/include)
+        - That's it! You now have Eclipse up and running with PropGCC and
+          PropWare! All of its auto-completion, code highlighting, and quick
+          and easy compilation!
+
+
+*NOTE: You are welcome to edit common.mk to not search for header files; See
+       the comment near the top of the file for my reasoning behind including
+       it and decide for yourself
 
 TODO:
-	- SD & FAT16/32 driver
-		- Write files
-			- Write blocks (low level SD)
-		- Traverse directories (implies ability to open files/directories not
-		  in the current directory)
-	- Created shared library file(s)
-		- ***Likely not going to happen: pre-compiled files implies an
-		  inability to have pre-processor optimizations
-	- Re-create SPI library to use inline assembly and FCACHE instead of
-	  a second cog
-	- Add "SPIShiftOut_Fast" and "SPIShiftIn_Fast" functions that do not use
-	  a delay in for the clock - useful for SD card read/write
-	- Add "SPIShiftIn_Multi", which will repeatedly shift in values and allow
-	  for the selection between *_Fast or normal using a parameter
+    - SD & FAT16/32 driver
+        - Traverse directories (implies ability to open files/directories not
+          in the current directory)
+    - Created shared library file(s)
+        - ***Likely not going to happen: pre-compiled files implies an
+          inability to have pre-processor optimizations
+    - Re-create SPI library to use inline assembly and FCACHE instead of
+      a second cog
+    - Add "SPIShiftIn_Multi", which will repeatedly shift in values and allow
+      for the selection between *_Fast or normal using a parameter
 
 Further description will come soon...
 

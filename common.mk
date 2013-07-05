@@ -33,7 +33,10 @@
 # Variable Definitions
 # #########################################################
 # where we installed the propeller binaries and libraries
-PREFIX = /opt/parallax
+
+ifndef PREFIX
+	PREFIX = '/opt/parallax'
+endif
 
 # libgcc directory
 LIBGCC = $(PREFIX)/lib/gcc/propeller-elf/4.6.1
@@ -54,23 +57,24 @@ CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL)
 CXXFLAGS += $(CFLAGS)
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
-INC += -I/mnt/win-7/Users/Public/Kits/Embedded/Parallax/Library -I/opt/parallax/include 
+INC += -I$(PROPWARE_PATH) -I $(PREFIX)/include
 
 ifneq ($(LDSCRIPT),)
 LDFLAGS += -T $(LDSCRIPT)
 endif
 
 # basic gnu tools
-CC = propeller-elf-gcc
-CXX = propeller-elf-g++
-LD = propeller-elf-ld
-AS = propeller-elf-as
-AR = propeller-elf-ar
-OBJCOPY = propeller-elf-objcopy
-LOADER = propeller-load
+GCC_PATH = $(PREFIX)/bin
+CC = $(GCC_PATH)/propeller-elf-gcc
+CXX = $(GCC_PATH)/ropeller-elf-g++
+LD = $(GCC_PATH)/ropeller-elf-ld
+AS = $(GCC_PATH)/propeller-elf-as
+AR = $(GCC_PATH)/propeller-elf-ar
+OBJCOPY = $(GCC_PATH)/propeller-elf-objcopy
+LOADER = $(GCC_PATH)/propeller-load
 
 # BSTC program
-BSTC=bstc
+BSTC=$(GCC_PATH)/bstc
 SPINDIR=.
 
 # #########################################################
@@ -124,12 +128,20 @@ endif
 # driver that the linker will place in the .text section.
 #
 %.cog: ../%.c ../%.h
+	@echo "Building file: $<'
+	@echo "Invoking: PropGCC Compiler"
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
+	@echo "Finished building: $<'
+	@echo ' '
 
 %.cog: ../%.cogc ../%.h
+	@echo "Building file: $<'
+	@echo "Invoking: PropGCC Compiler"
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
+	@echo "Finished building: $<'
+	@echo ' '
 
 #
 # a .ecog program is an object file that contains code intended to

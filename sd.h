@@ -18,10 +18,10 @@
 #define SD_H_
 
 #include <propeller.h>
+#include <string.h>
 #include <types.h>
 #include <gpio.h>
 #include <spi.h>
-#include <string.h>
 
 /**
  * \brief	Extra code options - Uncomment definitions to enable features
@@ -60,45 +60,49 @@
 #define SD_DEFAULT_SPI_FREQ		1800000
 
 // File modes
-typedef enum _sd_file_mode sd_file_mode;
-enum _sd_file_mode {
+typedef enum {
 	SD_FILE_MODE_R,
 #ifdef SD_FILE_WRITE
 	SD_FILE_MODE_R_PLUS, SD_FILE_MODE_A, SD_FILE_MODE_A_PLUS,
 #endif
 	SD_FILE_MODES
-};
+} sd_file_mode;
 
 #define SEEK_SET				0		// Beginning of the file
 #define SEEK_CUR				1		// Current position in the file
 #define SEEK_END				2		// End of the file
+
 // Error codes - preceded by SPI
 #define SD_ERRORS_BASE			16
-#define SD_ERRORS_LIMIT			32
-#define SD_INVALID_CMD			SD_ERRORS_BASE + 0
-#define SD_READ_TIMEOUT			SD_ERRORS_BASE + 1
-#define SD_INVALID_NUM_BYTES	SD_ERRORS_BASE + 2
-#define SD_INVALID_RESPONSE		SD_ERRORS_BASE + 3
-#define SD_INVALID_INIT			SD_ERRORS_BASE + 4
-#define SD_INVALID_FILESYSTEM	SD_ERRORS_BASE + 5
-#define SD_INVALID_DAT_STRT_ID	SD_ERRORS_BASE + 6
-#define SD_FILENAME_NOT_FOUND	SD_ERRORS_BASE + 7
-#define SD_EMPTY_FAT_ENTRY		SD_ERRORS_BASE + 8
-#define SD_CORRUPT_CLUSTER		SD_ERRORS_BASE + 9
-#define SD_INVALID_PTR_ORIGIN	SD_ERRORS_BASE + 10
-#define SD_ENTRY_NOT_FILE		SD_ERRORS_BASE + 11
-#define SD_INVALID_FILENAME		SD_ERRORS_BASE + 12
-#define SD_INVALID_FAT_APPEND	SD_ERRORS_BASE + 13
-#define SD_FILE_ALREADY_EXISTS	SD_ERRORS_BASE + 14
-#define SD_INVALID_FILE_MODE	SD_ERRORS_BASE + 15
-#define SD_TOO_MANY_FATS		SD_ERRORS_BASE + 16
-#define SD_READING_PAST_EOC		SD_ERRORS_BASE + 17
-#define SD_FILE_WITHOUT_BUFFER	SD_ERRORS_BASE + 18
+#define SD_ERRORS_LIMIT			32		// Maximum number of error codes allocated to this structure
+typedef enum {
+	SD_INVALID_CMD = SD_ERRORS_BASE,
+	SD_READ_TIMEOUT,
+	SD_INVALID_NUM_BYTES,
+	SD_INVALID_RESPONSE,
+	SD_INVALID_INIT,
+	SD_INVALID_FILESYSTEM,
+	SD_INVALID_DAT_STRT_ID,
+	SD_FILENAME_NOT_FOUND,
+	SD_EMPTY_FAT_ENTRY,
+	SD_CORRUPT_CLUSTER,
+	SD_INVALID_PTR_ORIGIN,
+	SD_ENTRY_NOT_FILE,
+	SD_INVALID_FILENAME,
+	SD_INVALID_FAT_APPEND,
+	SD_FILE_ALREADY_EXISTS,
+	SD_INVALID_FILE_MODE,
+	SD_TOO_MANY_FATS,
+	SD_READING_PAST_EOC,
+	SD_FILE_WITHOUT_BUFFER,
+	SD_ERRORS_SIZE
+} sd_error;
 
+// Forward declarations for buffers and files
 typedef struct _sd_buffer sd_buffer;
 typedef struct _sd_file sd_file;
 
-// If the system is low on RAM, allow the external program to access the generic buffer.
+// In case the system is low on RAM, allow the external program to access the generic buffer.
 extern sd_buffer g_sd_buf;
 
 /**
@@ -625,7 +629,6 @@ void SDWriteDat32 (uint8 buf[], const uint32 dat);
  * \return		Returns sector address of desired path
  */
 // TODO: Implement this (more than simply returning root directory)
-// TODO: Implement minimalist error checking (-1 or 0 would be valid error codes)
 // TODO: Allow for paths outside the current directory
 static uint32 SDGetSectorFromPath (const char *path);
 
@@ -750,7 +753,6 @@ static uint8 SDExtendFAT (sd_buffer *buf);
  * \brief	Allocate space for a new file
  *
  * \param	*name				Character array for the new file
- * \param	*f					File buffer to open the new file; TODO: Does this really need to be here or can the calling function take care of it?
  * \param	*fileEntryOffset	Offset from the currently loaded directory entry where
  * 								the file's metadata should be written
  */

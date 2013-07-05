@@ -7,6 +7,12 @@ OBJS = $(PRJ).o spi.o spi_as.o
 BOARD = QUICKSTART
 MODEL = lmm
 
+# Insert your own path here - it should be the same directory that contains "common.mk"
+PROPWARE_PATH = /home/david/External/Kits/Embedded/Parallax/Library/PropWare
+
+# Optionally, specify where your compiler is installed
+PREFIX = /opt/parallax
+
 all: $(NAME).elf
 
-include /mnt/win-7/Users/Public/Kits/Embedded/Parallax/Library/common.mk
+include $(PROPWARE_PATH)/common.mk

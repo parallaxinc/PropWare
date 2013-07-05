@@ -5,7 +5,7 @@
 ###############################
 
 ### CODE SPACE ###
-As of 4/22/2013, SD demo requires the following code space:
+As of 4/22/2013, SD demo requires the following code space (in bytes):
 Enabled Code Options						CMM Mode		LMM Mode
 None										7872			12920
 __simple_printf only						10344			17288
@@ -25,5 +25,3 @@ create symbolic links to the following files:
 	- sd.c
 	- sd.h		(see note in common.mk for reasoning why this must be included)
 
-### TODO ###
-	- 
