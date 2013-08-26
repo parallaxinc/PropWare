@@ -6,8 +6,8 @@ Getting Started - Choose one or the other:
     At the Terminal:
         1) Create a project directory and your source files
              1a) All C/C++ files must have an accompanying header file with a
-			     similar name; (i.e., if you have a file main.c, you must have
-			     main.h as well)
+                 similar name; (i.e., if you have a file main.c, you must have
+                 main.h as well)
         2) Create links to or copy all source files from PropWare into your
            project directory (compiling the library every time allows for
            pre-processor optimizations)
