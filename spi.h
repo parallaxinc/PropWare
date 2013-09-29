@@ -31,7 +31,7 @@
  * 								DEFAULT: OFF
  */
 //#define SPI_DEBUG
-//#define SPI_DEBUG_PARAMS
+#define SPI_DEBUG_PARAMS
 #define SPI_FAST
 //#define SPI_FAST_SECTOR
 

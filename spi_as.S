@@ -36,7 +36,7 @@
 
 						.section spi_as.cog, "ax"
 						.cog_ram
-
+						org 0
 
 						or dira, testLEDs				'' DEBUG: LEDs used for debugging purposes, can be removed later
 						// Begin by retreiving all parameters...

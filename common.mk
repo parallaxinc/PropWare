@@ -57,7 +57,7 @@ CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL)
 CXXFLAGS += $(CFLAGS)
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
-INC += -I$(PROPWARE_PATH) -I $(PREFIX)/include
+INC += -I$(PROPWARE_PATH) -I $(PREFIX)/propeller-elf/include
 
 ifneq ($(LDSCRIPT),)
 LDFLAGS += -T $(LDSCRIPT)
@@ -195,4 +195,4 @@ clean:
 # how to run
 # #########################################################
 run: $(NAME).elf
-	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t
+	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t -e
