@@ -192,7 +192,13 @@ clean:
 	rm -f *.o *.elf *.a *.cog *.ecog *.binary
 
 # #########################################################
-# how to run
+# how to run on RAM
 # #########################################################
 run: $(NAME).elf
+	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t
+
+# #########################################################
+# how to run on ROM
+# #########################################################
+install: $(NAME).elf
 	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t -e

@@ -1,7 +1,7 @@
 # Build all source code files within PropWare for easy testing of compilation errors
 PRJ = PropWare
 
-all: gpio.o spi.o spi_as.o sd.o
+all: gpio.o spi.o spi_as.o sd.o l3g.o mcp300x.0
 BOARD = QUICKSTART
 MODEL = cmm
 CFLAGS = -Os
