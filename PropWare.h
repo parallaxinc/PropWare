@@ -1,10 +1,20 @@
-/* File:    bit_expansion.h
+/* File:    PropWare.h
  *
  * Author:  David Zemon
  */
 
-#ifndef bit_expansion_h_
-#define bit_expansion_h_
+#ifndef PROPWARE_H
+#define PROPWARE_H
+
+#ifdef DAREDEVIL
+#define checkErrors(x)			x
+#else
+#define checkErrors(x)			if (err = x) return err
+#endif
+
+#define SECOND		((unsigned long long) CLKFREQ)
+#define MILLISECOND	((unsigned long long) (CLKFREQ / 1000))
+#define MICROSECOND ((unsigned long long) (MILLISECOND / 1000))
 
 #define BIT_0				0x00000001
 #define BIT_1				0x00000002
@@ -39,6 +49,15 @@
 #define BIT_30				0x40000000
 #define BIT_31				0x80000000
 
+#define NIBBLE_0			0xf
+#define NIBBLE_1			0xf0
+#define NIBBLE_2			0xf00
+#define NIBBLE_3			0xf000
+#define NIBBLE_4			0xf0000
+#define NIBBLE_5			0xf00000
+#define NIBBLE_6			0xf000000
+#define NIBBLE_7			0xf0000000
+
 #define BYTE_0				0xff
 #define BYTE_1				0xff00
 #define BYTE_2				0xff0000
@@ -47,4 +66,4 @@
 #define WORD_0				0xffff
 #define WORD_1				0xffff0000
 
-#endif /* bit_expansion_h_ */
+#endif /* PROPWARE_H */

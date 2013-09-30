@@ -66,7 +66,7 @@ endif
 # basic gnu tools
 GCC_PATH = $(PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
-CXX = $(GCC_PATH)/ropeller-elf-g++
+CXX = $(GCC_PATH)/propeller-elf-g++
 LD = $(GCC_PATH)/ropeller-elf-ld
 AS = $(GCC_PATH)/propeller-elf-as
 AR = $(GCC_PATH)/propeller-elf-ar

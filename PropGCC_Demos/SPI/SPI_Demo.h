@@ -9,8 +9,9 @@
 
 // Includes
 #include <propeller.h>
-#include <gpio.h>
 #include <stdio.h>
+#include <PropWare.h>
+#include <gpio.h>
 #include <spi.h>
 
 // Constants

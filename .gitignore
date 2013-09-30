@@ -12,6 +12,7 @@ PropGCC_Demos/SD/sd.h
 PropGCC_Demos/SD/spi.c
 PropGCC_Demos/SD/spi.h
 PropGCC_Demos/SD/spi_as.S
+PropGCC_Demos/SD/gpio.h
 PropGCC_Demos/SPI/spi.c
 PropGCC_Demos/SPI/spi.h
 PropGCC_Demos/SPI/spi_as.S

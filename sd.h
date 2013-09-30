@@ -19,7 +19,7 @@
 
 #include <propeller.h>
 #include <string.h>
-#include <types.h>
+#include <PropWare.h>
 #include <gpio.h>
 #include <spi.h>
 

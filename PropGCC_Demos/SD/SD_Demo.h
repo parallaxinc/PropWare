@@ -12,6 +12,7 @@
 
 // Includes
 #include <propeller.h>
+#include <PropWare.h>
 #include <gpio.h>
 #include <sd.h>
 

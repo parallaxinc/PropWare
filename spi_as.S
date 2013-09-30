@@ -7,7 +7,7 @@
  *
  */
 
-#include <bit_expansion.h>
+#include <PropWare.h>
 
 /* NOTE: These definitions *MUST* match up with the SPI source file "spi.c" */
 // Different fuctions supported by this GAS module
@@ -17,6 +17,7 @@
 #define SPI_FUNC_SEND_FAST		3
 #define SPI_FUNC_READ_FAST		4
 #define SPI_FUNC_READ_SECTOR	5
+#define SPI_FUNC_SET_POLARITY	6
 
 #define SPI_BITS_OFFSET			8
 #define SPI_MODE_OFFSET			16
@@ -35,7 +36,7 @@
 #define SD_SECTOR_SIZE			512
 
 						.section spi_as.cog, "ax"
-						.cog_ram
+						.compress off
 						org 0
 
 						or dira, testLEDs				'' DEBUG: LEDs used for debugging purposes, can be removed later
@@ -53,8 +54,7 @@ entry					call #READ_CMD					'' Read in the pin mask MOSI
 						call #READ_CMD					'' Read in the clock delay
 						mov clkDelay, mailbox
 						call #READ_CMD					'' Read in the polarity
-						andn outa, mailbox				'' \__ If polarity high, initialize sclk high, else clear the bit
-						or outa, mailbox				'' /
+						jmp #set_polarity
 
 						// Followed by setting MOSI & SCLK as outputs and MISO as input; Also set MOSI and MISO high
 						or dira, mosi
@@ -94,7 +94,18 @@ LOOP					// Retrieve a command
 						cmp temp, #SPI_FUNC_READ_SECTOR
 		if_z			jmp #read_sector
 
+						cmp temp, #SPI_FUNC_SET_POLARITY wz
+		if_z			jmp #set_polarity
+
 						// Default: Return to loop
+						jmp #LOOP
+
+/* FUNCTION: SPISetPolarity() */
+set_polarity			// Set the current SPI polarity; If polarity high, initialize sclk high, else clear the bit
+						call #READ_CMD					'' Read in the polarity
+						test mailbox, #1 wz
+		if_z			or outa, sclk
+		if_nz			andn outa, sclk
 						jmp #LOOP
 
 /* FUNCTION: SPIShiftOut() */
@@ -499,3 +510,5 @@ miso					res		1						'' Pin mask for MISO pin
 misoPinNum				res		1						'' Pin number for MISO
 sclk					res		1						'' Pin mask for SCLK pin
 clkDelay				res		1						'' Delay between clock ticks (Period / 2)
+
+						.compress default

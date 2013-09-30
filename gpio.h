@@ -7,8 +7,7 @@
 #define __GPIO_H
 
 #include <propeller.h>
-#include <types.h>
-#include <bit_expansion.h>
+#include <PropWare.h>
 
 #define DEBOUNCE_DELAY		3
 
@@ -52,7 +51,7 @@
 /* @Brief: Allow easy reading of only selected pins from a port
  *
  */
-#define GPIOPinRead(pins)				return (INA & (pins))
+#define GPIOPinRead(pins)				(INA & (pins))
 
 /* @Brief: Allow easy switch-press detection of any port and pin with debounce
  *				protection
@@ -62,6 +61,6 @@
  *
  * @return		Returns 1 or 0 depending on whether the switch was pressed
  */
-uint8 GPIOSwitchRead_Low (uint32 pin);
+uint8_t GPIOSwitchRead_Low (uint32_t pin);
 
 #endif /* __GPIO_H */

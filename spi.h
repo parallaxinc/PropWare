@@ -1,6 +1,6 @@
 /* File:    spi.h
  * Author:  David Zemon
- * 
+ *
  * Description: Provides a library for the propeller, running in the current cog,
  * 				for SPI communication. Inspired by OBEX #433.
  */
@@ -9,9 +9,8 @@
 #define SPI_H_
 
 #include <propeller.h>
+#include <PropWare.h>
 #include <gpio.h>
-#include <bit_expansion.h>
-#include <types.h>
 
 /**
  * \brief	Extra code options - Uncomment definitions to enable features
@@ -33,21 +32,32 @@
 //#define SPI_DEBUG
 #define SPI_DEBUG_PARAMS
 #define SPI_FAST
-//#define SPI_FAST_SECTOR
+#define SPI_FAST_SECTOR
 
-#define	SPI_POLARITY_LOW			0
-#define SPI_POLARITY_HIGH			1
+/**
+ * \brief	Descriptor for SPI signal as defined by Motorola modes
+ *
+ * \detailed	CPOL 0 refers to a low polarity (where the clock begins and
+ * 				ends in the low state) and CPOL 1 is for high polarity.
+ * 				TODO: Describe phase
+ *
+ * SPI mode		CPOL	CPHA
+ * 0			0		0
+ * 1			0		1
+ * 2			1		0
+ * 3			1		1
+ */
+enum spimode_t {SPI_MODE_0, SPI_MODE_1, SPI_MODE_2, SPI_MODE_3, SPI_MODES};
 
-#define SPI_MSB_PRE					0
-#define SPI_LSB_PRE					1
-#define SPI_MSB_POST				2
-#define SPI_LSB_POST				3
-#define SPI_LSB_FIRST				4
-#define	SPI_MSB_FIRST				5
+/**
+ * NOTE: Values starting at the end of SPI_MODE_* so that the values can be
+ * 		 easily distinguished
+ */
+enum spibitmode_t {SPI_LSB_FIRST = SPI_MODES, SPI_MSB_FIRST, SPI_BIT_MODES};
 
 // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
-#define SPI_WR_TIMEOUT_VAL			CLKFREQ/10
-#define SPI_RD_TIMEOUT_VAL			CLKFREQ/10
+#define SPI_WR_TIMEOUT_VAL			2ULL*CLKFREQ/1
+#define SPI_RD_TIMEOUT_VAL			2ULL*CLKFREQ/1
 #define SPI_MAX_PAR_BITS			31
 
 // Errors
@@ -66,6 +76,7 @@
 #define SPI_INVALID_FREQ			SPI_ERRORS_BASE + 10
 #define SPI_INVALID_BYTE_SIZE		SPI_ERRORS_BASE + 11
 #define SPI_ADDR_MISALIGN			SPI_ERRORS_BASE + 12
+#define SPI_INVALID_POLARITY		SPI_ERRORS_BASE + 13
 
 /**
  * \brief	Initialize an SPI module by starting a new cog
@@ -79,8 +90,15 @@
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
-		const uint32 frequency, const uint8 polarity);
+uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+		const uint32_t frequency, const uint8_t mode, const uint8_t bitmode);
+
+/**
+ * \brief	Determine if the SPI cog has already been initialized
+ *
+ * \return		Returns 1 if the SPI cog is up and running, 0 otherwise
+ */
+inline uint8_t SPIIsRunning (void);
 
 /**
  * \brief	Stop a running SPI cog
@@ -88,19 +106,39 @@ uint8 SPIStart (const uint32 mosi, const uint32 miso, const uint32 sclk,
  * \return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED
  * 				if no cog has previously been started)
  */
-uint8 SPIStop (void);
+uint8_t SPIStop (void);
+
+/**
+ * \brief	Set the mode of SPI communication
+ *
+ * \param	mode	TODO: Document me!
+ *
+ * \return		Can return non-zero in the case of a timeout
+ */
+uint8_t SPISetMode (const uint8_t mode);
+
+uint8_t SPISetBitMode (const uint8_t bitmode);
+
+/**
+ * \brief	Change the SPI module's clock frequency
+ *
+ * \param	frequency	Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
+ *
+ * \return		Returns 0 upon success, otherwise error code
+ */
+uint8_t SPISetClock (const uint32_t frequency);
 
 /**
  * \brief	Wait for the SPI cog to signal that it is in the idle state
  *
  * \return		May return non-zero error code when a timeout occurs
  */
-inline uint8 SPIWait (void);
+inline uint8_t SPIWait (void);
 
 /**
  * \brief		Send a value out to a peripheral device
  *
- * \detailed	Send pass a value and mode into the assembly cog to be sent out to the
+ * \detailed	Pass a value and mode into the assembly cog to be sent to the
  * 				peripheral; NOTE: this function is non-blocking and chip-select should
  * 				not be set inactive immediately after the return (you should call SPIWait()
  * 				before setting chip-select inactive)
@@ -112,7 +150,7 @@ inline uint8 SPIWait (void);
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8 SPIShiftOut (uint8 bits, uint32 value, const uint8 mode);
+uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
 
 /**
  * \brief	Receive a value in from a peripheral device
@@ -127,7 +165,7 @@ uint8 SPIShiftOut (uint8 bits, uint32 value, const uint8 mode);
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8 SPIShiftIn (const uint8 bits, const uint8 mode, void *data, const uint8 bytes);
+uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
 
 #ifdef SPI_FAST
 /**
@@ -143,7 +181,7 @@ uint8 SPIShiftIn (const uint8 bits, const uint8 mode, void *data, const uint8 by
  * \param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4
  * 						(is *data a pointer	to char, short or int?)
  */
-void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint8 bytes);
+void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes);
 
 /**
  * \brief	Read an entire sector of data in from an SD card
@@ -152,34 +190,12 @@ void SPIShiftIn_fast (const uint8 bits, const uint8 mode, void *data, const uint
  * \param	blocking	When set to non-zero, function will not return until the data
  * 						transfer is complete
  */
-void SPIShiftIn_sector (const uint8 addr[], const uint8 blocking);
+void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #endif
 
-/**
- * \brief	Change the SPI module's clock frequency
- *
- * \param	frequency	Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
- *
- * \return		Returns 0 upon success, otherwise error code
- */
-uint8 SPISetClock (const uint32 frequency);
-
-#ifdef SPI_DEBUG
-#include <stdio.h>
-#include <stdarg.h>
-/**
- * \brief	Print through UART an error string followed by entering an infinite loop
- *
- * \param	err		Error number used to determine error string
- */
-void SPIError (const uint8 err, ...);
-#else
-// Exit calling function by returning 'err'
-#define SPIError(err, ...)				return err
-#endif
-
-/*** Private definitions and Declarations ***/
-// Defintions
+/********************************************
+ *** Private definitions and Declarations ***
+ ********************************************/
 #define	SPI_TIMEOUT_WIGGLE_ROOM		300
 #define SPI_FUNC_SEND				0
 #define	SPI_FUNC_READ				1
@@ -187,10 +203,12 @@ void SPIError (const uint8 err, ...);
 #define SPI_FUNC_SEND_FAST			3
 #define SPI_FUNC_READ_FAST			4
 #define SPI_FUNC_READ_SECTOR		5
+#define SPI_FUNC_SET_MODE			6
+#define SPI_FUNC_SET_BITMODE		7
 #define SPI_BITS_OFFSET				8
 #define SPI_MODE_OFFSET				16
+#define SPI_BITMODE_BIT				BIT_2
 
-// Function prototypes
 /**
  * \brief	Read the value that the SPI cog just shifted in
  *
@@ -199,7 +217,7 @@ void SPIError (const uint8 err, ...);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static inline uint8 SPIReadPar (void *par, const uint8 bytes);
+static inline uint8_t SPIReadPar (void *par, const size_t size);
 
 /**
  * \brief	Count the number of set bits in a variable
@@ -208,7 +226,7 @@ static inline uint8 SPIReadPar (void *par, const uint8 bytes);
  *
  * \return		Number of bits in the parameter par (no error checking)
  */
-static uint8 SPICountBits (uint32 par);
+static uint8_t SPICountBits (uint32_t par);
 
 /**
  * \brief	Retrieve the pin number from a pin mask; i.e., if pinMask is 0x01,
@@ -221,6 +239,20 @@ static uint8 SPICountBits (uint32 par);
  *
  * \return		Returns the pin number of pinMask (no error checking)
  */
-static uint8 SPIGetPinNum (const uint32 pinMask);
+static uint8_t SPIGetPinNum (const uint32_t pinMask);
+
+#ifdef SPI_DEBUG
+#include <stdio.h>
+#include <stdarg.h>
+/**
+ * \brief	Print through UART an error string followed by entering an infinite loop
+ *
+ * \param	err		Error number used to determine error string
+ */
+static void SPIError (const uint8_t err, ...);
+#else
+// Exit calling function by returning 'err'
+#define SPIError(err, ...)				return err
+#endif
 
 #endif /* SPI_H_ */
