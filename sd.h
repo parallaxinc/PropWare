@@ -120,15 +120,15 @@ extern sd_buffer g_sd_buf;
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8 SDStart (const uint32 mosi, const uint32 miso, const uint32 sclk, const uint32 cs,
-		const uint32 freq);
+uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk, const uint32_t cs,
+		const uint32_t freq);
 
 /**
  * \brief	Mount either FAT16 or FAT32 filesystem
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDMount (void);
+uint8_t SDMount (void);
 
 #ifdef SD_FILE_WRITE
 /**
@@ -138,7 +138,7 @@ uint8 SDMount (void);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDUnmount (void);
+uint8_t SDUnmount (void);
 #endif
 
 /**
@@ -148,7 +148,7 @@ uint8 SDUnmount (void);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDchdir (const char *d);
+uint8_t SDchdir (const char *d);
 
 /**
  * \brief	Open a file with a given name and load its information into the file pointer
@@ -171,7 +171,7 @@ uint8 SDchdir (const char *d);
  *
  * \return 		Returns 0 upon success, error code otherwise
  */
-uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
+uint8_t SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
 
 #ifdef SD_FILE_WRITE
 /**
@@ -181,7 +181,7 @@ uint8 SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDfclose (sd_file *f);
+uint8_t SDfclose (sd_file *f);
 #endif
 
 #ifdef SD_FILE_WRITE
@@ -196,7 +196,7 @@ uint8 SDfclose (sd_file *f);
  *
  * \return
  */
-uint8 SDfputc (const char c, sd_file *f);
+uint8_t SDfputc (const char c, sd_file *f);
 
 /**
  * \brief	Insert a c-string into a file
@@ -209,7 +209,7 @@ uint8 SDfputc (const char c, sd_file *f);
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8 SDfputs (char *s, sd_file *f);
+uint8_t SDfputs (char *s, sd_file *f);
 #endif
 
 /**
@@ -241,7 +241,7 @@ char SDfgetc (sd_file *f);
  * \param	size	Maximum number of characters to read from the file
  * \param	*f		Address with the currently opened file
  */
-char * SDfgets (char s[], uint32 size, sd_file *f);
+char * SDfgets (char s[], uint32_t size, sd_file *f);
 
 /**
  * \brief	Determine whether the read pointer has reached the end of the file
@@ -252,7 +252,7 @@ char * SDfgets (char s[], uint32 size, sd_file *f);
  *
  * \return		Returns true if the read pointer points to the end of the file, false otherwise
  */
-inline uint8 SDfeof (sd_file *f);
+inline uint8_t SDfeof (sd_file *f);
 
 /**
  * \brief	Set the read pointer for a given file to the position 'origin + offset'
@@ -265,7 +265,7 @@ inline uint8 SDfeof (sd_file *f);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDfseekr (sd_file *f, const int32 offset, const uint8 origin);
+uint8_t SDfseekr (sd_file *f, const int32_t offset, const uint8_t origin);
 
 /**
  * \brief	Set the write pointer for a given file to the position 'origin + offset'
@@ -278,7 +278,7 @@ uint8 SDfseekr (sd_file *f, const int32 offset, const uint8 origin);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDfseekw (sd_file *f, const int32 offset, const uint8 origin);
+uint8_t SDfseekw (sd_file *f, const int32_t offset, const uint8_t origin);
 
 /**
  * \brief	Retrieve the current position of the read pointer
@@ -289,7 +289,7 @@ uint8 SDfseekw (sd_file *f, const int32 offset, const uint8 origin);
  *
  * \return		Returns the byte offset (from beginning) of the read pointer
  */
-inline uint32 SDftellr (const sd_file *f);
+inline uint32_t SDftellr (const sd_file *f);
 
 /**
  * \brief	Retrieve the current position of the write pointer
@@ -300,7 +300,7 @@ inline uint32 SDftellr (const sd_file *f);
  *
  * \return		Returns the byte offset (from beginning) of the write pointer
  */
-inline uint32 SDftellw (const sd_file *f);
+inline uint32_t SDftellw (const sd_file *f);
 
 #ifdef SD_SHELL
 // Shell definitions
@@ -322,7 +322,7 @@ inline uint32 SDftellw (const sd_file *f);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SD_Shell (sd_file *f);
+uint8_t SD_Shell (sd_file *f);
 
 /**
  * \brief	List the contents of a directory on the screen (similar to 'ls .')
@@ -331,7 +331,7 @@ uint8 SD_Shell (sd_file *f);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SD_Shell_ls (void);
+uint8_t SD_Shell_ls (void);
 
 /**
  * \brief	Dump the contents of a file to the screen (similar to 'cat f');
@@ -342,7 +342,7 @@ uint8 SD_Shell_ls (void);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SD_Shell_cat (const char *name, sd_file *f);
+uint8_t SD_Shell_cat (const char *name, sd_file *f);
 
 /**
  * \brief	Change the current working directory to *f (similar to 'cd f');
@@ -351,7 +351,7 @@ uint8 SD_Shell_cat (const char *name, sd_file *f);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SD_Shell_cd (const char *d);
+uint8_t SD_Shell_cd (const char *d);
 
 #ifdef SD_FILE_WRITE
 /**
@@ -359,7 +359,7 @@ uint8 SD_Shell_cd (const char *d);
  *
  * \param	*name		C-string name for the file to be created
  */
-uint8 SD_Shell_touch (const char name[]);
+uint8_t SD_Shell_touch (const char name[]);
 #endif
 #endif
 
@@ -372,7 +372,7 @@ uint8 SD_Shell_touch (const char name[]);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
+uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 #endif
 
 /*******************************************
@@ -484,39 +484,39 @@ uint8 SDPrintHexBlock (uint8 *dat, uint16 bytes);
 
 // File constants
 #ifndef SD_EOF
-#define SD_EOF						((uint8) -1)						// System dependent - may need to be defined elsewhere
+#define SD_EOF						((uint8_t) -1)						// System dependent - may need to be defined elsewhere
 #endif
 
-#define SD_FOLDER_ID				((uint8) -1)
+#define SD_FOLDER_ID				((uint8_t) -1)
 
 struct _sd_buffer {
-		uint8 buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
-		uint8 id;				// Buffer ID - determine who owns the current information
-		uint32 curClusterStartAddr;	// Store the current cluster's starting sector number
-		uint8 curSectorOffset;// Store the current sector offset from the beginning of the cluster
-		uint32 curAllocUnit;					// Store the current allocation unit
-		uint32 nextAllocUnit;					// Look-ahead at the next FAT entry
+		uint8_t buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
+		uint8_t id;				// Buffer ID - determine who owns the current information
+		uint32_t curClusterStartAddr;	// Store the current cluster's starting sector number
+		uint8_t curSectorOffset;// Store the current sector offset from the beginning of the cluster
+		uint32_t curAllocUnit;					// Store the current allocation unit
+		uint32_t nextAllocUnit;					// Look-ahead at the next FAT entry
 #ifdef SD_FILE_WRITE
-		uint8 mod;// When set, the currently loaded sector has been modified since it was read from
+		uint8_t mod;// When set, the currently loaded sector has been modified since it was read from
 				  // the SD card
 #endif
 };
 
 struct _sd_file {
 		sd_buffer *buf;
-		uint8 id;	// determine if the buffer is owned by this file
-		uint32 wPtr;
-		uint32 rPtr;
+		uint8_t id;	// determine if the buffer is owned by this file
+		uint32_t wPtr;
+		uint32_t rPtr;
 		sd_file_mode mode;
-		uint32 length;
-		uint32 maxSectors;	// Maximum number of sectors currently allocated to a file
-		uint8 mod;	// When the length of a file is changed, this variable will be set
-		uint32 firstAllocUnit; // File's starting allocation unit
-		uint32 curSector; // like curSectorOffset, but does not reset upon loading a new cluster
-		uint32 curCluster; // like curSector, but for allocation units
+		uint32_t length;
+		uint32_t maxSectors;	// Maximum number of sectors currently allocated to a file
+		uint8_t mod;	// When the length of a file is changed, this variable will be set
+		uint32_t firstAllocUnit; // File's starting allocation unit
+		uint32_t curSector; // like curSectorOffset, but does not reset upon loading a new cluster
+		uint32_t curCluster; // like curSector, but for allocation units
 
-		uint32 dirSectorAddr; // Which sector of the SD card contains this file's meta-data
-		uint16 fileEntryOffset;
+		uint32_t dirSectorAddr; // Which sector of the SD card contains this file's meta-data
+		uint16_t fileEntryOffset;
 };
 
 /***********************************
@@ -529,7 +529,7 @@ struct _sd_file {
  *
  * \return
  */
-static uint8 SDSendCommand (const uint8 cmd, const uint32 arg, const uint8 crc);
+static uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg, const uint8_t crc);
 
 /* brief	Receive response and data from SD card over SPI
  *
@@ -538,7 +538,7 @@ static uint8 SDSendCommand (const uint8 cmd, const uint32 arg, const uint8 crc);
  *
  * \return		Returns 0 for success, else error code
  */
-static uint8 SDGetResponse (const uint8 numBytes, uint8 *dat);
+static uint8_t SDGetResponse (const uint8_t numBytes, uint8_t *dat);
 
 /**
  * \brief	Receive data from SD card via SPI
@@ -548,7 +548,7 @@ static uint8 SDGetResponse (const uint8 numBytes, uint8 *dat);
  *
  * \return		Returns 0 for success, else error code
  */
-static uint8 SDReadBlock (uint16 bytes, uint8 *dat);
+static uint8_t SDReadBlock (uint16_t bytes, uint8_t *dat);
 
 /**
  * \brief	Write data to SD card via SPI
@@ -558,7 +558,7 @@ static uint8 SDReadBlock (uint16 bytes, uint8 *dat);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDWriteBlock (uint16 bytes, uint8 *dat);
+static uint8_t SDWriteBlock (uint16_t bytes, uint8_t *dat);
 
 /**
  * \brief	Read SD_SECTOR_SIZE-byte data block from SD card
@@ -568,7 +568,7 @@ static uint8 SDWriteBlock (uint16 bytes, uint8 *dat);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDReadDataBlock (uint32 address, uint8 *dat);
+static uint8_t SDReadDataBlock (uint32_t address, uint8_t *dat);
 
 /**
  * \brief	Write SD_SECTOR_SIZE-byte data block to SD card
@@ -578,7 +578,7 @@ static uint8 SDReadDataBlock (uint32 address, uint8 *dat);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDWriteDataBlock (uint32 address, uint8 *dat);
+static uint8_t SDWriteDataBlock (uint32_t address, uint8_t *dat);
 
 /**
  * \brief	Return byte-reversed 16-bit variable (SD cards store bytes little-endian therefore we must
@@ -588,7 +588,7 @@ static uint8 SDWriteDataBlock (uint32 address, uint8 *dat);
  *
  * \return		Returns a normal (big-endian) 16-bit word
  */
-static uint16 SDReadDat16 (const uint8 buf[]);
+static uint16_t SDReadDat16 (const uint8_t buf[]);
 
 /**
  * \brief	Return byte-reversed 32-bit variable (SD cards store bytes little-endian therefore we must
@@ -598,7 +598,7 @@ static uint16 SDReadDat16 (const uint8 buf[]);
  *
  * \return	Returns a normal (big-endian) 32-bit word
  */
-static uint32 SDReadDat32 (const uint8 buf[]);
+static uint32_t SDReadDat32 (const uint8_t buf[]);
 
 #ifdef SD_FILE_WRITE
 /**
@@ -608,7 +608,7 @@ static uint32 SDReadDat32 (const uint8 buf[]);
  * \param	buf[]		Address to store the first byte of data
  * \param	dat			Normal, 16-bit variable to be written to RAM in reverse endian
  */
-void SDWriteDat16 (uint8 buf[], const uint16 dat);
+void SDWriteDat16 (uint8_t buf[], const uint16_t dat);
 
 /**
  * \brief	Write a byte-reversed 32-bit variable (SD cards store bytes little-endian therefore we must
@@ -617,7 +617,7 @@ void SDWriteDat16 (uint8 buf[], const uint16 dat);
  * \param	buf[]		Address to store the first byte of data
  * \param	dat			Normal, 32-bit variable to be written to RAM in reverse endian
  */
-void SDWriteDat32 (uint8 buf[], const uint32 dat);
+void SDWriteDat32 (uint8_t buf[], const uint32_t dat);
 #endif
 
 /**
@@ -630,7 +630,7 @@ void SDWriteDat32 (uint8 buf[], const uint32 dat);
  */
 // TODO: Implement this (more than simply returning root directory)
 // TODO: Allow for paths outside the current directory
-static uint32 SDGetSectorFromPath (const char *path);
+static uint32_t SDGetSectorFromPath (const char *path);
 
 /**
  * \brief	Find and return the starting sector's address for a given allocation unit (note - not cluster)
@@ -639,7 +639,7 @@ static uint32 SDGetSectorFromPath (const char *path);
  *
  * \return		Returns sector address of desired allocation unit
  */
-static uint32 SDGetSectorFromAlloc (uint32 allocUnit);
+static uint32_t SDGetSectorFromAlloc (uint32_t allocUnit);
 
 /**
  * \brief	Read an entry from the FAT
@@ -649,7 +649,7 @@ static uint32 SDGetSectorFromAlloc (uint32 allocUnit);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDGetFATValue (const uint32 fatEntry, uint32 *value);
+static uint8_t SDGetFATValue (const uint32_t fatEntry, uint32_t *value);
 
 /**
  * \brief	Find the next sector in the FAT, directory, or file. When it is found, load it into the
@@ -659,7 +659,7 @@ static uint8 SDGetFATValue (const uint32 fatEntry, uint32 *value);
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-static uint8 SDLoadNextSector (sd_buffer *buf);
+static uint8_t SDLoadNextSector (sd_buffer *buf);
 
 /**
  * \brief	Load a requested sector into the buffer independent of the current sector or cluster
@@ -670,7 +670,7 @@ static uint8 SDLoadNextSector (sd_buffer *buf);
  * \param	offset		How many sectors past the first one should be skipped (sector number of the file)
  *
  */
-static uint8 SDLoadSectorFromOffset (sd_file *f, const uint32 offset);
+static uint8_t SDLoadSectorFromOffset (sd_file *f, const uint32_t offset);
 
 /**
  * \brief	When the final sector of a cluster is finished, SDIncCluster can be called. The appropriate
@@ -681,7 +681,7 @@ static uint8 SDLoadSectorFromOffset (sd_file *f, const uint32 offset);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDIncCluster (sd_buffer *buf);
+static uint8_t SDIncCluster (sd_buffer *buf);
 
 /**
  * \brief	Read the standard length name of a file entry. If an extension exists, a period will be
@@ -695,7 +695,7 @@ static uint8 SDIncCluster (sd_buffer *buf);
  *
  * \return
  */
-static void SDGetFilename (const uint8 *buf, char *filename);
+static void SDGetFilename (const uint8_t *buf, char *filename);
 
 /**
  * \brief	Find a file entry (file or sub-directory)
@@ -710,7 +710,7 @@ static void SDGetFilename (const uint8 *buf, char *filename);
  * \return		Returns 0 upon success, error code otherwise (common error code is SD_EOC_END for
  *              end-of-chain or file-not-found marker)
  */
-static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
+static uint8_t SDFind (const char *filename, uint16_t *fileEntryOffset);
 
 /**
  * \brief	Reload the sector currently in use by a given file
@@ -719,7 +719,7 @@ static uint8 SDFind (const char *filename, uint16 *fileEntryOffset);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDReloadBuf (sd_file *f);
+static uint8_t SDReloadBuf (sd_file *f);
 
 #ifdef SD_FILE_WRITE
 /**
@@ -736,7 +736,7 @@ static uint8 SDReloadBuf (sd_file *f);
  *
  * \return		Returns the number of the first unused allocation unit
  */
-static uint32 SDFindEmptySpace (const uint8 restore);
+static uint32_t SDFindEmptySpace (const uint8_t restore);
 
 /* \brief	Enlarge a file or directory by one cluster
  *
@@ -747,7 +747,7 @@ static uint32 SDFindEmptySpace (const uint8 restore);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-static uint8 SDExtendFAT (sd_buffer *buf);
+static uint8_t SDExtendFAT (sd_buffer *buf);
 
 /**
  * \brief	Allocate space for a new file
@@ -756,15 +756,15 @@ static uint8 SDExtendFAT (sd_buffer *buf);
  * \param	*fileEntryOffset	Offset from the currently loaded directory entry where
  * 								the file's metadata should be written
  */
-static uint8 SDCreateFile (const char *name, const uint16 *fileEntryOffset);
+static uint8_t SDCreateFile (const char *name, const uint16_t *fileEntryOffset);
 #endif
 
 #if (defined SD_SHELL || defined SD_VERBOSE)
 // TODO: Document this
-static inline void SDPrintFileEntry (const uint8 *file, char filename[]);
+static inline void SDPrintFileEntry (const uint8_t *file, char filename[]);
 
 // TODO: Document this
-static void SDPrintFileAttributes (const uint8 flag);
+static void SDPrintFileAttributes (const uint8_t flag);
 #endif
 
 #ifdef SD_DEBUG
@@ -772,14 +772,14 @@ static void SDPrintFileAttributes (const uint8 flag);
  *
  * \param	err		Error number used to determine error string
  */
-static void SDError (const uint8 err);
+static void SDError (const uint8_t err);
 
 /**
  * \brief	Print to screen each status bit individually with human-readable descriptions
  *
  * \param	response		first-byte response from the SD card
  */
-static void SDFirstByteExpansion (const uint8 response);
+static void SDFirstByteExpansion (const uint8_t response);
 #else
 // Exit calling function by returning 'err'
 #define SDError(err)				return err
