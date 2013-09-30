@@ -13,25 +13,21 @@
 // Different fuctions supported by this GAS module
 #define SPI_FUNC_SEND			0
 #define	SPI_FUNC_READ			1
-#define SPI_FUNC_CLK			2
-#define SPI_FUNC_SEND_FAST		3
-#define SPI_FUNC_READ_FAST		4
-#define SPI_FUNC_READ_SECTOR	5
-#define SPI_FUNC_SET_POLARITY	6
+#define SPI_FUNC_SEND_FAST		2
+#define SPI_FUNC_READ_FAST		3
+#define SPI_FUNC_READ_SECTOR	4
+#define SPI_FUNC_SET_MODE		5
+#define SPI_FUNC_SET_BITMODE	6
+#define SPI_FUNC_SET_FREQ		7
 
 #define SPI_BITS_OFFSET			8
-#define SPI_MODE_OFFSET			16
+
+#define SPI_PHASE_BIT			BIT_0
+#define SPI_POLARITY_BIT		BIT_1					'' Idle high == HIGH; Idle low == LOW
+#define SPI_BITMODE_BIT			BIT_2					'' MSB_FIRST == HIGH; LSB_FIRST == LOW
 
 #define SPI_FUNC_BITS			BYTE_0					'' Interpret bits 7-0 as a function descriptor
 #define SPI_BIT_COUNT_BITS		BYTE_1					'' Interpret bits 15-8 as bit-count descriptor
-#define SPI_MODE_BITS			BYTE_2					'' Interpret bits 23-16 as mode descriptor
-
-#define SPI_MSB_PRE				(0 << SPI_MODE_OFFSET)
-#define SPI_LSB_PRE				(1 << SPI_MODE_OFFSET)
-#define SPI_MSB_POST			(2 << SPI_MODE_OFFSET)
-#define SPI_LSB_POST			(3 << SPI_MODE_OFFSET)
-#define SPI_LSB_FIRST			(4 << SPI_MODE_OFFSET)
-#define	SPI_MSB_FIRST			(5 << SPI_MODE_OFFSET)
 
 #define SD_SECTOR_SIZE			512
 
@@ -51,10 +47,6 @@ entry					call #READ_CMD					'' Read in the pin mask MOSI
 						mov misoPinNum, mailbox
 						call #READ_CMD					'' Read in the pin mask SCLK
 						mov sclk, mailbox
-						call #READ_CMD					'' Read in the clock delay
-						mov clkDelay, mailbox
-						call #READ_CMD					'' Read in the polarity
-						jmp #set_polarity
 
 						// Followed by setting MOSI & SCLK as outputs and MISO as input; Also set MOSI and MISO high
 						or dira, mosi
@@ -78,10 +70,6 @@ LOOP					// Retrieve a command
 						cmp temp, #SPI_FUNC_READ wz
 		if_z			jmp #READ
 
-						// If command is "Set clock"
-						cmp temp, #SPI_FUNC_CLK wz
-		if_z			jmp #SET_CLOCK
-
 						// If command is "Send fast"
 						cmp temp, #SPI_FUNC_SEND_FAST wz
 		if_z			jmp #SEND_fast
@@ -94,18 +82,39 @@ LOOP					// Retrieve a command
 						cmp temp, #SPI_FUNC_READ_SECTOR
 		if_z			jmp #read_sector
 
-						cmp temp, #SPI_FUNC_SET_POLARITY wz
-		if_z			jmp #set_polarity
+						// If command is "Set mode"
+						cmp temp, #SPI_FUNC_SET_MODE wz
+		if_z			jmp #SET_MODE
+
+						// If command is "Set bitmode
+						cmp temp, #SPI_FUNC_SET_BITMODE wz
+		if_z			jmp #SET_BITMODE
+
+						// If command is "Set clock"
+						cmp temp, #SPI_FUNC_SET_FREQ wz
+		if_z			jmp #SET_FREQ
 
 						// Default: Return to loop
 						jmp #LOOP
 
 /* FUNCTION: SPISetPolarity() */
-set_polarity			// Set the current SPI polarity; If polarity high, initialize sclk high, else clear the bit
-						call #READ_CMD					'' Read in the polarity
-						test mailbox, #1 wz
+SET_MODE				// Set the current SPI polarity; If polarity high, initialize sclk high, else clear the bit
+						call #READ_CMD					'' Read in the mode
+						test mailbox, #SPI_POLARITY_BIT wz
 		if_z			or outa, sclk
 		if_nz			andn outa, sclk
+						mov clkPhase, mailbox
+						and clkPhase, #SPI_PHASE_BIT
+						jmp #LOOP
+
+SET_BITMODE				// Set shifting bitmode (LSB or MSB first) of communication
+						call #READ_CMD					'' Read in bitmode
+						mov bitmode, mailbox
+						jmp #LOOP
+
+/* FUNCTION: SPISetClock() */
+SET_FREQ				call #READ_CMD					'' Using READ_CMD instead of READ_DATA because -1 is not a valid clock signal
+						mov clkDelay, mailbox
 						jmp #LOOP
 
 /* FUNCTION: SPIShiftOut() */
@@ -113,8 +122,6 @@ SEND					// Interpret the bit count and mode of output for this send command
 						mov bitCount, mailbox			'' Initialize 'bitCount' register
 						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
 						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
-						mov mode, mailbox				'' Initialize 'mode' register
-						and mode, spiModeBits			'' Mask off all bits except the mode
 
 SEND_rd_data			rdlong mailbox, par
 						test mailbox, dataMask wz		'' Is BIT_31 cleared? (Implying data vs command)
@@ -124,7 +131,7 @@ SEND_rd_data			rdlong mailbox, par
 
 						mov clock, cnt					'' \__Prepare a register with the system counter for use in the *_CLOCK functions
 						add clock, clkDelay				'' /
-						cmp mode, spiMSBFirst wz		'' Is mode MSB first or LSB first?
+						cmp bitmode, #SPI_BITMODE_BIT wz		'' Is bitmode MSB first or LSB first?
 		if_z			jmp #msb_first
 
 						// LSB_FIRST Initialization
@@ -164,8 +171,6 @@ READ					// Interpret the bit count and mode of output for this read command
 						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
 						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
 						mov loopIdx, bitCount			'' Create a second storage register for the bit count - used in LSB modes
-						mov mode, mailbox				'' Initialize 'mode' register
-						and mode, spiModeBits			'' Mask off all bits except the mode
 						mov data, #0					'' Clear our the data register, ready for input
 
 						mov clock, cnt
@@ -234,8 +239,6 @@ SEND_fast				// Interpret the bit count and mode of output for this send command
 						mov bitCount, mailbox			'' Initialize 'bitCount' register
 						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
 						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
-						mov mode, mailbox				'' Initialize 'mode' register
-						and mode, spiModeBits			'' Mask off all bits except the mode
 
 SEND_rd_data_fast		rdlong mailbox, par
 						test mailbox, dataMask wz		'' Is BIT_31 cleared? (Implying data vs command)
@@ -245,7 +248,7 @@ SEND_rd_data_fast		rdlong mailbox, par
 
 						mov clock, cnt					'' \__Prepare a register with the system counter for use in the *_CLOCK functions
 						add clock, clkDelay				'' /
-						cmp mode, spiMSBFirst wz		'' Is mode MSB first or LSB first?
+						cmp bitmode, #SPI_BITMODE_BIT wz		'' Is bitmode MSB first or LSB first?
 		if_z			jmp #msb_first
 
 						// LSB_FIRST Initialization
@@ -287,8 +290,6 @@ READ_fast				// Interpret the bit count and mode of output for this read command
 						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
 						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
 						mov loopIdx, bitCount			'' Create a second storage register for the bit count - used in LSB modes
-						mov mode, mailbox				'' Initialize 'mode' register
-						and mode, spiModeBits			'' Mask off all bits except the mode
 						mov data, #0					'' Clear our the data register, ready for input
 
 						mov clock, cnt
@@ -431,11 +432,6 @@ read_byte				test miso, ina wc
 						wrlong negOne, par
 						jmp #LOOP
 
-/* FUNCTION: SPISetClock() */
-SET_CLOCK				call #READ_CMD					'' Using READ_CMD instead of READ_DATA because -1 is not a valid clock signal
-						mov clkDelay, mailbox
-						jmp #LOOP
-
 /* FUNCTION: SPIPostClock() */
 POST_CLOCK				waitcnt clock, clkDelay
 						xor outa, sclk
@@ -476,12 +472,6 @@ spiFuncBits				long	SPI_FUNC_BITS
 spiBitCountBits			long	SPI_BIT_COUNT_BITS
 spiModeBits				long	SPI_MODE_BITS
 dataMask				long	BIT_31
-spiMSBPre				long	SPI_MSB_PRE
-spiLSBPre				long	SPI_LSB_PRE
-spiMSBPost				long	SPI_MSB_POST
-spiLSBPost				long	SPI_LSB_POST
-spiLSBFirst				long	SPI_LSB_FIRST
-spiMSBFirst				long	SPI_MSB_FIRST
 sdSectorSize			long	SD_SECTOR_SIZE
 
 // DEBUG: The following set is used only for debugging purposes
@@ -500,9 +490,10 @@ mailbox					res		1						'' Address in hub memory used for communication with ano
 temp					res		1						'' Working register
 loopIdx					res		1						'' Used when bitCount cannot be modified during a loop (LSB first modes)
 clock					res		1						'' Used for clocking in and out with SCLK
-mode					res		1						'' Store for the original command passed in - used for referencing the mode and bit count
+bitmode					res		1						'' Store the current bitmode (LSB or MSB first)
+clkPhase				res		1						'' Store the current clock phase (CPHA)
 bitCount				res		1						'' Keep track of how many bits need to be sent/received - used for DJNZ loop
-data					res		1						'' Data is written to and read from this register
+data					res		1						'' Working register; Data is written to and read from this register
 
 mosi					res		1						'' Pin mask for MOSI pin
 mosiPinNum				res		1						'' Pin number for MOSI

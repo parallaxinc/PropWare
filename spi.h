@@ -2,7 +2,7 @@
  * Author:  David Zemon
  *
  * Description: Provides a library for the propeller, running in the current cog,
- * 				for SPI communication. Inspired by OBEX #433.
+ *              for SPI communication. Inspired by OBEX #433.
  */
 
 #ifndef SPI_H_
@@ -15,31 +15,31 @@
 /**
  * \brief	Extra code options - Uncomment definitions to enable features
  *
- * \param	SPI_DEBUG			Debugging features similar to exceptions; Errors will be
- * 								caught the program will enter an infinite loop
- * 								DEFAULT: OFF
- * \param	SPI_DEBUG_PARAMS	Parameter checking within each function call. I recommend
- * 								you leave this option enabled unless speed is critical
- * 								DEFAULT: ON
- * \param	SPI_FAST			Allows for fast send and receive routines without error
- * 								checking or timing delays; Normal routines still available
- * 								when enabled
- * 								DEFAULT: ON
- * 								TODO: Use the counter module instead of "xor clkPin, clkPin"
+ * \param	SPI_DEBUG           Debugging features similar to exceptions; Errors will be
+ *                              caught the program will enter an infinite loop
+ *                              DEFAULT: OFF
+ * \param	SPI_DEBUG_PARAMS    Parameter checking within each function call. I recommend
+ *                              you leave this option enabled unless speed is critical
+ *                              DEFAULT: ON
+ * \param	SPI_FAST            Allows for fast send and receive routines without error
+ *                              checking or timing delays; Normal routines still available
+ *                              when enabled
+ *                              DEFAULT: ON
+ *                              TODO: Use the counter module instead of "xor clkPin, clkPin"
  * \param	SPI_FAST_SECTOR		TODO: Figure out why this doesn't work... :(
- * 								DEFAULT: OFF
+ *                              DEFAULT: OFF
  */
 //#define SPI_DEBUG
 #define SPI_DEBUG_PARAMS
 #define SPI_FAST
-#define SPI_FAST_SECTOR
+//#define SPI_FAST_SECTOR
 
 /**
  * \brief	Descriptor for SPI signal as defined by Motorola modes
  *
- * \detailed	CPOL 0 refers to a low polarity (where the clock begins and
- * 				ends in the low state) and CPOL 1 is for high polarity.
- * 				TODO: Describe phase
+ * \detailed	CPOL 0 refers to a low polarity (where the clock idles in the
+ *              low state) and CPOL 1 is for high polarity.
+ *              TODO: Describe phase
  *
  * SPI mode		CPOL	CPHA
  * 0			0		0
@@ -47,13 +47,23 @@
  * 2			1		0
  * 3			1		1
  */
-enum spimode_t {SPI_MODE_0, SPI_MODE_1, SPI_MODE_2, SPI_MODE_3, SPI_MODES};
+enum spimode_t {
+	SPI_MODE_0,
+	SPI_MODE_1,
+	SPI_MODE_2,
+	SPI_MODE_3,
+	SPI_MODES
+};
 
 /**
  * NOTE: Values starting at the end of SPI_MODE_* so that the values can be
- * 		 easily distinguished
+ *       easily distinguished
  */
-enum spibitmode_t {SPI_LSB_FIRST = SPI_MODES, SPI_MSB_FIRST, SPI_BIT_MODES};
+enum spibitmode_t {
+	SPI_LSB_FIRST = SPI_MODES, // Start the enumeration where spimode_t left off; this ensures no overlap
+	SPI_MSB_FIRST,
+	SPI_BIT_MODES
+};
 
 // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
 #define SPI_WR_TIMEOUT_VAL			2ULL*CLKFREQ/1
@@ -76,32 +86,32 @@ enum spibitmode_t {SPI_LSB_FIRST = SPI_MODES, SPI_MSB_FIRST, SPI_BIT_MODES};
 #define SPI_INVALID_FREQ			SPI_ERRORS_BASE + 10
 #define SPI_INVALID_BYTE_SIZE		SPI_ERRORS_BASE + 11
 #define SPI_ADDR_MISALIGN			SPI_ERRORS_BASE + 12
-#define SPI_INVALID_POLARITY		SPI_ERRORS_BASE + 13
+#define SPI_INVALID_BITMODE			SPI_ERRORS_BASE + 13
 
 /**
- * \brief	Initialize an SPI module by starting a new cog
+ * \brief   Initialize an SPI module by starting a new cog
  *
- * \param	mosi		Pin mask for MOSI
- * \param	miso		Pin mask for MISO
- * \param	sclk		Pin mask for SCLK
- * \param	frequency	Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
- * \param	polarity	Polarity of the clock - idle low or high; must be one of
- * 						SPI_POLARITY_LOW or SPI_POLARITY_HIGH
+ * \param   mosi        Pin mask for MOSI
+ * \param   miso        Pin mask for MISO
+ * \param   sclk        Pin mask for SCLK
+ * \param   frequency   Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
+ * \param   polarity    Polarity of the clock - idle low or high; must be one of
+ *                      SPI_POLARITY_LOW or SPI_POLARITY_HIGH
  *
- * \return		Returns 0 upon success, otherwise error code
+ * \return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		const uint32_t frequency, const uint8_t mode, const uint8_t bitmode);
 
 /**
- * \brief	Determine if the SPI cog has already been initialized
+ * \brief    Determine if the SPI cog has already been initialized
  *
- * \return		Returns 1 if the SPI cog is up and running, 0 otherwise
+ * \return       Returns 1 if the SPI cog is up and running, 0 otherwise
  */
 inline uint8_t SPIIsRunning (void);
 
 /**
- * \brief	Stop a running SPI cog
+ * \brief   Stop a running SPI cog
  *
  * \return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED
  * 				if no cog has previously been started)
@@ -109,20 +119,28 @@ inline uint8_t SPIIsRunning (void);
 uint8_t SPIStop (void);
 
 /**
- * \brief	Set the mode of SPI communication
+ * \brief   Set the mode of SPI communication
  *
- * \param	mode	TODO: Document me!
+ * \param   mode    TODO: Document me!
  *
- * \return		Can return non-zero in the case of a timeout
+ * \return      Can return non-zero in the case of a timeout
  */
 uint8_t SPISetMode (const uint8_t mode);
 
+/**
+ * \brief   Set the bitmode of SPI communication
+ *
+ * \param   mode    Select one of SPI_LSB_FIRST or SPI_MSB_FIRST to choose
+ *                  which bit will be shifted out first
+ *
+ * \return      Can return non-zero in the case of a timeout
+ */
 uint8_t SPISetBitMode (const uint8_t bitmode);
 
 /**
- * \brief	Change the SPI module's clock frequency
+ * \brief   Change the SPI module's clock frequency
  *
- * \param	frequency	Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
+ * \param   frequency   Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
  *
  * \return		Returns 0 upon success, otherwise error code
  */
@@ -136,59 +154,59 @@ uint8_t SPISetClock (const uint32_t frequency);
 inline uint8_t SPIWait (void);
 
 /**
- * \brief		Send a value out to a peripheral device
+ * \brief       Send a value out to a peripheral device
  *
- * \detailed	Pass a value and mode into the assembly cog to be sent to the
- * 				peripheral; NOTE: this function is non-blocking and chip-select should
- * 				not be set inactive immediately after the return (you should call SPIWait()
- * 				before setting chip-select inactive)
+ * \detailed    Pass a value and mode into the assembly cog to be sent to the
+ *              peripheral; NOTE: this function is non-blocking and chip-select should
+ *              not be set inactive immediately after the return (you should call SPIWait()
+ *              before setting chip-select inactive)
  *
- * \param	bits		Number of bits to be shifted out
- * \param	value		The value to be shifted out
- * \param	mode		Controls whether the MSB or LSB is sent first; Must be one of
- * 						SPI_LSB_FIRST or SPI_MSB_FIRST
+ * \param   bits        Number of bits to be shifted out
+ * \param   value       The value to be shifted out
+ * \param   mode        Controls whether the MSB or LSB is sent first; Must be one of
+ *                      SPI_LSB_FIRST or SPI_MSB_FIRST
  *
- * \return		Returns 0 upon success, otherwise error code
+ * \return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
 
 /**
- * \brief	Receive a value in from a peripheral device
+ * \brief   Receive a value in from a peripheral device
  *
- * \param	bits		Number of bits to be shifted in
- * \param	mode		Controls whether the MSB or LSB is sent first and whether data is
- * 						valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
- * 						SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
- * \param	*data		Received data will be stored at this address
- * \param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4
- * 						(is *data a pointer	to char, short or int?)
+ * \param   bits        Number of bits to be shifted in
+ * \param   mode        Controls whether the MSB or LSB is sent first and whether data is
+ *                      valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
+ *                      SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
+ * \param   *data       Received data will be stored at this address
+ * \param   bytes       Byte-width of the *data variable type; Must be one of 1, 2, or 4
+ *                      (is *data a pointer to char, short or int?)
  *
- * \return		Returns 0 upon success, otherwise error code
+ * \return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
 
 #ifdef SPI_FAST
 /**
- * \brief	Receive a value in from a peripheral device; Optimized for fastest possible
- * 			clock speed; No error checking is performed; 'Timeout' event will never be
- * 			thrown and possible infinite loop can happen
+ * \brief   Receive a value in from a peripheral device; Optimized for fastest possible
+ *          clock speed; No error checking is performed; 'Timeout' event will never be
+ *          thrown and possible infinite loop can happen
  *
- * \param	bits		Number of bits to be shifted in
- * \param	mode		Controls whether the MSB or LSB is sent first and whether data is
- * 						valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
- * 						SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
- * \param	*data		Received data will be stored at this address
- * \param	bytes		Byte-width of the *data variable type; Must be one of 1, 2, or 4
- * 						(is *data a pointer	to char, short or int?)
+ * \param   bits        Number of bits to be shifted in
+ * \param   mode        Controls whether the MSB or LSB is sent first and whether data is
+ *                      valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
+ *                      SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
+ * \param   *data       Received data will be stored at this address
+ * \param   bytes       Byte-width of the *data variable type; Must be one of 1, 2, or 4
+ *                      (is *data a pointer	to char, short or int?)
  */
 void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes);
 
 /**
- * \brief	Read an entire sector of data in from an SD card
+ * \brief   Read an entire sector of data in from an SD card
  *
- * \param	*addr		First hub address where the data should be written
- * \param	blocking	When set to non-zero, function will not return until the data
- * 						transfer is complete
+ * \param   *addr       First hub address where the data should be written
+ * \param   blocking    When set to non-zero, function will not return until the data
+ *                      transfer is complete
  */
 void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #endif
@@ -199,60 +217,49 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #define	SPI_TIMEOUT_WIGGLE_ROOM		300
 #define SPI_FUNC_SEND				0
 #define	SPI_FUNC_READ				1
-#define SPI_FUNC_CLK				2
-#define SPI_FUNC_SEND_FAST			3
-#define SPI_FUNC_READ_FAST			4
-#define SPI_FUNC_READ_SECTOR		5
-#define SPI_FUNC_SET_MODE			6
-#define SPI_FUNC_SET_BITMODE		7
+#define SPI_FUNC_SEND_FAST			2
+#define SPI_FUNC_READ_FAST			3
+#define SPI_FUNC_READ_SECTOR		4
+#define SPI_FUNC_SET_MODE			5
+#define SPI_FUNC_SET_BITMODE		6
+#define SPI_FUNC_SET_FREQ			7
+
 #define SPI_BITS_OFFSET				8
-#define SPI_MODE_OFFSET				16
-#define SPI_BITMODE_BIT				BIT_2
+
+#define SPI_PHASE_BIT				BIT_0
+#define SPI_POLARITY_BIT			BIT_1		// Idle high == HIGH; Idle low == LOW
+#define SPI_BITMODE_BIT				BIT_2		// MSB_FIRST == HIGH; LSB_FIRST == LOW
 
 /**
- * \brief	Read the value that the SPI cog just shifted in
+ * \brief   Read the value that the SPI cog just shifted in
  *
- * \param	*par	Address to store the parameter
- * \param	bytes	Byte-width of the desired value
+ * \param   *par    Address to store the parameter
+ * \param	bytes   Byte-width of the desired value
  *
- * \return		Returns 0 upon success, error code otherwise
+ * \return      Returns 0 upon success, error code otherwise
  */
 static inline uint8_t SPIReadPar (void *par, const size_t size);
 
 /**
- * \brief	Count the number of set bits in a variable
+ * \brief   Count the number of set bits in a variable
  *
- * \param	par		Variable to count the bits in
+ * \param   par     Variable to count the bits in
  *
- * \return		Number of bits in the parameter par (no error checking)
+ * \return      Number of bits in the parameter par (no error checking)
  */
 static uint8_t SPICountBits (uint32_t par);
 
 /**
- * \brief	Retrieve the pin number from a pin mask; i.e., if pinMask is 0x01,
- *			return 0; if pinMask is 0x40, return 6
+ * \brief   Retrieve the pin number from a pin mask; i.e., if pinMask is 0x01,
+ *          return 0; if pinMask is 0x40, return 6
  *
- * \pre		Only 1 bit is set in pinMask (if more than one is set, the return value will
- *			be related to the least significant set bit)
+ * \pre     Only 1 bit is set in pinMask (if more than one is set, the return value will
+ *          be related to the least significant set bit)
  *
- * \param	pinMask		The bit number of the set bit in this variable will be returned
+ * \param   pinMask     The bit number of the set bit in this variable will be returned
  *
- * \return		Returns the pin number of pinMask (no error checking)
+ * \return      Returns the pin number of pinMask (no error checking)
  */
 static uint8_t SPIGetPinNum (const uint32_t pinMask);
-
-#ifdef SPI_DEBUG
-#include <stdio.h>
-#include <stdarg.h>
-/**
- * \brief	Print through UART an error string followed by entering an infinite loop
- *
- * \param	err		Error number used to determine error string
- */
-static void SPIError (const uint8_t err, ...);
-#else
-// Exit calling function by returning 'err'
-#define SPIError(err, ...)				return err
-#endif
 
 #endif /* SPI_H_ */

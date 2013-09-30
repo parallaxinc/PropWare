@@ -49,7 +49,7 @@
 //#define SD_DEBUG
 //#define SD_VERBOSE
 //#define SD_VERBOSE_BLOCKS
-//#define SD_SHELL
+#define SD_SHELL
 #define SD_FILE_WRITE
 
 // DANGEROUS, BAD HACK!!! FOR ADVANCED DEBUGGING ONLY
@@ -383,11 +383,10 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 #endif
 
 // SPI config
-#define SD_SPI_INIT_FREQ			400000					// Run SD initialization at 200 kHz
+#define SD_SPI_INIT_FREQ			200000					// Run SD initialization at 200 kHz
 #define SD_SPI_FINAL_FREQ			1900000					// Speed clock to 1.9 MHz after initialization
-#define SD_SPI_POLARITY				SPI_POLARITY_LOW		// SD cards like low polarity
-#define SD_SPI_MODE_OUT				SPI_MSB_FIRST
-#define SD_SPI_MODE_IN				SPI_MSB_PRE
+#define SD_SPI_MODE					SPI_MODE_0
+#define SD_SPI_BITMODE				SPI_MSB_FIRST
 #define SD_SPI_BYTE_IN_SZ			1
 
 // Misc. SD Definitions
