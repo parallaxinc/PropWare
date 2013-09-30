@@ -1,8 +1,6 @@
 /Debug
 **.elf
 **.o
-.project
-.cproject
 objects.mk
 sources.mk
 subdir.mk
@@ -17,3 +15,5 @@ PropGCC_Demos/SPI/spi.c
 PropGCC_Demos/SPI/spi.h
 PropGCC_Demos/SPI/spi_as.S
 **~
+/.cproject
+/.project
