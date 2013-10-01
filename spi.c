@@ -348,10 +348,6 @@ void SPIError (const uint8_t err, ...) {
 		case SPI_INVALID_PIN:
 		__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid pin");
 		break;
-		case SPI_INVALID_CLOCK_INIT:
-		__simple_printf(str, (err - SPI_ERRORS_BASE),
-				"Invalid clock polarity. Choose from SPI_POLARITY_HIGH or SPI_POLARITY_LOW");
-		break;
 		case SPI_INVALID_MODE:
 		__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid mode");
 		break;

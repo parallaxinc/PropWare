@@ -39,7 +39,6 @@ uint8_t MCP300xRead (const uint8_t channel, uint16_t *dat) {
 
 	GPIOPinClear(g_mcp300x_cs);
 	checkErrors(SPIShiftOut(MCP300X_OPTN_WIDTH, options));
-	waitcnt(CLKFREQ/1000 + CNT);
 	checkErrors(SPIShiftIn(MCP300X_DATA_WIDTH, dat, sizeof(*dat)));
 	GPIOPinSet(g_mcp300x_cs);
 
@@ -57,7 +56,6 @@ uint8_t MCP300xReadDif (const uint8_t channels, uint16_t *dat) {
 
 	GPIOPinClear(g_mcp300x_cs);
 	checkErrors(SPIShiftOut(MCP300X_OPTN_WIDTH, options));
-	waitcnt(CLKFREQ/1000 + CNT);
 	checkErrors(SPIShiftIn(MCP300X_DATA_WIDTH, dat, sizeof(*dat)));
 	GPIOPinSet(g_mcp300x_cs);
 

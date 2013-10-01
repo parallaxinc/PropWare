@@ -56,9 +56,7 @@ uint8_t L3GStart (const uint32_t cs, const uint8_t dpsMode) {
 	// NOTE: L3G has high- and low-pass filters. Should they be enabled? (Page
 	// 31)
 	checkErrors(L3GWrite8(L3G_CTRL_REG1, NIBBLE_0));
-	waitcnt(CLKFREQ/2 +CNT);
 	checkErrors(L3GWrite8(L3G_CTRL_REG4, (dpsMode << 4) | BIT_7));
-	waitcnt(CLKFREQ/2 +CNT);
 
 	return 0;
 }
@@ -87,11 +85,8 @@ uint8_t L3GRead (int16_t *val) {
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(8, addr));
-	waitcnt(CLKFREQ/1000 + CNT);
 	checkErrors(SPIShiftIn(16, &(val[L3G_X]), sizeof(val[L3G_X])));
-	waitcnt(CLKFREQ/1000 + CNT);
 	checkErrors(SPIShiftIn(16, &(val[L3G_Y]), sizeof(val[L3G_Y])));
-	waitcnt(CLKFREQ/1000 + CNT);
 	checkErrors(SPIShiftIn(16, &(val[L3G_Z]), sizeof(val[L3G_Z])));
 	GPIOPinSet(g_l3g_cs);
 
@@ -181,7 +176,6 @@ uint8_t L3GRead8 (uint8_t addr, uint8_t *dat) {
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(8, addr));
-	waitcnt(CLKFREQ / 1000 + CNT);
 	checkErrors(SPIShiftIn(8, dat, sizeof(*dat)));
 	GPIOPinSet(g_l3g_cs);
 
@@ -199,7 +193,6 @@ uint8_t L3GRead16 (uint8_t addr, uint16_t *dat) {
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(8, addr));
-	waitcnt(CLKFREQ / 1000 + CNT);
 	checkErrors(SPIShiftIn(16, dat, sizeof(*dat)));
 	GPIOPinSet(g_l3g_cs);
 
