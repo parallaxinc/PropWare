@@ -176,14 +176,19 @@ READ					// Interpret the bit count and mode of output for this read command
 						mov clock, cnt
 						add clock, clkDelay
 
-						cmp mode, spiMSBPre wz
-		if_z			call #msb_pre
-						cmp mode, spiLSBPre wz
-		if_z			call #lsb_pre
-						cmp mode, spiMSBPost wz
-		if_z			call #msb_post
-						cmp mode, spiLSBPost wz
+						// Determine clock phase and bit mode...
+						cmp bitmode, #SPI_BITMODE_BIT wz	'' First up is determining bitmode
+		if_z			jmp #read_msb_first
+
+						cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's LSB first, now determine CPHA
 		if_z			call #lsb_post
+						cmp clkPhase, #SPI_PHASE_BIT wz
+		if_nz			call #lsb_pre
+
+read_msb_first			cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's MSB first, now determine CPHA
+		if_z			call #msb_post
+						cmp clkPhase, #SPI_PHASE_BIT wz
+		if_nz			call #msb_pre
 
 						call #WRITE_DATA
 						jmp #LOOP
@@ -295,14 +300,19 @@ READ_fast				// Interpret the bit count and mode of output for this read command
 						mov clock, cnt
 						add clock, clkDelay
 
-						cmp mode, spiMSBPre wz
-		if_z			call #msb_pre
-						cmp mode, spiLSBPre wz
-		if_z			call #lsb_pre
-						cmp mode, spiMSBPost wz
-		if_z			call #msb_post
-						cmp mode, spiLSBPost wz
+						// Determine clock phase and bit mode...
+						cmp bitmode, #SPI_BITMODE_BIT wz	'' First up is determining bitmode
+		if_z			jmp #read_msb_first_fast
+
+						cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's LSB first, now determine CPHA
 		if_z			call #lsb_post
+						cmp clkPhase, #SPI_PHASE_BIT wz
+		if_nz			call #lsb_pre
+
+read_msb_first_fast		cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's MSB first, now determine CPHA
+		if_z			call #msb_post
+						cmp clkPhase, #SPI_PHASE_BIT wz
+		if_nz			call #msb_pre
 
 						call #WRITE_DATA
 						jmp #LOOP
@@ -470,7 +480,6 @@ WRITE_DATA_ret			ret
 negOne					long	-1						'' Used for comparison purposes
 spiFuncBits				long	SPI_FUNC_BITS
 spiBitCountBits			long	SPI_BIT_COUNT_BITS
-spiModeBits				long	SPI_MODE_BITS
 dataMask				long	BIT_31
 sdSectorSize			long	SD_SECTOR_SIZE
 
