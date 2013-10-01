@@ -4,8 +4,7 @@
  *          Collin Winans
  */
 
-#include "l3g.h"
-#include <stdio.h>
+#include <l3g.h>
 
 #define L3G_WHO_AM_I		0x0F
 

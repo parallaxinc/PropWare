@@ -5,7 +5,7 @@
  */
 
 // Includes
-#include "mcp300x.h"
+#include <mcp300x.h>
 
 #define MCP300X_START			BIT_4
 #define MCP300X_SINGLE_ENDED	BIT_3
