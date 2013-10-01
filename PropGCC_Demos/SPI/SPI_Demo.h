@@ -21,5 +21,6 @@
 #define MISO					BIT_3
 
 #define FREQ					100000
-#define POLARITY				SPI_POLARITY_LOW		// "HIGH" indicates that the clock line will be held high when not in use
+#define MODE					SPI_MODE_0
+#define BITMODE					SPI_MSB_FIRST
 #endif /* SPI_DEMO_H_ */

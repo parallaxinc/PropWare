@@ -12,7 +12,7 @@ void main (void) {
 	char *s;				// Create a pointer variable that can be incremented in a loop
 	char in;				// Create an input variable to store received values from SPI
 
-	SPIStart(MOSI, MISO, SCLK, FREQ, SPI_MODE_0, SPI_MSB_FIRST);// Initialize SPI module, giving it pin masks for the physical pins, frequency for the clock, and polarity of the clock
+	SPIStart(MOSI, MISO, SCLK, FREQ, MODE, BITMODE);// Initialize SPI module, giving it pin masks for the physical pins, frequency for the clock, mode of SPI, and bitmode
 	GPIODirModeSet(CS, GPIO_DIR_OUT);// Set chip select as an output (Note: the SPI module does not control chip select)
 
 	while (1) {
@@ -23,14 +23,14 @@ void main (void) {
 
 			in = 0xff;									// Reset input variable
 			GPIOPinClear(CS);						// Enable the SPI slave attached to CS
-			SPIShiftOut(8, *s);	// Output the next character of the string and increment the pointer to following character - note the "SPI_MSB_FIRST", meaning we intend to send the data out MSB-first
-			SPIWait();
+			SPIShiftOut(8, *s);	// Output the next character of the string and increment the pointer to following character
+			SPIWait();  // Be sure to wait until the assembly cog has *finished* shifting out data
 			GPIOPinSet(CS);						// Disable the SPI slave attached to CS
 
 			waitcnt(CLKFREQ/100 + CNT);
 			while (in != *s) {
 				GPIOPinClear(CS);
-				SPIShiftIn(8, &in, 1);  // Read in a value from the SPI device - note the "SPI_MSB_PRE", meaning we intend to interpret the data as MSB-first, and the data will be valid before (PRE) the clock cycle
+				SPIShiftIn(8, &in, 1);  // Read in a value from the SPI device
 				GPIOPinSet(CS);
 			}
 
