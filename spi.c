@@ -19,12 +19,13 @@ static void SPIError (const uint8_t err, ...);
 // Exit calling function by returning 'err'
 #define SPIError(err, ...)				return err
 #endif
-#define PROPWARE_SPI_SAFETY_CHECK(x, ...) if (err = x) SPIError(err, ...)
+#define PROPWARE_SPI_SAFETY_CHECK(x) if (err = x) SPIError(err)
+#define PROPWARE_SPI_SAFETY_CHECK_STR(x, str) if (err = x) SPIError(err, str)
 
 // Global variables
 extern uint32_t _load_start_spi_as_cog[];
 static uint32_t g_mailbox = -1;
-uint8_t g_spiCog = -1;
+volatile static int8_t g_spiCog = -1;
 
 // Function definitions
 uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
@@ -42,7 +43,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		SPIError(SPI_INVALID_PIN_MASK);
 
 	// Check clock frequency
-	if (CLKFREQ / 4 <= frequency)
+	if (CLKFREQ >> 2 <= frequency)
 		SPIError(SPI_INVALID_FREQ);
 
 	if (SPI_MODES <= mode)
@@ -57,27 +58,28 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
 		if (!SPIIsRunning())
 			SPIError(SPI_COG_NOT_STARTED);
+
 		// Pass in all parameters
-		PROPWARE_SPI_SAFETY_CHECK(SPIWait(), str);
+		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = mosi;
-		PROPWARE_SPI_SAFETY_CHECK(SPIWait(), str);
+		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = SPIGetPinNum(mosi);
-		PROPWARE_SPI_SAFETY_CHECK(SPIWait(), str);
+		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = miso;
-		PROPWARE_SPI_SAFETY_CHECK(SPIWait(), str);
+		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = SPIGetPinNum(miso);
-		PROPWARE_SPI_SAFETY_CHECK(SPIWait(), str);
+		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = sclk;
 	}
 
-	PROPWARE_SPI_SAFETY_CHECK(SPISetClock(frequency), str);
-	PROPWARE_SPI_SAFETY_CHECK(SPISetMode(mode), str);
-	PROPWARE_SPI_SAFETY_CHECK(SPISetBitMode(bitmode), str);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetClock(frequency), str);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetMode(mode), str);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetBitMode(bitmode), str);
 
 	return 0;
 }
 
-inline uint8_t SPIIsRunning (void) {
+inline int8_t SPIIsRunning (void) {
 	return -1 != g_spiCog;
 }
 
@@ -154,11 +156,11 @@ uint8_t SPISetClock (const uint32_t frequency) {
 inline uint8_t SPIWait (void) {
 	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	while ((uint32_t) -1 != g_mailbox) { // Wait for GAS cog to read in value and write -1
+	while ((uint32_t) -1 != g_mailbox) {  // Wait for GAS cog to read in value and write -1
 		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
 		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-			return SPI_TIMEOUT;	// Always use return instead of SPIError() for private functions
+			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
 	}
 
 	return 0;
@@ -236,10 +238,12 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET);
+	__simple_printf("Mailbox filled");
 	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
-
+	__simple_printf("Func bits received, sending shift out value\n");
 	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
 	g_mailbox = value & (~BIT_31);
+	__simple_printf("All done! :D\n");
 
 	return 0;
 }
@@ -268,8 +272,7 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
 		SPIError(SPI_MODULE_NOT_RUNNING);
 	if (SPI_MAX_PAR_BITS < bits)
 		SPIError(SPI_TOO_MANY_BITS);
-	if ((4 == bytes && ((uint32_t) data) % 4)
-			|| (2 == bytes && ((uint32_t) data) % 2))
+	if ((4 == bytes && ((uint32_t) data) % 4) || (2 == bytes && ((uint32_t) data) % 2))
 		SPIError(SPI_ADDR_MISALIGN);
 #endif
 
@@ -346,56 +349,52 @@ void SPIError (const uint8_t err, ...) {
 
 	switch (err) {
 		case SPI_INVALID_PIN:
-		__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid pin");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid pin");
+			break;
 		case SPI_INVALID_MODE:
-		__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid mode");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid mode");
+			break;
 		case SPI_INVALID_PIN_MASK:
-		__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid pin mask");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE), "Invalid pin mask");
+			break;
 		case SPI_TOO_MANY_BITS:
-		__simple_printf(str, (err - SPI_ERRORS_BASE),
-				"Incapable of handling so many bits in an argument");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE),
+					"Incapable of handling so many bits in an argument");
+			break;
 		case SPI_TIMEOUT:
-		va_start(list, 1);
-		__simple_printf("SPI Error %u: %s\n\tCalling function was %s\n",
-				(err - SPI_ERRORS_BASE), "Timed out during parameter passing",
-				va_arg(list, char*));
-		va_end(list);
-		break;
+			va_start(list, err);
+			__simple_printf("SPI Error %u: %s\n\tCalling function was %s\n",
+					(err - SPI_ERRORS_BASE), "Timed out during parameter passing",
+					va_arg(list, char*));
+			va_end(list);
+			break;
 		case SPI_TIMEOUT_RD:
-		__simple_printf(str, (err - SPI_ERRORS_BASE),
-				"Timed out during parameter read");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE),
+					"Timed out during parameter read");
+			break;
 		case SPI_COG_NOT_STARTED:
-		__simple_printf(str, (err - SPI_ERRORS_BASE),
-				"SPI's GAS cog was not started");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE),
+					"SPI's GAS cog was not started");
+			break;
 		case SPI_MODULE_NOT_RUNNING:
-		__simple_printf(str, (err - SPI_ERRORS_BASE), "SPI GAS cog not running");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE), "SPI GAS cog not running");
+			break;
 		case SPI_INVALID_FREQ:
-		__simple_printf(str, (err - SPI_ERRORS_BASE), "Frequency set too high");
-		break;
-		case SPI_INVALID_POLARITY:
-		__simple_printf(str, (err - SPI_ERRORS_BASE),
-				"Polarity is not one of SPI_POLARITY_HIGH or SPI_POLARITY_LOW");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE), "Frequency set too high");
+			break;
 		case SPI_ADDR_MISALIGN:
-		__simple_printf(str, (err - SPI_ERRORS_BASE),
-				"Passed in address is miss aligned");
-		break;
+			__simple_printf(str, (err - SPI_ERRORS_BASE),
+					"Passed in address is miss aligned");
+			break;
 		default:
-		// Is the error an SPI error?
-		if (err > SPI_ERRORS_BASE && err < (SPI_ERRORS_BASE + SPI_ERRORS_LIMIT))
-		__simple_printf("Unknown SPI error %u\n", (err - SPI_ERRORS_BASE));
-		else
-		__simple_printf("Unknown error %u\n", (err));
-		break;
+			// Is the error an SPI error?
+			if (err > SPI_ERRORS_BASE && err < (SPI_ERRORS_BASE + SPI_ERRORS_LIMIT))
+				__simple_printf("Unknown SPI error %u\n", (err - SPI_ERRORS_BASE));
+			else
+				__simple_printf("Unknown error %u\n", (err));
+			break;
 	}
 	while (1)
-	;
+		;
 }
 #endif

@@ -16,9 +16,9 @@
 
 // Constants
 #define CS						BIT_6
-#define MOSI					BIT_1
-#define SCLK					BIT_2
-#define MISO					BIT_3
+#define MOSI					BIT_0
+#define SCLK					BIT_1
+#define MISO					BIT_2
 
 #define FREQ					100000
 #define MODE					SPI_MODE_0
