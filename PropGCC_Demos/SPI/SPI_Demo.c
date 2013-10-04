@@ -8,7 +8,7 @@
 
 // Main function
 void main (void) {
-	char string[50] = "Hello world!\n";		// Create a string constant to output over SPI
+	char string[] = "Hello world!\n";		// Create a string constant to output over SPI
 	char *s;				// Create a pointer variable that can be incremented in a loop
 	char in;				// Create an input variable to store received values from SPI
 

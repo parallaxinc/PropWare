@@ -54,7 +54,7 @@ BOARDFLAG=-b$(BOARD)
 endif
 
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
-CFLAGS += -m$(MODEL)
+CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS)
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 INC += -I$(PROPWARE_PATH) -I $(PREFIX)/propeller-elf/include

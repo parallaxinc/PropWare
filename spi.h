@@ -47,23 +47,23 @@
  * 2			1		0
  * 3			1		1
  */
-enum spimode_t {
+typedef enum {
 	SPI_MODE_0,
 	SPI_MODE_1,
 	SPI_MODE_2,
 	SPI_MODE_3,
 	SPI_MODES
-};
+} spimode_t;
 
 /**
  * NOTE: Values starting at the end of SPI_MODE_* so that the values can be
  *       easily distinguished
  */
-enum spibitmode_t {
+typedef enum {
 	SPI_LSB_FIRST = SPI_MODES, // Start the enumeration where spimode_t left off; this ensures no overlap
 	SPI_MSB_FIRST,
 	SPI_BIT_MODES
-};
+} spibitmode_t;
 
 // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
 #define SPI_WR_TIMEOUT_VAL			2ULL*CLKFREQ/1
@@ -101,7 +101,7 @@ enum spibitmode_t {
  * \return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-		const uint32_t frequency, const uint8_t mode, const uint8_t bitmode);
+		const uint32_t frequency, const spimode_t mode, const spibitmode_t bitmode);
 
 /**
  * \brief    Determine if the SPI cog has already been initialized
@@ -163,8 +163,6 @@ inline uint8_t SPIWait (void);
  *
  * \param   bits        Number of bits to be shifted out
  * \param   value       The value to be shifted out
- * \param   mode        Controls whether the MSB or LSB is sent first; Must be one of
- *                      SPI_LSB_FIRST or SPI_MSB_FIRST
  *
  * \return      Returns 0 upon success, otherwise error code
  */
@@ -174,9 +172,6 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
  * \brief   Receive a value in from a peripheral device
  *
  * \param   bits        Number of bits to be shifted in
- * \param   mode        Controls whether the MSB or LSB is sent first and whether data is
- *                      valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
- *                      SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
  * \param   *data       Received data will be stored at this address
  * \param   bytes       Byte-width of the *data variable type; Must be one of 1, 2, or 4
  *                      (is *data a pointer to char, short or int?)
@@ -187,14 +182,28 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
 
 #ifdef SPI_FAST
 /**
+ * \brief       Send a value out to a peripheral device
+ *
+ * \detailed    Pass a value and mode into the assembly cog to be sent to the
+ *              peripheral; NOTE: this function is non-blocking and chip-select should
+ *              not be set inactive immediately after the return (you should call SPIWait()
+ *              before setting chip-select inactive); Optimized for fastest possible
+ *              clock speed; No error checking is performed; 'Timeout' event will never be
+ *         	    thrown and possible infinite loop can happen
+ *
+ * \param   bits        Number of bits to be shifted out
+ * \param   value       The value to be shifted out
+ *
+ * \return      Returns 0 upon success, otherwise error code
+ */
+void SPIShiftOut_fast (uint8_t bits, uint32_t value);
+
+/**
  * \brief   Receive a value in from a peripheral device; Optimized for fastest possible
  *          clock speed; No error checking is performed; 'Timeout' event will never be
  *          thrown and possible infinite loop can happen
  *
  * \param   bits        Number of bits to be shifted in
- * \param   mode        Controls whether the MSB or LSB is sent first and whether data is
- *                      valid before or after the clock pulse; Must be one of SPI_MSB_PRE,
- *                      SPI_LSB_PRE, SPI_MSB_POST, or SPI_LSB_POST
  * \param   *data       Received data will be stored at this address
  * \param   bytes       Byte-width of the *data variable type; Must be one of 1, 2, or 4
  *                      (is *data a pointer	to char, short or int?)

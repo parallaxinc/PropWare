@@ -33,7 +33,6 @@
 
 						.section spi_as.cog, "ax"
 						.compress off
-						org 0
 
 						or dira, testLEDs				'' DEBUG: LEDs used for debugging purposes, can be removed later
 						// Begin by retreiving all parameters...
@@ -317,7 +316,7 @@ read_msb_first_fast		cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's MSB first, now 
 						call #WRITE_DATA
 						jmp #LOOP
 
-msb_pre_fast				// Read in a value MSB-first with data valid before the clock
+msb_pre_fast			// Read in a value MSB-first with data valid before the clock
 						test miso, ina wc
 						muxc data, #BIT_0
 						shl data, #1

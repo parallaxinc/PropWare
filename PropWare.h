@@ -9,7 +9,7 @@
 #ifdef DAREDEVIL
 #define checkErrors(x)			x
 #else
-#define checkErrors(x)			if (err = x) return err
+#define checkErrors(x)			if ((err = x)) return err
 #endif
 
 #define SECOND		((unsigned long long) CLKFREQ)

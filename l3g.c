@@ -41,8 +41,6 @@ uint32_t g_l3g_cs;
 
 uint8_t L3GStart (const uint32_t cs, const uint8_t dpsMode) {
 	uint8_t err;
-	uint8_t i;
-	uint8_t dats[8];
 
 	// Ensure SPI module started
 	if (!SPIIsRunning())
@@ -106,13 +104,13 @@ uint8_t L3G_ioctl (const uint8_t func, const uint8_t wrVal, uint8_t *rdVal) {
 	switch (func) {
 		// All functions follow the read-modify-write routine
 		case L3G_FUNC_MOD_DPS:
-			checkErrors(L3GRead8(L3G_CTRL_REG4, &oldValue));
+			checkErrors(L3GRead8(L3G_CTRL_REG4, (int8_t *) &oldValue));
 			oldValue &= ~(BIT_6 | BIT_5);
 			oldValue |= wrVal << 5;
 			checkErrors(L3GWrite8(L3G_CTRL_REG4, oldValue));
 			break;
 		case L3G_FUNC_RD_REG:
-			checkErrors(L3GRead8(wrVal, rdVal));
+			checkErrors(L3GRead8(wrVal, (int8_t *) rdVal));
 			break;
 		default:
 			return -1; // TODO: Create a real error code
@@ -164,7 +162,7 @@ uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat) {
 	return 0;
 }
 
-uint8_t L3GRead8 (uint8_t addr, uint8_t *dat) {
+uint8_t L3GRead8 (uint8_t addr, int8_t *dat) {
 	uint8_t err;
 
 	addr |= BIT_7; // Set RW bit (
@@ -181,7 +179,7 @@ uint8_t L3GRead8 (uint8_t addr, uint8_t *dat) {
 	return 0;
 }
 
-uint8_t L3GRead16 (uint8_t addr, uint16_t *dat) {
+uint8_t L3GRead16 (uint8_t addr, int16_t *dat) {
 	uint8_t err;
 
 	addr |= BIT_7; // Set RW bit (

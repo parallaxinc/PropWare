@@ -19,8 +19,8 @@ static void SPIError (const uint8_t err, ...);
 // Exit calling function by returning 'err'
 #define SPIError(err, ...)				return err
 #endif
-#define PROPWARE_SPI_SAFETY_CHECK(x) if (err = x) SPIError(err)
-#define PROPWARE_SPI_SAFETY_CHECK_STR(x, str) if (err = x) SPIError(err, str)
+#define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) SPIError(err)
+#define PROPWARE_SPI_SAFETY_CHECK_STR(x, str) if ((err = x)) SPIError(err, str)
 
 // Global variables
 extern uint32_t _load_start_spi_as_cog[];
@@ -29,7 +29,7 @@ volatile static int8_t g_spiCog = -1;
 
 // Function definitions
 uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-		const uint32_t frequency, const uint8_t mode, const uint8_t bitmode) {
+		const uint32_t frequency, const spimode_t mode, const spibitmode_t bitmode) {
 	uint8_t err;
 	const char str[] = "SPIStart()";
 
@@ -223,7 +223,6 @@ static uint8_t SPIGetPinNum (const uint32_t pinMask) {
 
 uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 	uint8_t err;
-	const char str[] = "SPIShiftOut()";
 
 #ifdef SPI_DEBUG_PARAMS
 	// Check for errors
@@ -238,11 +237,12 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET);
-	__simple_printf("Mailbox filled");
+	__simple_printf("Mailbox filled\n");
 	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
 	__simple_printf("Func bits received, sending shift out value\n");
 	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
 	g_mailbox = value & (~BIT_31);
+	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
 	__simple_printf("All done! :D\n");
 
 	return 0;
@@ -277,14 +277,14 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
 #endif
 
 	// Ensure SPI module is not busy
-	if (err = SPIWait())
+	if ((err = SPIWait()))
 		SPIError(err, str);
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_READ | (bits << SPI_BITS_OFFSET);
 
 	// Read in parameter
-	if (err = SPIReadPar(data, bytes))
+	if ((err = SPIReadPar(data, bytes)))
 		SPIError(err, str);
 
 	return 0;

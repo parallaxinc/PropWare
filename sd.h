@@ -68,9 +68,12 @@ typedef enum {
 	SD_FILE_MODES
 } sd_file_mode;
 
-#define SEEK_SET				0		// Beginning of the file
-#define SEEK_CUR				1		// Current position in the file
-#define SEEK_END				2		// End of the file
+// File positions
+typedef enum {
+	SEEK_SET,  // Beginning of the file
+	SEEK_CUR,  // Current position in the file
+	SEEK_END   // End of the file
+} file_pos;
 
 // Error codes - preceded by SPI
 #define SD_ERRORS_BASE			16
@@ -120,8 +123,8 @@ extern sd_buffer g_sd_buf;
  *
  * \return		Returns 0 upon success, otherwise error code
  */
-uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk, const uint32_t cs,
-		const uint32_t freq);
+uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+		const uint32_t cs, const uint32_t freq);
 
 /**
  * \brief	Mount either FAT16 or FAT32 filesystem
@@ -265,7 +268,7 @@ inline uint8_t SDfeof (sd_file *f);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8_t SDfseekr (sd_file *f, const int32_t offset, const uint8_t origin);
+uint8_t SDfseekr (sd_file *f, const int32_t offset, const file_pos origin);
 
 /**
  * \brief	Set the write pointer for a given file to the position 'origin + offset'
@@ -278,7 +281,7 @@ uint8_t SDfseekr (sd_file *f, const int32_t offset, const uint8_t origin);
  *
  * \return		Returns 0 upon success, error code otherwise
  */
-uint8_t SDfseekw (sd_file *f, const int32_t offset, const uint8_t origin);
+uint8_t SDfseekw (sd_file *f, const int32_t offset, const file_pos origin);
 
 /**
  * \brief	Retrieve the current position of the read pointer
@@ -289,7 +292,7 @@ uint8_t SDfseekw (sd_file *f, const int32_t offset, const uint8_t origin);
  *
  * \return		Returns the byte offset (from beginning) of the read pointer
  */
-inline uint32_t SDftellr (const sd_file *f);
+inline file_pos SDftellr (const sd_file *f);
 
 /**
  * \brief	Retrieve the current position of the write pointer
@@ -300,7 +303,7 @@ inline uint32_t SDftellr (const sd_file *f);
  *
  * \return		Returns the byte offset (from beginning) of the write pointer
  */
-inline uint32_t SDftellw (const sd_file *f);
+inline file_pos SDftellw (const sd_file *f);
 
 #ifdef SD_SHELL
 // Shell definitions
@@ -489,33 +492,33 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 #define SD_FOLDER_ID				((uint8_t) -1)
 
 struct _sd_buffer {
-		uint8_t buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
-		uint8_t id;				// Buffer ID - determine who owns the current information
-		uint32_t curClusterStartAddr;	// Store the current cluster's starting sector number
-		uint8_t curSectorOffset;// Store the current sector offset from the beginning of the cluster
-		uint32_t curAllocUnit;					// Store the current allocation unit
-		uint32_t nextAllocUnit;					// Look-ahead at the next FAT entry
+	uint8_t buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
+	uint8_t id;				// Buffer ID - determine who owns the current information
+	uint32_t curClusterStartAddr;	// Store the current cluster's starting sector number
+	uint8_t curSectorOffset;  // Store the current sector offset from the beginning of the cluster
+	uint32_t curAllocUnit;					// Store the current allocation unit
+	uint32_t nextAllocUnit;					// Look-ahead at the next FAT entry
 #ifdef SD_FILE_WRITE
-		uint8_t mod;// When set, the currently loaded sector has been modified since it was read from
-				  // the SD card
+	uint8_t mod;// When set, the currently loaded sector has been modified since it was read from
+				// the SD card
 #endif
 };
 
 struct _sd_file {
-		sd_buffer *buf;
-		uint8_t id;	// determine if the buffer is owned by this file
-		uint32_t wPtr;
-		uint32_t rPtr;
-		sd_file_mode mode;
-		uint32_t length;
-		uint32_t maxSectors;	// Maximum number of sectors currently allocated to a file
-		uint8_t mod;	// When the length of a file is changed, this variable will be set
-		uint32_t firstAllocUnit; // File's starting allocation unit
-		uint32_t curSector; // like curSectorOffset, but does not reset upon loading a new cluster
-		uint32_t curCluster; // like curSector, but for allocation units
+	sd_buffer *buf;
+	uint8_t id;  // determine if the buffer is owned by this file
+	file_pos wPtr;
+	file_pos rPtr;
+	sd_file_mode mode;
+	uint32_t length;
+	uint32_t maxSectors;	// Maximum number of sectors currently allocated to a file
+	uint8_t mod;	// When the length of a file is changed, this variable will be set
+	uint32_t firstAllocUnit;  // File's starting allocation unit
+	uint32_t curSector;  // like curSectorOffset, but does not reset upon loading a new cluster
+	uint32_t curCluster;  // like curSector, but for allocation units
 
-		uint32_t dirSectorAddr; // Which sector of the SD card contains this file's meta-data
-		uint16_t fileEntryOffset;
+	uint32_t dirSectorAddr;  // Which sector of the SD card contains this file's meta-data
+	uint16_t fileEntryOffset;
 };
 
 /***********************************

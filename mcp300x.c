@@ -29,7 +29,6 @@ uint8_t MCP300xStart (const uint8_t cs) {
 
 uint8_t MCP300xRead (const uint8_t channel, uint16_t *dat) {
 	uint8_t err, options;
-	uint32_t led;
 
 	options = MCP300X_START | MCP300X_SINGLE_ENDED | channel;
 	options <<= 2; // One dead bit between output and input - see page 19 of datasheet

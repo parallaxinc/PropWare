@@ -12,8 +12,8 @@
 
 #include <propeller.h>
 #include <PropWare.h>
-//#include <spi.h>
-#include "SPI_c.h"
+#include <spi.h>
+//#include "SPI_c.h"
 
 #define L3G_SPI_MODE		SPI_MODE_3
 #define L3G_SPI_BITMODE		SPI_MSB_FIRST
@@ -69,8 +69,8 @@ static uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat);
 
 static uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat);
 
-static uint8_t L3GRead8 (uint8_t addr, uint8_t *dat);
+static uint8_t L3GRead8 (uint8_t addr, int8_t *dat);
 
-static uint8_t L3GRead16 (uint8_t addr, uint16_t *dat);
+static uint8_t L3GRead16 (uint8_t addr, int16_t *dat);
 
 #endif /* L3G_H_ */

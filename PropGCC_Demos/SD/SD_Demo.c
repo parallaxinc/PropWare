@@ -8,11 +8,8 @@
 
 // Main function
 void main (void) {
-	uint8 err, i;
-	uint16 temp = 0;
-	uint32 len;
+	uint8_t err, i;
 	char c;
-	char str[128];
 
 	sd_file f, f2;
 
@@ -44,12 +41,12 @@ void main (void) {
 	printf("Beginning SD card initialization...\n");
 #endif
 
-	if (err = SDStart(MOSI, MISO, SCLK, CS, SD_DEFAULT_SPI_FREQ))
+	if ((err = SDStart(MOSI, MISO, SCLK, CS, SD_DEFAULT_SPI_FREQ)))
 		error(err);
 #ifdef DEBUG
 	printf("SD routine started. Mounting now...\n");
 #endif
-	if (err = SDMount())
+	if ((err = SDMount()))
 		error(err);
 #ifdef DEBUG
 	printf("FAT partition mounted!\n");
@@ -118,7 +115,7 @@ void main (void) {
 	}
 }
 
-void error (const uint8 err) {
+void error (const uint8_t err) {
 #ifdef DEBUG
 	if (SD_ERRORS_BASE <= err && err < SD_ERRORS_LIMIT)
 		printf("SD error %u\n", err - SD_ERRORS_BASE);

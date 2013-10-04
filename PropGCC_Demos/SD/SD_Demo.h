@@ -8,7 +8,7 @@
 #define SD_DEMO_H_
 
 #define DEBUG
-//#define LOW_RAM_MODE
+#define LOW_RAM_MODE
 
 // Includes
 #include <propeller.h>
@@ -31,6 +31,6 @@
 
 #define NEW_FILE				"TEST.TXT"
 
-void error (const uint8 err);
+void error (const uint8_t err);
 
 #endif /* SD_DEMO_H_ */

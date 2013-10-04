@@ -15,8 +15,8 @@
 
 #include <propeller.h>
 #include <PropWare.h>
-//#include <spi.h>
-#include "SPI_c.h"
+#include <spi.h>
+//#include "SPI_c.h"
 #include <gpio.h>
 
 #define MCP300X_SPI_MODE		SPI_MODE_0
