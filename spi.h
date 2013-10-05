@@ -104,6 +104,14 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		const uint32_t frequency, const spimode_t mode, const spibitmode_t bitmode);
 
 /**
+ * \brief   Stop a running SPI cog
+ *
+ * \return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED
+ * 				if no cog has previously been started)
+ */
+uint8_t SPIStop (void);
+
+/**
  * \brief    Determine if the SPI cog has already been initialized
  *
  * \return       Returns 1 if the SPI cog is up and running, 0 otherwise
@@ -111,12 +119,11 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 inline int8_t SPIIsRunning (void);
 
 /**
- * \brief   Stop a running SPI cog
+ * \brief	Wait for the SPI cog to signal that it is in the idle state
  *
- * \return		Returns 0 upon success, otherwise error code (will return SPI_COG_NOT_STARTED
- * 				if no cog has previously been started)
+ * \return		May return non-zero error code when a timeout occurs
  */
-uint8_t SPIStop (void);
+inline uint8_t SPIWait (void);
 
 /**
  * \brief   Set the mode of SPI communication
@@ -145,13 +152,6 @@ uint8_t SPISetBitMode (const uint8_t bitmode);
  * \return		Returns 0 upon success, otherwise error code
  */
 uint8_t SPISetClock (const uint32_t frequency);
-
-/**
- * \brief	Wait for the SPI cog to signal that it is in the idle state
- *
- * \return		May return non-zero error code when a timeout occurs
- */
-inline uint8_t SPIWait (void);
 
 /**
  * \brief       Send a value out to a peripheral device

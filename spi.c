@@ -79,10 +79,6 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	return 0;
 }
 
-inline int8_t SPIIsRunning (void) {
-	return -1 != g_spiCog;
-}
-
 uint8_t SPIStop (void) {
 	if (!SPIIsRunning())
 		return 0;
@@ -90,6 +86,23 @@ uint8_t SPIStop (void) {
 	cogstop(g_spiCog);
 	g_spiCog = -1;
 	g_mailbox = -1;
+
+	return 0;
+}
+
+inline int8_t SPIIsRunning (void) {
+	return -1 != g_spiCog;
+}
+
+inline uint8_t SPIWait (void) {
+	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
+
+	while ((uint32_t) -1 != g_mailbox) {  // Wait for GAS cog to read in value and write -1
+		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
+
+		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
+			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
+	}
 
 	return 0;
 }
@@ -153,18 +166,123 @@ uint8_t SPISetClock (const uint32_t frequency) {
 	return 0;
 }
 
-inline uint8_t SPIWait (void) {
-	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
+uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
+	uint8_t err;
 
-	while ((uint32_t) -1 != g_mailbox) {  // Wait for GAS cog to read in value and write -1
-		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
+#ifdef SPI_DEBUG_PARAMS
+	// Check for errors
+	if (!SPIIsRunning())
+		SPIError(SPI_MODULE_NOT_RUNNING);
+	if (SPI_MAX_PAR_BITS < bits)
+		SPIError(SPI_TOO_MANY_BITS);
+#endif
 
-		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
-	}
+	// Wait to ensure the SPI cog is in its idle state
+	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+
+	// Call GAS function
+	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET);
+	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+
+	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
+	g_mailbox = value & (~BIT_31);
 
 	return 0;
 }
+
+uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
+	uint8_t err;
+	const char str[] = "SPIShiftIn()";
+
+	// Check for errors
+#ifdef SPI_DEBUG_PARAMS
+	if (!SPIIsRunning())
+		SPIError(SPI_MODULE_NOT_RUNNING);
+	if (SPI_MAX_PAR_BITS < bits)
+		SPIError(SPI_TOO_MANY_BITS);
+	if ((4 == bytes && ((uint32_t) data) % 4) || (2 == bytes && ((uint32_t) data) % 2))
+		SPIError(SPI_ADDR_MISALIGN);
+#endif
+
+	// Ensure SPI module is not busy
+	if ((err = SPIWait()))
+		SPIError(err, str);
+
+	// Call GAS function
+	g_mailbox = SPI_FUNC_READ | (bits << SPI_BITS_OFFSET);
+
+	// Read in parameter
+	if ((err = SPIReadPar(data, bytes)))
+		SPIError(err, str);
+
+	return 0;
+}
+
+#ifdef SPI_FAST
+void SPIShiftOut_fast (uint8_t bits, uint32_t value) {
+	// NOTE: No debugging within this function to allow for fastest possible
+	// execution time
+	// Wait to ensure the SPI cog is in its idle state
+	SPIWait();
+
+	// Call GAS function
+	g_mailbox = SPI_FUNC_SEND_FAST | (bits << SPI_BITS_OFFSET);
+	SPIWait();
+
+	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
+	g_mailbox = value & (~BIT_31);
+}
+
+void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
+	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
+	uint8_t *par8;
+	uint16_t *par16;
+	uint32_t *par32;
+
+	// Wait until idle state, then send function and mode bits
+	SPIWait();
+	g_mailbox = SPI_FUNC_READ_FAST | (bits << SPI_BITS_OFFSET);
+
+	// Wait for a value to be written
+	while ((uint32_t) -1 == g_mailbox)
+		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
+
+	// Determine if output variable is char, short or long and write data to that location
+	switch (bytes) {
+		case 1:
+			par8 = data;
+			*par8 = g_mailbox;
+			break;
+		case 2:
+			par16 = data;
+			*par16 = g_mailbox;
+			break;
+		case 4:
+			par32 = data;
+			*par32 = g_mailbox;
+			break;
+		default:
+#ifdef SPI_DEBUG
+			SPIError(SPI_INVALID_BYTE_SIZE);
+#else
+			return;
+#endif
+			break;
+	}
+
+	// Signal that value is saved and GAS cog can continue execution
+	g_mailbox = -1;
+}
+
+void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking) {
+	SPIWait();
+	g_mailbox = SPI_FUNC_READ_SECTOR;
+	SPIWait();
+	g_mailbox = (uint32_t) addr;
+	if (blocking)
+		SPIWait();
+}
+#endif
 
 static inline uint8_t SPIReadPar (void *par, const size_t bytes) {
 	uint8_t *par8;
@@ -220,127 +338,6 @@ static uint8_t SPIGetPinNum (const uint32_t pinMask) {
 		;
 	return --temp;
 }
-
-uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
-	uint8_t err;
-
-#ifdef SPI_DEBUG_PARAMS
-	// Check for errors
-	if (!SPIIsRunning())
-		SPIError(SPI_MODULE_NOT_RUNNING);
-	if (SPI_MAX_PAR_BITS < bits)
-		SPIError(SPI_TOO_MANY_BITS);
-#endif
-
-	// Wait to ensure the SPI cog is in its idle state
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
-
-	// Call GAS function
-	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET);
-	__simple_printf("Mailbox filled\n");
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
-	__simple_printf("Func bits received, sending shift out value\n");
-	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
-	g_mailbox = value & (~BIT_31);
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
-	__simple_printf("All done! :D\n");
-
-	return 0;
-}
-
-void SPIShiftOut_fast (uint8_t bits, uint32_t value) {
-	// NOTE: No debugging within this function to allow for fastest possible
-	// execution time
-	// Wait to ensure the SPI cog is in its idle state
-	SPIWait();
-
-	// Call GAS function
-	g_mailbox = SPI_FUNC_SEND_FAST | (bits << SPI_BITS_OFFSET);
-	SPIWait();
-
-	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
-	g_mailbox = value & (~BIT_31);
-}
-
-uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
-	uint8_t err;
-	const char str[] = "SPIShiftIn()";
-
-	// Check for errors
-#ifdef SPI_DEBUG_PARAMS
-	if (!SPIIsRunning())
-		SPIError(SPI_MODULE_NOT_RUNNING);
-	if (SPI_MAX_PAR_BITS < bits)
-		SPIError(SPI_TOO_MANY_BITS);
-	if ((4 == bytes && ((uint32_t) data) % 4) || (2 == bytes && ((uint32_t) data) % 2))
-		SPIError(SPI_ADDR_MISALIGN);
-#endif
-
-	// Ensure SPI module is not busy
-	if ((err = SPIWait()))
-		SPIError(err, str);
-
-	// Call GAS function
-	g_mailbox = SPI_FUNC_READ | (bits << SPI_BITS_OFFSET);
-
-	// Read in parameter
-	if ((err = SPIReadPar(data, bytes)))
-		SPIError(err, str);
-
-	return 0;
-}
-
-#ifdef SPI_FAST
-void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
-	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
-	uint8_t *par8;
-	uint16_t *par16;
-	uint32_t *par32;
-
-	// Wait until idle state, then send function and mode bits
-	SPIWait();
-	g_mailbox = SPI_FUNC_READ_FAST | (bits << SPI_BITS_OFFSET);
-
-	// Wait for a value to be written
-	while ((uint32_t) -1 == g_mailbox)
-		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
-
-	// Determine if output variable is char, short or long and write data to that location
-	switch (bytes) {
-		case 1:
-			par8 = data;
-			*par8 = g_mailbox;
-			break;
-		case 2:
-			par16 = data;
-			*par16 = g_mailbox;
-			break;
-		case 4:
-			par32 = data;
-			*par32 = g_mailbox;
-			break;
-		default:
-#ifdef SPI_DEBUG
-			SPIError(SPI_INVALID_BYTE_SIZE);
-#else
-			return;
-#endif
-			break;
-	}
-
-	// Signal that value is saved and GAS cog can continue execution
-	g_mailbox = -1;
-}
-
-void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking) {
-	SPIWait();
-	g_mailbox = SPI_FUNC_READ_SECTOR;
-	SPIWait();
-	g_mailbox = (uint32_t) addr;
-	if (blocking)
-		SPIWait();
-}
-#endif
 
 #ifdef SPI_DEBUG
 void SPIError (const uint8_t err, ...) {
