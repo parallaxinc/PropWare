@@ -55,7 +55,7 @@ endif
 
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
-CXXFLAGS += $(CFLAGS)
+CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 INC += -I$(PROPWARE_PATH) -I $(PREFIX)/propeller-elf/include
 
@@ -84,7 +84,7 @@ ifneq ($(NAME),)
 $(NAME).elf: $(OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: PropGCC Linker'
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CC) $(LDFLAGS) $(LIBS) -o $@ $(OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 endif

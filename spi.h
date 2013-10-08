@@ -70,6 +70,7 @@ typedef enum {
 #define SPI_WR_TIMEOUT_VAL			CLKFREQ/10
 #define SPI_RD_TIMEOUT_VAL			CLKFREQ/10
 #define SPI_MAX_PAR_BITS			31
+#define SPI_MAX_CLOCK				(CLKFREQ >> 2)
 
 // Errors
 #define SPI_ERRORS_BASE				1

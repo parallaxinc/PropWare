@@ -15,24 +15,28 @@
 #include <spi.h>
 //#include "SPI_c.h"
 
-#define L3G_SPI_MODE		SPI_MODE_3
-#define L3G_SPI_BITMODE		SPI_MSB_FIRST
+#define L3G_SPI_MODE			SPI_MODE_3
+#define L3G_SPI_BITMODE			SPI_MSB_FIRST
+#define L3G_SPI_DEFAULT_FREQ	1000000
 
-#define L3G_X				0
-#define L3G_Y				1
-#define L3G_Z				2
+#define L3G_X					0
+#define L3G_Y					1
+#define L3G_Z					2
 
-#define L3G_FUNC_MOD_DPS	0
-#define L3G_FUNC_RD_REG		1
+#define L3G_FUNC_MOD_DPS		0
+#define L3G_FUNC_RD_REG			1
 
-#define L3G_250_DPS			0x0
-#define L3G_500_DPS			0x01
-#define L3G_2000_DPS		0x02
+#define L3G_250_DPS				0x00
+#define L3G_500_DPS				0x10
+#define L3G_2000_DPS			0x20
 
 /**
  * \brief	Start
  */
-uint8_t L3GStart (const uint32_t cs, const uint8_t dpsMode);
+uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+		const uint32_t cs, const uint8_t dpsMode);
+
+void L3GAlwaysSetMode (const uint8_t alwaysSetMode);
 
 uint8_t L3GReadX (int16_t *val);
 

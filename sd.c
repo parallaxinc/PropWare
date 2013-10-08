@@ -67,19 +67,19 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	for (i = 0; i < 10; ++i) {
 		// Initialization loop (reset SD card)
 		for (j = 0; j < 10; ++j) {
-			GPIOPinSet(cs);
 			waitcnt(CLKFREQ/10 + CNT);
 
 			// Send at least 72 clock cycles to enable the SD card
+			GPIOPinSet(cs);
 			for (k = 0; k < 5; ++k)
 				checkErrors(SPIShiftOut(16, -1));
+			checkErrors(SPIWait());
 
+			GPIOPinClear(cs);
 			// Send SD into idle state, retrieve a response and ensure it is the "idle" response
 			if ((err = SDSendCommand(SD_CMD_IDLE, 0, SD_CRC_IDLE)))
 				SDError(err);
-			printf("Sent command 0!\n");
 			SDGetResponse(SD_RESPONSE_LEN_R1, response);
-			printf("Received response!\n");
 			if (SD_RESPONSE_IDLE == g_sd_firstByteResponse)
 				j = 10;
 #if (defined SD_VERBOSE && defined SD_DEBUG)
@@ -150,7 +150,7 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 #endif
 
 // Initialization nearly complete, increase clock
-	if (((uint32_t) -1) == freq)
+	if (((uint32_t) -1) != freq)
 		SPISetClock(freq);
 	else
 		SPISetClock(SD_SPI_FINAL_FREQ);

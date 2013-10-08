@@ -17,6 +17,7 @@
 #define MISO			BIT_1
 #define SCLK			BIT_2
 #define CS				BIT_3
+#define FREQ			20000
 
 // We're going to read from just channel 0 in this demo, but feel free to read from any that you like
 #define CHANNEL			CHANNEL_1

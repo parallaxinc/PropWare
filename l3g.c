@@ -38,13 +38,20 @@
 #define L3G_INT1_DURATION	0x38
 
 uint32_t g_l3g_cs;
+uint8_t g_l3g_alwaysSetMode = 0;
 
-uint8_t L3GStart (const uint32_t cs, const uint8_t dpsMode) {
+uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+		const uint32_t cs, const uint8_t dpsMode) {
 	uint8_t err;
 
 	// Ensure SPI module started
-	if (!SPIIsRunning())
-		return -1; // TODO: Create real error codes for this module
+	if (!SPIIsRunning()) {
+		checkErrors(
+				SPIStart(mosi, miso, sclk, L3G_SPI_DEFAULT_FREQ, L3G_SPI_MODE, L3G_SPI_BITMODE));
+	} else {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
 
 	g_l3g_cs = cs;
 	GPIODirModeSet(cs, GPIO_DIR_OUT);
@@ -53,9 +60,13 @@ uint8_t L3GStart (const uint32_t cs, const uint8_t dpsMode) {
 	// NOTE: L3G has high- and low-pass filters. Should they be enabled? (Page
 	// 31)
 	checkErrors(L3GWrite8(L3G_CTRL_REG1, NIBBLE_0));
-	checkErrors(L3GWrite8(L3G_CTRL_REG4, (dpsMode << 4) | BIT_7));
+	checkErrors(L3GWrite8(L3G_CTRL_REG4, dpsMode | BIT_7));
 
 	return 0;
+}
+
+void L3GAlwaysSetMode (const uint8_t alwaysSetMode) {
+	g_l3g_alwaysSetMode = alwaysSetMode;
 }
 
 uint8_t L3GReadX (int16_t *val) {
@@ -77,8 +88,10 @@ uint8_t L3GRead (int16_t *val) {
 	addr |= BIT_7; // Set RW bit (
 	addr |= BIT_6; // Enable address auto-increment
 
-	checkErrors(SPISetMode(L3G_SPI_MODE));
-	checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	if (g_l3g_alwaysSetMode) {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(8, addr));
@@ -101,6 +114,11 @@ uint8_t L3GRead (int16_t *val) {
 uint8_t L3G_ioctl (const uint8_t func, const uint8_t wrVal, uint8_t *rdVal) {
 	uint8_t err, oldValue;
 
+	if (g_l3g_alwaysSetMode) {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
+
 	switch (func) {
 		// All functions follow the read-modify-write routine
 		case L3G_FUNC_MOD_DPS:
@@ -110,7 +128,7 @@ uint8_t L3G_ioctl (const uint8_t func, const uint8_t wrVal, uint8_t *rdVal) {
 			checkErrors(L3GWrite8(L3G_CTRL_REG4, oldValue));
 			break;
 		case L3G_FUNC_RD_REG:
-			checkErrors(L3GRead8(wrVal, (int8_t *) rdVal));
+			checkErrors(L3GRead8(wrVal, (int8_t * ) rdVal));
 			break;
 		default:
 			return -1; // TODO: Create a real error code
@@ -131,11 +149,14 @@ uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat) {
 	outputValue = ((uint16_t) addr) << 8;
 	outputValue |= dat;
 
-	checkErrors(SPISetMode(L3G_SPI_MODE));
-	checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	if (g_l3g_alwaysSetMode) {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
 
 	GPIOPinClear(g_l3g_cs);
 	err = SPIShiftOut(16, outputValue);
+	checkErrors(SPIWait());
 	GPIOPinSet(g_l3g_cs);
 
 	return err;
@@ -152,11 +173,14 @@ uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat) {
 	outputValue |= ((uint16_t) ((uint8_t) dat)) << 8;
 	outputValue |= (uint8_t) (dat >> 8);
 
-	checkErrors(SPISetMode(L3G_SPI_MODE));
-	checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	if (g_l3g_alwaysSetMode) {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(24, outputValue));
+	checkErrors(SPIWait());
 	GPIOPinSet(g_l3g_cs);
 
 	return 0;
@@ -168,8 +192,10 @@ uint8_t L3GRead8 (uint8_t addr, int8_t *dat) {
 	addr |= BIT_7; // Set RW bit (
 	addr |= BIT_6; // Enable address auto-increment
 
-	checkErrors(SPISetMode(L3G_SPI_MODE));
-	checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	if (g_l3g_alwaysSetMode) {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(8, addr));
@@ -185,8 +211,10 @@ uint8_t L3GRead16 (uint8_t addr, int16_t *dat) {
 	addr |= BIT_7; // Set RW bit (
 	addr |= BIT_6; // Enable address auto-increment
 
-	checkErrors(SPISetMode(L3G_SPI_MODE));
-	checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	if (g_l3g_alwaysSetMode) {
+		checkErrors(SPISetMode(L3G_SPI_MODE));
+		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
+	}
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(8, addr));

@@ -24,3 +24,5 @@ PropGCC_Demos/MCP300x/spi_as.S
 **~
 /.cproject
 /.project
+/SPI_c.c
+/SPI_c.h

@@ -17,6 +17,7 @@ void main (void) {
 
 	if ((err = MCP300xStart(MOSI, MISO, SCLK, CS)))
 		error(err);
+	SPISetClock(FREQ);
 
 	// Set the Quickstart LEDs for output (used as a secondary display)
 	GPIODirModeSet(BYTE_2, GPIO_DIR_OUT);

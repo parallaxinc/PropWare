@@ -43,7 +43,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		SPIError(SPI_INVALID_PIN_MASK);
 
 	// Check clock frequency
-	if (CLKFREQ >> 2 <= frequency)
+	if (SPI_MAX_CLOCK <= frequency)
 		SPIError(SPI_INVALID_FREQ);
 
 	if (SPI_MODES <= mode)
@@ -158,7 +158,7 @@ uint8_t SPISetClock (const uint32_t frequency) {
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
 #ifdef SPI_DEBUG_PARAMS
-	if (CLKFREQ / 4 <= frequency)
+	if (SPI_MAX_CLOCK <= frequency)
 		SPIError(SPI_INVALID_FREQ);
 #endif
 

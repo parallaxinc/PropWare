@@ -20,7 +20,7 @@
 #include <gpio.h>
 
 #define MCP300X_SPI_DEFAULT_FREQ	1000000
-#define MCP300X_SPI_MODE			SPI_MODE_0
+#define MCP300X_SPI_MODE			SPI_MODE_2
 #define MCP300X_SPI_BITMODE			SPI_MSB_FIRST
 
 typedef enum {
