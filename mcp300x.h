@@ -19,32 +19,43 @@
 //#include "SPI_c.h"
 #include <gpio.h>
 
-#define MCP300X_SPI_MODE		SPI_MODE_0
-#define MCP300X_SPI_BITMODE		SPI_MSB_FIRST
+#define MCP300X_SPI_DEFAULT_FREQ	1000000
+#define MCP300X_SPI_MODE			SPI_MODE_0
+#define MCP300X_SPI_BITMODE			SPI_MSB_FIRST
 
-#define CHANNEL_0				0
-#define CHANNEL_1				1
-#define CHANNEL_2				2
-#define CHANNEL_3				3
-#define CHANNEL_4				4	// Only accessible on MCP3008
-#define CHANNEL_5				5	// Only accessible on MCP3008
-#define CHANNEL_6				6	// Only accessible on MCP3008
-#define CHANNEL_7				7	// Only accessible on MCP3008
+typedef enum {
+	CHANNEL_0,
+	CHANNEL_1,
+	CHANNEL_2,
+	CHANNEL_3,
+	CHANNEL_4,  // Only accessible on MCP3008
+	CHANNEL_5,  // Only accessible on MCP3008
+	CHANNEL_6,  // Only accessible on MCP3008
+	CHANNEL_7,  // Only accessible on MCP3008
+} mcp_channel_t;
 
 // Channel numbers listed as DIFF_<positive>_<negative>
-#define DIFF_0_1				0
-#define DIFF_1_0				1
-#define DIFF_2_3				2
-#define DIFF_3_2				3
-#define DIFF_4_5				4	// Only accessible on MCP3008
-#define DIFF_5_4				5	// Only accessible on MCP3008
-#define DIFF_6_7				6	// Only accessible on MCP3008
-#define DIFF_7_6				7	// Only accessible on MCP3008
+typedef enum {
+	DIFF_0_1,
+	DIFF_1_0,
+	DIFF_2_3,
+	DIFF_3_2,
+	DIFF_4_5,  // Only accessible on MCP3008
+	DIFF_5_4,  // Only accessible on MCP3008
+	DIFF_6_7,  // Only accessible on MCP3008
+	DIFF_7_6  // Only accessible on MCP3008
+} mcp_channel_diff_t;
 
-uint8_t MCP300xStart (const uint8_t cs);
+/**
+ *
+ */
+int8_t MCP300xStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+		const uint32_t cs);
 
-uint8_t MCP300xRead (const uint8_t channel, uint16_t *dat);
+void MCP300xAlwaysSetMode (const uint8_t alwaysSetMode);
 
-uint8_t MCP300xReadDif (const uint8_t channels, uint16_t *dat);
+int8_t MCP300xRead (const mcp_channel_t channel, uint16_t *dat);
+
+int8_t MCP300xReadDif (const mcp_channel_diff_t channels, uint16_t *dat);
 
 #endif /* MCP300X_H_ */

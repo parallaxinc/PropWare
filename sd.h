@@ -3,7 +3,7 @@
  *  \author    David Zemon
  *  \date      Spring 2013
  *  \pre       The SD card must be SDHC v2 and must be formatted to FAT16 or FAT32
- *  \warning   Unknown condition if card is not SDHC v2
+ *  \warning   Unknown result if card is not SDHC v2
  *  \copyright MIT license
  */
 
@@ -18,6 +18,7 @@
 #define SD_H_
 
 #include <propeller.h>
+#include <stdlib.h>
 #include <string.h>
 #include <PropWare.h>
 #include <gpio.h>
@@ -46,15 +47,12 @@
  * 								a minimum, nor is RAM usage
  * 								DEFAULT: ON
  */
-//#define SD_DEBUG
-//#define SD_VERBOSE
+#define SD_DEBUG
+#define SD_VERBOSE
 //#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
-#define SD_FILE_WRITE
+//#define SD_FILE_WRITE
 
-// DANGEROUS, BAD HACK!!! FOR ADVANCED DEBUGGING ONLY
-// To set all private functions to public, ensure the following line is uncommented
-//#define static
 #define SD_LINE_SIZE			16
 #define SD_SECTOR_SIZE			512
 #define SD_DEFAULT_SPI_FREQ		1800000
@@ -390,7 +388,6 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 #define SD_SPI_FINAL_FREQ			1900000					// Speed clock to 1.9 MHz after initialization
 #define SD_SPI_MODE					SPI_MODE_0
 #define SD_SPI_BITMODE				SPI_MSB_FIRST
-#define SD_SPI_BYTE_IN_SZ			1
 
 // Misc. SD Definitions
 #define SD_WIGGLE_ROOM				10000
@@ -489,7 +486,7 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 #define SD_EOF						((uint8_t) -1)						// System dependent - may need to be defined elsewhere
 #endif
 
-#define SD_FOLDER_ID				((uint8_t) -1)
+#define SD_FOLDER_ID				((uint8_t) -1)						// Signal that the contents of a buffer are a directory
 
 struct _sd_buffer {
 	uint8_t buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
@@ -512,7 +509,7 @@ struct _sd_file {
 	sd_file_mode mode;
 	uint32_t length;
 	uint32_t maxSectors;	// Maximum number of sectors currently allocated to a file
-	uint8_t mod;	// When the length of a file is changed, this variable will be set
+	uint8_t mod;	// When the length of a file is changed, this variable will be set, otherwise cleared
 	uint32_t firstAllocUnit;  // File's starting allocation unit
 	uint32_t curSector;  // like curSectorOffset, but does not reset upon loading a new cluster
 	uint32_t curCluster;  // like curSector, but for allocation units

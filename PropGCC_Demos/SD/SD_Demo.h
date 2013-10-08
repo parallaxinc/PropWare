@@ -8,7 +8,7 @@
 #define SD_DEMO_H_
 
 #define DEBUG
-#define LOW_RAM_MODE
+//#define LOW_RAM_MODE
 
 // Includes
 #include <propeller.h>
@@ -24,10 +24,10 @@
 #define printf		__simple_printf
 #endif
 
-#define CS						BIT_0
-#define MOSI					BIT_1
+#define CS						BIT_6
+#define MOSI					BIT_0
+#define MISO					BIT_1
 #define SCLK					BIT_2
-#define MISO					BIT_3
 
 #define NEW_FILE				"TEST.TXT"
 

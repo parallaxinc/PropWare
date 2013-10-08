@@ -24,7 +24,7 @@ static void SPIError (const uint8_t err, ...);
 
 // Global variables
 extern uint32_t _load_start_spi_as_cog[];
-static uint32_t g_mailbox = -1;
+volatile static uint32_t g_mailbox = -1;
 volatile static int8_t g_spiCog = -1;
 
 // Function definitions
@@ -55,6 +55,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	// If cog already started, do not start another
 	if (!SPIIsRunning()) {
 		// Start GAS cog
+		g_mailbox = 0;  // Set the mailbox to 0 (anything other than -1) so that we know when the SPI cog has started
 		g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
 		if (!SPIIsRunning())
 			SPIError(SPI_COG_NOT_STARTED);
@@ -72,9 +73,9 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		g_mailbox = sclk;
 	}
 
-	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetClock(frequency), str);
 	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetMode(mode), str);
 	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetBitMode(bitmode), str);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPISetClock(frequency), str);
 
 	return 0;
 }
@@ -97,12 +98,19 @@ inline int8_t SPIIsRunning (void) {
 inline uint8_t SPIWait (void) {
 	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	while ((uint32_t) -1 != g_mailbox) {  // Wait for GAS cog to read in value and write -1
-		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
-
-		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
+	while ((uint32_t) -1 != g_mailbox)  // Wait for GAS cog to read in value and write -1
+		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
 			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
-	}
+
+	return 0;
+}
+
+inline uint8_t SPIWaitSpecific (const uint32_t value) {
+	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
+
+	while (value == g_mailbox)  // Wait for GAS cog to read in value and write -1
+		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
+			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
 
 	return 0;
 }
@@ -119,7 +127,7 @@ uint8_t SPISetMode (const uint8_t mode) {
 
 	// Wait for SPI cog to go idle
 	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
-	g_mailbox = SPI_FUNC_SET_BITMODE;
+	g_mailbox = SPI_FUNC_SET_MODE;
 	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
 	g_mailbox = mode;
 
@@ -159,9 +167,32 @@ uint8_t SPISetClock (const uint32_t frequency) {
 	// Prepare cog for clock frequency change
 	g_mailbox = SPI_FUNC_SET_FREQ;
 	// Wait for the ready command
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK(SPIWaitSpecific(SPI_FUNC_SET_FREQ));
 	// Send new frequency
 	g_mailbox = CLKFREQ / frequency;
+
+	return 0;
+}
+
+uint8_t SPIGetClock (uint32_t *frequency) {
+	uint8_t err;
+	char str[] = "SPIGetClock()";
+
+#ifdef SPI_DEBUG_PARAMS
+	// Check for errors
+	if (!SPIIsRunning())
+		SPIError(SPI_MODULE_NOT_RUNNING);
+#endif
+
+	// Wait to ensure the SPI cog is in its idle state
+	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+
+	// Call GAS function
+	g_mailbox = SPI_FUNC_GET_FREQ;
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWaitSpecific(SPI_FUNC_GET_FREQ), str);
+
+	SPIReadPar(frequency, sizeof(*frequency));
+	*frequency = CLKFREQ / *frequency;
 
 	return 0;
 }
@@ -182,7 +213,7 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET);
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK(SPIWaitSpecific(SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET)));
 
 	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
 	g_mailbox = value & (~BIT_31);
@@ -205,15 +236,13 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
 #endif
 
 	// Ensure SPI module is not busy
-	if ((err = SPIWait()))
-		SPIError(err, str);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_READ | (bits << SPI_BITS_OFFSET);
 
 	// Read in parameter
-	if ((err = SPIReadPar(data, bytes)))
-		SPIError(err, str);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIReadPar(data, bytes), str);
 
 	return 0;
 }
@@ -245,29 +274,29 @@ void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
 
 	// Wait for a value to be written
 	while ((uint32_t) -1 == g_mailbox)
-		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
+	waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
 	// Determine if output variable is char, short or long and write data to that location
 	switch (bytes) {
 		case 1:
-			par8 = data;
-			*par8 = g_mailbox;
-			break;
+		par8 = data;
+		*par8 = g_mailbox;
+		break;
 		case 2:
-			par16 = data;
-			*par16 = g_mailbox;
-			break;
+		par16 = data;
+		*par16 = g_mailbox;
+		break;
 		case 4:
-			par32 = data;
-			*par32 = g_mailbox;
-			break;
+		par32 = data;
+		*par32 = g_mailbox;
+		break;
 		default:
 #ifdef SPI_DEBUG
-			SPIError(SPI_INVALID_BYTE_SIZE);
+		SPIError(SPI_INVALID_BYTE_SIZE);
 #else
-			return;
+		return;
 #endif
-			break;
+		break;
 	}
 
 	// Signal that value is saved and GAS cog can continue execution
@@ -280,7 +309,7 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking) {
 	SPIWait();
 	g_mailbox = (uint32_t) addr;
 	if (blocking)
-		SPIWait();
+	SPIWait();
 }
 #endif
 
@@ -291,24 +320,21 @@ static inline uint8_t SPIReadPar (void *par, const size_t bytes) {
 	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
 	// Wait for a value to be written
-	while ((uint32_t) -1 == g_mailbox) {
-		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
-
-		if ((timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
+	while ((uint32_t) -1 == g_mailbox)
+		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
 			return SPI_TIMEOUT_RD;
-	}
 
 	// Determine if output variable is char, short or long and write data to that location
 	switch (bytes) {
-		case 1:
+		case sizeof(uint8_t):
 			par8 = par;
 			*par8 = g_mailbox;
 			break;
-		case 2:
+		case sizeof(uint16_t):
 			par16 = par;
 			*par16 = g_mailbox;
 			break;
-		case 4:
+		case sizeof(uint32_t):
 			par32 = par;
 			*par32 = g_mailbox;
 			break;

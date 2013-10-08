@@ -14,6 +14,13 @@ PropGCC_Demos/SD/gpio.h
 PropGCC_Demos/SPI/spi.c
 PropGCC_Demos/SPI/spi.h
 PropGCC_Demos/SPI/spi_as.S
+PropGCC_Demos/MCP300x/.gitignore
+PropGCC_Demos/MCP300x/MCP300x_Datasheet.pdf
+PropGCC_Demos/MCP300x/mcp300x.c
+PropGCC_Demos/MCP300x/mcp300x.h
+PropGCC_Demos/MCP300x/spi.c
+PropGCC_Demos/MCP300x/spi.h
+PropGCC_Demos/MCP300x/spi_as.S
 **~
 /.cproject
 /.project

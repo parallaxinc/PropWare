@@ -9,6 +9,7 @@
 #define SPI_H_
 
 #include <propeller.h>
+#include <stdlib.h>
 #include <PropWare.h>
 #include <gpio.h>
 
@@ -31,7 +32,7 @@
  */
 #define SPI_DEBUG
 #define SPI_DEBUG_PARAMS
-#define SPI_FAST
+//#define SPI_FAST
 //#define SPI_FAST_SECTOR
 
 /**
@@ -66,8 +67,8 @@ typedef enum {
 } spibitmode_t;
 
 // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
-#define SPI_WR_TIMEOUT_VAL			2ULL*CLKFREQ/1
-#define SPI_RD_TIMEOUT_VAL			2ULL*CLKFREQ/1
+#define SPI_WR_TIMEOUT_VAL			CLKFREQ/10
+#define SPI_RD_TIMEOUT_VAL			CLKFREQ/10
 #define SPI_MAX_PAR_BITS			31
 
 // Errors
@@ -152,6 +153,10 @@ uint8_t SPISetBitMode (const uint8_t bitmode);
  * \return		Returns 0 upon success, otherwise error code
  */
 uint8_t SPISetClock (const uint32_t frequency);
+/**
+ * TODO: Should I leave this function or remove it?
+ */
+uint8_t SPIGetClock (uint32_t *frequency);
 
 /**
  * \brief       Send a value out to a peripheral device
@@ -223,7 +228,7 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 /********************************************
  *** Private definitions and Declarations ***
  ********************************************/
-#define	SPI_TIMEOUT_WIGGLE_ROOM		300
+#define	SPI_TIMEOUT_WIGGLE_ROOM		400
 #define SPI_FUNC_SEND				0
 #define	SPI_FUNC_READ				1
 #define SPI_FUNC_SEND_FAST			2
@@ -232,6 +237,7 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #define SPI_FUNC_SET_MODE			5
 #define SPI_FUNC_SET_BITMODE		6
 #define SPI_FUNC_SET_FREQ			7
+#define SPI_FUNC_GET_FREQ			8
 
 #define SPI_BITS_OFFSET				8
 

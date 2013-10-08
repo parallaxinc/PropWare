@@ -19,6 +19,7 @@
 #define SPI_FUNC_SET_MODE		5
 #define SPI_FUNC_SET_BITMODE	6
 #define SPI_FUNC_SET_FREQ		7
+#define SPI_FUNC_GET_FREQ		8
 
 #define SPI_BITS_OFFSET			8
 
@@ -34,9 +35,13 @@
 						.section spi_as.cog, "ax"
 						.compress off
 
+						org 0
+
 						or dira, testLEDs				'' DEBUG: LEDs used for debugging purposes, can be removed later
+						wrlong negOne, par				'' Inform parent cog that initialization has begun
+
 						// Begin by retreiving all parameters...
-entry					call #READ_CMD					'' Read in the pin mask MOSI
+						call #READ_CMD					'' Read in the pin mask MOSI
 						mov mosi, mailbox
 						call #READ_CMD					'' Read in the pin number for MOSI
 						mov mosiPinNum, mailbox
@@ -53,6 +58,7 @@ entry					call #READ_CMD					'' Read in the pin mask MOSI
 						andn dira, miso
 
 						// Followed by preparing the counter module for fast reading/writing
+						// TODO: Do this...
 
 /*** MAIN LOOP ***/
 LOOP					// Retrieve a command
@@ -93,6 +99,9 @@ LOOP					// Retrieve a command
 						cmp temp, #SPI_FUNC_SET_FREQ wz
 		if_z			jmp #SET_FREQ
 
+						cmp temp, #SPI_FUNC_GET_FREQ wz
+		if_z			jmp #GET_FREQ
+
 						// Default: Return to loop
 						jmp #LOOP
 
@@ -116,6 +125,11 @@ SET_FREQ				call #READ_CMD					'' Using READ_CMD instead of READ_DATA because -1
 						mov clkDelay, mailbox
 						jmp #LOOP
 
+/* FUNCTION: SPIGetClock() */
+GET_FREQ				mov data, #400 //clkDelay
+						call #WRITE_DATA
+						jmp #LOOP
+
 /* FUNCTION: SPIShiftOut() */
 SEND					// Interpret the bit count and mode of output for this send command
 						mov bitCount, mailbox			'' Initialize 'bitCount' register
@@ -128,14 +142,16 @@ SEND_rd_data			rdlong mailbox, par
 
 						mov data, mailbox				'' Initialize 'data' register
 
+						cmp bitmode, #SPI_BITMODE_BIT wz		'' Is bitmode MSB first or LSB first?
 						mov clock, cnt					'' \__Prepare a register with the system counter for use in the *_CLOCK functions
 						add clock, clkDelay				'' /
-						cmp bitmode, #SPI_BITMODE_BIT wz		'' Is bitmode MSB first or LSB first?
 		if_z			jmp #msb_first
 
 						// LSB_FIRST Initialization
 						mov loopIdx, negOne
 						sub bitCount, #1
+						mov clock, cnt					'' \__Prepare a register with the system counter for use in the *_CLOCK functions
+						add clock, clkDelay				'' /
 						jmp #lsb_first
 
 msb_first				// MSB_FIRST Routine
@@ -170,7 +186,7 @@ READ					// Interpret the bit count and mode of output for this read command
 						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
 						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
 						mov loopIdx, bitCount			'' Create a second storage register for the bit count - used in LSB modes
-						mov data, #0					'' Clear our the data register, ready for input
+						mov data, #0					'' Clear out the data register, ready for input
 
 						mov clock, cnt
 						add clock, clkDelay
@@ -181,15 +197,14 @@ READ					// Interpret the bit count and mode of output for this read command
 
 						cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's LSB first, now determine CPHA
 		if_z			call #lsb_post
-						cmp clkPhase, #SPI_PHASE_BIT wz
 		if_nz			call #lsb_pre
+						jmp #finish_lsb_first
 
 read_msb_first			cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's MSB first, now determine CPHA
 		if_z			call #msb_post
-						cmp clkPhase, #SPI_PHASE_BIT wz
 		if_nz			call #msb_pre
 
-						call #WRITE_DATA
+finish_lsb_first		call #WRITE_DATA
 						jmp #LOOP
 
 msb_pre					// Read in a value MSB-first with data valid before the clock
@@ -204,7 +219,7 @@ msb_pre_ret				ret
 
 lsb_pre					// Read in a value LSB-first with data valid before the clock
 						test miso, ina wc
-						muxc data, dataMask				'' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
+						muxc data, dataMask				'' Would use BIT_31 here, but it's too large to fit in an operand. `dataMask` already contains BIT_31
 						shr data, #1 wc					'' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
 						call #POST_CLOCK
 						djnz loopIdx, #lsb_pre
@@ -294,7 +309,7 @@ READ_fast				// Interpret the bit count and mode of output for this read command
 						and bitCount, spiBitCountBits	'' Mask off all bits except the bit count
 						shr bitCount, #SPI_BITS_OFFSET	'' Shift bit count into the lsb
 						mov loopIdx, bitCount			'' Create a second storage register for the bit count - used in LSB modes
-						mov data, #0					'' Clear our the data register, ready for input
+						mov data, #0					'' Clear out the data register, ready for input
 
 						mov clock, cnt
 						add clock, clkDelay
@@ -305,15 +320,14 @@ READ_fast				// Interpret the bit count and mode of output for this read command
 
 						cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's LSB first, now determine CPHA
 		if_z			call #lsb_post
-						cmp clkPhase, #SPI_PHASE_BIT wz
 		if_nz			call #lsb_pre
+						jmp #finish_lsb_first_fast
 
 read_msb_first_fast		cmp clkPhase, #SPI_PHASE_BIT wz		'' So it's MSB first, now determine CPHA
 		if_z			call #msb_post
-						cmp clkPhase, #SPI_PHASE_BIT wz
 		if_nz			call #msb_pre
 
-						call #WRITE_DATA
+finish_lsb_first_fast	call #WRITE_DATA
 						jmp #LOOP
 
 msb_pre_fast			// Read in a value MSB-first with data valid before the clock
@@ -469,7 +483,8 @@ READ_DATA				rdlong mailbox, par
 						wrlong negOne, par				'' Inform C cog that reading is complete
 READ_DATA_ret			ret
 
-WRITE_DATA				wrlong data, par
+WRITE_DATA				mov data, #400
+						wrlong data, par
 write_loop				rdlong mailbox, par				'' \.
 						cmp mailbox, negOne wz			''  |--> Hold GAS execution here until C has signaled read complete by writing -1
 		if_nz			jmp #write_loop					'' /
@@ -496,6 +511,7 @@ led23					long	BIT_23
 /* Beginning of variables */
 mailbox					res		1						'' Address in hub memory used for communication with another cog
 temp					res		1						'' Working register
+temp2					res		1
 loopIdx					res		1						'' Used when bitCount cannot be modified during a loop (LSB first modes)
 clock					res		1						'' Used for clocking in and out with SCLK
 bitmode					res		1						'' Store the current bitmode (LSB or MSB first)

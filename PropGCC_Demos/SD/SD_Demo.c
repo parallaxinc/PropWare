@@ -8,7 +8,7 @@
 
 // Main function
 void main (void) {
-	uint8_t err, i;
+	uint8_t err;
 	char c;
 
 	sd_file f, f2;
@@ -27,7 +27,7 @@ void main (void) {
 	f.buf = &fileBuf;
 	f2.buf = &fileBuf2;
 #else
-	/* Option 2: Use the generic buffer, g_sd_buf, as the buffer
+	/* Option 2: Use the generic buffer [i.e. g_sd_buf] as the buffer
 	 *
 	 * Good for low-RAM situations due to the re-use of g_sd_buf. Speed is
 	 * decreased when multiple files are used often.
@@ -41,8 +41,10 @@ void main (void) {
 	printf("Beginning SD card initialization...\n");
 #endif
 
-	if ((err = SDStart(MOSI, MISO, SCLK, CS, SD_DEFAULT_SPI_FREQ)))
+	// Start your engines!!!
+	if ((err = SDStart(MOSI, MISO, SCLK, CS, -1)))
 		error(err);
+
 #ifdef DEBUG
 	printf("SD routine started. Mounting now...\n");
 #endif
