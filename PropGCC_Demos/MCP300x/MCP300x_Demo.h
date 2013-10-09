@@ -9,6 +9,7 @@
 
 #include <propeller.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <PropWare.h>
 #include <mcp300x.h>
@@ -17,10 +18,10 @@
 #define MISO			BIT_1
 #define SCLK			BIT_2
 #define CS				BIT_3
-#define FREQ			20000
+#define FREQ			100000
 
 // We're going to read from just channel 0 in this demo, but feel free to read from any that you like
-#define CHANNEL			CHANNEL_1
+#define CHANNEL			MCP_CHANNEL_1
 
 #define DEBUG_LEDS		BYTE_2
 

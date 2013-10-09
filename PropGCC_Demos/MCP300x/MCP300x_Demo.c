@@ -11,6 +11,7 @@
 void main (void) {
 	int8_t err;
 	uint16_t data;
+	uint32_t loopCounter;
 	uint16_t divisor = 1024 / 8;
 	uint8_t scaledValue, i;
 	uint32_t ledOutput;
@@ -20,7 +21,7 @@ void main (void) {
 	SPISetClock(FREQ);
 
 	// Set the Quickstart LEDs for output (used as a secondary display)
-	GPIODirModeSet(BYTE_2, GPIO_DIR_OUT);
+	GPIODirModeSet(DEBUG_LEDS, GPIO_DIR_OUT);
 
 	// Though this functional call is not necessary (default value is 0), I
 	// want to bring attention to this function. It will determine whether the
@@ -32,19 +33,24 @@ void main (void) {
 	__simple_printf("Welcome to the MCP300x demo!\n");
 
 	while (1) {
-		if ((err = MCP300xRead(CHANNEL, &data)))
-			error(err);
+		loopCounter = CLKFREQ / 2 + CNT;
 
-		// Turn on LEDs proportional to the analog value
-		scaledValue = data/divisor;
-		ledOutput = 0;
-		for (i = 0; i < scaledValue; ++i)
-			ledOutput = (ledOutput << 1) | 1;
-		ledOutput <<= 16;
-		GPIOPinWrite(BYTE_2, ledOutput);
+		// Loop over the LED output very quickly, until we are within 1
+		// millisecond of total period
+		while (abs(loopCounter - CNT) > CLKFREQ/1000) {
+			if ((err = MCP300xRead(CHANNEL, &data)))
+				error(err);
+
+			// Turn on LEDs proportional to the analog value
+			scaledValue = (data + divisor/2 - 1) / divisor;
+			ledOutput = 0;
+			for (i = 0; i < scaledValue; ++i)
+				ledOutput = (ledOutput << 1) | 1;
+			ledOutput <<= 16;
+			GPIOPinWrite(DEBUG_LEDS, ledOutput);
+		}
 
 		__simple_printf("Channel %u is reading: %u\n", CHANNEL, data);
-		waitcnt(CLKFREQ/2 + CNT);
 	}
 }
 

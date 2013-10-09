@@ -21,8 +21,8 @@ Getting Started - Choose one or the other:
         2) Create a C/C++ project; Select cross compiler (No need to set the
            compiler or path, we'll use a Makefile still)
         3) Once the project is created and you've exited the dialog box,
-		   right-click on the project in the Project Pane and choose
-		   "Properties"
+           right-click on the project in the Project Pane and choose
+           "Properties"
         4) Click on "C/C++ Build" menu option to the left and then find the
            "Builder Settings" tab
         5) Uncheck "Use default build command" and ensure the "Build command"
@@ -33,7 +33,7 @@ Getting Started - Choose one or the other:
            should be the path to PropWare, and another should be the path to
            PropGCC's include folder (on Linux, /opt/parallax/include)
         8) Create files based on the same rules as "At the Terminal" (steps 1a
-		   and 2) and add source and header files where appropriate
+           and 2) and add source and header files where appropriate
         9) That's it! You now have Eclipse up and running with PropGCC and
            PropWare! All of its auto-completion, code highlighting, and quick
            and easy compilation!
@@ -47,13 +47,5 @@ TODO:
     - SD & FAT16/32 driver
         - Traverse directories (implies ability to open files/directories not
           in the current directory)
-    - Created shared library file(s)
-        - ***Likely not going to happen: pre-compiled files implies an
-          inability to have pre-processor optimizations
-    - Re-create SPI library to use inline assembly and FCACHE instead of
-      a second cog
     - Add "SPIShiftIn_Multi", which will repeatedly shift in values and allow
       for the selection between *_Fast or normal using a parameter
-
-Further description will come soon...
-

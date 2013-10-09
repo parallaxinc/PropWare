@@ -6,22 +6,21 @@
 
 ### CODE SPACE ###
 As of 4/22/2013, SD demo requires the following code space (in bytes):
-Enabled Code Options						CMM Mode		LMM Mode
-None										7872			12920
-__simple_printf only						10344			17288
-SD_DEBUG									11284			18704
-SD_DEBUG, SD_VERBOSE						17996			30576
-SD_DEBUG, SD_VERBOSE, SD_VERBOSE_BLOCKS		18308			Overflowed by 112
-SD_DEBUG, SD_SHELL							12464			20996
-SD_SHELL									11320			19316
-All											19700			Overflowed by 2672
+Enabled Code Options                        CMM Mode        LMM Mode
+None                                        7872            12920
+__simple_printf only                        10344           17288
+SD_DEBUG                                    11284           18704
+SD_DEBUG, SD_VERBOSE                        17996           30576
+SD_DEBUG, SD_VERBOSE, SD_VERBOSE_BLOCKS	    18308           Overflowed by 112
+SD_DEBUG, SD_SHELL                          12464           20996
+SD_SHELL                                    11320           19316
+All                                         19700           Overflowed by 2672
 
 ### NOTE ###
 To compile this demo, you must either copy into the working directory or 
 create symbolic links to the following files:
-	- spi.c
-	- spi.h		(see note in common.mk for reasoning why this must be included)
-	- spi_as.S
-	- sd.c
-	- sd.h		(see note in common.mk for reasoning why this must be included)
-
+    - spi.c
+    - spi.h  (see note in common.mk for reasoning why this must be included)
+    - spi_as.S
+    - sd.c
+    - sd.h  (see note in common.mk for reasoning why this must be included)

@@ -1,0 +1,15 @@
+###############################
+#
+# PropGCC MCP300x Demo - README
+# Analog-to-Digital converter
+#
+###############################
+
+### NOTE ###
+To compile this demo, you must either copy into the working directory or 
+create symbolic links to the following files:
+    - spi.c
+    - spi.h  (see note in common.mk for reasoning why this must be included)
+    - spi_as.S
+    - mcp300x.c
+    - mcp300x.h  (see note in common.mk for reasoning why this must be included)

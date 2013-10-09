@@ -41,7 +41,7 @@ uint32_t g_l3g_cs;
 uint8_t g_l3g_alwaysSetMode = 0;
 
 uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-		const uint32_t cs, const uint8_t dpsMode) {
+		const uint32_t cs, const l3g_dps_mode_t dpsMode) {
 	uint8_t err;
 
 	// Ensure SPI module started
@@ -81,7 +81,11 @@ uint8_t L3GReadZ (int16_t *val) {
 	return L3GRead16(L3G_OUT_Z_L, val);
 }
 
-uint8_t L3GRead (int16_t *val) {
+uint8_t L3GRead (const l3g_axis axis, int16_t *val) {
+	return L3GRead16(L3G_OUT_X_L + (axis << 1), val);
+}
+
+uint8_t L3GReadAll (int16_t *val) {
 	uint8_t err, i;
 
 	uint8_t addr = L3G_OUT_X_L;
@@ -111,7 +115,7 @@ uint8_t L3GRead (int16_t *val) {
 	return 0;
 }
 
-uint8_t L3G_ioctl (const uint8_t func, const uint8_t wrVal, uint8_t *rdVal) {
+uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal, uint8_t *rdVal) {
 	uint8_t err, oldValue;
 
 	if (g_l3g_alwaysSetMode) {
