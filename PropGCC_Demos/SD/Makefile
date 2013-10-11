@@ -1,7 +1,7 @@
 PRJ = SD_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o sd.o spi.o spi_as.o
+OBJS = $(PRJ).o sd.o spi.o spi_as.o PropWare.o
 BOARD = QUICKSTART
 MODEL = cmm
 CFLAGS = -Os

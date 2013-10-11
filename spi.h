@@ -11,7 +11,6 @@
 #include <propeller.h>
 #include <stdlib.h>
 #include <PropWare.h>
-#include <gpio.h>
 
 /**
  * \brief	Extra code options - Uncomment definitions to enable features
@@ -32,7 +31,7 @@
  */
 #define SPI_DEBUG
 #define SPI_DEBUG_PARAMS
-//#define SPI_FAST
+#define SPI_FAST
 //#define SPI_FAST_SECTOR
 
 /**

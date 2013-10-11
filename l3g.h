@@ -12,11 +12,12 @@
 
 #include <propeller.h>
 #include <PropWare.h>
-#include <spi.h>
+//#include <spi.h>
+#include <SPI_c.h>
 
 #define L3G_SPI_MODE			SPI_MODE_3
 #define L3G_SPI_BITMODE			SPI_MSB_FIRST
-#define L3G_SPI_DEFAULT_FREQ	1000000
+#define L3G_SPI_DEFAULT_FREQ	100000
 
 typedef enum {
 	L3G_X,

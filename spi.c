@@ -20,26 +20,27 @@ static void SPIError (const uint8_t err, ...);
 #define SPIError(err, ...)				return err
 #endif
 #define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) SPIError(err)
-#define PROPWARE_SPI_SAFETY_CHECK_STR(x, str) if ((err = x)) SPIError(err, str)
+#define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) SPIError(err, y)
 
 // Global variables
 extern uint32_t _load_start_spi_as_cog[];
 volatile static uint32_t g_mailbox = -1;
-volatile static int8_t g_spiCog = -1;
+static int8_t g_spiCog = -1;
 
 // Function definitions
 uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-		const uint32_t frequency, const spimode_t mode, const spibitmode_t bitmode) {
+		const uint32_t frequency, const spimode_t mode,
+		const spibitmode_t bitmode) {
 	uint8_t err;
 	const char str[] = "SPIStart()";
 
 #ifdef SPI_DEBUG_PARAMS
 	// Ensure all pin-mask parameters have exactly 1 set bit
-	if (1 != SPICountBits(mosi))
+	if (1 != PropWareCountBits(mosi))
 		SPIError(SPI_INVALID_PIN_MASK);
-	if (1 != SPICountBits(miso))
+	if (1 != PropWareCountBits(miso))
 		SPIError(SPI_INVALID_PIN_MASK);
-	if (1 != SPICountBits(sclk))
+	if (1 != PropWareCountBits(sclk))
 		SPIError(SPI_INVALID_PIN_MASK);
 
 	// Check clock frequency
@@ -55,7 +56,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	// If cog already started, do not start another
 	if (!SPIIsRunning()) {
 		// Start GAS cog
-		g_mailbox = 0;  // Set the mailbox to 0 (anything other than -1) so that we know when the SPI cog has started
+		g_mailbox = 0; // Set the mailbox to 0 (anything other than -1) so that we know when the SPI cog has started
 		g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
 		if (!SPIIsRunning())
 			SPIError(SPI_COG_NOT_STARTED);
@@ -64,11 +65,11 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = mosi;
 		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
-		g_mailbox = SPIGetPinNum(mosi);
+		g_mailbox = PropWareGetPinNum(mosi);
 		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = miso;
 		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
-		g_mailbox = SPIGetPinNum(miso);
+		g_mailbox = PropWareGetPinNum(miso);
 		PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 		g_mailbox = sclk;
 	}
@@ -98,9 +99,12 @@ inline int8_t SPIIsRunning (void) {
 inline uint8_t SPIWait (void) {
 	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	while ((uint32_t) -1 != g_mailbox)  // Wait for GAS cog to read in value and write -1
-		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
+	while ((uint32_t) -1 != g_mailbox) // Wait for GAS cog to read in value and write -1
+		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM) {
+			__simple_printf("Timing out with %u in mailbox.\n", g_mailbox);
+//			waitcnt(CLKFREQ / 1000 + CNT);
+			return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
+		}
 
 	return 0;
 }
@@ -108,15 +112,16 @@ inline uint8_t SPIWait (void) {
 inline uint8_t SPIWaitSpecific (const uint32_t value) {
 	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-	while (value == g_mailbox)  // Wait for GAS cog to read in value and write -1
+	while (value == g_mailbox) // Wait for GAS cog to read in value and write -1
 		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-			return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
+			return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
 
 	return 0;
 }
 
 uint8_t SPISetMode (const uint8_t mode) {
 	uint8_t err;
+	char str[] = "SPISetMode()";
 
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -126,16 +131,20 @@ uint8_t SPISetMode (const uint8_t mode) {
 #endif
 
 	// Wait for SPI cog to go idle
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	GPIOPinSet(BIT_16);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	g_mailbox = SPI_FUNC_SET_MODE;
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	GPIOPinSet(BIT_17);
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	g_mailbox = mode;
+	GPIOPinSet(BIT_18);
 
 	return 0;
 }
 
 uint8_t SPISetBitMode (const uint8_t bitmode) {
 	uint8_t err;
+	char str[] = "SPISetBitMode()";
 
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -144,9 +153,9 @@ uint8_t SPISetBitMode (const uint8_t bitmode) {
 		SPIError(SPI_INVALID_BITMODE);
 #endif
 
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	g_mailbox = SPI_FUNC_SET_BITMODE;
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	g_mailbox = bitmode;
 
 	return 0;
@@ -154,6 +163,7 @@ uint8_t SPISetBitMode (const uint8_t bitmode) {
 
 uint8_t SPISetClock (const uint32_t frequency) {
 	uint8_t err;
+	char str[] = "SPISetClock()";
 
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -163,11 +173,11 @@ uint8_t SPISetClock (const uint32_t frequency) {
 #endif
 
 	// Wait for SPI cog to go idle
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	// Prepare cog for clock frequency change
 	g_mailbox = SPI_FUNC_SET_FREQ;
 	// Wait for the ready command
-	PROPWARE_SPI_SAFETY_CHECK(SPIWaitSpecific(SPI_FUNC_SET_FREQ));
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWaitSpecific(SPI_FUNC_SET_FREQ), str);
 	// Send new frequency
 	g_mailbox = CLKFREQ / frequency;
 
@@ -185,7 +195,7 @@ uint8_t SPIGetClock (uint32_t *frequency) {
 #endif
 
 	// Wait to ensure the SPI cog is in its idle state
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_GET_FREQ;
@@ -199,6 +209,7 @@ uint8_t SPIGetClock (uint32_t *frequency) {
 
 uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 	uint8_t err;
+	char str[] = "SPIShiftOut()";
 
 #ifdef SPI_DEBUG_PARAMS
 	// Check for errors
@@ -209,11 +220,12 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 #endif
 
 	// Wait to ensure the SPI cog is in its idle state
-	PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 
 	// Call GAS function
 	g_mailbox = SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET);
-	PROPWARE_SPI_SAFETY_CHECK(SPIWaitSpecific(SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET)));
+	PROPWARE_SPI_SAFETY_CHECK_STR(
+			SPIWaitSpecific(SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET)), str);
 
 	// Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
 	g_mailbox = value & (~BIT_31);
@@ -231,7 +243,8 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
 		SPIError(SPI_MODULE_NOT_RUNNING);
 	if (SPI_MAX_PAR_BITS < bits)
 		SPIError(SPI_TOO_MANY_BITS);
-	if ((4 == bytes && ((uint32_t) data) % 4) || (2 == bytes && ((uint32_t) data) % 2))
+	if ((4 == bytes && ((uint32_t) data) % 4)
+			|| (2 == bytes && ((uint32_t) data) % 2))
 		SPIError(SPI_ADDR_MISALIGN);
 #endif
 
@@ -263,7 +276,6 @@ void SPIShiftOut_fast (uint8_t bits, uint32_t value) {
 }
 
 void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
-	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 	uint8_t *par8;
 	uint16_t *par16;
 	uint32_t *par32;
@@ -274,29 +286,29 @@ void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
 
 	// Wait for a value to be written
 	while ((uint32_t) -1 == g_mailbox)
-	waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
+		waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
 	// Determine if output variable is char, short or long and write data to that location
 	switch (bytes) {
 		case 1:
-		par8 = data;
-		*par8 = g_mailbox;
-		break;
+			par8 = data;
+			*par8 = g_mailbox;
+			break;
 		case 2:
-		par16 = data;
-		*par16 = g_mailbox;
-		break;
+			par16 = data;
+			*par16 = g_mailbox;
+			break;
 		case 4:
-		par32 = data;
-		*par32 = g_mailbox;
-		break;
+			par32 = data;
+			*par32 = g_mailbox;
+			break;
 		default:
 #ifdef SPI_DEBUG
-		SPIError(SPI_INVALID_BYTE_SIZE);
+			SPIError(SPI_INVALID_BYTE_SIZE);
 #else
-		return;
+			return;
 #endif
-		break;
+			break;
 	}
 
 	// Signal that value is saved and GAS cog can continue execution
@@ -309,7 +321,7 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking) {
 	SPIWait();
 	g_mailbox = (uint32_t) addr;
 	if (blocking)
-	SPIWait();
+		SPIWait();
 }
 #endif
 
@@ -349,26 +361,13 @@ static inline uint8_t SPIReadPar (void *par, const size_t bytes) {
 	return 0;
 }
 
-static uint8_t SPICountBits (uint32_t par) {
-	/* Brian Kernighan's method for counting set bits in a variable */
-	uint32_t c;					// c accumulates the total bits set in par
-	for (c = 0; par; ++c)
-		par &= par - 1;				// clear the least significant bit set
-
-	return c;
-}
-
-static uint8_t SPIGetPinNum (const uint32_t pinMask) {
-	uint8_t temp = 0;
-	while (!(0x01 & (pinMask >> temp++)))
-		;
-	return --temp;
-}
-
 #ifdef SPI_DEBUG
 void SPIError (const uint8_t err, ...) {
 	va_list list;
 	char str[] = "SPI Error %u: %s\n";
+
+//	printf("Poop on me..\n");
+//	while(1);
 
 	switch (err) {
 		case SPI_INVALID_PIN:
@@ -387,7 +386,8 @@ void SPIError (const uint8_t err, ...) {
 		case SPI_TIMEOUT:
 			va_start(list, err);
 			__simple_printf("SPI Error %u: %s\n\tCalling function was %s\n",
-					(err - SPI_ERRORS_BASE), "Timed out during parameter passing",
+					(err - SPI_ERRORS_BASE),
+					"Timed out during parameter passing",
 					va_arg(list, char*));
 			va_end(list);
 			break;
@@ -400,10 +400,12 @@ void SPIError (const uint8_t err, ...) {
 					"SPI's GAS cog was not started");
 			break;
 		case SPI_MODULE_NOT_RUNNING:
-			__simple_printf(str, (err - SPI_ERRORS_BASE), "SPI GAS cog not running");
+			__simple_printf(str, (err - SPI_ERRORS_BASE),
+					"SPI GAS cog not running");
 			break;
 		case SPI_INVALID_FREQ:
-			__simple_printf(str, (err - SPI_ERRORS_BASE), "Frequency set too high");
+			__simple_printf(str, (err - SPI_ERRORS_BASE),
+					"Frequency set too high");
 			break;
 		case SPI_ADDR_MISALIGN:
 			__simple_printf(str, (err - SPI_ERRORS_BASE),
@@ -411,8 +413,10 @@ void SPIError (const uint8_t err, ...) {
 			break;
 		default:
 			// Is the error an SPI error?
-			if (err > SPI_ERRORS_BASE && err < (SPI_ERRORS_BASE + SPI_ERRORS_LIMIT))
-				__simple_printf("Unknown SPI error %u\n", (err - SPI_ERRORS_BASE));
+			if (err > SPI_ERRORS_BASE
+					&& err < (SPI_ERRORS_BASE + SPI_ERRORS_LIMIT))
+				__simple_printf("Unknown SPI error %u\n",
+						(err - SPI_ERRORS_BASE));
 			else
 				__simple_printf("Unknown error %u\n", (err));
 			break;

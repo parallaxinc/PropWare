@@ -7,6 +7,7 @@
  *
  */
 
+#define ASM_OBJ_FILE
 #include <PropWare.h>
 
 /* NOTE: These definitions *MUST* match up with the SPI source file "spi.c" */
@@ -39,6 +40,8 @@
 
 						or dira, testLEDs				'' DEBUG: LEDs used for debugging purposes, can be removed later
 						wrlong negOne, par				'' Inform parent cog that initialization has begun
+
+						or outa, led23
 
 						// Begin by retreiving all parameters...
 						call #READ_CMD					'' Read in the pin mask MOSI

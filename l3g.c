@@ -48,6 +48,7 @@ uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	if (!SPIIsRunning()) {
 		checkErrors(
 				SPIStart(mosi, miso, sclk, L3G_SPI_DEFAULT_FREQ, L3G_SPI_MODE, L3G_SPI_BITMODE));
+
 	} else {
 		checkErrors(SPISetMode(L3G_SPI_MODE));
 		checkErrors(SPISetBitMode(L3G_SPI_BITMODE));
@@ -160,7 +161,7 @@ uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat) {
 
 	GPIOPinClear(g_l3g_cs);
 	err = SPIShiftOut(16, outputValue);
-	checkErrors(SPIWait());
+//	checkErrors(SPIWait());
 	GPIOPinSet(g_l3g_cs);
 
 	return err;
