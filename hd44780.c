@@ -25,8 +25,6 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	uint32_t tempMask;
 	uint8_t arg;
 
-	printf("Poop 1\n");
-
 #ifdef HD44780_DEBUG
 	if (1 != PropWareCountBits(rw) || 1 != PropWareCountBits(rs)
 			|| 1 != PropWareCountBits(en))
@@ -48,8 +46,6 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 			return HD44780_INVALID_DATA_MASK;
 	}
 
-	printf("Poop 2\n");
-
 	// Ensure that all 4 or 8 bits are consecutive
 	tempMask = dataPinsMask;
 	while (0 == (BIT_0 & tempMask))
@@ -64,28 +60,25 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 		return HD44780_INVALID_DIMENSIONS;
 #endif
 
-	printf("Poop 3\n");
-
 	// Save all control signal pin masks
-	GPIODirModeSet(rs | rw | en, GPIO_DIR_OUT);
 	g_hd44780_rs = rs;
 	g_hd44780_rw = rw;
 	g_hd44780_en = en;
+	GPIODirModeSet(rs | rw | en, GPIO_DIR_OUT);
+	GPIOPinClear(rs | rw | en);
 
 	// Save data pin masks
 	GPIODirModeSet(dataPinsMask, GPIO_DIR_OUT);
 	g_hd44780_dataMask = dataPinsMask;
 
-	printf("Poop 4\n");
 	// Determine the data LSB
 	while (!(BIT_0 & (dataPinsMask >> g_hd44780_dataLSBNum)))
 		g_hd44780_dataLSBNum++;
-	printf("Poop 5\n");
 
 	// Save the modes
 	g_hd44780_dim = dimensions;
-	g_hd44780_bitmode = bitmode;
 	HD44780GenerateMemMap(dimensions);
+	g_hd44780_bitmode = bitmode;
 
 	// Begin init routine:
 	if (HD44780_8BIT == bitmode)
@@ -94,7 +87,7 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 		/* Implied: "if (HD44780_4BIT == bitmode)" */
 		arg = 0x3;
 	arg <<= g_hd44780_dataLSBNum;
-	waitcnt(500 * MILLISECOND + CNT);
+	waitcnt(250 * MILLISECOND + CNT);
 	GPIOPinWrite(g_hd44780_dataMask, arg);
 	waitcnt(100 * MILLISECOND + CNT);
 	HD44780ClockPulse();
@@ -104,13 +97,13 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	HD44780ClockPulse();
 	waitcnt(10 * MILLISECOND + CNT);
 
+	i = 0;
 	if (HD44780_4BIT == bitmode) {
 		GPIOPinWrite(g_hd44780_dataMask, (0x2UL << g_hd44780_dataLSBNum));
 		HD44780ClockPulse();
+		GPIOPinWrite(g_hd44780_dataMask, 0);
+		HD44780ClockPulse();
 	}
-
-	HD44780Clear();
-	printf("1) 0x%02X\n", HD44780_CLEAR);
 
 	// Default functions during initialization
 	arg = HD44780_FUNCTION_SET;
@@ -137,6 +130,8 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	HD44780Cmd(arg);
 	printf("5) 0x%02X\n", arg);
 
+	HD44780Clear();
+
 	return 0;
 }
 
@@ -144,6 +139,7 @@ inline void HD44780Clear (void) {
 	HD44780Cmd(HD44780_CLEAR);
 	g_hd44780_curRow = 0;
 	g_hd44780_curCol = 0;
+	waitcnt(1530*MICROSECOND + CNT);
 }
 
 void HD44780Move (const uint8_t row, const uint8_t col) {
@@ -190,7 +186,8 @@ void HD44780_putchar (const char c) {
 		HD44780Write(c);
 
 		// Insert a line wrap if necessary
-		if (g_hd44780_memMap.charColumns == ++g_hd44780_curRow)
+		++g_hd44780_curCol;
+		if (g_hd44780_memMap.charColumns == g_hd44780_curCol)
 			HD44780_putchar('\n');
 
 		// Handle weird special case where a single row LCD is split across
@@ -201,8 +198,10 @@ void HD44780_putchar (const char c) {
 }
 
 void HD44780_puts (char* s) {
-	while (*(s++))
+	while (*s) {
 		HD44780_putchar(*s);
+		++s;
+	}
 }
 
 inline void HD44780Cmd (const uint8_t c) {
@@ -214,20 +213,20 @@ inline void HD44780Cmd (const uint8_t c) {
 void HD44780Write (const uint8_t val) {
 	uint32_t shiftedVal = val;
 
-// Clear RW to signal write value
+	// Clear RW to signal write value
 	GPIOPinClear(g_hd44780_rw);
 
 	if (HD44780_4BIT == g_hd44780_bitmode) {
-// shift out the high nibble
+		// shift out the high nibble
 		shiftedVal <<= g_hd44780_dataLSBNum - 4;
 		GPIOPinWrite(g_hd44780_dataMask, shiftedVal);
 		HD44780ClockPulse();
-		shiftedVal = val;
 		shiftedVal <<= 4;
 		waitcnt(MILLISECOND + CNT);
 		GPIOPinWrite(g_hd44780_dataMask, shiftedVal);
-// Shift remaining four bits out
-	} else /* Implied: if (HD44780_8BIT == g_hd44780_bitmode) */{
+	}
+	// Shift remaining four bits out
+	else /* Implied: if (HD44780_8BIT == g_hd44780_bitmode) */{
 		shiftedVal <<= g_hd44780_dataLSBNum;
 		GPIOPinWrite(g_hd44780_dataMask, shiftedVal);
 	}
@@ -238,7 +237,6 @@ void HD44780ClockPulse (void) {
 	GPIOPinSet(g_hd44780_en);
 	waitcnt(MILLISECOND + CNT);
 	GPIOPinClear(g_hd44780_en);
-	waitcnt(100*MICROSECOND + CNT);
 }
 
 void HD44780GenerateMemMap (const hd44780_dimensions_t dimensions) {
