@@ -4,6 +4,8 @@
  *          Collin Winans
  *
  * Description: TODO: Do me
+ *
+ * NOTE: Does not natively support 40x4 or 24x4 character displays
  */
 
 #ifndef HD44780_H_
@@ -26,7 +28,8 @@ typedef enum {
 	HD44780_8x1,
 	HD44780_8x2,
 	HD44780_8x4,
-	HD44780_16x1,
+	HD44780_16x1_1,
+	HD44780_16x1_2,
 	HD44780_16x2,
 	HD44780_16x4,
 	HD44780_20x1,
@@ -34,10 +37,8 @@ typedef enum {
 	HD44780_20x4,
 	HD44780_24x1,
 	HD44780_24x2,
-	HD44780_24x4,
 	HD44780_40x1,
 	HD44780_40x2,
-	HD44780_40x4,
 	HD44780_DIMENSIONS
 } hd44780_dimensions_t;
 
@@ -96,17 +97,56 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 		const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
 		const hd44780_dimensions_t dimensions);
 
-void HD44780Clear (void);
+inline void HD44780Clear (void);
 
+/**
+ * \brief       Move the cursor to a specified column and row
+ *
+ * \param   row     Zero-indexed row to place the cursor
+ * \param   col     Zero indexed column to place the cursor
+ */
 void HD44780Move (const uint8_t row, const uint8_t col);
 
+/**
+ * \brief       Print a string to the LCD
+ *
+ * \detailed    Via a series of calls to HD44780_putchar, prints each character
+ *              individually
+ *
+ * \param	*s	Address where c-string can be found (must be null-terminated)
+ */
 void HD44780_puts (char *s);
 
+/**
+ * \brief   Print a single char to the LCD and increment the pointer (automatic)
+ *
+ * \param   c   Individual char to be printed
+ */
 void HD44780_putchar (const char c);
 
-static void HD44780Cmd (const uint8_t c);
+/*************************
+ *** Private Functions ***
+ *************************/
+typedef struct {
+	uint8_t charRows;
+	uint8_t charColumns;
+	uint8_t ddramCharRowBreak;
+	uint8_t ddramLineEnd;
+} hd44780_mem_map_t;
+
+/**
+ * \brief   Send a control command to the LCD module
+ *
+ * \param   c   8-bit command to send to the LCD
+ */
+inline static void HD44780Cmd (const uint8_t c);
 
 static void HD44780Write (const uint8_t val);
 
-static inline void HD44780ClockPulse (void);
+/**
+ * \brief   Toggle the enable pin, inducing a write to the LCD's register
+ */
+static void HD44780ClockPulse (void);
+
+static void HD44780GenerateMemMap (const hd44780_dimensions_t dimensions);
 #endif /* HD44780_H_ */

@@ -12,14 +12,20 @@
 #include <PropWare.h>
 #include <hd44780.h>
 
-#define RS					BIT_29
-#define RW					BIT_28
-#define EN					BIT_27
+#define RS					BIT_14
+#define RW					BIT_12
+#define EN					BIT_10
 
-#define DATA				BIT_26 | BIT_25 | BIT_24 | BIT_23 | \
-							BIT_22 | BIT_21 | BIT_20 | BIT_19
+#define DATA_H				BIT_26 | BIT_25 | BIT_24 | BIT_23
+#define DATA_L				BIT_22 | BIT_21 | BIT_20 | BIT_19
 
+#ifdef DATA_L
 #define BITMODE				HD44780_8BIT
+#define DATA				DATA_H | DATA_L
+#else
+#define BITMODE				HD44780_4BIT
+#define DATA				DATA_H
+#endif
 #define DIMENSIONS			HD44780_16x2
 
 #endif /* HD44780_DEMO_H_ */

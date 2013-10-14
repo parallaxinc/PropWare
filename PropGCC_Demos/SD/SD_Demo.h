@@ -1,5 +1,5 @@
 /* File:    SD_Demo.h
- * 
+ *
  * Author:  David Zemon
  * Project: SD_Demo
  */
@@ -13,7 +13,6 @@
 // Includes
 #include <propeller.h>
 #include <PropWare.h>
-#include <gpio.h>
 #include <sd.h>
 
 #ifdef DEBUG
@@ -29,6 +28,7 @@
 #define MISO					BIT_1
 #define SCLK					BIT_2
 
+#define OLD_FILE				"STUFF.TXT"
 #define NEW_FILE				"TEST.TXT"
 
 void error (const uint8_t err);

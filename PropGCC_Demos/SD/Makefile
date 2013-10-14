@@ -7,7 +7,7 @@ MODEL = cmm
 CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
-PROPWARE_PATH = /home/david/PropWare
+PROPWARE_PATH = /home/david/External/Kits/Embedded/Parallax/Library/PropWare
 
 # Optionally, specify where your compiler is installed
 PREFIX = /opt/parallax

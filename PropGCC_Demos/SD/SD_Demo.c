@@ -58,7 +58,7 @@ void main (void) {
 	SD_Shell(&f);
 #elif (defined SD_FILE_WRITE)
 	// Create a blank file and copy the contents of STUFF.TXT into it
-	SDfopen("STUFF.TXT", &f, SD_FILE_MODE_R);
+	SDfopen(OLD_FILE, &f, SD_FILE_MODE_R);
 	SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R_PLUS);
 
 #ifdef DEBUG

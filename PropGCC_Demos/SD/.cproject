@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.633730501">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.633730501" moduleId="org.eclipse.cdt.core.settings" name="Debug">
@@ -28,6 +26,8 @@
 								<option id="gnu.c.compiler.option.debugging.level.271743186" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.35278218" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/home/david/PropWare"/>
+									<listOptionValue builtIn="false" value="/opt/parallax"/>
+									<listOptionValue builtIn="false" value="/home/david/External/Kits/Embedded/Parallax/Library/PropWare/PropGCC_Demos"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.672684770" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
