@@ -16,17 +16,8 @@ void main (void) {
 	if ((err = HD44780Start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
 		error(err);
 
-//	HD44780_putchar('H');
-//	HD44780_putchar('e');
-//	HD44780_putchar('l');
-//	HD44780_putchar('l');
-//	HD44780_putchar('o');
-//	HD44780_putchar('!');
-	HD44780_puts("0123456789abcdef0123456789abcdefHello world!!!");
-
-//	HD44780Move(0, 0);
-//	HD44780_puts("Hello!");
-//	HD44780Move(0, 4);
+	HD44780_puts("0123456789abcdef0123456789abcdef");
+	HD44780_puts("Hello world!!!");
 
 	return;
 }

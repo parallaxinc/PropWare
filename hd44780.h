@@ -14,7 +14,7 @@
 #include <propeller.h>
 #include <PropWare.h>
 
-#define HD44780_DEBUG
+//#define HD44780_DEBUG
 
 // LCD parameters
 typedef enum {

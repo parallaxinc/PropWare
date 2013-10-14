@@ -21,8 +21,6 @@ static hd44780_mem_map_t g_hd44780_memMap;
 int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 		const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
 		const hd44780_dimensions_t dimensions) {
-	uint8_t i, bits;
-	uint32_t tempMask;
 	uint8_t arg;
 
 #ifdef HD44780_DEBUG
@@ -60,6 +58,9 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 		return HD44780_INVALID_DIMENSIONS;
 #endif
 
+	// Wait for a couple years until the LCD has done internal initialization
+	waitcnt(250 * MILLISECOND + CNT);
+
 	// Save all control signal pin masks
 	g_hd44780_rs = rs;
 	g_hd44780_rw = rw;
@@ -87,21 +88,20 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 		/* Implied: "if (HD44780_4BIT == bitmode)" */
 		arg = 0x3;
 	arg <<= g_hd44780_dataLSBNum;
-	waitcnt(250 * MILLISECOND + CNT);
+
 	GPIOPinWrite(g_hd44780_dataMask, arg);
-	waitcnt(100 * MILLISECOND + CNT);
 	HD44780ClockPulse();
 	waitcnt(100 * MILLISECOND + CNT);
+
 	HD44780ClockPulse();
-	waitcnt(10 * MILLISECOND + CNT);
+	waitcnt(100 * MILLISECOND + CNT);
+
 	HD44780ClockPulse();
 	waitcnt(10 * MILLISECOND + CNT);
 
-	i = 0;
+
 	if (HD44780_4BIT == bitmode) {
-		GPIOPinWrite(g_hd44780_dataMask, (0x2UL << g_hd44780_dataLSBNum));
-		HD44780ClockPulse();
-		GPIOPinWrite(g_hd44780_dataMask, 0);
+		GPIOPinWrite(g_hd44780_dataMask, 0x2 << g_hd44780_dataLSBNum);
 		HD44780ClockPulse();
 	}
 
@@ -112,23 +112,19 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	if (0 != dimensions % 3)
 		arg |= HD44780_2LINE_MODE;
 	HD44780Cmd(arg);
-	printf("2) 0x%02X\n", arg);
 
 	// Turn off display shift (set cursor shift) and leave default of shift-left
 	HD44780Cmd(HD44780_SHIFT);
-	printf("3) 0x%02X\n", HD44780_SHIFT);
 
 	// Turn the display on; Leave cursor off and not blinking
 	//	HD44780Cmd(HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR);
 	arg = HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR | HD44780_CURSOR
 			| HD44780_BLINK;
 	HD44780Cmd(arg);
-	printf("4) 0x%02X\n", arg);
 
 	// Set cursor to auto-increment upon writing a character
 	arg = HD44780_ENTRY_MODE_SET | HD44780_SHIFT_INC;
 	HD44780Cmd(arg);
-	printf("5) 0x%02X\n", arg);
 
 	HD44780Clear();
 
@@ -205,7 +201,7 @@ void HD44780_puts (char* s) {
 }
 
 inline void HD44780Cmd (const uint8_t c) {
-//set RS to command mode and RW to write
+	//set RS to command mode and RW to write
 	GPIOPinClear(g_hd44780_rs);
 	HD44780Write(c);
 }
@@ -221,8 +217,9 @@ void HD44780Write (const uint8_t val) {
 		shiftedVal <<= g_hd44780_dataLSBNum - 4;
 		GPIOPinWrite(g_hd44780_dataMask, shiftedVal);
 		HD44780ClockPulse();
+
+		// Shift out low nibble
 		shiftedVal <<= 4;
-		waitcnt(MILLISECOND + CNT);
 		GPIOPinWrite(g_hd44780_dataMask, shiftedVal);
 	}
 	// Shift remaining four bits out
