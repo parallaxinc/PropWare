@@ -12,8 +12,8 @@
 
 #include <propeller.h>
 #include <PropWare.h>
-//#include <spi.h>
-#include <SPI_c.h>
+#include <spi.h>
+//#include <SPI_c.h>
 
 #define L3G_SPI_MODE			SPI_MODE_3
 #define L3G_SPI_BITMODE			SPI_MSB_FIRST

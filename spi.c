@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 /**
- * \brief   Print through UART an error string followed by entering an infinite loop
+ * \brief   Print through UART an error string followed by entering an infinite
+ *          loop
  *
  * \param   err     Error number used to determine error string
  */
@@ -32,7 +33,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 		const uint32_t frequency, const spimode_t mode,
 		const spibitmode_t bitmode) {
 	uint8_t err;
-	const char str[] = "SPIStart()";
+	const char str[11] = "SPIStart()";
 
 #ifdef SPI_DEBUG_PARAMS
 	// Ensure all pin-mask parameters have exactly 1 set bit
@@ -55,8 +56,11 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 
 	// If cog already started, do not start another
 	if (!SPIIsRunning()) {
+
 		// Start GAS cog
-		g_mailbox = 0; // Set the mailbox to 0 (anything other than -1) so that we know when the SPI cog has started
+		// Set the mailbox to 0 (anything other than -1) so that we know when
+		// the SPI cog has started
+		g_mailbox = 0;
 		g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
 		if (!SPIIsRunning())
 			SPIError(SPI_COG_NOT_STARTED);
@@ -93,18 +97,15 @@ uint8_t SPIStop (void) {
 }
 
 inline int8_t SPIIsRunning (void) {
-	return -1 != g_spiCog;
+	return !(((int8_t) -1) == g_spiCog);
 }
 
 inline uint8_t SPIWait (void) {
 	const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
 	while ((uint32_t) -1 != g_mailbox) // Wait for GAS cog to read in value and write -1
-		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM) {
-			__simple_printf("Timing out with %u in mailbox.\n", g_mailbox);
-//			waitcnt(CLKFREQ / 1000 + CNT);
+		if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
 			return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
-		}
 
 	return 0;
 }
@@ -121,7 +122,7 @@ inline uint8_t SPIWaitSpecific (const uint32_t value) {
 
 uint8_t SPISetMode (const uint8_t mode) {
 	uint8_t err;
-	char str[] = "SPISetMode()";
+	char str[14] = "SPISetMode()";
 
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -144,7 +145,7 @@ uint8_t SPISetMode (const uint8_t mode) {
 
 uint8_t SPISetBitMode (const uint8_t bitmode) {
 	uint8_t err;
-	char str[] = "SPISetBitMode()";
+	char str[16] = "SPISetBitMode()";
 
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -163,7 +164,7 @@ uint8_t SPISetBitMode (const uint8_t bitmode) {
 
 uint8_t SPISetClock (const uint32_t frequency) {
 	uint8_t err;
-	char str[] = "SPISetClock()";
+	char str[14] = "SPISetClock()";
 
 	if (!SPIIsRunning())
 		SPIError(SPI_MODULE_NOT_RUNNING);
@@ -186,7 +187,7 @@ uint8_t SPISetClock (const uint32_t frequency) {
 
 uint8_t SPIGetClock (uint32_t *frequency) {
 	uint8_t err;
-	char str[] = "SPIGetClock()";
+	char str[14] = "SPIGetClock()";
 
 #ifdef SPI_DEBUG_PARAMS
 	// Check for errors
@@ -209,7 +210,7 @@ uint8_t SPIGetClock (uint32_t *frequency) {
 
 uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 	uint8_t err;
-	char str[] = "SPIShiftOut()";
+	char str[14] = "SPIShiftOut()";
 
 #ifdef SPI_DEBUG_PARAMS
 	// Check for errors
@@ -235,7 +236,7 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
 
 uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
 	uint8_t err;
-	const char str[] = "SPIShiftIn()";
+	const char str[13] = "SPIShiftIn()";
 
 	// Check for errors
 #ifdef SPI_DEBUG_PARAMS
@@ -364,10 +365,7 @@ static inline uint8_t SPIReadPar (void *par, const size_t bytes) {
 #ifdef SPI_DEBUG
 void SPIError (const uint8_t err, ...) {
 	va_list list;
-	char str[] = "SPI Error %u: %s\n";
-
-//	printf("Poop on me..\n");
-//	while(1);
+	char str[18] = "SPI Error %u: %s\n";
 
 	switch (err) {
 		case SPI_INVALID_PIN:
@@ -387,8 +385,7 @@ void SPIError (const uint8_t err, ...) {
 			va_start(list, err);
 			__simple_printf("SPI Error %u: %s\n\tCalling function was %s\n",
 					(err - SPI_ERRORS_BASE),
-					"Timed out during parameter passing",
-					va_arg(list, char*));
+					"Timed out during parameter passing", va_arg(list, char *));
 			va_end(list);
 			break;
 		case SPI_TIMEOUT_RD:

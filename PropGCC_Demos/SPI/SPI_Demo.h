@@ -1,5 +1,5 @@
 /* File:    SPI_Demo.h
- * 
+ *
  * Author:  David Zemon
  * Project: SPI_Demo
  */
@@ -11,7 +11,6 @@
 #include <propeller.h>
 #include <stdio.h>
 #include <PropWare.h>
-#include <gpio.h>
 #include <spi.h>
 
 // Constants

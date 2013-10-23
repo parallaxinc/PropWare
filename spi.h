@@ -102,7 +102,8 @@ typedef enum {
  * \return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-		const uint32_t frequency, const spimode_t mode, const spibitmode_t bitmode);
+		const uint32_t frequency, const spimode_t mode,
+		const spibitmode_t bitmode);
 
 /**
  * \brief   Stop a running SPI cog
@@ -244,7 +245,6 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #define SPI_PHASE_BIT				BIT_0
 #define SPI_POLARITY_BIT			BIT_1		// Idle high == HIGH; Idle low == LOW
 #define SPI_BITMODE_BIT				BIT_2		// MSB_FIRST == HIGH; LSB_FIRST == LOW
-
 /**
  * \brief   Read the value that the SPI cog just shifted in
  *

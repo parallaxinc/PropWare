@@ -5,16 +5,28 @@
  *
  * Description: TODO: Do me
  *
+ * NOTE: To use the full functionality of printf (like %u, %X, etc), please use
+ *       the following format:
+ *          #include <stdio.h>
+ *          char myString[128];
+ *          int x = 42;
+ *          sprintf(myString, "The answer to life is: %i!", x);
+ *          HD44780_puts(myString);
+ *
  * NOTE: Does not natively support 40x4 or 24x4 character displays
  */
 
 #ifndef HD44780_H_
 #define HD44780_H_
 
+#include <stdarg.h>
+#include <stdlib.h>
 #include <propeller.h>
 #include <PropWare.h>
 
 //#define HD44780_DEBUG
+
+#define HD44780_TAB_WIDTH				4
 
 // LCD parameters
 typedef enum {
@@ -108,6 +120,13 @@ inline void HD44780Clear (void);
 void HD44780Move (const uint8_t row, const uint8_t col);
 
 /**
+ * TODO: Write full documentation
+ *
+ * Supported formats: i, d, u, X, s, c ("%%" will print '%')
+ */
+void HD44780_printf (char *fmt, ...);
+
+/**
  * \brief       Print a string to the LCD
  *
  * \detailed    Via a series of calls to HD44780_putchar, prints each character
@@ -123,6 +142,12 @@ void HD44780_puts (char *s);
  * \param   c   Individual char to be printed
  */
 void HD44780_putchar (const char c);
+
+void HD44780_int (int32_t x);
+
+void HD44780_uint (uint32_t x);
+
+void HD44780_hex (uint32_t x);
 
 /*************************
  *** Private Functions ***

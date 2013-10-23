@@ -24,38 +24,41 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	uint8_t arg;
 
 #ifdef HD44780_DEBUG
+	uint8_t i, bits;
+	uint32_t tempMask;
+
 	if (1 != PropWareCountBits(rw) || 1 != PropWareCountBits(rs)
 			|| 1 != PropWareCountBits(en))
-		return HD44780_INVALID_CTRL_SGNL;
+	return HD44780_INVALID_CTRL_SGNL;
 
 	// Ensure either 4 or 8 bits were sent in for the data mask
 	switch (bitmode) {
 		case HD44780_8BIT:
-			bits = 8;
-			if (8 != PropWareCountBits(dataPinsMask))
-				return HD44780_INVALID_DATA_MASK;
-			break;
+		bits = 8;
+		if (8 != PropWareCountBits(dataPinsMask))
+		return HD44780_INVALID_DATA_MASK;
+		break;
 		case HD44780_4BIT:
-			bits = 4;
-			if (4 != PropWareCountBits(dataPinsMask))
-				return HD44780_INVALID_DATA_MASK;
-			break;
+		bits = 4;
+		if (4 != PropWareCountBits(dataPinsMask))
+		return HD44780_INVALID_DATA_MASK;
+		break;
 		default:
-			return HD44780_INVALID_DATA_MASK;
+		return HD44780_INVALID_DATA_MASK;
 	}
 
 	// Ensure that all 4 or 8 bits are consecutive
 	tempMask = dataPinsMask;
 	while (0 == (BIT_0 & tempMask))
-		tempMask >>= 1;
+	tempMask >>= 1;
 	for (i = 0; i < bits; ++i)
-		if (0 == (BIT_0 & tempMask))
-			return HD44780_INVALID_DATA_MASK;
-		else
-			tempMask >>= 1;
+	if (0 == (BIT_0 & tempMask))
+	return HD44780_INVALID_DATA_MASK;
+	else
+	tempMask >>= 1;
 
 	if (HD44780_DIMENSIONS <= dimensions)
-		return HD44780_INVALID_DIMENSIONS;
+	return HD44780_INVALID_DIMENSIONS;
 #endif
 
 	// Wait for a couple years until the LCD has done internal initialization
@@ -99,7 +102,6 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	HD44780ClockPulse();
 	waitcnt(10 * MILLISECOND + CNT);
 
-
 	if (HD44780_4BIT == bitmode) {
 		GPIOPinWrite(g_hd44780_dataMask, 0x2 << g_hd44780_dataLSBNum);
 		HD44780ClockPulse();
@@ -118,8 +120,7 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 
 	// Turn the display on; Leave cursor off and not blinking
 	//	HD44780Cmd(HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR);
-	arg = HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR | HD44780_CURSOR
-			| HD44780_BLINK;
+	arg = HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR;
 	HD44780Cmd(arg);
 
 	// Set cursor to auto-increment upon writing a character
@@ -167,6 +168,53 @@ void HD44780Move (const uint8_t row, const uint8_t col) {
 	g_hd44780_curCol = col;
 }
 
+void HD44780_printf (char *fmt, ...) {
+	va_list list;
+	va_start(list, fmt);
+
+	while (*fmt) {
+		if ('%' == *fmt) {
+			++fmt;
+			switch (*fmt) {
+				case 'i':
+				case 'd':
+					HD44780_int(va_arg(list, int32_t));
+					break;
+				case 'u':
+					HD44780_uint(va_arg(list, uint32_t));
+					break;
+				case 's':
+					HD44780_puts(va_arg(list, char *));
+					break;
+				case 'c':
+					HD44780_putchar(va_arg(list, int));
+					break;
+				case 'X':
+					HD44780_hex(va_arg(list, uint32_t));
+					break;
+				case '%':
+					HD44780_putchar('%');
+					break;
+				default:
+					va_arg(list, void); // Increment va_arg pointer
+					HD44780_putchar(' ');
+					break;
+			}
+		} else
+			HD44780_putchar(*fmt);
+		++fmt;
+	}
+
+	va_end(list);
+}
+
+void HD44780_puts (char *s) {
+	while (*s) {
+		HD44780_putchar(*s);
+		++s;
+	}
+}
+
 void HD44780_putchar (const char c) {
 	// For manual new-line characters...
 	if ('\n' == c) {
@@ -174,6 +222,10 @@ void HD44780_putchar (const char c) {
 			g_hd44780_curRow = 0;
 		g_hd44780_curCol = 0;
 		HD44780Move(g_hd44780_curRow, g_hd44780_curCol);
+	} else if ('\t' == c) {
+		do {
+			HD44780_putchar(' ');
+		} while (g_hd44780_curCol % HD44780_TAB_WIDTH);
 	}
 	// And for everything else...
 	else {
@@ -193,11 +245,79 @@ void HD44780_putchar (const char c) {
 	}
 }
 
-void HD44780_puts (char* s) {
-	while (*s) {
-		HD44780_putchar(*s);
-		++s;
+void HD44780_int (int32_t x) {
+	char buf[32];
+	uint8_t j, i = 0;
+	uint8_t sign = 0;
+
+	if (x < 0) {
+		sign = 1;
+		x = abs(x);
+	} else if (0 == x) {
+		HD44780_putchar('0');
+		return;
 	}
+
+	// Create a character array in reverse order, starting with the tens
+	// digit and working toward the largest digit
+	while (x) {
+		buf[i] = x % 10 + '0';
+		x /= 10;
+		++i;
+	}
+
+	// If negative, add the sign
+	if (sign) {
+		buf[i] = '-';
+		++i;
+	}
+
+	// Reverse the character array
+	for (j = 0; j < i; ++j)
+		HD44780_putchar(buf[i - j - 1]);
+}
+
+void HD44780_uint (uint32_t x) {
+	const uint8_t divisor = 10;
+	char buf[32];
+	uint8_t j, i = 0;
+
+	if (0 == x)
+		HD44780_putchar('0');
+	else {
+		// Create a character array in reverse order, starting with the tens
+		// digit and working toward the largest digit
+		while (x) {
+			buf[i] = x % divisor + '0';
+			x /= divisor;
+			++i;
+		}
+
+		// Reverse the character array
+		for (j = 0; j < i; ++j)
+			HD44780_putchar(buf[i - j - 1]);
+	}
+}
+
+void HD44780_hex (uint32_t x) {
+	char buf[32];
+	uint8_t temp, j, i = 0;
+
+	while (x) {
+		temp = x & NIBBLE_0;
+		if (temp < 10)
+			buf[i] = temp + '0';
+		else {
+			temp -= 10;
+			buf[i] = temp + 'A';
+		}
+		++i;
+		x >>= 4;
+	}
+
+	// Reverse the character array
+	for (j = 0; j < i; ++j)
+		HD44780_putchar(buf[i - j - 1]);
 }
 
 inline void HD44780Cmd (const uint8_t c) {

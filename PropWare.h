@@ -115,7 +115,7 @@
 #define GPIOPinRead(pins)				(INA & (pins))
 
 #ifndef ASM_OBJ_FILE
-/* @Brief: Allow easy switch-press detection of any port and pin with debounce
+/* @Brief: Allow easy switch-press detection of any pin with de-bounce
  *				protection
  *				NOTE: "_Low" denotes active low switch-press
  *
@@ -130,6 +130,9 @@ uint8_t GPIOSwitchRead_Low (uint32_t pin);
  */
 uint8_t PropWareCountBits (uint32_t par);
 
+/**
+ * TODO: Do me
+ */
 uint8_t PropWareGetPinNum (const uint32_t pinMask);
 #endif
 #endif /* PROPWARE_H */

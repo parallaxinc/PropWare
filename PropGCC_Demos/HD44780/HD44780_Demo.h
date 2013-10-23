@@ -1,5 +1,5 @@
 /* File:    HD44780_Demo.h
- * 
+ *
  * Author:  David Zemon
  * Project: HD44780_Demo
  */
@@ -12,12 +12,12 @@
 #include <PropWare.h>
 #include <hd44780.h>
 
-#define RS					BIT_15
-#define RW					BIT_13
-#define EN					BIT_11
+#define RS					BIT_10
+#define RW					BIT_27
+#define EN					BIT_8
 
 #define DATA_H				BIT_26 | BIT_25 | BIT_24 | BIT_23
-#define DATA_L				BIT_22 | BIT_21 | BIT_20 | BIT_19
+//#define DATA_L				BIT_22 | BIT_21 | BIT_20 | BIT_19
 
 #ifdef DATA_L
 #define BITMODE				HD44780_8BIT

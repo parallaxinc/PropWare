@@ -41,8 +41,6 @@
 						or dira, testLEDs				'' DEBUG: LEDs used for debugging purposes, can be removed later
 						wrlong negOne, par				'' Inform parent cog that initialization has begun
 
-						or outa, led23
-
 						// Begin by retreiving all parameters...
 						call #READ_CMD					'' Read in the pin mask MOSI
 						mov mosi, mailbox
@@ -527,6 +525,7 @@ led20					long	BIT_20
 led21					long	BIT_21
 led22					long	BIT_22
 led23					long	BIT_23
+quarterSecond			long	20000000
 
 /* Beginning of variables */
 mailbox					res		1						'' Address in hub memory used for communication with another cog

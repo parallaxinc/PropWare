@@ -16,6 +16,7 @@
 #include <propeller.h>
 #include <PropWare.h>
 #include <spi.h>
+//#include <SPI_c.h>
 
 #define MCP300X_SPI_DEFAULT_FREQ	100000
 #define MCP300X_SPI_MODE			SPI_MODE_2

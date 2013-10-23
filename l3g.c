@@ -116,7 +116,8 @@ uint8_t L3GReadAll (int16_t *val) {
 	return 0;
 }
 
-uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal, uint8_t *rdVal) {
+uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal,
+		uint8_t *rdVal) {
 	uint8_t err, oldValue;
 
 	if (g_l3g_alwaysSetMode) {
@@ -185,7 +186,7 @@ uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat) {
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(24, outputValue));
-	checkErrors(SPIWait());
+//	checkErrors(SPIWait());
 	GPIOPinSet(g_l3g_cs);
 
 	return 0;
