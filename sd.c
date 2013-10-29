@@ -156,7 +156,7 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	if (((uint32_t) -1) != freq)
 		SPISetClock(freq);
 	else
-		SPISetClock(SD_SPI_FINAL_FREQ);
+		SPISetClock(SD_DEFAULT_SPI_FREQ);
 
 // If debugging requested, print to the screen CSD and CID registers from SD card
 #if (defined SD_VERBOSE && defined SD_DEBUG)

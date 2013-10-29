@@ -11,8 +11,6 @@
 void main (void) {
 	uint8_t err;
 
-//	__simple_printf("Hello!!!\n");
-
 	if ((err = HD44780Start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
 		error(err);
 

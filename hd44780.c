@@ -116,10 +116,10 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 	HD44780Cmd(arg);
 
 	// Turn off display shift (set cursor shift) and leave default of shift-left
-	HD44780Cmd(HD44780_SHIFT);
+	arg = HD44780_SHIFT;
+	HD44780Cmd(arg);
 
 	// Turn the display on; Leave cursor off and not blinking
-	//	HD44780Cmd(HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR);
 	arg = HD44780_DISPLAY_CTRL | HD44780_DISPLAY_PWR;
 	HD44780Cmd(arg);
 

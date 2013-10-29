@@ -24,7 +24,7 @@
 #include <propeller.h>
 #include <PropWare.h>
 
-//#define HD44780_DEBUG
+#define HD44780_DEBUG
 
 #define HD44780_TAB_WIDTH				4
 

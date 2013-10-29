@@ -1,10 +1,11 @@
-PRJ = SD_Demo
+CFLAGS = -Os
+
+PRJ = MAX6675_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o sd.o spi.o spi_as.o PropWare.o
+OBJS = $(PRJ).o hd44780.o spi.o spi_as.o PropWare.o max6675.o
 BOARD = QUICKSTART
-MODEL = cmm
-CFLAGS = -Os
+MODEL = lmm
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 PROPWARE_PATH = /home/david/External/Kits/Embedded/Parallax/Library/PropWare

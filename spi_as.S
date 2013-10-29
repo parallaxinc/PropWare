@@ -100,6 +100,7 @@ LOOP					// Retrieve a command
 						cmp temp, #SPI_FUNC_SET_FREQ wz
 		if_z			jmp #SET_FREQ
 
+						// If command is "Get clock"
 						cmp temp, #SPI_FUNC_GET_FREQ wz
 		if_z			jmp #GET_FREQ
 

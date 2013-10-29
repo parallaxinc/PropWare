@@ -11,7 +11,7 @@ MODEL = lmm
 PROPWARE_PATH = /home/david/PropWare
 
 # Optionally, specify where your compiler is installed
-PREFIX = /opt/parallax
+PREFIX = /home/david/reusable/SimpleIDE-0-9-40/parallax
 
 all: $(NAME).elf
 

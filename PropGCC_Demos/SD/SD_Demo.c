@@ -1,7 +1,7 @@
-/* File:    SD_Driver_gcc.c
+/* File:    SD_Demo.c
  * 
  * Author:  David Zemon
- * Project: SPI_Lib_gcc
+ * Project: SD_Demo
  */
 
 #include "SD_Demo.h"

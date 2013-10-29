@@ -23,7 +23,7 @@
 #define printf		__simple_printf
 #endif
 
-#define CS						BIT_6
+#define CS						BIT_4
 #define MOSI					BIT_0
 #define MISO					BIT_1
 #define SCLK					BIT_2

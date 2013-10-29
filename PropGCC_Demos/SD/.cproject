@@ -17,7 +17,7 @@
 				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.633730501" name="Debug" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.633730501." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.223378261" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
-							<option id="cdt.managedbuild.option.gnu.cross.path.1910141531" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" value="/opt/parallax/bin" valueType="string"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1910141531" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" value="/home/david/reusable/SimpleIDE-0-9-40/parallax/bin" valueType="string"/>
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.612169188" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" value="propeller-elf-" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1249282342" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
 							<builder arguments="-f ../Makefile" buildPath="${workspace_loc:/SD_Demo}/Debug" command="make" id="cdt.managedbuild.builder.gnu.cross.424380039" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
@@ -27,6 +27,7 @@
 								<option id="gnu.c.compiler.option.include.paths.35278218" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/home/david/PropWare"/>
 									<listOptionValue builtIn="false" value="/opt/parallax"/>
+									<listOptionValue builtIn="false" value="/home/david/reusable/SimpleIDE-0-9-40/parallax/propeller-elf/include"/>
 									<listOptionValue builtIn="false" value="/home/david/External/Kits/Embedded/Parallax/Library/PropWare/PropGCC_Demos"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.672684770" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>

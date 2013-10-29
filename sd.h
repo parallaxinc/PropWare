@@ -46,9 +46,9 @@
  * 								a minimum, nor is RAM usage
  * 								DEFAULT: ON
  */
-#define SD_DEBUG
-#define SD_VERBOSE
-#define SD_VERBOSE_BLOCKS
+//#define SD_DEBUG
+//#define SD_VERBOSE
+//#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
 #define SD_FILE_WRITE
 
@@ -60,7 +60,9 @@
 typedef enum {
 	SD_FILE_MODE_R,
 #ifdef SD_FILE_WRITE
-	SD_FILE_MODE_R_PLUS, SD_FILE_MODE_A, SD_FILE_MODE_A_PLUS,
+	SD_FILE_MODE_R_PLUS,
+	SD_FILE_MODE_A,
+	SD_FILE_MODE_A_PLUS,
 #endif
 	SD_FILE_MODES
 } sd_file_mode;
@@ -376,13 +378,13 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 /*******************************************
  *** Private SD Definitions & Prototypes ***
  *******************************************/
-#if (defined SD_DEBUG || defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS || defined SD_SHELL)
+#if (defined SD_DEBUG || defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS || \
+		defined SD_SHELL)
 #include <stdio.h>
 #endif
 
 // SPI config
 #define SD_SPI_INIT_FREQ			200000					// Run SD initialization at 200 kHz
-#define SD_SPI_FINAL_FREQ			1900000					// Speed clock to 1.9 MHz after initialization
 #define SD_SPI_MODE					SPI_MODE_0
 #define SD_SPI_BITMODE				SPI_MSB_FIRST
 
@@ -484,11 +486,10 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
 #endif
 
 #define SD_FOLDER_ID				((uint8_t) -1)						// Signal that the contents of a buffer are a directory
-
 struct _sd_buffer {
 	uint8_t buf[SD_SECTOR_SIZE];				// Buffer for SD card contents
-	uint8_t id;				// Buffer ID - determine who owns the current information
-	uint32_t curClusterStartAddr;	// Store the current cluster's starting sector number
+	uint8_t id;		// Buffer ID - determine who owns the current information
+	uint32_t curClusterStartAddr;// Store the current cluster's starting sector number
 	uint8_t curSectorOffset;  // Store the current sector offset from the beginning of the cluster
 	uint32_t curAllocUnit;					// Store the current allocation unit
 	uint32_t nextAllocUnit;					// Look-ahead at the next FAT entry
@@ -505,8 +506,8 @@ struct _sd_file {
 	file_pos rPtr;
 	sd_file_mode mode;
 	uint32_t length;
-	uint32_t maxSectors;	// Maximum number of sectors currently allocated to a file
-	uint8_t mod;	// When the length of a file is changed, this variable will be set, otherwise cleared
+	uint32_t maxSectors;// Maximum number of sectors currently allocated to a file
+	uint8_t mod;// When the length of a file is changed, this variable will be set, otherwise cleared
 	uint32_t firstAllocUnit;  // File's starting allocation unit
 	uint32_t curSector;  // like curSectorOffset, but does not reset upon loading a new cluster
 	uint32_t curCluster;  // like curSector, but for allocation units
@@ -525,7 +526,8 @@ struct _sd_file {
  *
  * \return
  */
-static uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg, const uint8_t crc);
+static uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg,
+		const uint8_t crc);
 
 /* brief	Receive response and data from SD card over SPI
  *
