@@ -132,13 +132,10 @@ uint8_t SPISetMode (const uint8_t mode) {
 #endif
 
 	// Wait for SPI cog to go idle
-	GPIOPinSet(BIT_16);
 	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	g_mailbox = SPI_FUNC_SET_MODE;
-	GPIOPinSet(BIT_17);
 	PROPWARE_SPI_SAFETY_CHECK_STR(SPIWait(), str);
 	g_mailbox = mode;
-	GPIOPinSet(BIT_18);
 
 	return 0;
 }

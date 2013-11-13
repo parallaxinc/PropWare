@@ -1,11 +1,10 @@
-CFLAGS = -Os
-
-PRJ = MCP300x_Demo
+PRJ = L3G_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o mcp300x.o spi.o spi_as.o PropWare.o
+OBJS = $(PRJ).o l3g.o spi.o spi_as.o PropWare.o
 BOARD = QUICKSTART
-MODEL = lmm
+MODEL = cmm
+CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 PROPWARE_PATH = /home/david/PropWare

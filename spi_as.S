@@ -25,7 +25,7 @@
 #define SPI_BITS_OFFSET			8
 
 #define SPI_PHASE_BIT			BIT_0
-#define SPI_POLARITY_BIT		BIT_1					'' Idle high == HIGH; Idle low == LOW
+#define SPI_POLARITY_BIT		BIT_1					'' When set, clock idles high; When reset, clock idles low
 #define SPI_BITMODE_BIT			BIT_2					'' MSB_FIRST == HIGH; LSB_FIRST == LOW
 
 #define SPI_FUNC_BITS			BYTE_0					'' Interpret bits 7-0 as a function descriptor
@@ -109,12 +109,19 @@ LOOP					// Retrieve a command
 
 /* FUNCTION: SPISetPolarity() */
 SET_MODE				// Set the current SPI polarity; If polarity high, initialize sclk high, else clear the bit
-						call #READ_CMD					'' Read in the mode
+						call #READ_DATA					'' Read in the mode
+
+						mov clkPhase, mailbox			'' Store the phase
+						and clkPhase, #SPI_PHASE_BIT	'' Clear the clock polarity bit
+
+						mov temp, mailbox
+						call #SEND_TO_LED
+
 						test mailbox, #SPI_POLARITY_BIT wz
-		if_z			or outa, sclk
-		if_nz			andn outa, sclk
-						mov clkPhase, mailbox
-						and clkPhase, #SPI_PHASE_BIT
+						muxz outa, sclk
+						muxz outa, led22
+						muxnz outa, led23
+
 						jmp #LOOP
 
 SET_BITMODE				// Set shifting bitmode (LSB or MSB first) of communication
@@ -128,7 +135,7 @@ SET_FREQ				call #READ_CMD					'' Using READ_CMD instead of READ_DATA because -1
 						jmp #LOOP
 
 /* FUNCTION: SPIGetClock() */
-GET_FREQ				mov data, #400 //clkDelay
+GET_FREQ				mov data, clkDelay
 						call #WRITE_DATA
 						jmp #LOOP
 
@@ -508,6 +515,12 @@ write_loop				rdlong mailbox, par				'' \.
 						cmp mailbox, negOne wz			''  |--> Hold GAS execution here until C has signaled read complete by writing -1
 		if_nz			jmp #write_loop					'' /
 WRITE_DATA_ret			ret
+
+SEND_TO_LED				mov temp2, temp					'' Save the original value
+						shl temp2, #16					'' Shift the first byte into the LEDs
+						and temp2, testLEDs				'' Clear all bits not associated with the LEDs
+						mov outa, temp2					'' Turn on the LEDs
+SEND_TO_LED_ret			ret
 
 /* Pre-Initialized Values */
 negOne					long	-1						'' Used for comparison purposes
