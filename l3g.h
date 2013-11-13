@@ -14,7 +14,7 @@
 #include <PropWare.h>
 #include <spi.h>
 
-#define L3G_SPI_MODE			SPI_MODE_2
+#define L3G_SPI_MODE			SPI_MODE_3
 #define L3G_SPI_BITMODE			SPI_MSB_FIRST
 #define L3G_SPI_DEFAULT_FREQ	100000
 
