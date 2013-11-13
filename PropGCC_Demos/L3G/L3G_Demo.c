@@ -21,7 +21,7 @@ void main (void) {
 		if ((err = L3GReadAll(gyroVals)))
 			error(err);
 		printf("Gyro vals... X: %i\tY: %i\tZ: %i\n", gyroVals[0], gyroVals[1], gyroVals[2]);
-		waitcnt(CLKFREQ/4 + CNT);
+		waitcnt(CLKFREQ/20 + CNT);
 	}
 }
 

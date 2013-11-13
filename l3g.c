@@ -32,9 +32,6 @@ uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	checkErrors(L3GWrite8(L3G_CTRL_REG1, NIBBLE_0));
 	checkErrors(L3GWrite8(L3G_CTRL_REG4, dpsMode | BIT_7));
 
-	// Debugging purposes only - remove when working again
-	checkErrors(L3GWrite8(L3G_CTRL_REG3, 0x08));
-
 	return 0;
 }
 
@@ -134,6 +131,7 @@ uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat) {
 
 	GPIOPinClear(g_l3g_cs);
 	err = SPIShiftOut(16, outputValue);
+	checkErrors(SPIWait());
 	GPIOPinSet(g_l3g_cs);
 
 	return err;
@@ -157,6 +155,7 @@ uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat) {
 
 	GPIOPinClear(g_l3g_cs);
 	checkErrors(SPIShiftOut(24, outputValue));
+	checkErrors(SPIWait());
 	GPIOPinSet(g_l3g_cs);
 
 	return 0;
