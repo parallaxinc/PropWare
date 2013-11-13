@@ -107,7 +107,7 @@ LOOP					// Retrieve a command
 						// Default: Return to loop
 						jmp #LOOP
 
-/* FUNCTION: SPISetPolarity() */
+/* FUNCTION: SPISetMode() */
 SET_MODE				// Set the current SPI polarity; If polarity high, initialize sclk high, else clear the bit
 						call #READ_DATA					'' Read in the mode
 
@@ -124,6 +124,7 @@ SET_MODE				// Set the current SPI polarity; If polarity high, initialize sclk h
 
 						jmp #LOOP
 
+/* FUNCTION: SPISetBitMode() */
 SET_BITMODE				// Set shifting bitmode (LSB or MSB first) of communication
 						call #READ_CMD					'' Read in bitmode
 						mov bitmode, mailbox
@@ -516,6 +517,7 @@ write_loop				rdlong mailbox, par				'' \.
 		if_nz			jmp #write_loop					'' /
 WRITE_DATA_ret			ret
 
+/* Debugging purposes only; not accessible through C interface */
 SEND_TO_LED				mov temp2, temp					'' Save the original value
 						shl temp2, #16					'' Shift the first byte into the LEDs
 						and temp2, testLEDs				'' Clear all bits not associated with the LEDs
