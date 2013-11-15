@@ -12,7 +12,7 @@
 #define MCP300X_DIFFERENTIAL	0
 
 #define MCP300X_OPTN_WIDTH		7
-#define MCP300X_DATA_WIDTH		10
+#define MCP300X_DATA_WIDTH		11
 
 uint8_t g_mcp300x_cs;
 uint8_t g_mcp300x_alwaysSetMode = 0;
