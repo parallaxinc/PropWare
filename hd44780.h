@@ -3,7 +3,7 @@
  *
  * @author          David Zemon, Collin Winans
  *
- * @description:    TODO: Do me
+ * @description     TODO: Do me
  *
  * @note            Does not natively support 40x4 or 24x4 character displays
  */
@@ -18,67 +18,67 @@
 
 #define HD44780_DEBUG
 
-#define HD44780_TAB_WIDTH				4
+#define HD44780_TAB_WIDTH               4
 
 // LCD parameters
 typedef enum {
-	HD44780_4BIT,
-	HD44780_8BIT,
-	HD44780_BITMODES
+    HD44780_4BIT,
+    HD44780_8BIT,
+    HD44780_BITMODES
 } hd44780_bitmode_t;
 
 // Possible LCD dimensions
 typedef enum {
-	HD44780_8x1,
-	HD44780_8x2,
-	HD44780_8x4,
-	HD44780_16x1_1,
-	HD44780_16x1_2,
-	HD44780_16x2,
-	HD44780_16x4,
-	HD44780_20x1,
-	HD44780_20x2,
-	HD44780_20x4,
-	HD44780_24x1,
-	HD44780_24x2,
-	HD44780_40x1,
-	HD44780_40x2,
-	HD44780_DIMENSIONS
+    HD44780_8x1,
+    HD44780_8x2,
+    HD44780_8x4,
+    HD44780_16x1_1,
+    HD44780_16x1_2,
+    HD44780_16x2,
+    HD44780_16x4,
+    HD44780_20x1,
+    HD44780_20x2,
+    HD44780_20x4,
+    HD44780_24x1,
+    HD44780_24x2,
+    HD44780_40x1,
+    HD44780_40x2,
+    HD44780_DIMENSIONS
 } hd44780_dimensions_t;
 
 // Errors
-#define HD44780_ERRORS_BASE				48
-#define HD44780_ERRORS_LIMIT			16
-#define HD44780_INVALID_CTRL_SGNL		HD44780_ERRORS_BASE + 0
-#define HD44780_INVALID_DATA_MASK		HD44780_ERRORS_BASE + 1
-#define HD44780_INVALID_DIMENSIONS		HD44780_ERRORS_BASE + 2
+#define HD44780_ERRORS_BASE             48
+#define HD44780_ERRORS_LIMIT            16
+#define HD44780_INVALID_CTRL_SGNL       HD44780_ERRORS_BASE + 0
+#define HD44780_INVALID_DATA_MASK       HD44780_ERRORS_BASE + 1
+#define HD44780_INVALID_DIMENSIONS      HD44780_ERRORS_BASE + 2
 
 // Commands; NOTE: must be OR-ed with arguments below
-#define HD44780_CLEAR					BIT_0
-#define HD44780_RET_HOME				BIT_1
-#define HD44780_ENTRY_MODE_SET			BIT_2
-#define HD44780_DISPLAY_CTRL			BIT_3
-#define HD44780_SHIFT					BIT_4
-#define HD44780_FUNCTION_SET			BIT_5
-#define HD44780_SET_CGRAM_ADDR			BIT_6
-#define HD44780_SET_DDRAM_ADDR			BIT_7
+#define HD44780_CLEAR                   BIT_0
+#define HD44780_RET_HOME                BIT_1
+#define HD44780_ENTRY_MODE_SET          BIT_2
+#define HD44780_DISPLAY_CTRL            BIT_3
+#define HD44780_SHIFT                   BIT_4
+#define HD44780_FUNCTION_SET            BIT_5
+#define HD44780_SET_CGRAM_ADDR          BIT_6
+#define HD44780_SET_DDRAM_ADDR          BIT_7
 
 // Entry mode arguments
-#define HD44780_SHIFT_INC				BIT_1
-#define HD44780_SHIFT_EN				BIT_0
+#define HD44780_SHIFT_INC               BIT_1
+#define HD44780_SHIFT_EN                BIT_0
 
 // Display control arguments
-#define HD44780_DISPLAY_PWR				BIT_2
-#define HD44780_CURSOR					BIT_1
-#define HD44780_BLINK					BIT_0
+#define HD44780_DISPLAY_PWR             BIT_2
+#define HD44780_CURSOR                  BIT_1
+#define HD44780_BLINK                   BIT_0
 
 // Cursor/display shift arguments
-#define HD44780_SHIFT_DISPLAY			BIT_3 // 0 = shift cursor
-#define HD44780_SHIFT_RIGHT				BIT_2 // 0 = shift left
+#define HD44780_SHIFT_DISPLAY           BIT_3 // 0 = shift cursor
+#define HD44780_SHIFT_RIGHT             BIT_2 // 0 = shift left
 // Function set arguments
-#define HD44780_8BIT_MODE				BIT_4 // 0 = 4-bit mode
-#define HD44780_2LINE_MODE				BIT_3 // 0 = 1-line mode
-#define HD44780_5x10_CHAR				BIT_2 // 0 = 5x8 dot mode
+#define HD44780_8BIT_MODE               BIT_4 // 0 = 4-bit mode
+#define HD44780_2LINE_MODE              BIT_3 // 0 = 1-line mode
+#define HD44780_5x10_CHAR               BIT_2 // 0 = 5x8 dot mode
 /************************
  *** Public Functions ***
  ************************/
@@ -94,17 +94,17 @@ typedef enum {
  * @param   bitmode         Select between HD44780_4BIT and HD44780_8BIT modes
  *                          to determine whether you will need 4 data wires
  *                          or 8 between the Propeller and your LCD device
- * @param   dimensions		Dimensions of your LCD device. Most common is
+ * @param   dimensions        Dimensions of your LCD device. Most common is
  *                          HD44780_16x2
  */
 int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
-		const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
-		const hd44780_dimensions_t dimensions);
+        const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
+        const hd44780_dimensions_t dimensions);
 
 inline void HD44780Clear (void);
 
 /**
- * @brief       Move the cursor to a specified column and row
+ * @brief   Move the cursor to a specified column and row
  *
  * @param   row     Zero-indexed row to place the cursor
  * @param   col     Zero indexed column to place the cursor
@@ -124,7 +124,8 @@ void HD44780_printf (char *fmt, ...);
  * @detailed    Via a series of calls to HD44780_putchar, prints each character
  *              individually
  *
- * @param	*s	Address where c-string can be found (must be null-terminated)
+ * @param       *s  Address where c-string can be found (must be
+ *                  null-terminated)
  */
 void HD44780_puts (char *s);
 
@@ -145,10 +146,10 @@ void HD44780_hex (uint32_t x);
  *** Private Functions ***
  *************************/
 typedef struct {
-	uint8_t charRows;
-	uint8_t charColumns;
-	uint8_t ddramCharRowBreak;
-	uint8_t ddramLineEnd;
+        uint8_t charRows;
+        uint8_t charColumns;
+        uint8_t ddramCharRowBreak;
+        uint8_t ddramLineEnd;
 } hd44780_mem_map_t;
 
 /**
