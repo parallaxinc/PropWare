@@ -1,0 +1,158 @@
+\hypertarget{mcp300x_8h}{\section{mcp300x.\-h \-File \-Reference}
+\label{mcp300x_8h}\index{mcp300x.\-h@{mcp300x.\-h}}
+}
+{\ttfamily \#include $<$propeller.\-h$>$}\*
+{\ttfamily \#include $<$\-Prop\-Ware.\-h$>$}\*
+{\ttfamily \#include $<$spi.\-h$>$}\*
+\subsection*{\-Defines}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{mcp300x_8h_a621a65c60ebc8b6e29643f156aa3b2cc}{\#define {\bfseries \-M\-C\-P300\-X\-\_\-\-S\-P\-I\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-F\-R\-E\-Q}~100000}\label{mcp300x_8h_a621a65c60ebc8b6e29643f156aa3b2cc}
+
+\item 
+\hypertarget{mcp300x_8h_a99d7ac666fbc6629fa9be5dda29f4056}{\#define {\bfseries \-M\-C\-P300\-X\-\_\-\-S\-P\-I\-\_\-\-M\-O\-D\-E}~\-S\-P\-I\-\_\-\-M\-O\-D\-E\-\_\-2}\label{mcp300x_8h_a99d7ac666fbc6629fa9be5dda29f4056}
+
+\item 
+\hypertarget{mcp300x_8h_ab85b369328ae5b85eca1b57ee101acea}{\#define {\bfseries \-M\-C\-P300\-X\-\_\-\-S\-P\-I\-\_\-\-B\-I\-T\-M\-O\-D\-E}~\-S\-P\-I\-\_\-\-M\-S\-B\-\_\-\-F\-I\-R\-S\-T}\label{mcp300x_8h_ab85b369328ae5b85eca1b57ee101acea}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum {\bfseries mcp\-\_\-channel\-\_\-t} \{ \*
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-0}, 
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-1}, 
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-2}, 
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-3}, 
+\*
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-4}, 
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-5}, 
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-6}, 
+{\bfseries \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-7}
+ \}
+\item 
+enum {\bfseries mcp\-\_\-channel\-\_\-diff\-\_\-t} \{ \*
+{\bfseries \-D\-I\-F\-F\-\_\-0\-\_\-1}, 
+{\bfseries \-D\-I\-F\-F\-\_\-1\-\_\-0}, 
+{\bfseries \-D\-I\-F\-F\-\_\-2\-\_\-3}, 
+{\bfseries \-D\-I\-F\-F\-\_\-3\-\_\-2}, 
+\*
+{\bfseries \-D\-I\-F\-F\-\_\-4\-\_\-5}, 
+{\bfseries \-D\-I\-F\-F\-\_\-5\-\_\-4}, 
+{\bfseries \-D\-I\-F\-F\-\_\-6\-\_\-7}, 
+{\bfseries \-D\-I\-F\-F\-\_\-7\-\_\-6}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+int8\-\_\-t \hyperlink{mcp300x_8h_ad58d8a85fea47dd984f4d74d93b59f4e}{\-M\-C\-P300x\-Start} (const uint32\-\_\-t mosi, const uint32\-\_\-t miso, const uint32\-\_\-t sclk, const uint32\-\_\-t cs)
+\begin{DoxyCompactList}\small\item\em \-Initialize communication with an \-M\-C\-P300x device. \end{DoxyCompactList}\item 
+void \hyperlink{mcp300x_8h_a2ecd4f4cc9e826b69197c971dd420e77}{\-M\-C\-P300x\-Always\-Set\-Mode} (const uint8\-\_\-t always\-Set\-Mode)
+\begin{DoxyCompactList}\small\item\em \-Choose whether to always set the \-S\-P\-I mode and bitmode before reading or writing to the \-A\-D\-C; \-Useful when multiple devices are connected to the \-S\-P\-I bus. \end{DoxyCompactList}\item 
+int8\-\_\-t \hyperlink{mcp300x_8h_ac1d5a8a6a28aa10a3536ea19f09b3cd1}{\-M\-C\-P300x\-Read} (const mcp\-\_\-channel\-\_\-t channel, uint16\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Read a specific channel's data in single-\/ended mode. \end{DoxyCompactList}\item 
+int8\-\_\-t \hyperlink{mcp300x_8h_af31798d3ac3f08916f64076951a29b2d}{\-M\-C\-P300x\-Read\-Dif} (const mcp\-\_\-channel\-\_\-diff\-\_\-t channels, uint16\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Read a specific axis's data in differential mode. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\begin{DoxyAuthor}{\-Author}
+\-David \-Zemon, \-Collin \-Winans
+\end{DoxyAuthor}
+\-M\-C\-P300x analog-\/to-\/digital driver for \-Parallax \-Propeller using \-S\-P\-I communication. \-Supports both \-M\-C\-P3004 and \-M\-C\-P3008 devices along with both single-\/ended and differential readings.
+
+\begin{DoxyNote}{\-Note}
+\-M\-C\-P300x chips uses \-S\-P\-I mode 2 and shifts data \-M\-S\-B first 
+\end{DoxyNote}
+
+
+\subsection{\-Function \-Documentation}
+\hypertarget{mcp300x_8h_a2ecd4f4cc9e826b69197c971dd420e77}{\index{mcp300x.\-h@{mcp300x.\-h}!\-M\-C\-P300x\-Always\-Set\-Mode@{\-M\-C\-P300x\-Always\-Set\-Mode}}
+\index{\-M\-C\-P300x\-Always\-Set\-Mode@{\-M\-C\-P300x\-Always\-Set\-Mode}!mcp300x.h@{mcp300x.\-h}}
+\subsubsection[{\-M\-C\-P300x\-Always\-Set\-Mode}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-M\-C\-P300x\-Always\-Set\-Mode} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{always\-Set\-Mode}
+\end{DoxyParamCaption}
+)}}\label{mcp300x_8h_a2ecd4f4cc9e826b69197c971dd420e77}
+
+
+\-Choose whether to always set the \-S\-P\-I mode and bitmode before reading or writing to the \-A\-D\-C; \-Useful when multiple devices are connected to the \-S\-P\-I bus. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em always\-Set\-Mode} & \-For any non-\/zero value, the \-S\-P\-I modes will always be set before a read or write routine \\
+\hline
+\end{DoxyParams}
+\hypertarget{mcp300x_8h_ac1d5a8a6a28aa10a3536ea19f09b3cd1}{\index{mcp300x.\-h@{mcp300x.\-h}!\-M\-C\-P300x\-Read@{\-M\-C\-P300x\-Read}}
+\index{\-M\-C\-P300x\-Read@{\-M\-C\-P300x\-Read}!mcp300x.h@{mcp300x.\-h}}
+\subsubsection[{\-M\-C\-P300x\-Read}]{\setlength{\rightskip}{0pt plus 5cm}int8\-\_\-t {\bf \-M\-C\-P300x\-Read} (
+\begin{DoxyParamCaption}
+\item[{const mcp\-\_\-channel\-\_\-t}]{channel, }
+\item[{uint16\-\_\-t $\ast$}]{dat}
+\end{DoxyParamCaption}
+)}}\label{mcp300x_8h_ac1d5a8a6a28aa10a3536ea19f09b3cd1}
+
+
+\-Read a specific channel's data in single-\/ended mode. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em axis} & \-One of \-M\-C\-P\-\_\-\-C\-H\-A\-N\-N\-E\-L\-\_\-$<$x$>$, where $<$x$>$ is a number 0 through 3 (or 0 through 7 for the \-M\-C\-P3008); \-Selects the channel to be read \\
+\hline
+{\em $\ast$val} & \-Address that data should be placed into\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, error code otherwise 
+\end{DoxyReturn}
+\hypertarget{mcp300x_8h_af31798d3ac3f08916f64076951a29b2d}{\index{mcp300x.\-h@{mcp300x.\-h}!\-M\-C\-P300x\-Read\-Dif@{\-M\-C\-P300x\-Read\-Dif}}
+\index{\-M\-C\-P300x\-Read\-Dif@{\-M\-C\-P300x\-Read\-Dif}!mcp300x.h@{mcp300x.\-h}}
+\subsubsection[{\-M\-C\-P300x\-Read\-Dif}]{\setlength{\rightskip}{0pt plus 5cm}int8\-\_\-t {\bf \-M\-C\-P300x\-Read\-Dif} (
+\begin{DoxyParamCaption}
+\item[{const mcp\-\_\-channel\-\_\-diff\-\_\-t}]{channels, }
+\item[{uint16\-\_\-t $\ast$}]{dat}
+\end{DoxyParamCaption}
+)}}\label{mcp300x_8h_af31798d3ac3f08916f64076951a29b2d}
+
+
+\-Read a specific axis's data in differential mode. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em axis} & \-One of \-D\-I\-F\-F\-\_\-$<$x$>$\-\_\-$<$y$>$, where $<$x$>$ is a number 0 through 3 (or 0 through 7 for the \-M\-C\-P3008) and $<$y$>$ is $<$x$>$ + ($<$x$>$ + 1)\%2 (\-See above defined enum or datasheet for details) \\
+\hline
+{\em $\ast$val} & \-Address that data should be placed into\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, error code otherwise 
+\end{DoxyReturn}
+\hypertarget{mcp300x_8h_ad58d8a85fea47dd984f4d74d93b59f4e}{\index{mcp300x.\-h@{mcp300x.\-h}!\-M\-C\-P300x\-Start@{\-M\-C\-P300x\-Start}}
+\index{\-M\-C\-P300x\-Start@{\-M\-C\-P300x\-Start}!mcp300x.h@{mcp300x.\-h}}
+\subsubsection[{\-M\-C\-P300x\-Start}]{\setlength{\rightskip}{0pt plus 5cm}int8\-\_\-t {\bf \-M\-C\-P300x\-Start} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{mosi, }
+\item[{const uint32\-\_\-t}]{miso, }
+\item[{const uint32\-\_\-t}]{sclk, }
+\item[{const uint32\-\_\-t}]{cs}
+\end{DoxyParamCaption}
+)}}\label{mcp300x_8h_ad58d8a85fea47dd984f4d74d93b59f4e}
+
+
+\-Initialize communication with an \-M\-C\-P300x device. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em mosi} & \-Pin mask for \-M\-O\-S\-I \\
+\hline
+{\em miso} & \-Pin mask for \-M\-I\-S\-O \\
+\hline
+{\em sclk} & \-Pin mask for \-S\-C\-L\-K \\
+\hline
+{\em cs} & \-Pin mask for \-C\-S\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, error code otherwise 
+\end{DoxyReturn}

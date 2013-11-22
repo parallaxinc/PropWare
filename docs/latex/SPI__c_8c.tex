@@ -1,0 +1,180 @@
+\hypertarget{SPI__c_8c}{\section{\-S\-P\-I\-\_\-c.\-c \-File \-Reference}
+\label{SPI__c_8c}\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}}
+}
+{\ttfamily \#include $<$\-S\-P\-I\-\_\-c.\-h$>$}\*
+{\ttfamily \#include $<$stdio.\-h$>$}\*
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint8\-\_\-t \hyperlink{SPI__c_8c_ae4ef02ff9049b9a16d01d12831fa166f}{\-S\-P\-I\-Start} (const uint32\-\_\-t mosi, const uint32\-\_\-t miso, const uint32\-\_\-t sclk, const uint32\-\_\-t frequency, const \hyperlink{spi_8h_a9a007893b26e98095afd1e6dc16b2354}{spimode\-\_\-t} mode, const \hyperlink{spi_8h_adb031b048513c82ad2714a30989813cb}{spibitmode\-\_\-t} bitmode)
+\begin{DoxyCompactList}\small\item\em \-Initialize an \-S\-P\-I module by starting a new cog. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{SPI__c_8c_a915c655cc322998c4f1272a4abf25830}{\-S\-P\-I\-Is\-Running} (void)
+\begin{DoxyCompactList}\small\item\em \-Determine if the \-S\-P\-I cog has already been initialized. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{SPI__c_8c_afbbabf86fc1531894472e7e3b2732996}{\-S\-P\-I\-Shift\-Out} (const uint8\-\_\-t bits, uint32\-\_\-t value)
+\begin{DoxyCompactList}\small\item\em \-Send a value out to a peripheral device. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{SPI__c_8c_a4d54a10d5d52ff9ebda8419061be1518}{\-S\-P\-I\-Shift\-In} (uint8\-\_\-t bits, void $\ast$data, const size\-\_\-t size)
+\begin{DoxyCompactList}\small\item\em \-Receive a value in from a peripheral device. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{SPI__c_8c_a8415a6a88c021f6750f8e3917c022c5d}{\-S\-P\-I\-Set\-Clock} (const uint32\-\_\-t frequency)
+\begin{DoxyCompactList}\small\item\em \-Change the \-S\-P\-I module's clock frequency. \end{DoxyCompactList}\item 
+\hypertarget{SPI__c_8c_a306d48ceb75797c8181606970c303645}{uint8\-\_\-t {\bfseries \-S\-P\-I\-Set\-Mode} (const \hyperlink{spi_8h_a9a007893b26e98095afd1e6dc16b2354}{spimode\-\_\-t} mode)}\label{SPI__c_8c_a306d48ceb75797c8181606970c303645}
+
+\item 
+\hypertarget{SPI__c_8c_a4021d898159ad0429fb1895af5e29610}{uint8\-\_\-t {\bfseries \-S\-P\-I\-Set\-Bit\-Mode} (const \hyperlink{spi_8h_adb031b048513c82ad2714a30989813cb}{spibitmode\-\_\-t} bitmode)}\label{SPI__c_8c_a4021d898159ad0429fb1895af5e29610}
+
+\item 
+\hypertarget{SPI__c_8c_ae54d9fd6c4ef6bd275c14e5b82238546}{void {\bfseries \-S\-P\-I\-Error} (const uint8\-\_\-t err)}\label{SPI__c_8c_ae54d9fd6c4ef6bd275c14e5b82238546}
+
+\item 
+\hypertarget{SPI__c_8c_a5169ec244431b483bb97a308823d72f1}{void {\bfseries \-Post\-Clock} ()}\label{SPI__c_8c_a5169ec244431b483bb97a308823d72f1}
+
+\item 
+\hypertarget{SPI__c_8c_aab3326c3fa39632bb674cd722ed271fb}{void {\bfseries \-Pre\-Clock} ()}\label{SPI__c_8c_aab3326c3fa39632bb674cd722ed271fb}
+
+\item 
+uint8\-\_\-t \hyperlink{SPI__c_8c_ac525786444c346aef24151e729ce6e9d}{\-S\-P\-I\-Get\-Pin\-Num} (const uint32\-\_\-t pin\-Mask)
+\begin{DoxyCompactList}\small\item\em \-Retrieve the pin number from a pin mask; i.\-e., if pin\-Mask is 0x01, return 0; if pin\-Mask is 0x40, return 6. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\begin{DoxyAuthor}{\-Author}
+\-Collin \-Winans 
+\end{DoxyAuthor}
+
+
+\subsection{\-Function \-Documentation}
+\hypertarget{SPI__c_8c_ac525786444c346aef24151e729ce6e9d}{\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}!\-S\-P\-I\-Get\-Pin\-Num@{\-S\-P\-I\-Get\-Pin\-Num}}
+\index{\-S\-P\-I\-Get\-Pin\-Num@{\-S\-P\-I\-Get\-Pin\-Num}!SPI_c.c@{\-S\-P\-I\-\_\-c.\-c}}
+\subsubsection[{\-S\-P\-I\-Get\-Pin\-Num}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Get\-Pin\-Num} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{pin\-Mask}
+\end{DoxyParamCaption}
+)}}\label{SPI__c_8c_ac525786444c346aef24151e729ce6e9d}
+
+
+\-Retrieve the pin number from a pin mask; i.\-e., if pin\-Mask is 0x01, return 0; if pin\-Mask is 0x40, return 6. 
+
+\begin{DoxyPrecond}{\-Precondition}
+\-Only 1 bit is set in pin\-Mask (if more than one is set, the return value will be related to the least significant set bit)
+\end{DoxyPrecond}
+
+\begin{DoxyParams}{\-Parameters}
+{\em pin\-Mask} & \-The bit number of the set bit in this variable will be returned\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns the pin number of pin\-Mask (no error checking) 
+\end{DoxyReturn}
+\hypertarget{SPI__c_8c_a915c655cc322998c4f1272a4abf25830}{\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}!\-S\-P\-I\-Is\-Running@{\-S\-P\-I\-Is\-Running}}
+\index{\-S\-P\-I\-Is\-Running@{\-S\-P\-I\-Is\-Running}!SPI_c.c@{\-S\-P\-I\-\_\-c.\-c}}
+\subsubsection[{\-S\-P\-I\-Is\-Running}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Is\-Running} (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}\label{SPI__c_8c_a915c655cc322998c4f1272a4abf25830}
+
+
+\-Determine if the \-S\-P\-I cog has already been initialized. 
+
+\begin{DoxyReturn}{\-Returns}
+\-Returns 1 if the \-S\-P\-I cog is up and running, 0 otherwise 
+\end{DoxyReturn}
+\hypertarget{SPI__c_8c_a8415a6a88c021f6750f8e3917c022c5d}{\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}!\-S\-P\-I\-Set\-Clock@{\-S\-P\-I\-Set\-Clock}}
+\index{\-S\-P\-I\-Set\-Clock@{\-S\-P\-I\-Set\-Clock}!SPI_c.c@{\-S\-P\-I\-\_\-c.\-c}}
+\subsubsection[{\-S\-P\-I\-Set\-Clock}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Set\-Clock} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{frequency}
+\end{DoxyParamCaption}
+)}}\label{SPI__c_8c_a8415a6a88c021f6750f8e3917c022c5d}
+
+
+\-Change the \-S\-P\-I module's clock frequency. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em frequency} & \-Frequency, in \-Hz, to run the \-S\-P\-I clock; \-Must be less than \-C\-L\-K\-F\-R\-E\-Q/4\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{SPI__c_8c_a4d54a10d5d52ff9ebda8419061be1518}{\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}!\-S\-P\-I\-Shift\-In@{\-S\-P\-I\-Shift\-In}}
+\index{\-S\-P\-I\-Shift\-In@{\-S\-P\-I\-Shift\-In}!SPI_c.c@{\-S\-P\-I\-\_\-c.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-In}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Shift\-In} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{bits, }
+\item[{void $\ast$}]{data, }
+\item[{const size\-\_\-t}]{size}
+\end{DoxyParamCaption}
+)}}\label{SPI__c_8c_a4d54a10d5d52ff9ebda8419061be1518}
+
+
+\-Receive a value in from a peripheral device. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em bits} & \-Number of bits to be shifted in \\
+\hline
+{\em $\ast$data} & \-Received data will be stored at this address \\
+\hline
+{\em bytes} & \-Byte-\/width of the $\ast$data variable type; \-Must be one of 1, 2, or 4 (is $\ast$data a pointer to char, short or int?)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{SPI__c_8c_afbbabf86fc1531894472e7e3b2732996}{\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}!\-S\-P\-I\-Shift\-Out@{\-S\-P\-I\-Shift\-Out}}
+\index{\-S\-P\-I\-Shift\-Out@{\-S\-P\-I\-Shift\-Out}!SPI_c.c@{\-S\-P\-I\-\_\-c.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-Out}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Shift\-Out} (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t}]{bits, }
+\item[{uint32\-\_\-t}]{value}
+\end{DoxyParamCaption}
+)}}\label{SPI__c_8c_afbbabf86fc1531894472e7e3b2732996}
+
+
+\-Send a value out to a peripheral device. 
+
+\-Pass a value and mode into the assembly cog to be sent to the peripheral; \-N\-O\-T\-E\-: this function is non-\/blocking and chip-\/select should not be set inactive immediately after the return (you should call \hyperlink{spi_8c_a7c28b5429b624322919ba48763fc763a}{\-S\-P\-I\-Wait()} before setting chip-\/select inactive)
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em bits} & \-Number of bits to be shifted out \\
+\hline
+{\em value} & \-The value to be shifted out\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{SPI__c_8c_ae4ef02ff9049b9a16d01d12831fa166f}{\index{\-S\-P\-I\-\_\-c.\-c@{\-S\-P\-I\-\_\-c.\-c}!\-S\-P\-I\-Start@{\-S\-P\-I\-Start}}
+\index{\-S\-P\-I\-Start@{\-S\-P\-I\-Start}!SPI_c.c@{\-S\-P\-I\-\_\-c.\-c}}
+\subsubsection[{\-S\-P\-I\-Start}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Start} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{mosi, }
+\item[{const uint32\-\_\-t}]{miso, }
+\item[{const uint32\-\_\-t}]{sclk, }
+\item[{const uint32\-\_\-t}]{frequency, }
+\item[{const {\bf spimode\-\_\-t}}]{mode, }
+\item[{const {\bf spibitmode\-\_\-t}}]{bitmode}
+\end{DoxyParamCaption}
+)}}\label{SPI__c_8c_ae4ef02ff9049b9a16d01d12831fa166f}
+
+
+\-Initialize an \-S\-P\-I module by starting a new cog. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em mosi} & \-Pin mask for \-M\-O\-S\-I \\
+\hline
+{\em miso} & \-Pin mask for \-M\-I\-S\-O \\
+\hline
+{\em sclk} & \-Pin mask for \-S\-C\-L\-K \\
+\hline
+{\em frequency} & \-Frequency, in \-Hz, to run the \-S\-P\-I clock; \-Must be less than \-C\-L\-K\-F\-R\-E\-Q/4 \\
+\hline
+{\em polarity} & \-Polarity of the clock -\/ idle low or high; must be one of \-S\-P\-I\-\_\-\-P\-O\-L\-A\-R\-I\-T\-Y\-\_\-\-L\-O\-W or \-S\-P\-I\-\_\-\-P\-O\-L\-A\-R\-I\-T\-Y\-\_\-\-H\-I\-G\-H\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}

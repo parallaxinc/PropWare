@@ -1,0 +1,59 @@
+\hypertarget{PropWare_8c}{\section{\-Prop\-Ware.\-c \-File \-Reference}
+\label{PropWare_8c}\index{\-Prop\-Ware.\-c@{\-Prop\-Ware.\-c}}
+}
+{\ttfamily \#include $<$\-Prop\-Ware.\-h$>$}\*
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint8\-\_\-t \hyperlink{PropWare_8c_af17217708c99a0d7d9d28e56c12ea74a}{\-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low} (uint32\-\_\-t pin)
+\begin{DoxyCompactList}\small\item\em \-Allow easy switch-\/press detection of any pin with de-\/bounce protection. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{PropWare_8c_a60f6e207adc0bb489f2c39210a1a2c4c}{\-Prop\-Ware\-Count\-Bits} (uint32\-\_\-t par)
+\item 
+uint8\-\_\-t \hyperlink{PropWare_8c_a1498c695112adc6e7680405d54b24c69}{\-Prop\-Ware\-Get\-Pin\-Num} (const uint32\-\_\-t pin\-Mask)
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\begin{DoxyAuthor}{\-Author}
+\-David \-Zemon 
+\end{DoxyAuthor}
+
+
+\subsection{\-Function \-Documentation}
+\hypertarget{PropWare_8c_af17217708c99a0d7d9d28e56c12ea74a}{\index{\-Prop\-Ware.\-c@{\-Prop\-Ware.\-c}!\-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low@{\-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low}}
+\index{\-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low@{\-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low}!PropWare.c@{\-Prop\-Ware.\-c}}
+\subsubsection[{\-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-G\-P\-I\-O\-Switch\-Read\-\_\-\-Low} (
+\begin{DoxyParamCaption}
+\item[{uint32\-\_\-t}]{pin}
+\end{DoxyParamCaption}
+)}}\label{PropWare_8c_af17217708c99a0d7d9d28e56c12ea74a}
+
+
+\-Allow easy switch-\/press detection of any pin with de-\/bounce protection. 
+
+\begin{DoxyNote}{\-Note}
+\char`\"{}\-\_\-\-Low\char`\"{} denotes active low switch-\/press
+\end{DoxyNote}
+
+\begin{DoxyParams}{\-Parameters}
+{\em pin} & bit mask to control which pin will be read\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 1 or 0 depending on whether the switch was pressed 
+\end{DoxyReturn}
+\hypertarget{PropWare_8c_a60f6e207adc0bb489f2c39210a1a2c4c}{\index{\-Prop\-Ware.\-c@{\-Prop\-Ware.\-c}!\-Prop\-Ware\-Count\-Bits@{\-Prop\-Ware\-Count\-Bits}}
+\index{\-Prop\-Ware\-Count\-Bits@{\-Prop\-Ware\-Count\-Bits}!PropWare.c@{\-Prop\-Ware.\-c}}
+\subsubsection[{\-Prop\-Ware\-Count\-Bits}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-Prop\-Ware\-Count\-Bits} (
+\begin{DoxyParamCaption}
+\item[{uint32\-\_\-t}]{par}
+\end{DoxyParamCaption}
+)}}\label{PropWare_8c_a60f6e207adc0bb489f2c39210a1a2c4c}
+\-T\-O\-D\-O\-: \-Do me \hypertarget{PropWare_8c_a1498c695112adc6e7680405d54b24c69}{\index{\-Prop\-Ware.\-c@{\-Prop\-Ware.\-c}!\-Prop\-Ware\-Get\-Pin\-Num@{\-Prop\-Ware\-Get\-Pin\-Num}}
+\index{\-Prop\-Ware\-Get\-Pin\-Num@{\-Prop\-Ware\-Get\-Pin\-Num}!PropWare.c@{\-Prop\-Ware.\-c}}
+\subsubsection[{\-Prop\-Ware\-Get\-Pin\-Num}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-Prop\-Ware\-Get\-Pin\-Num} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{pin\-Mask}
+\end{DoxyParamCaption}
+)}}\label{PropWare_8c_a1498c695112adc6e7680405d54b24c69}
+\-T\-O\-D\-O\-: \-Do me 

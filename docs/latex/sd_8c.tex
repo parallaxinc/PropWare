@@ -1,0 +1,114 @@
+\hypertarget{sd_8c}{\section{sd.\-c \-File \-Reference}
+\label{sd_8c}\index{sd.\-c@{sd.\-c}}
+}
+{\ttfamily \#include $<$sd.\-h$>$}\*
+\subsection*{\-Defines}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{sd_8c_a8bb45d03555ee522c24a0c1be1e09c45}{\#define {\bfseries \-S\-D\-Error}(err)~return err}\label{sd_8c_a8bb45d03555ee522c24a0c1be1e09c45}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint8\-\_\-t \hyperlink{group__sd__public_gaa6efc61bbfb71aeb8dddb042cbd5541a}{\-S\-D\-Start} (const uint32\-\_\-t mosi, const uint32\-\_\-t miso, const uint32\-\_\-t sclk, const uint32\-\_\-t cs, const uint32\-\_\-t freq)
+\begin{DoxyCompactList}\small\item\em \-Initialize \-S\-D card communication over \-S\-P\-I for 3.\-3\-V configuration. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga0146d4e47541912a908b9dc4930d9ea0}{\-S\-D\-Mount} (void)
+\begin{DoxyCompactList}\small\item\em \-Mount either \-F\-A\-T16 or \-F\-A\-T32 filesystem. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga6f278e19bcf845741a8336bc8e050280}{\-S\-D\-Unmount} (void)
+\begin{DoxyCompactList}\small\item\em \-Stop all \-S\-D activities and write any modified buffers. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga0c924f7c0df8b77d4dbcc11fa74da9a1}{\-S\-Dchdir} (const char $\ast$d)
+\begin{DoxyCompactList}\small\item\em \-Change the current working directory to $\ast$f (similar to 'cd f') \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga4302407556850cf38bd79d2e06b9435e}{\-S\-Dfopen} (const char $\ast$name, \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f, const sd\-\_\-file\-\_\-mode mode)
+\begin{DoxyCompactList}\small\item\em \-Open a file with a given name and load its information into the file pointer. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_gad0d4956ac718de7fa9bd8f87dbfafdf5}{\-S\-Dfclose} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Close a given file. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_gaad45d15b997bfeba9e2bb00707c93db0}{\-S\-Dfputc} (const char c, \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Insert a character into a given file. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga393d8159266baef0a0b7a373395ace54}{\-S\-Dfputs} (char $\ast$s, \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Insert a c-\/string into a file. \end{DoxyCompactList}\item 
+char \hyperlink{group__sd__public_gaf78a6c92a069f20cfe6e4d2f8b49e9f7}{\-S\-Dfgetc} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Read one character from the currently opened file. \end{DoxyCompactList}\item 
+char $\ast$ \hyperlink{group__sd__public_ga527ac922c698a6de67e96e9b9f056dd5}{\-S\-Dfgets} (char s\mbox{[}$\,$\mbox{]}, uint32\-\_\-t size, \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Read a line from a file until either 'size' characters have been read or a newline is found; \-Parameters should match stdio.\-h's fgets except for the file pointer \-N\-O\-T\-E\-: \-This function does not include error checking. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_gad0344fe0a330b064623744ca704382f0}{\-S\-Dfeof} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Determine whether the read pointer has reached the end of the file. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga1335b6fd2dba25b64c92f25b5179c240}{\-S\-Dfseekr} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f, const int32\-\_\-t offset, const file\-\_\-pos origin)
+\begin{DoxyCompactList}\small\item\em \-Set the read pointer for a given file to the position 'origin + offset'. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_gace39d4fd7f8c062c05553d9adc09cfba}{\-S\-Dfseekw} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f, const int32\-\_\-t offset, const file\-\_\-pos origin)
+\begin{DoxyCompactList}\small\item\em \-Set the write pointer for a given file to the position 'origin + offset'. \end{DoxyCompactList}\item 
+file\-\_\-pos \hyperlink{group__sd__public_gaf2afd1b19c70fd863559d542d67e3717}{\-S\-Dftellr} (const \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Retrieve the current position of the read pointer. \end{DoxyCompactList}\item 
+file\-\_\-pos \hyperlink{group__sd__public_ga146019999773d7bdceea8e7a224ac781}{\-S\-Dftellw} (const \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Retrieve the current position of the write pointer. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga57382ad7c6b2cf5eb51399f157f85146}{\-S\-D\-\_\-\-Shell} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Provide the user with a very basic \-Unix-\/like shell. \-The following commands are available to the user\-: ls, cat, cd. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga6798337a4d5c8b3b26d656ad4b437906}{\-S\-D\-\_\-\-Shell\-\_\-ls} (void)
+\begin{DoxyCompactList}\small\item\em \-List the contents of a directory on the screen (similar to 'ls .') \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_ga529e166e843180d7b6faa0b06096580f}{\-S\-D\-\_\-\-Shell\-\_\-cat} (const char $\ast$name, \hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Dump the contents of a file to the screen (similar to 'cat f');. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__public_gad2b78b0a9efcd14f43c2ab9e38d80e7f}{\-S\-D\-\_\-\-Shell\-\_\-touch} (const char name\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em \-Create a new file, do not open it. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga8dc156ec08bf1638f5e5690ce1d50955}{\-S\-D\-Send\-Command} (const uint8\-\_\-t cmd, const uint32\-\_\-t arg, const uint8\-\_\-t crc)
+\begin{DoxyCompactList}\small\item\em \-Send a command and argument over \-S\-P\-I to the \-S\-D card. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga8beda4a4b082ddbc6373d209a8b2848e}{\-S\-D\-Get\-Response} (uint8\-\_\-t bytes, uint8\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Receive response and data from \-S\-D card over \-S\-P\-I. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga86870ec9efe9cec23e365499247edd85}{\-S\-D\-Read\-Block} (uint16\-\_\-t bytes, uint8\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Receive data from \-S\-D card via \-S\-P\-I. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga7b37d2be5c0daf0e1f56d75b7f20490c}{\-S\-D\-Write\-Block} (uint16\-\_\-t bytes, uint8\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Write data to \-S\-D card via \-S\-P\-I. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga9cb0901da7dfeeb211dd30671d7640a4}{\-S\-D\-Read\-Data\-Block} (uint32\-\_\-t address, uint8\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Read \-S\-D\-\_\-\-S\-E\-C\-T\-O\-R\-\_\-\-S\-I\-Z\-E-\/byte data block from \-S\-D card. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga96ae7f7f33c4f6f3f1a90450fa70fe20}{\-S\-D\-Write\-Data\-Block} (uint32\-\_\-t address, uint8\-\_\-t $\ast$dat)
+\begin{DoxyCompactList}\small\item\em \-Write \-S\-D\-\_\-\-S\-E\-C\-T\-O\-R\-\_\-\-S\-I\-Z\-E-\/byte data block to \-S\-D card. \end{DoxyCompactList}\item 
+uint16\-\_\-t \hyperlink{group__sd__private_ga09f0fce8aede67604aef626c5279a3a7}{\-S\-D\-Read\-Dat16} (const uint8\-\_\-t buf\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em \-Return byte-\/reversed 16-\/bit variable (\-S\-D cards store bytes little-\/endian therefore we must reverse them to use multi-\/byte variables) \end{DoxyCompactList}\item 
+uint32\-\_\-t \hyperlink{group__sd__private_ga1d0dd969067387e8002c03483871aa47}{\-S\-D\-Read\-Dat32} (const uint8\-\_\-t buf\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em \-Return byte-\/reversed 32-\/bit variable (\-S\-D cards store bytes little-\/endian therefore we must reverse them to use multi-\/byte variables) \end{DoxyCompactList}\item 
+void \hyperlink{group__sd__private_ga555404275cd1337a0af1d886cef46d94}{\-S\-D\-Write\-Dat16} (uint8\-\_\-t buf\mbox{[}$\,$\mbox{]}, const uint16\-\_\-t dat)
+\begin{DoxyCompactList}\small\item\em \-Write a byte-\/reversed 16-\/bit variable (\-S\-D cards store bytes little-\/endian therefore we must reverse them to use multi-\/byte variables) \end{DoxyCompactList}\item 
+void \hyperlink{group__sd__private_ga089b5f011ba661fcbf84e5c27372625f}{\-S\-D\-Write\-Dat32} (uint8\-\_\-t buf\mbox{[}$\,$\mbox{]}, const uint32\-\_\-t dat)
+\begin{DoxyCompactList}\small\item\em \-Write a byte-\/reversed 32-\/bit variable (\-S\-D cards store bytes little-\/endian therefore we must reverse them to use multi-\/byte variables) \end{DoxyCompactList}\item 
+uint32\-\_\-t \hyperlink{group__sd__private_ga9b7b559a9ed2c91ca0c9d1f96f5c9a92}{\-S\-D\-Get\-Sector\-From\-Path} (const char $\ast$path)
+\begin{DoxyCompactList}\small\item\em \-Find and return the starting sector's address for a directory path given in a c-\/string. \-Use \-Unix-\/style path names (like /foo/bar/) !!!\-N\-O\-T\-E!!! \-Not yet implemented! \end{DoxyCompactList}\item 
+uint32\-\_\-t \hyperlink{group__sd__private_gaf3115c47cc913a11540b0abf3b670bce}{\-S\-D\-Get\-Sector\-From\-Alloc} (uint32\-\_\-t alloc\-Unit)
+\begin{DoxyCompactList}\small\item\em \-Find and return the starting sector's address for a given allocation unit (note -\/ not cluster) \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga0459bc40447b918a8abf1ebb57a67bb4}{\-S\-D\-Get\-F\-A\-T\-Value} (const uint32\-\_\-t fat\-Entry, uint32\-\_\-t $\ast$value)
+\begin{DoxyCompactList}\small\item\em \-Read an entry from the \-F\-A\-T. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga90dc04d8c4e081ab946e91e6fd06e377}{\-S\-D\-Load\-Next\-Sector} (\hyperlink{struct__sd__buffer}{sd\-\_\-buffer} $\ast$buf)
+\begin{DoxyCompactList}\small\item\em \-Find the next sector in the \-F\-A\-T, directory, or file. \-When it is found, load it into the appropriate global buffer. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_gafcdb4e5820c4eb65fde1e932aa66e150}{\-S\-D\-Load\-Sector\-From\-Offset} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f, const uint32\-\_\-t offset)
+\begin{DoxyCompactList}\small\item\em \-Load a requested sector into the buffer independent of the current sector or cluster. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_gab285932fa74b07785e7f749ab7954605}{\-S\-D\-Inc\-Cluster} (\hyperlink{struct__sd__buffer}{sd\-\_\-buffer} $\ast$buf)
+\begin{DoxyCompactList}\small\item\em \-Read the next sector from \-S\-D card into memory  \-When the final sector of a cluster is finished, \-S\-D\-Inc\-Cluster can be called. \-The appropriate global variables will be set according (incremented or set by the \-F\-A\-T) and the first sector of the next cluster will be read into the desired buffer. \end{DoxyCompactList}\item 
+void \hyperlink{group__sd__private_ga58df1c4a441a09559fdeefa8830b2ba3}{\-S\-D\-Get\-Filename} (const uint8\-\_\-t $\ast$buf, char $\ast$filename)
+\begin{DoxyCompactList}\small\item\em \-Read the standard length name of a file entry. \-If an extension exists, a period will be inserted before the extension. \-A null-\/terminator is always appended to the end. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_gab95a217c5576c70a2c0e0e49cacf21cd}{\-S\-D\-Find} (const char $\ast$filename, uint16\-\_\-t $\ast$file\-Entry\-Offset)
+\begin{DoxyCompactList}\small\item\em \-Find a file entry (file or sub-\/directory) \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga5bf131742ae27e3a88ef3e1de6f53342}{\-S\-D\-Reload\-Buf} (\hyperlink{struct__sd__file}{sd\-\_\-file} $\ast$f)
+\begin{DoxyCompactList}\small\item\em \-Reload the sector currently in use by a given file. \end{DoxyCompactList}\item 
+uint32\-\_\-t \hyperlink{group__sd__private_gaa8845c0c0998c4a31711acf0505b6551}{\-S\-D\-Find\-Empty\-Space} (const uint8\-\_\-t restore)
+\begin{DoxyCompactList}\small\item\em \-Find the first empty allocation unit in the \-F\-A\-T. \end{DoxyCompactList}\item 
+\hypertarget{group__sd__private_ga5c2c9c5b5a3771a4eede0d98ee6b31c8}{uint8\-\_\-t {\bfseries \-S\-D\-Extend\-F\-A\-T} (\hyperlink{struct__sd__buffer}{sd\-\_\-buffer} $\ast$buf)}\label{group__sd__private_ga5c2c9c5b5a3771a4eede0d98ee6b31c8}
+
+\item 
+uint8\-\_\-t \hyperlink{group__sd__private_ga3898013effb1d9efe33cd113843e20e1}{\-S\-D\-Create\-File} (const char $\ast$name, const uint16\-\_\-t $\ast$file\-Entry\-Offset)
+\begin{DoxyCompactList}\small\item\em \-Allocate space for a new file. \end{DoxyCompactList}\item 
+\hypertarget{group__sd__private_gab99307c5e8da94519307c18ae899f412}{void {\bfseries \-S\-D\-Print\-File\-Entry} (const uint8\-\_\-t $\ast$file, char filename\mbox{[}$\,$\mbox{]})}\label{group__sd__private_gab99307c5e8da94519307c18ae899f412}
+
+\item 
+\hypertarget{group__sd__private_ga19ae4511502328f5da7d18adb49cd786}{void {\bfseries \-S\-D\-Print\-File\-Attributes} (const uint8\-\_\-t flag)}\label{group__sd__private_ga19ae4511502328f5da7d18adb49cd786}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{group__sd__public_ga0bd95548a4187da52f3cda8634fefded}{\hyperlink{struct__sd__buffer}{sd\-\_\-buffer} {\bfseries g\-\_\-sd\-\_\-buf}}\label{group__sd__public_ga0bd95548a4187da52f3cda8634fefded}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\begin{DoxyAuthor}{\-Author}
+\-David \-Zemon 
+\end{DoxyAuthor}

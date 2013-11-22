@@ -1,7 +1,7 @@
-/* File:    hd44780.c
+/**
+ * @file    hd44780.c
  *
- * Author:  David Zemon
- *          Collin Winans
+ * @author  David Zemon, Collin Winans
  */
 
 #include <hd44780.h>

@@ -1,19 +1,11 @@
-/* File:    hd44780.h
+/**
+ * @file            hd44780.h
  *
- * Author:  David Zemon
- *          Collin Winans
+ * @author          David Zemon, Collin Winans
  *
- * Description: TODO: Do me
+ * @description:    TODO: Do me
  *
- * NOTE: To use the full functionality of printf (like %u, %X, etc), please use
- *       the following format:
- *          #include <stdio.h>
- *          char myString[128];
- *          int x = 42;
- *          sprintf(myString, "The answer to life is: %i!", x);
- *          HD44780_puts(myString);
- *
- * NOTE: Does not natively support 40x4 or 24x4 character displays
+ * @note            Does not natively support 40x4 or 24x4 character displays
  */
 
 #ifndef HD44780_H_
@@ -91,18 +83,18 @@ typedef enum {
  *** Public Functions ***
  ************************/
 /**
- * \brief   Initialize an HD44780 LCD display
+ * @brief   Initialize an HD44780 LCD display
  *
- * \param   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE: all
+ * @param   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE: all
  *                          pins must be consecutive and the LSB on the LCD must
  *                          be the LSB in your data mask (i.e., if you are using
  *                          pins 16-23 on the Propeller, pin 16 must be
  *                          connected to D0 on the LCD, NOT D7)
- * \param   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
- * \param   bitmode         Select between HD44780_4BIT and HD44780_8BIT modes
+ * @param   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
+ * @param   bitmode         Select between HD44780_4BIT and HD44780_8BIT modes
  *                          to determine whether you will need 4 data wires
  *                          or 8 between the Propeller and your LCD device
- * \param   dimensions		Dimensions of your LCD device. Most common is
+ * @param   dimensions		Dimensions of your LCD device. Most common is
  *                          HD44780_16x2
  */
 int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
@@ -112,10 +104,10 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 inline void HD44780Clear (void);
 
 /**
- * \brief       Move the cursor to a specified column and row
+ * @brief       Move the cursor to a specified column and row
  *
- * \param   row     Zero-indexed row to place the cursor
- * \param   col     Zero indexed column to place the cursor
+ * @param   row     Zero-indexed row to place the cursor
+ * @param   col     Zero indexed column to place the cursor
  */
 void HD44780Move (const uint8_t row, const uint8_t col);
 
@@ -127,19 +119,19 @@ void HD44780Move (const uint8_t row, const uint8_t col);
 void HD44780_printf (char *fmt, ...);
 
 /**
- * \brief       Print a string to the LCD
+ * @brief       Print a string to the LCD
  *
- * \detailed    Via a series of calls to HD44780_putchar, prints each character
+ * @detailed    Via a series of calls to HD44780_putchar, prints each character
  *              individually
  *
- * \param	*s	Address where c-string can be found (must be null-terminated)
+ * @param	*s	Address where c-string can be found (must be null-terminated)
  */
 void HD44780_puts (char *s);
 
 /**
- * \brief   Print a single char to the LCD and increment the pointer (automatic)
+ * @brief   Print a single char to the LCD and increment the pointer (automatic)
  *
- * \param   c   Individual char to be printed
+ * @param   c   Individual char to be printed
  */
 void HD44780_putchar (const char c);
 
@@ -160,16 +152,16 @@ typedef struct {
 } hd44780_mem_map_t;
 
 /**
- * \brief   Send a control command to the LCD module
+ * @brief   Send a control command to the LCD module
  *
- * \param   c   8-bit command to send to the LCD
+ * @param   c   8-bit command to send to the LCD
  */
 inline static void HD44780Cmd (const uint8_t c);
 
 static void HD44780Write (const uint8_t val);
 
 /**
- * \brief   Toggle the enable pin, inducing a write to the LCD's register
+ * @brief   Toggle the enable pin, inducing a write to the LCD's register
  */
 static void HD44780ClockPulse (void);
 

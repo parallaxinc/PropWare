@@ -1,7 +1,7 @@
-/* File:    l3g.c
+/**
+ * @file    l3g.c
  *
- * Author:  David Zemon
- *          Collin Winans
+ * @author  David Zemon, Collin Winans
  */
 
 #include <l3g.h>
@@ -27,7 +27,7 @@ uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 	GPIODirModeSet(cs, GPIO_DIR_OUT);
 	GPIOPinSet(cs);
 
-	// NOTE: L3G has high- and low-pass filters. Should they be enabled? (Page
+	// NOTE L3G has high- and low-pass filters. Should they be enabled? (Page
 	// 31)
 	checkErrors(L3GWrite8(L3G_CTRL_REG1, NIBBLE_0));
 	checkErrors(L3GWrite8(L3G_CTRL_REG4, dpsMode | BIT_7));

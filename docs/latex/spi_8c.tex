@@ -1,0 +1,315 @@
+\hypertarget{spi_8c}{\section{spi.\-c \-File \-Reference}
+\label{spi_8c}\index{spi.\-c@{spi.\-c}}
+}
+{\ttfamily \#include $<$spi.\-h$>$}\*
+\subsection*{\-Defines}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{spi_8c_ab9eb6c976ee83ffd40933f1c90421909}{\#define {\bfseries \-S\-P\-I\-Error}(err,...)~return err}\label{spi_8c_ab9eb6c976ee83ffd40933f1c90421909}
+
+\item 
+\hypertarget{spi_8c_aae0107323059a06b2104c33f72c07e36}{\#define {\bfseries \-P\-R\-O\-P\-W\-A\-R\-E\-\_\-\-S\-P\-I\-\_\-\-S\-A\-F\-E\-T\-Y\-\_\-\-C\-H\-E\-C\-K}(x)~if ((err = x)) \-S\-P\-I\-Error(err)}\label{spi_8c_aae0107323059a06b2104c33f72c07e36}
+
+\item 
+\hypertarget{spi_8c_a8d4e6968735d42b9e81dc52e16d7a8f7}{\#define {\bfseries \-P\-R\-O\-P\-W\-A\-R\-E\-\_\-\-S\-P\-I\-\_\-\-S\-A\-F\-E\-T\-Y\-\_\-\-C\-H\-E\-C\-K\-\_\-\-S\-T\-R}(x, y)~if ((err = x)) \-S\-P\-I\-Error(err, y)}\label{spi_8c_a8d4e6968735d42b9e81dc52e16d7a8f7}
+
+\end{DoxyCompactItemize}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint8\-\_\-t \hyperlink{spi_8c_ae4ef02ff9049b9a16d01d12831fa166f}{\-S\-P\-I\-Start} (const uint32\-\_\-t mosi, const uint32\-\_\-t miso, const uint32\-\_\-t sclk, const uint32\-\_\-t frequency, const \hyperlink{spi_8h_a9a007893b26e98095afd1e6dc16b2354}{spimode\-\_\-t} mode, const \hyperlink{spi_8h_adb031b048513c82ad2714a30989813cb}{spibitmode\-\_\-t} bitmode)
+\begin{DoxyCompactList}\small\item\em \-Initialize an \-S\-P\-I module by starting a new cog. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{spi_8c_a5cfe040d2137a50877b5234171eebf81}{\-S\-P\-I\-Stop} (void)
+\begin{DoxyCompactList}\small\item\em \-Stop a running \-S\-P\-I cog. \end{DoxyCompactList}\item 
+int8\-\_\-t \hyperlink{spi_8c_ab1ff9212eaff36a9678edc5ca6d20de3}{\-S\-P\-I\-Is\-Running} (void)
+\begin{DoxyCompactList}\small\item\em \-Determine if the \-S\-P\-I cog has already been initialized. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{spi_8c_a7c28b5429b624322919ba48763fc763a}{\-S\-P\-I\-Wait} (void)
+\begin{DoxyCompactList}\small\item\em \-Wait for the \-S\-P\-I cog to signal that it is in the idle state. \end{DoxyCompactList}\item 
+\hypertarget{spi_8c_a7f34b5b47a91f6dff54a28dfce05a586}{uint8\-\_\-t {\bfseries \-S\-P\-I\-Wait\-Specific} (const uint32\-\_\-t value)}\label{spi_8c_a7f34b5b47a91f6dff54a28dfce05a586}
+
+\item 
+uint8\-\_\-t \hyperlink{spi_8c_a3fcc0a1cd923223738fe2f1f1d905c89}{\-S\-P\-I\-Set\-Mode} (const uint8\-\_\-t mode)
+\begin{DoxyCompactList}\small\item\em \-Set the mode of \-S\-P\-I communication. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{spi_8c_a5dfe751b2cb2eda650a7d304bb4055b9}{\-S\-P\-I\-Set\-Bit\-Mode} (const uint8\-\_\-t bitmode)
+\begin{DoxyCompactList}\small\item\em \-Set the bitmode of \-S\-P\-I communication. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{spi_8c_a8415a6a88c021f6750f8e3917c022c5d}{\-S\-P\-I\-Set\-Clock} (const uint32\-\_\-t frequency)
+\begin{DoxyCompactList}\small\item\em \-Change the \-S\-P\-I module's clock frequency. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{spi_8c_aec694b2eedcd0f7eb7f65640b3b3f8a2}{\-S\-P\-I\-Get\-Clock} (uint32\-\_\-t $\ast$frequency)
+\item 
+uint8\-\_\-t \hyperlink{spi_8c_a029d4832e0d423b87f8a63dbf3203235}{\-S\-P\-I\-Shift\-Out} (uint8\-\_\-t bits, uint32\-\_\-t value)
+\begin{DoxyCompactList}\small\item\em \-Send a value out to a peripheral device. \end{DoxyCompactList}\item 
+uint8\-\_\-t \hyperlink{spi_8c_a231398176f838e68bd8d8f157093d345}{\-S\-P\-I\-Shift\-In} (const uint8\-\_\-t bits, void $\ast$data, const size\-\_\-t bytes)
+\begin{DoxyCompactList}\small\item\em \-Receive a value in from a peripheral device. \end{DoxyCompactList}\item 
+void \hyperlink{spi_8c_a2031bd3335e67981ca36e29fe54aae13}{\-S\-P\-I\-Shift\-Out\-\_\-fast} (uint8\-\_\-t bits, uint32\-\_\-t value)
+\begin{DoxyCompactList}\small\item\em \-Send a value out to a peripheral device. \end{DoxyCompactList}\item 
+void \hyperlink{spi_8c_a729e6ea2dda812fd5fff3499f76ed935}{\-S\-P\-I\-Shift\-In\-\_\-fast} (const uint8\-\_\-t bits, void $\ast$data, const uint8\-\_\-t bytes)
+\begin{DoxyCompactList}\small\item\em \-Receive a value in from a peripheral device; \-Optimized for fastest possible clock speed; \-No error checking is performed; '\-Timeout' event will never be thrown and possible infinite loop can happen. \end{DoxyCompactList}\item 
+void \hyperlink{spi_8c_ae7a49a60d6c0d3975ff96727fa7b0a7c}{\-S\-P\-I\-Shift\-In\-\_\-sector} (const uint8\-\_\-t addr\mbox{[}$\,$\mbox{]}, const uint8\-\_\-t blocking)
+\begin{DoxyCompactList}\small\item\em \-Read an entire sector of data in from an \-S\-D card. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{\-Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{spi_8c_af864733fe2257d756fbf0eabf7bafee4}{uint32\-\_\-t {\bfseries \-\_\-load\-\_\-start\-\_\-spi\-\_\-as\-\_\-cog} \mbox{[}$\,$\mbox{]}}\label{spi_8c_af864733fe2257d756fbf0eabf7bafee4}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\begin{DoxyAuthor}{\-Author}
+\-David \-Zemon 
+\end{DoxyAuthor}
+
+
+\subsection{\-Function \-Documentation}
+\hypertarget{spi_8c_aec694b2eedcd0f7eb7f65640b3b3f8a2}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Get\-Clock@{\-S\-P\-I\-Get\-Clock}}
+\index{\-S\-P\-I\-Get\-Clock@{\-S\-P\-I\-Get\-Clock}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Get\-Clock}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Get\-Clock} (
+\begin{DoxyParamCaption}
+\item[{uint32\-\_\-t $\ast$}]{frequency}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_aec694b2eedcd0f7eb7f65640b3b3f8a2}
+\-T\-O\-D\-O\-: \-Should \-I leave this function or remove it? \hypertarget{spi_8c_ab1ff9212eaff36a9678edc5ca6d20de3}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Is\-Running@{\-S\-P\-I\-Is\-Running}}
+\index{\-S\-P\-I\-Is\-Running@{\-S\-P\-I\-Is\-Running}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Is\-Running}]{\setlength{\rightskip}{0pt plus 5cm}int8\-\_\-t {\bf \-S\-P\-I\-Is\-Running} (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}\label{spi_8c_ab1ff9212eaff36a9678edc5ca6d20de3}
+
+
+\-Determine if the \-S\-P\-I cog has already been initialized. 
+
+\begin{DoxyReturn}{\-Returns}
+\-Returns 1 if the \-S\-P\-I cog is up and running, 0 otherwise 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a5dfe751b2cb2eda650a7d304bb4055b9}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Set\-Bit\-Mode@{\-S\-P\-I\-Set\-Bit\-Mode}}
+\index{\-S\-P\-I\-Set\-Bit\-Mode@{\-S\-P\-I\-Set\-Bit\-Mode}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Set\-Bit\-Mode}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Set\-Bit\-Mode} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{bitmode}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a5dfe751b2cb2eda650a7d304bb4055b9}
+
+
+\-Set the bitmode of \-S\-P\-I communication. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em mode} & \-Select one of \-S\-P\-I\-\_\-\-L\-S\-B\-\_\-\-F\-I\-R\-S\-T or \-S\-P\-I\-\_\-\-M\-S\-B\-\_\-\-F\-I\-R\-S\-T to choose which bit will be shifted out first\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Can return non-\/zero in the case of a timeout 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a8415a6a88c021f6750f8e3917c022c5d}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Set\-Clock@{\-S\-P\-I\-Set\-Clock}}
+\index{\-S\-P\-I\-Set\-Clock@{\-S\-P\-I\-Set\-Clock}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Set\-Clock}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Set\-Clock} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{frequency}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a8415a6a88c021f6750f8e3917c022c5d}
+
+
+\-Change the \-S\-P\-I module's clock frequency. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em frequency} & \-Frequency, in \-Hz, to run the \-S\-P\-I clock; \-Must be less than \-C\-L\-K\-F\-R\-E\-Q/4\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a3fcc0a1cd923223738fe2f1f1d905c89}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Set\-Mode@{\-S\-P\-I\-Set\-Mode}}
+\index{\-S\-P\-I\-Set\-Mode@{\-S\-P\-I\-Set\-Mode}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Set\-Mode}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Set\-Mode} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{mode}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a3fcc0a1cd923223738fe2f1f1d905c89}
+
+
+\-Set the mode of \-S\-P\-I communication. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em mode} & \-T\-O\-D\-O\-: \-Document me!\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Can return non-\/zero in the case of a timeout 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a231398176f838e68bd8d8f157093d345}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Shift\-In@{\-S\-P\-I\-Shift\-In}}
+\index{\-S\-P\-I\-Shift\-In@{\-S\-P\-I\-Shift\-In}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-In}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Shift\-In} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{bits, }
+\item[{void $\ast$}]{data, }
+\item[{const size\-\_\-t}]{size}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a231398176f838e68bd8d8f157093d345}
+
+
+\-Receive a value in from a peripheral device. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em bits} & \-Number of bits to be shifted in \\
+\hline
+{\em $\ast$data} & \-Received data will be stored at this address \\
+\hline
+{\em bytes} & \-Byte-\/width of the $\ast$data variable type; \-Must be one of 1, 2, or 4 (is $\ast$data a pointer to char, short or int?)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a729e6ea2dda812fd5fff3499f76ed935}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Shift\-In\-\_\-fast@{\-S\-P\-I\-Shift\-In\-\_\-fast}}
+\index{\-S\-P\-I\-Shift\-In\-\_\-fast@{\-S\-P\-I\-Shift\-In\-\_\-fast}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-In\-\_\-fast}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-S\-P\-I\-Shift\-In\-\_\-fast} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{bits, }
+\item[{void $\ast$}]{data, }
+\item[{const uint8\-\_\-t}]{bytes}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a729e6ea2dda812fd5fff3499f76ed935}
+
+
+\-Receive a value in from a peripheral device; \-Optimized for fastest possible clock speed; \-No error checking is performed; '\-Timeout' event will never be thrown and possible infinite loop can happen. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em bits} & \-Number of bits to be shifted in \\
+\hline
+{\em $\ast$data} & \-Received data will be stored at this address \\
+\hline
+{\em bytes} & \-Byte-\/width of the $\ast$data variable type; \-Must be one of 1, 2, or 4 (is $\ast$data a pointer to char, short or int?) \\
+\hline
+\end{DoxyParams}
+\hypertarget{spi_8c_ae7a49a60d6c0d3975ff96727fa7b0a7c}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Shift\-In\-\_\-sector@{\-S\-P\-I\-Shift\-In\-\_\-sector}}
+\index{\-S\-P\-I\-Shift\-In\-\_\-sector@{\-S\-P\-I\-Shift\-In\-\_\-sector}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-In\-\_\-sector}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-S\-P\-I\-Shift\-In\-\_\-sector} (
+\begin{DoxyParamCaption}
+\item[{const uint8\-\_\-t}]{addr\mbox{[}$\,$\mbox{]}, }
+\item[{const uint8\-\_\-t}]{blocking}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_ae7a49a60d6c0d3975ff96727fa7b0a7c}
+
+
+\-Read an entire sector of data in from an \-S\-D card. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em $\ast$addr} & \-First hub address where the data should be written \\
+\hline
+{\em blocking} & \-When set to non-\/zero, function will not return until the data transfer is complete \\
+\hline
+\end{DoxyParams}
+\hypertarget{spi_8c_a029d4832e0d423b87f8a63dbf3203235}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Shift\-Out@{\-S\-P\-I\-Shift\-Out}}
+\index{\-S\-P\-I\-Shift\-Out@{\-S\-P\-I\-Shift\-Out}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-Out}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Shift\-Out} (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t}]{bits, }
+\item[{uint32\-\_\-t}]{value}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a029d4832e0d423b87f8a63dbf3203235}
+
+
+\-Send a value out to a peripheral device. 
+
+\-Pass a value and mode into the assembly cog to be sent to the peripheral; \-N\-O\-T\-E\-: this function is non-\/blocking and chip-\/select should not be set inactive immediately after the return (you should call \hyperlink{spi_8c_a7c28b5429b624322919ba48763fc763a}{\-S\-P\-I\-Wait()} before setting chip-\/select inactive)
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em bits} & \-Number of bits to be shifted out \\
+\hline
+{\em value} & \-The value to be shifted out\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a2031bd3335e67981ca36e29fe54aae13}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Shift\-Out\-\_\-fast@{\-S\-P\-I\-Shift\-Out\-\_\-fast}}
+\index{\-S\-P\-I\-Shift\-Out\-\_\-fast@{\-S\-P\-I\-Shift\-Out\-\_\-fast}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Shift\-Out\-\_\-fast}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-S\-P\-I\-Shift\-Out\-\_\-fast} (
+\begin{DoxyParamCaption}
+\item[{uint8\-\_\-t}]{bits, }
+\item[{uint32\-\_\-t}]{value}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a2031bd3335e67981ca36e29fe54aae13}
+
+
+\-Send a value out to a peripheral device. 
+
+\-Pass a value and mode into the assembly cog to be sent to the peripheral; \-N\-O\-T\-E\-: this function is non-\/blocking and chip-\/select should not be set inactive immediately after the return (you should call \hyperlink{spi_8c_a7c28b5429b624322919ba48763fc763a}{\-S\-P\-I\-Wait()} before setting chip-\/select inactive); \-Optimized for fastest possible clock speed; \-No error checking is performed; '\-Timeout' event will never be thrown and possible infinite loop can happen
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em bits} & \-Number of bits to be shifted out \\
+\hline
+{\em value} & \-The value to be shifted out\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{spi_8c_ae4ef02ff9049b9a16d01d12831fa166f}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Start@{\-S\-P\-I\-Start}}
+\index{\-S\-P\-I\-Start@{\-S\-P\-I\-Start}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Start}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Start} (
+\begin{DoxyParamCaption}
+\item[{const uint32\-\_\-t}]{mosi, }
+\item[{const uint32\-\_\-t}]{miso, }
+\item[{const uint32\-\_\-t}]{sclk, }
+\item[{const uint32\-\_\-t}]{frequency, }
+\item[{const {\bf spimode\-\_\-t}}]{mode, }
+\item[{const {\bf spibitmode\-\_\-t}}]{bitmode}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_ae4ef02ff9049b9a16d01d12831fa166f}
+
+
+\-Initialize an \-S\-P\-I module by starting a new cog. 
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em mosi} & \-Pin mask for \-M\-O\-S\-I \\
+\hline
+{\em miso} & \-Pin mask for \-M\-I\-S\-O \\
+\hline
+{\em sclk} & \-Pin mask for \-S\-C\-L\-K \\
+\hline
+{\em frequency} & \-Frequency, in \-Hz, to run the \-S\-P\-I clock; \-Must be less than \-C\-L\-K\-F\-R\-E\-Q/4 \\
+\hline
+{\em polarity} & \-Polarity of the clock -\/ idle low or high; must be one of \-S\-P\-I\-\_\-\-P\-O\-L\-A\-R\-I\-T\-Y\-\_\-\-L\-O\-W or \-S\-P\-I\-\_\-\-P\-O\-L\-A\-R\-I\-T\-Y\-\_\-\-H\-I\-G\-H\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a5cfe040d2137a50877b5234171eebf81}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Stop@{\-S\-P\-I\-Stop}}
+\index{\-S\-P\-I\-Stop@{\-S\-P\-I\-Stop}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Stop}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Stop} (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{spi_8c_a5cfe040d2137a50877b5234171eebf81}
+
+
+\-Stop a running \-S\-P\-I cog. 
+
+\begin{DoxyReturn}{\-Returns}
+\-Returns 0 upon success, otherwise error code (will return \-S\-P\-I\-\_\-\-C\-O\-G\-\_\-\-N\-O\-T\-\_\-\-S\-T\-A\-R\-T\-E\-D if no cog has previously been started) 
+\end{DoxyReturn}
+\hypertarget{spi_8c_a7c28b5429b624322919ba48763fc763a}{\index{spi.\-c@{spi.\-c}!\-S\-P\-I\-Wait@{\-S\-P\-I\-Wait}}
+\index{\-S\-P\-I\-Wait@{\-S\-P\-I\-Wait}!spi.c@{spi.\-c}}
+\subsubsection[{\-S\-P\-I\-Wait}]{\setlength{\rightskip}{0pt plus 5cm}uint8\-\_\-t {\bf \-S\-P\-I\-Wait} (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}\label{spi_8c_a7c28b5429b624322919ba48763fc763a}
+
+
+\-Wait for the \-S\-P\-I cog to signal that it is in the idle state. 
+
+\begin{DoxyReturn}{\-Returns}
+\-May return non-\/zero error code when a timeout occurs 
+\end{DoxyReturn}

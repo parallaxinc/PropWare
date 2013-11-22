@@ -1,10 +1,10 @@
-/* File:    spi_as.S
+/**
+ * @file    spi_as.S
  *
- * Author:  David Zemon
- */
-
-/* Description: SPI routine for Parallax Propeller. Runs in master mode only.
+ * @author  David Zemon
  *
+ * @description		SPI routine for Parallax Propeller. Runs in master mode
+ *			only.
  */
 
 #define ASM_OBJ_FILE
