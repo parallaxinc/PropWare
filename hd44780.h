@@ -101,6 +101,9 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
         const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
         const hd44780_dimensions_t dimensions);
 
+/**
+ * @brief   Clear the LCD display and return cursor to home
+ */
 inline void HD44780Clear (void);
 
 /**
@@ -112,7 +115,13 @@ inline void HD44780Clear (void);
 void HD44780Move (const uint8_t row, const uint8_t col);
 
 /**
- * TODO: Write full documentation
+ * @brief       Print formatted text to the LCD
+ *
+ * @detailed    Please visit http://www.cplusplus.com/reference/cstdio/printf/
+ *              for full documentation
+ *
+ * @param       *fmt    C string that contains the text to be written to the LCD
+ * @param       ...     (optional) Additional arguments
  *
  * Supported formats: i, d, u, X, s, c ("%%" will print '%')
  */
@@ -136,10 +145,25 @@ void HD44780_puts (char *s);
  */
 void HD44780_putchar (const char c);
 
+/**
+ * @brief   Format and print a signed number to the LCD
+ *
+ * @param   x   The signed number to be printed
+ */
 void HD44780_int (int32_t x);
 
+/**
+ * @brief   Format and print a unsigned number to the LCD
+ *
+ * @param   x   The unsigned number to be printed
+ */
 void HD44780_uint (uint32_t x);
 
+/**
+ * @brief   Format and print an unsigned hexadecimal number to the LCD
+ *
+ * @param   x   The number to be printed
+ */
 void HD44780_hex (uint32_t x);
 
 /*************************
