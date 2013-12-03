@@ -9,7 +9,7 @@ MODEL = lmm
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH
-	PROPWARE_PATH = /path/to/PropWare
+	PROPWARE_PATH = ../../..
 endif
 
 # Optionally, specify where your compiler is installed

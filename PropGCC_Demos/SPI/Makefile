@@ -3,13 +3,13 @@ CFLAGS = -Os
 PRJ = SPI_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o spi.o spi_as.o PropWare.o
+OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH
-	PROPWARE_PATH = /path/to/PropWare
+	PROPWARE_PATH = ../../..
 endif
 
 # Optionally, specify where your compiler is installed
