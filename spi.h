@@ -254,7 +254,7 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #define SPI_FUNC_SEND_FAST          2
 #define SPI_FUNC_READ_FAST          3
 #define SPI_FUNC_READ_SECTOR        4
-#define SPI_FUNC_SET_MOD            5
+#define SPI_FUNC_SET_MODE           5
 #define SPI_FUNC_SET_BITMODE        6
 #define SPI_FUNC_SET_FREQ           7
 #define SPI_FUNC_GET_FREQ           8
