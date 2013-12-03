@@ -56,7 +56,7 @@ endif
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
-LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
+LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti -Xlinker -MAP=map_file
 INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
 LIBS += -lPropWare
 

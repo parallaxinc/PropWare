@@ -33,7 +33,7 @@
 
 #define SD_SECTOR_SIZE			512
 
-						.section spi_as.cog, "ax"
+						.section .spi_as_cog, "ax"
 						.compress off
 
 						org 0
