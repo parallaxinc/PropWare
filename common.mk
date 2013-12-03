@@ -34,12 +34,12 @@
 # #########################################################
 # where we installed the propeller binaries and libraries
 
-ifndef PREFIX
-	PREFIX = '/opt/parallax'
+ifndef PROPGCC_PREFIX
+	PROPGCC_PREFIX = /opt/parallax
 endif
 
 # libgcc directory
-LIBGCC = $(PREFIX)/lib/gcc/propeller-elf/4.6.1
+LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 
 ifndef MODEL
 MODEL=lmm
@@ -57,12 +57,12 @@ CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
-INC += -I$(PROPWARE_PATH) -I $(PREFIX)/propeller-elf/include
+INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
 
 ifeq ($(MODEL), cmm)
-LIB_INC += -L$(PREFIX)/propeller-elf/lib/cmm
+LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib/cmm
 else
-LIB_INC += -L$(PREFIX)/propeller-elf/lib
+LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib
 endif
 
 ifneq ($(LDSCRIPT),)
@@ -70,7 +70,7 @@ LDFLAGS += -T $(LDSCRIPT)
 endif
 
 # basic gnu tools
-GCC_PATH = $(PREFIX)/bin
+GCC_PATH = $(PROPGCC_PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
 CXX = $(GCC_PATH)/propeller-elf-g++
 LD = $(GCC_PATH)/ropeller-elf-ld

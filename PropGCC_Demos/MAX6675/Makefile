@@ -8,10 +8,14 @@ BOARD = QUICKSTART
 MODEL = lmm
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
-PROPWARE_PATH = /home/david/External/Kits/Embedded/Parallax/Library/PropWare
+ifndef PROPWARE_PATH
+	PROPWARE_PATH = /path/to/PropWare
+endif
 
 # Optionally, specify where your compiler is installed
-PREFIX = /home/david/reusable/SimpleIDE-0-9-40/parallax
+ifndef PROPGCC_PREFIX
+	PROPGCC_PREFIX = /path/to/compiler/directory  # Default = /opt/parallax
+endif
 
 all: $(NAME).elf
 
