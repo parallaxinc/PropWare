@@ -12,10 +12,10 @@
 #include <PropWare.h>
 #include <spi.h>
 
-#define MAX6675_SPI_DEFAULT_FREQ		1000000
-#define MAX6675_SPI_MODE				SPI_MODE_1
-#define MAX6675_SPI_BITMODE				SPI_MSB_FIRST
-#define MAX6675_BIT_WIDTH				12
+#define MAX6675_SPI_DEFAULT_FREQ        1000000
+#define MAX6675_SPI_MODE                SPI_MODE_1
+#define MAX6675_SPI_BITMODE             SPI_MSB_FIRST
+#define MAX6675_BIT_WIDTH               12
 
 /**
  * @brief   Initialize communication with an MAX6675 device
@@ -28,7 +28,7 @@
  * @return      Returns 0 upon success, error code otherwise
  */
 int8_t MAX6675Start (const uint32_t mosi, const uint32_t miso,
-		const uint32_t sclk, const uint32_t cs);
+        const uint32_t sclk, const uint32_t cs);
 
 /**
  * @brief   Choose whether to always set the SPI mode and bitmode before reading

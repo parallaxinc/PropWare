@@ -11,6 +11,16 @@
 #ifndef HD44780_H_
 #define HD44780_H_
 
+/**
+ * @defgroup _propware_hd44780	HD44780 Character LCD
+ * @{
+ */
+
+/**
+ * @defgroup _propware_hd44780_public	Public memebers
+ * @{
+ */
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <propeller.h>
@@ -166,9 +176,15 @@ void HD44780_uint (uint32_t x);
  */
 void HD44780_hex (uint32_t x);
 
+/**@}*/
+
 /*************************
  *** Private Functions ***
  *************************/
+/**
+ * @defgroup _propware_hd44780_private  Private members
+ * @{
+ */
 typedef struct {
         uint8_t charRows;
         uint8_t charColumns;
@@ -191,4 +207,9 @@ static void HD44780Write (const uint8_t val);
 static void HD44780ClockPulse (void);
 
 static void HD44780GenerateMemMap (const hd44780_dimensions_t dimensions);
+
+/**@}*/
+
+/**@}*/
+
 #endif /* HD44780_H_ */

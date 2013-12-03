@@ -92,7 +92,7 @@ ifneq ($(NAME),)
 $(NAME).elf: $(OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: PropGCC Linker'
-	$(CC) $(LDFLAGS) $(LIB_INC) $(LIBS) -o $@ $(OBJS)
+	$(CC) $(LDFLAGS) $(LIB_INC) -o $@ $(OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 endif

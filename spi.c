@@ -19,7 +19,7 @@
 static void SPIError (const uint8_t err, ...);
 #else
 // Exit calling function by returning 'err'
-#define SPIError(err, ...)				return err
+#define SPIError(err, ...)          return err
 #endif
 #define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) SPIError(err)
 #define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) SPIError(err, y)
@@ -104,9 +104,9 @@ inline int8_t SPIIsRunning (void) {
 inline uint8_t SPIWait (void) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-    while ((uint32_t) -1 != g_mailbox) // Wait for GAS cog to read in value and write -1
+    while ((uint32_t) -1 != g_mailbox)  // Wait for GAS cog to read in value and write -1
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-            return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
+            return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
 
     return 0;
 }
@@ -114,9 +114,9 @@ inline uint8_t SPIWait (void) {
 inline uint8_t SPIWaitSpecific (const uint32_t value) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-    while (value == g_mailbox) // Wait for GAS cog to read in value and write -1
+    while (value == g_mailbox)  // Wait for GAS cog to read in value and write -1
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-            return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
+            return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
 
     return 0;
 }

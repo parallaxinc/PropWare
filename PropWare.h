@@ -7,6 +7,11 @@
 #ifndef PROPWARE_H
 #define PROPWARE_H
 
+/**
+ * @defgroup    _propware   PropWare generic definitions and functions
+ * @{
+ */
+
 #ifndef ASM_OBJ_FILE
 #include <propeller.h>
 #endif
@@ -76,42 +81,48 @@
 #define GPIO_DIR_IN         0
 #define GPIO_DIR_OUT        -1
 
-/* @brief: Set selected pins as either input or output
+/* @brief       Set selected pins as either input or output
  *
- * @param    pins        bit mask to control which pins are set as input or output
- * @param    dir            I/O direction to set selected pins; must be one of
- *                         GPIO_DIR_IN or GPIO_DIR_OUT
+ * @param[in]   pins        bit mask to control which pins are set as input or
+ *                          output
+ * @param[in]   dir         I/O direction to set selected pins; must be one of
+ *                          GPIO_DIR_IN or GPIO_DIR_OUT
  */
 #define GPIODirModeSet(pins,dir)    DIRA = (DIRA & (~(pins))) | ((pins) & dir)
 
-/* @brief: Set selected pins high
+/* @brief       Set selected pins high
  *
- * @param    pins        Bit mask to control which pins will be set high
+ * @param[in]   pins        Bit mask to control which pins will be set high
  */
 #define GPIOPinSet(pins)            OUTA |= (pins)
 
-/* @brief: Clear selected pins low
+/* @brief       Clear selected output pins (set them 0)
  *
- * @param    pins        Bit mask to control which pins will be cleared low
+ * @param[in]   pins    Bit mask to control which pins will be cleared low
  */
 #define GPIOPinClear(pins)          OUTA &= ~(pins)
 
-/* @Brief: Allow easy write to a port w/o destroying data elsewhere in the port
+/* @brief       Allow easy write to a port w/o destroying data elsewhere in the port
  *
- * @param    pins        bit mask to control which pins will be written to
- * @param    value        value to be bit-masked and then written to the port
+ * @param[in]   pins    bit mask to control which pins will be written to
+ * @param[in]   value   value to be bit-masked and then written to the port
  */
-#define GPIOPinWrite(pins,value)    OUTA = (OUTA & (~(pins))) | ((value) & (pins))
+#define GPIOPinWrite(pins,value)    \
+    OUTA = (OUTA & (~(pins))) | ((value) & (pins))
 
-/* @brief: Allow easy write to a port w/o destroying data elsewhere in the port
+/* @brief       Allow easy write to a port w/o destroying data elsewhere in the port
  *
- * @param    port        Port # to write to (like 0, for P0 or 1 for P1)
- * @param    pin            pin to toggle
+ * @param[in]   port    Port # to write to (like 0, for P0 or 1 for P1)
+ * @param[in]   pin     pin to toggle
  */
 #define GPIOPinToggle(pins)         OUTA ^= pins
 
-/* @Brief: Allow easy reading of only selected pins from a port
+/* @brief       Allow easy reading of only selected pins from a port
  *
+ * @param[in]   pins    Bit mask to control which pins will be read from the
+ *                      input register, INA
+ *
+ * @return      Value of INA masked by `pins` parameter
  */
 #define GPIOPinRead(pins)           (INA & (pins))
 
@@ -128,13 +139,27 @@
 uint8_t GPIOSwitchRead_Low (uint32_t pin);
 
 /**
- * TODO: Do me
+ * @brief       Count the number of set bits in a parameter
+ *
+ * @param[in]   par     Parameter whose bits should be counted
+ *
+ * @return      Number of bits that are non-zero in par
  */
 uint8_t PropWareCountBits (uint32_t par);
 
 /**
- * TODO: Do me
+ * @brief       Determine which pin number based on a pin mask
+ *
+ * @note        Return value is 0-indexed
+ *
+ * @param[in]   pinMask     Value with only a single bit set high representing
+ *                          Propeller pin (i.e.: 0x80 would be pin 7)
+ *
+ * @return      Return the pin number of pinMask
  */
 uint8_t PropWareGetPinNum (const uint32_t pinMask);
 #endif
+
+/**@}*/
+
 #endif /* PROPWARE_H */

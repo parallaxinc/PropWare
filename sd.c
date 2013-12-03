@@ -31,7 +31,7 @@ static void SDFirstByteExpansion (const uint8_t response);
 // Initialization variables
 static uint32_t g_sd_cs;  // Chip select pin mask
 static uint8_t g_sd_filesystem;  // Filesystem type - one of SD_FAT_16 or SD_FAT_32
-static uint8_t g_sd_sectorsPerCluster_shift; // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
+static uint8_t g_sd_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
 static uint32_t g_sd_rootDirSectors;  // Number of sectors for the root directory
 static uint32_t g_sd_fatStart;  // Starting block address of the FAT
 static uint32_t g_sd_rootAddr;  // Starting block address of the root directory
@@ -41,13 +41,13 @@ static uint32_t g_sd_firstDataAddr;  // Starting block address of the first data
 // FAT filesystem variables
 static uint8_t g_sd_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_FILE_WRITE
-static uint8_t g_sd_fatMod = 0; // Has the currently loaded FAT sector been modified
+static uint8_t g_sd_fatMod = 0;  // Has the currently loaded FAT sector been modified
 static uint32_t g_sd_fatSize;
 #endif
-static uint16_t g_sd_entriesPerFatSector_Shift; // How many FAT entries are in a single sector of the FAT
-static uint32_t g_sd_curFatSector; // Store the current FAT sector loaded into g_sd_fat
+static uint16_t g_sd_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
+static uint32_t g_sd_curFatSector;  // Store the current FAT sector loaded into g_sd_fat
 
-static uint32_t g_sd_dir_firstAllocUnit; // Store the current directory's starting allocation unit
+static uint32_t g_sd_dir_firstAllocUnit;  // Store the current directory's starting allocation unit
 
 sd_buffer g_sd_buf;
 
@@ -425,7 +425,7 @@ uint8_t SDchdir (const char *d) {
             g_sd_buf.curAllocUnit |= SDReadDat16(
                     &(g_sd_buf.buf[fileEntryOffset + SD_FILE_START_CLSTR_HIGH]))
                     << 16;
-            g_sd_buf.curAllocUnit &= 0x0FFFFFFF; // Clear the highest 4 bits - they are always reserved
+            g_sd_buf.curAllocUnit &= 0x0FFFFFFF;  // Clear the highest 4 bits - they are always reserved
         }
         SDGetFATValue(g_sd_buf.curAllocUnit, &(g_sd_buf.nextAllocUnit));
         if (0 == g_sd_buf.curAllocUnit) {
@@ -523,7 +523,7 @@ uint8_t SDfopen (const char *name, sd_file *f, const sd_file_mode mode) {
                 &(g_sd_buf.buf[fileEntryOffset + SD_FILE_START_CLSTR_HIGH]))
                 << 16;
 
-        f->buf->curAllocUnit &= 0x0FFFFFFF; // Clear the highest 4 bits - they are always reserved
+        f->buf->curAllocUnit &= 0x0FFFFFFF;  // Clear the highest 4 bits - they are always reserved
     }
     f->firstAllocUnit = f->buf->curAllocUnit;
     f->curCluster = 0;
@@ -624,8 +624,8 @@ uint8_t SDfclose (sd_file *f) {
 
 uint8_t SDfputc (const char c, sd_file *f) {
     uint8_t err;
-    uint16_t sectorPtr = f->wPtr % SD_SECTOR_SIZE; // Determines byte-offset within a sector
-    uint32_t sectorOffset = (f->wPtr >> SD_SECTOR_SIZE_SHIFT); // Determine the needed file sector
+    uint16_t sectorPtr = f->wPtr % SD_SECTOR_SIZE;  // Determines byte-offset within a sector
+    uint32_t sectorOffset = (f->wPtr >> SD_SECTOR_SIZE_SHIFT);  // Determine the needed file sector
 
     // Determine if the correct sector is loaded
     if (f->buf->id != f->id)
@@ -698,7 +698,7 @@ char SDfgetc (sd_file *f) {
 #endif
         SDLoadSectorFromOffset(f, sectorOffset);
     }
-    ++(f->rPtr); // Pre-increment used here because f->rPtr has already been read
+    ++(f->rPtr);  // Pre-increment used here because f->rPtr has already been read
     c = f->buf->buf[ptr];
     return c;
 }
@@ -1324,7 +1324,7 @@ uint8_t SDGetFATValue (const uint32_t fatEntry, uint32_t *value) {
         /* Implied check for (SD_FAT_32 == g_sd_filesystem) */
         *value = SDReadDat32(
                 &g_sd_fat[(fatEntry - firstAvailableAllocUnit) << 2]);
-    *value &= 0x0FFFFFFF; // Clear the highest 4 bits - they are always reserved
+    *value &= 0x0FFFFFFF;  // Clear the highest 4 bits - they are always reserved
 #if (defined SD_VERBOSE && defined SD_DEBUG)
             printf("\tReceived value: 0x%08X / %u\n", *value, *value);
 #endif
@@ -1351,7 +1351,7 @@ uint8_t SDLoadNextSector (sd_buffer *buf) {
             return SD_EOC_END;
         // Root dir of FAT16; Not last sector
         else
-            return SDReadDataBlock(++(buf->curSectorOffset), buf->buf); // Any error from reading the data block will be returned to calling function
+            return SDReadDataBlock(++(buf->curSectorOffset), buf->buf);  // Any error from reading the data block will be returned to calling function
     }
     // We are looking at a generic data cluster.
     else {
@@ -1361,7 +1361,7 @@ uint8_t SDLoadNextSector (sd_buffer *buf) {
             // Gen. data cluster; Not the end; Load next sector in the cluster
             return SDReadDataBlock(
                     ++(buf->curSectorOffset) + buf->curClusterStartAddr,
-                    buf->buf); // Any error from reading the data block will be returned to calling function
+                    buf->buf);  // Any error from reading the data block will be returned to calling function
         }
         // End of generic data cluster; Look through the FAT to find the next cluster
         else
@@ -1551,7 +1551,7 @@ uint8_t SDFind (const char *filename, uint16_t *fileEntryOffset) {
         if (!(SD_DELETED_FILE_MARK == g_sd_buf.buf[*fileEntryOffset])) {
             SDGetFilename(&(g_sd_buf.buf[*fileEntryOffset]), readEntryName);
             if (!strcmp(filename, readEntryName))
-                return 0; // File names match, return 0 to indicate a successful search
+                return 0;  // File names match, return 0 to indicate a successful search
         }
 
         // Increment to the next file
@@ -1812,7 +1812,7 @@ uint8_t SDExtendFAT (sd_buffer *buf) {
 
 uint8_t SDCreateFile (const char *name, const uint16_t *fileEntryOffset) {
     uint8_t i, j;
-    char uppercaseName[SD_FILENAME_STR_LEN]; // TODO: Looks like I forgot to ensure the filename is uppercase? "var not used"
+    char uppercaseName[SD_FILENAME_STR_LEN];  // TODO: Looks like I forgot to ensure the filename is uppercase? "var not used"
     uint32_t allocUnit;
 
 #ifdef SD_DEBUG

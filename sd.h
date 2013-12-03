@@ -27,11 +27,11 @@
 #include <spi.h>
 
 /**
- * @defgroup sd FAT16/32 SD card
+ * @defgroup _propware_sd           FAT16/32 SD card
  @{*/
 
 /**
- * @defgroup sd_public Public members
+ * @defgroup _propware_sd_public    Public members
  @{*/
 
 /**
