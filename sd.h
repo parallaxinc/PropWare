@@ -6,15 +6,38 @@
  * @pre         The SD card must be SDHC v2 and must be formatted to FAT16 or
  *              FAT32
  * @warning     Unknown result if card is not SDHC v2
- * @copyright   MIT license
- */
-
-/**
+ *
  * TODO:    Re-arrange errors in order of impact level; Allows the user to do
  *          something like:
  *              if ((SD_ERRORS_BASE + 6) < (err = SDFoo()))
  *                 throw(err);
  *          which would ignore any error less than 6
+ */
+
+/**
+ * @copyright
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 David Zemon
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 #ifndef SD_H_

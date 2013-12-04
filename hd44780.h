@@ -8,6 +8,32 @@
  * @note            Does not natively support 40x4 or 24x4 character displays
  */
 
+/**
+ * @copyright
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 David Zemon
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #ifndef HD44780_H_
 #define HD44780_H_
 
@@ -17,7 +43,7 @@
  */
 
 /**
- * @defgroup _propware_hd44780_public	Public memebers
+ * @defgroup _propware_hd44780_public	Public members
  * @{
  */
 
@@ -28,16 +54,26 @@
 
 #define HD44780_DEBUG
 
+/** Number of spaces inserted for '\\t' */
 #define HD44780_TAB_WIDTH               4
 
-// LCD parameters
+/**
+ * @brief   LCD databus width
+ */
 typedef enum {
     HD44780_4BIT,
     HD44780_8BIT,
     HD44780_BITMODES
 } hd44780_bitmode_t;
 
-// Possible LCD dimensions
+/**
+ * @brief   Supported LCD dimensions; Used for determining cursor placement
+ *
+ * @note    There are two variations of 16x1 character LCDs; if you're unsure
+ *          which version you have, try 16x1_1 first, it is more common. 16x1_1
+ *          uses both DDRAM lines of the controller, 8-characters on each line;
+ *          16x1_2 places all 16 characters are a single line of DDRAM.
+ */
 typedef enum {
     HD44780_8x1,
     HD44780_8x2,

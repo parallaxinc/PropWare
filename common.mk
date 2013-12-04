@@ -56,7 +56,7 @@ endif
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
-LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti -Xlinker -MAP=map_file
+LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti -Xlinker -M
 INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
 LIBS += -lPropWare
 
@@ -75,7 +75,7 @@ endif
 GCC_PATH = $(PROPGCC_PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
 CXX = $(GCC_PATH)/propeller-elf-g++
-LD = $(GCC_PATH)/ropeller-elf-ld
+LD = $(GCC_PATH)/propeller-elf-ld
 AS = $(GCC_PATH)/propeller-elf-as
 AR = $(GCC_PATH)/propeller-elf-ar
 OBJCOPY = $(GCC_PATH)/propeller-elf-objcopy

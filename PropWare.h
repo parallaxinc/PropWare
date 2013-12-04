@@ -4,6 +4,32 @@
  * @author  David Zemon
  */
 
+/**
+ * @copyright
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 David Zemon
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #ifndef PROPWARE_H
 #define PROPWARE_H
 
@@ -81,7 +107,8 @@
 #define GPIO_DIR_IN         0
 #define GPIO_DIR_OUT        -1
 
-/* @brief       Set selected pins as either input or output
+/**
+ * @brief       Set selected pins as either input or output
  *
  * @param[in]   pins        bit mask to control which pins are set as input or
  *                          output
@@ -90,19 +117,22 @@
  */
 #define GPIODirModeSet(pins,dir)    DIRA = (DIRA & (~(pins))) | ((pins) & dir)
 
-/* @brief       Set selected pins high
+/**
+ * @brief       Set selected pins high
  *
  * @param[in]   pins        Bit mask to control which pins will be set high
  */
 #define GPIOPinSet(pins)            OUTA |= (pins)
 
-/* @brief       Clear selected output pins (set them 0)
+/**
+ * @brief       Clear selected output pins (set them 0)
  *
  * @param[in]   pins    Bit mask to control which pins will be cleared low
  */
 #define GPIOPinClear(pins)          OUTA &= ~(pins)
 
-/* @brief       Allow easy write to a port w/o destroying data elsewhere in the port
+/**
+ * @brief       Allow easy write to a port w/o destroying data elsewhere in the port
  *
  * @param[in]   pins    bit mask to control which pins will be written to
  * @param[in]   value   value to be bit-masked and then written to the port
@@ -110,14 +140,16 @@
 #define GPIOPinWrite(pins,value)    \
     OUTA = (OUTA & (~(pins))) | ((value) & (pins))
 
-/* @brief       Allow easy write to a port w/o destroying data elsewhere in the port
+/**
+ * @brief       Allow easy write to a port w/o destroying data elsewhere in the port
  *
  * @param[in]   port    Port # to write to (like 0, for P0 or 1 for P1)
  * @param[in]   pin     pin to toggle
  */
 #define GPIOPinToggle(pins)         OUTA ^= pins
 
-/* @brief       Allow easy reading of only selected pins from a port
+/**
+ * @brief       Allow easy reading of only selected pins from a port
  *
  * @param[in]   pins    Bit mask to control which pins will be read from the
  *                      input register, INA
@@ -128,7 +160,7 @@
 
 #ifndef ASM_OBJ_FILE
 /**
- * @brief   Allow easy switch-press detection of any pin with de-bounce
+ * @brief   Allow easy switch-press detection of any pin; Includes de-bounce
  *          protection
  * @note    "_Low" denotes active low switch-press
  *
