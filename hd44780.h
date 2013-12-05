@@ -10,10 +10,6 @@
  *
  * @note        Does not natively support 40x4 or 24x4 character displays
  *
- * @detailed
- */
-
-/**
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>

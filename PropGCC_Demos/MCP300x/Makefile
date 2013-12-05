@@ -14,7 +14,8 @@ endif
 
 # Optionally, specify where your compiler is installed
 ifndef PROPGCC_PREFIX
-	PROPGCC_PREFIX = /path/to/compiler/directory  # Default = /opt/parallax
+	# Default = /opt/parallax
+	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
 
 all: $(NAME).elf
