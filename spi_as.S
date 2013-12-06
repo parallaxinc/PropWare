@@ -53,13 +53,13 @@
 
 #define SD_SECTOR_SIZE          512
 
-                        .section spi_as_cog, "ax"
+                        .section spi_as.cog, "ax"
                         .compress off
 
                         org 0
 
-                        .global     _SPI_DUMMY_VAR
-_SPI_DUMMY_VAR          jmp #_SPI_DUMMY_VAR
+                        .global _SPI_DUMMY_VAR
+_SPI_DUMMY_VAR          nop
 
                         or dira, testLEDs               '' DEBUG: LEDs used for debugging purposes, can be removed later
                         wrlong negOne, par              '' Inform parent cog that initialization has begun
@@ -540,7 +540,7 @@ SEND_TO_LED             mov temp2, temp                 '' Save the original val
                         shl temp2, #16                  '' Shift the first byte into the LEDs
                         and temp2, testLEDs             '' Clear all bits not associated with the LEDs
                         mov outa, temp2                 '' Turn on the LEDs
-SEND_TO_LED_ret        ret
+SEND_TO_LED_ret         ret
 
 /* Pre-Initialized Values */
 negOne                  long    -1                      '' Used for comparison purposes
@@ -568,7 +568,7 @@ temp2                   res     1
 loopIdx                 res     1                       '' Used when bitCount cannot be modified during a loop (LSB first modes)
 clock                   res     1                       '' Used for clocking in and out with SCLK
 bitmode                 res     1                       '' Store the current bitmode (LSB or MSB first)
-clkPhas                 res     1                       '' Store the current clock phase (CPHA)
+clkPhase                res     1                       '' Store the current clock phase (CPHA)
 bitCount                res     1                       '' Keep track of how many bits need to be sent/received - used for DJNZ loop
 data                    res     1                       '' Working register; Data is written to and read from this register
 

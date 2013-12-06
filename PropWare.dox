@@ -1,0 +1,27 @@
+/**
+@mainpage   PropWare v1.1 Documentation
+
+<p>Anyone who wants to design a logo, feel free!</p>
+
+<p>WARNING: The naming scheme of all functions may change in the near future, as
+I am still deciding what is the best (or least bad) way to go about this.
+Suggestions are welcome for naming schemes so long as detailed explanations
+accompany them. I will remove this warning when the naming scheme is finalized.
+
+<h2>Useful links</h2>
+<ul>
+    <li>Source code: 
+        <a href="https://github.com/SwimDude0614/PropWare" target="_blank">
+        https://github.com/SwimDude0614/PropWare</a>
+    </li>
+    <li>Parallax 
+        <a href="http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller" target="_blank">
+        forums</a>
+        <br>(expect a PropWare-specific thread soon)
+    </li>
+    <li>Parallax Object Exchange (OBEX)
+        <a href="http://obex.parallax.com/" target="_blank">
+        http://obex.parallax.com/</a>
+    </li>
+</ul>
+ */
