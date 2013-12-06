@@ -551,14 +551,14 @@ sdSectorSize            long    SD_SECTOR_SIZE
 
 // DEBUG: The following set is used only for debugging purposes
 testLEDs                long    BYTE_2
-led1                    long    BIT_16
-led1                    long    BIT_17
-led1                    long    BIT_18
-led1                    long    BIT_19
-led2                    long    BIT_20
-led2                    long    BIT_21
-led2                    long    BIT_22
-led2                    long    BIT_23
+led16                   long    BIT_16
+led17                   long    BIT_17
+led18                   long    BIT_18
+led19                   long    BIT_19
+led20                   long    BIT_20
+led21                   long    BIT_21
+led22                   long    BIT_22
+led23                   long    BIT_23
 quarterSecond           long    20000000
 
 /* Beginning of variables */
