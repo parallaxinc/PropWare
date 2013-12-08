@@ -1,6 +1,9 @@
 /**
  * @file        sd.h
  * @brief       SDHC driver for FAT16 and FAT32 for Parallax Propeller
+ */
+/**
+ * @brief       SDHC driver for FAT16 and FAT32 for Parallax Propeller
  * @author      David Zemon
  * @date        Spring 2013
  * @pre         The SD card must be SDHC v2 and must be formatted to FAT16 or
@@ -13,7 +16,6 @@
  *                 throw(err);
  *          which would ignore any error less than 6
  */
-
 /**
  * @copyright
  * The MIT License (MIT)<br>
@@ -131,8 +133,10 @@ typedef enum {
 typedef struct _sd_buffer sd_buffer;
 typedef struct _sd_file sd_file;
 
-// In case the system is low on RAM, allow the external program to access the
-// generic buffer.
+/**
+ * In case the system is low on RAM, allow the external program to access the
+ * generic buffer
+ */
 extern sd_buffer g_sd_buf;
 
 /**

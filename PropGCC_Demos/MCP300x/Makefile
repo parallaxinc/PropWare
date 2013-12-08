@@ -3,7 +3,7 @@ CFLAGS = -Os
 PRJ = MCP300x_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o mcp300x.o spi.o spi_as.o PropWare.o
+OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
 

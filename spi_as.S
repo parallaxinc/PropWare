@@ -53,13 +53,6 @@
 
 #define SD_SECTOR_SIZE          512
 
-/**
- * function to start the SPI code in its own COG
- * C interface is:
- *   int _SPIStartCog(void *arg);
- *
- * returns the number of the COG, or -1 if no COGs are left
- */
                         .section spi_as.cog, "ax"
                         .compress off
 
@@ -585,13 +578,24 @@ clkDelay                res     1                       '' Delay between clock t
 
                         .compress default
 
+/**
+ * function to start the SPI code in its own COG
+ * C interface is:
+ *   int _SPIStartCog(void *arg);
+ *
+ * returns the number of the COG, or -1 if no COGs are left
+ */
                         .text
 					    .global __SPIStartCog
-__SPIStartCog            mviw r7, #__load_start_spi_as_cog  '' linker magic for the start of the spi_as.cog section
+__SPIStartCog           mviw r7, #__load_start_spi_as_cog  '' linker magic for the start of the spi_as.cog section
 					    shl r7, #2
 					    or r7, #8							'' 8 means first available cog
 					    shl r0, #16 						'' assumes bottom two bits of r0 are 0, i.e. arg must be long aligned
 					    or r0, r7
 					    coginit r0 wc,wr
 		if_b			neg r0, #1							'' if C is set, return -1
-					    lret
+#ifdef __PROPELLER_CMM__
+    					lret
+#else
+    					mov pc, lr
+#endif

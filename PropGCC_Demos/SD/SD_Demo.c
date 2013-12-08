@@ -1,7 +1,8 @@
-/* File:    SD_Demo.c
- * 
- * Author:  David Zemon
- * Project: SD_Demo
+/**
+ * @file    SD_Demo.c
+ *
+ * @author  David Zemon
+ * @project SD_Demo
  */
 
 #include "SD_Demo.h"
@@ -54,9 +55,9 @@ void main (void) {
 	printf("FAT partition mounted!\n");
 #endif
 
-#ifdef SD_SHELL
+#ifdef TEST_SHELL
 	SD_Shell(&f);
-#elif (defined SD_FILE_WRITE)
+#elif (defined TEST_WRITE)
 	// Create a blank file and copy the contents of STUFF.TXT into it
 	SDfopen(OLD_FILE, &f, SD_FILE_MODE_R);
 	SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R_PLUS);
@@ -70,7 +71,6 @@ void main (void) {
 		SDfputc(c, &f2);
 #ifdef _STDIO_H
 		putchar(SDfgetc(&f2));
-//		putchar(c);
 #endif
 	}
 
