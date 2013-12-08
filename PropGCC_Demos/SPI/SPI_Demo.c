@@ -6,8 +6,6 @@
 
 #include "SPI_Demo.h"
 
-extern uint32_t SPI_DUMMY_VAR[];
-
 // Main function
 _NORETURN void main (void) {
 	char string[] = "Hello world!\n";		// Create a string constant to output over SPI
@@ -41,8 +39,6 @@ _NORETURN void main (void) {
 			++s;
 
 			putchar(in);							// Print the character to the screen
-
-			in = SPI_DUMMY_VAR;
 		}
 
 		GPIOPinToggle(BYTE_2);

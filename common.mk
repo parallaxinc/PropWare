@@ -56,16 +56,19 @@ endif
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
-LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti -Xlinker -M
+LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
 LIBS += -lPropWare
 
+# Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
 LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib/cmm
 else
 LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib
 endif
-LIB_INC += -L$(PROPWARE_PATH)/Debug
+
+# Add the appropriate PropWare library folder to the search path
+LIB_INC += -L$(PROPWARE_PATH)/$(MODEL)
 
 ifneq ($(LDSCRIPT),)
 LDFLAGS += -T $(LDSCRIPT)

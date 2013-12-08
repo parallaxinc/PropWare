@@ -46,7 +46,7 @@ static void SPIError (const uint8_t err, ...);
 #define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) SPIError(err, y)
 
 // Global variables
-extern uint32_t _load_start_spi_as_cog[];
+extern uint32_t _SPIStartCog(void *arg);
 volatile static uint32_t g_mailbox = -1;
 static int8_t g_spiCog = -1;
 
@@ -83,7 +83,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
         // Set the mailbox to 0 (anything other than -1) so that we know when
         // the SPI cog has started
         g_mailbox = 0;
-        g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
+        g_spiCog = _SPIStartCog((void *) &g_mailbox);
         if (!SPIIsRunning())
             SPIError(SPI_COG_NOT_STARTED);
 
