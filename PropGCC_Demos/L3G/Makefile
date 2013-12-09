@@ -17,6 +17,8 @@ ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
 
+dummy := $(shell test -d Debug || mkdir -p Debug)
+
 all: $(NAME).elf
 
 include $(PROPWARE_PATH)/common.mk
