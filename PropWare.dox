@@ -1,7 +1,8 @@
 /**
 @mainpage   PropWare v1.1 Documentation
 
-<p>Anyone who wants to design a logo, feel free!</p>
+<p>Download PropWare 
+<a href="https://github.com/SwimDude0614/PropWare" target="_blank">here</a>.</p>
 
 <p>WARNING: The naming scheme of all functions may change in the near future, as
 I am still deciding what is the best (or least bad) way to go about this.
@@ -46,7 +47,7 @@ accompany them. I will remove this warning when the naming scheme is finalized.
     </li>
 </ul>
 
-<h3>Building the library</h3>
+<h3>Building the PropWare static library</h3>
 <ul>
     <li>
         Enter the PropWare root directory at the command line
@@ -56,7 +57,7 @@ accompany them. I will remove this warning when the naming scheme is finalized.
         memory model as well as executables for each example project
     </li>
 </ul>
-<h3>PropWare "Hello world"</h3>
+<h3>Deploying a PropWare application</h3>
 <p>PropWare makes building and running applications very easy, especially when
 you use Eclipse. Below are two different methods for building and deploying a
 PropGCC application using PropWare</p>
