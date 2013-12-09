@@ -3,7 +3,7 @@ CFLAGS = -Os
 PRJ = HD44780_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o hd44780.o PropWare.o
+OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
 

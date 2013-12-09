@@ -3,7 +3,7 @@ PRJ = SD_Demo
 NAME = $(PRJ)
 OBJS = $(PRJ).o
 BOARD = QUICKSTART
-MODEL = lmm
+MODEL = cmm
 CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"

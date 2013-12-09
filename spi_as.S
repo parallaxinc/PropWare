@@ -594,6 +594,7 @@ __SPIStartCog           mviw r7, #__load_start_spi_as_cog  '' linker magic for t
 					    or r0, r7
 					    coginit r0 wc,wr
 		if_b			neg r0, #1							'' if C is set, return -1
+						// Temporary hack until fix for GCC is released
 #ifdef __PROPELLER_CMM__
     					lret
 #else

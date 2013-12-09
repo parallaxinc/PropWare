@@ -77,9 +77,9 @@
  *                              necessarily at a minimum, nor is RAM usage
  *                              DEFAULT: ON
  */
-//#define SD_DEBUG
-//#define SD_VERBOSE
-//#define SD_VERBOSE_BLOCKS
+#define SD_DEBUG
+#define SD_VERBOSE
+#define SD_VERBOSE_BLOCKS
 #define SD_SHELL
 #define SD_FILE_WRITE
 

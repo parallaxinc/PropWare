@@ -3,7 +3,7 @@ CFLAGS = -Os
 PRJ = MAX6675_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o hd44780.o spi.o spi_as.o PropWare.o max6675.o
+OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
 

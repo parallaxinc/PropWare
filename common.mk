@@ -57,6 +57,7 @@ CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
+ASFLAGS += -m$(MODEL)
 INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
 LIBS += -lPropWare
 
@@ -122,14 +123,14 @@ endif
 %.o: ../%.s
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Assembler'
-	$(CC) $(INC) -o $@ -c $<
+	$(CC) $(INC) $(ASFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 	
 %.o: ../%.S
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Assembler'
-	$(CC) $(INC) -o $@ -c $<
+	$(CC) $(INC) $(ASFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 

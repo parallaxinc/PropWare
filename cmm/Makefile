@@ -2,7 +2,7 @@
 PRJ = PropWare
 
 LIBNAME = $(PRJ)
-OBJS = PropWare.o spi.o spi_as.o sd.o l3g.o mcp300x.o hd44780.o
+OBJS = PropWare.o spi.o spi_as.o sd.o l3g.o mcp300x.o hd44780.o max6675.o
 BOARD = QUICKSTART
 MODEL = cmm
 CFLAGS = -Os
