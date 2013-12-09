@@ -1,7 +1,11 @@
 PropGCC SPI Demo - README
 
-NOTE: To compile this demo, you must either copy the files or create symbolic
-links to the following files:
-	- spi.c
-	- spi.h		(see note in common.mk for reasoning why this must be included)
-	- spi_as.S
+Example project to demonstrate various functions within PropWare's SPI module.
+
+An SPI bus in master mode will be opened and the simple string "Hello world\n" 
+will be sent to the slave. After sending each character, it will wait to receive
+the same character back as an echo. Upon receiving the echo character, it will
+be printed to the computer terminal.
+
+After each iteration over the entire string, the 8 LEDs on the Quickstart board
+will be toggled (likely only visible on an oscilloscope). 

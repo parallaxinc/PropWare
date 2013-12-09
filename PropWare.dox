@@ -8,18 +8,160 @@ I am still deciding what is the best (or least bad) way to go about this.
 Suggestions are welcome for naming schemes so long as detailed explanations
 accompany them. I will remove this warning when the naming scheme is finalized.
 
+<h2>Getting Started</h2>
+<h3>Prerequisites</h3>
+<ul>
+    <li>
+        Install GNU Make
+        <ul>
+            <li>
+                Debian Linux distributions: type "sudo apt-get install make" at
+                the terminal
+            </li>
+            <li>
+                Windows:
+                <a href="http://gnuwin32.sourceforge.net/packages/make.htm" target="_blank">
+                http://gnuwin32.sourceforge.net/packages/make.htm</a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        [Optional] Add an environment variable PROPGCC_PREFIX = 
+        \<propgcc root\>/bin
+        <ul>
+            <li>
+                Note: If you skip this step, you'll need to set PROPGCC_PREFIX
+                in all makefiles used by Propeller applications
+            </li>
+        </ul> 
+    </li>
+    <li>
+        [Optional] Add an environment variable PROPWARE_PATH = \<PropWare root\>
+        <ul>
+            <li>
+                Note: If you skip this step, you'll need to set PROPWARE_PATH
+                in all makefiles used by PropWare applications
+            </li>
+        </ul> 
+    </li>
+</ul>
+
+<h3>Building the library</h3>
+<ul>
+    <li>
+        Enter the PropWare root directory at the command line
+    </li>
+    <li>
+        Run "make"; This will build the library file, libPropWare.a, for each
+        memory model as well as executables for each example project
+    </li>
+</ul>
+<h3>PropWare "Hello world"</h3>
+<p>PropWare makes building and running applications very easy, especially when
+you use Eclipse. Below are two different methods for building and deploying a
+PropGCC application using PropWare</p>
+<ul>
+    <li>
+        At the Terminal:
+        <ol>
+            <li>
+                Create a project directory and your source files
+                <ul><li>All C/C++ files must have an accompanying header file 
+                     with a similar name; (i.e., if you have a file main.c, you 
+                     must have main.h as well)</li></ul>
+            </li>
+            <li>
+                Create a Makefile for the project (see any of the Demo projects 
+                for examples)
+            </li>
+            <li>
+                Create a "Debug" folder in the project directory and run
+                "make -f ../Makefile" within it
+                <ul><li>This Debug folder allows for seamless Eclipse 
+                integration; If you are certain you do not want to use Eclipse,
+                you can run make wherever you choose. The remaining steps assume
+                you are running from within the Debug directory</li></ul> 
+            </li>
+            <li>
+                The "run" target for make will load your executable into the
+                Propeller's RAM and begin running the application:
+                "make -f ../Makefile run"
+            </li>
+            <li>
+                When you are ready to install the program to the Propeller's
+                EEPROM, the "install" target will load your executable into both
+                EEPROM and RAM and then begin execution: 
+                "make -f ../Makefile install"
+            </li>
+        </ol>
+    </li>
+    <li>
+        From Eclipse (recommended):
+        <ol>
+            <li>
+                Install Eclipse and the CDT plugin
+            </li>
+            <li>
+                Create a C/C++ project; Select cross compiler (No need to set 
+                the compiler or path, we'll be using a custom makefile)
+            </li>
+            <li>
+                Once the project is created and you've exited the dialog box,
+                right-click on the project in the Project Pane and choose
+                "Properties"
+            </li>
+            <li>
+                Click on "C/C++ Build" menu option to the left and then find the
+                "Builder Settings" tab
+            </li>
+            <li>
+                Uncheck "Use default build command" and ensure the "Build
+                command" text box reads "make -f ../Makefile"
+            </li>
+            <li>
+                In the left-pane, expand the "C/C++ Build" menu and select
+                "Settings"
+            </li>
+            <li>
+                In the "Tool Settings" tab, find "Cross GCC Compiler" and then
+                "Includes" beneath that. Add two lines to "Include paths (-l)", 
+                one should be the path to PropWare, and another should be the 
+                path to PropGCC's include folder (on Linux, 
+                /opt/parallax/include)
+                <ul><li>This is done simply for the indexer that helps you keep
+                track of included files - it will not affect the build process
+                </li></ul>
+            </li>
+            <li>
+                Create your files based on the same rules as "At the Terminal"
+                (steps 1 and 2) and add source and header files where 
+                appropriate
+            </li>
+            <li>
+                That's it! You now have Eclipse up and running with PropGCC and
+                PropWare! All of its auto-completion, code highlighting, and 
+                quick and easy compilation! Projects can be compiled with
+                Eclipse's built-in "Build Project" found in the "Project" menu,
+                but you'll need to run and install your application from the
+                terminal.
+            </li>
+       </ol>
+    </li>
+</ul>
 <h2>Useful links</h2>
 <ul>
-    <li>Source code: 
+    <li>
+        Source code: 
         <a href="https://github.com/SwimDude0614/PropWare" target="_blank">
         https://github.com/SwimDude0614/PropWare</a>
     </li>
-    <li>Parallax 
+    <li>
+        Parallax forums can be found 
         <a href="http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller" target="_blank">
-        forums</a>
-        <br>(expect a PropWare-specific thread soon)
+        here</a>
     </li>
-    <li>Parallax Object Exchange (OBEX)
+    <li>
+        Parallax Object Exchange (OBEX)
         <a href="http://obex.parallax.com/" target="_blank">
         http://obex.parallax.com/</a>
     </li>

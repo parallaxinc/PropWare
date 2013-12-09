@@ -72,16 +72,17 @@ static uint32_t g_sd_dir_firstAllocUnit;  // Store the current directory's start
 
 sd_buffer g_sd_buf;
 
-// Assigned to a file and then to each buffer that it touches - overwritten by other functions
-// and used as a check by the file to determine if the buffer needs to be reloaded with its
-// sector
+// Assigned to a file and then to each buffer that it touches - overwritten by
+// other functions and used as a check by the file to determine if the buffer
+// needs to be reloaded with its sector
 static uint8_t g_sd_fileID = 0;
 
 // First byte response receives special treatment to allow for proper debugging
 static uint8_t g_sd_firstByteResponse;
 
 #ifdef SD_DEBUG
-// variable is needed to help determine what is causing seemingly random timeouts
+// variable is needed to help determine what is causing seemingly random
+// timeouts
 uint32_t g_sd_sectorRdAddress;
 #endif
 
