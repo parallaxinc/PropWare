@@ -2,6 +2,7 @@
 /Debug
 **.elf
 **.o
+**.a
 objects.mk
 sources.mk
 subdir.mk
@@ -14,6 +15,7 @@ PropGCC_Demos/**/sd.*
 PropGCC_Demos/**/mcp300x.*
 PropGCC_Demos/**/hd44780.*
 PropGCC_Demos/**/l3g.*
+PropGCC_Demos/**/max6675.*
 **~
 /.cproject
 /.project

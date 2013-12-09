@@ -4,6 +4,27 @@
  * @author  David Zemon
  */
 
+/**
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 // Includes
 #include <spi.h>
 
@@ -19,13 +40,13 @@
 static void SPIError (const uint8_t err, ...);
 #else
 // Exit calling function by returning 'err'
-#define SPIError(err, ...)				return err
+#define SPIError(err, ...)          return err
 #endif
 #define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) SPIError(err)
 #define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) SPIError(err, y)
 
 // Global variables
-extern uint32_t _load_start_spi_as_cog[];
+extern uint32_t _SPIStartCog(void *arg);
 volatile static uint32_t g_mailbox = -1;
 static int8_t g_spiCog = -1;
 
@@ -62,7 +83,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
         // Set the mailbox to 0 (anything other than -1) so that we know when
         // the SPI cog has started
         g_mailbox = 0;
-        g_spiCog = cognew(_load_start_spi_as_cog, &g_mailbox);
+        g_spiCog = _SPIStartCog((void *) &g_mailbox);
         if (!SPIIsRunning())
             SPIError(SPI_COG_NOT_STARTED);
 
@@ -104,9 +125,9 @@ inline int8_t SPIIsRunning (void) {
 inline uint8_t SPIWait (void) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-    while ((uint32_t) -1 != g_mailbox) // Wait for GAS cog to read in value and write -1
+    while ((uint32_t) -1 != g_mailbox)  // Wait for GAS cog to read in value and write -1
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-            return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
+            return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
 
     return 0;
 }
@@ -114,9 +135,9 @@ inline uint8_t SPIWait (void) {
 inline uint8_t SPIWaitSpecific (const uint32_t value) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-    while (value == g_mailbox) // Wait for GAS cog to read in value and write -1
+    while (value == g_mailbox)  // Wait for GAS cog to read in value and write -1
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-            return SPI_TIMEOUT; // Always use return instead of SPIError() for private functions
+            return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
 
     return 0;
 }

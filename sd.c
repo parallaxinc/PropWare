@@ -4,12 +4,32 @@
  * @author  David Zemon
  */
 
+/**
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 // Includes
 #include <sd.h>
 
 #ifdef SD_DEBUG
-/**
- * @brief   Print an error through UART string followed by entering an infinite
+/* @brief   Print an error through UART string followed by entering an infinite
  *          loop
  *
  * @param   err     Error number used to determine error string
@@ -32,7 +52,7 @@ static void SDFirstByteExpansion (const uint8_t response);
 // Initialization variables
 static uint32_t g_sd_cs;  // Chip select pin mask
 static uint8_t g_sd_filesystem;  // Filesystem type - one of SD_FAT_16 or SD_FAT_32
-static uint8_t g_sd_sectorsPerCluster_shift; // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
+static uint8_t g_sd_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
 static uint32_t g_sd_rootDirSectors;  // Number of sectors for the root directory
 static uint32_t g_sd_fatStart;  // Starting block address of the FAT
 static uint32_t g_sd_rootAddr;  // Starting block address of the root directory
@@ -42,13 +62,13 @@ static uint32_t g_sd_firstDataAddr;  // Starting block address of the first data
 // FAT filesystem variables
 static uint8_t g_sd_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_FILE_WRITE
-static uint8_t g_sd_fatMod = 0; // Has the currently loaded FAT sector been modified
+static uint8_t g_sd_fatMod = 0;  // Has the currently loaded FAT sector been modified
 static uint32_t g_sd_fatSize;
 #endif
-static uint16_t g_sd_entriesPerFatSector_Shift; // How many FAT entries are in a single sector of the FAT
-static uint32_t g_sd_curFatSector; // Store the current FAT sector loaded into g_sd_fat
+static uint16_t g_sd_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
+static uint32_t g_sd_curFatSector;  // Store the current FAT sector loaded into g_sd_fat
 
-static uint32_t g_sd_dir_firstAllocUnit; // Store the current directory's starting allocation unit
+static uint32_t g_sd_dir_firstAllocUnit;  // Store the current directory's starting allocation unit
 
 sd_buffer g_sd_buf;
 
@@ -107,8 +127,8 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
                 j = 10;
 #if (defined SD_VERBOSE && defined SD_DEBUG)
             else
-            printf("Failed attempt at CMD0: 0x%02X\n",
-                    g_sd_firstByteResponse);
+                printf("Failed attempt at CMD0: 0x%02X\n",
+                        g_sd_firstByteResponse);
 #endif
         }
         if (SD_RESPONSE_IDLE != g_sd_firstByteResponse)
@@ -128,7 +148,7 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
             i = 10;
 #if (defined SD_VERBOSE && defined SD_DEBUG)
         else
-        printf("Failed attempt at CMD8\n");
+            printf("Failed attempt at CMD8\n");
 #endif
     }
 
@@ -164,8 +184,8 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
             break;
 #if (defined SD_VERBOSE && defined SD_DEBUG)
         else
-        printf("Failed attempt at active state: 0x%02X\n",
-                g_sd_firstByteResponse);
+            printf("Failed attempt at active state: 0x%02X\n",
+                    g_sd_firstByteResponse);
 #endif
     }
     if (SD_RESPONSE_ACTIVE != g_sd_firstByteResponse)
@@ -184,18 +204,18 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
 #if (defined SD_VERBOSE && defined SD_DEBUG)
     printf("Requesting CSD...\n");
     if ((err = SDSendCommand(SD_CMD_RD_CSD, 0, SD_CRC_OTHER)))
-    SDError(err);
+        SDError(err);
     if ((err = SDReadBlock(16, response)))
-    SDError(err);
+        SDError(err);
     printf("CSD Contents:\n");
     SDPrintHexBlock(response, 16);
     putchar('\n');
 
     printf("Requesting CID...\n");
     if ((err = SDSendCommand(SD_CMD_RD_CID, 0, SD_CRC_OTHER)))
-    SDError(err);
+        SDError(err);
     if ((err = SDReadBlock(16, response)))
-    SDError(err);
+        SDError(err);
     printf("CID Contents:\n");
     SDPrintHexBlock(response, 16);
     putchar('\n');
@@ -426,7 +446,8 @@ uint8_t SDchdir (const char *d) {
             g_sd_buf.curAllocUnit |= SDReadDat16(
                     &(g_sd_buf.buf[fileEntryOffset + SD_FILE_START_CLSTR_HIGH]))
                     << 16;
-            g_sd_buf.curAllocUnit &= 0x0FFFFFFF; // Clear the highest 4 bits - they are always reserved
+            // Clear the highest 4 bits - they are always reserved
+            g_sd_buf.curAllocUnit &= 0x0FFFFFFF;
         }
         SDGetFATValue(g_sd_buf.curAllocUnit, &(g_sd_buf.nextAllocUnit));
         if (0 == g_sd_buf.curAllocUnit) {
@@ -842,7 +863,7 @@ uint8_t SD_Shell (sd_file *f) {
 #endif
 #ifdef SD_VERBOSE_BLOCKS
         else if (!strcmp(cmd, "d"))
-        SDPrintHexBlock(g_sd_buf.buf, SD_SECTOR_SIZE);
+            SDPrintHexBlock(g_sd_buf.buf, SD_SECTOR_SIZE);
 #endif
         else if (!strcmp(cmd, SD_SHELL_EXIT))
             break;
@@ -980,25 +1001,25 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes) {
     printf("Printing %u bytes...\n", bytes);
     printf("Offset\t");
     for (i = 0; i < SD_LINE_SIZE; ++i)
-    printf("0x%X  ", i);
+        printf("0x%X  ", i);
     putchar('\n');
 
     if (bytes % SD_LINE_SIZE)
-    bytes = bytes / SD_LINE_SIZE + 1;
+        bytes = bytes / SD_LINE_SIZE + 1;
     else
-    bytes /= SD_LINE_SIZE;
+        bytes /= SD_LINE_SIZE;
 
     for (i = 0; i < bytes; ++i) {
         s = (uint8_t *) (dat + SD_LINE_SIZE * i);
         printf("0x%04X:\t", SD_LINE_SIZE * i);
         for (j = 0; j < SD_LINE_SIZE; ++j)
-        printf("0x%02X ", s[j]);
+            printf("0x%02X ", s[j]);
         printf(" - ");
         for (j = 0; j < SD_LINE_SIZE; ++j) {
             if ((' ' <= s[j]) && (s[j] <= '~'))
-            putchar(s[j]);
+                putchar(s[j]);
             else
-            putchar('.');
+                putchar('.');
         }
 
         putchar('\n');
@@ -1011,8 +1032,7 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes) {
 /************************************
  *** Private Function Definitions ***
  ************************************/
-uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg,
-        const uint8_t crc) {
+uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg, const uint8_t crc) {
     uint8_t err;
 
     // Send out the command
@@ -1106,7 +1126,7 @@ uint8_t SDReadBlock (uint16_t bytes, uint8_t *dat) {
             while (bytes--) {
 #if (defined SD_DEBUG)
                 if ((err = SPIShiftIn(8, dat++, sizeof(*dat))))
-                return err;
+                    return err;
 #elif (defined SPI_FAST)
                 SPIShiftIn_fast(8, dat++, sizeof(*dat));
 #else
@@ -1167,7 +1187,7 @@ uint8_t SDWriteBlock (uint16_t bytes, uint8_t *dat) {
         while (bytes--) {
 #if (defined SD_DEBUG)
             if ((err = SPIShiftOut(8, *(dat++))))
-            return err;
+                return err;
 #elif (defined SPI_FAST)
             SPIShiftOut_fast(8, *(dat++));
 #else
@@ -1311,8 +1331,7 @@ uint8_t SDGetFATValue (const uint32_t fatEntry, uint32_t *value) {
 #endif
         // Need new sector, load it
         g_sd_curFatSector = fatEntry >> g_sd_entriesPerFatSector_Shift;
-        if ((err =
-                SDReadDataBlock(g_sd_curFatSector + g_sd_fatStart, g_sd_fat)))
+        if ((err = SDReadDataBlock(g_sd_curFatSector + g_sd_fatStart, g_sd_fat)))
             return err;
 #if (defined SD_VERBOSE_BLOCKS && defined SD_VERBOSE && defined SD_DEBUG)
         SDPrintHexBlock(g_sd_fat, SD_SECTOR_SIZE);
@@ -1341,9 +1360,10 @@ uint8_t SDGetFATValue (const uint32_t fatEntry, uint32_t *value) {
         /* Implied check for (SD_FAT_32 == g_sd_filesystem) */
         *value = SDReadDat32(
                 &g_sd_fat[(fatEntry - firstAvailableAllocUnit) << 2]);
-    *value &= 0x0FFFFFFF; // Clear the highest 4 bits - they are always reserved
+    // Clear the highest 4 bits - they are always reserved
+    *value &= 0x0FFFFFFF;  
 #if (defined SD_VERBOSE && defined SD_DEBUG)
-            printf("\tReceived value: 0x%08X / %u\n", *value, *value);
+    printf("\tReceived value: 0x%08X / %u\n", *value, *value);
 #endif
 
     return 0;
@@ -1499,7 +1519,7 @@ uint8_t SDIncCluster (sd_buffer *buf) {
 
 #if (defined SD_VERBOSE_BLOCKS && defined SD_VERBOSE && defined SD_DEBUG)
     if ((err = SDReadDataBlock(buf->curClusterStartAddr, buf->buf)))
-    return err;
+        return err;
     SDPrintHexBlock(buf->buf, SD_SECTOR_SIZE);
     return 0;
 #else
@@ -1557,8 +1577,8 @@ uint8_t SDFind (const char *filename, uint16_t *fileEntryOffset) {
             || (SDGetSectorFromAlloc(g_sd_dir_firstAllocUnit)
                     != g_sd_buf.curClusterStartAddr)) {
 #if (defined SD_VERBOSE && defined SD_DEBUG)
-        printf(
-                "'find' requires a backtrack to beginning of directory's cluster\n");
+        printf("'find' requires a backtrack to beginning of directory's "
+                "cluster\n");
 #endif
         g_sd_buf.curClusterStartAddr = SDGetSectorFromAlloc(
                 g_sd_dir_firstAllocUnit);
@@ -1742,9 +1762,9 @@ uint32_t SDFindEmptySpace (const uint8_t restore) {
 #if (defined SD_VERBOSE && defined SD_DEBUG)
     printf("Available space found: 0x%08X / %u\n",
             (g_sd_curFatSector << g_sd_entriesPerFatSector_Shift)
-            + allocOffset / g_sd_filesystem,
+                    + allocOffset / g_sd_filesystem,
             (g_sd_curFatSector << g_sd_entriesPerFatSector_Shift)
-            + allocOffset / g_sd_filesystem);
+                    + allocOffset / g_sd_filesystem);
 #endif
 
     // If we loaded a new fat sector (and then modified it directly above),
@@ -1771,7 +1791,8 @@ uint8_t SDExtendFAT (sd_buffer *buf) {
 #endif
 
     // Do we need to load a different sector of the FAT or is the correct one
-    // currently loaded? (Correct means the sector currently containing the EOC marker)
+    // currently loaded? (Correct means the sector currently containing the EOC
+    // marker)
     if ((buf->curAllocUnit >> g_sd_entriesPerFatSector_Shift)
             != g_sd_curFatSector) {
 
@@ -1801,9 +1822,9 @@ uint8_t SDExtendFAT (sd_buffer *buf) {
     if (SD_EOC_BEG
             <= SDReadDat32(
                     &(g_sd_fat[(buf->curAllocUnit
-                                    % (1 << g_sd_entriesPerFatSector_Shift))
+                            % (1 << g_sd_entriesPerFatSector_Shift))
                             * g_sd_filesystem])))
-    return SD_INVALID_FAT_APPEND;
+        return SD_INVALID_FAT_APPEND;
 #endif
 
 #if (defined SD_VERBOSE_BLOCKS && defined SD_VERBOSE && defined SD_DEBUG)
@@ -1851,14 +1872,14 @@ uint8_t SDCreateFile (const char *name, const uint16_t *fileEntryOffset) {
 #endif
     // Parameter checking...
     if (SD_FILENAME_STR_LEN < strlen(name))
-    return SD_INVALID_FILENAME;
+        return SD_INVALID_FILENAME;
 
     // Convert the name to uppercase
     for (i = 0; name[i]; ++i)
-    if ('a' <= name[i] && 'z' >= name[i])
-    uppercaseName[i] = name[i] + 'A' - 'a';
-    else
-    uppercaseName[i] = name[i];
+        if ('a' <= name[i] && 'z' >= name[i])
+            uppercaseName[i] = name[i] + 'A' - 'a';
+        else
+            uppercaseName[i] = name[i];
 #endif
 
     // Write the file fields in order...
@@ -1984,124 +2005,127 @@ void SDError (const uint8_t err) {
 
     switch (err) {
         case SD_INVALID_CMD:
-        printf(str, (err - SD_ERRORS_BASE), "Invalid command");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Invalid command");
+            break;
         case SD_READ_TIMEOUT:
-        printf(str, (err - SD_ERRORS_BASE), "Timed out during read");
-        printf("\tRead sector address was: 0x%08X / %u",
-                g_sd_sectorRdAddress, g_sd_sectorRdAddress);
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Timed out during read");
+            printf("\tRead sector address was: 0x%08X / %u",
+                    g_sd_sectorRdAddress, g_sd_sectorRdAddress);
+            break;
         case SD_INVALID_NUM_BYTES:
-        printf(str, (err - SD_ERRORS_BASE), "Invalid number of bytes");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Invalid number of bytes");
+            break;
         case SD_INVALID_RESPONSE:
 #ifdef SD_VERBOSE
-        printf("SD Error %u: %s0x%02X\nThe following bits are set:\n",
-                (err - SD_ERRORS_BASE),
-                "Invalid first-byte response\n\tReceived: ",
-                g_sd_firstByteResponse);
+            printf("SD Error %u: %s0x%02X\nThe following bits are set:\n",
+                    (err - SD_ERRORS_BASE),
+                    "Invalid first-byte response\n\tReceived: ",
+                    g_sd_firstByteResponse);
 #else
-        printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
-                "Invalid first-byte response\n\tReceived: ", g_sd_firstByteResponse);
+            printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
+                    "Invalid first-byte response\n\tReceived: ",
+                    g_sd_firstByteResponse);
 #endif
-        SDFirstByteExpansion(g_sd_firstByteResponse);
-        break;
+            SDFirstByteExpansion(g_sd_firstByteResponse);
+            break;
         case SD_INVALID_INIT:
 #ifdef SD_VERBOSE
-        printf("SD Error %u: %s\n\tResponse: 0x%02X\n",
-                (err - SD_ERRORS_BASE),
-                "Invalid response during initialization",
-                g_sd_firstByteResponse);
+            printf("SD Error %u: %s\n\tResponse: 0x%02X\n",
+                    (err - SD_ERRORS_BASE),
+                    "Invalid response during initialization",
+                    g_sd_firstByteResponse);
 #else
-        printf("SD Error %u: %s\n\tResponse: %u\n", (err - SD_ERRORS_BASE),
-                "Invalid response during initialization", g_sd_firstByteResponse);
+            printf("SD Error %u: %s\n\tResponse: %u\n", (err - SD_ERRORS_BASE),
+                    "Invalid response during initialization",
+                    g_sd_firstByteResponse);
 #endif
-        break;
+            break;
         case SD_INVALID_FILESYSTEM:
-        printf(str, (err - SD_ERRORS_BASE), "Invalid filesystem");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Invalid filesystem");
+            break;
         case SD_INVALID_DAT_STRT_ID:
 #ifdef SD_VERBOSE
-        printf("SD Error %u: %s0x%02X\n", (err - SD_ERRORS_BASE),
-                "Invalid data-start ID\n\tReceived: ",
-                g_sd_firstByteResponse);
+            printf("SD Error %u: %s0x%02X\n", (err - SD_ERRORS_BASE),
+                    "Invalid data-start ID\n\tReceived: ",
+                    g_sd_firstByteResponse);
 #else
-        printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
-                "Invalid data-start ID\n\tReceived: ", g_sd_firstByteResponse);
+            printf("SD Error %u: %s%u\n", (err - SD_ERRORS_BASE),
+                    "Invalid data-start ID\n\tReceived: ",
+                    g_sd_firstByteResponse);
 #endif
-        break;
+            break;
         case SD_FILENAME_NOT_FOUND:
-        printf(str, (err - SD_ERRORS_BASE), "Filename not found");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Filename not found");
+            break;
         case SD_EMPTY_FAT_ENTRY:
-        printf(str, (err - SD_ERRORS_BASE), "FAT points to empty entry");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "FAT points to empty entry");
+            break;
         case SD_CORRUPT_CLUSTER:
-        printf(str, (err - SD_ERRORS_BASE), "SD cluster is corrupt");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "SD cluster is corrupt");
+            break;
         case SD_INVALID_PTR_ORIGIN:
-        printf(str, (err - SD_ERRORS_BASE), "Invalid pointer origin");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Invalid pointer origin");
+            break;
         case SD_ENTRY_NOT_FILE:
-        printf(str, (err - SD_ERRORS_BASE),
-                "Requested file entry is not a file");
-        break;
+            printf(str, (err - SD_ERRORS_BASE),
+                    "Requested file entry is not a file");
+            break;
         case SD_INVALID_FILENAME:
-        printf(str, (err - SD_ERRORS_BASE),
-                "Invalid filename - please use 8.3 format");
-        break;
+            printf(str, (err - SD_ERRORS_BASE),
+                    "Invalid filename - please use 8.3 format");
+            break;
         case SD_INVALID_FAT_APPEND:
-        printf(str, (err - SD_ERRORS_BASE),
-                "FAT entry append was attempted unnecessarily");
-        break;
+            printf(str, (err - SD_ERRORS_BASE),
+                    "FAT entry append was attempted unnecessarily");
+            break;
         case SD_FILE_ALREADY_EXISTS:
-        printf(str, (err - SD_ERRORS_BASE),
-                "Attempting to create an already existing file");
-        break;
+            printf(str, (err - SD_ERRORS_BASE),
+                    "Attempting to create an already existing file");
+            break;
         case SD_INVALID_FILE_MODE:
-        printf(str, (err - SD_ERRORS_BASE), "Invalid file mode");
-        break;
+            printf(str, (err - SD_ERRORS_BASE), "Invalid file mode");
+            break;
         case SD_TOO_MANY_FATS:
-        printf(str, (err - SD_ERRORS_BASE),
-                "This driver is only capable of writing files on FAT "
-                "partitions with two (2) copies of the FAT");
-        break;
+            printf(str, (err - SD_ERRORS_BASE),
+                    "This driver is only capable of writing files on FAT "
+                            "partitions with two (2) copies of the FAT");
+            break;
         case SD_FILE_WITHOUT_BUFFER:
-        printf(str, (err - SD_ERRORS_BASE),
-                "SDfopen() was passed a file struct with "
-                "an uninitialized buffer");
-        break;
+            printf(str, (err - SD_ERRORS_BASE),
+                    "SDfopen() was passed a file struct with "
+                            "an uninitialized buffer");
+            break;
         default:
-        // Is the error an SPI error?
-        if (err > SD_ERRORS_BASE
-                && err < (SD_ERRORS_BASE + SD_ERRORS_LIMIT))
-        printf("Unknown SD error %u\n", (err - SD_ERRORS_BASE));
-        // If not, print unknown error
-        else
-        printf("Unknown error %u\n", err);
-        break;
+            // Is the error an SPI error?
+            if (err > SD_ERRORS_BASE
+                    && err < (SD_ERRORS_BASE + SD_ERRORS_LIMIT))
+                printf("Unknown SD error %u\n", (err - SD_ERRORS_BASE));
+            // If not, print unknown error
+            else
+                printf("Unknown error %u\n", err);
+            break;
     }
     while (1)
-    ;
+        ;
 }
 
 void SDFirstByteExpansion (const uint8_t response) {
     if (BIT_0 & response)
-    printf("\t0: Idle\n");
+        printf("\t0: Idle\n");
     if (BIT_1 & response)
-    printf("\t1: Erase reset\n");
+        printf("\t1: Erase reset\n");
     if (BIT_2 & response)
-    printf("\t2: Illegal command\n");
+        printf("\t2: Illegal command\n");
     if (BIT_3 & response)
-    printf("\t3: Communication CRC error\n");
+        printf("\t3: Communication CRC error\n");
     if (BIT_4 & response)
-    printf("\t4: Erase sequence error\n");
+        printf("\t4: Erase sequence error\n");
     if (BIT_5 & response)
-    printf("\t5: Address error\n");
+        printf("\t5: Address error\n");
     if (BIT_6 & response)
-    printf("\t6: Parameter error\n");
+        printf("\t6: Parameter error\n");
     if (BIT_7 & response)
-    printf("\t7: Something is really screwed up. This should always be 0."
-            "\n");
+        printf("\t7: Something is really screwed up. This should always be 0."
+                "\n");
 }
 #endif

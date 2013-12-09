@@ -7,35 +7,81 @@
  *                  communication
  */
 
+/**
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #ifndef L3G_H_
 #define L3G_H_
+
+/**
+ * @defgroup _propware_l3g  L3G 3-axis gyroscope
+ * @{
+ */
+
+/**
+ * @defgroup _propware_l3g_public   Public members
+ * @{
+ */
 
 #include <propeller.h>
 #include <PropWare.h>
 #include <spi.h>
 
-#define L3G_SPI_MODE            SPI_MODE_3
-#define L3G_SPI_BITMODE         SPI_MSB_FIRST
-#define L3G_SPI_DEFAULT_FREQ    100000
-
+/**
+ * Axes of the L3G device
+ */
 typedef enum {
     L3G_X,
     L3G_Y,
     L3G_Z
 } l3g_axis;
 
+/**
+ * Extra and advanced functions for users available to users
+ */
 typedef enum {
+    /** Set the sensitivity of input values; must be one of l3g_dps_mode_t */
     L3G_FUNC_MOD_DPS,
+    /** Read the value on any internal register */
     L3G_FUNC_RD_REG,
+    /** Total number of advanced functions */
     L3G_FUNCS
 } l3g_ioctl_function_t;
 
+/**
+ * Sensitivity measured in degrees per second
+ */
 typedef enum {
+    /** 250 degrees per second */
     L3G_250_DPS = 0x00,
+    /** 500 degrees per second */
     L3G_500_DPS = 0x10,
+    /** 2000 degrees per second */
     L3G_2000_DPS = 0x20
 } l3g_dps_mode_t;
 
+/**
+ * @name    Register address
+ * @{
+ */
 #define L3G_WHO_AM_I        0x0F
 
 #define L3G_CTRL_REG1       0x20
@@ -66,6 +112,7 @@ typedef enum {
 #define L3G_INT1_THS_ZH     0x36
 #define L3G_INT1_THS_ZL     0x37
 #define L3G_INT1_DURATION   0x38
+/**@}*/
 
 /**
  * @brief   Initialize an L3G module
@@ -160,10 +207,15 @@ uint8_t L3GReadAll (int16_t *val);
  */
 uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal,
         uint8_t *rdVal);
+/**@}*/
 
 /*************************************
  *** Private Function Declarations ***
  *************************************/
+/**
+ * @defgroup    _propware_l3g_private   Private members
+ * @{
+ */
 static uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat);
 
 static uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat);
@@ -171,5 +223,9 @@ static uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat);
 static uint8_t L3GRead8 (uint8_t addr, int8_t *dat);
 
 static uint8_t L3GRead16 (uint8_t addr, int16_t *dat);
+
+/**@}*/
+
+/**@}*/
 
 #endif /* L3G_H_ */

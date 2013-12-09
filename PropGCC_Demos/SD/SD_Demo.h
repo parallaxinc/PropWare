@@ -1,7 +1,8 @@
-/* File:    SD_Demo.h
+/**
+ * @file    SD_Demo.h
  *
- * Author:  David Zemon
- * Project: SD_Demo
+ * @author  David Zemon
+ * @project SD_Demo
  */
 
 #ifndef SD_DEMO_H_
@@ -9,6 +10,8 @@
 
 #define DEBUG
 //#define LOW_RAM_MODE
+#define TEST_WRITE
+#define TEST_SHELL
 
 // Includes
 #include <propeller.h>

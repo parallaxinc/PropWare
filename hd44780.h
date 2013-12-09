@@ -1,15 +1,47 @@
 /**
- * @file            hd44780.h
+ * @file        hd44780.h
+ */
+/**
+ * @author      David Zemon
+ * @author      Collin Winans
  *
- * @author          David Zemon, Collin Winans
+ * @brief       Support for the common "character LCD" modules making use of the
+ *              HD44780 controller
  *
- * @description     TODO: Do me
+ * @note        Does not natively support 40x4 or 24x4 character displays
  *
- * @note            Does not natively support 40x4 or 24x4 character displays
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef HD44780_H_
 #define HD44780_H_
+
+/**
+ * @defgroup _propware_hd44780	HD44780 Character LCD
+ * @{
+ */
+
+/**
+ * @defgroup _propware_hd44780_public	Public members
+ * @{
+ */
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -18,16 +50,26 @@
 
 #define HD44780_DEBUG
 
+/** Number of spaces inserted for '\\t' */
 #define HD44780_TAB_WIDTH               4
 
-// LCD parameters
+/**
+ * @brief   LCD databus width
+ */
 typedef enum {
     HD44780_4BIT,
     HD44780_8BIT,
     HD44780_BITMODES
 } hd44780_bitmode_t;
 
-// Possible LCD dimensions
+/**
+ * @brief   Supported LCD dimensions; Used for determining cursor placement
+ *
+ * @note    There are two variations of 16x1 character LCDs; if you're unsure
+ *          which version you have, try 16x1_1 first, it is more common. 16x1_1
+ *          uses both DDRAM lines of the controller, 8-characters on each line;
+ *          16x1_2 places all 16 characters are a single line of DDRAM.
+ */
 typedef enum {
     HD44780_8x1,
     HD44780_8x2,
@@ -46,14 +88,22 @@ typedef enum {
     HD44780_DIMENSIONS
 } hd44780_dimensions_t;
 
-// Errors
+/**
+ * @name    Error codes
+ * @{
+ */
 #define HD44780_ERRORS_BASE             48
 #define HD44780_ERRORS_LIMIT            16
 #define HD44780_INVALID_CTRL_SGNL       HD44780_ERRORS_BASE + 0
 #define HD44780_INVALID_DATA_MASK       HD44780_ERRORS_BASE + 1
 #define HD44780_INVALID_DIMENSIONS      HD44780_ERRORS_BASE + 2
+/**@}*/
 
-// Commands; NOTE: must be OR-ed with arguments below
+/**
+ * @name    Commands
+ * @note    Must be combined with arguments below to create a parameter for the
+ *          HD44780
+ */
 #define HD44780_CLEAR                   BIT_0
 #define HD44780_RET_HOME                BIT_1
 #define HD44780_ENTRY_MODE_SET          BIT_2
@@ -62,23 +112,42 @@ typedef enum {
 #define HD44780_FUNCTION_SET            BIT_5
 #define HD44780_SET_CGRAM_ADDR          BIT_6
 #define HD44780_SET_DDRAM_ADDR          BIT_7
+/**@}*/
 
-// Entry mode arguments
+/**
+ * @name    Entry mode arguments
+ * @{
+ */
 #define HD44780_SHIFT_INC               BIT_1
 #define HD44780_SHIFT_EN                BIT_0
+/**@}*/
 
-// Display control arguments
+/**
+ * @name    Display control arguments
+ * @{
+ */
 #define HD44780_DISPLAY_PWR             BIT_2
 #define HD44780_CURSOR                  BIT_1
 #define HD44780_BLINK                   BIT_0
+/**@}*/
 
-// Cursor/display shift arguments
+/**
+ * @name    Cursor/display shift arguments
+ * @{
+ */
 #define HD44780_SHIFT_DISPLAY           BIT_3 // 0 = shift cursor
 #define HD44780_SHIFT_RIGHT             BIT_2 // 0 = shift left
-// Function set arguments
+ /**@}*/
+
+/**
+ * @name Function set arguments
+ * @{
+ */
 #define HD44780_8BIT_MODE               BIT_4 // 0 = 4-bit mode
 #define HD44780_2LINE_MODE              BIT_3 // 0 = 1-line mode
 #define HD44780_5x10_CHAR               BIT_2 // 0 = 5x8 dot mode
+/**@}*/
+
 /************************
  *** Public Functions ***
  ************************/
@@ -166,9 +235,15 @@ void HD44780_uint (uint32_t x);
  */
 void HD44780_hex (uint32_t x);
 
+/**@}*/
+
 /*************************
  *** Private Functions ***
  *************************/
+/**
+ * @defgroup _propware_hd44780_private  Private members
+ * @{
+ */
 typedef struct {
         uint8_t charRows;
         uint8_t charColumns;
@@ -191,4 +266,9 @@ static void HD44780Write (const uint8_t val);
 static void HD44780ClockPulse (void);
 
 static void HD44780GenerateMemMap (const hd44780_dimensions_t dimensions);
+
+/**@}*/
+
+/**@}*/
+
 #endif /* HD44780_H_ */

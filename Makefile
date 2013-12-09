@@ -1,15 +1,11 @@
-# Build all source code files within PropWare for easy testing of compilation errors
-PRJ = PropWare
-
-all: PropWare.o spi.o spi_as.o sd.o l3g.o mcp300x.o hd44780.o
-BOARD = QUICKSTART
-MODEL = cmm
-CFLAGS = -Os
-
-# Insert your own path here - it should be the same directory that contains "common.mk"
-PROPWARE_PATH = /home/david/PropWare
-
-# Optionally, specify where your compiler is installed
-PREFIX = /opt/parallax
-
-include $(PROPWARE_PATH)/common.mk
+all:
+	$(MAKE) -C cmm
+	$(MAKE) -C lmm
+	$(MAKE) -C xmm
+	$(MAKE) -C PropGCC_Demos
+	
+clean:
+	$(MAKE) -C cmm clean
+	$(MAKE) -C lmm clean
+	$(MAKE) -C xmm clean
+	$(MAKE) -C PropGCC_Demos clean

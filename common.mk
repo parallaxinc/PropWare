@@ -2,7 +2,7 @@
 # This makefile fragment builds LMM/XMM/XMMC demo programs
 #
 # To use it, define:
-#  PROPLIB to be the path to this directory
+#  PROPWARE_PATH to be the path to this directory
 #  NAME to be the name of project
 #       - this is used to create the final program $(NAME).elf
 #  OBJS to be the object files needed for the project
@@ -34,12 +34,12 @@
 # #########################################################
 # where we installed the propeller binaries and libraries
 
-ifndef PREFIX
-	PREFIX = '/opt/parallax'
+ifndef PROPGCC_PREFIX
+	PROPGCC_PREFIX = /opt/parallax
 endif
 
 # libgcc directory
-LIBGCC = $(PREFIX)/lib/gcc/propeller-elf/4.6.1
+LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 
 ifndef MODEL
 MODEL=lmm
@@ -57,23 +57,29 @@ CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
-INC += -I$(PROPWARE_PATH) -I $(PREFIX)/propeller-elf/include
+ASFLAGS += -m$(MODEL)
+INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
+LIBS += -lPropWare
 
+# Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
-LIB_INC += -L$(PREFIX)/propeller-elf/lib/cmm
+LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib/cmm
 else
-LIB_INC += -L$(PREFIX)/propeller-elf/lib
+LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib
 endif
+
+# Add the appropriate PropWare library folder to the search path
+LIB_INC += -L$(PROPWARE_PATH)/$(MODEL)
 
 ifneq ($(LDSCRIPT),)
 LDFLAGS += -T $(LDSCRIPT)
 endif
 
 # basic gnu tools
-GCC_PATH = $(PREFIX)/bin
+GCC_PATH = $(PROPGCC_PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
 CXX = $(GCC_PATH)/propeller-elf-g++
-LD = $(GCC_PATH)/ropeller-elf-ld
+LD = $(GCC_PATH)/propeller-elf-ld
 AS = $(GCC_PATH)/propeller-elf-as
 AR = $(GCC_PATH)/propeller-elf-ar
 OBJCOPY = $(GCC_PATH)/propeller-elf-objcopy
@@ -90,7 +96,7 @@ ifneq ($(NAME),)
 $(NAME).elf: $(OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: PropGCC Linker'
-	$(CC) $(LDFLAGS) $(LIB_INC) $(LIBS) -o $@ $(OBJS)
+	$(CC) $(LDFLAGS) $(LIB_INC) -o $@ $(OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 endif
@@ -117,14 +123,14 @@ endif
 %.o: ../%.s
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Assembler'
-	$(CC) $(INC) -o $@ -c $<
+	$(CC) $(INC) $(ASFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 	
 %.o: ../%.S
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Assembler'
-	$(CC) $(INC) -o $@ -c $<
+	$(CC) $(INC) $(ASFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 

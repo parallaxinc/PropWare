@@ -3,15 +3,20 @@ CFLAGS = -Os
 PRJ = SPI_Demo
 
 NAME = $(PRJ)
-OBJS = $(PRJ).o spi.o spi_as.o PropWare.o
+OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
-PROPWARE_PATH = /home/david/PropWare
+ifndef PROPWARE_PATH
+	PROPWARE_PATH = ../../..
+endif
 
 # Optionally, specify where your compiler is installed
-PREFIX = /opt/parallax
+ifndef PROPGCC_PREFIX
+	# Default = /opt/parallax
+	PROPGCC_PREFIX = /path/to/compiler/directory
+endif
 
 all: $(NAME).elf
 
