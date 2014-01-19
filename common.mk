@@ -59,7 +59,7 @@ CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 ASFLAGS += -m$(MODEL)
 INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
-LIBS += -lPropWare
+LIBS += -lPropWare_$(model)
 
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
