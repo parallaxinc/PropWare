@@ -1,5 +1,5 @@
 /**
- * @file    MAX6675_Demo.h
+ * @file    MAX6675_Demo.c
  *
  * @author  David Zemon
  * @project MAX6675_Demo
