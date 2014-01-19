@@ -1,4 +1,7 @@
-CFLAGS = -Os
+# @file     Makefile
+#
+# @author   David Zemon
+# @project  MCP300x_Demo
 
 PRJ = MCP300x_Demo
 
@@ -6,6 +9,7 @@ NAME = $(PRJ)
 OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
+CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH
@@ -17,8 +21,6 @@ ifndef PROPGCC_PREFIX
 	# Default = /opt/parallax
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
-
-dummy := $(shell test -d Debug || mkdir -p Debug)
 
 all: $(NAME).elf
 

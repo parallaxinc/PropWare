@@ -23,16 +23,16 @@
 #endif
 
 #if (!(defined SD_VERBOSE) && !(defined SD_VERBOSE_BLOCKS))
-#define printf		__simple_printf
+#define printf      __simple_printf
 #endif
 
-#define CS						BIT_4
-#define MOSI					BIT_0
-#define MISO					BIT_1
-#define SCLK					BIT_2
+#define CS          BIT_4
+#define MOSI        BIT_0
+#define MISO        BIT_1
+#define SCLK        BIT_2
 
-#define OLD_FILE				"STUFF.TXT"
-#define NEW_FILE				"TEST.TXT"
+#define OLD_FILE    "STUFF.TXT"
+#define NEW_FILE    "TEST.TXT"
 
 void error (const uint8_t err);
 

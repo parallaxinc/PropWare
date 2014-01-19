@@ -11,7 +11,7 @@ all:
 	$(MAKE) -C MCP300x/Debug -f ../Makefile
 	$(MAKE) -C SD/Debug -f ../Makefile
 	$(MAKE) -C SPI/Debug -f ../Makefile
-	
+
 clean:
 	$(shell test -d HD44780/Debug || mkdir -p HD44780/Debug)
 	$(shell test -d L3G/Debug || mkdir -p L3G/Debug)

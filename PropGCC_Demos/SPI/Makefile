@@ -1,4 +1,7 @@
-CFLAGS = -Os
+# @file     Makefile
+#
+# @author   David Zemon
+# @project  SPI_Demo
 
 PRJ = SPI_Demo
 
@@ -6,6 +9,7 @@ NAME = $(PRJ)
 OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
+CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH

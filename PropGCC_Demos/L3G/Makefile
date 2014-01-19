@@ -1,3 +1,8 @@
+# @file     Makefile
+#
+# @author   David Zemon
+# @project  L3G_Demo
+
 PRJ = L3G_Demo
 
 NAME = $(PRJ)
@@ -16,8 +21,6 @@ ifndef PROPGCC_PREFIX
 	# Default = /opt/parallax
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
-
-dummy := $(shell test -d Debug || mkdir -p Debug)
 
 all: $(NAME).elf
 
