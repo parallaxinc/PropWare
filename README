@@ -5,10 +5,6 @@ Purpose:   Generic C library files for the Parallax Propeller Microcontroller
 Please find full documentation here:
 http://david.zemon.name/professional/PropWare/docs/html/
 
-*NOTE: You are welcome to edit common.mk to not search for header files; See
-       the comment near the top of the file for my reasoning behind including
-       it and decide for yourself
-
 TODO:
     - SD & FAT16/32 driver
         - Traverse directories (implies ability to open files/directories not

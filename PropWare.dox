@@ -49,7 +49,7 @@
 
 <ul>
     <li>
-        <label>Select your operating system: <select onclick="toggleStuffs()" name="os_select">
+        <label>Select your operating system: <select onchange="toggleStuffs()" name="os_select">
             <option selected value="none"></option>
 
             <option value="windoze">Windows</option>
@@ -62,30 +62,33 @@
         </select> </label>
     </li>
 
-    <li class="windoze">The first prerequisite is the compiler. In our case, PropGCC, a specially ported version of the
-        GNU C compiler (GCC) for the Parallax Propeller. I find the easiest way to install it is via Parallax's <a
+    <!-- GCC -->
+    <li class="windoze">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
+        the compiler of choice. I find the easiest way to install it is via Parallax's <a
                 target="_blank"
-                href="http://learn.parallax.com/propeller-c-set-simpleide/windows">SimpleIDE</a>. If you prefer, you can
+                href="http://learn.parallax.com/propeller-c-set-simpleide/windows">Simple IDE</a>. If you prefer, you
+        can also download PropGCC directly from <a target="_blank"
+                                                   href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+    </li>
+
+    <li class="debian">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
+        the compiler of choice. I find the easiest way to install it is via Parallax's <a
+                target="_blank"
+                href="http://learn.parallax.com/propeller-c-set-simpleide/linux">Simple IDE</a>. If you prefer, you can
         also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">here</a>.
     </li>
 
-    <li class="debian">The first prerequisite is the compiler. In our case, PropGCC, a specially ported version of the
-        GNU C compiler (GCC) for the Parallax Propeller. I find the easiest way to install it is via Parallax's <a
+    <li class="mac">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is the
+        compiler of choice. I find the easiest way to install it is via Parallax's <a
                 target="_blank"
-                href="http://learn.parallax.com/propeller-c-set-simpleide/linux">SimpleIDE</a>. If you prefer, you can
+                href="http://learn.parallax.com/propeller-c-set-simpleide/mac">Simple IDE</a>. If you prefer, you can
         also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">here</a>.
     </li>
 
-    <li class="mac">The first prerequisite is the compiler. In our case, PropGCC, a specially ported version of the GNU
-        C compiler (GCC) for the Parallax Propeller. I find the easiest way to install it is via Parallax's <a
-                target="_blank"
-                href="http://learn.parallax.com/propeller-c-set-simpleide/mac">SimpleIDE</a>. If you prefer, you can
-        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">here</a>.
-    </li>
-
-    <li class="windoze">Install GNU Make: Download the <a target="_blank"
-                                                          href="http://gnuwin32.sourceforge.net/downlinks/make.php">complete
-        package</a> and follow the on-screen instructions upon executing the file
+    <!-- GNU make -->
+    <li class="windoze">Install GNU Make: Download and install the <a target="_blank"
+                                                                      href="http://gnuwin32.sourceforge.net/downlinks/make.php">complete
+        package</a>
     </li>
 
     <li class="debian">Install GNU Make: type "sudo apt-get install make" at the terminal</li>
@@ -95,22 +98,20 @@
         Overflow</a> has good instructions on the topic.
     </li>
 
-    <li class="windoze">[Optional] Add an environment variable PROPGCC_PREFIX = &lt;propgcc root&gt;/bin
+    <!-- PROP_GCC env var -->
+    <li class="windoze">[Optional] Add an environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;
         <ul>
             <li>Windows 2000, XP, Vista, and 7 users should see this well-written <a target="_blank"
                                                                                      href="http://www.computerhope.com/issues/ch000549.htm">tutorial</a>
-                for accessing the "Environment Variables" window
-            </li>
-
-            <li>Windows 8 and 8.1 users can follow this <a
-                    href="http://www.c-sharpcorner.com/UploadFile/6cde20/use-of-environment-variable-in-windows-8/">tutorial</a>
+                and Windows 8/8.1 users can follow this <a
+                        href="http://www.c-sharpcorner.com/UploadFile/6cde20/use-of-environment-variable-in-windows-8/">tutorial</a>
                 with lots of pictures for accessing the "Environment Variables" window
             </li>
 
             <li>Once you have the "Environment Variables" window open, click "New..." under "System Variables" and enter
-                "PROPGCC_PREFIX" as the "Variable name" and the full path to the PropGCC bin folder as the "Variable
-                value". For example, if you downloaded PropGCC to C:\Users\Joe\Downloads\PropGCC, then you would enter
-                "C:\Users\Joe\Downloads\PropGCC\bin" as the "Variable value"
+                "PROPGCC_PREFIX" as the "Variable name" and the full path to the PropGCC folder as the "Variable value".
+                For example, if you installed PropGCC via SimpleIDE, your PropGCC path is likely to be "C:\Program Files
+                (x86)\SimpleIDE\propeller-gcc"
             </li>
 
             <li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
@@ -119,13 +120,14 @@
         </ul>
     </li>
 
-    <li class="debian">[Optional] Add a root environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;/bin
+    <li class="debian">[Optional] Add a root environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;
         <ol>
             <li>Enter "gksudo gedit /etc/environment" at the terminal</li>
 
-            <li>Append a new line to the bottom of the file with the full path to the PropGCC bin folder. For example,
-                if you downloaded PropGCC to /home/joe/Downloads/PropGCC, then you would append the line
-                "PROPGCC_PREFIX=/home/joe/Downloads/PropGCC/bin" (no spaces!)
+            <li>Append a new line to the bottom of the file with the full path to the PropGCC folder. For example, if
+                you are using GCC bundled with Simple IDE and you ran the setup script (setup.sh) in the Simple IDE
+                folder, then PropGCC would have been installed to /opt/parallax and you would append the line
+                "PROPGCC_PREFIX=/opt/parallax" (no spaces!)
             </li>
 
             <li>Save and exit the text editor</li>
@@ -143,7 +145,7 @@
     </li>
 
     <li class="mac">
-        [Optional] Add an environment variable PROPGCC_PREFIX = &lt;propgcc root&gt;/bin
+        [Optional] Add a root environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;
         <ul>
             <li>
                 I'm afraid I don't know anyone with a Mac to try this on, and I'm not 100% confident this works, but <a
@@ -154,8 +156,9 @@
             </li>
 
             <li>Once you determine the correct file to edit, append a new line to the bottom with the full path to the
-                PropGCC bin folder. For example, if you downloaded PropGCC to /home/joe/Downloads/PropGCC, then you
-                would append the line "PROPGCC_PREFIX=/home/joe/Downloads/PropGCC/bin" (no spaces!)
+                PropGCC folder. For example, if you are using GCC bundled with Simple IDE and Simple IDE was extracted
+                to /home/joe/SimpleIDE-0-9-45, then you would append the line
+                "PROPGCC_PREFIX=/home/joe/SimpleIDE-0-9-45/parallax" (no spaces!)
             </li>
 
             <li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
@@ -164,7 +167,8 @@
         </ul>
     </li>
 
-    <li class="os_independent">[Optional] Add another environment variable PROPWARE_PATH = &#60;PropWare root&#62;
+    <!-- PROPWARE_PATH env var -->
+    <li class="os_independent">[Optional] Add another environment variable PROPWARE_PATH=&lt;PropWare root&gt;
         <ul>
             <li>Detailed instructions for creating environment variables can be found in the step above</li>
 
@@ -191,12 +195,63 @@
     deploying a PropGCC application using PropWare.</p>
 
 <ul>
+    <!-- Eclipse -->
+    <li>From Eclipse (recommended):
+        <ol>
+            <li>If you have Eclipse, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users,
+                find "Eclipse IDE for C/C++ Developers" <a target="_blank"
+                                                           href="http://www.eclipse.org/downloads/">here</a> and
+                download the appropriate package
+            </li>
+
+            <li>Create a new C or C++ project; "Project Type" should be Executable -&gt; Empty Project and "Toolchains"
+                should be set for cross compiler; On second page, select "Advanced settings..."
+            </li>
+
+            <li>In the left-pane, click on "C/C++ Build" menu option to the left and then find the "Builder Settings"
+                tab</li>
+
+            <li>Uncheck "Use default build command" and ensure the "Build command" text box reads "make -f ../Makefile"
+            </li>
+
+            <li>In the left-pane, expand the "C/C++ Build" menu and select "Settings"</li>
+
+            <li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
+                "Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's
+                include folder (on Linux, /opt/parallax/propeller-elf/include)
+                <ul>
+                    <li>This is done simply for the indexer that helps you keep track of included files - it will not
+                        affect the build process and can be skipped (not recommended)
+                    </li>
+                </ul>
+            </li>
+
+            <li>With the include paths set, you are done modifying settings and can click "OK" on the current
+                dialogue and then "Next &gt;" and "Finish" on the other</li>
+
+            <li>Create your files based on the same rules as "At the Terminal" (steps 1 and 2) and add source and header
+                files where appropriate
+            </li>
+
+            <li>That's it! You now have Eclipse up and running with PropGCC and PropWare! All of its auto-completion,
+                code highlighting, and quick and easy compilation! Projects can be compiled with Eclipse's built-in
+                "Build Project" found in the "Project" menu. Though you can load your program to the Propeller via
+                some Eclipse magic, I find it's a lot more trouble than it's worth. Simply open a terminal, navigate
+                to &lt;project root&gt;/Debug and type either "make -f ../Makefile run" to test your application in
+                RAM or "make -f ../Makefile install" to load your application to EEPROM
+            </li>
+        </ol>
+    </li>
+
+    <!-- Terminal -->
     <li>At the Terminal:
         <ol>
             <li>Create a project directory and your source files
                 <ul>
                     <li>All C/C++ files must have an accompanying header file with a similar name; (i.e., if you have a
-                        file main.c, you must have main.h as well)
+                        file main.c, you must have main.h as well); You are welcome to edit common.mk to not search for
+                        header files; See the comment near the top of the file for my reasoning behind including it and
+                        decide for yourself
                     </li>
                 </ul>
             </li>
@@ -218,47 +273,6 @@
 
             <li>When you are ready to install the program to the Propeller's EEPROM, the "install" target will load your
                 executable into both EEPROM and RAM and then begin execution: "make -f ../Makefile install"
-            </li>
-        </ol>
-    </li>
-
-    <li>From Eclipse (recommended):
-        <ol>
-            <li>Install Eclipse and the CDT plugin</li>
-
-            <li>Create a C/C++ project; Select cross compiler (No need to set the compiler or path, we'll be using a
-                custom makefile)
-            </li>
-
-            <li>Once the project is created and you've exited the dialog box, right-click on the project in the Project
-                Pane and choose "Properties"
-            </li>
-
-            <li>Click on "C/C++ Build" menu option to the left and then find the "Builder Settings" tab</li>
-
-            <li>Uncheck "Use default build command" and ensure the "Build command" text box reads "make -f ../Makefile"
-            </li>
-
-            <li>In the left-pane, expand the "C/C++ Build" menu and select "Settings"</li>
-
-            <li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
-                "Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's
-                include folder (on Linux, /opt/parallax/include)
-                <ul>
-                    <li>This is done simply for the indexer that helps you keep track of included files - it will not
-                        affect the build process
-                    </li>
-                </ul>
-            </li>
-
-            <li>Create your files based on the same rules as "At the Terminal" (steps 1 and 2) and add source and header
-                files where appropriate
-            </li>
-
-            <li>That's it! You now have Eclipse up and running with PropGCC and PropWare! All of its auto-completion,
-                code highlighting, and quick and easy compilation! Projects can be compiled with Eclipse's built-in
-                "Build Project" found in the "Project" menu, but you'll need to run and install your application from
-                the terminal.
             </li>
         </ol>
     </li>
