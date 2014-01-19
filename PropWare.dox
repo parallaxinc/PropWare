@@ -179,7 +179,7 @@
     </li>
 </ul>
 
-<h3>Building the PropWare static library</h3>
+<h3>Building the PropWare Static Libraries</h3>
 
 <ul>
     <li>Enter the PropWare root directory at the command line</li>
@@ -191,7 +191,7 @@
 
 <h3>Deploying a PropWare application</h3>
 
-<p>PropWare makes building and running applications very easy. Below are two different methods for building and
+<p>PropWare makes building and running applications very easy. Below are three different methods for building and
     deploying a PropGCC application using PropWare.</p>
 
 <ul>
@@ -209,7 +209,8 @@
             </li>
 
             <li>In the left-pane, click on "C/C++ Build" menu option to the left and then find the "Builder Settings"
-                tab</li>
+                tab
+            </li>
 
             <li>Uncheck "Use default build command" and ensure the "Build command" text box reads "make -f ../Makefile"
             </li>
@@ -226,8 +227,9 @@
                 </ul>
             </li>
 
-            <li>With the include paths set, you are done modifying settings and can click "OK" on the current
-                dialogue and then "Next &gt;" and "Finish" on the other</li>
+            <li>With the include paths set, you are done modifying settings and can click "OK" on the current dialogue
+                and then "Next &gt;" and "Finish" on the other
+            </li>
 
             <li>Create your files based on the same rules as "At the Terminal" (steps 1 and 2) and add source and header
                 files where appropriate
@@ -235,10 +237,10 @@
 
             <li>That's it! You now have Eclipse up and running with PropGCC and PropWare! All of its auto-completion,
                 code highlighting, and quick and easy compilation! Projects can be compiled with Eclipse's built-in
-                "Build Project" found in the "Project" menu. Though you can load your program to the Propeller via
-                some Eclipse magic, I find it's a lot more trouble than it's worth. Simply open a terminal, navigate
-                to &lt;project root&gt;/Debug and type either "make -f ../Makefile run" to test your application in
-                RAM or "make -f ../Makefile install" to load your application to EEPROM
+                "Build Project" found in the "Project" menu. Though you can load your program to the Propeller via some
+                Eclipse magic, I find it's a lot more trouble than it's worth. Simply open a terminal, navigate to &lt;project
+                root&gt;/Debug and type either "make -f ../Makefile run" to test your application in RAM or "make -f
+                ../Makefile install" to load your application to EEPROM
             </li>
         </ol>
     </li>
@@ -278,9 +280,37 @@
     </li>
 
     <!-- Importing Examples -->
-    <li>Importing Example Projects:
+    <li>Importing Example Projects into Eclipse:
         <ol>
-            <li>Coming momentarily...</li>
+            <li>All example projects can be imported into Eclipse simultaneously. You will need Eclipse and the CDT
+                plugin as described in "From Eclipse" step 1.
+            </li>
+
+            <li>In the "File" menu of Eclipse, select "Import..."; Under "General", you should find "Existing Projects
+                into Workspace"; Press "Next &gt;"
+            </li>
+
+            <li>In "Select root directory:", enter (or browse to) the Examples directory in PropWare
+                <ul>
+                    <li>[Optional] After the projects appear in the "Projects:" windows, you can deselect any that you
+                        don't want imported
+                    </li>
+                </ul>
+            </li>
+
+            <li>Under "Options", ensure that "Copy projects into workspace" is selected and press "Finish" to close the
+                dialogue
+                <ul>
+                    <li>[Optional] You can unselect "Copy projects into workspace" if you do not wish to make copies of
+                        all project files into the Eclipse workspace folder; This is only recommended if you will never
+                        make modifications to the example files
+                    </li>
+                </ul>
+            </li>
+
+            <li>Two minor modifications need to be made to the project settings; These modifications are detailed in
+                steps 3 through 7 of "From Eclipse" above
+            </li>
         </ol>
     </li>
 </ul>
