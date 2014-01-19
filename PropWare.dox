@@ -59,7 +59,7 @@
 
 			<option value="mac">Mac OS X</option>
 
-			<option value="all">Show all</option>
+			<!--<option value="all">Show all</option>-->
 		</select> </label>
 	</li>
 
