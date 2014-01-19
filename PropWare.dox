@@ -63,6 +63,24 @@
 		</select> </label>
 	</li>
 
+	<li class="windoze">The first prerequisite is the compiler. In our case, PropGCC, a specially ported version of the
+		GNU C compiler (GCC) for the Parallax Propeller. I find the easiest way to install it is via Parallax's <a
+				href="http://learn.parallax.com/propeller-c-set-simpleide/windows">SimpleIDE</a>. If you prefer, you can
+		also download PropGCC directly from <a href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+	</li>
+
+	<li class="debian">The first prerequisite is the compiler. In our case, PropGCC, a specially ported version of the
+		GNU C compiler (GCC) for the Parallax Propeller. I find the easiest way to install it is via Parallax's <a
+				href="http://learn.parallax.com/propeller-c-set-simpleide/linux">SimpleIDE</a>. If you prefer, you can
+		also download PropGCC directly from <a href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+	</li>
+
+	<li class="mac">The first prerequisite is the compiler. In our case, PropGCC, a specially ported version of the
+		GNU C compiler (GCC) for the Parallax Propeller. I find the easiest way to install it is via Parallax's <a
+				href="http://learn.parallax.com/propeller-c-set-simpleide/mac">SimpleIDE</a>. If you prefer, you can
+		also download PropGCC directly from <a href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+	</li>
+
 	<li class="windoze">Install GNU Make: Download the <a target="_blank"
 														  href="http://gnuwin32.sourceforge.net/downlinks/make.php">complete
 		package</a> and follow the on-screen instructions upon executing the file
@@ -166,8 +184,8 @@
 
 <h3>Deploying a PropWare application</h3>
 
-<p>PropWare makes building and running applications very easy, especially when you use Eclipse. Below are two different
-	methods for building and deploying a PropGCC application using PropWare</p>
+<p>PropWare makes building and running applications very easy. Below are two different
+	methods for building and deploying a PropGCC application using PropWare.</p>
 
 <ul>
 	<li>At the Terminal:
