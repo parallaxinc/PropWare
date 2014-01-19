@@ -46,7 +46,7 @@
 <h2>Getting Started</h2>
 
 
-<h3 onclick="doStuff()">Prerequisites</h3>
+<h3>Prerequisites</h3>
 
 <ul>
 	<li>
