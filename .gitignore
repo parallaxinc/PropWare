@@ -9,8 +9,5 @@ objects.mk
 sources.mk
 subdir.mk
 makefile
-PropGCC_Demos/MCP300x/MCP300x_Datasheet.pdf
-/.cproject
-/.project
-/SPI_c.c
-/SPI_c.h
+.cproject
+.project
