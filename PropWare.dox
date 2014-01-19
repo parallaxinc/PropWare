@@ -1,170 +1,267 @@
-/**
-@mainpage   PropWare v1.1 Documentation
+/** @mainpage PropWare v1.1 Documentation
+@htmlonly
 
-<p>Download PropWare 
-<a href="https://github.com/SwimDude0614/PropWare" target="_blank">here</a>.</p>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<script type="text/javascript">
+	function showAll() {
+		$(".windoze").show();
+		$(".debian").show();
+		$(".mac").show();
+		$(".os_independent").show();
+	}
 
-<p>WARNING: The naming scheme of all functions may change in the near future, as
-I am still deciding what is the best (or least bad) way to go about this.
-Suggestions are welcome for naming schemes so long as detailed explanations
-accompany them. I will remove this warning when the naming scheme is finalized.
+	function hideAll() {
+		$(".windoze").hide();
+		$(".debian").hide();
+		$(".mac").hide();
+		$(".os_independent").hide();
+	}
+
+	function toggleStuffs() {
+		var selectBox = document.getElementsByName("os_select").item(0);
+		var selection = selectBox.options[selectBox.selectedIndex].value;
+
+		if ('all' == selection) {
+			showAll();
+		} else {
+			hideAll();
+			if ('none' != selection) {
+				$("." + selection).show();
+				$(".os_independent").show();
+			}
+		}
+	}
+</script>
+
+<p>
+	Download PropWare <a href="https://github.com/SwimDude0614/PropWare"
+						 target="_blank">here</a>.
+</p>
+
+<p>WARNING: The naming scheme of all functions may change in the near future, as I am still deciding what is the best
+	(or least bad) way to go about this. Suggestions are welcome for naming schemes so long as detailed explanations
+	accompany them. I will remove this warning when the naming scheme is finalized.
 
 <h2>Getting Started</h2>
-<h3>Prerequisites</h3>
+
+
+<h3 onclick="doStuff()">Prerequisites</h3>
+
 <ul>
-    <li>
-        Install GNU Make
-        <ul>
-            <li>
-                Debian Linux distributions: type "sudo apt-get install make" at
-                the terminal
-            </li>
-            <li>
-                Windows:
-                <a href="http://gnuwin32.sourceforge.net/packages/make.htm" target="_blank">
-                http://gnuwin32.sourceforge.net/packages/make.htm</a>
-            </li>
-        </ul>
-    </li>
-    <li>
-        [Optional] Add an environment variable PROPGCC_PREFIX = 
-        \<propgcc root\>/bin
-        <ul>
-            <li>
-                Note: If you skip this step, you'll need to set PROPGCC_PREFIX
-                in all makefiles used by Propeller applications
-            </li>
-        </ul> 
-    </li>
-    <li>
-        [Optional] Add an environment variable PROPWARE_PATH = \<PropWare root\>
-        <ul>
-            <li>
-                Note: If you skip this step, you'll need to set PROPWARE_PATH
-                in all makefiles used by PropWare applications
-            </li>
-        </ul> 
-    </li>
+	<li>
+		<label>Select your operating system: <select onclick="toggleStuffs()" name="os_select">
+			<option selected value="none"></option>
+
+			<option value="windoze">Windows</option>
+
+			<option value="debian">Debian Linux (Ubuntu)</option>
+
+			<option value="mac">Mac OS X</option>
+
+			<option value="all">Show all</option>
+		</select> </label>
+	</li>
+
+	<li class="windoze">Install GNU Make: Download the <a target="_blank"
+														  href="http://gnuwin32.sourceforge.net/downlinks/make.php">complete
+		package</a> and follow the on-screen instructions upon executing the file
+	</li>
+
+	<li class="debian">Install GNU Make: type "sudo apt-get install make" at the terminal</li>
+
+	<li class="mac">Install GNU Make: You will need to install Make via Xcode on a Mac. <a
+			href="https://stackoverflow.com/questions/10265742/how-to-install-make-and-gcc-on-a-mac" target="_blank">Stack
+		Overflow</a> has good instructions on the topic.
+	</li>
+
+	<li class="windoze">[Optional] Add an environment variable PROPGCC_PREFIX = &lt;propgcc root&gt;/bin
+		<ul>
+			<li>Windows 2000, XP, Vista, and 7 users should see this well-written <a
+					href="http://www.computerhope.com/issues/ch000549.htm">tutorial</a> for accessing the "Environment
+				Variables" window
+			</li>
+
+			<li>Windows 8 and 8.1 users can follow this <a
+					href="http://www.c-sharpcorner.com/UploadFile/6cde20/use-of-environment-variable-in-windows-8/">tutorial</a>
+				with lots of pictures for accessing the "Environment Variables" window
+			</li>
+
+			<li>Once you have the "Environment Variables" window open, click "New..." under "System Variables" and enter
+				"PROPGCC_PREFIX" as the "Variable name" and the full path to the PropGCC bin folder as the "Variable
+				value". For example, if you downloaded PropGCC to C:\Users\Joe\Downloads\PropGCC, then you would enter
+				"C:\Users\Joe\Downloads\PropGCC\bin" as the "Variable value"
+			</li>
+
+			<li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
+				applications
+			</li>
+		</ul>
+	</li>
+
+	<li class="debian">[Optional] Add a root environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;/bin
+		<ol>
+			<li>Enter "gksudo gedit /etc/environment" at the terminal</li>
+
+			<li>Append a new line to the bottom of the file with the full path to the PropGCC bin folder. For example,
+				if you downloaded PropGCC to /home/joe/Downloads/PropGCC, then you would append the line
+				"PROPGCC_PREFIX=/home/joe/Downloads/PropGCC/bin" (no spaces!)
+			</li>
+
+			<li>Save and exit the text editor</li>
+		</ol>
+		<ul>
+			<li>Note: Creating an environment variable at the root level is only necessary if you plan on using a
+				graphical IDE such as Eclipse; If you are compiling source from the terminal you should edit ~/.bashrc
+				instead of /etc/environment
+			</li>
+
+			<li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
+				applications
+			</li>
+		</ul>
+	</li>
+
+	<li class="mac">
+		[Optional] Add an environment variable PROPGCC_PREFIX = &lt;propgcc root&gt;/bin
+		<ul>
+			<li>
+				I'm afraid I don't know anyone with a Mac to try this on, and I'm not 100% confident this works, but <a
+					href="https://stackoverflow.com/questions/5240628/how-to-set-environment-variable-for-root-user">here's
+				a link</a> that might help you. If you have trouble with building your projects via Eclipse or any
+				application not launched from the terminal, please let me know and I'll work with you to solve it
+			</li>
+
+			<li>Once you determine the correct file to edit, append a new line to the bottom with the full path to the
+				PropGCC bin folder. For example, if you downloaded PropGCC to /home/joe/Downloads/PropGCC, then you
+				would append the line "PROPGCC_PREFIX=/home/joe/Downloads/PropGCC/bin" (no spaces!)
+			</li>
+
+			<li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
+				applications
+			</li>
+		</ul>
+	</li>
+
+	<li class="os_independent">[Optional] Add another environment variable PROPWARE_PATH = &#60;PropWare root&#62;
+		<ul>
+			<li>Detailed instructions for creating environment variables can be found in the step above</li>
+
+			<li>Note: If you skip this step, you'll need to set PROPWARE_PATH in all makefiles used by PropWare
+				applications
+			</li>
+		</ul>
+	</li>
 </ul>
 
 <h3>Building the PropWare static library</h3>
+
 <ul>
-    <li>
-        Enter the PropWare root directory at the command line
-    </li>
-    <li>
-        Run "make"; This will build the library file, libPropWare.a, for each
-        memory model as well as executables for each example project
-    </li>
+	<li>Enter the PropWare root directory at the command line</li>
+
+	<li>Run "make"; This will build the library file, libPropWare.a, for each memory model as well as executables for
+		each example project
+	</li>
 </ul>
+
 <h3>Deploying a PropWare application</h3>
-<p>PropWare makes building and running applications very easy, especially when
-you use Eclipse. Below are two different methods for building and deploying a
-PropGCC application using PropWare</p>
+
+<p>PropWare makes building and running applications very easy, especially when you use Eclipse. Below are two different
+	methods for building and deploying a PropGCC application using PropWare</p>
+
 <ul>
-    <li>
-        At the Terminal:
-        <ol>
-            <li>
-                Create a project directory and your source files
-                <ul><li>All C/C++ files must have an accompanying header file 
-                     with a similar name; (i.e., if you have a file main.c, you 
-                     must have main.h as well)</li></ul>
-            </li>
-            <li>
-                Create a Makefile for the project (see any of the Demo projects 
-                for examples)
-            </li>
-            <li>
-                Create a "Debug" folder in the project directory and run
-                "make -f ../Makefile" within it
-                <ul><li>This Debug folder allows for seamless Eclipse 
-                integration; If you are certain you do not want to use Eclipse,
-                you can run make wherever you choose. The remaining steps assume
-                you are running from within the Debug directory</li></ul> 
-            </li>
-            <li>
-                The "run" target for make will load your executable into the
-                Propeller's RAM and begin running the application:
-                "make -f ../Makefile run"
-            </li>
-            <li>
-                When you are ready to install the program to the Propeller's
-                EEPROM, the "install" target will load your executable into both
-                EEPROM and RAM and then begin execution: 
-                "make -f ../Makefile install"
-            </li>
-        </ol>
-    </li>
-    <li>
-        From Eclipse (recommended):
-        <ol>
-            <li>
-                Install Eclipse and the CDT plugin
-            </li>
-            <li>
-                Create a C/C++ project; Select cross compiler (No need to set 
-                the compiler or path, we'll be using a custom makefile)
-            </li>
-            <li>
-                Once the project is created and you've exited the dialog box,
-                right-click on the project in the Project Pane and choose
-                "Properties"
-            </li>
-            <li>
-                Click on "C/C++ Build" menu option to the left and then find the
-                "Builder Settings" tab
-            </li>
-            <li>
-                Uncheck "Use default build command" and ensure the "Build
-                command" text box reads "make -f ../Makefile"
-            </li>
-            <li>
-                In the left-pane, expand the "C/C++ Build" menu and select
-                "Settings"
-            </li>
-            <li>
-                In the "Tool Settings" tab, find "Cross GCC Compiler" and then
-                "Includes" beneath that. Add two lines to "Include paths (-l)", 
-                one should be the path to PropWare, and another should be the 
-                path to PropGCC's include folder (on Linux, 
-                /opt/parallax/include)
-                <ul><li>This is done simply for the indexer that helps you keep
-                track of included files - it will not affect the build process
-                </li></ul>
-            </li>
-            <li>
-                Create your files based on the same rules as "At the Terminal"
-                (steps 1 and 2) and add source and header files where 
-                appropriate
-            </li>
-            <li>
-                That's it! You now have Eclipse up and running with PropGCC and
-                PropWare! All of its auto-completion, code highlighting, and 
-                quick and easy compilation! Projects can be compiled with
-                Eclipse's built-in "Build Project" found in the "Project" menu,
-                but you'll need to run and install your application from the
-                terminal.
-            </li>
-       </ol>
-    </li>
+	<li>At the Terminal:
+		<ol>
+			<li>Create a project directory and your source files
+				<ul>
+					<li>All C/C++ files must have an accompanying header file with a similar name; (i.e., if you have a
+						file main.c, you must have main.h as well)
+					</li>
+				</ul>
+			</li>
+
+			<li>Create a Makefile for the project (see any of the Demo projects for examples)</li>
+
+			<li>Create a "Debug" folder in the project directory and run "make -f ../Makefile" within it
+				<ul>
+					<li>This Debug folder allows for seamless Eclipse integration; If you are certain you do not want to
+						use Eclipse, you can run make wherever you choose. The remaining steps assume you are running
+						from within the Debug directory
+					</li>
+				</ul>
+			</li>
+
+			<li>The "run" target for make will load your executable into the Propeller's RAM and begin running the
+				application: "make -f ../Makefile run"
+			</li>
+
+			<li>When you are ready to install the program to the Propeller's EEPROM, the "install" target will load your
+				executable into both EEPROM and RAM and then begin execution: "make -f ../Makefile install"
+			</li>
+		</ol>
+	</li>
+
+	<li>From Eclipse (recommended):
+		<ol>
+			<li>Install Eclipse and the CDT plugin</li>
+
+			<li>Create a C/C++ project; Select cross compiler (No need to set the compiler or path, we'll be using a
+				custom makefile)
+			</li>
+
+			<li>Once the project is created and you've exited the dialog box, right-click on the project in the Project
+				Pane and choose "Properties"
+			</li>
+
+			<li>Click on "C/C++ Build" menu option to the left and then find the "Builder Settings" tab</li>
+
+			<li>Uncheck "Use default build command" and ensure the "Build command" text box reads "make -f ../Makefile"
+			</li>
+
+			<li>In the left-pane, expand the "C/C++ Build" menu and select "Settings"</li>
+
+			<li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
+				"Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's
+				include folder (on Linux, /opt/parallax/include)
+				<ul>
+					<li>This is done simply for the indexer that helps you keep track of included files - it will not
+						affect the build process
+					</li>
+				</ul>
+			</li>
+
+			<li>Create your files based on the same rules as "At the Terminal" (steps 1 and 2) and add source and header
+				files where appropriate
+			</li>
+
+			<li>That's it! You now have Eclipse up and running with PropGCC and PropWare! All of its auto-completion,
+				code highlighting, and quick and easy compilation! Projects can be compiled with Eclipse's built-in
+				"Build Project" found in the "Project" menu, but you'll need to run and install your application from
+				the terminal.
+			</li>
+		</ol>
+	</li>
 </ul>
+
 <h2>Useful links</h2>
+
 <ul>
-    <li>
-        Source code: 
-        <a href="https://github.com/SwimDude0614/PropWare" target="_blank">
-        https://github.com/SwimDude0614/PropWare</a>
-    </li>
-    <li>
-        Parallax forums can be found 
-        <a href="http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller" target="_blank">
-        here</a>
-    </li>
-    <li>
-        Parallax Object Exchange (OBEX)
-        <a href="http://obex.parallax.com/" target="_blank">
-        http://obex.parallax.com/</a>
-    </li>
+	<li>Source code: <a href="https://github.com/SwimDude0614/PropWare"
+						target="_blank"> https://github.com/SwimDude0614/PropWare</a>
+	</li>
+
+	<li>Parallax forums can be found <a
+			href="http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller"
+			target="_blank"> here</a>
+	</li>
+
+	<li>Parallax Object Exchange (OBEX) <a href="http://obex.parallax.com/"
+										   target="_blank"> http://obex.parallax.com/</a>
+	</li>
 </ul>
- */
+
+<script type="text/javascript">
+	hideAll();
+</script>
+
+@endhtmlonly */
