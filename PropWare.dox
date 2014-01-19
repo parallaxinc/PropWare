@@ -159,7 +159,7 @@
 <ul>
 	<li>Enter the PropWare root directory at the command line</li>
 
-	<li>Run "make"; This will build the library file, libPropWare.a, for each memory model as well as executables for
+	<li>Run "make"; This will build the library file, libPropWare_*.a, for each memory model as well as executables for
 		each example project
 	</li>
 </ul>
