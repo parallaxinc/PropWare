@@ -27,4 +27,11 @@
 
 #define DEBUG_LEDS      BYTE_2
 
+/**
+ * @brief       Report errors to the Debug LEDs for user interpretation
+ *
+ * @param[in]   err     Error value
+ */
+void error (int8_t err);
+
 #endif /* MCP300X_DEMO_H_ */

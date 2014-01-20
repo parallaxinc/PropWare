@@ -66,12 +66,12 @@ typedef enum {
 } mcp_channel_diff_t;
 
 /**
- * @brief   Initialize communication with an MCP300x device
+ * @brief       Initialize communication with an MCP300x device
  *
- * @param   mosi        Pin mask for MOSI
- * @param   miso        Pin mask for MISO
- * @param   sclk        Pin mask for SCLK
- * @param   cs          Pin mask for CS
+ * @param[in]   mosi        Pin mask for MOSI
+ * @param[in]   miso        Pin mask for MISO
+ * @param[in]   sclk        Pin mask for SCLK
+ * @param[in]   cs          Pin mask for CS
  *
  * @return      Returns 0 upon success, error code otherwise
  */
@@ -79,35 +79,35 @@ int8_t MCP300xStart (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs);
 
 /**
- * @brief   Choose whether to always set the SPI mode and bitmode before reading
- *          or writing to the ADC; Useful when multiple devices are
- *          connected to the SPI bus
+ * @brief       Choose whether to always set the SPI mode and bitmode before
+ *              reading or writing to the ADC; Useful when multiple devices are
+ *              connected to the SPI bus
  *
- * @param   alwaysSetMode   For any non-zero value, the SPI modes will always be
- *                          set before a read or write routine
+ * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
+ *                              always be set before a read or write routine
  */
 void MCP300xAlwaysSetMode (const uint8_t alwaysSetMode);
 
 /**
- * @brief   Read a specific channel's data in single-ended mode
+ * @brief       Read a specific channel's data in single-ended mode
  *
- * @param   axis    One of MCP_CHANNEL_<x>, where <x> is a number 0 through 3
- *                  (or 0 through 7 for the MCP3008); Selects the channel to be
- *                  read
- * @param   *val    Address that data should be placed into
+ * @param[in]   axis    One of MCP_CHANNEL_<x>, where <x> is a number 0 through
+ *                      3 (or 0 through 7 for the MCP3008); Selects the channel
+ *                      to be read
+ * @param[out]  *val    Address that data should be placed into
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 int8_t MCP300xRead (const mcp_channel_t channel, uint16_t *dat);
 
 /**
- * @brief   Read a specific axis's data in differential mode
+ * @brief       Read a specific axis's data in differential mode
  *
- * @param   axis    One of DIFF_<x>_<y>, where <x> is a number 0 through 3
- *                  (or 0 through 7 for the MCP3008) and <y> is
- *                  <x> + (<x> + 1)%2 (See above defined enum or datasheet for
- *                  details)
- * @param   *val    Address that data should be placed into
+ * @param[in]   axis    One of DIFF_<x>_<y>, where <x> is a number 0 through 3
+ *                      (or 0 through 7 for the MCP3008) and <y> is
+ *                      <x> + (<x> + 1)%2 (See above defined enum or datasheet
+ *                      for details)
+ * @param[out]  *val    Address that data should be placed into
  *
  * @return      Returns 0 upon success, error code otherwise
  */

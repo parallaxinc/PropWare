@@ -125,14 +125,15 @@ typedef enum {
 #define SPI_INVALID_BITMODE         SPI_ERRORS_BASE + 13
 
 /**
- * @brief   Initialize an SPI module by starting a new cog
+ * @brief       Initialize an SPI module by starting a new cog
  *
- * @param   mosi        Pin mask for MOSI
- * @param   miso        Pin mask for MISO
- * @param   sclk        Pin mask for SCLK
- * @param   frequency   Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
- * @param   polarity    Polarity of the clock - idle low or high; must be one of
- *                      SPI_POLARITY_LOW or SPI_POLARITY_HIGH
+ * @param[in]   mosi        Pin mask for MOSI
+ * @param[in]   miso        Pin mask for MISO
+ * @param[in]   sclk        Pin mask for SCLK
+ * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must be less
+ *                          than CLKFREQ/4
+ * @param[in]   polarity    Polarity of the clock - idle low or high; must be
+ *                          one of SPI_POLARITY_LOW or SPI_POLARITY_HIGH
  *
  * @return      Returns 0 upon success, otherwise error code
  */
@@ -163,34 +164,42 @@ inline int8_t SPIIsRunning (void);
 inline uint8_t SPIWait (void);
 
 /**
- * @brief   Set the mode of SPI communication
+ * @brief       Set the mode of SPI communication
  *
- * @param   mode    TODO: Document me!
- *
- * @return      Can return non-zero in the case of a timeout
- */
-uint8_t SPISetMode (const uint8_t mode);
-
-/**
- * @brief   Set the bitmode of SPI communication
- *
- * @param   mode    Select one of SPI_LSB_FIRST or SPI_MSB_FIRST to choose
- *                  which bit will be shifted out first
+ * @param[in]   mode    Sets the SPI mode to one SPI_MODE_0, SPI_MODE_1,
+ *                      SPI_MODE_2, or SPI_MODE_3
  *
  * @return      Can return non-zero in the case of a timeout
  */
-uint8_t SPISetBitMode (const uint8_t bitmode);
+uint8_t SPISetMode (const spimode_t mode);
 
 /**
- * @brief   Change the SPI module's clock frequency
+ * @brief       Set the bitmode of SPI communication
  *
- * @param   frequency   Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4
+ * @param[in]   mode    Select one of SPI_LSB_FIRST or SPI_MSB_FIRST to choose
+ *                      which bit will be shifted out first
  *
- * @return  Returns 0 upon success, otherwise error code
+ * @return      Can return non-zero in the case of a timeout
+ */
+uint8_t SPISetBitMode (const spibitmode_t bitmode);
+
+/**
+ * @brief       Change the SPI module's clock frequency
+ *
+ * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must be less
+ *                          than CLKFREQ/4 (for 80 MHz, 1.9 MHz is the fastest
+ *                          I've tested successfully)
+ *
+ * @return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPISetClock (const uint32_t frequency);
+
 /**
- * TODO: Should I leave this function or remove it?
+ * @brief       Retrieve the SPI module's clock frequency
+ *
+ * @param[out]  *frequency  Frequency, in Hz, that the SPI object is running
+ *
+ * @return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIGetClock (uint32_t *frequency);
 
@@ -198,24 +207,28 @@ uint8_t SPIGetClock (uint32_t *frequency);
  * @brief       Send a value out to a peripheral device
  *
  * @detailed    Pass a value and mode into the assembly cog to be sent to the
- *              peripheral; NOTE: this function is non-blocking and chip-select should
- *              not be set inactive immediately after the return (you should call SPIWait()
- *              before setting chip-select inactive)
+ *              peripheral; NOTE: this function is non-blocking and chip-select
+ *              should not be set inactive immediately after the return (you
+ *              should call SPIWait() before setting chip-select inactive)
  *
- * @param   bits        Number of bits to be shifted out
- * @param   value       The value to be shifted out
+ * @param[in]   bits        Number of bits to be shifted out
+ * @param[in]   value       The value to be shifted out
  *
  * @return      Returns 0 upon success, otherwise error code
  */
 uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
 
 /**
- * @brief   Receive a value in from a peripheral device
+ * @brief       Receive a value in from a peripheral device
  *
- * @param   bits        Number of bits to be shifted in
- * @param   *data       Received data will be stored at this address
- * @param   bytes       Byte-width of the *data variable type; Must be one of 1, 2, or 4
- *                      (is *data a pointer to char, short or int?)
+ * @param[in]   bits        Number of bits to be shifted in
+ * @param[out]  *data       Received data will be stored at this address
+ * @param[in]   bytes       Number of bytes allocated to *data; Example:
+ *                              int newVal;
+ *                              SPIShiftIn(8, &newVal, sizeof(newVal));
+ *                          Or if using a pointer:
+ *                              int *newVal;
+ *                              SPIShiftIn(8, newVal, sizeof(*newVal));
  *
  * @return      Returns 0 upon success, otherwise error code
  */
@@ -226,39 +239,45 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
  * @brief       Send a value out to a peripheral device
  *
  * @detailed    Pass a value and mode into the assembly cog to be sent to the
- *              peripheral; NOTE: this function is non-blocking and chip-select should
- *              not be set inactive immediately after the return (you should call SPIWait()
- *              before setting chip-select inactive); Optimized for fastest possible
- *              clock speed; No error checking is performed; 'Timeout' event will never be
- *              thrown and possible infinite loop can happen
+ *              peripheral; NOTE: this function is non-blocking and chip-select
+ *              should not be set inactive immediately after the return (you
+ *              should call SPIWait() before setting chip-select inactive);
+ *              Optimized for fastest possible clock speed; No error checking is
+ *              performed; 'Timeout' event will never be thrown and possible
+ *              infinite loop can happen
  *
- * @param   bits        Number of bits to be shifted out
- * @param   value       The value to be shifted out
+ * @param[in]   bits        Number of bits to be shifted out
+ * @param[in]   value       The value to be shifted out
  *
  * @return      Returns 0 upon success, otherwise error code
  */
 void SPIShiftOut_fast (uint8_t bits, uint32_t value);
 
 /**
- * @brief   Receive a value in from a peripheral device; Optimized for fastest possible
- *          clock speed; No error checking is performed; 'Timeout' event will never be
- *          thrown and possible infinite loop can happen
+ * @brief       Receive a value in from a peripheral device; Optimized for
+ *              fastest possible clock speed; No error checking is performed;
+ *              'Timeout' event will never be thrown and possible infinite loop
+ *              can happen
  *
- * @param   bits        Number of bits to be shifted in
- * @param   *data       Received data will be stored at this address
- * @param   bytes       Byte-width of the *data variable type; Must be one of 1, 2, or 4
- *                      (is *data a pointer to char, short or int?)
+ * @param[in]   bits    Number of bits to be shifted in
+ * @param[out]  *data   Received data will be stored at this address
+ * @param[in]   bytes   Number of bytes allocated to *data; Example:
+ *                          int newVal;
+ *                          SPIShiftIn_fast(8, &newVal, sizeof(newVal));
+ *                      Or if using a pointer:
+ *                          int *newVal;
+ *                          SPIShiftIn_fast(8, newVal, sizeof(*newVal));
  */
 void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes);
 
 /**
- * @brief   Read an entire sector of data in from an SD card
+ * @brief       Read an entire sector of data in from an SD card
  *
- * @param   *addr       First hub address where the data should be written
- * @param   blocking    When set to non-zero, function will not return until the data
- *                      transfer is complete
+ * @param[out]  *addr       First hub address where the data should be written
+ * @param[in]   blocking    When set to non-zero, function will not return until
+ *                          the data transfer is complete
  */
-void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
+int8_t SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #endif
 
 /**@}*/
@@ -284,35 +303,41 @@ void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
 #define SPI_BITS_OFFSET             8
 
 #define SPI_PHASE_BIT               BIT_0
-#define SPI_POLARITY_BIT            BIT_1   // Idle high == HIGH; Idle low == LOW
-#define SPI_BITMODE_BIT             BIT_2   // MSB_FIRST == HIGH; LSB_FIRST == LOW
+#define SPI_POLARITY_BIT            BIT_1 // Idle high == HIGH; Idle low == LOW
+#define SPI_BITMODE_BIT             BIT_2 // MSB_FIRST == HIGH; LSB_FIRST == LOW
 /**
- * @brief   Read the value that the SPI cog just shifted in
+ * @brief       Read the value that the SPI cog just shifted in
  *
- * @param   *par    Address to store the parameter
- * @param   bytes   Byte-width of the desired value
+ * @param[out]  *par    Address to store the parameter
+ * @param[in]   bytes   Number of bytes allocated to *data; Example:
+ *                          int newVal;
+ *                          SPIReadPar(&newVal, sizeof(newVal));
+ *                      Or if using a pointer:
+ *                          int *newVal;
+ *                          SPIReadPar(newVal, sizeof(*newVal));
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 static inline uint8_t SPIReadPar (void *par, const size_t size);
 
 /**
- * @brief   Count the number of set bits in a variable
+ * @brief       Count the number of set bits in a variable
  *
- * @param   par     Variable to count the bits in
+ * @param[in]   par     Variable to count the bits in
  *
  * @return      Number of bits in the parameter par (no error checking)
  */
 static uint8_t SPICountBits (uint32_t par);
 
 /**
- * @brief   Retrieve the pin number from a pin mask; i.e., if pinMask is 0x01,
- *          return 0; if pinMask is 0x40, return 6
+ * @brief       Retrieve the pin number from a pin mask; i.e., if pinMask is
+ *              0x01, return 0; if pinMask is 0x40, return 6
  *
- * @pre     Only 1 bit is set in pinMask (if more than one is set, the return value will
- *          be related to the least significant set bit)
+ * @pre         Only 1 bit is set in pinMask (if more than one is set, the
+ *              return value will be related to the least significant set bit)
  *
- * @param   pinMask     The bit number of the set bit in this variable will be returned
+ * @param[in]   pinMask     The bit number of the set bit in this variable will
+ *                          be returned
  *
  * @return      Returns the pin number of pinMask (no error checking)
  */

@@ -142,7 +142,7 @@ inline uint8_t SPIWaitSpecific (const uint32_t value) {
     return 0;
 }
 
-uint8_t SPISetMode (const uint8_t mode) {
+uint8_t SPISetMode (const spimode_t mode) {
     uint8_t err;
     char str[14] = "SPISetMode()";
 
@@ -162,7 +162,7 @@ uint8_t SPISetMode (const uint8_t mode) {
     return 0;
 }
 
-uint8_t SPISetBitMode (const uint8_t bitmode) {
+uint8_t SPISetBitMode (const spibitmode_t bitmode) {
     uint8_t err;
     char str[16] = "SPISetBitMode()";
 
@@ -335,13 +335,17 @@ void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
     g_mailbox = -1;
 }
 
-void SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking) {
+int8_t SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking) {
+    int8_t err;
+
     SPIWait();
     g_mailbox = SPI_FUNC_READ_SECTOR;
     SPIWait();
     g_mailbox = (uint32_t) addr;
     if (blocking)
-        SPIWait();
+        PROPWARE_SPI_SAFETY_CHECK(SPIWait());
+
+    return 0;
 }
 #endif
 

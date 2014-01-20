@@ -2,6 +2,7 @@
  * @file    PropWare.h
  *
  * @author  David Zemon
+ * @project PropWare
  */
 
 /**
@@ -155,13 +156,14 @@
 
 #ifndef ASM_OBJ_FILE
 /**
- * @brief   Allow easy switch-press detection of any pin; Includes de-bounce
- *          protection
- * @note    "_Low" denotes active low switch-press
+ * @brief       Allow easy switch-press detection of any pin; Includes de-bounce
+ *              protection
  *
- * @param   pin     bit mask to control which pin will be read
+ * @note        "_Low" denotes active low switch-press
  *
- * @return  Returns 1 or 0 depending on whether the switch was pressed
+ * @param[in]   pin     bit mask to control which pin will be read
+ *
+ * @return      Returns 1 or 0 depending on whether the switch was pressed
  */
 uint8_t GPIOSwitchRead_Low (uint32_t pin);
 
