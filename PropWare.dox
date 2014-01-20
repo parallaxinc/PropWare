@@ -258,7 +258,7 @@
                 </ul>
             </li>
 
-            <li>Create a Makefile for your project, following the template set under the PropWare_Demos directory</li>
+            <li>Create a Makefile for your project, following the template set under the Examples directory</li>
 
             <li>Create a "Debug" folder in the project directory and run "make -f ../Makefile" within it
                 <ul>
