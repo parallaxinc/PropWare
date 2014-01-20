@@ -34,6 +34,12 @@
 # #########################################################
 # where we installed the propeller binaries and libraries
 
+ifeq ($(OS), Windows_NT)
+	CLEAN=del /f
+else
+	CLEAN=rm -f
+endif
+
 ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /opt/parallax
 endif
@@ -201,7 +207,7 @@ endif
 	@echo ' '
 
 clean:
-	rm -f *.o *.elf *.a *.cog *.ecog *.binary
+	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary
 
 # #########################################################
 # how to run on RAM
