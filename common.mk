@@ -34,12 +34,14 @@
 # #########################################################
 # where we installed the propeller binaries and libraries
 
+# Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
 else
 	CLEAN=rm -f
 endif
 
+# Find PropGCC
 ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /opt/parallax
 endif
@@ -47,16 +49,18 @@ endif
 # libgcc directory
 LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 
+# Define a default memory model
 ifndef MODEL
-MODEL=lmm
+	MODEL=lmm
 endif
 
+# Define a default board
 ifndef BOARD
-BOARD=$(PROPELLER_LOAD_BOARD)
+	BOARD=$(PROPELLER_LOAD_BOARD)
 endif
 
 ifneq ($(BOARD),)
-BOARDFLAG=-b$(BOARD)
+	BOARDFLAG=-b$(BOARD)
 endif
 
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
@@ -64,21 +68,21 @@ CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 ASFLAGS += -m$(MODEL)
-INC += -I$(PROPWARE_PATH) -I$(PROPGCC_PREFIX)/propeller-elf/include
+INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 LIBS += -lPropWare_$(MODEL)
 
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
-LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib/cmm
+	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib/cmm'
 else
-LIB_INC += -L$(PROPGCC_PREFIX)/propeller-elf/lib
+	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib'
 endif
 
 # Add the appropriate PropWare library folder to the search path
-LIB_INC += -L$(PROPWARE_PATH)/$(MODEL)
+LIB_INC += -L'$(PROPWARE_PATH)/$(MODEL)'
 
 ifneq ($(LDSCRIPT),)
-LDFLAGS += -T $(LDSCRIPT)
+	LDFLAGS += -T '$(LDSCRIPT)'
 endif
 
 # basic gnu tools
@@ -207,7 +211,13 @@ endif
 	@echo ' '
 
 clean:
-	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary
+	$(CLEAN) *.o 2> nul
+	$(CLEAN) *.elf 2> nul
+	$(CLEAN) *.a 2> nul
+	$(CLEAN) *.cog 2> nul
+	$(CLEAN) *.ecog 2> nul
+	$(CLEAN) *.binary 2> nul
+
 
 # #########################################################
 # how to run on RAM

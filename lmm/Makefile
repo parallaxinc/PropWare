@@ -1,4 +1,4 @@
-# Build all source code files within PropWare for easy testing of compilation errors
+# Build the PropWare library with the long memory model (LMM)
 PRJ = PropWare_lmm
 
 LIBNAME = $(PRJ)
@@ -9,7 +9,7 @@ CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH
-	PROPWARE_PATH = ..
+	PROPWARE_PATH=..
 endif
 
 # Optionally, specify where your compiler is installed

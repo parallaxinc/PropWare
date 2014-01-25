@@ -1,4 +1,4 @@
-# Build all source code files within PropWare for easy testing of compilation errors
+# Build the PropWare library with the compressed memory model (CMM)
 PRJ = PropWare_cmm
 
 LIBNAME = $(PRJ)

@@ -1,4 +1,4 @@
-# Build all source code files within PropWare for easy testing of compilation errors
+# Build the PropWare library with the extended memory model ?C?(XMMC)
 PRJ = PropWare_xmmc
 
 LIBNAME = $(PRJ)
