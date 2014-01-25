@@ -1,5 +1,10 @@
 ifeq ($(OS), Windows_NT)
 	DIR_DIV=\\\\
+	
+# When the Windows command mkdir tries to create a directory that already
+# exists, an error is thrown. Though this does not cause any problems for Make,
+# it does clutter up the terminal significantly. These "errors" can be safely
+# ignored and thrown into nul
 	NULL=2> nul
 else
 	MKDIR_FLAG=-p
