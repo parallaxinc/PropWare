@@ -1,9 +1,9 @@
 all:
 	$(MAKE) -C cmm
-#	$(MAKE) -C lmm
-#	$(MAKE) -C xmm
-#	$(MAKE) -C xmmc
-#	$(MAKE) -C Examples
+	$(MAKE) -C lmm
+	$(MAKE) -C xmm
+	$(MAKE) -C xmmc
+	$(MAKE) -C Examples
 	
 clean:
 	$(MAKE) -C cmm clean

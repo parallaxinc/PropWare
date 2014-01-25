@@ -1,12 +1,12 @@
 # #########################################################
-# This makefile fragment builds LMM/XMM/XMMC demo programs
+# This makefile fragment builds CMM/LMM/XMM/XMMC demo programs
 #
 # To use it, define:
 #  PROPWARE_PATH to be the path to this directory
 #  NAME to be the name of project
 #       - this is used to create the final program $(NAME).elf
 #  OBJS to be the object files needed for the project
-#  MODEL to lmm, xmm, or xmmc
+#  MODEL to cmm, lmm, xmm, or xmmc
 #  CFLAGS to be desired CFLAGS
 #
 #  Then set up a default "all" target (normally this will be
@@ -211,13 +211,7 @@ endif
 	@echo ' '
 
 clean:
-	$(CLEAN) *.o 2> nul
-	$(CLEAN) *.elf 2> nul
-	$(CLEAN) *.a 2> nul
-	$(CLEAN) *.cog 2> nul
-	$(CLEAN) *.ecog 2> nul
-	$(CLEAN) *.binary 2> nul
-
+	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary 2> nul
 
 # #########################################################
 # how to run on RAM

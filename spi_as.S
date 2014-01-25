@@ -45,8 +45,8 @@
 #define SPI_BITS_OFFSET         8
 
 #define SPI_PHASE_BIT           BIT_0
-#define SPI_POLARITY_BIT        BIT_1                   '' When set, clock idles high; When reset, clock idles low
-#define SPI_BITMODE_BIT         BIT_2                   '' MSB_FIRST == HIGH; LSB_FIRST == LOW
+#define SPI_POLARITY_BIT        BIT_1                   '' When set, clock idles high, When reset, clock idles low
+#define SPI_BITMODE_BIT         BIT_2                   '' MSB_FIRST == HIGH, LSB_FIRST == LOW
 
 #define SPI_FUNC_BITS           BYTE_0                  '' Interpret bits 7-0 as a function descriptor
 #define SPI_BIT_COUNT_BITS      BYTE_1                  '' Interpret bits 15-8 as bit-count descriptor
@@ -73,7 +73,7 @@
                         call #READ_CMD                  '' Read in the pin mask SCLK
                         mov sclk, mailbox
 
-                        // Followed by setting MOSI & SCLK as outputs and MISO as input; Also set MOSI and MISO high
+                        // Followed by setting MOSI & SCLK as outputs and MISO as input, Also set MOSI and MISO high
                         or dira, mosi
                         or dira, sclk
                         andn dira, miso
@@ -128,7 +128,7 @@ LOOP                    // Retrieve a command
                         jmp #LOOP
 
 /* FUNCTION: SPISetMode() */
-SET_MODE                // Set the current SPI polarity; If polarity high, initialize sclk high, else clear the bit
+SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA                 '' Read in the mode
 
                         mov clkPhase, mailbox           '' Store the phase
@@ -424,7 +424,7 @@ lsb_post_fast           // Read in a value LSB-first with data valid after the c
 lsb_post_fast_ret       ret
 
 /* FUNCTION: SPIReadSDSector() */
-read_sector             // Read an entire sector from the SD card as quickly as possible; write values to the mailbox
+read_sector             // Read an entire sector from the SD card as quickly as possible, write values to the mailbox
 read_sector_addr        rdlong mailbox, par             '' Read in hub address to store the data
                         cmp mailbox, negOne wz          '' Are we reading a valid parameter?
         if_z            jmp #read_sector_addr           '' If not valid, read in a new value
@@ -532,7 +532,7 @@ write_loop              rdlong mailbox, par             '' \.
         if_nz           jmp #write_loop                 '' /
 WRITE_DATA_ret          ret
 
-/* Debugging purposes only; not accessible through C interface */
+/* Debugging purposes only, not accessible through C interface */
 SEND_TO_LED             mov temp2, temp                 '' Save the original value
                         shl temp2, #16                  '' Shift the first byte into the LEDs
                         and temp2, testLEDs             '' Clear all bits not associated with the LEDs
@@ -567,7 +567,7 @@ clock                   res     1                       '' Used for clocking in 
 bitmode                 res     1                       '' Store the current bitmode (LSB or MSB first)
 clkPhase                res     1                       '' Store the current clock phase (CPHA)
 bitCount                res     1                       '' Keep track of how many bits need to be sent/received - used for DJNZ loop
-data                    res     1                       '' Working register; Data is written to and read from this register
+data                    res     1                       '' Working register, Data is written to and read from this register
 
 mosi                    res     1                       '' Pin mask for MOSI pin
 mosiPinNum              res     1                       '' Pin number for MOSI
@@ -581,7 +581,7 @@ clkDelay                res     1                       '' Delay between clock t
 /**
  * function to start the SPI code in its own COG
  * C interface is:
- *   int _SPIStartCog(void *arg);
+ *   int _SPIStartCog(void *arg)
  *
  * returns the number of the COG, or -1 if no COGs are left
  */
