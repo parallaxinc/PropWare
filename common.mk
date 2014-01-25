@@ -69,7 +69,7 @@ CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall
 CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
-ASFLAGS += -m$(MODEL)
+ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 LIBS += -lPropWare_$(MODEL)
 
