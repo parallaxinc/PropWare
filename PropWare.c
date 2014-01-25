@@ -28,7 +28,7 @@
 
 #include <PropWare.h>
 
-uint8_t GPIOSwitchRead_Low (uint32_t pin) {
+uint8_t GPIOSwitchRead_Low (const uint32_t pin) {
     DIRA &= ~pin; // Set the pin as input
 
     if ((OUTA & pin) ^ pin) {   // If pin is grounded (aka, pressed)

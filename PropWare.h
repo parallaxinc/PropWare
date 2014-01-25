@@ -36,6 +36,7 @@
 
 #ifndef ASM_OBJ_FILE
 #include <propeller.h>
+#include <stdint.h>
 #endif
 
 #ifdef DAREDEVIL
@@ -165,7 +166,7 @@
  *
  * @return      Returns 1 or 0 depending on whether the switch was pressed
  */
-uint8_t GPIOSwitchRead_Low (uint32_t pin);
+uint8_t GPIOSwitchRead_Low (const uint32_t pin);
 
 /**
  * @brief       Count the number of set bits in a parameter
