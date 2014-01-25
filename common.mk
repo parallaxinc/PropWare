@@ -37,10 +37,13 @@
 # Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
+# When the Windows command del tries to delete a file that does not exist, an 
+# error is thrown. Though this does not cause any problems for Make, it does 
+# clutter up the terminal significantly. These "errors" can be safely ignored 
+# and thrown into nul
 	NULL=2> nul
 else
 	CLEAN=rm -f
-#	NULL=/dev/null
 endif
 
 # Find PropGCC
