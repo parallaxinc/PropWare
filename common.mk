@@ -37,10 +37,10 @@
 # Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
-	NULL=nul
+	NULL=2> nul
 else
 	CLEAN=rm -f
-	NULL=/dev/null
+#	NULL=/dev/null
 endif
 
 # Find PropGCC
@@ -213,7 +213,7 @@ endif
 	@echo ' '
 
 clean:
-	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary 2> $(NULL)
+	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary $(NULL)
 
 # #########################################################
 # how to run on RAM
