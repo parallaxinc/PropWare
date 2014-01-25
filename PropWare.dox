@@ -103,9 +103,12 @@
         <ul>
             <li>Windows 2000, XP, Vista, and 7 users should see this well-written <a target="_blank"
                                                                                      href="http://www.computerhope.com/issues/ch000549.htm">tutorial</a>
-                and Windows 8/8.1 users can follow this <a
-                        href="http://www.c-sharpcorner.com/UploadFile/6cde20/use-of-environment-variable-in-windows-8/">tutorial</a>
-                with lots of pictures for accessing the "Environment Variables" window
+                for accessing the "Environment Variables" window
+            </li>
+
+            <li>Windows 8/8.1 users can follow this <a target="_blank"
+                                                       href="http://www.c-sharpcorner.com/UploadFile/6cde20/use-of-environment-variable-in-windows-8/">tutorial</a>
+                with lots of pictures
             </li>
 
             <li>Once you have the "Environment Variables" window open, click "New..." under "System Variables" and enter
