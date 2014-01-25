@@ -4,7 +4,6 @@ ifeq ($(OS), Windows_NT)
 else
 	MKDIR_FLAG=-p
 	DIR_DIV=/
-#	NULL=/dev/null
 endif
 
 all:

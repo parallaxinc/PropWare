@@ -40,7 +40,6 @@ ifeq ($(OS), Windows_NT)
 	NULL=2> nul
 else
 	CLEAN=rm -f
-#	NULL=/dev/null
 endif
 
 # Find PropGCC
