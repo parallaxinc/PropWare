@@ -111,9 +111,9 @@
  * TODO: Check documentation for accuracy
  */
 typedef enum {
-     /**
-      * Read only; Read pointer starts at first character
-      */
+    /**
+     * Read only; Read pointer starts at first character
+     */
     SD_FILE_MODE_R,
 #ifdef SD_OPTION_FILE_WRITE
     /**
@@ -404,15 +404,30 @@ inline file_pos SDftellr (const sd_file *f);
 inline file_pos SDftellw (const sd_file *f);
 
 #ifdef SD_OPTION_SHELL
-// Shell definitions
+/**
+ * @name Shell Definitions
+ * @{
+ */
+/** Maximum number of characters allowed at the command prompt */
 #define SD_SHELL_INPUT_LEN          64
+/**
+ * Maximum number of characters for an individual command (does not include
+ * parameters
+ */
 #define SD_SHELL_CMD_LEN            8
+/** Maximum number of characters for each command argument */
 #define SD_SHELL_ARG_LEN            32
+/** String defining the "exit" command to quit the SD_Shell() function*/
 #define SD_SHELL_EXIT               ("exit")
+/** String defining the "ls" command to call SD_Shell_ls(); List dir contents */
 #define SD_SHELL_LS                 ("ls")
+/** String defining the "cat" command to call SD_Shell_cat(); Prints a file */
 #define SD_SHELL_CAT                ("cat")
+/** String defining the "cd" command to call SD_Shell_cd(); Change directory */
 #define SD_SHELL_CD                 ("cd")
+/** String defining the "touch" command; Creates an empty file */
 #define SD_SHELL_TOUCH              ("touch")
+/**@}*/
 
 /**
  * @brief   Provide the user with a very basic Unix-like shell. The following
