@@ -17,7 +17,7 @@ SD_SHELL                                    11320           19316
 All                                         19700           Overflowed by 2672
 
 ### NOTE ###
-To compile this demo, you must either copy into the working directory or 
+To compile this demo, you must either copy into the working directory or
 create symbolic links to the following files:
     - spi.c
     - spi.h  (see note in common.mk for reasoning why this must be included)

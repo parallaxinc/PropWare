@@ -1,13 +1,14 @@
 /**
- * @file           spi.h
- * @author         David Zemon
- *
- * @description    Provides a library for the propeller, running in the current
- *                 cog, for SPI communication. Inspired by OBEX #433.
- *
+ * @file    spi.h
  */
-
 /**
+ * @brief   Provides a library for the propeller, running in the current cog,
+ *          for SPI communication
+ *
+ * @project PropWare
+ *
+ * @author  David Zemon
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
@@ -37,38 +38,49 @@
  */
 
 /**
- * @defgroup _propware_spi_public   Public members
- * @{
+ * @publicsection @{
  */
 
 #include <propeller.h>
 #include <stdlib.h>
 #include <PropWare.h>
 
+/** @name   SPI Extra Code Options
+ * @{ */
 /**
- * @brief   Extra code options - Uncomment definitions to enable features
- *
- * @param   SPI_DEBUG           Debugging features similar to exceptions; Errors
- *                              will be caught the program will enter an
- *                              infinite loop
- *                              DEFAULT: OFF
- * @param   SPI_DEBUG_PARAMS    Parameter checking within each function call. I
- *                              recommend you leave this option enabled unless
- *                              speed is critical
- *                              DEFAULT: ON
- * @param   SPI_FAST            Allows for fast send and receive routines
- *                              without error checking or timing delays; Normal
- *                              routines still available when enabled
- *                              DEFAULT: ON
- *                              TODO: Use the counter module instead of
- *                              "xor clkPin, clkPin"
- * @param   SPI_FAST_SECTOR     TODO: Figure out why this doesn't work... :(
- *                              DEFAULT: OFF
+ * Debugging features similar to exceptions; Errors will be caught the program
+ * will enter an infinite loop
+ * <p>
+ * DEFAULT: Off
  */
-//#define SPI_DEBUG
-#define SPI_DEBUG_PARAMS
-#define SPI_FAST
-//#define SPI_FAST_SECTOR
+#define SPI_OPTION_DEBUG
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SPI_OPTION_DEBUG
+/**
+ * Parameter checking within each function call. I recommend you leave this
+ * option enabled unless speed is critical
+ * <p>
+ * DEFAULT: On
+ */
+#define SPI_OPTION_DEBUG_PARAMS
+/**
+ * Allows for fast send and receive routines without error checking or timing
+ * delays; Normal routines still available when enabled
+ *
+ * TODO: Use the counter module instead of "xor clkPin, clkPin"
+ * <p>
+ * DEFAULT: On
+ */
+#define SPI_OPTION_FAST
+/**
+ * TODO: Figure out why this doesn't work... :(
+ * <p>
+ * DEFAULT: Off
+ */
+#define SPI_OPTION_FAST_SECTOR
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SPI_OPTION_FAST_SECTOR
+/** @} */
 
 /**
  * @brief   Descriptor for SPI signal as defined by Motorola modes
@@ -76,26 +88,35 @@
  * @detailed    CPOL 0 refers to a low polarity (where the clock idles in the
  *              low state) and CPOL 1 is for high polarity.
  *              TODO: Describe phase
+ * <table><tr><td>SPI Mode</td><td>CPOL</td><td>CPHA</td></tr><tr><td>0</td>
+ * <td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>2
+ * </td><td>1</td><td>0</td></tr><tr><td>3</td><td>1</td><td>1</td></tr></table>
+ */
+/* Raw text version of the above HTML table
  *
- * SPI mode     CPOL    CPHA
+ * SPI Mode     CPOL    CPHA
  * 0            0       0
  * 1            0       1
  * 2            1       0
  * 3            1       1
  */
 typedef enum {
-    SPI_MODE_0,
-    SPI_MODE_1,
-    SPI_MODE_2,
-    SPI_MODE_3,
-    SPI_MODES
+    /** Mode 0 */SPI_MODE_0,
+    /** Mode 1 */SPI_MODE_1,
+    /** Mode 2 */SPI_MODE_2,
+    /** Mode 3 */SPI_MODE_3,
+    /** Number of SPI modes */SPI_MODES
 } spimode_t;
 
 /**
- * @note Initial value is SPI_MODES + 1 making them easily distinguishable
+ * @brief   Determine if data is communicated with the LSB or MSB sent/received
+ *          first
+ *
+ * @note    Initial value is SPI_MODES + 1 making them easily distinguishable
  */
 typedef enum {
-    SPI_LSB_FIRST = SPI_MODES,  // Start the enumeration where spimode_t left off; this ensures no overlap
+    // Start the enumeration where spimode_t left off; this ensures no overlap
+    SPI_LSB_FIRST = SPI_MODES,
     SPI_MSB_FIRST,
     SPI_BIT_MODES
 } spibitmode_t;
@@ -106,23 +127,28 @@ typedef enum {
 #define SPI_MAX_PAR_BITS            31
 #define SPI_MAX_CLOCK               (CLKFREQ >> 2)
 
-// Errors
-#define SPI_ERRORS_BASE             1
+/** Number of allocated error codes for SPI */
 #define SPI_ERRORS_LIMIT            16
-#define SPI_INVALID_PIN             SPI_ERRORS_BASE + 0
-#define SPI_INVALID_CLOCK_INIT      SPI_ERRORS_BASE + 1
-#define SPI_INVALID_MODE            SPI_ERRORS_BASE + 2
-#define SPI_INVALID_PIN_MASK        SPI_ERRORS_BASE + 3
-#define SPI_TOO_MANY_BITS           SPI_ERRORS_BASE + 4
-#define SPI_TIMEOUT                 SPI_ERRORS_BASE + 5
-#define SPI_TIMEOUT_RD              SPI_ERRORS_BASE + 6
-#define SPI_EXCESSIVE_PAR_SZ        SPI_ERRORS_BASE + 7
-#define SPI_COG_NOT_STARTED         SPI_ERRORS_BASE + 8
-#define SPI_MODULE_NOT_RUNNING      SPI_ERRORS_BASE + 9
-#define SPI_INVALID_FREQ            SPI_ERRORS_BASE + 10
-#define SPI_INVALID_BYTE_SIZE       SPI_ERRORS_BASE + 11
-#define SPI_ADDR_MISALIGN           SPI_ERRORS_BASE + 12
-#define SPI_INVALID_BITMODE         SPI_ERRORS_BASE + 13
+
+/**
+ * Error codes - Proceeded by nothing
+ */
+typedef enum {
+    /** SPI Error  0 */SPI_INVALID_PIN = 0,
+    /** SPI Error  1 */SPI_INVALID_CLOCK_INIT,
+    /** SPI Error  2 */SPI_INVALID_MODE,
+    /** SPI Error  3 */SPI_INVALID_PIN_MASK,
+    /** SPI Error  4 */SPI_TOO_MANY_BITS,
+    /** SPI Error  5 */SPI_TIMEOUT,
+    /** SPI Error  6 */SPI_TIMEOUT_RD,
+    /** SPI Error  7 */SPI_EXCESSIVE_PAR_SZ,
+    /** SPI Error  8 */SPI_COG_NOT_STARTED,
+    /** SPI Error  9 */SPI_MODULE_NOT_RUNNING,
+    /** SPI Error 10 */SPI_INVALID_FREQ,
+    /** SPI Error 11 */SPI_INVALID_BYTE_SIZE,
+    /** SPI Error 12 */SPI_ADDR_MISALIGN,
+    /** SPI Error 13 */SPI_INVALID_BITMODE
+} spi_error_code_t;
 
 /**
  * @brief       Initialize an SPI module by starting a new cog
@@ -234,7 +260,7 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
  */
 uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
 
-#ifdef SPI_FAST
+#ifdef SPI_OPTION_FAST
 /**
  * @brief       Send a value out to a peripheral device
  *
@@ -286,8 +312,7 @@ int8_t SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
  *** Private definitions and Declarations ***
  ********************************************/
 /**
- * @defgroup _propware_spi_private  Private members
- * @{
+ * @privatesection @{
  */
 #define SPI_TIMEOUT_WIGGLE_ROOM     400
 #define SPI_FUNC_SEND               0

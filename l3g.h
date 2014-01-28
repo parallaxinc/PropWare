@@ -1,13 +1,14 @@
 /**
- * @file            l3g.h
- *
- * @author          David Zemon, Collin Winans
- *
- * @description     L3G gyrometer driver for Parallax Propeller using SPI
- *                  communication
+ * @file    l3g.h
  */
-
 /**
+ * @brief   L3G gyroscope driver using SPI communication for the Parallax
+ *          Propeller
+ *
+ * @project PropWare
+ *
+ * @author  David Zemon, Collin Winans
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
@@ -37,8 +38,7 @@
  */
 
 /**
- * @defgroup _propware_l3g_public   Public members
- * @{
+ * @publicsection @{
  */
 
 #include <propeller.h>
@@ -49,13 +49,17 @@
  * Axes of the L3G device
  */
 typedef enum {
+    /** X axis */
     L3G_X,
+    /** Y axis */
     L3G_Y,
+    /** Z axis */
     L3G_Z
 } l3g_axis;
 
 /**
- * Extra and advanced functions for users available to users
+ * Extra functions available on the L3G device; Callable by passing one as the
+ * first parameter to @ref L3G_ioctl
  */
 typedef enum {
     /** Set the sensitivity of input values; must be one of l3g_dps_mode_t */
@@ -115,15 +119,15 @@ typedef enum {
 /**@}*/
 
 /**
- * @brief   Initialize an L3G module
+ * @brief       Initialize an L3G module
  *
- * @param   mosi        Pin mask for MOSI
- * @param   miso        Pin mask for MISO
- * @param   sclk        Pin mask for SCLK
- * @param   cs          Pin mask for CS
- * @param   dpsMode     One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS;
- *                      Determines the resolution of the L3G device in terms of
- *                      degrees per second
+ * @param[in]   mosi        Pin mask for MOSI
+ * @param[in]   miso        Pin mask for MISO
+ * @param[in]   sclk        Pin mask for SCLK
+ * @param[in]   cs          Pin mask for CS
+ * @param[in]   dpsMode     One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS;
+ *                          Determines the resolution of the L3G device in terms
+ *                          of degrees per second
  *
  * @return       Returns 0 upon success, error code otherwise
  */
@@ -131,79 +135,79 @@ uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
         const uint32_t cs, const l3g_dps_mode_t dpsMode);
 
 /**
- * @brief   Choose whether to always set the SPI mode and bitmode before reading
- *          or writing to the L3G module; Useful when multiple devices are
- *          connected to the SPI bus
+ * @brief       Choose whether to always set the SPI mode and bitmode before
+ *              reading or writing to the L3G module; Useful when multiple
+ *              devices are connected to the SPI bus
  *
- * @param   alwaysSetMode   For any non-zero value, the SPI modes will always be
- *                          set before a read or write routine
+ * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
+ *                              always be set before a read or write routine
  */
-void L3GAlwaysSetMode (const uint8_t alwaysSetMode);
+void L3GAlwaysSetSPIMode (const uint8_t alwaysSetMode);
 
 /**
- * @brief   Read a specific axis's data
+ * @brief       Read a specific axis's data
  *
- * @param   axis    One of L3G_X, L3G_Y, L3G_Z; Selects the axis to be read
- * @param   *val    Address that data should be placed into
+ * @param[in]   axis    One of L3G_X, L3G_Y, L3G_Z; Selects the axis to be read
+ * @param[out]  *val    Address that data should be placed into
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 uint8_t L3GRead (const l3g_axis axis, int16_t *val);
 
 /**
- * @brief   Read data from the X axis
+ * @brief       Read data from the X axis
  *
- * @param   *val    Address that data should be placed into
+ * @param[out]  *val    Address that data should be placed into
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 uint8_t L3GReadX (int16_t *val);
 
 /**
- * @brief   Read data from the Y axis
+ * @brief       Read data from the Y axis
  *
- * @param   *val    Address that data should be placed into
+ * @param[out]  *val    Address that data should be placed into
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 uint8_t L3GReadY (int16_t *val);
 
 /**
- * @brief   Read data from the Z axis
+ * @brief       Read data from the Z axis
  *
- * @param   *val    Address that data should be placed into
+ * @param[out]  *val    Address that data should be placed into
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 uint8_t L3GReadZ (int16_t *val);
 
 /**
- * @brief   Read data from all three axes
+ * @brief       Read data from all three axes
  *
- * @param   *val    Starting address for data to be placed; 6 contiguous bytes
- *                  of space are required for the read routine
+ * @param[out]  *val    Starting address for data to be placed; 6 contiguous
+ *                      bytes of space are required for the read routine
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 uint8_t L3GReadAll (int16_t *val);
 
 /**
- * @brief   Allow numerous advanced functions to be performed on the L3G
+ * @brief       Allow numerous advanced functions to be performed on the L3G,
+ *              depending on the value of the first parameter
  *
- * ALL Functions
- * @param   func    Descriptor for which function should be performed
  *
- * @return     Returns 0 upon success, error code otherwise
+ * @detailed    <strong>L3G_FUNC_MOD_DPS:</strong> Modify the precision of L3G
+ *              in terms of degrees per second
+ * @param[in]   func    Descriptor for which function should be performed
+ * @param[in]   wrVal   One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS
+ * @param[out]  *rdVal  Unused
  *
- * L3G_FUNC_MOD_DPS
- * @detailed    Modify the precision of L3G in terms of degrees per second
- * @param   wrVal   One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS
- * @param   *rdVal  Unused
+ * @detailed    <strong>L3G_FUNC_RD_REG:</strong> Read any register from the L3G
+ * @param[in]   func    Descriptor for which function should be performed
+ * @param[in]   wrVal   Address of the desired register
+ * @param[out]  *rdVal  Resulting value will be stored in rdVal
  *
- * L3G_FUNC_RD_REG
- * @detailed    Read any register from the L3G
- * @param    wrVal    Address of the desired register
- * @param    *rdVal    Resulting value will be stored in rdVal
+ * @return      Returns 0 upon success, error code otherwise
  */
 uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal,
         uint8_t *rdVal);
@@ -213,15 +217,47 @@ uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal,
  *** Private Function Declarations ***
  *************************************/
 /**
- * @defgroup    _propware_l3g_private   Private members
- * @{
+ * @privatesection @{
+ */
+
+/**
+ * @brief       Write one byte to the L3G module
+ *
+ * @param[in]   address     Destination register address
+ * @param[in]   dat         Data to be written to the destination register
+ *
+ * @return      Returns 0 upon success, error code otherwise
  */
 static uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat);
 
+/**
+ * @brief       Write one byte to the L3G module
+ *
+ * @param[in]   address     Destination register address
+ * @param[in]   dat         Data to be written to the destination register
+ *
+ * @return      Returns 0 upon success, error code otherwise
+ */
 static uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat);
 
+/**
+ * @brief       Read one byte from the L3G module
+ *
+ * @param[in]   address     Origin register address
+ * @param[out]  *dat        Address where incoming data should be stored
+ *
+ * @return      Returns 0 upon success, error code otherwise
+ */
 static uint8_t L3GRead8 (uint8_t addr, int8_t *dat);
 
+/**
+ * @brief       Read two bytes from the L3G module
+ *
+ * @param[in]   address     Origin register address
+ * @param[out]  *dat        Address where incoming data should be stored
+ *
+ * @return      Returns 0 upon success, error code otherwise
+ */
 static uint8_t L3GRead16 (uint8_t addr, int16_t *dat);
 
 /**@}*/

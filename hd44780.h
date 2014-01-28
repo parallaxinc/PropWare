@@ -2,11 +2,13 @@
  * @file        hd44780.h
  */
 /**
+ * @brief       Support for the common "character LCD" modules using the HD44780
+ *              controller for the Parallax Propeller
+ *
+ * @project PropWare
+ *
  * @author      David Zemon
  * @author      Collin Winans
- *
- * @brief       Support for the common "character LCD" modules making use of the
- *              HD44780 controller
  *
  * @note        Does not natively support 40x4 or 24x4 character displays
  *
@@ -39,8 +41,7 @@
  */
 
 /**
- * @defgroup _propware_hd44780_public	Public members
- * @{
+ * @publicsection @{
  */
 
 #include <stdarg.h>
@@ -48,7 +49,15 @@
 #include <propeller.h>
 #include <PropWare.h>
 
-#define HD44780_DEBUG
+/** @name   HD44780 Extra Code Options
+ * @{ */
+/**
+ * Enable or disable error checking on parameters
+ * <p>
+ * DEFAULT: On
+ */
+#define HD44780_OPTION_DEBUG
+/** @} */
 
 /** Number of spaces inserted for '\\t' */
 #define HD44780_TAB_WIDTH               4
@@ -71,33 +80,34 @@ typedef enum {
  *          16x1_2 places all 16 characters are a single line of DDRAM.
  */
 typedef enum {
-    HD44780_8x1,
-    HD44780_8x2,
-    HD44780_8x4,
-    HD44780_16x1_1,
-    HD44780_16x1_2,
-    HD44780_16x2,
-    HD44780_16x4,
-    HD44780_20x1,
-    HD44780_20x2,
-    HD44780_20x4,
-    HD44780_24x1,
-    HD44780_24x2,
-    HD44780_40x1,
-    HD44780_40x2,
-    HD44780_DIMENSIONS
+    /** 8x1 */HD44780_8x1,
+    /** 8x2 */HD44780_8x2,
+    /** 8x4 */HD44780_8x4,
+    /** 16x1 mode 1 */HD44780_16x1_1,
+    /** 16x1 mode 2 */HD44780_16x1_2,
+    /** 16x2 */HD44780_16x2,
+    /** 16x4 */HD44780_16x4,
+    /** 20x1 */HD44780_20x1,
+    /** 20x2 */HD44780_20x2,
+    /** 20x4 */HD44780_20x4,
+    /** 24x1 */HD44780_24x1,
+    /** 24x2 */HD44780_24x2,
+    /** 40x1 */HD44780_40x1,
+    /** 40x2 */HD44780_40x2,
+    /** Number of different dimensions supported */HD44780_DIMENSIONS
 } hd44780_dimensions_t;
 
-/**
- * @name    Error codes
- * @{
- */
-#define HD44780_ERRORS_BASE             48
+/** Number of allocated error codes for HD44780 */
 #define HD44780_ERRORS_LIMIT            16
-#define HD44780_INVALID_CTRL_SGNL       HD44780_ERRORS_BASE + 0
-#define HD44780_INVALID_DATA_MASK       HD44780_ERRORS_BASE + 1
-#define HD44780_INVALID_DIMENSIONS      HD44780_ERRORS_BASE + 2
-/**@}*/
+
+/**
+ * Error codes - Proceeded by SD, SPI
+ */
+typedef enum {
+    /** HD44780 Error 0 */HD44780_INVALID_CTRL_SGNL = 48,
+    /** HD44780 Error 1 */HD44780_INVALID_DATA_MASK,
+    /** HD44780 Error 2 */HD44780_INVALID_DIMENSIONS
+} hd44780_error_code_t;
 
 /**
  * @name    Commands
@@ -137,7 +147,7 @@ typedef enum {
  */
 #define HD44780_SHIFT_DISPLAY           BIT_3 // 0 = shift cursor
 #define HD44780_SHIFT_RIGHT             BIT_2 // 0 = shift left
- /**@}*/
+/**@}*/
 
 /**
  * @name Function set arguments
@@ -152,19 +162,22 @@ typedef enum {
  *** Public Functions ***
  ************************/
 /**
- * @brief   Initialize an HD44780 LCD display
+ * @brief       Initialize an HD44780 LCD display
  *
- * @param   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE: all
- *                          pins must be consecutive and the LSB on the LCD must
- *                          be the LSB in your data mask (i.e., if you are using
- *                          pins 16-23 on the Propeller, pin 16 must be
- *                          connected to D0 on the LCD, NOT D7)
- * @param   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
- * @param   bitmode         Select between HD44780_4BIT and HD44780_8BIT modes
- *                          to determine whether you will need 4 data wires
- *                          or 8 between the Propeller and your LCD device
- * @param   dimensions        Dimensions of your LCD device. Most common is
- *                          HD44780_16x2
+ * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE:
+ *                              all pins must be consecutive and the LSB on the
+ *                              LCD must be the LSB in your data mask (i.e., if
+ *                              you are using pins 16-23 on the Propeller, pin
+ *                              16 must be connected to D0 on the LCD, NOT D7)
+ * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
+ * @param[in]   bitmode         Select between HD44780_4BIT and HD44780_8BIT
+ *                              modes to determine whether you will need 4 data
+ *                              wires or 8 between the Propeller and your LCD
+ *                              device
+ * @param[in]   dimensions      Dimensions of your LCD device. Most common is
+ *                              HD44780_16x2
+ *
+ * @return      Returns 0 upon success, otherwise error code
  */
 int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
         const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
@@ -176,10 +189,10 @@ int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
 inline void HD44780Clear (void);
 
 /**
- * @brief   Move the cursor to a specified column and row
+ * @brief       Move the cursor to a specified column and row
  *
- * @param   row     Zero-indexed row to place the cursor
- * @param   col     Zero indexed column to place the cursor
+ * @param[in]   row     Zero-indexed row to place the cursor
+ * @param[in]   col     Zero indexed column to place the cursor
  */
 void HD44780Move (const uint8_t row, const uint8_t col);
 
@@ -189,8 +202,8 @@ void HD44780Move (const uint8_t row, const uint8_t col);
  * @detailed    Please visit http://www.cplusplus.com/reference/cstdio/printf/
  *              for full documentation
  *
- * @param       *fmt    C string that contains the text to be written to the LCD
- * @param       ...     (optional) Additional arguments
+ * @param[in]   *fmt    C string that contains the text to be written to the LCD
+ * @param[in]   ...     (optional) Additional arguments
  *
  * Supported formats: i, d, u, X, s, c ("%%" will print '%')
  */
@@ -202,36 +215,37 @@ void HD44780_printf (char *fmt, ...);
  * @detailed    Via a series of calls to HD44780_putchar, prints each character
  *              individually
  *
- * @param       *s  Address where c-string can be found (must be
+ * @param[in]   *s  Address where c-string can be found (must be
  *                  null-terminated)
  */
 void HD44780_puts (char *s);
 
 /**
- * @brief   Print a single char to the LCD and increment the pointer (automatic)
+ * @brief       Print a single char to the LCD and increment the pointer
+ *              (automatic)
  *
- * @param   c   Individual char to be printed
+ * @param[in]   c   Individual char to be printed
  */
 void HD44780_putchar (const char c);
 
 /**
- * @brief   Format and print a signed number to the LCD
+ * @brief       Format and print a signed number to the LCD
  *
- * @param   x   The signed number to be printed
+ * @param[in]   x   The signed number to be printed
  */
 void HD44780_int (int32_t x);
 
 /**
- * @brief   Format and print a unsigned number to the LCD
+ * @brief       Format and print a unsigned number to the LCD
  *
- * @param   x   The unsigned number to be printed
+ * @param[in]   x   The unsigned number to be printed
  */
 void HD44780_uint (uint32_t x);
 
 /**
- * @brief   Format and print an unsigned hexadecimal number to the LCD
+ * @brief       Format and print an unsigned hexadecimal number to the LCD
  *
- * @param   x   The number to be printed
+ * @param[in]   x   The number to be printed
  */
 void HD44780_hex (uint32_t x);
 
@@ -241,23 +255,27 @@ void HD44780_hex (uint32_t x);
  *** Private Functions ***
  *************************/
 /**
- * @defgroup _propware_hd44780_private  Private members
- * @{
+ * @privatesection @{
  */
 typedef struct {
-        uint8_t charRows;
-        uint8_t charColumns;
-        uint8_t ddramCharRowBreak;
-        uint8_t ddramLineEnd;
+    uint8_t charRows;
+    uint8_t charColumns;
+    uint8_t ddramCharRowBreak;
+    uint8_t ddramLineEnd;
 } hd44780_mem_map_t;
 
 /**
- * @brief   Send a control command to the LCD module
+ * @brief      Send a control command to the LCD module
  *
- * @param   c   8-bit command to send to the LCD
+ * @param[in]  c   8-bit command to send to the LCD
  */
 inline static void HD44780Cmd (const uint8_t c);
 
+/**
+ * @brief       Write a single byte to the LCD - instruction or data
+ *
+ * @param[in]   val     Value to be written
+ */
 static void HD44780Write (const uint8_t val);
 
 /**
@@ -265,6 +283,10 @@ static void HD44780Write (const uint8_t val);
  */
 static void HD44780ClockPulse (void);
 
+/**
+ * @brief   The memory map is used to determine where line wraps should and
+ *          shouldn't occur
+ */
 static void HD44780GenerateMemMap (const hd44780_dimensions_t dimensions);
 
 /**@}*/

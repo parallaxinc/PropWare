@@ -28,7 +28,7 @@
 // Includes
 #include <spi.h>
 
-#ifdef SPI_DEBUG
+#ifdef SPI_OPTION_DEBUG
 #include <stdio.h>
 #include <stdarg.h>
 /**
@@ -57,7 +57,7 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
     uint8_t err;
     const char str[11] = "SPIStart()";
 
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     // Ensure all pin-mask parameters have exactly 1 set bit
     if (1 != PropWareCountBits(mosi))
         SPIError(SPI_INVALID_PIN_MASK);
@@ -148,7 +148,7 @@ uint8_t SPISetMode (const spimode_t mode) {
 
     if (!SPIIsRunning())
         SPIError(SPI_MODULE_NOT_RUNNING);
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     if (SPI_MODES <= mode)
         SPIError(SPI_INVALID_MODE);
 #endif
@@ -168,7 +168,7 @@ uint8_t SPISetBitMode (const spibitmode_t bitmode) {
 
     if (!SPIIsRunning())
         SPIError(SPI_MODULE_NOT_RUNNING);
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     if (SPI_LSB_FIRST != bitmode && SPI_MSB_FIRST != bitmode)
         SPIError(SPI_INVALID_BITMODE);
 #endif
@@ -187,7 +187,7 @@ uint8_t SPISetClock (const uint32_t frequency) {
 
     if (!SPIIsRunning())
         SPIError(SPI_MODULE_NOT_RUNNING);
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     if (SPI_MAX_CLOCK <= frequency)
         SPIError(SPI_INVALID_FREQ);
 #endif
@@ -208,7 +208,7 @@ uint8_t SPIGetClock (uint32_t *frequency) {
     uint8_t err;
     char str[14] = "SPIGetClock()";
 
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     // Check for errors
     if (!SPIIsRunning())
         SPIError(SPI_MODULE_NOT_RUNNING);
@@ -231,7 +231,7 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value) {
     uint8_t err;
     char str[14] = "SPIShiftOut()";
 
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     // Check for errors
     if (!SPIIsRunning())
         SPIError(SPI_MODULE_NOT_RUNNING);
@@ -258,7 +258,7 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
     const char str[13] = "SPIShiftIn()";
 
     // Check for errors
-#ifdef SPI_DEBUG_PARAMS
+#ifdef SPI_OPTION_DEBUG_PARAMS
     if (!SPIIsRunning())
         SPIError(SPI_MODULE_NOT_RUNNING);
     if (SPI_MAX_PAR_BITS < bits)
@@ -280,7 +280,7 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t bytes) {
     return 0;
 }
 
-#ifdef SPI_FAST
+#ifdef SPI_OPTION_FAST
 void SPIShiftOut_fast (uint8_t bits, uint32_t value) {
     // NOTE: No debugging within this function to allow for fastest possible
     // execution time
@@ -323,7 +323,7 @@ void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes) {
             *par32 = g_mailbox;
             break;
         default:
-#ifdef SPI_DEBUG
+#ifdef SPI_OPTION_DEBUG
             SPIError(SPI_INVALID_BYTE_SIZE);
 #else
             return;
@@ -385,7 +385,7 @@ static inline uint8_t SPIReadPar (void *par, const size_t bytes) {
     return 0;
 }
 
-#ifdef SPI_DEBUG
+#ifdef SPI_OPTION_DEBUG
 void SPIError (const uint8_t err, ...) {
     va_list list;
     char str[18] = "SPI Error %u: %s\n";

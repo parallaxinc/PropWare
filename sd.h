@@ -1,13 +1,18 @@
 /**
  * @file        sd.h
- * @brief       SDHC driver for FAT16 and FAT32 for Parallax Propeller
  */
 /**
- * @brief       SDHC driver for FAT16 and FAT32 for Parallax Propeller
+ * @brief       SDHC driver for FAT16 and FAT32 for the Parallax Propeller
+ *
+ * @project PropWare
+ *
  * @author      David Zemon
+ *
  * @date        Spring 2013
+ *
  * @pre         The SD card must be SDHC v2 and must be formatted to FAT16 or
  *              FAT32
+ *
  * @warning     Unknown result if card is not SDHC v2
  *
  * TODO:    Re-arrange errors in order of impact level; Allows the user to do
@@ -15,8 +20,7 @@
  *              if ((SD_ERRORS_BASE + 6) < (err = SDFoo()))
  *                 throw(err);
  *          which would ignore any error less than 6
- */
-/**
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
@@ -51,86 +55,138 @@
  @{*/
 
 /**
- * @defgroup _propware_sd_public    Public members
- @{*/
-
-/**
- * @brief    Extra code options - Uncomment definitions to enable features
- *
- * @param    SD_DEBUG           Enables thorough debugging features similar to
- *                              exceptions; Errors will be caught the program
- *                              will enter an infinite loop
- *                              DEFAULT: OFF
- * @param    SD_VERBOSE         Verbose functions will be enabled (such as
- *                              SDPrintHexBlock) and error checking will display
- *                              pertinent information through UART
- *                              DEFAULT: OFF
- * @param    SD_VERBOSE_BLOCKS  Select data blocks/sectors will be display via
- *                              UART for debugging purposes
- *                              DEFAULT: OFF
- * @param    SD_SHELL           Unix-like command-line arguments will be defined
- *                              and available
- *                              DEFAULT: ON
- * @param    SD_FILE_WRITE      Allows for files to be created and written to -
- *                              adds noticeable code size
- *                              NOTE: Work-in-progress, code size is not
- *                              necessarily at a minimum, nor is RAM usage
- *                              DEFAULT: ON
+ * @publicsection @{
  */
-#define SD_DEBUG
-#define SD_VERBOSE
-#define SD_VERBOSE_BLOCKS
-#define SD_SHELL
-#define SD_FILE_WRITE
 
+/** @name   SD Extra Code Options
+ * @{ */
+/**
+ * Enables thorough debugging features similar to exceptions; Errors caught by
+ * the program will enter an infinite debug loop
+ * <p>
+ * DEFAULT: Off
+ */
+#define SD_OPTION_DEBUG
+/**
+ * Enables thorough debugging features similar to exceptions; Errors will be
+ * caught the program will enter an infinite loop
+ * <p>
+ * DEFAULT: Off
+ */
+#define SD_OPTION_VERBOSE
+/**
+ * Select data blocks/sectors will be display via UART for debugging purposes
+ * <p>
+ * DEFAULT: Off
+ */
+#define SD_OPTION_VERBOSE_BLOCKS
+/**
+ * Unix-like command-line arguments will be defined and available
+ * <p>
+ * DEFAULT: On
+ */
+#define SD_OPTION_SHELL
+/**
+ * Allows for files to be created and written to
+ * <p>
+ * DEFAULT: ON
+ *
+ * @note    Adds noticeable code size
+ * @note    Work-in-progress, code size is not necessarily at a minimum, nor is
+ *          RAM usage
+ */
+#define SD_OPTION_FILE_WRITE
+/** @} */
+
+/** Number of characters printed to the terminal before a line break */
 #define SD_LINE_SIZE            16
+/** Number of bytes in a sector of the SD card */
 #define SD_SECTOR_SIZE          512
+/** Default frequency to run the SPI module */
 #define SD_DEFAULT_SPI_FREQ     1800000
 
-// File modes
+/**
+ * File modes
+ *
+ * TODO: Check documentation for accuracy
+ */
 typedef enum {
+     /**
+      * Read only; Read pointer starts at first character
+      */
     SD_FILE_MODE_R,
-#ifdef SD_FILE_WRITE
+#ifdef SD_OPTION_FILE_WRITE
+    /**
+     * Read+ (read + write); Read and write pointers both start at first
+     * character
+     */
     SD_FILE_MODE_R_PLUS,
+    /**
+     * Append (write only); Write pointer starts at last character + 1
+     */
     SD_FILE_MODE_A,
+    /**
+     * Append+ (read + write); Write pointer starts at last character + 1, read
+     * pointer starts at first character
+     */
     SD_FILE_MODE_A_PLUS,
 #endif
+    /** Total number of different file modes */
     SD_FILE_MODES
 } sd_file_mode;
 
-// File positions
+/**
+ * File Positions
+ */
 typedef enum {
-    SEEK_SET,  // Beginning of the file
-    SEEK_CUR,  // Current position in the file
-    SEEK_END   // End of the file
+    /** Beginning of the file */SEEK_SET,
+    /** Current position in the file */SEEK_CUR,
+    /** End of the file */SEEK_END
 } file_pos;
 
-// Error codes - preceded by SPI
-#define SD_ERRORS_BASE          16
-#define SD_ERRORS_LIMIT         32
-#define SD_INVALID_CMD          SD_ERRORS_BASE + 0
-#define SD_READ_TIMEOUT         SD_ERRORS_BASE + 1
-#define SD_INVALID_NUM_BYTES    SD_ERRORS_BASE + 2
-#define SD_INVALID_RESPONSE     SD_ERRORS_BASE + 3
-#define SD_INVALID_INIT         SD_ERRORS_BASE + 4
-#define SD_INVALID_FILESYSTEM   SD_ERRORS_BASE + 5
-#define SD_INVALID_DAT_STRT_ID  SD_ERRORS_BASE + 6
-#define SD_FILENAME_NOT_FOUND   SD_ERRORS_BASE + 7
-#define SD_EMPTY_FAT_ENTRY      SD_ERRORS_BASE + 8
-#define SD_CORRUPT_CLUSTER      SD_ERRORS_BASE + 9
-#define SD_INVALID_PTR_ORIGIN   SD_ERRORS_BASE + 10
-#define SD_ENTRY_NOT_FILE       SD_ERRORS_BASE + 11
-#define SD_INVALID_FILENAME     SD_ERRORS_BASE + 12
-#define SD_INVALID_FAT_APPEND   SD_ERRORS_BASE + 13
-#define SD_FILE_ALREADY_EXISTS  SD_ERRORS_BASE + 14
-#define SD_INVALID_FILE_MODE    SD_ERRORS_BASE + 15
-#define SD_TOO_MANY_FATS        SD_ERRORS_BASE + 16
-#define SD_READING_PAST_EOC     SD_ERRORS_BASE + 17
-#define SD_FILE_WITHOUT_BUFFER  SD_ERRORS_BASE + 18
-#define SD_ERRORS_SIZE          SD_ERRORS_BASE + 19
+/** Number of allocated error codes for SD */
+#define SD_ERRORS_LIMIT 32
+
+/**
+ * Error codes - preceded by SPI
+ */
+typedef enum {
+    /** SD Error  0 */SD_INVALID_CMD = 16,
+    /** SD Error  1 */SD_READ_TIMEOUT,
+    /** SD Error  2 */SD_INVALID_NUM_BYTES,
+    /** SD Error  3 */SD_INVALID_RESPONSE,
+    /** SD Error  4 */SD_INVALID_INIT,
+    /** SD Error  5 */SD_INVALID_FILESYSTEM,
+    /** SD Error  6 */SD_INVALID_DAT_STRT_ID,
+    /** SD Error  7 */SD_FILENAME_NOT_FOUND,
+    /** SD Error  8 */SD_EMPTY_FAT_ENTRY,
+    /** SD Error  9 */SD_CORRUPT_CLUSTER,
+    /** SD Error 10 */SD_INVALID_PTR_ORIGIN,
+    /** SD Error 11 */SD_ENTRY_NOT_FILE,
+    /** SD Error 12 */SD_INVALID_FILENAME,
+    /** SD Error 13 */SD_INVALID_FAT_APPEND,
+    /** SD Error 14 */SD_FILE_ALREADY_EXISTS,
+    /** SD Error 15 */SD_INVALID_FILE_MODE,
+    /** SD Error 16 */SD_TOO_MANY_FATS,
+    /** SD Error 17 */SD_READING_PAST_EOC,
+    /** SD Error 18 */SD_FILE_WITHOUT_BUFFER,
+    /** SD Error 19 */SD_ERRORS_SIZE
+} sd_error_code_t;
 
 // Forward declarations for buffers and files
+/**
+ * Buffer object used for storing SD data; Each instance uses 527 bytes (526
+ * if SD_OPTION_FILE_WRITE is disabled)
+ */
 typedef struct _sd_buffer sd_buffer;
+
+/**
+ * SD file object
+ *
+ * @note    Must be initialized with an sd_buffer object before use; If one has
+ *          not been explicitly created then the global buffer, g_sd_buf, can be
+ *          used at the expense of decreased performance
+ */
 typedef struct _sd_file sd_file;
 
 /**
@@ -165,7 +221,7 @@ uint8_t SDStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
  */
 uint8_t SDMount (void);
 
-#ifdef SD_FILE_WRITE
+#ifdef SD_OPTION_FILE_WRITE
 /**
  * @brief   Stop all SD activities and write any modified buffers
  *
@@ -212,7 +268,7 @@ uint8_t SDchdir (const char *d);
  */
 uint8_t SDfopen (const char *name, sd_file *f, const sd_file_mode mode);
 
-#ifdef SD_FILE_WRITE
+#ifdef SD_OPTION_FILE_WRITE
 /**
  * @brief   Close a given file
  *
@@ -347,7 +403,7 @@ inline file_pos SDftellr (const sd_file *f);
  */
 inline file_pos SDftellw (const sd_file *f);
 
-#ifdef SD_SHELL
+#ifdef SD_OPTION_SHELL
 // Shell definitions
 #define SD_SHELL_INPUT_LEN          64
 #define SD_SHELL_CMD_LEN            8
@@ -400,7 +456,7 @@ uint8_t SD_Shell_cat (const char *name, sd_file *f);
  */
 uint8_t SD_Shell_cd (const char *d);
 
-#ifdef SD_FILE_WRITE
+#ifdef SD_OPTION_FILE_WRITE
 /**
  * @brief   Create a new file, do not open it
  *
@@ -412,7 +468,7 @@ uint8_t SD_Shell_touch (const char name[]);
 #endif
 #endif
 
-#if (defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS)
+#if (defined SD_OPTION_VERBOSE || defined SD_OPTION_VERBOSE_BLOCKS)
 /**
  * @brief    Print a block of data in hex format to the screen in SD_LINE_SIZE-byte lines
  *
@@ -430,10 +486,11 @@ uint8_t SDPrintHexBlock (uint8_t *dat, uint16_t bytes);
  *** Private SD Definitions & Prototypes ***
  *******************************************/
 /**
- * @defgroup sd_private Private members
- @{*/
-#if (defined SD_DEBUG || defined SD_VERBOSE || defined SD_VERBOSE_BLOCKS || \
-defined SD_SHELL)
+ * @privatesection
+ * @{
+ */
+#if (defined SD_OPTION_DEBUG || defined SD_OPTION_VERBOSE || defined SD_OPTION_VERBOSE_BLOCKS || \
+defined SD_Shell)
 #include <stdio.h>
 #endif
 
@@ -449,7 +506,7 @@ defined SD_SHELL)
 
 // SD Commands
 #define SD_CMD_IDLE                 0x40 + 0        // Send card into idle state
-#define    SD_CMD_SDHC              0x40 + 8        // Set SD card version (1 or 2) and voltage level range
+#define SD_CMD_SDHC                 0x40 + 8        // Set SD card version (1 or 2) and voltage level range
 #define SD_CMD_RD_CSD               0x40 + 9        // Request "Card Specific Data" block contents
 #define SD_CMD_RD_CID               0x40 + 10       // Request "Card Identification" block contents
 #define SD_CMD_RD_BLOCK             0x40 + 17       // Request data block
@@ -539,17 +596,28 @@ defined SD_SHELL)
 #define SD_EOF                      ((uint8_t) -1)  // System dependent - may need to be defined elsewhere
 #endif
 
-#define SD_FOLDER_ID                ((uint8_t) -1)  // Signal that the contents of a buffer are a directory
+// Signal that the contents of a buffer are a directory
+#define SD_FOLDER_ID                ((uint8_t) -1)
+
 struct _sd_buffer {
-    uint8_t buf[SD_SECTOR_SIZE];  // Buffer for SD card contents
-    uint8_t id;  // Buffer ID - determine who owns the current information
-    uint32_t curClusterStartAddr;  // Store the current cluster's starting sector number
-    uint8_t curSectorOffset;  // Store the current sector offset from the beginning of the cluster
-    uint32_t curAllocUnit;  // Store the current allocation unit
-    uint32_t nextAllocUnit;  // Look-ahead at the next FAT entry
-#ifdef SD_FILE_WRITE
-    uint8_t mod; // When set, the currently loaded sector has been modified since it was read from
-                 // the SD card
+    /**  Buffer for SD card contents */
+    uint8_t buf[SD_SECTOR_SIZE];
+    /** Buffer ID - determine who owns the current information */
+    uint8_t id;
+    /** Store the current cluster's starting sector number */
+    uint32_t curClusterStartAddr;
+    /** Store the current sector offset from the beginning of the cluster */
+    uint8_t curSectorOffset;
+    /** Store the current allocation unit */
+    uint32_t curAllocUnit;
+    /** Look-ahead at the next FAT entry */
+    uint32_t nextAllocUnit;
+#ifdef SD_OPTION_FILE_WRITE
+    /**
+     * When set, the currently loaded sector has been modified since it was
+     * read from the SD card
+     */
+    uint8_t mod;
 #endif
 };
 
@@ -560,13 +628,13 @@ struct _sd_file {
     file_pos rPtr;
     sd_file_mode mode;
     uint32_t length;
-    uint32_t maxSectors; // Maximum number of sectors currently allocated to a file
-    uint8_t mod; // When the length of a file is changed, this variable will be set, otherwise cleared
+    uint32_t maxSectors;  // Maximum number of sectors currently allocated to a file
+    uint8_t mod;  // When the length of a file is changed, this variable will be set, otherwise cleared
     uint32_t firstAllocUnit;  // File's starting allocation unit
-    uint32_t curSector; // like curSectorOffset, but does not reset upon loading a new cluster
+    uint32_t curSector;  // like curSectorOffset, but does not reset upon loading a new cluster
     uint32_t curCluster;  // like curSector, but for allocation units
 
-    uint32_t dirSectorAddr; // Which sector of the SD card contains this file's meta-data
+    uint32_t dirSectorAddr;  // Which sector of the SD card contains this file's meta-data
     uint16_t fileEntryOffset;
 };
 
@@ -581,8 +649,7 @@ struct _sd_file {
  *
  * @return
  */
-uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg,
-        const uint8_t crc);
+uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg, const uint8_t crc);
 
 /**
  * @brief   Receive response and data from SD card over SPI
@@ -658,7 +725,7 @@ uint16_t SDReadDat16 (const uint8_t buf[]);
  */
 uint32_t SDReadDat32 (const uint8_t buf[]);
 
-#ifdef SD_FILE_WRITE
+#ifdef SD_OPTION_FILE_WRITE
 /**
  * @brief   Write a byte-reversed 16-bit variable (SD cards store bytes
  *          little-endian therefore we must reverse them to use multi-byte
@@ -798,7 +865,7 @@ uint8_t SDFind (const char *filename, uint16_t *fileEntryOffset);
  */
 uint8_t SDReloadBuf (sd_file *f);
 
-#ifdef SD_FILE_WRITE
+#ifdef SD_OPTION_FILE_WRITE
 /**
  * @brief       Find the first empty allocation unit in the FAT
  *
@@ -838,7 +905,7 @@ uint8_t SDExtendFAT (sd_buffer *buf);
 uint8_t SDCreateFile (const char *name, const uint16_t *fileEntryOffset);
 #endif
 
-#if (defined SD_SHELL || defined SD_VERBOSE)
+#if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)
 // TODO: Document this
 inline void SDPrintFileEntry (const uint8_t *file, char filename[]);
 

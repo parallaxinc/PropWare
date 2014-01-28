@@ -1,11 +1,11 @@
 /**
  * @file    PropWare.h
- *
+ */
+/**
+ * @brief   Generic definitions and functions for the Parallax Propeller
  * @author  David Zemon
  * @project PropWare
- */
-
-/**
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
@@ -30,7 +30,7 @@
 #define PROPWARE_H
 
 /**
- * @defgroup    _propware   PropWare generic definitions and functions
+ * @defgroup    _propware   PropWare
  * @{
  */
 

@@ -1,12 +1,14 @@
 /**
- * @file            max6675.h
- *
- * @author          David Zemon
- *
- * @description     TODO: Do me
+ * @file    max6675.h
  */
-
 /**
+ * @brief   MAX6675 K-type thermocouple amplifier driver using SPI communication
+ *          for the Parallax Propeller
+ *
+ * @project PropWare
+ *
+ * @author  David Zemon
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
@@ -30,21 +32,25 @@
 #ifndef MAX6675_H_
 #define MAX6675_H_
 
+/**
+ * @defgroup _propware_max6675  MAX6675 K-type thermocouple amplifier
+ * @{
+ */
+
+/**
+ * @publicsection @{
+ */
+
 #include <PropWare.h>
 #include <spi.h>
 
-#define MAX6675_SPI_DEFAULT_FREQ        1000000
-#define MAX6675_SPI_MODE                SPI_MODE_1
-#define MAX6675_SPI_BITMODE             SPI_MSB_FIRST
-#define MAX6675_BIT_WIDTH               12
-
 /**
- * @brief   Initialize communication with an MAX6675 device
+ * @brief       Initialize communication with an MAX6675 device
  *
- * @param   mosi        Pin mask for MOSI
- * @param   miso        Pin mask for MISO
- * @param   sclk        Pin mask for SCLK
- * @param   cs          Pin mask for CS
+ * @param[in]   mosi        Pin mask for MOSI
+ * @param[in]   miso        Pin mask for MISO
+ * @param[in]   sclk        Pin mask for SCLK
+ * @param[in]   cs          Pin mask for CS
  *
  * @return      Returns 0 upon success, error code otherwise
  */
@@ -52,12 +58,12 @@ int8_t MAX6675Start (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs);
 
 /**
- * @brief   Choose whether to always set the SPI mode and bitmode before reading
- *          or writing to the chip; Useful when multiple devices are
- *          connected to the SPI bus
+ * @brief       Choose whether to always set the SPI mode and bitmode before
+ *              reading or writing to the chip; Useful when multiple devices are
+ *              connected to the SPI bus
  *
- * @param   alwaysSetMode   For any non-zero value, the SPI modes will always be
- *                          set before a read or write routine
+ * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
+ *                              always be set before a read or write routine
  */
 void MAX6675AlwaysSetMode (const uint8_t alwaysSetMode);
 
@@ -75,21 +81,37 @@ void MAX6675AlwaysSetMode (const uint8_t alwaysSetMode);
 int8_t MAX6675Read (uint16_t *dat);
 
 /**
- * @brief   Read data and return integer value
+ * @brief       Read data and return integer value
  *
- * @param   *dat    Address where data should be stored
+ * @param[out]  *dat    Address where data should be stored
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 int8_t MAX6675ReadWhole (uint16_t *dat);
 
 /**
- * @brief   Read data in floating point form
+ * @brief       Read data in floating point form
  *
- * @param   *dat    Address where data should be stored
+ * @param[out]  *dat    Address where data should be stored
  *
  * @return      Returns 0 upon success, error code otherwise
  */
 int8_t MAX6675ReadFloat (float *dat);
+
+/** @} */
+
+/*************************
+ *** Private Functions ***
+ *************************/
+/**
+ * @privatesection @{
+ */
+#define MAX6675_SPI_DEFAULT_FREQ        1000000
+#define MAX6675_SPI_MODE                SPI_MODE_1
+#define MAX6675_SPI_BITMODE             SPI_MSB_FIRST
+#define MAX6675_BIT_WIDTH               12
+/** @} */
+
+/** @} */
 
 #endif /* MAX6675_H_ */

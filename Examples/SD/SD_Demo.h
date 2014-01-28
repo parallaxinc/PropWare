@@ -22,7 +22,7 @@
 #include <stdio.h>
 #endif
 
-#if (!(defined SD_VERBOSE) && !(defined SD_VERBOSE_BLOCKS))
+#if (!(defined SD_OPTION_VERBOSE) && !(defined SD_OPTION_VERBOSE_BLOCKS))
 #define printf      __simple_printf
 #endif
 

@@ -60,7 +60,7 @@ uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
     return 0;
 }
 
-void L3GAlwaysSetMode (const uint8_t alwaysSetMode) {
+void L3GAlwaysSetSPIMode (const uint8_t alwaysSetMode) {
     g_l3g_alwaysSetMode = alwaysSetMode;
 }
 
