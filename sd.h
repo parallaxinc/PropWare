@@ -145,13 +145,15 @@ typedef enum {
 } file_pos;
 
 /** Number of allocated error codes for SD */
-#define SD_ERRORS_LIMIT 32
+#define SD_ERRORS_LIMIT     32
+/** First SD error code */
+#define SD_ERRORS_BASE      16
 
 /**
  * Error codes - preceded by SPI
  */
 typedef enum {
-    /** SD Error  0 */SD_INVALID_CMD = 16,
+    /** SD Error  0 */SD_INVALID_CMD = SD_ERRORS_BASE,
     /** SD Error  1 */SD_READ_TIMEOUT,
     /** SD Error  2 */SD_INVALID_NUM_BYTES,
     /** SD Error  3 */SD_INVALID_RESPONSE,
@@ -327,7 +329,7 @@ char SDfgetc (sd_file *f);
  * @brief       Read a line from a file until either 'size' characters have been
  *              read or a newline is found; Parameters should match stdio.h's
  *              fgets except for the file pointer
- * 
+ *
  * @note        This function does not include error checking
  *
  * @pre         *f must point to a currently opened and valid file
@@ -489,7 +491,7 @@ uint8_t SD_Shell_touch (const char name[]);
 
 #if (defined SD_OPTION_VERBOSE || defined SD_OPTION_VERBOSE_BLOCKS)
 /**
- * @brief       Print a block of data in hex format to the screen in 
+ * @brief       Print a block of data in hex format to the screen in
  *              SD_LINE_SIZE-byte lines
  *
  * @param[in]   *dat       Pointer to the beginning of the data
@@ -644,18 +646,18 @@ struct _sd_buffer {
 struct _sd_file {
     sd_buffer *buf;
     /** determine if the buffer is owned by this file */
-    uint8_t id;  // 
+    uint8_t id;  //
     file_pos wPtr;
     file_pos rPtr;
     sd_file_mode mode;
     uint32_t length;
     /** Maximum number of sectors currently allocated to a file */
-    uint32_t maxSectors;  
+    uint32_t maxSectors;
     /**
-     * When the length of a file is changed, this variable will be set, 
+     * When the length of a file is changed, this variable will be set,
      * otherwise cleared
      */
-    uint8_t mod; 
+    uint8_t mod;
     /** File's starting allocation unit */
     uint32_t firstAllocUnit;
     /** like curSectorOffset, but does not reset upon loading a new cluster */
@@ -680,7 +682,7 @@ struct _sd_file {
  *
  * @return      Returns 0 for success, else error code
  */
-uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg, 
+uint8_t SDSendCommand (const uint8_t cmd, const uint32_t arg,
                        const uint8_t crc);
 
 /**
@@ -785,7 +787,7 @@ void SDWriteDat32 (uint8_t buf[], const uint32_t dat);
  * @brief       Find and return the starting sector's address for a directory
  *              path given in a c-string. Use Unix-style path names (like
  *              /foo/bar/)
- * 
+ *
  * @note        !!!Not yet implemented!!!
  *
  * @param[in]   *path   C-string representing Unix-style path
@@ -858,13 +860,13 @@ uint8_t SDLoadSectorFromOffset (sd_file *f, const uint32_t offset);
 uint8_t SDIncCluster (sd_buffer *buf);
 
 /**
- * @brief       Read the standard length name of a file entry. If an extension 
+ * @brief       Read the standard length name of a file entry. If an extension
  *              exists, a period will be inserted before the extension. A null-
  *              terminator is always appended to the end
  *
- * @pre         *buf must point to the first byte in a FAT entry - no error 
+ * @pre         *buf must point to the first byte in a FAT entry - no error
  *              checking is executed on buf
- * @pre         Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of memory 
+ * @pre         Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of memory
  *              are not allocated for filename
  *
  * @param[in]   *buf        First byte in local memory containing a FAT entry
@@ -941,11 +943,20 @@ uint8_t SDCreateFile (const char *name, const uint16_t *fileEntryOffset);
 #endif
 
 #if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)
-// TODO: Document this
-inline void SDPrintFileEntry (const uint8_t *file, char filename[]);
+/**
+ * @brief       Print the attributes and name of a file entry
+ *
+ * @param[in]   *fileEntry  Address of the first byte of the file entry
+ * @param[out]  *filename   Allocated space for the filename string to be stored
+ */
+inline void SDPrintFileEntry (const uint8_t *fileEntry, char filename[]);
 
-// TODO: Document this
-void SDPrintFileAttributes (const uint8_t flag);
+/**
+ * @brief       Print attributes of a file entry
+ *
+ * @param[in]
+ */
+void SDPrintFileAttributes (const uint8_t flags);
 #endif
 
 /**@}*/

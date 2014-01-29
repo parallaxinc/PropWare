@@ -129,12 +129,14 @@ typedef enum {
 
 /** Number of allocated error codes for SPI */
 #define SPI_ERRORS_LIMIT            16
+/** First SPI error code */
+#define SPI_ERRORS_BASE             0
 
 /**
  * Error codes - Proceeded by nothing
  */
 typedef enum {
-    /** SPI Error  0 */SPI_INVALID_PIN = 0,
+    /** SPI Error  0 */SPI_INVALID_PIN = SPI_ERRORS_BASE,
     /** SPI Error  1 */SPI_INVALID_CLOCK_INIT,
     /** SPI Error  2 */SPI_INVALID_MODE,
     /** SPI Error  3 */SPI_INVALID_PIN_MASK,

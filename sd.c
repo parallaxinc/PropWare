@@ -1957,43 +1957,43 @@ uint8_t SDCreateFile (const char *name, const uint16_t *fileEntryOffset) {
 #endif
 
 #if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)
-inline void SDPrintFileEntry (const uint8_t *file, char filename[]) {
-    SDPrintFileAttributes(file[SD_FILE_ATTRIBUTE_OFFSET]);
-    SDGetFilename(file, filename);
+inline void SDPrintFileEntry (const uint8_t *fileEntry, char filename[]) {
+    SDPrintFileAttributes(fileEntry[SD_FILE_ATTRIBUTE_OFFSET]);
+    SDGetFilename(fileEntry, filename);
     printf("\t\t%s", filename);
-    if (SD_SUB_DIR & file[SD_FILE_ATTRIBUTE_OFFSET])
+    if (SD_SUB_DIR & fileEntry[SD_FILE_ATTRIBUTE_OFFSET])
         putchar('/');
     putchar('\n');
 }
 
-void SDPrintFileAttributes (const uint8_t flag) {
+void SDPrintFileAttributes (const uint8_t flags) {
 // Print file attributes
-    if (SD_READ_ONLY & flag)
+    if (SD_READ_ONLY & flags)
         putchar(SD_READ_ONLY_CHAR);
     else
         putchar(SD_READ_ONLY_CHAR_);
 
-    if (SD_HIDDEN_FILE & flag)
+    if (SD_HIDDEN_FILE & flags)
         putchar(SD_HIDDEN_FILE_CHAR);
     else
         putchar(SD_HIDDEN_FILE_CHAR_);
 
-    if (SD_SYSTEM_FILE & flag)
+    if (SD_SYSTEM_FILE & flags)
         putchar(SD_SYSTEM_FILE_CHAR);
     else
         putchar(SD_SYSTEM_FILE_CHAR_);
 
-    if (SD_VOLUME_ID & flag)
+    if (SD_VOLUME_ID & flags)
         putchar(SD_VOLUME_ID_CHAR);
     else
         putchar(SD_VOLUME_ID_CHAR_);
 
-    if (SD_SUB_DIR & flag)
+    if (SD_SUB_DIR & flags)
         putchar(SD_SUB_DIR_CHAR);
     else
         putchar(SD_SUB_DIR_CHAR_);
 
-    if (SD_ARCHIVE & flag)
+    if (SD_ARCHIVE & flags)
         putchar(SD_ARCHIVE_CHAR);
     else
         putchar(SD_ARCHIVE_CHAR_);
