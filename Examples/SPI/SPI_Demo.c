@@ -47,7 +47,8 @@ void main (void) {
 
             ++s;
 
-            putchar(in);            // Print the character to the screen
+            // Print the character to the screen
+            putchar(in);            
         }
 
         // Signal that the entire string has been sent
