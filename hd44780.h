@@ -5,7 +5,7 @@
  * @brief       Support for the common "character LCD" modules using the HD44780
  *              controller for the Parallax Propeller
  *
- * @project PropWare
+ * @project     PropWare
  *
  * @author      David Zemon
  * @author      Collin Winans
@@ -99,12 +99,14 @@ typedef enum {
 
 /** Number of allocated error codes for HD44780 */
 #define HD44780_ERRORS_LIMIT            16
+/** First HD44780 error code */
+#define HD44780_ERRORS_BASE             48
 
 /**
  * Error codes - Proceeded by SD, SPI
  */
 typedef enum {
-    /** HD44780 Error 0 */HD44780_INVALID_CTRL_SGNL = 48,
+    /** HD44780 Error 0 */HD44780_INVALID_CTRL_SGNL = HD44780_ERRORS_BASE,
     /** HD44780 Error 1 */HD44780_INVALID_DATA_MASK,
     /** HD44780 Error 2 */HD44780_INVALID_DIMENSIONS
 } hd44780_error_code_t;
@@ -257,10 +259,18 @@ void HD44780_hex (uint32_t x);
 /**
  * @privatesection @{
  */
+/**
+ * Store metadata on the LCD device to determine when line-wraps should and
+ * shouldn't occur
+ */
 typedef struct {
+    /** How many characters can be displayed on a single row */
     uint8_t charRows;
+    /** How many characters can be dispayed in a single column */
     uint8_t charColumns;
+    /** How many contiguous bytes of memory per visible character row */
     uint8_t ddramCharRowBreak;
+    /** Last byte of memory used in each DDRAM line */
     uint8_t ddramLineEnd;
 } hd44780_mem_map_t;
 

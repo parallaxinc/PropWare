@@ -1,10 +1,13 @@
 /**
  * @file    mcp300x.c
- *
- * @author  David Zemon, Collin Winans
  */
 
 /**
+ * @project PropWare
+ *
+ * @author  David Zemon
+ * @author  Collin Winans
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>

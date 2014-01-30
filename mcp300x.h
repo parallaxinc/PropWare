@@ -1,16 +1,16 @@
 /**
- * @file        mcp300x.h
- *
- * @author      David Zemon, Collin Winans
- *
- * @description MCP300x analog-to-digital driver for Parallax Propeller using
- *              SPI communication. Supports both MCP3004 and MCP3008 devices
- *              along with both single-ended and differential readings.
- *
- * @note        MCP300x chips uses SPI mode 2 and shifts data MSB first
+ * @file    mcp300x.h
  */
 
 /**
+ * @brief   MCP3004/MCP3008 ADC driver using SPI communication for the Parallax
+ *          Propeller
+ *
+ * @author  David Zemon
+ * @author  Collin Winans
+ *
+ * @note    MCP300x chips uses SPI mode 2 and shifts data MSB first
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
@@ -34,35 +34,40 @@
 #ifndef MCP300X_H_
 #define MCP300X_H_
 
+/** @defgroup _propware_mcp300x MCP300x     MCP300x 10-bit ADC
+ * @{
+ */
+
+/**
+ * @publicsection @{
+ */
+
 #include <propeller.h>
 #include <PropWare.h>
 #include <spi.h>
 
-#define MCP300X_SPI_DEFAULT_FREQ    100000
-#define MCP300X_SPI_MODE            SPI_MODE_2
-#define MCP300X_SPI_BITMODE         SPI_MSB_FIRST
-
+/** Single-ended channels */
 typedef enum {
-    MCP_CHANNEL_0,
-    MCP_CHANNEL_1,
-    MCP_CHANNEL_2,
-    MCP_CHANNEL_3,
-    MCP_CHANNEL_4,  // Only accessible on MCP3008
-    MCP_CHANNEL_5,  // Only accessible on MCP3008
-    MCP_CHANNEL_6,  // Only accessible on MCP3008
-    MCP_CHANNEL_7,  // Only accessible on MCP3008
+    /** Channel 0 */MCP_CHANNEL_0,
+    /** Channel 1 */MCP_CHANNEL_1,
+    /** Channel 2 */MCP_CHANNEL_2,
+    /** Channel 3 */MCP_CHANNEL_3,
+    /** Channel 4 (MCP3008 only) */MCP_CHANNEL_4,
+    /** Channel 5 (MCP3008 only) */MCP_CHANNEL_5,
+    /** Channel 6 (MCP3008 only) */MCP_CHANNEL_6,
+    /** Channel 7 (MCP3008 only) */MCP_CHANNEL_7,
 } mcp_channel_t;
 
-// Channel numbers listed as DIFF_<positive>_<negative>
+/** Pseudo-differential pair channels */
 typedef enum {
-    DIFF_0_1,
-    DIFF_1_0,
-    DIFF_2_3,
-    DIFF_3_2,
-    DIFF_4_5,  // Only accessible on MCP3008
-    DIFF_5_4,  // Only accessible on MCP3008
-    DIFF_6_7,  // Only accessible on MCP3008
-    DIFF_7_6  // Only accessible on MCP3008
+    /** CH0+, CH1- */DIFF_0_1,
+    /** CH1+, CH0- */DIFF_1_0,
+    /** CH2+, CH3- */DIFF_2_3,
+    /** CH3+, CH2- */DIFF_3_2,
+    /** CH4+, CH5- (MCP3008 only) */DIFF_4_5,
+    /** CH5+, CH4- (MCP3008 only) */DIFF_5_4,
+    /** CH6+, CH7- (MCP3008 only) */DIFF_6_7,
+    /** CH7+, CH6- (MCP3008 only) */DIFF_7_6
 } mcp_channel_diff_t;
 
 /**
@@ -112,5 +117,23 @@ int8_t MCP300xRead (const mcp_channel_t channel, uint16_t *dat);
  * @return      Returns 0 upon success, error code otherwise
  */
 int8_t MCP300xReadDif (const mcp_channel_diff_t channels, uint16_t *dat);
+
+/**@}*/
+
+/*************************
+ *** Private Functions ***
+ *************************/
+/**
+ * @privatesection
+ * @{
+ */
+
+#define MCP300X_SPI_DEFAULT_FREQ    100000
+#define MCP300X_SPI_MODE            SPI_MODE_2
+#define MCP300X_SPI_BITMODE         SPI_MSB_FIRST
+
+/**@}*/
+
+/**@}*/
 
 #endif /* MCP300X_H_ */

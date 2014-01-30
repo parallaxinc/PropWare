@@ -7,7 +7,8 @@
  *
  * @project PropWare
  *
- * @author  David Zemon, Collin Winans
+ * @author  David Zemon
+ * @author  Collin Winans
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -49,12 +50,9 @@
  * Axes of the L3G device
  */
 typedef enum {
-    /** X axis */
-    L3G_X,
-    /** Y axis */
-    L3G_Y,
-    /** Z axis */
-    L3G_Z
+    /** X axis */L3G_X,
+    /** Y axis */L3G_Y,
+    /** Z axis */L3G_Z
 } l3g_axis;
 
 /**

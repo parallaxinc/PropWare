@@ -68,13 +68,13 @@ int8_t MAX6675Start (const uint32_t mosi, const uint32_t miso,
 void MAX6675AlwaysSetMode (const uint8_t alwaysSetMode);
 
 /**
- * @brief   Read data in fixed-point form
+ * @brief       Read data in fixed-point form
  *
  * @detailed    12-bit data is stored where lower 2 bits are fractional and
  *              upper 10 bits are the whole number. Value presented in degrees
  *              Celsius
  *
- * @param   *dat    Address where data should be stored
+ * @param[out]  *dat    Address where data should be stored
  *
  * @return      Returns 0 upon success, error code otherwise
  */

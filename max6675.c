@@ -1,10 +1,12 @@
 /**
  * @file    max6675.c
- *
- * @author  David Zemon
  */
 
 /**
+ * @project PropWare
+ *
+ * @author  David Zemon
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>

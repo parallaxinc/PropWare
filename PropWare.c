@@ -1,11 +1,11 @@
 /**
  * @file    PropWare.c
+ */
+/**
+ * @project PropWare
  *
  * @author  David Zemon
- * @project PropWare
- */
-
-/**
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>

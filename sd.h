@@ -4,7 +4,7 @@
 /**
  * @brief       SDHC driver for FAT16 and FAT32 for the Parallax Propeller
  *
- * @project PropWare
+ * @project     PropWare
  *
  * @author      David Zemon
  *

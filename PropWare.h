@@ -3,8 +3,10 @@
  */
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller
- * @author  David Zemon
+ *
  * @project PropWare
+ *
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>

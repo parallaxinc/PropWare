@@ -1,12 +1,14 @@
 /**
  * @file    spi_as.S
- *
- * @author  David Zemon
- *
- * @brief   SPI routine for Parallax Propeller. Runs in master mode only.
  */
 
 /**
+ * @brief   SPI routine for Parallax Propeller. Runs in master mode only.
+ *
+ * @project PropWare
+ *
+ * @author  David Zemon
+ *
  * @copyright
  * The MIT License (MIT)<br>
  * <br>Copyright (c) 2013 David Zemon<br>
