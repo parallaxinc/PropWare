@@ -29,6 +29,10 @@
 #ifndef HD44780_DEMO_H_
 #define HD44780_DEMO_H_
 
+/** @addtogroup _propware_examples
+ * @{
+ */
+
 #include <propeller.h>
 #include <stdio.h>
 #include <PropWare.h>
@@ -50,6 +54,14 @@
 #endif
 #define DIMENSIONS          HD44780_16x2
 
+/**
+ * @brief       Enter an infinite loop that blinks the error code on the
+ *              QUICKSTART's 8 onboard LEDs
+ *
+ * @param[in]   err     Error code
+ */
 void error (const uint8_t err);
+
+/**@}*/
 
 #endif /* HD44780_DEMO_H_ */
