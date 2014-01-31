@@ -29,12 +29,13 @@
 #ifndef SD_DEMO_H_
 #define SD_DEMO_H_
 
-/** @addtogroup _propware_examples
+/**
+ * @addtogroup _propware_examples
  * @{
  */
 
 /**
- * @defgroup    _propware_examples_sd  FAT16/32     SD Card Demo
+ * @defgroup _propware_examples_sd  SD Card Demo
  * @{
  */
 

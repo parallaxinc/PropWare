@@ -34,7 +34,7 @@
  */
 
 /**
- * @defgroup    _propware_examples_mcp300x  MCP300x     MCP300x Demo
+ * @defgroup    _propware_examples_mcp300x  MCP300x Demo
  * @{
  */
 

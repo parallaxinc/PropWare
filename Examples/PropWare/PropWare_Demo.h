@@ -1,8 +1,13 @@
 /**
- * @file    MAX6675_Demo.h
+ * @file    PropWare_Demo.h
  */
 /**
- * @project MAX6675_Demo
+ * @brief   Examples demonstrating PropWare capabilities
+ *
+ * @note    Coming soon! I will demonstrate the capabilities of some of the
+ *          basics in PropWare along with some multi-core programming!
+ *
+ * @project PropWare_Demo
  *
  * @author  David Zemon
  *
@@ -26,57 +31,23 @@
  * SOFTWARE.
  */
 
-#ifndef MAX6675_DEMO_H_
-#define MAX6675_DEMO_H_
+#ifndef PROPWARE_DEMO_H_
+#define PROPWARE_DEMO_H_
 
-/** @addtogroup _propware_examples
+/**
+ * @defgroup _propware_examples  Examples
  * @{
  */
 
 /**
- * @defgroup    _propware_examples_max6675  MAX6675 Demo
- * @{
+ * @defgroup _propware_example_propware PropWare Functions & Macros
  */
 
 #include <stdio.h>
 #include <PropWare.h>
-#include <spi.h>
-#include <hd44780.h>
-#include <max6675.h>
 
-/** Pin number for MOSI (master out - slave in) */
-#define MOSI                BIT_0
-/** Pin number for the clock signal */
-#define SCLK                BIT_1
-/** Pin number for MISO (master in - slave out) */
-#define MISO                BIT_2
-/** Pin number for chip select */
-#define CS                  BIT_5
-#define FREQ            10000
+/*@}*/
 
-#define DEBUG_LEDS      BYTE_2
+/*@}*/
 
-#define RS              BIT_14
-#define RW              BIT_12
-#define EN              BIT_10
-
-#define DATA_H          BIT_26 | BIT_25 | BIT_24 | BIT_23
-#define DATA_L          BIT_22 | BIT_21 | BIT_20 | BIT_19
-
-#ifdef DATA_L
-#define BITMODE         HD44780_8BIT
-#define DATA            DATA_H | DATA_L
-#else
-#define BITMODE         HD44780_4BIT
-#define DATA            DATA_H
-#endif
-
-#define DIMENSIONS      HD44780_16x2
-
-void error (int8_t err);
-
-/**@}*/
-
-/**@}*/
-
-#endif /* MAX6675_DEMO_H_ */
+#endif /* PROPWARE_DEMO_H_ */

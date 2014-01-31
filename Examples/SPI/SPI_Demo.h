@@ -34,7 +34,7 @@
  */
 
 /**
- * @defgroup    _propware_examples_spi  SPI     SPI Demo
+ * @defgroup    _propware_examples_spi  SPI Demo
  * @{
  */
 
