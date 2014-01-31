@@ -29,6 +29,15 @@
 #ifndef MAX6675_DEMO_H_
 #define MAX6675_DEMO_H_
 
+/** @addtogroup _propware_examples
+ * @{
+ */
+
+/**
+ * @defgroup    _propware_examples_max6675  MAX6675     MAX6675 Demo
+ * @{
+ */
+
 #include <stdio.h>
 #include <PropWare.h>
 #include <spi.h>
@@ -65,5 +74,9 @@
 #define DIMENSIONS      HD44780_16x2
 
 void error (int8_t err);
+
+/**@}*/
+
+/**@}*/
 
 #endif /* MAX6675_DEMO_H_ */

@@ -29,6 +29,15 @@
 #ifndef MCP300X_DEMO_H_
 #define MCP300X_DEMO_H_
 
+/** @addtogroup _propware_examples
+ * @{
+ */
+
+/**
+ * @defgroup    _propware_examples_mcp300x  MCP300x     MCP300x Demo
+ * @{
+ */
+
 #include <propeller.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,5 +67,9 @@
  * @param[in]   err     Error value
  */
 void error (int8_t err);
+
+/**@}*/
+
+/**@}*/
 
 #endif /* MCP300X_DEMO_H_ */

@@ -29,6 +29,15 @@
 #ifndef SD_DEMO_H_
 #define SD_DEMO_H_
 
+/** @addtogroup _propware_examples
+ * @{
+ */
+
+/**
+ * @defgroup    _propware_examples_sd  FAT16/32     SD Card Demo
+ * @{
+ */
+
 #define DEBUG
 //#define LOW_RAM_MODE
 #define TEST_WRITE
@@ -60,5 +69,9 @@
 #define NEW_FILE    "TEST.TXT"
 
 void error (const uint8_t err);
+
+/**@}*/
+
+/**@}*/
 
 #endif /* SD_DEMO_H_ */

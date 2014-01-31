@@ -33,6 +33,11 @@
  * @{
  */
 
+/**
+ * @defgroup    _propware_examples_hd44780  HD44780     Character LCD Demo
+ * @{
+ */
+
 #include <propeller.h>
 #include <stdio.h>
 #include <PropWare.h>
@@ -61,6 +66,8 @@
  * @param[in]   err     Error code
  */
 void error (const uint8_t err);
+
+/**@}*/
 
 /**@}*/
 

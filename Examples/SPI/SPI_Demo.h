@@ -29,6 +29,15 @@
 #ifndef SPI_DEMO_H_
 #define SPI_DEMO_H_
 
+/** @addtogroup _propware_examples
+ * @{
+ */
+
+/**
+ * @defgroup    _propware_examples_spi  SPI     SPI Demo
+ * @{
+ */
+
 // Includes
 #include <propeller.h>
 #include <stdio.h>
@@ -51,5 +60,9 @@
 #define MODE                SPI_MODE_0
 /** Determine if the LSB or MSB should be sent first for each byte */
 #define BITMODE             SPI_MSB_FIRST
+
+/**@}*/
+
+/**@}*/
 
 #endif /* SPI_DEMO_H_ */
