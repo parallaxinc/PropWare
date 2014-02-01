@@ -1,15 +1,22 @@
 /**
- * @file    PropWare_Demo.h
+ * @file        PropWare_Demo.h
  */
 /**
- * @brief   Examples demonstrating PropWare capabilities
+ * @brief       Blink an LED on each of the 8 Propeller cogs
  *
- * @note    Coming soon! I will demonstrate the capabilities of some of the
- *          basics in PropWare along with some multi-core programming!
+ * @detailed    This file is nearly a direct copy of SimpleIDE's blinkcogs.c.
+ *              Some changes were made to highlight the helpfulness of PropWare.
  *
- * @project PropWare_Demo
+ *              Make all propeller cogs blink assigned pins at exactly the same
+ *              rate and time to demonstrate the precision of the
+ *              _start_cog_thread method. This program and method uses 8 LMM C
+ *              program COG "threads" of execution simultaneously.
  *
- * @author  David Zemon
+ *              This program should be compiled with the LMM memory model.
+ *
+ * @project     PropWare_Demo
+ *
+ * @author      Modified by David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -35,18 +42,23 @@
 #define PROPWARE_DEMO_H_
 
 /**
- * @defgroup _propware_examples  Examples
+ * @defgroup    _propware_example_propware  PropWare Basics
+ * @ingroup     _propware_examples
  * @{
- */
-
-/**
- * @defgroup _propware_example_propware PropWare Functions & Macros
  */
 
 #include <stdio.h>
 #include <PropWare.h>
 
-/*@}*/
+#define COGS            8
+#define STACK_SIZE      16
+
+/**
+ * @brief       Toggle thread function gets started in an LMM COG.
+ *
+ * @param[in]   *arg    pin number to toggle
+ */
+void do_toggle (void *arg);
 
 /*@}*/
 

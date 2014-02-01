@@ -2,6 +2,9 @@
  * @file    SD_Demo.h
  */
 /**
+ * @brief   Demonstrate various functions including writing to files and the
+ *          Shell
+ *
  * @project SD_Demo
  *
  * @author  David Zemon
@@ -30,12 +33,8 @@
 #define SD_DEMO_H_
 
 /**
- * @addtogroup _propware_examples
- * @{
- */
-
-/**
- * @defgroup _propware_examples_sd  SD Card Demo
+ * @defgroup    _propware_example_sd    SD Card Demo
+ * @ingroup     _propware_examples
  * @{
  */
 
@@ -70,8 +69,6 @@
 #define NEW_FILE    "TEST.TXT"
 
 void error (const uint8_t err);
-
-/**@}*/
 
 /**@}*/
 

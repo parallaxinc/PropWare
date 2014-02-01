@@ -2,6 +2,8 @@
  * @file    SPI_Demo.h
  */
 /**
+ * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
+ *
  * @project SPI_Demo
  *
  * @author  David Zemon
@@ -29,12 +31,9 @@
 #ifndef SPI_DEMO_H_
 #define SPI_DEMO_H_
 
-/** @addtogroup _propware_examples
- * @{
- */
-
 /**
- * @defgroup    _propware_examples_spi  SPI Demo
+ * @defgroup    _propware_example_spi   SPI Demo
+ * @ingroup     _propware_examples
  * @{
  */
 
@@ -60,8 +59,6 @@
 #define MODE                SPI_MODE_0
 /** Determine if the LSB or MSB should be sent first for each byte */
 #define BITMODE             SPI_MSB_FIRST
-
-/**@}*/
 
 /**@}*/
 

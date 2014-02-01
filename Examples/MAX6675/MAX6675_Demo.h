@@ -2,6 +2,8 @@
  * @file    MAX6675_Demo.h
  */
 /**
+ * @brief   Display the temperature on stdout and a character LCD
+ *
  * @project MAX6675_Demo
  *
  * @author  David Zemon
@@ -29,12 +31,9 @@
 #ifndef MAX6675_DEMO_H_
 #define MAX6675_DEMO_H_
 
-/** @addtogroup _propware_examples
- * @{
- */
-
 /**
- * @defgroup    _propware_examples_max6675  MAX6675 Demo
+ * @defgroup    _propware_example_max6675  MAX6675 Demo
+ * @ingroup     _propware_examples
  * @{
  */
 
@@ -74,8 +73,6 @@
 #define DIMENSIONS      HD44780_16x2
 
 void error (int8_t err);
-
-/**@}*/
 
 /**@}*/
 

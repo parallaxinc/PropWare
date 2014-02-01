@@ -2,6 +2,8 @@
  * @file    HD44780_Demo.h
  */
 /**
+ * @brief   Display "Hello world" on LCD screen and demonstrate line-wrapping
+ *
  * @project HD44780_Demo
  *
  * @author  David Zemon
@@ -29,12 +31,9 @@
 #ifndef HD44780_DEMO_H_
 #define HD44780_DEMO_H_
 
-/** @addtogroup _propware_examples
- * @{
- */
-
 /**
- * @defgroup    _propware_examples_hd44780  HD44780     Character LCD Demo
+ * @defgroup _propware_examples_hd44780 Character LCD Demo
+ * @ingroup _propware_examples
  * @{
  */
 
@@ -69,6 +68,6 @@ void error (const uint8_t err);
 
 /**@}*/
 
-/**@}*/
+/*@}*/
 
 #endif /* HD44780_DEMO_H_ */

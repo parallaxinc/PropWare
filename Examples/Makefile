@@ -29,6 +29,9 @@ all:
 	
 	$(shell mkdir $(MKDIR_FLAG) SPI$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C SPI/Debug -f ../Makefile
+	
+	$(shell mkdir $(MKDIR_FLAG) PropWare$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare/Debug -f ../Makefile
 
 clean:
 	$(shell mkdir $(MKDIR_FLAG) HD44780$(DIR_DIV)Debug $(NULL))
@@ -48,3 +51,6 @@ clean:
 	
 	$(shell mkdir $(MKDIR_FLAG) SPI$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C SPI/Debug -f ../Makefile clean
+	
+	$(shell mkdir $(MKDIR_FLAG) PropWare$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare/Debug -f ../Makefile clean

@@ -2,6 +2,9 @@
  * @file    MCP300x_Demo.h
  */
 /**
+ * @brief   Display the value of an analog channel on stdout and as a bar graph
+ *          over the 8 LEDs of the QUICKSTART board
+ *
  * @project MCP300x_Demo
  *
  * @author  David Zemon
@@ -29,12 +32,9 @@
 #ifndef MCP300X_DEMO_H_
 #define MCP300X_DEMO_H_
 
-/** @addtogroup _propware_examples
- * @{
- */
-
 /**
- * @defgroup    _propware_examples_mcp300x  MCP300x Demo
+ * @defgroup    _propware_example_mcp300x   MCP300x Demo
+ * @ingroup     _propware_examples
  * @{
  */
 
@@ -67,8 +67,6 @@
  * @param[in]   err     Error value
  */
 void error (int8_t err);
-
-/**@}*/
 
 /**@}*/
 

@@ -26,13 +26,60 @@
  * SOFTWARE.
  */
 
-
 #include "PropWare_Demo.h"
 
-/**
- * @brief   Demonstrate various aspects of the top-level PropWare functions and
- *          preprocessor macros
- */
-void main (void) {
-	// TODO: Coming soon!!!
+static int cog_stack[STACK_SIZE][8];
+static _thread_state_t thread_data;
+
+volatile unsigned int wait_time;
+volatile unsigned int startcnt;
+volatile unsigned int pins;
+volatile int syncstart;
+
+int main (int argc, char* argv[]) {
+    int n;
+    int cog;
+    int pin[] = {
+            BIT_16,
+            BIT_17,
+            BIT_18,
+            BIT_19,
+            BIT_20,
+            BIT_21,
+            BIT_22,
+            BIT_23 };
+    unsigned int nextcnt;
+
+    wait_time = 50 * MILLISECOND;
+
+    syncstart = 0;
+
+    for (n = 1; n < COGS; n++) {
+        cog = _start_cog_thread(cog_stack[n] + STACK_SIZE, do_toggle,
+                (void*) pin[n], &thread_data);
+        printf("Toggle COG %d Started\n", cog);
+    }
+
+    startcnt = CNT;
+    syncstart = 1;
+    nextcnt = wait_time + startcnt;
+    while (1) {
+        GPIOPinToggle(pin[0]);
+        nextcnt = waitcnt2(nextcnt, wait_time);
+    }
+    return 0;
+}
+
+void do_toggle (void *arg) {
+    int pin = (int) arg;
+    unsigned int nextcnt;
+
+    while (syncstart == 0)
+        ;  // wait for start signal from main cog
+
+    nextcnt = wait_time + startcnt;
+    while (1) {
+        GPIOPinToggle(pin);
+        nextcnt = waitcnt2(nextcnt, wait_time);
+    }
 }
