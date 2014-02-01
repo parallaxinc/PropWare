@@ -1,5 +1,5 @@
 /**
-@mainpage PropWare v1.1 Documentation
+@mainpage PropWare Documentation - Nightly
 @htmlonly
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
@@ -40,9 +40,8 @@
                          target="_blank">here</a>.
 </p>
 
-<p>WARNING: The naming scheme of all functions may change in the near future, as I am still deciding what is the best
-    (or least bad) way to go about this. Suggestions are welcome for naming schemes so long as detailed explanations
-    accompany them. I will remove this warning when the naming scheme is finalized.
+<p>The current naming scheme will be permanently saved as a version 1.x release. A new, unified naming scheme (still
+    TBD) will be released as version 2.0.</p>
 
 <h2>Getting Started</h2>
 
