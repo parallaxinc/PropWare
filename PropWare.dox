@@ -1,5 +1,5 @@
 /**
-@mainpage PropWare Documentation - Nightly
+@mainpage PropWare v2.0 Documentation - Nightly
 @htmlonly
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
@@ -39,9 +39,6 @@
     Download PropWare <a href="https://github.com/SwimDude0614/PropWare"
                          target="_blank">here</a>.
 </p>
-
-<p>The current naming scheme will be permanently saved as a version 1.x release. A new, unified naming scheme (still
-    TBD) will be released as version 2.0.</p>
 
 <h2>Getting Started</h2>
 
