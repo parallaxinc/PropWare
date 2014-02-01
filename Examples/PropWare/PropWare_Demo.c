@@ -28,18 +28,18 @@
 
 #include "PropWare_Demo.h"
 
-static int cog_stack[STACK_SIZE][8];
+static uint32_t cog_stack[STACK_SIZE][8];
 static _thread_state_t thread_data;
 
-volatile unsigned int wait_time;
-volatile unsigned int startcnt;
-volatile unsigned int pins;
-volatile int syncstart;
+volatile uint32_t wait_time;
+volatile uint32_t startcnt;
+volatile uint32_t pins;
+volatile uint8_t syncstart;
 
 int main (int argc, char* argv[]) {
-    int n;
-    int cog;
-    int pin[] = {
+    uint8_t n;
+    uint8_t cog;
+    uint32_t pin[] = {
             BIT_16,
             BIT_17,
             BIT_18,
@@ -48,7 +48,7 @@ int main (int argc, char* argv[]) {
             BIT_21,
             BIT_22,
             BIT_23 };
-    unsigned int nextcnt;
+    uint32_t nextcnt;
 
     wait_time = 50 * MILLISECOND;
 
@@ -64,18 +64,21 @@ int main (int argc, char* argv[]) {
     syncstart = 1;
     nextcnt = wait_time + startcnt;
     while (1) {
-        GPIOPinToggle(pin[0]);
+        GPIOPinSet(pin[0]);
+        nextcnt = waitcnt2(nextcnt, wait_time);
+        GPIOPinClear(pin[0]);
         nextcnt = waitcnt2(nextcnt, wait_time);
     }
     return 0;
 }
 
 void do_toggle (void *arg) {
-    int pin = (int) arg;
-    unsigned int nextcnt;
+    uint32_t pin = (uint32_t) arg;
+    uint32_t nextcnt;
 
+    // wait for start signal from main cog
     while (syncstart == 0)
-        ;  // wait for start signal from main cog
+        ;
 
     nextcnt = wait_time + startcnt;
     while (1) {

@@ -48,6 +48,9 @@
  */
 
 #include <stdio.h>
+
+// Note the lack of an include propeller.h; This is because PropWare.h will
+// include propeller.h for you
 #include <PropWare.h>
 
 #define COGS            8
