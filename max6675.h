@@ -54,7 +54,7 @@
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MAX6675Start (const uint32_t mosi, const uint32_t miso,
+int8_t max6675_start (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs);
 
 /**
@@ -65,7 +65,7 @@ int8_t MAX6675Start (const uint32_t mosi, const uint32_t miso,
  * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
  *                              always be set before a read or write routine
  */
-void MAX6675AlwaysSetMode (const uint8_t alwaysSetMode);
+void max6675_always_set_spi_mode (const uint8_t alwaysSetMode);
 
 /**
  * @brief       Read data in fixed-point form
@@ -78,7 +78,7 @@ void MAX6675AlwaysSetMode (const uint8_t alwaysSetMode);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MAX6675Read (uint16_t *dat);
+int8_t max6675_read (uint16_t *dat);
 
 /**
  * @brief       Read data and return integer value
@@ -87,7 +87,7 @@ int8_t MAX6675Read (uint16_t *dat);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MAX6675ReadWhole (uint16_t *dat);
+int8_t max6675_read_whole (uint16_t *dat);
 
 /**
  * @brief       Read data in floating point form
@@ -96,7 +96,7 @@ int8_t MAX6675ReadWhole (uint16_t *dat);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MAX6675ReadFloat (float *dat);
+int8_t max6675_read_float (float *dat);
 
 /** @} */
 

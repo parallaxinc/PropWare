@@ -129,7 +129,7 @@ LOOP                    // Retrieve a command
                         // Default: Return to loop
                         jmp #LOOP
 
-/* FUNCTION: SPISetMode() */
+/* FUNCTION: spi_set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA                 '' Read in the mode
 
@@ -141,23 +141,23 @@ SET_MODE                // Set the current SPI polarity, If polarity high, initi
 
                         jmp #LOOP
 
-/* FUNCTION: SPISetBitMode() */
+/* FUNCTION: spi_set_bit_mode() */
 SET_BITMODE             // Set shifting bitmode (LSB or MSB first) of communication
                         call #READ_CMD                  '' Read in bitmode
                         mov bitmode, mailbox
                         jmp #LOOP
 
-/* FUNCTION: SPISetClock() */
+/* FUNCTION: spi_set_clock() */
 SET_FREQ                call #READ_CMD                  '' Using READ_CMD instead of READ_DATA because -1 is not a valid clock signal
                         mov clkDelay, mailbox
                         jmp #LOOP
 
-/* FUNCTION: SPIGetClock() */
+/* FUNCTION: spi_get_clock() */
 GET_FREQ                mov data, clkDelay
                         call #WRITE_DATA
                         jmp #LOOP
 
-/* FUNCTION: SPIShiftOut() */
+/* FUNCTION: spi_shift_out() */
 SEND                    // Interpret the bit count and mode of output for this send command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
                         and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
@@ -213,7 +213,7 @@ lsb_first               // LSB_FIRST Routine
 SEND_complete           wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
                         jmp #LOOP
 
-/* FUNCTION: SPIShiftIn() */
+/* FUNCTION: spi_shift_in() */
 READ                    // Interpret the bit count and mode of output for this read command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
                         and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
@@ -298,7 +298,7 @@ lsb_cpha1               // Read in a value LSB-first with data valid after the c
                         shr data, temp
 lsb_cpha1_ret           ret
 
-/* FUNCTION: SPIShiftOut_fast() */
+/* FUNCTION: spi_shift_out_fast() */
 SEND_fast               // Interpret the bit count and mode of output for this send command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
                         and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
@@ -348,7 +348,7 @@ lsb_first_fast          // LSB_FIRST Routine
 SEND_complete_fast      wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
                         jmp #LOOP
 
-/* FUNCTION: SPIShiftIn_fast() */
+/* FUNCTION: spi_shift_in_fast() */
 READ_fast               // Interpret the bit count and mode of output for this read command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
                         and bitCount, spiBitCountBits   '' Mask off all bits except the bit count

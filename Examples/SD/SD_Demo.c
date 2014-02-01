@@ -33,7 +33,7 @@ void main (void) {
     uint8_t err;
     char c;
 
-    sd_file f, f2;
+    SD_File f, f2;
 
 #ifndef LOW_RAM_MODE
     /* Option 1: Create at least one new sd_buffer variable
@@ -44,8 +44,8 @@ void main (void) {
      * contents to be kept in RAM while a file is loaded.
      *
      */
-    sd_buffer fileBuf;  // If extra RAM is available
-    sd_buffer fileBuf2;
+    SD_Buffer fileBuf;  // If extra RAM is available
+    SD_Buffer fileBuf2;
     f.buf = &fileBuf;
     f2.buf = &fileBuf2;
 #else
@@ -64,20 +64,20 @@ void main (void) {
 #endif
 
     // Start your engines!!!
-    if ((err = SDStart(MOSI, MISO, SCLK, CS, -1)))
+    if ((err = sd_start(MOSI, MISO, SCLK, CS, -1)))
         error(err);
 
 #ifdef DEBUG
     printf("SD routine started. Mounting now...\n");
 #endif
-    if ((err = SDMount()))
+    if ((err = sd_mount()))
         error(err);
 #ifdef DEBUG
     printf("FAT partition mounted!\n");
 #endif
 
 #ifdef TEST_SHELL
-    SD_Shell(&f);
+    sd_shell(&f);
 #elif (defined TEST_WRITE)
     // Create a blank file and copy the contents of STUFF.TXT into it
     SDfopen(OLD_FILE, &f, SD_FILE_MODE_R);
@@ -131,9 +131,9 @@ void main (void) {
     printf("Execution complete!\n");
 #endif
 
-    GPIODirModeSet(BIT_16, GPIO_DIR_OUT);
+    gpio_set_dir(BIT_16, GPIO_DIR_OUT);
     while (1) {
-        GPIOPinToggle(BIT_16);
+        gpio_pin_toggle(BIT_16);
         waitcnt(CLKFREQ/2 + CNT);
     }
 }

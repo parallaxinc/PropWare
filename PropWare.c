@@ -28,7 +28,7 @@
 
 #include <PropWare.h>
 
-uint8_t GPIOSwitchRead_Low (const uint32_t pin) {
+uint8_t gpio_read_switch_low (const uint32_t pin) {
     DIRA &= ~pin; // Set the pin as input
 
     if ((OUTA & pin) ^ pin) {   // If pin is grounded (aka, pressed)
@@ -42,7 +42,7 @@ uint8_t GPIOSwitchRead_Low (const uint32_t pin) {
     return 0;
 }
 
-uint8_t PropWareCountBits (uint32_t par) {
+uint8_t propware_count_bits (uint32_t par) {
     /* Brian Kernighan's method for counting set bits in a variable */
     uint32_t c;                     // c accumulates the total bits set in par
     for (c = 0; par; ++c)
@@ -51,7 +51,7 @@ uint8_t PropWareCountBits (uint32_t par) {
     return c;
 }
 
-uint8_t PropWareGetPinNum (const uint32_t pinMask) {
+uint8_t propware_get_pin_num (const uint32_t pinMask) {
     uint8_t temp = 0;
     while (!(0x01 & (pinMask >> temp++)))
         ;

@@ -42,9 +42,9 @@
 #endif
 
 #ifdef DAREDEVIL
-#define checkErrors(x)      x
+#define check_errors(x)      x
 #else
-#define checkErrors(x)      if ((err = x)) return err
+#define check_errors(x)      if ((err = x)) return err
 #endif
 
 #define SECOND              ((unsigned long long) CLKFREQ)
@@ -114,21 +114,21 @@
  * @param[in]   dir         I/O direction to set selected pins; must be one of
  *                          GPIO_DIR_IN or GPIO_DIR_OUT
  */
-#define GPIODirModeSet(pins,dir)    DIRA = (DIRA & (~(pins))) | ((pins) & dir)
+#define gpio_set_dir(pins,dir)    DIRA = (DIRA & (~(pins))) | ((pins) & dir)
 
 /**
  * @brief       Set selected pins high
  *
  * @param[in]   pins        Bit mask to control which pins will be set high
  */
-#define GPIOPinSet(pins)            OUTA |= (pins)
+#define gpio_pin_set(pins)            OUTA |= (pins)
 
 /**
  * @brief       Clear selected output pins (set them 0)
  *
  * @param[in]   pins    Bit mask to control which pins will be cleared low
  */
-#define GPIOPinClear(pins)          OUTA &= ~(pins)
+#define gpio_pin_clear(pins)          OUTA &= ~(pins)
 
 /**
  * @brief       Allow easy write to a port w/o destroying data elsewhere in the port
@@ -136,7 +136,7 @@
  * @param[in]   pins    bit mask to control which pins will be written to
  * @param[in]   value   value to be bit-masked and then written to the port
  */
-#define GPIOPinWrite(pins,value)    \
+#define gpio_pin_write(pins,value)    \
     OUTA = (OUTA & (~(pins))) | ((value) & (pins))
 
 /**
@@ -145,7 +145,7 @@
  * @param[in]   port    Port # to write to (like 0, for P0 or 1 for P1)
  * @param[in]   pin     pin to toggle
  */
-#define GPIOPinToggle(pins)         OUTA ^= pins
+#define gpio_pin_toggle(pins)         OUTA ^= pins
 
 /**
  * @brief       Allow easy reading of only selected pins from a port
@@ -155,7 +155,7 @@
  *
  * @return      Value of INA masked by `pins` parameter
  */
-#define GPIOPinRead(pins)           (INA & (pins))
+#define gpio_pin_read(pins)           (INA & (pins))
 
 #ifndef ASM_OBJ_FILE
 /**
@@ -168,7 +168,7 @@
  *
  * @return      Returns 1 or 0 depending on whether the switch was pressed
  */
-uint8_t GPIOSwitchRead_Low (const uint32_t pin);
+uint8_t gpio_read_switch_low (const uint32_t pin);
 
 /**
  * @brief       Count the number of set bits in a parameter
@@ -177,7 +177,7 @@ uint8_t GPIOSwitchRead_Low (const uint32_t pin);
  *
  * @return      Number of bits that are non-zero in par
  */
-uint8_t PropWareCountBits (uint32_t par);
+uint8_t propware_count_bits (uint32_t par);
 
 /**
  * @brief       Determine which pin number based on a pin mask
@@ -189,7 +189,7 @@ uint8_t PropWareCountBits (uint32_t par);
  *
  * @return      Return the pin number of pinMask
  */
-uint8_t PropWareGetPinNum (const uint32_t pinMask);
+uint8_t propware_get_pin_num (const uint32_t pinMask);
 #endif
 
 /**@}*/

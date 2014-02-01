@@ -1,7 +1,6 @@
 /**
  * @file    max6675.c
  */
-
 /**
  * @project PropWare
  *
@@ -32,58 +31,58 @@
 uint32_t g_max6675_cs = -1;
 uint8_t g_max6675_alwaysSetMode = 0;
 
-int8_t MAX6675Start (const uint32_t mosi, const uint32_t miso,
+int8_t max6675_start (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs) {
     int8_t err;
 
-    if (!SPIIsRunning()) {
-        checkErrors(
-                SPIStart(mosi, miso, sclk, MAX6675_SPI_DEFAULT_FREQ, MAX6675_SPI_MODE, MAX6675_SPI_BITMODE));
+    if (!spi_is_running()) {
+        check_errors(
+                spi_start(mosi, miso, sclk, MAX6675_SPI_DEFAULT_FREQ, MAX6675_SPI_MODE, MAX6675_SPI_BITMODE));
     } else {
-        checkErrors(SPISetMode(MAX6675_SPI_MODE));
-        checkErrors(SPISetBitMode(MAX6675_SPI_BITMODE));
+        check_errors(spi_set_mode(MAX6675_SPI_MODE));
+        check_errors(spi_set_bit_mode(MAX6675_SPI_BITMODE));
     }
 
     g_max6675_cs = cs;
-    GPIODirModeSet(cs, GPIO_DIR_OUT);
+    gpio_set_dir(cs, GPIO_DIR_OUT);
 
     return 0;
 }
 
-void MAX6675AlwaysSetMode (const uint8_t alwaysSetMode) {
+void max6675_always_set_spi_mode (const uint8_t alwaysSetMode) {
     g_max6675_alwaysSetMode = alwaysSetMode;
 }
 
-int8_t MAX6675Read (uint16_t *dat) {
+int8_t max6675_read (uint16_t *dat) {
     int8_t err;
 
     if (g_max6675_alwaysSetMode) {
-        checkErrors(SPISetMode(MAX6675_SPI_MODE));
-        checkErrors(SPISetBitMode(MAX6675_SPI_BITMODE));
+        check_errors(spi_set_mode(MAX6675_SPI_MODE));
+        check_errors(spi_set_bit_mode(MAX6675_SPI_BITMODE));
     }
 
     *dat = 0;
-    GPIOPinClear(g_max6675_cs);
-    checkErrors(SPIShiftIn(MAX6675_BIT_WIDTH, dat, sizeof(*dat)));
-    GPIOPinSet(g_max6675_cs);
+    gpio_pin_clear(g_max6675_cs);
+    check_errors(spi_shift_in(MAX6675_BIT_WIDTH, dat, sizeof(*dat)));
+    gpio_pin_set(g_max6675_cs);
 
     return 0;
 }
 
-int8_t MAX6675ReadWhole (uint16_t *dat) {
+int8_t max6675_read_whole (uint16_t *dat) {
     int8_t err;
 
-    checkErrors(MAX6675Read(dat));
+    check_errors(max6675_read(dat));
     *dat >>= 2;
 
     return 0;
 }
 
-int8_t MAX6675ReadFloat (float *dat) {
+int8_t max6675_read_float (float *dat) {
     int8_t err;
     uint16_t temp;
 
-    checkErrors(MAX6675Read(&temp));
+    check_errors(max6675_read(&temp));
 
     *dat = temp >> 2;
     *dat += ((float) (temp & (BIT_1 | BIT_0))) / 4;

@@ -64,9 +64,9 @@ int main (int argc, char* argv[]) {
     syncstart = 1;
     nextcnt = wait_time + startcnt;
     while (1) {
-        GPIOPinSet(pin[0]);
+        gpio_pin_set(pin[0]);
         nextcnt = waitcnt2(nextcnt, wait_time);
-        GPIOPinClear(pin[0]);
+        gpio_pin_clear(pin[0]);
         nextcnt = waitcnt2(nextcnt, wait_time);
     }
     return 0;
@@ -82,7 +82,7 @@ void do_toggle (void *arg) {
 
     nextcnt = wait_time + startcnt;
     while (1) {
-        GPIOPinToggle(pin);
+        gpio_pin_toggle(pin);
         nextcnt = waitcnt2(nextcnt, wait_time);
     }
 }

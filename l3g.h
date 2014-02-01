@@ -53,20 +53,20 @@ typedef enum {
     /** X axis */L3G_X,
     /** Y axis */L3G_Y,
     /** Z axis */L3G_Z
-} l3g_axis;
+} L3G_Axis;
 
 /**
  * Extra functions available on the L3G device; Callable by passing one as the
- * first parameter to @ref L3G_ioctl
+ * first parameter to @ref l3g_ioctl
  */
 typedef enum {
-    /** Set the sensitivity of input values; must be one of l3g_dps_mode_t */
+    /** Set the sensitivity of input values; must be one of L3G_DPSMode */
     L3G_FUNC_MOD_DPS,
     /** Read the value on any internal register */
     L3G_FUNC_RD_REG,
     /** Total number of advanced functions */
     L3G_FUNCS
-} l3g_ioctl_function_t;
+} L3G_IoctlFunction;
 
 /**
  * Sensitivity measured in degrees per second
@@ -78,7 +78,7 @@ typedef enum {
     L3G_500_DPS = 0x10,
     /** 2000 degrees per second */
     L3G_2000_DPS = 0x20
-} l3g_dps_mode_t;
+} L3G_DPSMode;
 
 /**
  * @name    Register address
@@ -129,8 +129,8 @@ typedef enum {
  *
  * @return       Returns 0 upon success, error code otherwise
  */
-uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-        const uint32_t cs, const l3g_dps_mode_t dpsMode);
+uint8_t l3g_start (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+        const uint32_t cs, const L3G_DPSMode dpsMode);
 
 /**
  * @brief       Choose whether to always set the SPI mode and bitmode before
@@ -140,7 +140,7 @@ uint8_t L3GStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
  * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
  *                              always be set before a read or write routine
  */
-void L3GAlwaysSetSPIMode (const uint8_t alwaysSetMode);
+void l3g_always_set_spi_mode (const uint8_t alwaysSetMode);
 
 /**
  * @brief       Read a specific axis's data
@@ -150,7 +150,7 @@ void L3GAlwaysSetSPIMode (const uint8_t alwaysSetMode);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-uint8_t L3GRead (const l3g_axis axis, int16_t *val);
+uint8_t l3g_read (const L3G_Axis axis, int16_t *val);
 
 /**
  * @brief       Read data from the X axis
@@ -159,7 +159,7 @@ uint8_t L3GRead (const l3g_axis axis, int16_t *val);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-uint8_t L3GReadX (int16_t *val);
+uint8_t l3g_read_x (int16_t *val);
 
 /**
  * @brief       Read data from the Y axis
@@ -168,7 +168,7 @@ uint8_t L3GReadX (int16_t *val);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-uint8_t L3GReadY (int16_t *val);
+uint8_t l3g_read_y (int16_t *val);
 
 /**
  * @brief       Read data from the Z axis
@@ -177,7 +177,7 @@ uint8_t L3GReadY (int16_t *val);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-uint8_t L3GReadZ (int16_t *val);
+uint8_t l3g_read_z (int16_t *val);
 
 /**
  * @brief       Read data from all three axes
@@ -187,7 +187,7 @@ uint8_t L3GReadZ (int16_t *val);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-uint8_t L3GReadAll (int16_t *val);
+uint8_t l3g_read_all (int16_t *val);
 
 /**
  * @brief       Allow numerous advanced functions to be performed on the L3G,
@@ -207,7 +207,7 @@ uint8_t L3GReadAll (int16_t *val);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal,
+uint8_t l3g_ioctl (const L3G_IoctlFunction func, const uint8_t wrVal,
         uint8_t *rdVal);
 /**@}*/
 
@@ -226,7 +226,7 @@ uint8_t L3G_ioctl (const l3g_ioctl_function_t func, const uint8_t wrVal,
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-static uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat);
+static uint8_t l3g_write8 (uint8_t addr, const uint8_t dat);
 
 /**
  * @brief       Write one byte to the L3G module
@@ -236,7 +236,7 @@ static uint8_t L3GWrite8 (uint8_t addr, const uint8_t dat);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-static uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat);
+static uint8_t l3g_write16 (uint8_t addr, const uint16_t dat);
 
 /**
  * @brief       Read one byte from the L3G module
@@ -246,7 +246,7 @@ static uint8_t L3GWrite16 (uint8_t addr, const uint16_t dat);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-static uint8_t L3GRead8 (uint8_t addr, int8_t *dat);
+static uint8_t l3g_read8 (uint8_t addr, int8_t *dat);
 
 /**
  * @brief       Read two bytes from the L3G module
@@ -256,7 +256,7 @@ static uint8_t L3GRead8 (uint8_t addr, int8_t *dat);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-static uint8_t L3GRead16 (uint8_t addr, int16_t *dat);
+static uint8_t l3g_read16 (uint8_t addr, int16_t *dat);
 
 /**@}*/
 

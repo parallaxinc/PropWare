@@ -1,7 +1,6 @@
 /**
  * @file    mcp300x.h
  */
-
 /**
  * @brief   MCP3004/MCP3008 ADC driver using SPI communication for the Parallax
  *          Propeller
@@ -56,7 +55,7 @@ typedef enum {
     /** Channel 5 (MCP3008 only) */MCP_CHANNEL_5,
     /** Channel 6 (MCP3008 only) */MCP_CHANNEL_6,
     /** Channel 7 (MCP3008 only) */MCP_CHANNEL_7,
-} mcp_channel_t;
+} MCP_Channel;
 
 /** Pseudo-differential pair channels */
 typedef enum {
@@ -68,7 +67,7 @@ typedef enum {
     /** CH5+, CH4- (MCP3008 only) */DIFF_5_4,
     /** CH6+, CH7- (MCP3008 only) */DIFF_6_7,
     /** CH7+, CH6- (MCP3008 only) */DIFF_7_6
-} mcp_channel_diff_t;
+} MCP_ChannelDiff;
 
 /**
  * @brief       Initialize communication with an MCP300x device
@@ -80,7 +79,7 @@ typedef enum {
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MCP300xStart (const uint32_t mosi, const uint32_t miso,
+int8_t mcp300x_start (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs);
 
 /**
@@ -91,7 +90,7 @@ int8_t MCP300xStart (const uint32_t mosi, const uint32_t miso,
  * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
  *                              always be set before a read or write routine
  */
-void MCP300xAlwaysSetMode (const uint8_t alwaysSetMode);
+void mcp300x_always_set_spi_mode (const uint8_t alwaysSetMode);
 
 /**
  * @brief       Read a specific channel's data in single-ended mode
@@ -103,7 +102,7 @@ void MCP300xAlwaysSetMode (const uint8_t alwaysSetMode);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MCP300xRead (const mcp_channel_t channel, uint16_t *dat);
+int8_t mcp300x_read (const MCP_Channel channel, uint16_t *dat);
 
 /**
  * @brief       Read a specific axis's data in differential mode
@@ -116,7 +115,7 @@ int8_t MCP300xRead (const mcp_channel_t channel, uint16_t *dat);
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-int8_t MCP300xReadDif (const mcp_channel_diff_t channels, uint16_t *dat);
+int8_t mcp300x_read_diff (const MCP_ChannelDiff channels, uint16_t *dat);
 
 /**@}*/
 

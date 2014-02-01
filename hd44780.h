@@ -69,7 +69,7 @@ typedef enum {
     HD44780_4BIT,
     HD44780_8BIT,
     HD44780_BITMODES
-} hd44780_bitmode_t;
+} HD44780_Bitmode;
 
 /**
  * @brief   Supported LCD dimensions; Used for determining cursor placement
@@ -95,7 +95,7 @@ typedef enum {
     /** 40x1 */HD44780_40x1,
     /** 40x2 */HD44780_40x2,
     /** Number of different dimensions supported */HD44780_DIMENSIONS
-} hd44780_dimensions_t;
+} HD44780_Dimensions;
 
 /** Number of allocated error codes for HD44780 */
 #define HD44780_ERRORS_LIMIT            16
@@ -109,7 +109,7 @@ typedef enum {
     /** HD44780 Error 0 */HD44780_INVALID_CTRL_SGNL = HD44780_ERRORS_BASE,
     /** HD44780 Error 1 */HD44780_INVALID_DATA_MASK,
     /** HD44780 Error 2 */HD44780_INVALID_DIMENSIONS
-} hd44780_error_code_t;
+} HD44780_ErrorCode;
 
 /**
  * @name    Commands
@@ -181,14 +181,14 @@ typedef enum {
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-int8_t HD44780Start (const uint32_t dataPinsMask, const uint32_t rs,
-        const uint32_t rw, const uint32_t en, const hd44780_bitmode_t bitmode,
-        const hd44780_dimensions_t dimensions);
+int8_t hd44780_start (const uint32_t dataPinsMask, const uint32_t rs,
+        const uint32_t rw, const uint32_t en, const HD44780_Bitmode bitmode,
+        const HD44780_Dimensions dimensions);
 
 /**
  * @brief   Clear the LCD display and return cursor to home
  */
-inline void HD44780Clear (void);
+inline void hd44780_clear (void);
 
 /**
  * @brief       Move the cursor to a specified column and row
@@ -196,7 +196,7 @@ inline void HD44780Clear (void);
  * @param[in]   row     Zero-indexed row to place the cursor
  * @param[in]   col     Zero indexed column to place the cursor
  */
-void HD44780Move (const uint8_t row, const uint8_t col);
+void hd44780_move (const uint8_t row, const uint8_t col);
 
 /**
  * @brief       Print formatted text to the LCD
@@ -209,7 +209,7 @@ void HD44780Move (const uint8_t row, const uint8_t col);
  *
  * Supported formats: i, d, u, X, s, c ("%%" will print '%')
  */
-void HD44780_printf (char *fmt, ...);
+void hd44780_printf (char *fmt, ...);
 
 /**
  * @brief       Print a string to the LCD
@@ -220,7 +220,7 @@ void HD44780_printf (char *fmt, ...);
  * @param[in]   *s  Address where c-string can be found (must be
  *                  null-terminated)
  */
-void HD44780_puts (char *s);
+void hd44780_puts (char *s);
 
 /**
  * @brief       Print a single char to the LCD and increment the pointer
@@ -228,28 +228,28 @@ void HD44780_puts (char *s);
  *
  * @param[in]   c   Individual char to be printed
  */
-void HD44780_putchar (const char c);
+void hd44780_putchar (const char c);
 
 /**
  * @brief       Format and print a signed number to the LCD
  *
  * @param[in]   x   The signed number to be printed
  */
-void HD44780_int (int32_t x);
+void hd44780_int (int32_t x);
 
 /**
  * @brief       Format and print a unsigned number to the LCD
  *
  * @param[in]   x   The unsigned number to be printed
  */
-void HD44780_uint (uint32_t x);
+void hd44780_uint (uint32_t x);
 
 /**
  * @brief       Format and print an unsigned hexadecimal number to the LCD
  *
  * @param[in]   x   The number to be printed
  */
-void HD44780_hex (uint32_t x);
+void hd44780_hex (uint32_t x);
 
 /**@}*/
 
@@ -272,32 +272,32 @@ typedef struct {
     uint8_t ddramCharRowBreak;
     /** Last byte of memory used in each DDRAM line */
     uint8_t ddramLineEnd;
-} hd44780_mem_map_t;
+} HD44780_MemMap;
 
 /**
  * @brief      Send a control command to the LCD module
  *
  * @param[in]  c   8-bit command to send to the LCD
  */
-inline static void HD44780Cmd (const uint8_t c);
+inline static void hd44780_cmd (const uint8_t c);
 
 /**
  * @brief       Write a single byte to the LCD - instruction or data
  *
  * @param[in]   val     Value to be written
  */
-static void HD44780Write (const uint8_t val);
+static void hd44780_write (const uint8_t val);
 
 /**
  * @brief   Toggle the enable pin, inducing a write to the LCD's register
  */
-static void HD44780ClockPulse (void);
+static void hd44780_clock_pulse (void);
 
 /**
  * @brief   The memory map is used to determine where line wraps should and
  *          shouldn't occur
  */
-static void HD44780GenerateMemMap (const hd44780_dimensions_t dimensions);
+static void hd44780_generate_mem_map (const HD44780_Dimensions dimensions);
 
 /**@}*/
 

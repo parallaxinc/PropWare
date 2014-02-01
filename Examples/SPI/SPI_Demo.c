@@ -38,13 +38,13 @@ void main (void) {
 
     // Initialize SPI module, giving it pin masks for the physical pins,
     // frequency for the clock, mode of SPI, and bitmode
-    SPIStart(MOSI, MISO, SCLK, FREQ, MODE, BITMODE);
+    spi_start(MOSI, MISO, SCLK, FREQ, MODE, BITMODE);
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
-    GPIODirModeSet(CS, GPIO_DIR_OUT);
+    gpio_set_dir(CS, GPIO_DIR_OUT);
 
-    GPIODirModeSet(BYTE_2, GPIO_DIR_OUT);
+    gpio_set_dir(BYTE_2, GPIO_DIR_OUT);
 
     while (1) {
         s = string;         // Set the pointer to the beginning of the string
@@ -52,30 +52,30 @@ void main (void) {
 
             waitcnt(CLKFREQ/100 + CNT);
 
-            GPIOPinClear(CS);       // Enable the SPI slave attached to CS
-            SPIShiftOut(8, *s);  // Output the next character of the string
+            gpio_pin_clear(CS);       // Enable the SPI slave attached to CS
+            spi_shift_out(8, *s);  // Output the next character of the string
 
             // Be sure to wait until the SPI communication has FINISHED before
             // proceeding to set chip select high
-            SPIWait();
-            GPIOPinSet(CS);
+            spi_wait();
+            gpio_pin_set(CS);
 
             waitcnt(CLKFREQ/100 + CNT);
             in = 0xff;              // Reset input variable
             while (in != *s) {
-                GPIOPinClear(CS);
-                SPIShiftIn(8, &in, 1);  // Read in a value from the SPI device
-                GPIOPinSet(CS);
+                gpio_pin_clear(CS);
+                spi_shift_in(8, &in, 1);  // Read in a value from the SPI device
+                gpio_pin_set(CS);
             }
 
             // Increment the character pointer
             ++s;
 
             // Print the character to the screen
-            putchar(in);            
+            putchar(in);
         }
 
         // Signal that the entire string has been sent
-        GPIOPinToggle(BYTE_2);
+        gpio_pin_toggle(BYTE_2);
     }
 }

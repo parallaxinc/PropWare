@@ -106,7 +106,7 @@ typedef enum {
     /** Mode 2 */SPI_MODE_2,
     /** Mode 3 */SPI_MODE_3,
     /** Number of SPI modes */SPI_MODES
-} spimode_t;
+} SPI_Mode;
 
 /**
  * @brief   Determine if data is communicated with the LSB or MSB sent/received
@@ -115,11 +115,11 @@ typedef enum {
  * @note    Initial value is SPI_MODES + 1 making them easily distinguishable
  */
 typedef enum {
-    // Start the enumeration where spimode_t left off; this ensures no overlap
+    // Start the enumeration where SPI_Mode left off; this ensures no overlap
     SPI_LSB_FIRST = SPI_MODES,
     SPI_MSB_FIRST,
     SPI_BIT_MODES
-} spibitmode_t;
+} SPI_BitMode;
 
 // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
 #define SPI_WR_TIMEOUT_VAL          CLKFREQ/10
@@ -150,7 +150,7 @@ typedef enum {
     /** SPI Error 11 */SPI_INVALID_BYTE_SIZE,
     /** SPI Error 12 */SPI_ADDR_MISALIGN,
     /** SPI Error 13 */SPI_INVALID_BITMODE
-} spi_error_code_t;
+} SPI_ErrorCode;
 
 /**
  * @brief       Initialize an SPI module by starting a new cog
@@ -165,9 +165,9 @@ typedef enum {
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-        const uint32_t frequency, const spimode_t mode,
-        const spibitmode_t bitmode);
+uint8_t spi_start (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
+        const uint32_t frequency, const SPI_Mode mode,
+        const SPI_BitMode bitmode);
 
 /**
  * @brief   Stop a running SPI cog
@@ -175,21 +175,30 @@ uint8_t SPIStart (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
  * @return  Returns 0 upon success, otherwise error code (will return
  *          SPI_COG_NOT_STARTED if no cog has previously been started)
  */
-uint8_t SPIStop (void);
+uint8_t spi_stop (void);
 
 /**
  * @brief    Determine if the SPI cog has already been initialized
  *
  * @return       Returns 1 if the SPI cog is up and running, 0 otherwise
  */
-inline int8_t SPIIsRunning (void);
+inline int8_t spi_is_running (void);
 
 /**
  * @brief   Wait for the SPI cog to signal that it is in the idle state
  *
  * @return  May return non-zero error code when a timeout occurs
  */
-inline uint8_t SPIWait (void);
+inline uint8_t spi_wait (void);
+
+/**
+ * @brief   Wait for a specific value from the assembly cog
+ *
+ * @param[in]   value   The value being waited on
+ *
+ * @return  May return non-zero error code when a timeout occurs
+ */
+inline uint8_t spi_wait_specific (const uint32_t value);
 
 /**
  * @brief       Set the mode of SPI communication
@@ -199,7 +208,7 @@ inline uint8_t SPIWait (void);
  *
  * @return      Can return non-zero in the case of a timeout
  */
-uint8_t SPISetMode (const spimode_t mode);
+uint8_t spi_set_mode (const SPI_Mode mode);
 
 /**
  * @brief       Set the bitmode of SPI communication
@@ -209,7 +218,7 @@ uint8_t SPISetMode (const spimode_t mode);
  *
  * @return      Can return non-zero in the case of a timeout
  */
-uint8_t SPISetBitMode (const spibitmode_t bitmode);
+uint8_t spi_set_bit_mode (const SPI_BitMode bitmode);
 
 /**
  * @brief       Change the SPI module's clock frequency
@@ -220,7 +229,7 @@ uint8_t SPISetBitMode (const spibitmode_t bitmode);
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-uint8_t SPISetClock (const uint32_t frequency);
+uint8_t spi_set_clock (const uint32_t frequency);
 
 /**
  * @brief       Retrieve the SPI module's clock frequency
@@ -229,7 +238,7 @@ uint8_t SPISetClock (const uint32_t frequency);
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-uint8_t SPIGetClock (uint32_t *frequency);
+uint8_t spi_get_clock (uint32_t *frequency);
 
 /**
  * @brief       Send a value out to a peripheral device
@@ -237,14 +246,14 @@ uint8_t SPIGetClock (uint32_t *frequency);
  * @detailed    Pass a value and mode into the assembly cog to be sent to the
  *              peripheral; NOTE: this function is non-blocking and chip-select
  *              should not be set inactive immediately after the return (you
- *              should call SPIWait() before setting chip-select inactive)
+ *              should call spi_wait() before setting chip-select inactive)
  *
  * @param[in]   bits        Number of bits to be shifted out
  * @param[in]   value       The value to be shifted out
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
+uint8_t spi_shift_out (uint8_t bits, uint32_t value);
 
 /**
  * @brief       Receive a value in from a peripheral device
@@ -253,14 +262,14 @@ uint8_t SPIShiftOut (uint8_t bits, uint32_t value);
  * @param[out]  *data       Received data will be stored at this address
  * @param[in]   bytes       Number of bytes allocated to *data; Example:
  *                              int newVal;
- *                              SPIShiftIn(8, &newVal, sizeof(newVal));
+ *                              spi_shift_in(8, &newVal, sizeof(newVal));
  *                          Or if using a pointer:
  *                              int *newVal;
- *                              SPIShiftIn(8, newVal, sizeof(*newVal));
+ *                              spi_shift_in(8, newVal, sizeof(*newVal));
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
+uint8_t spi_shift_in (const uint8_t bits, void *data, const size_t size);
 
 #ifdef SPI_OPTION_FAST
 /**
@@ -269,7 +278,7 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
  * @detailed    Pass a value and mode into the assembly cog to be sent to the
  *              peripheral; NOTE: this function is non-blocking and chip-select
  *              should not be set inactive immediately after the return (you
- *              should call SPIWait() before setting chip-select inactive);
+ *              should call spi_wait() before setting chip-select inactive);
  *              Optimized for fastest possible clock speed; No error checking is
  *              performed; 'Timeout' event will never be thrown and possible
  *              infinite loop can happen
@@ -279,7 +288,7 @@ uint8_t SPIShiftIn (const uint8_t bits, void *data, const size_t size);
  *
  * @return      Returns 0 upon success, otherwise error code
  */
-void SPIShiftOut_fast (uint8_t bits, uint32_t value);
+void spi_shift_out_fast (uint8_t bits, uint32_t value);
 
 /**
  * @brief       Receive a value in from a peripheral device; Optimized for
@@ -291,12 +300,12 @@ void SPIShiftOut_fast (uint8_t bits, uint32_t value);
  * @param[out]  *data   Received data will be stored at this address
  * @param[in]   bytes   Number of bytes allocated to *data; Example:
  *                          int newVal;
- *                          SPIShiftIn_fast(8, &newVal, sizeof(newVal));
+ *                          spi_shift_in_fast(8, &newVal, sizeof(newVal));
  *                      Or if using a pointer:
  *                          int *newVal;
- *                          SPIShiftIn_fast(8, newVal, sizeof(*newVal));
+ *                          spi_shift_in_fast(8, newVal, sizeof(*newVal));
  */
-void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes);
+void spi_shift_in_fast (const uint8_t bits, void *data, const uint8_t bytes);
 
 /**
  * @brief       Read an entire sector of data in from an SD card
@@ -305,7 +314,7 @@ void SPIShiftIn_fast (const uint8_t bits, void *data, const uint8_t bytes);
  * @param[in]   blocking    When set to non-zero, function will not return until
  *                          the data transfer is complete
  */
-int8_t SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
+int8_t spi_shift_in_sector (const uint8_t addr[], const uint8_t blocking);
 #endif
 
 /**@}*/
@@ -338,37 +347,14 @@ int8_t SPIShiftIn_sector (const uint8_t addr[], const uint8_t blocking);
  * @param[out]  *par    Address to store the parameter
  * @param[in]   bytes   Number of bytes allocated to *data; Example:
  *                          int newVal;
- *                          SPIReadPar(&newVal, sizeof(newVal));
+ *                          spi_read_par(&newVal, sizeof(newVal));
  *                      Or if using a pointer:
  *                          int *newVal;
- *                          SPIReadPar(newVal, sizeof(*newVal));
+ *                          spi_read_par(newVal, sizeof(*newVal));
  *
  * @return      Returns 0 upon success, error code otherwise
  */
-static inline uint8_t SPIReadPar (void *par, const size_t size);
-
-/**
- * @brief       Count the number of set bits in a variable
- *
- * @param[in]   par     Variable to count the bits in
- *
- * @return      Number of bits in the parameter par (no error checking)
- */
-static uint8_t SPICountBits (uint32_t par);
-
-/**
- * @brief       Retrieve the pin number from a pin mask; i.e., if pinMask is
- *              0x01, return 0; if pinMask is 0x40, return 6
- *
- * @pre         Only 1 bit is set in pinMask (if more than one is set, the
- *              return value will be related to the least significant set bit)
- *
- * @param[in]   pinMask     The bit number of the set bit in this variable will
- *                          be returned
- *
- * @return      Returns the pin number of pinMask (no error checking)
- */
-static uint8_t SPIGetPinNum (const uint32_t pinMask);
+static inline uint8_t spi_read_par (void *par, const size_t size);
 
 /**@}*/
 
