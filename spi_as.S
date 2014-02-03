@@ -131,7 +131,7 @@ LOOP                    // Retrieve a command
 
 /* FUNCTION: spi_set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
-                        call #READ_DATA                 '' Read in the mode
+                        call #READ_DATA_CONFIRM                 '' Read in the mode
 
                         mov clkPhase, mailbox           '' Store the phase
                         and clkPhase, #SPI_PHASE_BIT    '' Clear the clock polarity bit
@@ -148,7 +148,7 @@ SET_BITMODE             // Set shifting bitmode (LSB or MSB first) of communicat
                         jmp #LOOP
 
 /* FUNCTION: spi_set_clock() */
-SET_FREQ                call #READ_CMD                  '' Using READ_CMD instead of READ_DATA because -1 is not a valid clock signal
+SET_FREQ                call #READ_CMD                  '' Using READ_CMD instead of READ_DATA_CONFIRM because -1 is not a valid clock signal
                         mov clkDelay, mailbox
                         jmp #LOOP
 
@@ -163,7 +163,7 @@ SEND                    // Interpret the bit count and mode of output for this s
                         and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
 
-SEND_rd_data            rdlong mailbox, par
+SEND_rd_data            call #READ_DATA
                         test mailbox, dataMask wz       '' Is BIT_31 cleared? (Implying data vs command)
         if_nz           jmp #SEND_rd_data               '' If not z, value is not data. Try again
 
@@ -304,7 +304,7 @@ SEND_fast               // Interpret the bit count and mode of output for this s
                         and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
 
-SEND_rd_data_fast       rdlong mailbox, par
+SEND_rd_data_fast       call #READ_DATA
                         test mailbox, dataMask wz       '' Is BIT_31 cleared? (Implying data vs command)
         if_nz           jmp #SEND_rd_data               '' If not z, value is not data. Try again
 
@@ -427,7 +427,7 @@ lsb_post_fast_ret       ret
 
 /* FUNCTION: SPIReadSDSector() */
 read_sector             // Read an entire sector from the SD card as quickly as possible, write values to the mailbox
-read_sector_addr        rdlong mailbox, par             '' Read in hub address to store the data
+read_sector_addr        call #READ_DATA                 '' Read in hub address to store the data
                         cmp mailbox, negOne wz          '' Are we reading a valid parameter?
         if_z            jmp #read_sector_addr           '' If not valid, read in a new value
                         // Do not write -1 back to global mailbox until the entire read has completed
@@ -525,8 +525,14 @@ READ_CMD_ret            ret
 READ_DATA               rdlong mailbox, par
                         test mailbox, dataMask wz       '' Is BIT_31 cleared? (Implying data vs command)
         if_nz           jmp #READ_DATA                  '' If not z, value is not data. Try again
-                        wrlong negOne, par              '' Inform C cog that reading is complete
 READ_DATA_ret           ret
+
+/* Loop reading in a value from hub-RAM and store in 'mailbox' ONLY if BIT_31 is not set. */
+READ_DATA_CONFIRM       rdlong mailbox, par
+                        test mailbox, dataMask wz       '' Is BIT_31 cleared? (Implying data vs command)
+        if_nz           jmp #READ_DATA_CONFIRM          '' If not z, value is not data. Try again
+                        wrlong negOne, par              '' Inform C cog that reading is complete
+READ_DATA_CONFIRM_ret   ret
 
 WRITE_DATA              wrlong data, par
 write_loop              rdlong mailbox, par             '' \.
