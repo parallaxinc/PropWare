@@ -45,13 +45,13 @@
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI                BIT_0
-/** Pin number for the clock signal */
-#define SCLK                BIT_1
 /** Pin number for MISO (master in - slave out) */
-#define MISO                BIT_2
+#define MISO                BIT_1
+/** Pin number for the clock signal */
+#define SCLK                BIT_2
 /** Pin number for chip select */
 #define CS                  BIT_5
-#define FREQ            10000
+#define FREQ                10000
 
 #define DEBUG_LEDS      BYTE_2
 

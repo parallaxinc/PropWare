@@ -126,9 +126,11 @@ inline int8_t spi_is_running (void) {
 inline uint8_t spi_wait (void) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-    while ((uint32_t) -1 != g_mailbox)  // Wait for GAS cog to read in value and write -1
+    // Wait for GAS cog to read in value and write -1
+    while ((uint32_t) -1 != g_mailbox)
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-            return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
+            // Always use return instead of SPIError() for private functions
+            return SPI_TIMEOUT;
 
     return 0;
 }
@@ -136,9 +138,11 @@ inline uint8_t spi_wait (void) {
 inline uint8_t spi_wait_specific (const uint32_t value) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
-    while (value == g_mailbox)  // Wait for GAS cog to read in value and write -1
+    // Wait for GAS cog to read in value and write -1
+    while (value == g_mailbox)
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
-            return SPI_TIMEOUT;  // Always use return instead of SPIError() for private functions
+            // Always use return instead of SPIError() for private functions
+            return SPI_TIMEOUT;
 
     return 0;
 }
@@ -156,6 +160,7 @@ uint8_t spi_set_mode (const SPI_Mode mode) {
 
     // Wait for SPI cog to go idle
     PROPWARE_SPI_SAFETY_CHECK_STR(spi_wait(), str);
+
     g_mailbox = SPI_FUNC_SET_MODE;
     PROPWARE_SPI_SAFETY_CHECK_STR(spi_wait(), str);
     g_mailbox = mode;
@@ -248,7 +253,8 @@ uint8_t spi_shift_out (uint8_t bits, uint32_t value) {
     PROPWARE_SPI_SAFETY_CHECK_STR(
             spi_wait_specific(SPI_FUNC_SEND | (bits << SPI_BITS_OFFSET)), str);
 
-    // Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
+    // Pass parameter in; Bit 31 is cleared to indicate data is being sent.
+    // Without this limitation, who's to say the value being passed is not -1?
     g_mailbox = value & (~BIT_31);
 
     return 0;
@@ -292,7 +298,8 @@ void spi_shift_out_fast (uint8_t bits, uint32_t value) {
     g_mailbox = SPI_FUNC_SEND_FAST | (bits << SPI_BITS_OFFSET);
     spi_wait();
 
-    // Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to say the value being passed is not -1?
+    // Pass parameter in; Bit 31 is cleared to indicate data is being sent.
+    // Without this limitation, who's to say the value being passed is not -1?
     g_mailbox = value & (~BIT_31);
 }
 
@@ -309,7 +316,8 @@ void spi_shift_in_fast (const uint8_t bits, void *data, const uint8_t bytes) {
     while ((uint32_t) -1 == g_mailbox)
         waitcnt(SPI_TIMEOUT_WIGGLE_ROOM + CNT);
 
-    // Determine if output variable is char, short or long and write data to that location
+    // Determine if output variable is char, short or long and write data to
+    // that location
     switch (bytes) {
         case 1:
             par8 = data;
@@ -361,7 +369,8 @@ static inline uint8_t spi_read_par (void *par, const size_t bytes) {
         if (abs(timeoutCnt - CNT) < SPI_TIMEOUT_WIGGLE_ROOM)
             return SPI_TIMEOUT_RD;
 
-    // Determine if output variable is char, short or long and write data to that location
+    // Determine if output variable is char, short or long and write data to
+    // that location
     switch (bytes) {
         case sizeof(uint8_t):
             par8 = par;
