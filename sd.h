@@ -67,6 +67,8 @@
  * DEFAULT: Off
  */
 #define SD_OPTION_DEBUG
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SD_OPTION_DEBUG
 /**
  * Enables thorough debugging features similar to exceptions; Errors will be
  * caught the program will enter an infinite loop
@@ -74,12 +76,16 @@
  * DEFAULT: Off
  */
 #define SD_OPTION_VERBOSE
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SD_OPTION_VERBOSE
 /**
  * Select data blocks/sectors will be display via UART for debugging purposes
  * <p>
  * DEFAULT: Off
  */
 #define SD_OPTION_VERBOSE_BLOCKS
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SD_OPTION_VERBOSE_BLOCKS
 /**
  * Unix-like command-line arguments will be defined and available
  * <p>
@@ -95,7 +101,7 @@
  * @note    Work-in-progress, code size is not necessarily at a minimum, nor is
  *          RAM usage
  */
-//#define SD_OPTION_FILE_WRITE
+#define SD_OPTION_FILE_WRITE
 /** @} */
 
 /** Number of characters printed to the terminal before a line break */
