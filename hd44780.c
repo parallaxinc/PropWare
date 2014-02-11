@@ -1,7 +1,6 @@
 /**
  * @file    hd44780.c
- */
-/**
+ *
  * @project PropWare
  *
  * @author  David Zemon

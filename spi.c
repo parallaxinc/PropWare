@@ -1,7 +1,6 @@
 /**
  * @file    spi.c
- */
-/**
+ *
  * @project PropWare
  *
  * @author  David Zemon

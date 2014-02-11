@@ -1,7 +1,6 @@
 /**
  * @file    MCP300x_Demo.c
- */
-/**
+ *
  * @project MCP300x_Demo
  *
  * @author  David Zemon

@@ -1,7 +1,6 @@
 /**
  * @file    spi.h
- */
-/**
+ *
  * @brief       SPI serial communications library; Core functionality comes from
  *              a dedicated assembly cog
  *

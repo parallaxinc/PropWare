@@ -1,7 +1,6 @@
 /**
  * @file    HD44780_Demo.c
- */
-/**
+ *
  * @project HD44780_Demo
  *
  * @author  David Zemon

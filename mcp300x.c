@@ -1,7 +1,6 @@
 /**
  * @file    mcp300x.c
- */
-/**
+ *
  * @project PropWare
  *
  * @author  David Zemon

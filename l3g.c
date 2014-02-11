@@ -1,7 +1,6 @@
 /**
  * @file    l3g.c
- */
-/**
+ *
  * @project PropWare
  *
  * @author  David Zemon

@@ -1,7 +1,6 @@
 /**
  * @file    MAX6675_Demo.c
- */
-/**
+ *
  * @project MAX6675_Demo
  *
  * @author  David Zemon

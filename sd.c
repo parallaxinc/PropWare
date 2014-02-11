@@ -1,7 +1,7 @@
 /**
  * @file    sd.c
- */
-/**
+ *
+ *
  * @project PropWare
  *
  * @author  David Zemon
@@ -2180,3 +2180,8 @@ void sd_first_byte_expansion (const uint8_t response) {
                 "\n");
 }
 #endif
+
+/**
+
+ */
+
