@@ -234,7 +234,13 @@ uint8_t sd_unmount (void);
 #endif
 
 /**
- * @brief       Change the current working directory to *f (similar to 'cd f')
+ * @brief       Change the current working directory to *d (similar to 'cd dir')
+ *
+ * @detailed    At the moment, the target directory must be an immediate child
+ *              of the current directory ("." and ".." are allowed). I hope to
+ *              implement the ability to change to any directory soon (such as
+ *              "cd ../siblingDirectory") but attempting to do this now would
+ *              currently result in an SD_FILENAME_NOT_FOUND error
  *
  * @param[in]   *d     Short filename of directory to change to
  *
@@ -468,7 +474,7 @@ uint8_t sd_shell_ls (void);
 uint8_t sd_shell_cat (const char *name, SD_File *f);
 
 /**
- * @brief       Change the current working directory to *f (similar to 'cd f');
+ * @brief       Change the current working directory to *d (similar to 'cd dir');
  *
  * @param[in]   *d  Short filename of directory to change to
  *
