@@ -29,6 +29,12 @@
 // Includes
 #include <sd.h>
 
+/**
+ * @brief       Short-hand for checking if a function through an error and
+ *              handling it
+ *
+ * @param[in]   x   Any function that might throw an SD error
+ */
 #define sd_check_errors(x)  if ((err = x)) sd_error(err)
 
 #ifdef SD_OPTION_DEBUG
@@ -47,7 +53,12 @@ static void sd_error (const uint8_t err);
  */
 static void sd_first_byte_expansion (const uint8_t response);
 #else
-// Exit calling function by returning 'err'
+/**
+ * @brief       Because SD_OPTION_DEBUG is not defined, we're simply going to
+ *              return the error
+ *
+ * @param[in]   err     The error thrown by an SD function
+ */
 #define sd_error(err)                return err
 #endif
 
