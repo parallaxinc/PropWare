@@ -114,7 +114,8 @@
 /**
  * File modes
  *
- * TODO: Check documentation for accuracy
+ * TODO: Learn what these modes *should* do and do it; At the moment, these modes
+ *       essentially aren't used for anything
  */
 typedef enum {
     /**
@@ -679,6 +680,7 @@ struct _sd_file {
     uint32_t curCluster;
     /** Which sector of the SD card contains this file's meta-data */
     uint32_t dirSectorAddr;
+    /** Address within the sector of this file's entry */
     uint16_t fileEntryOffset;
 };
 
