@@ -343,8 +343,7 @@ contacting David Zemon</a> or forking the repository and creating a pull request
 <h2 id="usefulLinks">Useful links</h2>
 
 <ul>
-    <li>Source code: <a href="https://github.com/SwimDude0614/PropWare"
-                        target="_blank"> https://github.com/SwimDude0614/PropWare</a>
+    <li><a target="_blank" href="https://github.com/SwimDude0614/PropWare">PropWare source code</a>
     </li>
 
     <li>Parallax forums can be found <a
@@ -352,8 +351,22 @@ contacting David Zemon</a> or forking the repository and creating a pull request
             target="_blank"> here</a>
     </li>
 
-    <li>Parallax Object Exchange (OBEX) <a href="http://obex.parallax.com/"
-                                           target="_blank"> http://obex.parallax.com/</a>
+    <li><a target="_blank" href="http://learn.parallax.com/node/640">Simple IDE</a>: Light-weight IDE for Parallax
+        Propeller
+    </li>
+
+    <li><a target="_blank" href="https://code.google.com/p/propgcc/">PropGCC</a>: GCC compiler for Parallax Propeller
+    </li>
+
+    <li><a href="http://obex.parallax.com/" target="_blank">OBEX</a>: Parallax Object Exchange
+    </li>
+
+    <li><a target="_blank" href="https://code.google.com/p/lib-propelleruino/">libpropelleruino</a>: Arduino-compatible
+        source for the Propeller
+    </li>
+
+    <li><a target="_blank" href="https://github.com/libpropeller/libpropeller">libpropeller</a>: C++ Propeller GCC
+        objects
     </li>
 </ul>
 
