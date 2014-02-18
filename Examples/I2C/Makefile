@@ -1,0 +1,33 @@
+# @file     Makefile
+#
+# @author   David Zemon
+# @project  I2C_Demo
+
+PRJ = I2C_Demo
+
+NAME = $(PRJ)
+OBJS = $(PRJ).o
+BOARD = QUICKSTART
+MODEL = lmm
+CFLAGS = -Os
+LIBS = simplei2c
+
+# Insert your own path here - it should be the same directory that contains "common.mk"
+ifndef PROPWARE_PATH
+	PROPWARE_PATH = ../../..
+endif
+
+# Insert the patht to the propeller Learn folder
+ifndef PROP_LEARN_PATH
+	PROP_LEARN_PATH = /path/to/Parallax/Learn/direcotry
+endif
+
+# Optionally, specify where your compiler is installed
+ifndef PROPGCC_PREFIX
+	# Default = /opt/parallax
+	PROPGCC_PREFIX = /path/to/compiler/directory
+endif
+
+all: $(NAME).elf
+
+include $(PROPWARE_PATH)/common.mk

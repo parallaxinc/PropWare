@@ -1159,7 +1159,7 @@ uint8_t sd_read_block (uint16_t bytes, uint8_t *dat) {
 #elif (defined SPI_FAST)
                 spi_shift_in_fast(8, dat++, sizeof(*dat));
 #else
-                spi_shift_in(8, dat++, SD_SPI_BYTE_IN_SZ);
+                spi_shift_in(8, dat++, sizeof(*dat));
 #endif
             }
 

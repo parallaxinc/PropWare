@@ -76,6 +76,12 @@ ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 LIBS += -lPropWare_$(MODEL)
 
+# If Parallax's Learn folder is present, include all of it's libraries
+ifdef PROP_LEARN_PATH
+	INC += -I'$(PROP_LEARN_PATH)/Simple Libraries'
+	LIB_INC += -L'$(PROP_LEARN_PATH)/Simple Libraries/*/*/$(MODEL)'
+endif
+
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
 	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib/cmm'
@@ -127,7 +133,7 @@ endif
 	$(CC) $(INC) $(CFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
-	
+
 %.o: ../%.cpp ../%.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropG++ Compiler'
@@ -141,7 +147,7 @@ endif
 	$(CC) $(INC) $(ASFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
-	
+
 %.o: ../%.S
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Assembler'
