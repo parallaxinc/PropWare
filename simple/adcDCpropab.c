@@ -7,7 +7,7 @@
  * Copyright (C) Parallax, Inc. 2013. All Rights MIT Licensed.
  *
  * @brief Initialize ADC124S021 and measure voltage as a raw, 12-bit5 adc value.
- * @n @n <b><i>CONSTRUCTION ZONE:</i></b> This library is preliminary, revisions
+ * @n @n <b><i>CONSTRUCTION ZONE:</i></b> This library is preliminary, revisions 
  * pending.
  */
 
@@ -23,7 +23,7 @@ void adc_init(int csPin, int sclPin, int doPin, int diPin)
   dout = doPin;
   din = diPin;
   scl = sclPin;
-  cs = csPin;
+  cs = csPin;  
 }
 
 int adc_in(int channel)
@@ -52,7 +52,7 @@ int adc124S021dc(int channel)
   }
   high(cs);
   return val;
-}
+}  
 
 
 /**

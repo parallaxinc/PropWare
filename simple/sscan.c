@@ -15,14 +15,14 @@
 #include <stdlib.h>
 #include "simpletext.h"
 
-int sscan(const char *str, const char *fmt, ...)
+int sscan(const char *str, const char *fmt, ...) 
 {
   va_list args;
-
+  
   va_start(args, fmt);
   int blocks = _doscanf(str, fmt, args);
   va_end(args);
-
+  
   return blocks;
 }
 

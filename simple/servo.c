@@ -10,7 +10,7 @@
  *
  * @brief Manages control of up to 14 servos using another CMM/LMM cog.
  *
- * Please submit bug reports, suggestions, and improvements to
+ * Please submit bug reports, suggestions, and improvements to         
  * this code to editor@parallax.com.
  */
 
@@ -20,23 +20,23 @@
 void pulse_outCtr(int pin, int time);                 // pulseOut function definition
 
 
-static unsigned int stack[(160 + (64 * 4)) / 4];      // Stack
+static unsigned int stack[(160 + (64 * 4)) / 4];      // Stack          
 
 static volatile int p[14] = {-1, -1, -1, -1,          // I/O pins
-                     -1, -1, -1, -1, -1, -1,
+                     -1, -1, -1, -1, -1, -1, 
                      -1, -1, -1, -1};
 static volatile int t[14] = {-1, -1, -1, -1,          // Current iteration pulse widths
-                     -1, -1, -1, -1, -1, -1,
+                     -1, -1, -1, -1, -1, -1, 
                      -1, -1, -1, -1};
 static volatile int tp[14] = {-1, -1, -1, -1,         // Previous iteration pulse widths
-                     -1, -1, -1, -1, -1, -1,
+                     -1, -1, -1, -1, -1, -1, 
                      -1, -1, -1, -1};
 static volatile int r[14] = {2000, 2000, 2000, 2000,  // Step sizes initialized to 2000
-                     2000, 2000, 2000, 2000, 2000,
+                     2000, 2000, 2000, 2000, 2000, 
                      2000, 2000, 2000, 2000, 2000};
 
 static volatile unsigned int servoCog = 0;            // Cog initialozed to zero
-static volatile unsigned int lockID;                  // Lock ID
+static volatile unsigned int lockID;                  // Lock ID 
 
 void servo(void *par);                                // Function prototype for servo
 
@@ -50,7 +50,7 @@ int servo_speed(int pin, int speed)                   // Set continuous rotation
   return servo_set(pin, speed + 1500);                // Add center pulse width to speed
 }
 
-int servo_set(int pin, int time)                      // Set pulse width to servo on pin
+int servo_set(int pin, int time)                      // Set pulse width to servo on pin 
 {
   if(servoCog == 0)                                   // If cog not started
   {
@@ -67,7 +67,7 @@ int servo_set(int pin, int time)                      // Set pulse width to serv
     {
       t[i] = time;                                    // Set pulse duration
       lockclr(lockID);                                // Clear lock
-      return 1;                                       // Return success
+      return 1;                                       // Return success 
     }
   }
   for(i= 0; i < s; i++)                               // Look for empty slot
@@ -82,8 +82,8 @@ int servo_set(int pin, int time)                      // Set pulse width to serv
     p[i] = pin;                                      // Set up pin and pulse durations
     t[i] = time;
     tp[i] = time;
-    lockclr(lockID);                                 // Clear the lock
-    return pin;                                      // Return success
+    lockclr(lockID);                                 // Clear the lock 
+    return pin;                                      // Return success 
   }
   else                                               // servo not found, no empty slots?
   {
@@ -138,10 +138,10 @@ void servo(void *par)                                // servo process in other c
   mark();                                            // Mark the current time
   while(1)                                           // servo control loop
   {
-    while(lockset(lockID));                          // Set the lock
+    while(lockset(lockID));                          // Set the lock 
     for(i = 0; i < s; i++)                           // Go through all possible servos
     {
-      if(t[i] == 0)                                  // Detach servo?
+      if(t[i] == 0)                                  // Detach servo? 
       {
         input(p[i]);                                 // Set I/O pin to input
         p[i] = -1;                                   // Remove from list
@@ -159,7 +159,7 @@ void servo(void *par)                                // servo process in other c
           {
             step = -step;                            // Make step negative
           }
-          tPulse = tp[i] + step;                     // Increment pulse by step
+          tPulse = tp[i] + step;                     // Increment pulse by step 
         }
         pulse_outCtr(p[i], tPulse);                  // Send pulse to servo
         tp[i] = tPulse;                              // Remember pulse for next time

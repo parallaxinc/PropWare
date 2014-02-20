@@ -8,7 +8,7 @@
 
 int dscan(text_t *device, const char *fmt, ...)
 {
-  char str[256];
+  char str[256]; 
   va_list args;
   readStr(device, str, 256);
   va_start(args, fmt);

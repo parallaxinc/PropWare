@@ -97,22 +97,22 @@ int _dosprnt(const char *fmt, va_list args, char *obuf)
       case '%':
         buf += SPUTC(c, buf);
         break;
-
+  
       case 'b':
           l_arg = va_arg(args, int);
         buf += SPUTL(l_arg, 2, width, fill_char, buf);
         break;
-
+  
       case 'c':
         i_arg = va_arg(args, int);
         buf += SPUTC(i_arg, buf);
         break;
-
+  
       case 's':
         s_arg = va_arg(args, char *);
         buf += SPUTS(s_arg, buf);
         break;
-
+  
       case 'd':
       case 'u':
         l_arg = va_arg(args, int);

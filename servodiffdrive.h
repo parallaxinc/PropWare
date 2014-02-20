@@ -8,14 +8,14 @@
  * @copyright Copyright (C) Parallax, Inc. 2012.  See end of file for
  * terms of use (MIT License).
  *
- * @brief Adds a layer over servo library for
- * use with a differential servo drive robot.  You have to add the
+ * @brief Adds a layer over servo library for 
+ * use with a differential servo drive robot.  You have to add the 
  * simpletools and servo libraries to your project (with the Add Simple
  * Libraries button) for this to work.
  *
  * @detail Functions that control servo speeds and directions automatically
- * reverse servo speed on the right side to make intuitive functions that
- * involve positive values for forward and negative ones for backward.
+ * reverse servo speed on the right side to make intuitive functions that 
+ * involve positive values for forward and negative ones for backward.  
  * speed control calls typically set up once with drivePins(left, right).
  * After that driveSpeeds(speedLeft, speedRight) control servo speed and
  * direction.  Example: driveSpeed(200, 200) is full speed forward.  Likewise,
@@ -39,7 +39,7 @@ extern "C" {
  * @brief Set up left and right wheel servo pin connections.
  *
  * @detail Call this function once to tell the library which pins the left and
- * right continuous rotation drive servos are connected to.
+ * right continuous rotation drive servos are connected to. 
  *
  * @param left Left servo pin
  * @param right Right servo pin
@@ -54,7 +54,7 @@ void drive_pins(int left, int right);
  * used for forward and -200 for backward.  Then, linear speed control happens in the
  * -100...0...100 range.
  *
- * @param left Left srvo speed
+ * @param left Left srvo speed 
  * @param right Right servo speed
  */
 void drive_speeds(int left, int right);
@@ -62,7 +62,7 @@ void drive_speeds(int left, int right);
 /**
  * @brief Set the maximum ramp step size.
  *
- * @detail Call this function if you want a large change in speed to be reached
+ * @detail Call this function if you want a large change in speed to be reached 
  * incrementally for a ramping effect.  Default is 2000 (no ramping whatsoever).
  * values in the 4 to 10 range tend to have a visible effect.  4 is a little sluggish
  * but works well for gradual speed changes that are useful in hill climbing applications.
@@ -76,7 +76,7 @@ void drive_setramp(int left, int right);
  * @brief Stops the drive wheel servo signals without stopping the processor that controls
  * them.
  *
- * @detail This function is useful for stopping the control signals to the drive wheel
+ * @detail This function is useful for stopping the control signals to the drive wheel 
  * servos without stopping signals to the rest of the servos.  You can call driveSpeeds to
  * wake the servos back up.  This can save some power if your application needs to operate
  * other servos while giving the continuous rotation drive servos a rest.
@@ -87,9 +87,9 @@ void drive_setramp(int left, int right);
 void drive_sleep();
 
 /**
- * @brief Stops the processor that controls all servos in the application.
+ * @brief Stops the processor that controls all servos in the application.  
  *
- * @detail This function takes all servos in the application out of commission, and all
+ * @detail This function takes all servos in the application out of commission, and all 
  * settings will be lost.  Use at the end of the program for maximum power savings.
  *
  * @param left Left sevo maximum ramp step
@@ -100,9 +100,9 @@ void drive_stop();
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */  
 #endif
-/* SERVPDIFFDRIVE_H */
+/* SERVPDIFFDRIVE_H */  
 
 /**
  * TERMS OF USE: MIT License

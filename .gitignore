@@ -11,3 +11,4 @@ makefile
 **.o
 **.a
 **~
+**.swp

@@ -63,7 +63,7 @@ fdserial *fdserial_open(int rxpin, int txpin, int mode, int baudrate)
 }
 
 /*
- * stop stops the cog running the native assembly driver
+ * stop stops the cog running the native assembly driver 
  */
 void fdserial_close(fdserial *term)
 {
@@ -71,11 +71,11 @@ void fdserial_close(fdserial *term)
   fdserial_st* fdp = (fdserial_st*) term->devst;
 
   while(fdserial_rxCheck(term) >= 0)
-      ; // clear out queue by receiving all available
+      ; // clear out queue by receiving all available 
   fdserial_txFlush(term);
 
   if(id > 0) cogstop(getStopCOGID(id));
-
+  
   free((void*)fdp->buffptr);
   free((void*)fdp);
   free(term);
@@ -94,7 +94,7 @@ int fdserial_txEmpty(fdserial *term)
 /*
  * Gets a byte from the receive queue if available
  * Function does not block. We move rxtail after getting char.
- * @returns receive byte 0 to 0xff or -1 if none available
+ * @returns receive byte 0 to 0xff or -1 if none available 
  */
 int fdserial_rxCheck(fdserial *term)
 {
@@ -112,7 +112,7 @@ int fdserial_rxCheck(fdserial *term)
 
 /*
  * Wait for a byte from the receive queue. blocks until something is ready.
- * @returns received byte
+ * @returns received byte 
  */
 int fdserial_rxChar(fdserial *term)
 {
@@ -124,7 +124,7 @@ int fdserial_rxChar(fdserial *term)
 
 /*
  * tx sends a byte on the transmit queue.
- * @param txbyte is byte to send.
+ * @param txbyte is byte to send. 
  */
 int fdserial_txChar(fdserial *term, int txbyte)
 {

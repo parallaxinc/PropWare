@@ -1,4 +1,4 @@
-/**
+/**                                                                             
  * @file simpletools.h
  *
  * @author Andy Lindsay
@@ -8,37 +8,37 @@
  * @copyright
  * Copyright (C) Parallax, Inc. 2013. All Rights MIT Licensed.
  *
- * @brief This library provides convenience functions
- * for a variety of microcontroller I/O, timing, conversion, and
- * communication tasks.  This library also includes (and you can
- * call functions from)
+ * @brief This library provides convenience functions 
+ * for a variety of microcontroller I/O, timing, conversion, and  
+ * communication tasks.  This library also includes (and you can 
+ * call functions from) 
  * <a target="blank" href="../../../Text%20Devices/libsimpletext/
- * Documentation%20simpletext%20Library.html">simpletext</a>
+ * Documentation%20simpletext%20Library.html">simpletext</a> 
  * and
  * <a target="blank" href="../../../Text%20Devices/libsimpletext/
- * Documentation%20serial%20Library.html">serial</a>.
+ * Documentation%20serial%20Library.html">serial</a>.  
  *
  * <b>NOTE:</b> If you want to update old projects to work with this version
  * of simpletools, you may need to manually use the Add Simple Library button
- * to add .../SimpleIDE/Learn/Text Devices/libsimpletext.
+ * to add .../SimpleIDE/Learn/Text Devices/libsimpletext.  
  *
- * <b><i>CONSTRUCTION ZONE:</i></b> This library is still preliminary,
+ * <b><i>CONSTRUCTION ZONE:</i></b> This library is still preliminary, 
  * revisions pending.
- * @n @n dac_ctr, square_wave, and all pwm functions, are currently
- * only supported by the LMM and CMM memory models.
+ * @n @n dac_ctr, square_wave, and all pwm functions, are currently  
+ * only supported by the LMM and CMM memory models.  
  *
  * @details This (under development) library provides a set of
  * introductory functions that simplify:
- *
+ *  
  * @li I/O control - convenient I/O pin monitoring and control functions
  * @li Timing - Delays, timeouts
  * @li Timed I/O - pulse generation/measurement, square waves, transition
  * counting, RC decay, etc.
- * @li Analog - D/A conversion, PWM, and more.
+ * @li Analog - D/A conversion, PWM, and more.  
  * @n For A/D conversion see ...Learn/Simple Libraries/Convert
  * for A/D conversion libraries
  * @li Serial Communication - SPI, I2C
- * @n For half and full duplex asynchronous serial communication, see
+ * @n For half and full duplex asynchronous serial communication, see 
  * ...Learn/Simple Libraries/Text Devices
  * @li Memory - EEPROM, SD storage
  *
@@ -63,10 +63,10 @@
  * Simple Text folder replaces PropGCC serial driver support for simple
  * and full duplex serial peripherals. @n @n
  * Revision 0.93 i2c_newbus now uses @n
- *   .../Learn/Simple Libraries/Protocol/simplei2c/@n
+ *   .../Learn/Simple Libraries/Protocol/simplei2c/@n 
  * Added:@n
  *   i2c_out, i2c_in to cover most common I2C slave applications
- * EEPROM ee_get_* and ee_put_* changed to ee_get* and ee_put* where
+ * EEPROM ee_get_* and ee_put_* changed to ee_get* and ee_put* where 
  * the * term is camel-case. @n @n
  * Revision 0.94 Fixed bug in ee_put* that prevented contiguous data
  * from crossing the EEPROM's address/128 buffer boundaries.  Updated
@@ -74,8 +74,10 @@
  * Revision 0.95 square_wave bug that prevented output frequency changes
  * (fixed). @n@n
  * Revision 0.96 ee_putStr updated to support 128 byte page writes.  More
- * corrections to ee_put* for contiguous data crossing address/128 boundary.
- * Revision 0.96.1 Add documentation for start_fpu_cog and stop_fpu_cog.
+ * corrections to ee_put* for contiguous data crossing address/128 boundary. @n@n
+ * Revision 0.96.1 Add documentation for start_fpu_cog and stop_fpu_cog. @n@n
+ * Revision 0.97 Add cog_run and cog_end for simplified running of function
+ * code in other cogs. @n@n
  */
 
 #ifndef SIMPLETOOLS_H
@@ -113,7 +115,7 @@ extern int eeInitFlag;
 
 //extern i2c *eeprom;
 //extern int dacCtrBits;
-
+ 
 #ifndef PI
 #define PI 3.141592653589793
 #endif
@@ -177,25 +179,25 @@ extern int eeInitFlag;
 
 
 // Values for use with shift_in
-#ifndef   MSBPRE
+#ifndef   MSBPRE     
 #define   MSBPRE     0
 #endif
-#ifndef   LSBPRE
+#ifndef   LSBPRE     
 #define   LSBPRE     1
 #endif
-#ifndef   MSBPOST
+#ifndef   MSBPOST    
 #define   MSBPOST    2
 #endif
-#ifndef   LSBPOST
+#ifndef   LSBPOST    
 #define   LSBPOST    3
 #endif
-
+  
 // Values for use with shift_out
-#ifndef   LSBFIRST
+#ifndef   LSBFIRST   
 #define   LSBFIRST   0
 #endif
 
-#ifndef   MSBFIRST
+#ifndef   MSBFIRST   
 #define   MSBFIRST   1
 #endif
 
@@ -307,7 +309,7 @@ unsigned int reverse(int pin);
 unsigned int get_state(int pin);
 
 /**
- * @brief Check the direction of the I/O pin.
+ * @brief Check the direction of the I/O pin.                                        
  *
  * @details This function will tell you the direction of the
  * I/O pin as seen by the cog executing it.  Keep in mind that
@@ -337,7 +339,7 @@ unsigned int get_direction(int pin);
 unsigned int get_output(int pin);
 
 /**
- * @brief Set an I/O pin to a given direction.
+ * @brief Set an I/O pin to a given direction.                                        
  *
  * @details This function sets an I/O pin to either output or input.
  *
@@ -364,7 +366,7 @@ void set_output(int pin, int state);
  * @brief Get states of a contiguous group of I/O pins
  *
  * @details This works the same as getState, but for a group of pins.  It
- * tells you the actual state of each pin, regardless of whether it's a
+ * tells you the actual state of each pin, regardless of whether it's a 
  * voltage applied to input or transmitted by an output.
  *
  * @param endPin The highest numbered pin.
@@ -378,7 +380,7 @@ unsigned int get_states(int endPin, int startPin);
 /**
  * @brief Get directions for a contiguous group of I/O pins.
  *
- * @details Get direction register states from a contiguous group of bits
+ * @details Get direction register states from a contiguous group of bits 
  * in the cog's output register.
  *
  * @param endPin The highest numbered pin.
@@ -392,13 +394,13 @@ unsigned int get_directions(int endPin, int startPin);
 /**
  * @brief Get output settings for a contiguous group of I/O pins.
  *
- * @details Get output register settings for a contiguous group of bits
+ * @details Get output register settings for a contiguous group of bits 
  * in the cog's output register.
  *
  * @param endPin The highest numbered pin.
  * @param startPin The lowest numbered pin.
  *
- * @returns Pattern value containing a binary bit pattern.  The value
+ * @returns Pattern value containing a binary bit pattern.  The value 
  * for startPin should be in bit-0, next in bit-1, etc.
  */
 unsigned int get_outputs(int endPin, int startPin);
@@ -406,7 +408,7 @@ unsigned int get_outputs(int endPin, int startPin);
 /**
  * @brief Set directions for a contiguous group of I/O pins.
  *
- * @details Set directions values in a contiguous group of bits in the
+ * @details Set directions values in a contiguous group of bits in the 
  * cog's output register.
  *
  * @param endPin The highest numbered pin.
@@ -445,10 +447,10 @@ void pause(int time);
  * @brief Delay cog from moving on to the next statement for a certain number
  * of system clock ticks.
  *
- * @details At 80 MHz, each clock tick is 12.5 ns.  Code overhead varies
+ * @details At 80 MHz, each clock tick is 12.5 ns.  Code overhead varies 
  * depending on memory model and optimization.  A simple test if you want a
  * certain number of clock ticks is:
- *
+ * 
  *  @code
  *  unsigned int ti, tf, us, pauseTicks;
  *  us = CLKFREQ/1000000;                               // 1 us worth of ticks
@@ -487,7 +489,7 @@ int timeout(int time);
  * mark or wait functions.
  *
  * @details The default time increment is 1 us, so wait(2000) will return wait
- * until 2 us after the last call to mark or wait.  This function automatically
+ * until 2 us after the last call to mark or wait.  This function automatically 
  * updates the marked time; you can call it repeatedly without having to call mark.
  *
  * @param time Number of time increments.
@@ -527,8 +529,8 @@ long count(int pin, long duration);
  *
  * This library uses another cog's counter modules (2 per cog) to perform duty modulation,
  * which is useful for D/A conversion.  The digital signal it generates will affect LED
- * brightness.  The signal can be passed through a low pass RC filter for digital to
- * analog voltage conversion.  Add an op amp buffer if it needs to drive a load.
+ * brightness.  The signal can be passed through a low pass RC filter for digital to 
+ * analog voltage conversion.  Add an op amp buffer if it needs to drive a load.  
  *
  * Default resolution is 8 bits for output voltages ranging from 0 V to (255/256) of
  * 3.3 V.
@@ -542,7 +544,7 @@ long count(int pin, long duration);
  * @param pin I/O pin number.
  * @param channel Use 0 or 1 to select the cog's CTRA or CTRB counter modules, which
  * are used for D/A conversion.
- * @param dacVal Number of 256ths of 3.3 V by default.  Use a value from 0 (0 V)
+ * @param dacVal Number of 256ths of 3.3 V by default.  Use a value from 0 (0 V) 
  * to 255 .
  */
 void dac_ctr(int pin, int channel, int dacVal);
@@ -563,16 +565,16 @@ void dac_ctr(int pin, int channel, int dacVal);
 void dac_ctr_res(int bits);
 
 /**
- * @brief Stop the cog that's transmitting the DAC signal(s).
+ * @brief Stop the cog that's transmitting the DAC signal(s).  
  *
  * @details Stops any signals, lets go of any I/O pins, and reclaims the cog for
- * other uses.
+ * other uses.  
  *
  */
 void dac_ctr_stop(void);
 
 /**
- * @brief Use same cog to send square wave of a certain
+ * @brief Use same cog to send square wave of a certain 
  * frequency for a certain amount of time.  For set and forget
  * with another cog, try square_wave function instead.
  *
@@ -586,14 +588,14 @@ void freqout(int pin, int msTime, int frequency);
 /**
  * @brief Start pulse width modulation (PWM) process in another cog.
  *
- * @details Great for DC motors, can also be used for servos, but the
+ * @details Great for DC motors, can also be used for servos, but the 
  * servo library is probably a better choice for that.
  *
  * A PWM signal sends repeated high signals with a fixed cycle time.
  * Your code will typically control the amount of time a PWM signal is
  * high during each cycle.  For example, pwm_start(1000) will establish
  * a 1000 us PWM cycle.  You can then use the pwm_set function to send
- * high signals that last anywhere from 0 to 1000 us.
+ * high signals that last anywhere from 0 to 1000 us.   
  *
  * @param cycleMicroseconds Number of microseconds the PWM cycle lasts.
  */
@@ -607,20 +609,20 @@ int pwm_start(unsigned int cycleMicroseconds);
  * sets up 1000 us (1 ms) you could use this function to make the signal
  * high for 3/4 of its cycle with pwm_set(pin, channel, 750).  If the
  * signal goes to a DC motor through an H bridge or other driver circuit,
- * the motor will behave as though it's only getting 3/4 of the supply
+ * the motor will behave as though it's only getting 3/4 of the supply 
  * and turn at roughly 3/4 of full speed.
  *
- * @param pin I/O pin to send the PWM signal.  You can change this
- * value on the fly, which is useful for speed control of a DC motor in
+ * @param pin I/O pin to send the PWM signal.  You can change this 
+ * value on the fly, which is useful for speed control of a DC motor in 
  * two different directions.  When the PWM signal changes to a new pin,
  * the cog sets the previous pin to input.  If you want it to stay low
- * when the PWM cog lets go, just set the pin low in your code before
+ * when the PWM cog lets go, just set the pin low in your code before 
  * calling pwm_start.
- *
- * @param channel You have options of 0 or 1 for up to two simultaneous
+ * 
+ * @param channel You have options of 0 or 1 for up to two simultaneous 
  * PWM signals.  If you have an application in mind that requires more
  * PWM signals, check the SimpleIDE/Learn/Simple Libraries/Motor
- * directory, and also online at obex.parallax.com.
+ * directory, and also online at obex.parallax.com. 
  *
  * @param tHigh The high time for each PWM cycle repetition.
  */
@@ -685,15 +687,15 @@ long rc_time(int pin, int state);
 
 /**
  * @brief Make I/O pin transmit a repeated high/low signal at a certain frequency.
- * High and low times are the same.  Frequency can range from 1 Hz to 128 MHz.
+ * High and low times are the same.  Frequency can range from 1 Hz to 128 MHz.  
  *
  * @details Uses one additional cog with up to two active channels, each with a selectable
- * frequency.  You can change transmit pins on the fly by calling this function on the
+ * frequency.  You can change transmit pins on the fly by calling this function on the 
  * same channel, but with a different pin.  The previous pin will be set to input in that
  * cog.  If your code is set to output, it will not affect that setting, only the setting
  * for the cog that is transmitting the square wave.  Code in your cog, or some other cog
  * can modulate the signal.  A low signal allows the square wave to transmit, and a high
- * signal prevents it.
+ * signal prevents it.  
  *
  * @param pin I/O pin that transmits square wave frequency.  To stop sending the signal.
  * and change the pin back to input, pass the pin as a negative number.
@@ -704,10 +706,10 @@ long rc_time(int pin, int state);
 void square_wave(int pin, int channel, int freq);
 
 /**
- * @brief Stop the cog that's transmitting a square wave.
+ * @brief Stop the cog that's transmitting a square wave.  
  *
  * @details Stops any signals, lets go of any I/O pins, and reclaims the cog for
- * other uses.
+ * other uses.  
  *
  */
 void square_wave_stop(void);
@@ -741,7 +743,7 @@ void set_io_dt(long clockticks);
 *
 * @param pinDat Data pin.
 * @param pinClk Clock pin.
-* @param mode Order and orientation to clock pulse options:
+* @param mode Order and orientation to clock pulse options: 
 * MSBPRE, LSBPRE, MSBPOST,LSBPOST.
 * @param bits Number of binary values to transfer.
 *
@@ -767,15 +769,15 @@ void shift_out(int pinDat, int pinClk, int mode, int bits, int value);
  *
  * @param sdapin the I2C bus' serial data pin.
  *
- * @param scldrive sets I/O pin connected to SCL line to send high signals by
- * either (sclDrive = 0) allowing the pullup resistor on the bus to pull the
+ * @param scldrive sets I/O pin connected to SCL line to send high signals by 
+ * either (sclDrive = 0) allowing the pullup resistor on the bus to pull the 
  * line high, or (sclDrive = 1) by setting the I/O pin to output and driving the
- * line high.  sclDrive = 0 is by far the most common arrangement.  sclDrive = 1
- * is used with some Propeller boards that do not have a pull-up resistor on the
- * EEPROM's SCL line.
+ * line high.  sclDrive = 0 is by far the most common arrangement.  sclDrive = 1 
+ * is used with some Propeller boards that do not have a pull-up resistor on the 
+ * EEPROM's SCL line.    
  *
  * @returns a pointer to the I2C bus.  You will need this to pass to the i2cWrite and
- * i2cRead functions for communication on the bus.
+ * i2cRead functions for communication on the bus. 
  */
 i2c *i2c_newbus(int sclpin, int sdapin, int scldrive);
 
@@ -786,16 +788,16 @@ i2c *i2c_newbus(int sclpin, int sdapin, int scldrive);
  * @details This function uses Simple Libraries/Protocol/libsimplei2c for
  * clock and data line signaling.  You can also use this library to create
  * custom I2C functions.  Other I2C signaling options are included in
- * Propeller GCC.  Search for i2C int he propgcc folder for more info.
+ * Propeller GCC.  Search for i2C int he propgcc folder for more info.  
  *
  * @param *bus pointer to an I2C bus.  Use i2c_newbus to get a pointer to an
  * I2C bus structure.
  *
- * @param i2cAddr 8 bit device address.  This is the 7-bit I2C address and
+ * @param i2cAddr 8 bit device address.  This is the 7-bit I2C address and 
  * read/write bit.  The value of the read/write bit does not matter because
  * the i2c_out and i2c_in functions clear and set it as needed.
  *
- * @param *regAddr Pointer to variable or array that contains the number of
+ * @param *regAddr Pointer to variable or array that contains the number of 
  * bytes to write to the device's register(s) or a memory address.
  *
  * @param regSize Number of bytes to use for regAddr.  This value can be zero
@@ -805,10 +807,10 @@ i2c *i2c_newbus(int sclpin, int sdapin, int scldrive);
  *
  * @param count number of bytes in data
  *
- * @returns total number of bytes written. Should be 1 + regSize + count.
+ * @returns total number of bytes written. Should be 1 + regSize + count.  
  */
-HUBTEXT int  i2c_out(i2c *bus, int i2cAddr,
-                     const unsigned char *regAddr, int regSize,
+HUBTEXT int  i2c_out(i2c *bus, int i2cAddr, 
+                     const unsigned char *regAddr, int regSize, 
                      const unsigned char *data, int count);
 
 
@@ -818,30 +820,30 @@ HUBTEXT int  i2c_out(i2c *bus, int i2cAddr,
  * @details This function uses Simple Libraries/Protocol/libsimplei2c for
  * clock and data line signaling.  You can also use this library to create
  * custom I2C functions.  Other I2C signaling options are included in
- * Propeller GCC.  Search for i2C int he propgcc folder for more info.
+ * Propeller GCC.  Search for i2C int he propgcc folder for more info.  
  *
  * @param *bus pointer to an I2C bus.  Use i2c_newbus to get a pointer to an
  * I2C bus structure.
  *
- * @param i2cAddr 8 bit device address.  This is the 7-bit I2C address and
+ * @param i2cAddr 8 bit device address.  This is the 7-bit I2C address and 
  * read/write bit.  The value of the read/write bit does not matter because
  * the i2c_out and i2c_in functions clear and set it as needed.
  *
- * @param regAddr Pointer to variable or array that contains the number of
+ * @param regAddr Pointer to variable or array that contains the number of 
  * bytes to write to the device's register(s) or a memory address.
  *
  * @param regSize Number of bytes to use for regAddr.  This value can be zero
  * for no register or memory address data.
  *
- * @param *data Pointer to variable or array that will receive data from
+ * @param *data Pointer to variable or array that will receive data from 
  * I2C device.
  *
  * @param count number of bytes in data
  *
- * @returns total number of bytes written. Should be 1 + regSize + count.
+ * @returns total number of bytes written. Should be 1 + regSize + count.  
  */
-HUBTEXT int  i2c_in(i2c *bus, int i2cAddr,
-                     const unsigned char *regAddr, int regSize,
+HUBTEXT int  i2c_in(i2c *bus, int i2cAddr, 
+                     const unsigned char *regAddr, int regSize, 
                      unsigned char *data, int count);
 
 
@@ -897,7 +899,7 @@ void ee_putInt(int value, int addr);
 
 /**
  * @brief Get an int value from a certain address in the Propeller Chip's
- * dedicated EEPROM.  If you are fetching several int values, make sure to
+ * dedicated EEPROM.  If you are fetching several int values, make sure to 
  * add 4 to the addr value with each successive call.
  *
  * @param addr The EEPROM address with the int value that should be fetched.
@@ -913,7 +915,7 @@ int ee_getInt(int addr);
 
 
 /**
- * @brief Store a string of byte values starting at a certain address in
+ * @brief Store a string of byte values starting at a certain address in 
  * the Propeller Chip's dedicated EEPROM.
  *
  * @param s Address of a char array containing the string of bytes.
@@ -931,8 +933,8 @@ void ee_putStr(unsigned char *s, int n, int addr);
 
 
 /**
- * @brief Fetch a string of byte values starting at a certain address in
- * Propeller Chip's dedicated EEPROM.
+ * @brief Fetch a string of byte values starting at a certain address in 
+ * Propeller Chip's dedicated EEPROM.  
  *
  * @param s Address of a char array to receive the string of bytes fetched
  * from EEPROM.
@@ -940,7 +942,7 @@ void ee_putStr(unsigned char *s, int n, int addr);
  * @param n The number of bytes to copy from EEPROM to the array.
  *
  * @param addr The EEPROM address of the first byte in the string.
- *
+ * 
  * @returns The address of the array that stores the characters that
  * were fetched.
  */
@@ -984,7 +986,7 @@ void ee_putFloat32(float value, int addr);
  * click the Show Project Manager button in SimpleIDE's bottom-left corner.  Then
  * click the Linker tab, and check the Math Lib box.
  *
- * @param addr The EEPROM address with the 32-bit floating point float value
+ * @param addr The EEPROM address with the 32-bit floating point float value 
  * that should be fetched.
  *
  * @returns value The float value stored by the EEPROM at the specified address.
@@ -1006,6 +1008,35 @@ float ee_getFloat32(int addr);
  */
 int sd_mount(int doPin, int clkPin, int diPin, int csPin);
 
+
+/**
+ * @brief Restarts floating point coprocessor (which runs in a separate
+ * cog) after it has been shut down by stop_fpu_cog.  This process is 
+ * started automatically when an application that uses the simpletools
+ * library is launched.  So the only time you would call it is after
+ * calling stop_fpu_cog in order to reclaim a cog for other uses.  
+ * CAUTION: Do not try call simpletext library functions while the
+ * fpu cog is shut down, it could cause the application to hang.
+ *
+ * @returns Nonzero if successful, or zero if no cogs available.
+ */
+int start_fpu_cog(void);
+
+
+/**
+ * @brief Stop floating point coprocessing cog that is started
+ * automatically when an application that uses the simpletools library 
+ * is launched.  When this function stops the cog running the floating 
+ * point coprocessor, it will save a cog, but disable certain floating 
+ * point functionalities until it is restarted by calling start_fpu_cog.
+ * CAUTION: Do not try call simpletext library functions while the
+ * fpu cog is shut down, it could cause the application to hang.
+ *
+ * @returns Nonzero if successful, or zero if no cogs available.
+ */
+void stop_fpu_cog(void);
+
+
 /**
  * @brief Convert value to zero terminated text string.
  *
@@ -1023,31 +1054,41 @@ char* itoa(int i, char b[], int base);
 
 
 /**
- * @brief Restarts floating point coprocessor (which runs in a separate
- * cog) after it has been shut down by stop_fpu_cog.  This process is
- * started automatically when an application that uses the simpletools
- * library is launched.  So the only time you would call it is after
- * calling stop_fpu_cog in order to reclaim a cog for other uses.
- * CAUTION: Do not try call simpletext library functions while the
- * fpu cog is shut down, it could cause the application to hang.
+ * @brief Run a function's code in the next available cog (processor).
  *
- * @returns Nonzero if successful, or zero if no cogs available.
+ * @details cog_run is designed to make launching application level
+ * functions (typically from the main file) quick and easy. All you have
+ * to do is pass a pointer to a function with no return value or parameters
+ * along with the number for extra memory to reserve. The value returned 
+ * can be used to shut down the process and free up memory and a cog later
+ * by passing it to cog_end. 
+ *
+ * @param *function pointer to a function with no parameters 
+ * or return value. Example, if your function is void myFunction(), then
+ * pass &myFunciton. 
+ *
+ * @param stacksize Number of extra int variables for local variable declarations
+ * and call/return stack. This also needs to cover any local variable declarations
+ * in functions that your function calls, including library functions. Be liberal 
+ * with extra stack space for prototyping, and if in doubt, 40 to whatever value 
+ * you calculate.
+ *
+ * @returns Address of memory set aside for the cog. Make sure to save this value
+ * in a variable if you inted to stop the process later with cog_end.
  */
-int start_fpu_cog(void);
+int *cog_run(void (*function)(void *par), int stacksize);
 
 
 /**
- * @brief Stop floating point coprocessing cog that is started
- * automatically when an application that uses the simpletools library
- * is launched.  When this function stops the cog running the floating
- * point coprocessor, it will save a cog, but disable certain floating
- * point functionalities until it is restarted by calling start_fpu_cog.
- * CAUTION: Do not try call simpletext library functions while the
- * fpu cog is shut down, it could cause the application to hang.
+ * @brief End function code running in another cog that was launched with cog_run.
  *
- * @returns Nonzero if successful, or zero if no cogs available.
+ * @details This function uses the value returned by cog_run to stop a function
+ * running in another cog and free the stack space cog_run allocated with its
+ * stacksize parameter.
+ *
+ * @param *coginfo the address returned by cog_run.
  */
-void stop_fpu_cog(void);
+void cog_end(int *coginfo);
 
 
 int add_driver(_Driver *driverAddr);
@@ -1055,9 +1096,9 @@ int add_driver(_Driver *driverAddr);
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */  
 #endif
-/* SIMPLETOOLS_H */
+/* SIMPLETOOLS_H */  
 
 /**
  * TERMS OF USE: MIT License

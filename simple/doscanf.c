@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "simpletext.h"
 
-static const char* trim(const char* str)
+static const char* trim(const char* str) 
 {
     while (isspace(*str))
         str++;
@@ -26,7 +26,7 @@ static const char* trim(const char* str)
     return str;
 }
 
-static const char* _scanf_gets(const char *str, char* dst, unsigned width, int gettingChars)
+static const char* _scanf_gets(const char *str, char* dst, unsigned width, int gettingChars) 
 {
     while (width-- && (gettingChars || !isspace(*str)))
         *dst++ = *str++;
@@ -37,10 +37,10 @@ static const char* _scanf_gets(const char *str, char* dst, unsigned width, int g
     return str;
 }
 
-int _doscanf(const char* str, const char *fmt, va_list args)
+int _doscanf(const char* str, const char *fmt, va_list args) 
 {
   int blocks = 0;
-
+ 
   int fch;
   while (str && *str && (fch = *fmt++))
   {
@@ -48,7 +48,7 @@ int _doscanf(const char* str, const char *fmt, va_list args)
     int base = 16;
     int isWhiteSpaceOK = 0;
     int done = 0;
-
+    
     if (fch != '%')
     {
         if (isspace(fch))
@@ -57,12 +57,12 @@ int _doscanf(const char* str, const char *fmt, va_list args)
             break;
         continue;
     }
-
+            
     if (!isdigit(*fmt))
         width = ULONG_MAX;
     else
         fmt = _scanf_getl(fmt, &width, 10, 11, 0);
-
+            
     fch = *fmt++;
     if (fch != 'c' && fch != '%')
     {
@@ -70,8 +70,8 @@ int _doscanf(const char* str, const char *fmt, va_list args)
         if (!*str)
             break;
     }
-
-    switch (fch)
+            
+    switch (fch) 
       {
       case '%':
           if (*str++ != '%')

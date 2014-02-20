@@ -16,6 +16,7 @@ from shutil import copy2
 class ImportSimple:
     PROPWARE_ROOT = "./"
     CHEATER_DIR = "simple/"
+    LEARN_ENV_VAR = "PROP_LEARN_PATH"
 
     def __init__(self):
         self.libraries = {}
@@ -30,15 +31,16 @@ class ImportSimple:
     def getLibraries(self, rootPath):
         # Get a map of all the libraries
         for categoryDir in os.listdir(rootPath):
-            for subDir in os.listdir(rootPath + categoryDir):
-                if os.path.isdir(rootPath + categoryDir + '/' + subDir):
-                    self.libraries[subDir[3:]] = rootPath + categoryDir + '/' + subDir
+            if os.path.isdir(rootPath + categoryDir):
+                for subDir in os.listdir(rootPath + categoryDir):
+                    if os.path.isdir(rootPath + categoryDir + '/' + subDir):
+                        self.libraries[subDir[3:]] = rootPath + categoryDir + '/' + subDir
 
     @staticmethod
     def getRootPath():
         # Get the root path without the stupid extra slashes
-        propLearnPath = os.environ["PROP_LEARN_PATH"].split('\\')
-        return ''.join(propLearnPath)
+        propLearnPath = os.environ[ImportSimple.LEARN_ENV_VAR].split('\\')
+        return ''.join(propLearnPath) + '/Simple Libraries/'
 
     @staticmethod
     def isSourceOrHeaderFile(f):

@@ -9,23 +9,23 @@
  * terms of use (MIT License).
  *
  * @brief If you need to control more than the 14 servos the servo library
- * covers, add this library to your project to control up to 14 more for a
+ * covers, add this library to your project to control up to 14 more for a 
  * total of 28 servos.  Control the first 14 with servo_set,
  * servo_speed, servo_angle, and other servo_ function calls.  Control servos
  * 15 and up with the same function calls, but starting with servoAux_ instead
- * of servo_.
- * @n @n Currently supports LMM and CMM memory models.
+ * of servo_.    
+ * @n @n Currently supports LMM and CMM memory models.  
  * @n    servo library launches a single cog for controlling 1st to 14th servos
  * @n    servoAux library launches an additional cog for controlling the 15th through
  *       28th servos
  *
- * @details This library automatically delivers
- * control pulses to the servos every 20 ms, all you have to do is use the set
- * method to pick the pin the servo is connected to and the duration of the
+ * @details This library automatically delivers 
+ * control pulses to the servos every 20 ms, all you have to do is use the set 
+ * method to pick the pin the servo is connected to and the duration of the 
  * control pulses.
  *
  * Parallax standard servos have a position range from approximately 0 to 180
- * degrees.
+ * degrees.  
  *
  * Please submit bug reports, suggestions, and improvements to
  * this code to editor@parallax.com.
@@ -54,13 +54,13 @@ extern "C" {
  *
  * 0 to 1800 corresponds to control pulses ranging from 500 to 2300 with 1400
  * at center (90 degrees), which is slightly different from the 1500 center
- * convention, but it places the Parallax Standard Servo's range of motion neatly
+ * convention, but it places the Parallax Standard Servo's range of motion neatly 
  * between its mechanical limits.
  *
  * @param pin Number of the I/O pin connected to servo
  * @param degreeTenths Tenths of a degree from 0 to 1800
  *
- * @returns pin number = success, -1 = no cogs available, -2 = no locks available, -3 =
+ * @returns pin number = success, -1 = no cogs available, -2 = no locks available, -3 = 
  * all 14 servo slots already filled.
  */
 int servoAux_angle(int pin, int degreeTenths);
@@ -85,7 +85,7 @@ int servoAux_angle(int pin, int degreeTenths);
  * @param pin Number of the I/O pin connected to servo
  * @param speed from -100 to 100
  *
- * @returns pin number = success, -1 = no cogs available, -2 = no locks available, -3 =
+ * @returns pin number = success, -1 = no cogs available, -2 = no locks available, -3 = 
  * all 14 servo slots already filled.
  */
 int servoAux_speed(int pin, int speed);
@@ -95,7 +95,7 @@ int servoAux_speed(int pin, int speed);
  * in a given 20 ms time period.
  *
  * @details This function allows you to make a Parallax Continuous Rotation
- * servo ramp up to and down from whatever speed or position it was previously set to.
+ * servo ramp up to and down from whatever speed or position it was previously set to.  
  * It also allows you to set the rate at which a Parallax Standard servo turns
  * from its previous position to a new position.
  *
@@ -111,7 +111,7 @@ int servoAux_speed(int pin, int speed);
 int servoAux_setRamp(int pin, int stepSize);
 
 /**
- * @brief Sets servo control signal to servo connected to a given pin for
+ * @brief Sets servo control signal to servo connected to a given pin for 
  * microsecond pulse durations.
  *
  * @details This function directly controls the number of microseconds servo
@@ -137,16 +137,16 @@ int servoAux_setRamp(int pin, int stepSize);
  * @li Stay still                  -> servoAux_set(pin, 1500);
  * @li Full speed counterclockwise -> servoAux_set(pin, 1600);
  *
- * Values in the 1400 to 1600 range are (roughly) proportional to speed for a
- * Parallax Continuous Rotation Servo, but it's not nearly as precise as position
- * control.  Setting full speeds at 1300 and 1700 is a common practice to make sure
+ * Values in the 1400 to 1600 range are (roughly) proportional to speed for a 
+ * Parallax Continuous Rotation Servo, but it's not nearly as precise as position 
+ * control.  Setting full speeds at 1300 and 1700 is a common practice to make sure 
  * both servos are going as fast as they possibly can.
  *
  * @param pin Number of the I/O pin that sends signals to the servo.
  *
  * @param time Microsecond servo pulse time.
  *
- * @returns pin number = success, -1 = no cogs available, -2 = no locks available, -3 =
+ * @returns pin number = success, -1 = no cogs available, -2 = no locks available, -3 = 
  * all 14 servo slots already filled.
  */
 int servoAux_set(int pin, int time);
@@ -183,10 +183,10 @@ int servoAux_start(void);
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */  
 #endif
 
-/* servoAux_H */
+/* servoAux_H */  
 
 /**
  * TERMS OF USE: MIT License

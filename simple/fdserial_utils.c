@@ -9,12 +9,12 @@
 #include "fdserial.h"
 
 /*
- * rxflush empties the receive queue
+ * rxflush empties the receive queue 
  */
 void fdserial_rxFlush(fdserial *term)
 {
   while(fdserial_rxCheck(term) >= 0)
-      ; // clear out queue by receiving all available
+      ; // clear out queue by receiving all available 
 }
 
 /*
@@ -32,7 +32,7 @@ int fdserial_rxReady(fdserial *term)
  * Get a byte from the receive queue if available within timeout period.
  * Function blocks if no recieve for ms timeout.
  * @param ms is number of milliseconds to wait for a char
- * @returns receive byte 0 to 0xff or -1 if none available
+ * @returns receive byte 0 to 0xff or -1 if none available 
  */
 int fdserial_rxTime(fdserial *term, int ms)
 {

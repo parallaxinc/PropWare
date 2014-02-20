@@ -35,7 +35,7 @@ terminal *simpleterm_open(void)
   DIRA &= ~(1<<rxpin);
 
   debug_port.devst     = &debug_serial;
-
+  
   debug_port.txChar    = serial_txChar;     /* required for terminal to work */
   debug_port.rxChar    = serial_rxChar;     /* required for terminal to work */
 

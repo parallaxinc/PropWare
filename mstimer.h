@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-#include "simpletools.h"
+#include "simpletools.h"                      
 
 /**
  * @brief Start the millisecond timer.
@@ -48,7 +48,7 @@ void mstime_reset();
 /**
  * @brief Set the millisecond timer.
  *
- * @param newTime New millisecond time value that timer should start
+ * @param newTime New millisecond time value that timer should start 
  * counting from.
  */
 void mstime_set(int newTime);
@@ -56,9 +56,9 @@ void mstime_set(int newTime);
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */ 
 #endif
-/* MSTIMER_H */
+/* MSTIMER_H */ 
 
 /**
  * TERMS OF USE: MIT License
