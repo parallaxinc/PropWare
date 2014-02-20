@@ -1,7 +1,6 @@
 /**
  * @file    SPI_Demo.c
- */
-/**
+ *
  * @project SPI_Demo
  *
  * @author  David Zemon

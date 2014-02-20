@@ -67,6 +67,8 @@
  * DEFAULT: Off
  */
 #define SD_OPTION_DEBUG
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SD_OPTION_DEBUG
 /**
  * Enables thorough debugging features similar to exceptions; Errors will be
  * caught the program will enter an infinite loop
@@ -74,12 +76,16 @@
  * DEFAULT: Off
  */
 #define SD_OPTION_VERBOSE
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SD_OPTION_VERBOSE
 /**
  * Select data blocks/sectors will be display via UART for debugging purposes
  * <p>
  * DEFAULT: Off
  */
 #define SD_OPTION_VERBOSE_BLOCKS
+// This allows Doxygen to document the macro without permanently enabling it
+#undef SD_OPTION_VERBOSE_BLOCKS
 /**
  * Unix-like command-line arguments will be defined and available
  * <p>
@@ -108,7 +114,8 @@
 /**
  * File modes
  *
- * TODO: Check documentation for accuracy
+ * TODO: Learn what these modes *should* do and do it; At the moment, these modes
+ *       essentially aren't used for anything
  */
 typedef enum {
     /**
@@ -172,10 +179,9 @@ typedef enum {
     /** SD Error 16 */SD_TOO_MANY_FATS,
     /** SD Error 17 */SD_READING_PAST_EOC,
     /** SD Error 18 */SD_FILE_WITHOUT_BUFFER,
-    /** SD Error 19 */SD_ERRORS_SIZE
+    /** SD Error 19 */SD_CMD8_FAILURE
 } SD_ErrorCode;
 
-// Forward declarations for buffers and files
 /**
  * Buffer object used for storing SD data; Each instance uses 527 bytes (526
  * if SD_OPTION_FILE_WRITE is disabled)
@@ -235,7 +241,13 @@ uint8_t sd_unmount (void);
 #endif
 
 /**
- * @brief       Change the current working directory to *f (similar to 'cd f')
+ * @brief       Change the current working directory to *d (similar to 'cd dir')
+ *
+ * @detailed    At the moment, the target directory must be an immediate child
+ *              of the current directory ("." and ".." are allowed). I hope to
+ *              implement the ability to change to any directory soon (such as
+ *              "cd ../siblingDirectory") but attempting to do this now would
+ *              currently result in an SD_FILENAME_NOT_FOUND error
  *
  * @param[in]   *d     Short filename of directory to change to
  *
@@ -469,7 +481,7 @@ uint8_t sd_shell_ls (void);
 uint8_t sd_shell_cat (const char *name, SD_File *f);
 
 /**
- * @brief       Change the current working directory to *f (similar to 'cd f');
+ * @brief       Change the current working directory to *d (similar to 'cd dir');
  *
  * @param[in]   *d  Short filename of directory to change to
  *
@@ -517,7 +529,7 @@ defined SD_Shell)
 #endif
 
 // SPI config
-#define SD_SPI_INIT_FREQ            200000          // Run SD initialization at 200 kHz
+#define SD_SPI_INIT_FREQ            60000          // Run SD initialization at 200 kHz
 #define SD_SPI_MODE                 SPI_MODE_0
 #define SD_SPI_BITMODE              SPI_MSB_FIRST
 
@@ -528,7 +540,7 @@ defined SD_Shell)
 
 // SD Commands
 #define SD_CMD_IDLE                 0x40 + 0        // Send card into idle state
-#define SD_CMD_SDHC                 0x40 + 8        // Set SD card version (1 or 2) and voltage level range
+#define SD_CMD_INTERFASE_COND       0x40 + 8        // Send interface condition and host voltage range
 #define SD_CMD_RD_CSD               0x40 + 9        // Request "Card Specific Data" block contents
 #define SD_CMD_RD_CID               0x40 + 10       // Request "Card Identification" block contents
 #define SD_CMD_RD_BLOCK             0x40 + 17       // Request data block
@@ -537,12 +549,14 @@ defined SD_Shell)
 #define SD_CMD_APP                  0x40 + 55       // Inform card that following instruction is application specific
 #define SD_CMD_WR_OP                0x40 + 41       // Send operating conditions for SDC
 // SD Arguments
-#define SD_CMD_VOLT_ARG             0x000001AA
+#define SD_HOST_VOLTAGE_3V3         (((uint16_t) 0x01) << 8)
+#define SD_R7_CHECK_PATTERN         0xAA
+#define SD_ARG_CMD8                 (SD_HOST_VOLTAGE_3V3 | SD_R7_CHECK_PATTERN)
 #define SD_ARG_LEN                  5
 
 // SD CRCs
 #define SD_CRC_IDLE                 0x95
-#define SD_CRC_SDHC                 0x87
+#define SD_CRC_CMD8                 0x87            // CRC only valid for CMD8 argument of 0x000001AA
 #define SD_CRC_ACMD                 0x77
 #define SD_CRC_OTHER                0x01
 
@@ -552,7 +566,7 @@ defined SD_Shell)
 #define SD_DATA_START_ID            0xFE
 #define SD_RESPONSE_LEN_R1          1
 #define SD_RESPONSE_LEN_R3          5
-#define    SD_RESPONSE_LEN_R7       5
+#define SD_RESPONSE_LEN_R7          5
 #define SD_RSPNS_TKN_BITS           0x0f
 #define SD_RSPNS_TKN_ACCPT          ((0x02 << 1) | 1)
 #define SD_RSPNS_TKN_CRC            ((0x05 << 1) | 1)
@@ -666,6 +680,7 @@ struct _sd_file {
     uint32_t curCluster;
     /** Which sector of the SD card contains this file's meta-data */
     uint32_t dirSectorAddr;
+    /** Address within the sector of this file's entry */
     uint16_t fileEntryOffset;
 };
 

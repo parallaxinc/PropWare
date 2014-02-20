@@ -37,9 +37,9 @@
 # Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
-# When the Windows command del tries to delete a file that does not exist, an 
-# error is thrown. Though this does not cause any problems for Make, it does 
-# clutter up the terminal significantly. These "errors" can be safely ignored 
+# When the Windows command del tries to delete a file that does not exist, an
+# error is thrown. Though this does not cause any problems for Make, it does
+# clutter up the terminal significantly. These "errors" can be safely ignored
 # and thrown into nul
 	NULL=2> nul
 else
@@ -69,12 +69,12 @@ ifneq ($(BOARD),)
 endif
 
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
-CFLAGS += -m$(MODEL) -Wall
+CFLAGS += -m$(MODEL) -Wall -m32bit-doubles -std=c99
 CXXFLAGS += $(CFLAGS) -Wall
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
-LIBS += -lPropWare_$(MODEL)
+LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -ltiny
 
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
@@ -83,8 +83,9 @@ else
 	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib'
 endif
 
-# Add the appropriate PropWare library folder to the search path
+# Add the appropriate PropWare and Simple library folder to the search path
 LIB_INC += -L'$(PROPWARE_PATH)/$(MODEL)'
+LIB_INC += -L'$(PROPWARE_PATH)/simple/$(MODEL)'
 
 ifneq ($(LDSCRIPT),)
 	LDFLAGS += -T '$(LDSCRIPT)'
@@ -127,7 +128,7 @@ endif
 	$(CC) $(INC) $(CFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
-	
+
 %.o: ../%.cpp ../%.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropG++ Compiler'
@@ -141,7 +142,7 @@ endif
 	$(CC) $(INC) $(ASFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
-	
+
 %.o: ../%.S
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Assembler'

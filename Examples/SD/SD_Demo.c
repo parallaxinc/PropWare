@@ -1,7 +1,6 @@
 /**
  * @file    SD_Demo.c
- */
-/**
+ *
  * @project SD_Demo
  *
  * @author  David Zemon

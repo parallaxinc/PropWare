@@ -1,7 +1,6 @@
 /**
  * @file    max6675.c
- */
-/**
+ *
  * @project PropWare
  *
  * @author  David Zemon

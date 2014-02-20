@@ -40,9 +40,29 @@
                          target="_blank">here</a>.
 </p>
 
-<h2>Getting Started</h2>
+<h2>Contents</h2>
+<ol>
+    <li>
+        <a href="#gettingStarted">Getting Started</a>
+        <ol>
+            <li><a href="#getStart_PreReq">Prerequisites</a></li>
+            <li><a href="#getStart_BuildLib">Building the PropWare Static Libraries</a></li>
+            <li><a href="#getStart_Deploy">Deploying a PropWare Application</a></li>
+        </ol>
+    </li>
 
-<h3>Prerequisites</h3>
+    <li>
+        <a href="#contribute">Developing and Contributing to PropWare</a>
+    </li>
+
+    <li>
+        <a href="#usefulLinks">Useful Links</a>
+    </li>
+</ol>
+
+<h2 id="gettingStarted">Getting Started</h2>
+
+<h3 id="getStart_PreReq">Prerequisites</h3>
 
 <ul>
     <li>
@@ -179,7 +199,7 @@
     </li>
 </ul>
 
-<h3>Building the PropWare Static Libraries</h3>
+<h3 id="getStart_BuildLib">Building the PropWare Static Libraries</h3>
 
 <ul>
     <li>Enter the PropWare root directory at the command line</li>
@@ -189,7 +209,7 @@
     </li>
 </ul>
 
-<h3>Deploying a PropWare application</h3>
+<h3 id="getStart_Deploy">Deploying a PropWare application</h3>
 
 <p>PropWare makes building and running applications very easy. Below are three different methods for building and
     deploying a PropGCC application using PropWare.</p>
@@ -219,7 +239,7 @@
 
             <li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
                 "Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's
-                include folder (on Linux, /opt/parallax/propeller-elf/include)
+                include folder (on Linux & Mac, /opt/parallax/propeller-elf/include)
                 <ul>
                     <li>This is done simply for the indexer that helps you keep track of included files - it will not
                         affect the build process and can be skipped (not recommended)
@@ -315,11 +335,15 @@
     </li>
 </ul>
 
-<h2>Useful links</h2>
+<h2 id="contribute">Developing and Contributing to PropWare</h2>
+<p>PropWare is developed by David Zemon.</p>
+<p>Contributions can be made by either <a target="_blank" href="http://david.zemon.name/professional/contact.shtml">
+contacting David Zemon</a> or forking the repository and creating a pull request.</p>
+
+<h2 id="usefulLinks">Useful links</h2>
 
 <ul>
-    <li>Source code: <a href="https://github.com/SwimDude0614/PropWare"
-                        target="_blank"> https://github.com/SwimDude0614/PropWare</a>
+    <li><a target="_blank" href="https://github.com/SwimDude0614/PropWare">PropWare source code</a>
     </li>
 
     <li>Parallax forums can be found <a
@@ -327,8 +351,22 @@
             target="_blank"> here</a>
     </li>
 
-    <li>Parallax Object Exchange (OBEX) <a href="http://obex.parallax.com/"
-                                           target="_blank"> http://obex.parallax.com/</a>
+    <li><a target="_blank" href="http://learn.parallax.com/node/640">Simple IDE</a>: Light-weight IDE for Parallax
+        Propeller
+    </li>
+
+    <li><a target="_blank" href="https://code.google.com/p/propgcc/">PropGCC</a>: GCC compiler for Parallax Propeller
+    </li>
+
+    <li><a href="http://obex.parallax.com/" target="_blank">OBEX</a>: Parallax Object Exchange
+    </li>
+
+    <li><a target="_blank" href="https://code.google.com/p/lib-propelleruino/">libpropelleruino</a>: Arduino-compatible
+        source for the Propeller
+    </li>
+
+    <li><a target="_blank" href="https://github.com/libpropeller/libpropeller">libpropeller</a>: C++ Propeller GCC
+        objects
     </li>
 </ul>
 

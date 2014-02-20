@@ -1,8 +1,7 @@
 /**
  * @file    PropWare_Demo.c
- */
-/**
- * @Project PropWare_Demo
+ *
+ * @project PropWare_Demo
  *
  * @author  Modified by David Zemon
  */

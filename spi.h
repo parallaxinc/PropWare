@@ -1,13 +1,16 @@
 /**
  * @file    spi.h
- */
-/**
- * @brief   Provides a library for the propeller, running in the current cog,
- *          for SPI communication
  *
- * @project PropWare
+ * @brief       SPI serial communications library; Core functionality comes from
+ *              a dedicated assembly cog
  *
- * @author  David Zemon
+ * @detailed    This SPI module is not currently thread safe! Do not try to
+ *              call SPI functiions from more than one cog. Look for a lockable
+ *              version in PropWare v3.0
+ *
+ * @project     PropWare
+ *
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
