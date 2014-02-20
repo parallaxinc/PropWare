@@ -6,10 +6,10 @@
  * @copyright
  * Copyright (C) Parallax, Inc. 2012. All Rights MIT Licensed.
  *
- * @brief Plays 16-bit, 32ksps, mono .wav files in the root directory of a
+ * @brief Plays 16-bit, 32ksps, mono .wav files in the root directory of a 
  * microSD card.
 
- * @n @n Currently supports LMM and CMM memory models.
+ * @n @n Currently supports LMM and CMM memory models.  
  * @n @n
  * WAV file info sources, thanks to:
  *   @n http://blogs.msdn.com/b/dawate/archive/2009/06/23/intro-to-audio-programming-part-2-demystifying-the-wav-format.aspx
@@ -23,7 +23,7 @@
 static volatile int sampleRate;
 static volatile int swap = 0;
 static volatile int playing = 0;
-static volatile short int wavVal;
+static volatile short int wavVal;  
 static volatile int dacVal;
 static volatile unsigned int dtSample;
 //static volatile unsigned int t;
@@ -75,13 +75,13 @@ void wav_volume(int vol)
   if(vol < 0) vol = 0;
   vol = 1 << (21 - significantBitsPerSample + vol);
   unsigned int vi = volume;
-  unsigned int vf = vol;
+  unsigned int vf = vol;   
   for(int v = vi; volume != vf;)
-  {
+  { 
     if(vf > volume) volume++;
     if(vf < volume) volume--;
-    if(volume == vf) break;
-  }
+    if(volume == vf) break;  
+  } 
 }
 
 void wav_stop(void)
@@ -111,25 +111,25 @@ void wav_reader(void *par)
   char b[4];
   int v;
   unsigned short int w;
-
+  
   const char* trackp = (const char*) track;
-
+  
   fp = fopen(trackp, "r");
   if(fp)
   {
     fread(b, 1, 4, fp);
     //print("Chunk ID: %s\n", b);
-
+    
     fread(b, 1, 4, fp);
     int fileSize = b[3] << 24 | b[2] << 16 | b[1] << 8 | b[0];
     //print("File Size: %d\n", fileSize);
-
+    
     fread(b, 1, 4, fp);
     //print("RIFF Type: %s\n", b);
 
     fread(b, 1, 4, fp);
     //print("Chunk ID: %s\n", b);
-
+    
     fread(b, 1, 4, fp);
     int chunkDataSize = b[3] << 24 | b[2] << 16 | b[1] << 8 | b[0];
     //print("Chunk data size: %d\n", chunkDataSize);
@@ -167,7 +167,7 @@ void wav_reader(void *par)
     else
     {
       extraFormatBytes = 0;
-    }
+    }  
     //print("Extra format bytes: %d\n", extraFormatBytes);
 
     fread(b, 1, 4, fp);
@@ -182,21 +182,21 @@ void wav_reader(void *par)
     fread(wavDacBufferL, 1, 512, fp);
     //tf = CNT;
     //int t = tf - ti;
-    //print("\nClock ticks for 512 bytes = %d\n", t);
+    //print("\nClock ticks for 512 bytes = %d\n", t); 
     //byteRate = CLKFREQ*32/t*16;
-    //print("Bandwidth (bytes/sec): = %d\n\n", byteRate);
+    //print("Bandwidth (bytes/sec): = %d\n\n", byteRate); 
     fread(wavDacBufferH, 1, 512, fp);
-
+       
     if(!cog)
       cog = cogstart(&audio_dac, NULL, stack, sizeof(stack)) + 1;
-
+    
     int reps = (fileSize-1)/1024;
     playing = 1;
     settingUp = 0;
     int i;
-
+    
     for(i = 1; i < reps; i++)
-    {
+    { 
       while(swap != 2);
       fread(wavDacBufferL, 1, BUF_SIZE, fp);
       while(swap != 1);
@@ -252,7 +252,7 @@ void audio_dac(void *par)
       waitcnt(t+=dtSample);
     }
   }
-}
+}  
 
 
 /**

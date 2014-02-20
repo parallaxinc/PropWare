@@ -6,7 +6,7 @@
  * @version 0.85
  *
  * @copyright
- * Copyright (C) 2013, Parallax Inc.
+ * Copyright (C) 2013, Parallax Inc. 
  * See end of file for terms of use.
  *
  * Simple Terminal Library API definition.
@@ -171,44 +171,44 @@ char *getStr(char *buffer, int max);
 
 /**
  * Print a string representation of a binary number to the debug port.
- * @param value is number to print.
- * @param digits is number of characters to print.
+ * @param value is number to print. 
+ * @param digits is number of characters to print. 
  */
 void putBin(int value);
 /**
  * Send a char on the debug port.
- * @param c is the char to send.
+ * @param c is the char to send. 
  */
 void putChar(char c);
 /**
  * Print a string representation of a decimal number to the debug port.
- * @param value is number to print.
+ * @param value is number to print. 
  */
 void putDec(int value);
 /**
  * Print a string representation of a 32 bit floating point number to the debug port.
- * @param value is number to print.
+ * @param value is number to print. 
  */
 void putFloat(float value);
 /**
  * Print a string representation of a hexadecimal number to the debug port.
- * @param value is number to print.
- * @param digits is number of characters to print.
+ * @param value is number to print. 
+ * @param digits is number of characters to print. 
  */
 void putHex(int value);
 /**
  * Send a string + new line on the transmit debug port.
- * @param str is the null terminated string to send.
+ * @param str is the null terminated string to send. 
  */
 int  putln(const char* str);
 /**
  * Send a string + new line on the transmit debug port. This is an alias of putln.
- * @param str is the null terminated string to send.
+ * @param str is the null terminated string to send. 
  */
 int  putLine(const char* str);
 /**
  * Send a string on the transmit debug port.
- * @param str is the null terminated string to send.
+ * @param str is the null terminated string to send. 
  */
 int  putStr(const char* str);
 
@@ -259,79 +259,79 @@ char *readStr(text_t *device, char *buffer, int max);
 /**
  * Print a string representation of a binary number to the debug port.
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
+ * @param value is number to print. 
  */
 void writeBin(text_t *device, int value);
 /**
  * Print a string representation of a binary number to output
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
- * @param digits is number of characters to print.
+ * @param value is number to print. 
+ * @param digits is number of characters to print. 
  */
 void writeBinDigits(text_t *device, int value, int digits);
 /**
  * Send a char on the transmit device.
  * @param device is a previously open/started terminal device.
- * @param c is the char to send.
+ * @param c is the char to send. 
  */
 void writeChar(text_t *device, char c);
 /**
  * Print a string representation of a decimal number to output
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
+ * @param value is number to print. 
  */
 void writeDec(text_t *device, int value);
 /**
  * Print a string representation of a decimal number to output
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
- * @param width is number of characters to print padded by spaces.
+ * @param value is number to print. 
+ * @param width is number of characters to print padded by spaces. 
  */
 void writeDecDigits(text_t *device, int value, int width);
 /**
  * Print a string representation of a 32 bit floating point number to device
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
+ * @param value is number to print. 
  */
 void writeFloat(text_t *device, float value);
 /**
  * Print a string representation of a hexadecimal number to output
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
+ * @param value is number to print. 
  */
 void writeHex(text_t *device, int value);
 /**
  * Print a string representation of a hexadecimal number to output
  * @param device is a previously open/started terminal device.
- * @param value is number to print.
- * @param digits is number of hexadecimal characters to print.
+ * @param value is number to print. 
+ * @param digits is number of hexadecimal characters to print. 
  */
 void writeHexDigits(text_t *device, int value, int digits);
 /**
  * Print a string representation of a 32 bit floating point number to device
  * @param device is a previously open/started terminal device.
- * @param width is number of characters to print.
- * @param precision is number of decimal point digits to print.
- * @param value is number to print.
+ * @param width is number of characters to print. 
+ * @param precision is number of decimal point digits to print. 
+ * @param value is number to print. 
  */
 void writeFloatPrecision(text_t *device, float value, int width, int precision);
 /**
  * Send a string + new line on the transmit device.
  * @param device is a previously open/started terminal device.
- * @param str is the null terminated string to send.
+ * @param str is the null terminated string to send. 
  */
 int  writeLine(text_t *device, char* str);
 /**
  * Send a string on the transmit device.
  * @param device is a previously open/started terminal device.
- * @param str is the null terminated string to send.
+ * @param str is the null terminated string to send. 
  */
 int  writeStr(text_t *device, char* str);
 /**
  * Send a string on the transmit device.
  * @param device is a previously open/started terminal device.
- * @param str is the null terminated string to send.
- * @param width is number of characters to print padded by spaces.
+ * @param str is the null terminated string to send. 
+ * @param width is number of characters to print padded by spaces. 
  */
 int  writeStrDigits(text_t *device, char* str, int width);
 

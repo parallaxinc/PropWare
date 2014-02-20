@@ -14,7 +14,7 @@ char* float2string(float f, char *s, int ccount, int digits)
 {
   union convert  {
     float v;
-    int   w;
+    int   w; 
   } fval;
 
   int m = 0;
@@ -37,7 +37,7 @@ char* float2string(float f, char *s, int ccount, int digits)
   int clamp = 6; /* a buffer must be at least clamp + 4 digits */
   digits = (digits > clamp) ? clamp : digits;
 
-  if(f < 0.0)
+  if(f < 0.0) 
   {
     sign = 1;
     f = -f;
@@ -52,7 +52,7 @@ char* float2string(float f, char *s, int ccount, int digits)
   // Using 2^10x has similar values to 10^3x. */
   fval.v = f;
   g = fval.w;
-
+  
   g >>= 23;
   g &= 0xFF;
   g -= 127;
@@ -86,7 +86,7 @@ char* float2string(float f, char *s, int ccount, int digits)
       c += 48;
       s[j++] = c;
     }
-  }
+  }  
 
   /* If digits > current size, move right, then pad with spaces
   // if(digits < 0) digits = 0; */
@@ -98,15 +98,15 @@ char* float2string(float f, char *s, int ccount, int digits)
   q = j;
   n = p;
 
-  if(offset > 0)
-  {
+  if(offset > 0) 
+  { 
     for( ; j >= 0; )
     {
-      s[n--] = s[j--];
+      s[n--] = s[j--];      
     }
     for( ; n >= 0; )
     {
-      s[n--] = ' ';
+      s[n--] = ' ';      
     }
     j = p;
   }
@@ -129,18 +129,18 @@ char* float2string(float f, char *s, int ccount, int digits)
 
   m = j-1;
   j--;
-  if(s[j] >= '5')
+  if(s[j] >= '5') 
   {
     j--;
     for( ; (j >= 0); j--)
     {
       if((s[j] < '0')||(s[j] > '9')) continue;
-      if(s[j] < '9')
+      if(s[j] < '9') 
       {
         s[j]++;
         break;
       }
-      else
+      else 
       {
         s[j] = '0';
       }
@@ -156,7 +156,7 @@ char* float2string(float f, char *s, int ccount, int digits)
 {
   union convert  {
     float v;
-    int   w;
+    int   w; 
   } fval;
 
   int m = 0;
@@ -179,7 +179,7 @@ char* float2string(float f, char *s, int ccount, int digits)
   int clamp = 6; /* a buffer must be at least clamp + 4 digits */
   digits = (digits > clamp) ? clamp : digits;
 
-  if(f < 0.0)
+  if(f < 0.0) 
   {
     sign = 1;
     f = -f;
@@ -194,7 +194,7 @@ char* float2string(float f, char *s, int ccount, int digits)
   // Using 2^10x has similar values to 10^3x. */
   fval.v = f;
   g = fval.w;
-
+  
   g >>= 23;
   g &= 0xFF;
   g -= 127;
@@ -229,7 +229,7 @@ char* float2string(float f, char *s, int ccount, int digits)
         s[j++] = '0';
       }
     }
-  }
+  }  
 
   /* If digits > current size, move right, then pad with spaces
   // if(digits < 0) digits = 0; */
@@ -241,15 +241,15 @@ char* float2string(float f, char *s, int ccount, int digits)
   q = j;
   n = p;
 
-  if(offset > 0)
-  {
+  if(offset > 0) 
+  { 
     for( ; j >= 0; )
     {
-      s[n--] = s[j--];
+      s[n--] = s[j--];      
     }
     for( ; n >= 0; )
     {
-      s[n--] = ' ';
+      s[n--] = ' ';      
     }
     j = p;
   }
@@ -272,18 +272,18 @@ char* float2string(float f, char *s, int ccount, int digits)
 
   m = j-1;
   j--;
-  if(s[j] >= '5')
+  if(s[j] >= '5') 
   {
     j--;
     for( ; (j >= 0); j--)
     {
       if((s[j] < '0')||(s[j] > '9')) continue;
-      if(s[j] < '9')
+      if(s[j] < '9') 
       {
         s[j]++;
         break;
       }
-      else
+      else 
       {
         s[j] = '0';
       }

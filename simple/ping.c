@@ -14,7 +14,7 @@ int ping_cm(int pin)
   return cmDist;
 }
 
-int ping_inches(int pin)
+int ping_inches(int pin) 
 {
   long tEcho = ping(pin);
   int inDist = tEcho / 148;

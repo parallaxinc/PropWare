@@ -25,20 +25,20 @@ extern "C" {
  * @brief Approximation of PI for converting g to angular values like
  * rotation and tilt.
  */
-#ifndef PI
-#define PI 3.141592653589793
+#ifndef PI 
+#define PI 3.141592653589793 
 #endif
 
 /**
- * @brief Measure acceleration in terms of g (acceleration due to earth's
+ * @brief Measure acceleration in terms of g (acceleration due to earth's 
  * gravity). A measurement of +/-1250 corresponds to approximately +/- 1 g.
  *
  * @param axisPin Number of I/O pin connected to either MX2125's X- or Y-
  * axis pins.
  *
  * @returns Value that represents 1250ths of a g acting on the
- * axis. 1250ths is a nominal value, the accelerometer is not that
- * precise.
+ * axis. 1250ths is a nominal value, the accelerometer is not that 
+ * precise. 
  */
 int mx_accel(int axisPin);
 
@@ -51,29 +51,29 @@ int mx_accel(int axisPin);
  *
  * @param yPin Number of I/O pin connected to MX2125's y-axis pin.
  *
- * @returns Integer degree value (0 to 359) that represents the clockwise
- * angle of rotation.
+ * @returns Integer degree value (0 to 359) that represents the clockwise 
+ * angle of rotation. 
  */
-int mx_rotate(int xPin, int yPin);
+int mx_rotate(int xPin, int yPin); 
 
 /**
- * @brief Measure the level of tilt in terms of +/- 90 degrees. 0 degrees
- * is when the top surface of the accelerometer chip is parallel to the
+ * @brief Measure the level of tilt in terms of +/- 90 degrees. 0 degrees 
+ * is when the top surface of the accelerometer chip is parallel to the 
  * ground.
  *
  * @param axisPin Number of I/O pin connected to either of MX2125's X- or Y-
  * axis pins.
  *
- * @returns Value from 0 to 90 that represents the tilt of that axis.
+ * @returns Value from 0 to 90 that represents the tilt of that axis. 
  */
 int mx_tilt(int axisPin);
 
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */ 
 #endif
-/* MX2125_H */
+/* MX2125_H */ 
 
 /**
 * TERMS OF USE: MIT License

@@ -8,7 +8,7 @@
 * @copyright
 * Copyright (C) Parallax, Inc. 2012. All Rights MIT Licensed.
 *
-* @brief Measure Ping))) Ultrasonic Distance Sensor values in cm, inches,
+* @brief Measure Ping))) Ultrasonic Distance Sensor values in cm, inches, 
 * or microsecond echo return times.
 */
 
@@ -56,9 +56,9 @@ int ping_inches(int pin);
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */ 
 #endif
-/* PING_H */
+/* PING_H */ 
 
 /**
 * TERMS OF USE: MIT License

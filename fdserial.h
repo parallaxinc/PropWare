@@ -59,7 +59,7 @@ typedef struct fdserial_struct
 } fdserial_st;
 
 /**
- * @brief Initializes and starts native assembly driver in a cog.
+ * @brief Initializes and starts native assembly driver in a cog. 
  * @param rxpin is pin number for receive input
  * @param txpin is pin number for transmit output
  * @param mode is interface mode
@@ -69,19 +69,19 @@ typedef struct fdserial_struct
 fdserial *fdserial_open(int rxpin, int txpin, int mode, int baudrate);
 
 /**
- * @brief Stop stops the cog running the native assembly driver
+ * @brief Stop stops the cog running the native assembly driver 
  */
 void fdserial_close(fdserial *term);
 
 /**
  * @brief Gets a byte from the receive queue if available
  * function does not block.
- * @returns receive byte 0 to 0xff or -1 if none available
+ * @returns receive byte 0 to 0xff or -1 if none available 
  */
 int  fdserial_rxCheck(fdserial *term);
 
 /**
- * @brief Empties the receive queue
+ * @brief Empties the receive queue 
  */
 void fdserial_rxFlush(fdserial *term);
 
@@ -96,20 +96,20 @@ int  fdserial_rxReady(fdserial *term);
  * @brief Gets a byte from the receive queue if available by timeout
  * function blocks if no recieve for ms timeout.
  * @param ms is number of milliseconds to wait for a char
- * @returns receive byte 0 to 0xff or -1 if none available
+ * @returns receive byte 0 to 0xff or -1 if none available 
  */
 int  fdserial_rxTime(fdserial *term, int ms);
 
 /**
  * @brief Waits for a byte from the receive queue. blocks until somehting is ready
- * @returns received byte.
+ * @returns received byte. 
  */
 int  fdserial_rxChar(fdserial *term);
 
 /**
  * @brief Sends a byte on the transmit queue.
- * @param txbyte is byte to send.
- * @returns waits for and returns received byte if mode is 8
+ * @param txbyte is byte to send. 
+ * @returns waits for and returns received byte if mode is 8 
  */
 int  fdserial_txChar(fdserial *term, int txbyte);
 
@@ -128,7 +128,7 @@ void fdserial_txFlush(fdserial *term);
 }
 #endif
 
-#endif
+#endif 
 /* __FDSerial_H */
 
 /*

@@ -1,6 +1,6 @@
 /**
  * @file serial_open.c
- * Opens a serial module.
+ * Opens a serial module. 
  *
  * Copyright (c) 2013, Parallax Inc.
  * Written by Steve Denson
@@ -29,7 +29,7 @@ serial *serial_open(int rxpin, int txpin, int mode, int baudrate)
   serptr = (Serial_t*) malloc(sizeof(Serial_t));
   text->devst = serptr;
   //memset((char*)serptr, 0, sizeof(Serial_t));
-
+  
   text->txChar    = serial_txChar;     /* required for terminal to work */
   text->rxChar    = serial_rxChar;     /* required for terminal to work */
 

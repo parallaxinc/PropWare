@@ -58,7 +58,7 @@ float string2float(char *s, char **end)
   for( ; (*s >= '0') && (*s <= '9'); s++) {
     n += (x * ch2int(*s));
     x /= 10.0;
-  }
+  } 
   *end = s; /* need for scanf */
   return n * sign;
 }

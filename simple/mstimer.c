@@ -16,7 +16,7 @@
 static volatile int t, dt, cog;               // Global var for cogs to share
 static unsigned int stack[40 + 25];           // Stack vars for other cog
 
-void ms_timer(void *par);
+void ms_timer(void *par);                 
 
 int mstime_start()
 {
@@ -30,7 +30,7 @@ void mstime_stop()
   {
     cogstop(cog -1);
     cog = 0;
-  }
+  }    
 }
 
 int mstime_get()
@@ -49,15 +49,15 @@ void mstime_set(int newTime)
 }
 
 // Function runs in another cog
-void ms_timer(void *par)
+void ms_timer(void *par)                      
 {
   dt = CLKFREQ/1000;
   int ticks = CNT;
-  while(1)
+  while(1)                                   
   {
-    waitcnt(ticks+=dt);
-    t++;
-  }
+    waitcnt(ticks+=dt);                              
+    t++;                                     
+  }                            
 }
 
 /**

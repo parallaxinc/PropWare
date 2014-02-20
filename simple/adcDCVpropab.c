@@ -7,7 +7,7 @@
  * Copyright (C) Parallax, Inc. 2013. All Rights MIT Licensed.
  *
  * @brief Measure ADC124S021 voltage as a floating point value.
- * @n @n <b><i>CONSTRUCTION ZONE:</i></b> This library is preliminary, major revisions
+ * @n @n <b><i>CONSTRUCTION ZONE:</i></b> This library is preliminary, major revisions 
  * pending, not for release.
  */
 

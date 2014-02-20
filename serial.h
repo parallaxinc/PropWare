@@ -56,14 +56,14 @@ void serial_close(serial *device);
 /**
  * Gets a byte from the receive queue if available. Function does not block.
  * @param device is a previously open/started terminal device.
- * @returns receive byte 0 to 0xff or -1 if none available
+ * @returns receive byte 0 to 0xff or -1 if none available 
  */
 int  serial_rxChar(serial *device);
 /**
  * Sends a byte on the transmit queue.
  * @param device is a previously open/started terminal device.
- * @param txbyte is byte to send.
- * @returns waits for and returns received byte if mode is 8
+ * @param txbyte is byte to send. 
+ * @returns waits for and returns received byte if mode is 8 
  */
 int  serial_txChar(serial *device, int txbyte);
 

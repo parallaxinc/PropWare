@@ -8,11 +8,11 @@
  * @copyright
  * Copyright (C) Parallax, Inc. 2013. All Rights MIT Licensed.
  *
- * @brief This library provides convenience
+ * @brief This library provides convenience 
  * functions for reading measurements from the Parallax Compass Module
  * 3-Axis HMC5883L.
- * @n @n <b><i>CONSTRUCTION ZONE:</i></b> This library is preliminary, major revisions
- * pending.
+ * @n @n <b><i>CONSTRUCTION ZONE:</i></b> This library is preliminary, major revisions 
+ * pending. 
  */
 
 #ifndef COMPASS3D_H
@@ -29,8 +29,8 @@ extern "C" {
  * @brief Initialize the Compass
  *
  * @details This function initializes the compass, but
- * before calling it, you have to set up an I2C bus.
- * Example: Assuming the your program is using the
+ * before calling it, you have to set up an I2C bus.  
+ * Example: Assuming the your program is using the 
  * simpletools library, you can use:
  *
  *   @code
@@ -40,13 +40,13 @@ extern "C" {
  * ... where sclPin is the number of the I/O pin
  * connected to the compass module's SCL line and sdaPin
  * is the number of the pin connected to the module's
- * SDA line.
+ * SDA line. 
  *
  * @param I2C bus pointer.  In the example above, the pointer
- * is mybus.
+ * is mybus.  
  *
  * @returns void, but it will display an error message if the
- * compass module does not respond.
+ * compass module does not respond. 
  */
 void compass_init(i2c *bus);
 
@@ -57,29 +57,29 @@ void compass_init(i2c *bus);
  * bus, reads its x, y, and z values and loads them into
  * variables that are passed by address.
  *
- * @param *bus A pointer to the I2C bus (mybus in the
+ * @param *bus A pointer to the I2C bus (mybus in the 
  * example above).
  *
- * @param *px A pointer to a variable to receive the
+ * @param *px A pointer to a variable to receive the 
  * x-value measurement.
  *
- * @param *py A pointer to a variable to receive the
+ * @param *py A pointer to a variable to receive the 
  * y-value measurement.
  *
- * @param *pz A pointer to a variable to receive the
+ * @param *pz A pointer to a variable to receive the 
  * z-value measurement.
  *
  * @returns void, but it will display an error message if the
- * compass module does not respond.
+ * compass module does not respond. 
  */
 void compass_read(i2c *bus, int *px, int *py, int *pz);
 
 #if defined(__cplusplus)
 }
 #endif
-/* __cplusplus */
+/* __cplusplus */  
 #endif
-/* COMPASS3D_H */
+/* COMPASS3D_H */  
 
 /**
  * TERMS OF USE: MIT License
