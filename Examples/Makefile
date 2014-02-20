@@ -35,6 +35,9 @@ all:
 	
 	$(shell mkdir $(MKDIR_FLAG) I2C$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C I2C/Debug -f ../Makefile
+	
+	$(shell mkdir $(MKDIR_FLAG) SimpleText$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C SimpleText/Debug -f ../Makefile
 
 clean:
 	$(shell mkdir $(MKDIR_FLAG) HD44780$(DIR_DIV)Debug $(NULL))
@@ -60,3 +63,6 @@ clean:
 	
 	$(shell mkdir $(MKDIR_FLAG) I2C$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C I2C/Debug -f ../Makefile clean
+	
+	$(shell mkdir $(MKDIR_FLAG) SimpleText$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C SimpleText/Debug -f ../Makefile clean
