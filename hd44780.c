@@ -154,7 +154,7 @@ int8_t hd44780_start (const uint32_t dataPinsMask, const uint32_t rs,
     return 0;
 }
 
-inline void hd44780_clear (void) {
+void hd44780_clear (void) {
     hd44780_cmd(HD44780_CLEAR);
     g_hd44780_curRow = 0;
     g_hd44780_curCol = 0;
@@ -342,7 +342,7 @@ void hd44780_hex (uint32_t x) {
         hd44780_putchar(buf[i - j - 1]);
 }
 
-inline void hd44780_cmd (const uint8_t c) {
+void hd44780_cmd (const uint8_t c) {
     //set RS to command mode and RW to write
     gpio_pin_clear(g_hd44780_rs);
     hd44780_write(c);

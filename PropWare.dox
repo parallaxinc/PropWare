@@ -239,7 +239,7 @@
 
             <li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
                 "Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's
-                include folder (on Linux, /opt/parallax/propeller-elf/include)
+                include folder (on Linux & Mac, /opt/parallax/propeller-elf/include)
                 <ul>
                     <li>This is done simply for the indexer that helps you keep track of included files - it will not
                         affect the build process and can be skipped (not recommended)

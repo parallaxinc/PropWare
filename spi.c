@@ -118,11 +118,11 @@ uint8_t spi_stop (void) {
     return 0;
 }
 
-inline int8_t spi_is_running (void) {
+int8_t spi_is_running (void) {
     return !(((int8_t) -1) == g_spiCog);
 }
 
-inline uint8_t spi_wait (void) {
+uint8_t spi_wait (void) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
     // Wait for GAS cog to read in value and write -1
@@ -134,7 +134,7 @@ inline uint8_t spi_wait (void) {
     return 0;
 }
 
-inline uint8_t spi_wait_specific (const uint32_t value) {
+uint8_t spi_wait_specific (const uint32_t value) {
     const uint32_t timeoutCnt = SPI_WR_TIMEOUT_VAL + CNT;
 
     // Wait for GAS cog to read in value and write -1

@@ -10,7 +10,6 @@ OBJS = $(PRJ).o
 BOARD = QUICKSTART
 MODEL = lmm
 CFLAGS = -Os
-LIBS = simplei2c
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH

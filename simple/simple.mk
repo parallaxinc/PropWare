@@ -54,41 +54,17 @@ endif
 # libgcc directory
 LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 
-# Define a default memory model
-ifndef MODEL
-	MODEL=lmm
-endif
-
-# Define a default board
-ifndef BOARD
-	BOARD=$(PROPELLER_LOAD_BOARD)
-endif
-
-ifneq ($(BOARD),)
-	BOARDFLAG=-b$(BOARD)
-endif
-
 CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
 CFLAGS += -m$(MODEL) -Wall -m32bit-doubles -std=c99
 CXXFLAGS += $(CFLAGS) -Wall
-LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
-LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -ltiny
 
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
 	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib/cmm'
 else
 	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib'
-endif
-
-# Add the appropriate PropWare and Simple library folder to the search path
-LIB_INC += -L'$(PROPWARE_PATH)/$(MODEL)'
-LIB_INC += -L'$(PROPWARE_PATH)/simple/$(MODEL)'
-
-ifneq ($(LDSCRIPT),)
-	LDFLAGS += -T '$(LDSCRIPT)'
 endif
 
 # basic gnu tools
@@ -108,28 +84,19 @@ SPINDIR=.
 # #########################################################
 # Build Commands
 # #########################################################
-ifneq ($(NAME),)
-$(NAME).elf: $(OBJS)
-	@echo 'Building target: $@'
-	@echo 'Invoking: PropGCC Linker'
-	$(CC) $(LDFLAGS) $(LIB_INC) -o $@ $(OBJS) $(LIBS)
-	@echo 'Finished building target: $@'
-	@echo ' '
-endif
-
 ifneq ($(LIBNAME),)
 lib$(LIBNAME).a: $(OBJS)
 	$(AR) rs $@ $(OBJS)
 endif
 
-%.o: ../%.c ../%.h
+%.o: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.o: ../%.cpp ../%.h
+%.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropG++ Compiler'
 	$(CC) $(INC) $(CXXFLAGS) -o $@ -c $<
@@ -155,7 +122,7 @@ endif
 # run in a COG separate from the main program; i.e., it's a COG
 # driver that the linker will place in the .text section.
 #
-%.cog: ../%.c ../%.h
+%.cog: ../%.c
 	@echo "Building file: $<'
 	@echo "Invoking: PropGCC Compiler"
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
@@ -163,7 +130,7 @@ endif
 	@echo "Finished building: $<'
 	@echo ' '
 
-%.cog: ../%.cogc ../%.h
+%.cog: ../%.cogc
 	@echo "Building file: $<'
 	@echo "Invoking: PropGCC Compiler"
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
@@ -177,7 +144,7 @@ endif
 # driver that the linker will place in the .drivers section which
 # gets loaded to high EEPROM space above 0x8000.
 #
-%.ecog: ../%.c ../%.h
+%.ecog: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
@@ -186,7 +153,7 @@ endif
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.ecog: ../%.ecogc ../%.h
+%.ecog: ../%.ecogc
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
@@ -218,15 +185,3 @@ endif
 
 clean:
 	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary $(NULL)
-
-# #########################################################
-# how to run on RAM
-# #########################################################
-run: $(NAME).elf
-	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t
-
-# #########################################################
-# how to run on ROM
-# #########################################################
-install: $(NAME).elf
-	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t -e
