@@ -48,6 +48,10 @@
 #include <stdlib.h>
 #include <PropWare.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 /** @name   SPI Extra Code Options
  * @{ */
 /**
@@ -362,5 +366,9 @@ static inline uint8_t spi_read_par (void *par, const size_t size);
 /**@}*/
 
 /**@}*/
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* SPI_H_ */

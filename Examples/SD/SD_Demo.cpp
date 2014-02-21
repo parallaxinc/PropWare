@@ -28,34 +28,35 @@
 #include "SD_Demo.h"
 
 // Main function
-void main (void) {
+int main () {
     uint8_t err;
     char c;
 
-    SD_File f, f2;
+    SD sd;
+    SD::File f, f2;
 
 #ifndef LOW_RAM_MODE
-    /* Option 1: Create at least one new sd_buffer variable
+    /* Option 1: Create at least one new SD::Buffer variable
      *
-     * An extra 526 bytes of memory are required to create a new sd_buffer
+     * An extra 526 bytes of memory are required to create a new SD::Buffer
      * for the file variable, but speed will be increased if files are
      * being switched often. Using this option will allow the directory
      * contents to be kept in RAM while a file is loaded.
      *
      */
-    SD_Buffer fileBuf;  // If extra RAM is available
-    SD_Buffer fileBuf2;
+    SD::Buffer fileBuf;  // If extra RAM is available
+    SD::Buffer fileBuf2;
     f.buf = &fileBuf;
     f2.buf = &fileBuf2;
 #else
-    /* Option 2: Use the generic buffer [i.e. g_sd_buf] as the buffer
+    /* Option 2: Use the generic buffer [i.e. SD.m_buf] as the buffer
      *
      * Good for low-RAM situations due to the re-use of g_sd_buf. Speed is
      * decreased when multiple files are used often.
      *
      */
-    f.buf = &g_sd_buf;
-    f2.buf = &g_sd_buf;
+    f.buf = &(sd.m_buf);
+    f2.buf = &(sd.m_buf);
 #endif
 
 #ifdef DEBUG
@@ -63,20 +64,20 @@ void main (void) {
 #endif
 
     // Start your engines!!!
-    if ((err = sd_start(MOSI, MISO, SCLK, CS, -1)))
+    if ((err = sd.start(MOSI, MISO, SCLK, CS, -1)))
         error(err);
 
 #ifdef DEBUG
     printf("SD routine started. Mounting now...\n");
 #endif
-    if ((err = sd_mount()))
+    if ((err = sd.mount()))
         error(err);
 #ifdef DEBUG
     printf("FAT partition mounted!\n");
 #endif
 
 #ifdef TEST_SHELL
-    sd_shell(&f);
+    sd.shell(&f);
 #elif (defined TEST_WRITE)
     // Create a blank file and copy the contents of STUFF.TXT into it
     SDfopen(OLD_FILE, &f, SD_FILE_MODE_R);
@@ -135,6 +136,8 @@ void main (void) {
         gpio_pin_toggle(BIT_16);
         waitcnt(CLKFREQ/2 + CNT);
     }
+
+    return 0;
 }
 
 void error (const uint8_t err) {

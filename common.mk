@@ -68,9 +68,10 @@ ifneq ($(BOARD),)
 	BOARDFLAG=-b$(BOARD)
 endif
 
-CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
-CFLAGS += -m$(MODEL) -Wall -m32bit-doubles -std=c99
-CXXFLAGS += $(CFLAGS) -Wall
+CFLAGS_NO_MODEL := -Wall -m32bit-doubles
+CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
+CSTANDARD = -std=c99
+CXXFLAGS += $(CFLAGS)
 LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
@@ -94,7 +95,7 @@ endif
 # basic gnu tools
 GCC_PATH = $(PROPGCC_PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
-CXX = $(GCC_PATH)/propeller-elf-g++
+CXX = $(GCC_PATH)/propeller-elf-gcc
 LD = $(GCC_PATH)/propeller-elf-ld
 AS = $(GCC_PATH)/propeller-elf-as
 AR = $(GCC_PATH)/propeller-elf-ar
@@ -125,7 +126,7 @@ endif
 %.o: ../%.c ../%.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
-	$(CC) $(INC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(INC) $(CFLAGS) $(CSTANDARD) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -158,7 +159,7 @@ endif
 %.cog: ../%.c ../%.h
 	@echo "Building file: $<'
 	@echo "Invoking: PropGCC Compiler"
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
 	@echo "Finished building: $<'
 	@echo ' '
@@ -166,7 +167,7 @@ endif
 %.cog: ../%.cogc ../%.h
 	@echo "Building file: $<'
 	@echo "Invoking: PropGCC Compiler"
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
 	@echo "Finished building: $<'
 	@echo ' '
@@ -180,7 +181,7 @@ endif
 %.ecog: ../%.c ../%.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
 	@echo 'Renaming: ".text" section'
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
 	@echo 'Finished building: $<'
@@ -189,7 +190,7 @@ endif
 %.ecog: ../%.ecogc ../%.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
 	@echo 'Renaming: ".text" section'
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
 	@echo 'Finished building: $<'

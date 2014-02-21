@@ -49,7 +49,7 @@
 #include <sd.h>
 
 #ifdef DEBUG
-#include <stdio.h>
+#include <tinyio.h>
 #endif
 
 #if (!(defined SD_OPTION_VERBOSE) && !(defined SD_OPTION_VERBOSE_BLOCKS))
