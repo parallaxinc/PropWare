@@ -39,7 +39,7 @@
  */
 
 #include <propeller.h>
-#include <stdio.h>
+#include <tinyio.h>
 #include <stdlib.h>
 
 #include <PropWare.h>

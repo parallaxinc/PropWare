@@ -39,7 +39,9 @@ int main () {
 
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
         error(err);
-    spi_set_clock(FREQ);
+
+    // Retrieve the SPI module and manually set the clock frequency
+    PropWare::SPI::getSPI()->set_clock(FREQ);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);

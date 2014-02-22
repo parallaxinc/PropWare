@@ -31,108 +31,15 @@
 
 namespace PropWare {
 
-/**
- * Public constants
- */
-const uint8_t SD::LINE_SIZE = 16;
-const uint16_t SD::SECTOR_SIZE = SD_SECTOR_SIZE;
-const uint32_t SD::DEFAULT_SPI_FREQ = 1800000;
-const int8_t SD::FOLDER_ID = -1;
-const uint8_t SD::SHELL_INPUT_LEN = SD_SHELL_INPUT_LEN;
-const uint8_t SD::SHELL_CMD_LEN = SD_SHELL_CMD_LEN;
-const uint8_t SD::SHELL_ARG_LEN = SD_SHELL_ARG_LEN;
+// Intialize string constants
 const char SD::SHELL_EXIT[] = "exit";
 const char SD::SHELL_LS[] = "ls";
 const char SD::SHELL_CAT[] = "cat";
 const char SD::SHELL_CD[] = "cd";
 const char SD::SHELL_TOUCH[] = "touch";
 
-/**
- * Private constants
- */
-const uint32_t SD::SPI_INIT_FREQ = 200000;
-const SPI_Mode SD::SPI_MODE = SPI_MODE_0;
-const SPI_BitMode SD::SPI_BITMODE = SPI_MSB_FIRST;
 const uint32_t SD::RESPONSE_TIMEOUT = CLKFREQ / 10;
 const uint32_t SD::WIGGLE_ROOM = RESPONSE_TIMEOUT / 50;
-const uint8_t SD::SECTOR_SIZE_SHIFT = 9;
-const uint8_t SD::CMD_IDLE = 0x40 + 0;
-const uint8_t SD::CMD_INTERFACE_COND = 0x40 + 8;
-const uint8_t SD::CMD_RD_CSD = 0x40 + 9;
-const uint8_t SD::CMD_RD_CID = 0x40 + 10;
-const uint8_t SD::CMD_RD_BLOCK = 0x40 + 17;
-const uint8_t SD::CMD_WR_BLOCK = 0x40 + 24;
-const uint8_t SD::CMD_WR_OP = 0x40 + 41;
-const uint8_t SD::CMD_APP = 0x40 + 55;
-const uint8_t SD::CMD_READ_OCR = 0x40 + 58;
-const uint32_t SD::HOST_VOLTAGE_3V3 = 0x01;
-const uint32_t SD::R7_CHECK_PATTERN = 0xAA;
-const uint32_t SD::SD::ARG_CMD8 = ((SD::HOST_VOLTAGE_3V3 << 8) |
-        SD::R7_CHECK_PATTERN);
-const uint32_t SD::ARG_LEN = 5;
-const uint8_t SD::CRC_IDLE = 0x95;
-const uint8_t SD::CRC_CMD8 = 0x87;
-const uint8_t SD::CRC_ACMD = 0x77;
-const uint8_t SD::CRC_OTHER = 0x01;
-const uint8_t SD::RESPONSE_IDLE = 0x01;
-const uint8_t SD::RESPONSE_ACTIVE = 0x00;
-const uint8_t SD::DATA_START_ID = 0xFE;
-const uint8_t SD::RESPONSE_LEN_R1 = 1;
-const uint8_t SD::RESPONSE_LEN_R3 = 5;
-const uint8_t SD::RESPONSE_LEN_R7 = 5;
-const uint8_t SD::RSPNS_TKN_BITS = 0x0f;
-const uint8_t SD::RSPNS_TKN_ACCPT = (0x02 << 1) | 1;
-const uint8_t SD::RSPNS_TKN_CRC = (0x05 << 1) | 1;
-const uint8_t SD::RSPNS_TKN_WR = (0x06 << 1) | 1;
-const uint8_t SD::FAT_16 = 2;
-const uint8_t SD::FAT_32 = 4;
-const uint8_t SD::BOOT_SECTOR_ID = 0xEB;
-const uint8_t SD::BOOT_SECTOR_ID_ADDR = 0;
-const uint16_t SD::BOOT_SECTOR_BACKUP = 0x1C6;
-const uint8_t SD::CLUSTER_SIZE_ADDR = 0x0D;
-const uint8_t SD::RSVD_SCTR_CNT_ADDR = 0x0E;
-const uint8_t SD::NUM_FATS_ADDR = 0x10;
-const uint8_t SD::ROOT_ENTRY_CNT_ADDR = 0x11;
-const uint8_t SD::TOT_SCTR_16_ADDR = 0x13;
-const uint8_t SD::FAT_SIZE_16_ADDR = 0x16;
-const uint8_t SD::TOT_SCTR_32_ADDR = 0x20;
-const uint8_t SD::FAT_SIZE_32_ADDR = 0x24;
-const uint8_t SD::ROOT_CLUSTER_ADDR = 0x2c;
-const uint16_t SD::FAT12_CLSTR_CNT = 4085;
-const uint16_t SD::FAT16_CLSTR_CNT = 65525;
-const uint8_t SD::FILE_ENTRY_LENGTH = 32;
-const uint8_t SD::DELETED_FILE_MARK = 0xE5;
-const uint8_t SD::FILE_NAME_LEN = SD_FILE_NAME_LEN;
-const uint8_t SD::FILE_EXTENSION_LEN = SD_FILE_EXTENSION_LEN;
-const uint8_t SD::FILENAME_STR_LEN = SD_FILENAME_STR_LEN;
-const uint8_t SD::FILE_ATTRIBUTE_OFFSET = 0x0B;
-const uint8_t SD::FILE_START_CLSTR_LOW = 0x1A;
-const uint8_t SD::FILE_START_CLSTR_HIGH = 0x14;
-const uint8_t SD::FILE_LEN_OFFSET = 0x1C;
-const int8_t SD::FREE_CLUSTER = 0;
-const int8_t SD::RESERVED_CLUSTER = 1;
-const int8_t SD::RSVD_CLSTR_VAL_BEG = -15;
-const int8_t SD::BAD_CLUSTER = -8;
-const int32_t SD::EOC_BEG = -7;
-const int32_t SD::EOC_END = -1;
-const uint8_t SD::READ_ONLY = BIT_0;
-const char SD::READ_ONLY_CHAR = 'r';
-const char SD::READ_ONLY_CHAR_ = 'w';
-const uint8_t SD::HIDDEN_FILE = BIT_1;
-const char SD::HIDDEN_FILE_CHAR = 'h';
-const char SD::HIDDEN_FILE_CHAR_ = '.';
-const uint8_t SD::SYSTEM_FILE = BIT_2;
-const char SD::SYSTEM_FILE_CHAR = 's';
-const char SD::SYSTEM_FILE_CHAR_ = '.';
-const uint8_t SD::VOLUME_ID = BIT_3;
-const char SD::VOLUME_ID_CHAR = 'v';
-const char SD::VOLUME_ID_CHAR_ = '.';
-const uint8_t SD::SUB_DIR = BIT_4;
-const char SD::SUB_DIR_CHAR = 'd';
-const char SD::SUB_DIR_CHAR_ = 'f';
-const uint8_t SD::ARCHIVE = BIT_5;
-const char SD::ARCHIVE_CHAR = 'a';
-const char SD::ARCHIVE_CHAR_ = '.';
 
 /**
  * @brief       Short-hand for checking if a function through an error and
@@ -147,10 +54,13 @@ const char SD::ARCHIVE_CHAR_ = '.';
  *********************************/
 SD::SD () {
     this->m_fileID = 0;
-
 #ifdef SD_OPTION_FILE_WRITE
     this->m_fatMod = false;
 #endif
+}
+
+SD::Buffer* SD::getGlobalBuffer () {
+    return &(this->m_buf);
 }
 
 uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
@@ -160,12 +70,13 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
     uint8_t stageCleared;  // Flag to signal when one stage has completed
 
     // Set CS for output and initialize high
+    this->m_spi = SPI::getSPI();
     this->m_cs = cs;
     gpio_set_dir(cs, GPIO_DIR_OUT);
     gpio_pin_set(cs);
 
     // Start SPI module
-    if ((err = spi_start(mosi, miso, sclk, SD::SPI_INIT_FREQ, SD::SPI_MODE,
+    if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ, SD::SPI_MODE,
             SD::SPI_BITMODE)))
         this->error(err);
 
@@ -183,11 +94,11 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
             // Send at least 72 clock cycles to enable the SD card
             gpio_pin_set(cs);
             for (k = 0; k < 5; ++k)
-                check_errors(spi_shift_out(16, -1));
+                check_errors(this->m_spi->shift_out(16, -1));
 
             // Be very super 100% sure that all clocks have finished ticking
             // before setting chip select low
-            check_errors(spi_wait());
+            check_errors(this->m_spi->wait());
             waitcnt(CLKFREQ / 10 + CNT);
 
             // Chip select goes low for the duration of this function
@@ -285,9 +196,9 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
 //    printf("Increasing clock to full speed\n");
 //#endif
 //    if (-1 == freq || 0 == freq)
-//        spi_set_clock(SD::DEFAULT_SPI_FREQ);
+//        this->m_spi->set_clock(SD::DEFAULT_SPI_FREQ);
 //    else
-//        spi_set_clock(freq);
+//        this->m_spi->set_clock(freq);
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     // If debugging requested, print to the screen CSD and CID registers from SD
@@ -352,8 +263,7 @@ uint8_t SD::mount (void) {
         ++this->m_sectorsPerCluster_shift;
     }
     --this->m_sectorsPerCluster_shift;
-    rsvdSectorCount = this->read_rev_dat16(
-            &((this->m_buf.buf)[SD::RSVD_SCTR_CNT_ADDR]));
+    rsvdSectorCount = this->read_rev_dat16(&((this->m_buf.buf)[SD::RSVD_SCTR_CNT_ADDR]));
     numFATs = this->m_buf.buf[SD::NUM_FATS_ADDR];
 #ifdef SD_OPTION_FILE_WRITE
     if (2 != numFATs)
@@ -1138,14 +1048,14 @@ int8_t SD::send_command (const uint8_t cmd, const uint32_t arg,
     uint8_t err;
 
     // Send out the command
-    check_errors(spi_shift_out(8, cmd));
+    check_errors(this->m_spi->shift_out(8, cmd));
 
     // Send argument
-    check_errors(spi_shift_out(16, (arg >> 16)));
-    check_errors(spi_shift_out(16, arg & WORD_0));
+    check_errors(this->m_spi->shift_out(16, (arg >> 16)));
+    check_errors(this->m_spi->shift_out(16, arg & WORD_0));
 
     // Send sixth byte - CRC
-    check_errors(spi_shift_out(8, crc));
+    check_errors(this->m_spi->shift_out(8, crc));
 
     return 0;
 }
@@ -1158,7 +1068,7 @@ int8_t SD::get_response (uint8_t bytes, uint8_t *dat) {
     timeout = SD::RESPONSE_TIMEOUT + CNT;
     do {
         check_errors(
-                spi_shift_in(8, &this->m_firstByteResponse,
+                this->m_spi->shift_in(8, &this->m_firstByteResponse,
                         sizeof(this->m_firstByteResponse)));
 
         // Check for timeout
@@ -1175,13 +1085,13 @@ int8_t SD::get_response (uint8_t bytes, uint8_t *dat) {
 
         // Read remaining bytes
         while (bytes--)
-            check_errors(spi_shift_in(8, dat++, sizeof(*dat)));
+            check_errors(this->m_spi->shift_in(8, dat++, sizeof(*dat)));
     } else
         return SD::INVALID_RESPONSE;
 
     // Responses should always be followed up by outputting 8 clocks with MOSI
     // high
-    check_errors(spi_shift_out(8, 0xff));
+    check_errors(this->m_spi->shift_out(8, 0xff));
 
     return 0;
 }
@@ -1194,7 +1104,7 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
     timeout = SD::RESPONSE_TIMEOUT + CNT;
     do {
         check_errors(
-                spi_shift_in(8, &this->m_firstByteResponse,
+                this->m_spi->shift_in(8, &this->m_firstByteResponse,
                         sizeof(this->m_firstByteResponse)));
 
         // Check for timeout
@@ -1207,7 +1117,7 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
         // Ignore blank data again
         timeout = SD::RESPONSE_TIMEOUT + CNT;
         do {
-            check_errors(spi_shift_in(8, dat, sizeof(*dat)));
+            check_errors(this->m_spi->shift_in(8, dat, sizeof(*dat)));
 
             // Check for timeout
             if (abs(timeout - CNT) < SD::WIGGLE_ROOM)
@@ -1219,17 +1129,17 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
             // Read in requested data bytes
 #if (defined SPI_FAST_SECTOR)
             if (SD::SECTOR_SIZE == bytes) {
-                spi_shift_in_sector(dat, 1);
+                this->m_spi->shift_in_sector(dat, 1);
                 bytes = 0;
             }
 #endif
             while (bytes--) {
 #if (defined SD_OPTION_DEBUG)
-                check_errors(spi_shift_in(8, dat++, sizeof(*dat)));
+                check_errors(this->m_spi->shift_in(8, dat++, sizeof(*dat)));
 #elif (defined SPI_FAST)
-                spi_shift_in_fast(8, dat++, sizeof(*dat));
+                this->m_spi->shift_in_fast(8, dat++, sizeof(*dat));
 #else
-                spi_shift_in(8, dat++, sizeof(*dat));
+                this->m_spi->shift_in(8, dat++, sizeof(*dat));
 #endif
             }
 
@@ -1237,7 +1147,7 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
             for (i = 0; i < 2; ++i) {
                 timeout = SD::RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(spi_shift_in(8, &checksum, sizeof(checksum)));
+                    check_errors(this->m_spi->shift_in(8, &checksum, sizeof(checksum)));
 
                     // Check for timeout
                     if ((timeout - CNT) < SD::WIGGLE_ROOM)
@@ -1246,7 +1156,7 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
             }
 
             // Send final 0xff
-            check_errors(spi_shift_out(8, 0xff));
+            check_errors(this->m_spi->shift_out(8, 0xff));
         } else {
             return SD::INVALID_DAT_STRT_ID;
         }
@@ -1264,7 +1174,7 @@ int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
     timeout = SD::RESPONSE_TIMEOUT + CNT;
     do {
         check_errors(
-                spi_shift_in(8, &this->m_firstByteResponse,
+                this->m_spi->shift_in(8, &this->m_firstByteResponse,
                         sizeof(this->m_firstByteResponse)));
 
         // Check for timeout
@@ -1277,16 +1187,16 @@ int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
         // Received "active" response
 
         // Send data Start ID
-        check_errors(spi_shift_out(8, SD::DATA_START_ID));
+        check_errors(this->m_spi->shift_out(8, SD::DATA_START_ID));
 
         // Send all bytes
         while (bytes--) {
 #if (defined SD_OPTION_DEBUG)
-            check_errors(spi_shift_out(8, *(dat++)));
+            check_errors(this->m_spi->shift_out(8, *(dat++)));
 #elif (defined SPI_FAST)
-            spi_shift_out_fast(8, *(dat++));
+            this->m_spi->shift_out_fast(8, *(dat++));
 #else
-            spi_shift_out(8, *(dat++));
+            this->m_spi->shift_out(8, *(dat++));
 #endif
         }
 
@@ -1294,7 +1204,7 @@ int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
         timeout = SD::RESPONSE_TIMEOUT + CNT;
         do {
             check_errors(
-                    spi_shift_in(8, &this->m_firstByteResponse,
+                    this->m_spi->shift_in(8, &this->m_firstByteResponse,
                             sizeof(this->m_firstByteResponse)));
 
             // Check for timeout
@@ -1315,7 +1225,7 @@ int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
 
     // Wait until the SD card is no longer busy
     while (!temp)
-        spi_shift_in(8, &temp, 1);
+        this->m_spi->shift_in(8, &temp, 1);
 
 #if (defined SD_OPTION_DEBUG && defined SD_OPTION_VERBOSE)
     printf("Reading block at sector address: 0x%08X / %u\n", address, address);
@@ -1341,7 +1251,7 @@ int8_t SD::write_data_block (uint32_t address, uint8_t *dat) {
 
     // Wait until the SD card is no longer busy
     while (!temp)
-        spi_shift_in(8, &temp, 1);
+        this->m_spi->shift_in(8, &temp, 1);
 
 #if (defined SD_OPTION_DEBUG && defined SD_OPTION_VERBOSE)
     printf("Writing block at address: 0x%08X / %u\n", address, address);

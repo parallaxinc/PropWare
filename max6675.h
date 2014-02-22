@@ -106,11 +106,12 @@ class MAX6675 {
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 1000000;
-        static const SPI_Mode SPI_MODE = SPI_MODE_1;
-        static const SPI_BitMode SPI_BITMODE = SPI_MSB_FIRST;
+        static const SPI::Mode SPI_MODE = SPI::MODE_1;
+        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
         static const uint8_t BIT_WIDTH = 12;
 
     private:
+        SPI *m_spi;
         uint32_t m_cs;
         uint8_t m_alwaysSetMode;
 };

@@ -215,8 +215,8 @@ class L3G {
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;
-        static const SPI_Mode SPI_MODE = SPI_MODE_3;
-        static const SPI_BitMode SPI_BITMODE = SPI_MSB_FIRST;
+        static const SPI::Mode SPI_MODE = SPI::MODE_3;
+        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
         /***********************************
          *** Private Method Declarations ***
@@ -263,6 +263,7 @@ class L3G {
         uint8_t read16 (uint8_t addr, int16_t *dat);
 
     private:
+        SPI *m_spi;
         uint32_t m_cs;
         uint8_t m_alwaysSetMode;
 };

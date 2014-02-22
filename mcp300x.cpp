@@ -40,16 +40,17 @@ int8_t MCP300x::start (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs) {
     int8_t err;
 
+    this->m_spi = SPI::getSPI();
     this->m_cs = cs;
     gpio_set_dir(cs, GPIO_DIR_OUT);
     gpio_pin_set(cs);
 
-    if (!spi_is_running()) {
+    if (!this->m_spi->is_running()) {
         check_errors(
-                spi_start(mosi, miso, sclk, MCP300x::SPI_DEFAULT_FREQ, MCP300x::SPI_MODE, MCP300x::SPI_BITMODE));
+                this->m_spi->start(mosi, miso, sclk, MCP300x::SPI_DEFAULT_FREQ, MCP300x::SPI_MODE, MCP300x::SPI_BITMODE));
     } else {
-        check_errors(spi_set_mode(MCP300x::SPI_MODE));
-        check_errors(spi_set_bit_mode(MCP300x::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MCP300x::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
     }
 
     return 0;
@@ -66,13 +67,13 @@ int8_t MCP300x::read (const MCP300x::Channel channel, uint16_t *dat) {
     options <<= 2; // One dead bit between output and input - see page 19 of datasheet
 
     if (this->m_alwaysSetMode) {
-        check_errors(spi_set_mode(MCP300x::SPI_MODE));
-        check_errors(spi_set_bit_mode(MCP300x::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MCP300x::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
     }
 
     gpio_pin_clear(this->m_cs);
-    check_errors(spi_shift_out(MCP300x::OPTN_WIDTH, options));
-    check_errors(spi_shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
+    check_errors(this->m_spi->shift_out(MCP300x::OPTN_WIDTH, options));
+    check_errors(this->m_spi->shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
     gpio_pin_set(this->m_cs);
 
     return 0;
@@ -85,13 +86,13 @@ int8_t MCP300x::read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat) {
     options <<= 2; // One dead bit between output and input - see page 19 of datasheet
 
     if (this->m_alwaysSetMode) {
-        check_errors(spi_set_mode(MCP300x::SPI_MODE));
-        check_errors(spi_set_bit_mode(MCP300x::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MCP300x::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
     }
 
     gpio_pin_clear(this->m_cs);
-    check_errors(spi_shift_out(MCP300x::OPTN_WIDTH, options));
-    check_errors(spi_shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
+    check_errors(this->m_spi->shift_out(MCP300x::OPTN_WIDTH, options));
+    check_errors(this->m_spi->shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
     gpio_pin_set(this->m_cs);
 
     return 0;

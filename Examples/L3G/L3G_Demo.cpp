@@ -26,7 +26,7 @@
  */
 
 // Includes
-#include <stdio.h>
+#include <tinyio.h>
 #include "L3G_Demo.h"
 
 // Main function

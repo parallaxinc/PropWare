@@ -47,7 +47,8 @@
  * @{
  */
 
-#include <stdio.h>
+#include <tinyio.h>
+#include <sys/thread.h>
 
 // Note the lack of an include for propeller.h; This is because PropWare.h will
 // include propeller.h for you

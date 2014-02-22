@@ -38,12 +38,14 @@ int8_t MAX6675::start (const uint32_t mosi, const uint32_t miso,
         const uint32_t sclk, const uint32_t cs) {
     int8_t err;
 
-    if (!spi_is_running()) {
+    this->m_spi = SPI::getSPI();
+
+    if (!this->m_spi->is_running()) {
         check_errors(
-                spi_start(mosi, miso, sclk, MAX6675::SPI_DEFAULT_FREQ, MAX6675::SPI_MODE, MAX6675::SPI_BITMODE));
+                this->m_spi->start(mosi, miso, sclk, MAX6675::SPI_DEFAULT_FREQ, MAX6675::SPI_MODE, MAX6675::SPI_BITMODE));
     } else {
-        check_errors(spi_set_mode(MAX6675::SPI_MODE));
-        check_errors(spi_set_bit_mode(MAX6675::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MAX6675::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MAX6675::SPI_BITMODE));
     }
 
     this->m_cs = cs;
@@ -60,13 +62,13 @@ int8_t MAX6675::read (uint16_t *dat) {
     int8_t err;
 
     if (this->m_alwaysSetMode) {
-        check_errors(spi_set_mode(MAX6675::SPI_MODE));
-        check_errors(spi_set_bit_mode(MAX6675::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MAX6675::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MAX6675::SPI_BITMODE));
     }
 
     *dat = 0;
     gpio_pin_clear(this->m_cs);
-    check_errors(spi_shift_in(MAX6675::BIT_WIDTH, dat, sizeof(*dat)));
+    check_errors(this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat, sizeof(*dat)));
     gpio_pin_set(this->m_cs);
 
     return 0;

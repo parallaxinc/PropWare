@@ -118,8 +118,8 @@ class MCP300x {
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;
-        static const SPI_Mode SPI_MODE = SPI_MODE_2;
-        static const SPI_BitMode SPI_BITMODE = SPI_MSB_FIRST;
+        static const SPI::Mode SPI_MODE = SPI::MODE_2;
+        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
         static const uint8_t START = BIT_4;
         static const uint8_t SINGLE_ENDED = BIT_3;
@@ -128,6 +128,7 @@ class MCP300x {
         static const uint8_t DATA_WIDTH = 11;
 
     private:
+        SPI *m_spi;
         uint8_t m_cs;
         uint8_t m_alwaysSetMode;
 };

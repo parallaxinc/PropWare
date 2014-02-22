@@ -55,8 +55,8 @@ int main () {
      * decreased when multiple files are used often.
      *
      */
-    f.buf = &(sd.m_buf);
-    f2.buf = &(sd.m_buf);
+    f.buf = sd.getGlobalBuffer();
+    f2.buf = sd.getGlobalBuffer();
 #endif
 
 #ifdef DEBUG

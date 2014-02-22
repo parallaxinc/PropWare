@@ -39,7 +39,7 @@
 
 // Includes
 #include <propeller.h>
-#include <stdio.h>
+#include <tinyio.h>
 #include <PropWare.h>
 #include <spi.h>
 
@@ -56,9 +56,9 @@
 /** Frequency (in hertz) to run the SPI module */
 #define FREQ                100000
 /** The SPI mode to run */
-#define MODE                SPI_MODE_0
+#define MODE                PropWare::SPI::MODE_0
 /** Determine if the LSB or MSB should be sent first for each byte */
-#define BITMODE             SPI_MSB_FIRST
+#define BITMODE             PropWare::SPI::MSB_FIRST
 
 /**@}*/
 

@@ -102,19 +102,49 @@ namespace PropWare {
 class SD {
     public:
         /** Number of characters printed to the terminal before a line break */
-        static const uint8_t LINE_SIZE;
+        static const uint8_t LINE_SIZE = 16;
         /**
          * Number of bytes in a sector of the SD card
          * Need a pre-processor macro here for static allocation of
          * SD::Buffer.buf
          */
 #define SD_SECTOR_SIZE  512
-        static const uint16_t SECTOR_SIZE;
+        static const uint16_t SECTOR_SIZE = SD_SECTOR_SIZE;
         /** Default frequency to run the SPI module */
-        static const uint32_t DEFAULT_SPI_FREQ;
+        static const uint32_t DEFAULT_SPI_FREQ = 1800000;
 
         // Signal that the contents of a buffer are a directory
-        static const int8_t FOLDER_ID;
+        static const int8_t FOLDER_ID = -1;
+
+#ifdef SD_OPTION_SHELL
+        /**
+         * @name Shell Definitions
+         * @{
+         */
+        /** Maximum number of characters allowed at the command prompt */
+#define SD_SHELL_INPUT_LEN  128
+        static const uint8_t SHELL_INPUT_LEN = SD_SHELL_INPUT_LEN;
+        /**
+         * Maximum number of characters for an individual command (does not include
+         * parameters
+         */
+#define SD_SHELL_CMD_LEN    8
+        static const uint8_t SHELL_CMD_LEN = SD_SHELL_CMD_LEN;
+        /** Maximum number of characters for each command argument */
+#define SD_SHELL_ARG_LEN    64
+        static const uint8_t SHELL_ARG_LEN = SD_SHELL_ARG_LEN;
+        /** String defining the "exit" command to quit the SD_Shell() function*/
+        static const char SHELL_EXIT[];
+        /** String defining the "ls" command to call SD_Shell_ls(); List dir contents */
+        static const char SHELL_LS[];
+        /** String defining the "cat" command to call SD_Shell_cat(); Prints a file */
+        static const char SHELL_CAT[];
+        /** String defining the "cd" command to call SD_Shell_cd(); Change directory */
+        static const char SHELL_CD[];
+        /** String defining the "touch" command; Creates an empty file */
+        static const char SHELL_TOUCH[];
+        /**@}*/
+#endif
 
     public:
         /**
@@ -249,16 +279,17 @@ class SD {
 
     public:
         /**
-         * In case the system is low on RAM, allow the external program to access the
-         * generic buffer
-         */
-        Buffer m_buf;
-
-    public:
-        /**
          * @brief       Construct an SD object; Set two simple member variables
          */
         SD ();
+
+        /**
+         * @brief   Give access to the internal buffer in case the user wants to
+         *          save on system memory
+         *
+         * @return  Returns the system SD::Buffer
+         */
+        SD::Buffer* getGlobalBuffer ();
 
         /**
          * @brief       Initialize SD card communication over SPI for 3.3V configuration
@@ -396,7 +427,7 @@ class SD {
 
         /**
          * @brief       Read a line from a file until either 'size' characters have been
-         *              read or a newline is found; Parameters should match stdio.h's
+         *              read or a newline is found; Parameters should match tinyio.h's
          *              fgets except for the file pointer
          *
          * @note        This function does not include error checking
@@ -479,34 +510,6 @@ class SD {
         uint32_t ftellw (const SD::File *f);
 
 #ifdef SD_OPTION_SHELL
-        /**
-         * @name Shell Definitions
-         * @{
-         */
-        /** Maximum number of characters allowed at the command prompt */
-#define SD_SHELL_INPUT_LEN  128
-        static const uint8_t SHELL_INPUT_LEN;
-        /**
-         * Maximum number of characters for an individual command (does not include
-         * parameters
-         */
-#define SD_SHELL_CMD_LEN    8
-        static const uint8_t SHELL_CMD_LEN;
-        /** Maximum number of characters for each command argument */
-#define SD_SHELL_ARG_LEN    64
-        static const uint8_t SHELL_ARG_LEN;
-        /** String defining the "exit" command to quit the SD_Shell() function*/
-        static const char SHELL_EXIT[];
-        /** String defining the "ls" command to call SD_Shell_ls(); List dir contents */
-        static const char SHELL_LS[];
-        /** String defining the "cat" command to call SD_Shell_cat(); Prints a file */
-        static const char SHELL_CAT[];
-        /** String defining the "cd" command to call SD_Shell_cd(); Change directory */
-        static const char SHELL_CD[];
-        /** String defining the "touch" command; Creates an empty file */
-        static const char SHELL_TOUCH[];
-        /**@}*/
-
         /**
          * @brief       Provide the user with a very basic Unix-like shell. The
          *              following commands are available to the user: ls, cat, cd.
@@ -890,113 +893,114 @@ class SD {
 #endif
 #endif
 
+    private:
         /*************************
          *** Private Constants ***
          *************************/
-    private:
         // SPI config
-        static const uint32_t SPI_INIT_FREQ;  // Run SD initialization at 200 kHz
-        static const SPI_Mode SPI_MODE;
-        static const SPI_BitMode SPI_BITMODE;
+        static const uint32_t SPI_INIT_FREQ = 200000;  // Run SD initialization at 200 kHz
+        static const SPI::Mode SPI_MODE = SPI::MODE_0;
+        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
         // Misc. SD Definitions
         static const uint32_t RESPONSE_TIMEOUT;  // Wait 0.1 seconds for a response before timing out
         static const uint32_t WIGGLE_ROOM;
-        static const uint8_t SECTOR_SIZE_SHIFT;
+        static const uint8_t SECTOR_SIZE_SHIFT = 9;
 
         // SD Commands
-        static const uint8_t CMD_IDLE;  // Send card into idle state
-        static const uint8_t CMD_INTERFACE_COND;  // Send interface condition and host voltage range
-        static const uint8_t CMD_RD_CSD;  // Request "Card Specific Data" block contents
-        static const uint8_t CMD_RD_CID;  // Request "Card Identification" block contents
-        static const uint8_t CMD_RD_BLOCK;  // Request data block
-        static const uint8_t CMD_WR_BLOCK;  // Write data block
-        static const uint8_t CMD_WR_OP;  // Send operating conditions for SDC
-        static const uint8_t CMD_APP;  // Inform card that following instruction is application specific
-        static const uint8_t CMD_READ_OCR;  // Request "Operating Conditions Register" contents
+        static const uint8_t CMD_IDLE = 0x40 + 1;  // Send card into idle state
+        static const uint8_t CMD_INTERFACE_COND = 0x40 + 8;  // Send interface condition and host voltage range
+        static const uint8_t CMD_RD_CSD = 0x40 + 9;  // Request "Card Specific Data" block contents
+        static const uint8_t CMD_RD_CID = 0x40 + 10;  // Request "Card Identification" block contents
+        static const uint8_t CMD_RD_BLOCK = 0x40 + 17;  // Request data block
+        static const uint8_t CMD_WR_BLOCK = 0x40 + 24;  // Write data block
+        static const uint8_t CMD_WR_OP = 0x40 + 41;  // Send operating conditions for SDC
+        static const uint8_t CMD_APP = 0x40 + 55;  // Inform card that following instruction is application specific
+        static const uint8_t CMD_READ_OCR = 0x40 + 58;  // Request "Operating Conditions Register" contents
 
         // SD Arguments
-        static const uint32_t HOST_VOLTAGE_3V3;
-        static const uint32_t R7_CHECK_PATTERN;
-        static const uint32_t ARG_CMD8;
-        static const uint32_t ARG_LEN;
+        static const uint32_t HOST_VOLTAGE_3V3 = 0x01;
+        static const uint32_t R7_CHECK_PATTERN = 0xAA;
+        static const uint32_t ARG_CMD8 = ((SD::HOST_VOLTAGE_3V3 << 8)
+                | SD::R7_CHECK_PATTERN);
+        static const uint32_t ARG_LEN = 5;
 
         // SD CRCs
-        static const uint8_t CRC_IDLE;
-        static const uint8_t CRC_CMD8;  // CRC only valid for CMD8 argument of 0x000001AA
-        static const uint8_t CRC_ACMD;
-        static const uint8_t CRC_OTHER;
+        static const uint8_t CRC_IDLE = 0x95;
+        static const uint8_t CRC_CMD8 = 0x87;  // CRC only valid for CMD8 argument of 0x000001AA
+        static const uint8_t CRC_ACMD = 0x77;
+        static const uint8_t CRC_OTHER = 0x01;
 
         // SD Responses
-        static const uint8_t RESPONSE_IDLE;
-        static const uint8_t RESPONSE_ACTIVE;
-        static const uint8_t DATA_START_ID;
-        static const uint8_t RESPONSE_LEN_R1;
-        static const uint8_t RESPONSE_LEN_R3;
-        static const uint8_t RESPONSE_LEN_R7;
-        static const uint8_t RSPNS_TKN_BITS;
-        static const uint8_t RSPNS_TKN_ACCPT;
-        static const uint8_t RSPNS_TKN_CRC;
-        static const uint8_t RSPNS_TKN_WR;
+        static const uint8_t RESPONSE_IDLE = 0x01;
+        static const uint8_t RESPONSE_ACTIVE = 0x00;
+        static const uint8_t DATA_START_ID = 0xFE;
+        static const uint8_t RESPONSE_LEN_R1 = 1;
+        static const uint8_t RESPONSE_LEN_R3 = 5;
+        static const uint8_t RESPONSE_LEN_R7 = 5;
+        static const uint8_t RSPNS_TKN_BITS = 0x0f;
+        static const uint8_t RSPNS_TKN_ACCPT = (0x02 << 1) | 1;
+        static const uint8_t RSPNS_TKN_CRC = (0x05 << 1) | 1;
+        static const uint8_t RSPNS_TKN_WR = (0x06 << 1) | 1;
 
         // Boot sector addresses/values
-        static const uint8_t FAT_16;  // A FAT entry in FAT16 is 2-bytes
-        static const uint8_t FAT_32;  // A FAT entry in FAT32 is 4-bytes
-        static const uint8_t BOOT_SECTOR_ID;
-        static const uint8_t BOOT_SECTOR_ID_ADDR;
-        static const uint16_t BOOT_SECTOR_BACKUP;
-        static const uint8_t CLUSTER_SIZE_ADDR;
-        static const uint8_t RSVD_SCTR_CNT_ADDR;
-        static const uint8_t NUM_FATS_ADDR;
-        static const uint8_t ROOT_ENTRY_CNT_ADDR;
-        static const uint8_t TOT_SCTR_16_ADDR;
-        static const uint8_t FAT_SIZE_16_ADDR;
-        static const uint8_t TOT_SCTR_32_ADDR;
-        static const uint8_t FAT_SIZE_32_ADDR;
-        static const uint8_t ROOT_CLUSTER_ADDR;
-        static const uint16_t FAT12_CLSTR_CNT;
-        static const uint16_t FAT16_CLSTR_CNT;
+        static const uint8_t FAT_16 = 2;  // A FAT entry in FAT16 is 2-bytes
+        static const uint8_t FAT_32 = -4;  // A FAT entry in FAT32 is 4-bytes
+        static const uint8_t BOOT_SECTOR_ID = 0xEB;
+        static const uint8_t BOOT_SECTOR_ID_ADDR = 0;
+        static const uint16_t BOOT_SECTOR_BACKUP = 0x1C6;
+        static const uint8_t CLUSTER_SIZE_ADDR = 0x0D;
+        static const uint8_t RSVD_SCTR_CNT_ADDR = 0x0E;
+        static const uint8_t NUM_FATS_ADDR = 0x10;
+        static const uint8_t ROOT_ENTRY_CNT_ADDR = 0x11;
+        static const uint8_t TOT_SCTR_16_ADDR = 0x13;
+        static const uint8_t FAT_SIZE_16_ADDR = 0x16;
+        static const uint8_t TOT_SCTR_32_ADDR = 0x20;
+        static const uint8_t FAT_SIZE_32_ADDR = 0x24;
+        static const uint8_t ROOT_CLUSTER_ADDR = 0x2c;
+        static const uint16_t FAT12_CLSTR_CNT = 4085;
+        static const uint16_t FAT16_CLSTR_CNT = 65525;
 
         // FAT file/directory values
-        static const uint8_t FILE_ENTRY_LENGTH;  // An entry in a directory uses 32 bytes
-        static const uint8_t DELETED_FILE_MARK;  // Marks that a file has been deleted here, continue to the next entry
+        static const uint8_t FILE_ENTRY_LENGTH = 32;  // An entry in a directory uses 32 bytes
+        static const uint8_t DELETED_FILE_MARK = 0xE5;  // Marks that a file has been deleted here, continue to the next entry
 #define SD_FILE_NAME_LEN        8
-        static const uint8_t FILE_NAME_LEN;  // 8 characters in the standard file name
+        static const uint8_t FILE_NAME_LEN = SD_FILE_NAME_LEN;  // 8 characters in the standard file name
 #define SD_FILE_EXTENSION_LEN   3
-        static const uint8_t FILE_EXTENSION_LEN;  // 3 character file name extension
+        static const uint8_t FILE_EXTENSION_LEN = SD_FILE_EXTENSION_LEN;  // 3 character file name extension
 #define SD_FILENAME_STR_LEN     (SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2)
-        static const uint8_t FILENAME_STR_LEN;
-        static const uint8_t FILE_ATTRIBUTE_OFFSET;  // Byte of a file entry to store attribute flags
-        static const uint8_t FILE_START_CLSTR_LOW;  // Starting cluster number
-        static const uint8_t FILE_START_CLSTR_HIGH;  // High word (16-bits) of the starting cluster number (FAT32 only)
-        static const uint8_t FILE_LEN_OFFSET;  // Length of a file in bytes
-        static const int8_t FREE_CLUSTER;  // Cluster is unused
-        static const int8_t RESERVED_CLUSTER;
-        static const int8_t RSVD_CLSTR_VAL_BEG;  // First reserved cluster value
-        static const int8_t RSVD_CLSTR_VAL_END;  // Last reserved cluster value
-        static const int8_t BAD_CLUSTER;  // Cluster is corrupt
-        static const int32_t EOC_BEG;  // First marker for end-of-chain (end of file entry within FAT)
-        static const int32_t EOC_END;  // Last marker for end-of-chain
+        static const uint8_t FILENAME_STR_LEN = SD_FILENAME_STR_LEN;
+        static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
+        static const uint8_t FILE_START_CLSTR_LOW = 0x1A;  // Starting cluster number
+        static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High word (16-bits) of the starting cluster number (FAT32 only)
+        static const uint8_t FILE_LEN_OFFSET = 0x1C;  // Length of a file in bytes
+        static const int8_t FREE_CLUSTER = 0;  // Cluster is unused
+        static const int8_t RESERVED_CLUSTER = 1;
+        static const int8_t RSVD_CLSTR_VAL_BEG = -15;  // First reserved cluster value
+        static const int8_t RSVD_CLSTR_VAL_END = -9;  // Last reserved cluster value
+        static const int8_t BAD_CLUSTER = -8;  // Cluster is corrupt
+        static const int32_t EOC_BEG = -7;  // First marker for end-of-chain (end of file entry within FAT)
+        static const int32_t EOC_END = -1;  // Last marker for end-of-chain
 
         // FAT file attributes (definitions with trailing underscore represent character for a cleared attribute flag)
-        static const uint8_t READ_ONLY;
-        static const char READ_ONLY_CHAR;
-        static const char READ_ONLY_CHAR_;
-        static const uint8_t HIDDEN_FILE;
-        static const char HIDDEN_FILE_CHAR;
-        static const char HIDDEN_FILE_CHAR_;
-        static const uint8_t SYSTEM_FILE;
-        static const char SYSTEM_FILE_CHAR;
-        static const char SYSTEM_FILE_CHAR_;
-        static const uint8_t VOLUME_ID;
-        static const char VOLUME_ID_CHAR;
-        static const char VOLUME_ID_CHAR_;
-        static const uint8_t SUB_DIR;
-        static const char SUB_DIR_CHAR;
-        static const char SUB_DIR_CHAR_;
-        static const uint8_t ARCHIVE;
-        static const char ARCHIVE_CHAR;
-        static const char ARCHIVE_CHAR_;
+        static const uint8_t READ_ONLY = BIT_0;
+        static const char READ_ONLY_CHAR = 'r';
+        static const char READ_ONLY_CHAR_ = 'w';
+        static const uint8_t HIDDEN_FILE = BIT_1;
+        static const char HIDDEN_FILE_CHAR = 'h';
+        static const char HIDDEN_FILE_CHAR_ = '.';
+        static const uint8_t SYSTEM_FILE = BIT_2;
+        static const char SYSTEM_FILE_CHAR = 's';
+        static const char SYSTEM_FILE_CHAR_ = '.';
+        static const uint8_t VOLUME_ID = BIT_3;
+        static const char VOLUME_ID_CHAR = 'v';
+        static const char VOLUME_ID_CHAR_ = '.';
+        static const uint8_t SUB_DIR = BIT_4;
+        static const char SUB_DIR_CHAR = 'd';
+        static const char SUB_DIR_CHAR_ = 'f';
+        static const uint8_t ARCHIVE = BIT_5;
+        static const char ARCHIVE_CHAR = 'a';
+        static const char ARCHIVE_CHAR_ = '.';
 
         /*******************************
          *** Private Member Variable ***
@@ -1004,6 +1008,7 @@ class SD {
     private:
         /*** Global variable declarations ***/
         // Initialization variables
+        SPI *m_spi;
         uint32_t m_cs;  // Chip select pin mask
         uint8_t m_filesystem;  // Filesystem type - one of SD::FAT_16 or SD::FAT_32
         uint8_t m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
@@ -1014,6 +1019,7 @@ class SD {
         uint32_t m_firstDataAddr;  // Starting block address of the first data cluster
 
         // FAT filesystem variables
+        SD::Buffer m_buf;
         uint8_t m_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_OPTION_FILE_WRITE
         uint8_t m_fatMod;  // Has the currently loaded FAT sector been modified
