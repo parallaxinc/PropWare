@@ -31,13 +31,15 @@
 int main () {
     uint8_t err;
 
+    char buffer[128];
+
     HD44780 lcd;
 
     if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
-    lcd.putStr("0123456789abcdef0123456789abcdef");
-    lcd.putStr("Hello world!!!");
+    sprintf(buffer, "%u %s%07d 0x%x", 123456789, "Hello!", -12345, 0xabcdef);
+    lcd.putStr(buffer);
 
     return 0;
 }

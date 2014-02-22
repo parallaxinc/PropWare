@@ -161,6 +161,7 @@ class HD44780 {
         static const uint8_t FUNC_8BIT_MODE;  // 0 = 4-bit mode
         static const uint8_t FUNC_2LINE_MODE;  // 0 = 1-line mode
         static const uint8_t FUNC_5x10_CHAR;  // 0 = 5x8 dot mode
+        /**@}*/
 
         /************************
          *** Public Functions ***
@@ -205,19 +206,6 @@ class HD44780 {
         void move (const uint8_t row, const uint8_t col);
 
         /**
-         * @brief       Print formatted text to the LCD
-         *
-         * @detailed    Please visit http://www.cplusplus.com/reference/cstdio/printf/
-         *              for full documentation
-         *
-         * @param[in]   *fmt    C string that contains the text to be written to the LCD
-         * @param[in]   ...     (optional) Additional arguments
-         *
-         * Supported formats: i, d, u, X, s, c ("%%" will print '%')
-         */
-        void printf (const char fmt[], ...);
-
-        /**
          * @brief       Print a string to the LCD
          *
          * @detailed    Via a series of calls to HD44780_putchar, prints each character
@@ -235,27 +223,6 @@ class HD44780 {
          * @param[in]   c   Individual char to be printed
          */
         void putChar (const char c);
-
-        /**
-         * @brief       Format and print a signed number to the LCD
-         *
-         * @param[in]   x   The signed number to be printed
-         */
-        void putInt (int32_t x);
-
-        /**
-         * @brief       Format and print a unsigned number to the LCD
-         *
-         * @param[in]   x   The unsigned number to be printed
-         */
-        void putUint (uint32_t x);
-
-        /**
-         * @brief       Format and print an unsigned hexadecimal number to the LCD
-         *
-         * @param[in]   x   The number to be printed
-         */
-        void putHex (uint32_t x);
 
     private:
         /**

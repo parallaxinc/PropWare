@@ -31,6 +31,7 @@ int main () {
     int8_t err;
     uint16_t data;
     uint32_t loopCounter;
+    char buffer[128];
 
     HD44780 lcd;
 
@@ -56,7 +57,8 @@ int main () {
             error(err);
 
         lcd.clear();
-        lcd.printf("Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
+        sprintf(buffer, "Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
+        lcd.putStr(buffer);
 
         waitcnt(loopCounter);
     }

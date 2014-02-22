@@ -38,7 +38,7 @@
  */
 
 #include <propeller.h>
-#include <stdio.h>
+#include <tinyio.h>
 #include <PropWare.h>
 #include <hd44780.h>
 

@@ -211,47 +211,6 @@ void HD44780::move (const uint8_t row, const uint8_t col) {
     this->m_curCol = col;
 }
 
-void HD44780::printf (const char fmt[], ...) {
-    const char *s = fmt;
-    va_list list;
-    va_start(list, fmt);
-
-    while (*s) {
-        if ('%' == *s) {
-            ++s;
-            switch (*s) {
-                case 'i':
-                case 'd':
-                    this->putInt(va_arg(list, int32_t));
-                    break;
-                case 'u':
-                    this->putUint(va_arg(list, uint32_t));
-                    break;
-                case 's':
-                    this->putStr(va_arg(list, char *));
-                    break;
-                case 'c':
-                    this->putChar(va_arg(list, int));
-                    break;
-                case 'X':
-                    this->putHex(va_arg(list, uint32_t));
-                    break;
-                case '%':
-                    this->putChar('%');
-                    break;
-                default:
-                    va_arg(list, int);  // Increment va_arg pointer
-                    this->putChar(' ');
-                    break;
-            }
-        } else
-            this->putChar(*s);
-        ++s;
-    }
-
-    va_end(list);
-}
-
 void HD44780::putStr (const char str[]) {
     const char *s = str;
 
@@ -289,81 +248,6 @@ void HD44780::putChar (const char c) {
         if (this->m_memMap.ddramCharRowBreak > this->m_memMap.ddramLineEnd)
             this->move(this->m_curRow, this->m_curCol);
     }
-}
-
-void HD44780::putInt (int32_t x) {
-    char buf[32];
-    uint8_t j, i = 0;
-    uint8_t sign = 0;
-
-    if (x < 0) {
-        sign = 1;
-        x = abs(x);
-    } else if (0 == x) {
-        this->putChar('0');
-        return;
-    }
-
-    // Create a character array in reverse order, starting with the tens
-    // digit and working toward the largest digit
-    while (x) {
-        buf[i] = x % 10 + '0';
-        x /= 10;
-        ++i;
-    }
-
-    // If negative, add the sign
-    if (sign) {
-        buf[i] = '-';
-        ++i;
-    }
-
-    // Reverse the character array
-    for (j = 0; j < i; ++j)
-        this->putChar(buf[i - j - 1]);
-}
-
-void HD44780::putUint (uint32_t x) {
-    const uint8_t divisor = 10;
-    char buf[32];
-    uint8_t j, i = 0;
-
-    if (0 == x)
-        this->putChar('0');
-    else {
-        // Create a character array in reverse order, starting with the tens
-        // digit and working toward the largest digit
-        while (x) {
-            buf[i] = x % divisor + '0';
-            x /= divisor;
-            ++i;
-        }
-
-        // Reverse the character array
-        for (j = 0; j < i; ++j)
-            this->putChar(buf[i - j - 1]);
-    }
-}
-
-void HD44780::putHex (uint32_t x) {
-    char buf[32];
-    uint8_t temp, j, i = 0;
-
-    while (x) {
-        temp = x & NIBBLE_0;
-        if (temp < 10)
-            buf[i] = temp + '0';
-        else {
-            temp -= 10;
-            buf[i] = temp + 'A';
-        }
-        ++i;
-        x >>= 4;
-    }
-
-    // Reverse the character array
-    for (j = 0; j < i; ++j)
-        this->putChar(buf[i - j - 1]);
 }
 
 void HD44780::cmd (const uint8_t c) {
