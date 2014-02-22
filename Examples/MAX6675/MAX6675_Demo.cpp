@@ -33,7 +33,7 @@ int main () {
     uint32_t loopCounter;
     char buffer[128];
 
-    HD44780 lcd;
+    PropWare::HD44780 lcd;
 
     if ((err = max6675_start(MOSI, MISO, SCLK, CS)))
         error(err);

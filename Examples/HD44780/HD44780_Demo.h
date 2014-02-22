@@ -53,10 +53,10 @@
 #define BITMODE             HD44780::BM_8
 #define DATA                DATA_H | DATA_L
 #else
-#define BITMODE             HD44780::BM_4
+#define BITMODE             PropWare::HD44780::BM_4
 #define DATA                DATA_H
 #endif
-#define DIMENSIONS          HD44780::DIM_16x2
+#define DIMENSIONS          PropWare::HD44780::DIM_16x2
 
 /**
  * @brief       Enter an infinite loop that blinks the error code on the

@@ -29,6 +29,8 @@
 // Includes
 #include <sd.h>
 
+namespace PropWare {
+
 /**
  * Public constants
  */
@@ -2253,3 +2255,5 @@ void SD::first_byte_expansion (const uint8_t response) {
                 "\n");
 }
 #endif
+
+}

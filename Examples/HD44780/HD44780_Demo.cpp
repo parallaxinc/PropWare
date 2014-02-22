@@ -33,7 +33,7 @@ int main () {
 
     char buffer[128];
 
-    HD44780 lcd;
+    PropWare::HD44780 lcd;
 
     if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);

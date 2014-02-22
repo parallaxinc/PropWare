@@ -37,21 +37,21 @@
  * @{
  */
 
-#include <stdio.h>
+#include <tinyio.h>
 #include <PropWare.h>
 #include <spi.h>
 #include <hd44780.h>
 #include <max6675.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI                BIT_0
+#define MOSI            BIT_0
 /** Pin number for MISO (master in - slave out) */
-#define MISO                BIT_1
+#define MISO            BIT_1
 /** Pin number for the clock signal */
-#define SCLK                BIT_2
+#define SCLK            BIT_2
 /** Pin number for chip select */
-#define CS                  BIT_5
-#define FREQ                10000
+#define CS              BIT_5
+#define FREQ            10000
 
 #define DEBUG_LEDS      BYTE_2
 
@@ -63,14 +63,14 @@
 #define DATA_L          BIT_22 | BIT_21 | BIT_20 | BIT_19
 
 #ifdef DATA_L
-#define BITMODE         HD44780::BM_8
+#define BITMODE         PropWare::HD44780::BM_8
 #define DATA            DATA_H | DATA_L
 #else
 #define BITMODE         HD44780_4BIT
 #define DATA            DATA_H
 #endif
 
-#define DIMENSIONS      HD44780::DIM_16x2
+#define DIMENSIONS      PropWare::HD44780::DIM_16x2
 
 void error (int8_t err);
 

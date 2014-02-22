@@ -51,6 +51,8 @@
 #include <PropWare.h>
 #include <spi.h>
 
+namespace PropWare {
+
 /** @name   SD Extra Code Options
  * @{ */
 /**
@@ -1036,5 +1038,7 @@ class SD {
         uint32_t m_sectorRdAddress;
 #endif
 };
+
+}
 
 #endif /* SD_H_ */

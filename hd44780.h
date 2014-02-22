@@ -35,19 +35,12 @@
 #ifndef HD44780_H_
 #define HD44780_H_
 
-/**
- * @defgroup _propware_hd44780	HD44780 Character LCD
- * @{
- */
-
-/**
- * @publicsection @{
- */
-
 #include <stdarg.h>
 #include <stdlib.h>
 #include <propeller.h>
 #include <PropWare.h>
+
+namespace PropWare {
 
 /** @name   HD44780 Extra Code Options
  * @{ */
@@ -65,9 +58,9 @@ class HD44780 {
          * @brief   LCD databus width
          */
         typedef enum {
-            BM_4,
-            BM_8,
-            BITMODES
+            /** 4-bit mode */BM_4,
+            /** 8-bit mode */BM_8,
+            /** Number of unique bitmodes */BITMODES
         } Bitmode;
 
         /**
@@ -93,7 +86,7 @@ class HD44780 {
             /** 24x2 */DIM_24x2,
             /** 40x1 */DIM_40x1,
             /** 40x2 */DIM_40x2,
-            /** Number of different dimensions supported */DIMENSIONS
+            /** Number of unique dimensions supported */DIMENSIONS
         } Dimensions;
 
         /** Number of allocated error codes for HD44780 */
@@ -279,5 +272,7 @@ class HD44780 {
         uint8_t m_curCol;
         HD44780::MemMap m_memMap;
 };
+
+}
 
 #endif /* HD44780_H_ */

@@ -32,8 +32,8 @@ int main () {
     uint8_t err;
     char c;
 
-    SD sd;
-    SD::File f, f2;
+    PropWare::SD sd;
+    PropWare::SD::File f, f2;
 
 #ifndef LOW_RAM_MODE
     /* Option 1: Create at least one new SD::Buffer variable
@@ -44,8 +44,8 @@ int main () {
      * contents to be kept in RAM while a file is loaded.
      *
      */
-    SD::Buffer fileBuf;  // If extra RAM is available
-    SD::Buffer fileBuf2;
+    PropWare::SD::Buffer fileBuf;  // If extra RAM is available
+    PropWare::SD::Buffer fileBuf2;
     f.buf = &fileBuf;
     f2.buf = &fileBuf2;
 #else

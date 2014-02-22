@@ -31,6 +31,8 @@
 #include <tinyio.h>
 #endif
 
+namespace PropWare {
+
 const uint8_t HD44780::TAB_WIDTH = 4;
 
 const uint8_t HD44780::CLEAR = BIT_0;
@@ -375,4 +377,6 @@ void HD44780::generate_mem_map (const HD44780::Dimensions dimensions) {
         default:
             break;
     }
+}
+
 }
