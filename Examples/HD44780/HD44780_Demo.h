@@ -50,13 +50,13 @@
 //#define DATA_L            BIT_22 | BIT_21 | BIT_20 | BIT_19
 
 #ifdef DATA_L
-#define BITMODE             HD44780_8BIT
+#define BITMODE             HD44780::BM_8
 #define DATA                DATA_H | DATA_L
 #else
-#define BITMODE             HD44780_4BIT
+#define BITMODE             HD44780::BM_4
 #define DATA                DATA_H
 #endif
-#define DIMENSIONS          HD44780_16x2
+#define DIMENSIONS          HD44780::DIM_16x2
 
 /**
  * @brief       Enter an infinite loop that blinks the error code on the

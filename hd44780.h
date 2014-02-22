@@ -59,248 +59,258 @@
 #define HD44780_OPTION_DEBUG
 /** @} */
 
-/** Number of spaces inserted for '\\t' */
-#define HD44780_TAB_WIDTH               4
+class HD44780 {
+    public:
+        /**
+         * @brief   LCD databus width
+         */
+        typedef enum {
+            BM_4,
+            BM_8,
+            BITMODES
+        } Bitmode;
 
-/**
- * @brief   LCD databus width
- */
-typedef enum {
-    HD44780_4BIT,
-    HD44780_8BIT,
-    HD44780_BITMODES
-} HD44780_Bitmode;
+        /**
+         * @brief   Supported LCD dimensions; Used for determining cursor placement
+         *
+         * @note    There are two variations of 16x1 character LCDs; if you're unsure
+         *          which version you have, try 16x1_1 first, it is more common. 16x1_1
+         *          uses both DDRAM lines of the controller, 8-characters on each line;
+         *          16x1_2 places all 16 characters are a single line of DDRAM.
+         */
+        typedef enum {
+            /** 8x1 */DIM_8x1,
+            /** 8x2 */DIM_8x2,
+            /** 8x4 */DIM_8x4,
+            /** 16x1 mode 1 */DIM_16x1_1,
+            /** 16x1 mode 2 */DIM_16x1_2,
+            /** 16x2 */DIM_16x2,
+            /** 16x4 */DIM_16x4,
+            /** 20x1 */DIM_20x1,
+            /** 20x2 */DIM_20x2,
+            /** 20x4 */DIM_20x4,
+            /** 24x1 */DIM_24x1,
+            /** 24x2 */DIM_24x2,
+            /** 40x1 */DIM_40x1,
+            /** 40x2 */DIM_40x2,
+            /** Number of different dimensions supported */DIMENSIONS
+        } Dimensions;
 
-/**
- * @brief   Supported LCD dimensions; Used for determining cursor placement
- *
- * @note    There are two variations of 16x1 character LCDs; if you're unsure
- *          which version you have, try 16x1_1 first, it is more common. 16x1_1
- *          uses both DDRAM lines of the controller, 8-characters on each line;
- *          16x1_2 places all 16 characters are a single line of DDRAM.
- */
-typedef enum {
-    /** 8x1 */HD44780_8x1,
-    /** 8x2 */HD44780_8x2,
-    /** 8x4 */HD44780_8x4,
-    /** 16x1 mode 1 */HD44780_16x1_1,
-    /** 16x1 mode 2 */HD44780_16x1_2,
-    /** 16x2 */HD44780_16x2,
-    /** 16x4 */HD44780_16x4,
-    /** 20x1 */HD44780_20x1,
-    /** 20x2 */HD44780_20x2,
-    /** 20x4 */HD44780_20x4,
-    /** 24x1 */HD44780_24x1,
-    /** 24x2 */HD44780_24x2,
-    /** 40x1 */HD44780_40x1,
-    /** 40x2 */HD44780_40x2,
-    /** Number of different dimensions supported */HD44780_DIMENSIONS
-} HD44780_Dimensions;
-
-/** Number of allocated error codes for HD44780 */
+        /** Number of allocated error codes for HD44780 */
 #define HD44780_ERRORS_LIMIT            16
-/** First HD44780 error code */
+        /** First HD44780 error code */
 #define HD44780_ERRORS_BASE             48
 
-/**
- * Error codes - Proceeded by SD, SPI
- */
-typedef enum {
-    /** HD44780 Error 0 */HD44780_INVALID_CTRL_SGNL = HD44780_ERRORS_BASE,
-    /** HD44780 Error 1 */HD44780_INVALID_DATA_MASK,
-    /** HD44780 Error 2 */HD44780_INVALID_DIMENSIONS
-} HD44780_ErrorCode;
+        /**
+         * Error codes - Proceeded by SD, SPI
+         */
+        typedef enum {
+            /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780_ERRORS_BASE,
+            /** HD44780 Error 1 */INVALID_DATA_MASK,
+            /** HD44780 Error 2 */INVALID_DIMENSIONS
+        } ErrorCode;
 
-/**
- * @name    Commands
- * @note    Must be combined with arguments below to create a parameter for the
- *          HD44780
- */
-#define HD44780_CLEAR                   BIT_0
-#define HD44780_RET_HOME                BIT_1
-#define HD44780_ENTRY_MODE_SET          BIT_2
-#define HD44780_DISPLAY_CTRL            BIT_3
-#define HD44780_SHIFT                   BIT_4
-#define HD44780_FUNCTION_SET            BIT_5
-#define HD44780_SET_CGRAM_ADDR          BIT_6
-#define HD44780_SET_DDRAM_ADDR          BIT_7
-/**@}*/
+    public:
+        /** Number of spaces inserted for '\\t' */
+        static const uint8_t TAB_WIDTH;
 
-/**
- * @name    Entry mode arguments
- * @{
- */
-#define HD44780_SHIFT_INC               BIT_1
-#define HD44780_SHIFT_EN                BIT_0
-/**@}*/
+        /**
+         * @name    Commands
+         * @note    Must be combined with arguments below to create a parameter for the
+         *          HD44780
+         */
+        static const uint8_t CLEAR;
+        static const uint8_t RET_HOME;
+        static const uint8_t ENTRY_MODE_SET;
+        static const uint8_t DISPLAY_CTRL;
+        static const uint8_t SHIFT;
+        static const uint8_t FUNCTION_SET;
+        static const uint8_t SET_CGRAM_ADDR;
+        static const uint8_t SET_DDRAM_ADDR;
+        /**@}*/
 
-/**
- * @name    Display control arguments
- * @{
- */
-#define HD44780_DISPLAY_PWR             BIT_2
-#define HD44780_CURSOR                  BIT_1
-#define HD44780_BLINK                   BIT_0
-/**@}*/
+        /**
+         * @name    Entry mode arguments
+         * @{
+         */
+        static const uint8_t SHIFT_INC;
+        static const uint8_t SHIFT_EN;
+        /**@}*/
 
-/**
- * @name    Cursor/display shift arguments
- * @{
- */
-#define HD44780_SHIFT_DISPLAY           BIT_3 // 0 = shift cursor
-#define HD44780_SHIFT_RIGHT             BIT_2 // 0 = shift left
-/**@}*/
+        /**
+         * @name    Display control arguments
+         * @{
+         */
+        static const uint8_t DISPLAY_PWR;
+        static const uint8_t CURSOR;
+        static const uint8_t BLINK;
+        /**@}*/
 
-/**
- * @name Function set arguments
- * @{
- */
-#define HD44780_8BIT_MODE               BIT_4 // 0 = 4-bit mode
-#define HD44780_2LINE_MODE              BIT_3 // 0 = 1-line mode
-#define HD44780_5x10_CHAR               BIT_2 // 0 = 5x8 dot mode
-/**@}*/
+        /**
+         * @name    Cursor/display shift arguments
+         * @{
+         */
+        static const uint8_t SHIFT_DISPLAY;  // 0 = shift cursor
+        static const uint8_t SHIFT_RIGHT;  // 0 = shift left
+        /**@}*/
 
-/************************
- *** Public Functions ***
- ************************/
-/**
- * @brief       Initialize an HD44780 LCD display
- *
- * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE:
- *                              all pins must be consecutive and the LSB on the
- *                              LCD must be the LSB in your data mask (i.e., if
- *                              you are using pins 16-23 on the Propeller, pin
- *                              16 must be connected to D0 on the LCD, NOT D7)
- * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
- * @param[in]   bitmode         Select between HD44780_4BIT and HD44780_8BIT
- *                              modes to determine whether you will need 4 data
- *                              wires or 8 between the Propeller and your LCD
- *                              device
- * @param[in]   dimensions      Dimensions of your LCD device. Most common is
- *                              HD44780_16x2
- *
- * @return      Returns 0 upon success, otherwise error code
- */
-int8_t hd44780_start (const uint32_t dataPinsMask, const uint32_t rs,
-        const uint32_t rw, const uint32_t en, const HD44780_Bitmode bitmode,
-        const HD44780_Dimensions dimensions);
+        /**
+         * @name Function set arguments
+         * @{
+         */
+        static const uint8_t FUNC_8BIT_MODE;  // 0 = 4-bit mode
+        static const uint8_t FUNC_2LINE_MODE;  // 0 = 1-line mode
+        static const uint8_t FUNC_5x10_CHAR;  // 0 = 5x8 dot mode
 
-/**
- * @brief   Clear the LCD display and return cursor to home
- */
-inline void hd44780_clear (void);
+        /************************
+         *** Public Functions ***
+         ************************/
+    public:
+        HD44780 ();
 
-/**
- * @brief       Move the cursor to a specified column and row
- *
- * @param[in]   row     Zero-indexed row to place the cursor
- * @param[in]   col     Zero indexed column to place the cursor
- */
-void hd44780_move (const uint8_t row, const uint8_t col);
+        /**
+         * @brief       Initialize an HD44780 LCD display
+         *
+         * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE:
+         *                              all pins must be consecutive and the LSB on the
+         *                              LCD must be the LSB in your data mask (i.e., if
+         *                              you are using pins 16-23 on the Propeller, pin
+         *                              16 must be connected to D0 on the LCD, NOT D7)
+         * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
+         * @param[in]   bitmode         Select between HD44780_4BIT and HD44780_8BIT
+         *                              modes to determine whether you will need 4 data
+         *                              wires or 8 between the Propeller and your LCD
+         *                              device
+         * @param[in]   dimensions      Dimensions of your LCD device. Most common is
+         *                              HD44780_16x2
+         *
+         * @return      Returns 0 upon success, otherwise error code
+         */
+        int8_t start (const uint32_t dataPinsMask, const uint32_t rs,
+                const uint32_t rw, const uint32_t en,
+                const HD44780::Bitmode bitmode,
+                const HD44780::Dimensions dimensions);
 
-/**
- * @brief       Print formatted text to the LCD
- *
- * @detailed    Please visit http://www.cplusplus.com/reference/cstdio/printf/
- *              for full documentation
- *
- * @param[in]   *fmt    C string that contains the text to be written to the LCD
- * @param[in]   ...     (optional) Additional arguments
- *
- * Supported formats: i, d, u, X, s, c ("%%" will print '%')
- */
-void hd44780_printf (char *fmt, ...);
+        /**
+         * @brief   Clear the LCD display and return cursor to home
+         */
+        void clear (void);
 
-/**
- * @brief       Print a string to the LCD
- *
- * @detailed    Via a series of calls to HD44780_putchar, prints each character
- *              individually
- *
- * @param[in]   *s  Address where c-string can be found (must be
- *                  null-terminated)
- */
-void hd44780_puts (char *s);
+        /**
+         * @brief       Move the cursor to a specified column and row
+         *
+         * @param[in]   row     Zero-indexed row to place the cursor
+         * @param[in]   col     Zero indexed column to place the cursor
+         */
+        void move (const uint8_t row, const uint8_t col);
 
-/**
- * @brief       Print a single char to the LCD and increment the pointer
- *              (automatic)
- *
- * @param[in]   c   Individual char to be printed
- */
-void hd44780_putchar (const char c);
+        /**
+         * @brief       Print formatted text to the LCD
+         *
+         * @detailed    Please visit http://www.cplusplus.com/reference/cstdio/printf/
+         *              for full documentation
+         *
+         * @param[in]   *fmt    C string that contains the text to be written to the LCD
+         * @param[in]   ...     (optional) Additional arguments
+         *
+         * Supported formats: i, d, u, X, s, c ("%%" will print '%')
+         */
+        void printf (const char fmt[], ...);
 
-/**
- * @brief       Format and print a signed number to the LCD
- *
- * @param[in]   x   The signed number to be printed
- */
-void hd44780_int (int32_t x);
+        /**
+         * @brief       Print a string to the LCD
+         *
+         * @detailed    Via a series of calls to HD44780_putchar, prints each character
+         *              individually
+         *
+         * @param[in]   *s  Address where c-string can be found (must be
+         *                  null-terminated)
+         */
+        void putStr (const char str[]);
 
-/**
- * @brief       Format and print a unsigned number to the LCD
- *
- * @param[in]   x   The unsigned number to be printed
- */
-void hd44780_uint (uint32_t x);
+        /**
+         * @brief       Print a single char to the LCD and increment the pointer
+         *              (automatic)
+         *
+         * @param[in]   c   Individual char to be printed
+         */
+        void putChar (const char c);
 
-/**
- * @brief       Format and print an unsigned hexadecimal number to the LCD
- *
- * @param[in]   x   The number to be printed
- */
-void hd44780_hex (uint32_t x);
+        /**
+         * @brief       Format and print a signed number to the LCD
+         *
+         * @param[in]   x   The signed number to be printed
+         */
+        void putInt (int32_t x);
 
-/**@}*/
+        /**
+         * @brief       Format and print a unsigned number to the LCD
+         *
+         * @param[in]   x   The unsigned number to be printed
+         */
+        void putUint (uint32_t x);
 
-/*************************
- *** Private Functions ***
- *************************/
-/**
- * @privatesection @{
- */
-/**
- * Store metadata on the LCD device to determine when line-wraps should and
- * shouldn't occur
- */
-typedef struct {
-    /** How many characters can be displayed on a single row */
-    uint8_t charRows;
-    /** How many characters can be dispayed in a single column */
-    uint8_t charColumns;
-    /** How many contiguous bytes of memory per visible character row */
-    uint8_t ddramCharRowBreak;
-    /** Last byte of memory used in each DDRAM line */
-    uint8_t ddramLineEnd;
-} HD44780_MemMap;
+        /**
+         * @brief       Format and print an unsigned hexadecimal number to the LCD
+         *
+         * @param[in]   x   The number to be printed
+         */
+        void putHex (uint32_t x);
 
-/**
- * @brief      Send a control command to the LCD module
- *
- * @param[in]  c   8-bit command to send to the LCD
- */
-inline static void hd44780_cmd (const uint8_t c);
+    private:
+        /**
+         * Store metadata on the LCD device to determine when line-wraps should and
+         * shouldn't occur
+         */
+        typedef struct {
+                /** How many characters can be displayed on a single row */
+                uint8_t charRows;
+                /** How many characters can be dispayed in a single column */
+                uint8_t charColumns;
+                /** How many contiguous bytes of memory per visible character row */
+                uint8_t ddramCharRowBreak;
+                /** Last byte of memory used in each DDRAM line */
+                uint8_t ddramLineEnd;
+        } MemMap;
 
-/**
- * @brief       Write a single byte to the LCD - instruction or data
- *
- * @param[in]   val     Value to be written
- */
-static void hd44780_write (const uint8_t val);
+        /*************************
+         *** Private Functions ***
+         *************************/
+    private:
+        /**
+         * @brief      Send a control command to the LCD module
+         *
+         * @param[in]  c   8-bit command to send to the LCD
+         */
+        void cmd (const uint8_t c);
 
-/**
- * @brief   Toggle the enable pin, inducing a write to the LCD's register
- */
-static void hd44780_clock_pulse (void);
+        /**
+         * @brief       Write a single byte to the LCD - instruction or data
+         *
+         * @param[in]   val     Value to be written
+         */
+        void write (const uint8_t val);
 
-/**
- * @brief   The memory map is used to determine where line wraps should and
- *          shouldn't occur
- */
-static void hd44780_generate_mem_map (const HD44780_Dimensions dimensions);
+        /**
+         * @brief   Toggle the enable pin, inducing a write to the LCD's register
+         */
+        void clock_pulse (void);
 
-/**@}*/
+        /**
+         * @brief   The memory map is used to determine where line wraps should and
+         *          shouldn't occur
+         */
+        void generate_mem_map (const HD44780::Dimensions dimensions);
 
-/**@}*/
+    private:
+        uint32_t m_rs, m_rw, m_en;
+        uint32_t m_dataMask;
+        HD44780::Dimensions m_dim;
+        HD44780::Bitmode m_bitmode;
+        uint8_t m_dataLSBNum;
+        uint8_t m_curRow;
+        uint8_t m_curCol;
+        HD44780::MemMap m_memMap;
+};
 
 #endif /* HD44780_H_ */

@@ -27,16 +27,17 @@
 
 #include "MAX6675_Demo.h"
 
-void main (void) {
+int main () {
     int8_t err;
     uint16_t data;
-    char buffer[32];
     uint32_t loopCounter;
+
+    HD44780 lcd;
 
     if ((err = max6675_start(MOSI, MISO, SCLK, CS)))
         error(err);
 
-    if ((err = hd44780_start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
+    if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
     // Though this functional call is not necessary (default value is 0), I
@@ -46,7 +47,7 @@ void main (void) {
     // configuration
     max6675_always_set_spi_mode(1);
 
-    hd44780_puts("Welcome to the MAX6675 demo!\n");
+    lcd.putStr("Welcome to the MAX6675 demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
@@ -54,12 +55,13 @@ void main (void) {
         if ((err = max6675_read(&data)))
             error(err);
 
-        sprintf(buffer, "Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
-        hd44780_clear();
-        hd44780_puts(buffer);
+        lcd.clear();
+        lcd.printf("Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
 
         waitcnt(loopCounter);
     }
+
+    return 0;
 }
 
 void error (int8_t err) {

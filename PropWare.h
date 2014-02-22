@@ -41,6 +41,10 @@
 #include <stdint.h>
 #endif
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #ifdef DAREDEVIL
 #define check_errors(x)      x
 #else
@@ -193,5 +197,9 @@ uint8_t propware_get_pin_num (const uint32_t pinMask);
 #endif
 
 /**@}*/
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* PROPWARE_H */

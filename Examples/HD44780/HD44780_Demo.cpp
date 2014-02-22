@@ -28,16 +28,18 @@
 #include "HD44780_Demo.h"
 
 // Main function
-void main (void) {
+int main () {
     uint8_t err;
 
-    if ((err = hd44780_start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
+    HD44780 lcd;
+
+    if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
-    hd44780_puts("0123456789abcdef0123456789abcdef");
-    hd44780_puts("Hello world!!!");
+    lcd.putStr("0123456789abcdef0123456789abcdef");
+    lcd.putStr("Hello world!!!");
 
-    return;
+    return 0;
 }
 
 void error (const uint8_t err) {

@@ -144,8 +144,11 @@ const char SD::ARCHIVE_CHAR_ = '.';
  *** Public Method Definitions ***
  *********************************/
 SD::SD () {
-    this->m_fatMod = false;
     this->m_fileID = 0;
+
+#ifdef SD_OPTION_FILE_WRITE
+    this->m_fatMod = false;
+#endif
 }
 
 uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
