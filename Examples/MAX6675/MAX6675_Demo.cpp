@@ -34,8 +34,9 @@ int main () {
     char buffer[128];
 
     PropWare::HD44780 lcd;
+    PropWare::MAX6675 thermo;
 
-    if ((err = max6675_start(MOSI, MISO, SCLK, CS)))
+    if ((err = thermo.start(MOSI, MISO, SCLK, CS)))
         error(err);
 
     if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
@@ -43,17 +44,17 @@ int main () {
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
-    // max6675_read* functions will always explicitly set the SPI modes before
+    // thermo.read* functions will always explicitly set the SPI modes before
     // each call, or assume that the SPI cog is still running in the proper
     // configuration
-    max6675_always_set_spi_mode(1);
+    thermo.always_set_spi_mode(1);
 
     lcd.putStr("Welcome to the MAX6675 demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
 
-        if ((err = max6675_read(&data)))
+        if ((err = thermo.read(&data)))
             error(err);
 
         lcd.clear();

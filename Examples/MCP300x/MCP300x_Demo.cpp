@@ -28,15 +28,16 @@
 #include "MCP300x_Demo.h"
 
 // Main function
-void main (void) {
+int main () {
     int8_t err;
     uint16_t data;
     uint32_t loopCounter;
     uint16_t divisor = 1024 / 8;
     uint8_t scaledValue, i;
     uint32_t ledOutput;
+    PropWare::MCP300x adc;
 
-    if ((err = mcp300x_start(MOSI, MISO, SCLK, CS)))
+    if ((err = adc.start(MOSI, MISO, SCLK, CS)))
         error(err);
     spi_set_clock(FREQ);
 
@@ -45,12 +46,12 @@ void main (void) {
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
-    // mcp300x_read* functions will always explicitly set the SPI modes before
+    // adc.read* functions will always explicitly set the SPI modes before
     // each call, or assume that the SPI cog is still running in the proper
     // configuration
-    mcp300x_always_set_spi_mode(0);
+    adc.always_set_spi_mode(0);
 
-    __simple_printf("Welcome to the MCP300x demo!\n");
+    puts("Welcome to the MCP300x demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
@@ -58,7 +59,7 @@ void main (void) {
         // Loop over the LED output very quickly, until we are within 1
         // millisecond of total period
         while (abs(loopCounter - CNT) > CLKFREQ / 1000) {
-            if ((err = mcp300x_read(CHANNEL, &data)))
+            if ((err = adc.read(CHANNEL, &data)))
                 error(err);
 
             // Turn on LEDs proportional to the analog value
@@ -70,8 +71,10 @@ void main (void) {
             gpio_pin_write(DEBUG_LEDS, ledOutput);
         }
 
-        __simple_printf("Channel %u is reading: %u\n", CHANNEL, data);
+        printf("Channel %u is reading: %u\n", CHANNEL, data);
     }
+
+    return 0;
 }
 
 void error (int8_t err) {

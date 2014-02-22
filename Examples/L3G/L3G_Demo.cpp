@@ -30,11 +30,12 @@
 #include "L3G_Demo.h"
 
 // Main function
-void main (void) {
+int main () {
     int8_t err;
     int16_t gyroVals[3];
+    PropWare::L3G gyro;
 
-    if ((err = l3g_start(MOSI, MISO, SCLK, CS, L3G_2000_DPS)))
+    if ((err = gyro.start(MOSI, MISO, SCLK, CS, PropWare::L3G::DPS_2000)))
         error(err);
 
     // Though this functional call is not necessary (default value is 0), I
@@ -42,15 +43,17 @@ void main (void) {
     // l3g_read* functions will always explicitly set the SPI modes before
     // each call, or assume that the SPI cog is still running in the proper
     // configuration
-    l3g_always_set_spi_mode(1);
+    gyro.always_set_spi_mode(1);
 
     while (1) {
-        if ((err = l3g_read_all(gyroVals)))
+        if ((err = gyro.read_all(gyroVals)))
             error(err);
         printf("Gyro vals... X: %i\tY: %i\tZ: %i\n", gyroVals[0], gyroVals[1],
                 gyroVals[2]);
         waitcnt(CLKFREQ/20 + CNT);
     }
+
+    return 0;
 }
 
 void error (const int8_t err) {

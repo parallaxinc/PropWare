@@ -46,18 +46,18 @@
 #include <mcp300x.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI                BIT_0
+#define MOSI            BIT_0
 /** Pin number for MISO (master in - slave out) */
-#define MISO                BIT_1
+#define MISO            BIT_1
 /** Pin number for the clock signal */
-#define SCLK                BIT_2
+#define SCLK            BIT_2
 /** Pin number for chip select */
-#define CS                  BIT_3
+#define CS              BIT_3
 #define FREQ            100000
 
 // We're going to read from just channel 1 in this demo, but feel free to read
 // from any that you like
-#define CHANNEL         MCP_CHANNEL_1
+#define CHANNEL         PropWare::MCP300x::CHANNEL_1
 
 #define DEBUG_LEDS      BYTE_2
 

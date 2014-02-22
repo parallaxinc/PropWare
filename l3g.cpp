@@ -28,77 +28,78 @@
 
 #include <l3g.h>
 
-#define L3G_SPI_MODE            SPI_MODE_3
-#define L3G_SPI_BITMODE         SPI_MSB_FIRST
-#define L3G_SPI_DEFAULT_FREQ    100000
+namespace PropWare {
 
-uint32_t g_l3g_cs;
-uint8_t g_l3g_alwaysSetMode = 0;
+L3G::L3G () {
+    this->m_cs = -1;
+    this->m_alwaysSetMode = 0;
+}
 
-uint8_t l3g_start (const uint32_t mosi, const uint32_t miso, const uint32_t sclk,
-        const uint32_t cs, const L3G_DPSMode dpsMode) {
+uint8_t L3G::start (const uint32_t mosi, const uint32_t miso,
+        const uint32_t sclk, const uint32_t cs, const L3G::DPSMode dpsMode) {
     uint8_t err;
 
     // Ensure SPI module started
     if (!spi_is_running()) {
         check_errors(
-                spi_start(mosi, miso, sclk, L3G_SPI_DEFAULT_FREQ, L3G_SPI_MODE, L3G_SPI_BITMODE));
+                spi_start(mosi, miso, sclk, L3G::SPI_DEFAULT_FREQ, L3G::SPI_MODE,
+                        L3G::SPI_BITMODE));
 
     } else {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    g_l3g_cs = cs;
+    this->m_cs = cs;
     gpio_set_dir(cs, GPIO_DIR_OUT);
     gpio_pin_set(cs);
 
     // NOTE L3G has high- and low-pass filters. Should they be enabled? (Page
     // 31)
-    check_errors(l3g_write8(L3G_CTRL_REG1, NIBBLE_0));
-    check_errors(l3g_write8(L3G_CTRL_REG4, dpsMode | BIT_7));
+    check_errors(this->write8(L3G::CTRL_REG1, NIBBLE_0));
+    check_errors(this->write8(L3G::CTRL_REG4, dpsMode | BIT_7));
 
     return 0;
 }
 
-void l3g_always_set_spi_mode (const uint8_t alwaysSetMode) {
-    g_l3g_alwaysSetMode = alwaysSetMode;
+void L3G::always_set_spi_mode (const uint8_t alwaysSetMode) {
+    this->m_alwaysSetMode = alwaysSetMode;
 }
 
-uint8_t l3g_read_x (int16_t *val) {
-    return l3g_read16(L3G_OUT_X_L, val);
+uint8_t L3G::read_x (int16_t *val) {
+    return this->read16(L3G::OUT_X_L, val);
 }
 
-uint8_t l3g_read_y (int16_t *val) {
-    return l3g_read16(L3G_OUT_Y_L, val);
+uint8_t L3G::read_y(int16_t *val) {
+    return this->read16(L3G::OUT_Y_L, val);
 }
 
-uint8_t l3g_read_z (int16_t *val) {
-    return l3g_read16(L3G_OUT_Z_L, val);
+uint8_t L3G::read_z (int16_t *val) {
+    return this->read16(L3G::OUT_Z_L, val);
 }
 
-uint8_t l3g_read (const L3G_Axis axis, int16_t *val) {
-    return l3g_read16(L3G_OUT_X_L + (axis << 1), val);
+uint8_t L3G::read (const L3G::Axis axis, int16_t *val) {
+    return this->read16(L3G::OUT_X_L + (axis << 1), val);
 }
 
-uint8_t l3g_read_all (int16_t *val) {
+uint8_t L3G::read_all (int16_t *val) {
     uint8_t err, i;
 
-    uint8_t addr = L3G_OUT_X_L;
+    uint8_t addr = L3G::OUT_X_L;
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
 
-    if (g_l3g_alwaysSetMode) {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(g_l3g_cs);
+    gpio_pin_clear(this->m_cs);
     check_errors(spi_shift_out(8, addr));
-    check_errors(spi_shift_in(16, &(val[L3G_X]), sizeof(val[L3G_X])));
-    check_errors(spi_shift_in(16, &(val[L3G_Y]), sizeof(val[L3G_Y])));
-    check_errors(spi_shift_in(16, &(val[L3G_Z]), sizeof(val[L3G_Z])));
-    gpio_pin_set(g_l3g_cs);
+    check_errors(spi_shift_in(16, &(val[L3G::X]), sizeof(val[L3G::X])));
+    check_errors(spi_shift_in(16, &(val[L3G::Y]), sizeof(val[L3G::Y])));
+    check_errors(spi_shift_in(16, &(val[L3G::Z]), sizeof(val[L3G::Z])));
+    gpio_pin_set(this->m_cs);
 
     // err is useless at this point and will be used as a temporary 8-bit
     // variable
@@ -111,25 +112,25 @@ uint8_t l3g_read_all (int16_t *val) {
     return 0;
 }
 
-uint8_t l3g_ioctl (const L3G_IoctlFunction func, const uint8_t wrVal,
+uint8_t L3G::ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
         uint8_t *rdVal) {
     uint8_t err, oldValue;
 
-    if (g_l3g_alwaysSetMode) {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
     switch (func) {
         // All functions follow the read-modify-write routine
-        case L3G_FUNC_MOD_DPS:
-            check_errors(l3g_read8(L3G_CTRL_REG4, (int8_t *) &oldValue));
+        case L3G::FUNC_MOD_DPS:
+            check_errors(this->read8(L3G::CTRL_REG4, (int8_t * ) &oldValue));
             oldValue &= ~(BIT_6 | BIT_5);
             oldValue |= wrVal << 5;
-            check_errors(l3g_write8(L3G_CTRL_REG4, oldValue));
+            check_errors(this->write8(L3G::CTRL_REG4, oldValue));
             break;
-        case L3G_FUNC_RD_REG:
-            check_errors(l3g_read8(wrVal, (int8_t * ) rdVal));
+        case L3G::FUNC_RD_REG:
+            check_errors(this->read8(wrVal, (int8_t * ) rdVal));
             break;
         default:
             return -1;  // TODO: Create a real error code
@@ -141,7 +142,7 @@ uint8_t l3g_ioctl (const L3G_IoctlFunction func, const uint8_t wrVal,
 /*************************************
  *** Private Function Declarations ***
  *************************************/
-uint8_t l3g_write8 (uint8_t addr, const uint8_t dat) {
+uint8_t L3G::write8 (uint8_t addr, const uint8_t dat) {
     uint8_t err;
     uint16_t outputValue;
 
@@ -150,20 +151,20 @@ uint8_t l3g_write8 (uint8_t addr, const uint8_t dat) {
     outputValue = ((uint16_t) addr) << 8;
     outputValue |= dat;
 
-    if (g_l3g_alwaysSetMode) {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(g_l3g_cs);
+    gpio_pin_clear(this->m_cs);
     err = spi_shift_out(16, outputValue);
     check_errors(spi_wait());
-    gpio_pin_set(g_l3g_cs);
+    gpio_pin_set(this->m_cs);
 
     return err;
 }
 
-uint8_t l3g_write16 (uint8_t addr, const uint16_t dat) {
+uint8_t L3G::write16 (uint8_t addr, const uint16_t dat) {
     uint8_t err;
     uint16_t outputValue;
 
@@ -174,53 +175,53 @@ uint8_t l3g_write16 (uint8_t addr, const uint16_t dat) {
     outputValue |= ((uint16_t) ((uint8_t) dat)) << 8;
     outputValue |= (uint8_t) (dat >> 8);
 
-    if (g_l3g_alwaysSetMode) {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(g_l3g_cs);
+    gpio_pin_clear(this->m_cs);
     check_errors(spi_shift_out(24, outputValue));
     check_errors(spi_wait());
-    gpio_pin_set(g_l3g_cs);
+    gpio_pin_set(this->m_cs);
 
     return 0;
 }
 
-uint8_t l3g_read8 (uint8_t addr, int8_t *dat) {
+uint8_t L3G::read8 (uint8_t addr, int8_t *dat) {
     uint8_t err;
 
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
 
-    if (g_l3g_alwaysSetMode) {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(g_l3g_cs);
+    gpio_pin_clear(this->m_cs);
     check_errors(spi_shift_out(8, addr));
     check_errors(spi_shift_in(8, dat, sizeof(*dat)));
-    gpio_pin_set(g_l3g_cs);
+    gpio_pin_set(this->m_cs);
 
     return 0;
 }
 
-uint8_t l3g_read16 (uint8_t addr, int16_t *dat) {
+uint8_t L3G::read16 (uint8_t addr, int16_t *dat) {
     uint8_t err;
 
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
 
-    if (g_l3g_alwaysSetMode) {
-        check_errors(spi_set_mode(L3G_SPI_MODE));
-        check_errors(spi_set_bit_mode(L3G_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(spi_set_mode(L3G::SPI_MODE));
+        check_errors(spi_set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(g_l3g_cs);
+    gpio_pin_clear(this->m_cs);
     check_errors(spi_shift_out(8, addr));
     check_errors(spi_shift_in(16, dat, sizeof(*dat)));
-    gpio_pin_set(g_l3g_cs);
+    gpio_pin_set(this->m_cs);
 
     // err is useless at this point and will be used as a temporary 8-bit
     // variable
@@ -229,4 +230,6 @@ uint8_t l3g_read16 (uint8_t addr, int16_t *dat) {
     *dat |= err;
 
     return 0;
+}
+
 }

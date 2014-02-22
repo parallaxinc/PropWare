@@ -44,74 +44,77 @@
 #include <PropWare.h>
 #include <spi.h>
 
-/**
- * @brief       Initialize communication with an MAX6675 device
- *
- * @param[in]   mosi        Pin mask for MOSI
- * @param[in]   miso        Pin mask for MISO
- * @param[in]   sclk        Pin mask for SCLK
- * @param[in]   cs          Pin mask for CS
- *
- * @return      Returns 0 upon success, error code otherwise
- */
-int8_t max6675_start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t cs);
+namespace PropWare {
 
-/**
- * @brief       Choose whether to always set the SPI mode and bitmode before
- *              reading or writing to the chip; Useful when multiple devices are
- *              connected to the SPI bus
- *
- * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
- *                              always be set before a read or write routine
- */
-void max6675_always_set_spi_mode (const uint8_t alwaysSetMode);
+class MAX6675 {
+    public:
+        MAX6675 ();
 
-/**
- * @brief       Read data in fixed-point form
- *
- * @detailed    12-bit data is stored where lower 2 bits are fractional and
- *              upper 10 bits are the whole number. Value presented in degrees
- *              Celsius
- *
- * @param[out]  *dat    Address where data should be stored
- *
- * @return      Returns 0 upon success, error code otherwise
- */
-int8_t max6675_read (uint16_t *dat);
+        /**
+         * @brief       Initialize communication with an MAX6675 device
+         *
+         * @param[in]   mosi        Pin mask for MOSI
+         * @param[in]   miso        Pin mask for MISO
+         * @param[in]   sclk        Pin mask for SCLK
+         * @param[in]   cs          Pin mask for CS
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        int8_t start (const uint32_t mosi, const uint32_t miso,
+                const uint32_t sclk, const uint32_t cs);
 
-/**
- * @brief       Read data and return integer value
- *
- * @param[out]  *dat    Address where data should be stored
- *
- * @return      Returns 0 upon success, error code otherwise
- */
-int8_t max6675_read_whole (uint16_t *dat);
+        /**
+         * @brief       Choose whether to always set the SPI mode and bitmode before
+         *              reading or writing to the chip; Useful when multiple devices are
+         *              connected to the SPI bus
+         *
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
+         *                              always be set before a read or write routine
+         */
+        void always_set_spi_mode (const uint8_t alwaysSetMode);
 
-/**
- * @brief       Read data in floating point form
- *
- * @param[out]  *dat    Address where data should be stored
- *
- * @return      Returns 0 upon success, error code otherwise
- */
-int8_t max6675_read_float (float *dat);
+        /**
+         * @brief       Read data in fixed-point form
+         *
+         * @detailed    12-bit data is stored where lower 2 bits are fractional and
+         *              upper 10 bits are the whole number. Value presented in degrees
+         *              Celsius
+         *
+         * @param[out]  *dat    Address where data should be stored
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        int8_t read (uint16_t *dat);
 
-/** @} */
+        /**
+         * @brief       Read data and return integer value
+         *
+         * @param[out]  *dat    Address where data should be stored
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        int8_t read_whole (uint16_t *dat);
 
-/*************************
- *** Private Functions ***
- *************************/
-/**
- * @privatesection @{
- */
-#define MAX6675_SPI_DEFAULT_FREQ        1000000
-#define MAX6675_SPI_MODE                SPI_MODE_1
-#define MAX6675_SPI_BITMODE             SPI_MSB_FIRST
-#define MAX6675_BIT_WIDTH               12
-/** @} */
+        /**
+         * @brief       Read data in floating point form
+         *
+         * @param[out]  *dat    Address where data should be stored
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        int8_t read_float (float *dat);
 
-/** @} */
+    private:
+        static const uint32_t SPI_DEFAULT_FREQ = 1000000;
+        static const SPI_Mode SPI_MODE = SPI_MODE_1;
+        static const SPI_BitMode SPI_BITMODE = SPI_MSB_FIRST;
+        static const uint8_t BIT_WIDTH = 12;
+
+    private:
+        uint32_t m_cs;
+        uint8_t m_alwaysSetMode;
+};
+
+}
 
 #endif /* MAX6675_H_ */
