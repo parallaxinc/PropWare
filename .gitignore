@@ -10,5 +10,7 @@ makefile
 **.elf
 **.o
 **.a
+**.map
+**.rawmap
 **~
 **.swp

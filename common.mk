@@ -68,11 +68,11 @@ ifneq ($(BOARD),)
 	BOARDFLAG=-b$(BOARD)
 endif
 
-CFLAGS_NO_MODEL := -Wall -m32bit-doubles
+CFLAGS_NO_MODEL := -Wall -m32bit-doubles -g
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
 CXXFLAGS += $(CFLAGS)
-LDFLAGS += -m$(MODEL) -fno-exceptions -fno-rtti
+LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -ltiny
@@ -218,7 +218,7 @@ endif
 	@echo ' '
 
 clean:
-	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary $(NULL)
+	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary *.map *.rawmap $(NULL)
 
 # #########################################################
 # how to run on RAM
