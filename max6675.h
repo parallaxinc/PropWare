@@ -32,15 +32,6 @@
 #ifndef MAX6675_H_
 #define MAX6675_H_
 
-/**
- * @defgroup _propware_max6675  MAX6675 K-type thermocouple amplifier
- * @{
- */
-
-/**
- * @publicsection @{
- */
-
 #include <PropWare.h>
 #include <spi.h>
 

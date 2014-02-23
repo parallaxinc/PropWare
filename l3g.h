@@ -33,15 +33,6 @@
 #ifndef L3G_H_
 #define L3G_H_
 
-/**
- * @defgroup _propware_l3g  L3G 3-axis gyroscope
- * @{
- */
-
-/**
- * @publicsection @{
- */
-
 #include <propeller.h>
 #include <PropWare.h>
 #include <spi.h>

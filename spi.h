@@ -52,7 +52,7 @@
  */
 #define SPI_OPTION_DEBUG
 // This allows Doxygen to document the macro without permanently enabling it
-//#undef SPI_OPTION_DEBUG
+#undef SPI_OPTION_DEBUG
 /**
  * Parameter checking within each function call. I recommend you leave this
  * option enabled unless speed is critical
@@ -252,10 +252,10 @@ class SPI {
         /**
          * @brief       Send a value out to a peripheral device
          *
-         * @detailed    Pass a value and mode into the assembly cog to be sent to the
-         *              peripheral; NOTE: this function is non-blocking and chip-select
-         *              should not be set inactive immediately after the return (you
-         *              should call spi_wait() before setting chip-select inactive)
+         * Pass a value and mode into the assembly cog to be sent to the
+         * peripheral; NOTE: this function is non-blocking and chip-select
+         * should not be set inactive immediately after the return (you should
+         * call spi_wait() before setting chip-select inactive)
          *
          * @param[in]   bits        Number of bits to be shifted out
          * @param[in]   value       The value to be shifted out
@@ -376,10 +376,10 @@ class SPI {
          *
          * @param   err     Error number used to determine error string
          */
-        void error (const uint8_t err, ...);
+        void spi_error (const uint8_t err, ...);
 #else
         // Exit calling function by returning 'err'
-#define this->error(err, ...)          return err
+#define spi_error(err,...)          return err
 #endif
 
     private:

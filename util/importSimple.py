@@ -14,8 +14,8 @@ from shutil import copy2
 
 
 class ImportSimple:
-    PROPWARE_ROOT = "./"
-    CHEATER_DIR = "simple/"
+    PROPWARE_ROOT = "../"
+    CHEATER_DIR = PROPWARE_ROOT + "simple/"
     LEARN_ENV_VAR = "PROP_LEARN_PATH"
 
     def __init__(self):

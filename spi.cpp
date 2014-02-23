@@ -40,8 +40,8 @@ const uint32_t SPI::WR_TIMEOUT_VAL = CLKFREQ / 10;
 const uint32_t SPI::RD_TIMEOUT_VAL = CLKFREQ / 10;
 const uint32_t SPI::MAX_CLOCK = CLKFREQ >> 2;
 
-#define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) this->error(err)
-#define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) this->error(err, y)
+#define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) spi_error(err)
+#define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) spi_error(err, y)
 
 SPI::SPI () {
     this->m_mailbox = -1;
@@ -65,20 +65,20 @@ uint8_t SPI::start (const uint32_t mosi, const uint32_t miso,
 #ifdef SPI_OPTION_DEBUG_PARAMS
     // Ensure all pin-mask parameters have exactly 1 set bit
     if (1 != propware_count_bits(mosi))
-        this->error(SPI::INVALID_PIN_MASK);
+        spi_error(SPI::INVALID_PIN_MASK);
     if (1 != propware_count_bits(miso))
-        this->error(SPI::INVALID_PIN_MASK);
+        spi_error(SPI::INVALID_PIN_MASK);
     if (1 != propware_count_bits(sclk))
-        this->error(SPI::INVALID_PIN_MASK);
+        spi_error(SPI::INVALID_PIN_MASK);
 
     // Check clock frequency
     if (SPI::MAX_CLOCK <= frequency)
-        this->error(SPI::INVALID_FREQ);
+        spi_error(SPI::INVALID_FREQ);
 
     if (SPI::MODES <= mode)
-        this->error(SPI::INVALID_MODE);
+        spi_error(SPI::INVALID_MODE);
     if (SPI::LSB_FIRST != bitmode && SPI::MSB_FIRST != bitmode)
-        this->error(SPI::INVALID_BITMODE);
+        spi_error(SPI::INVALID_BITMODE);
 #endif
 
     // If cog already started, do not start another
@@ -90,7 +90,7 @@ uint8_t SPI::start (const uint32_t mosi, const uint32_t miso,
         this->m_mailbox = 0;
         this->m_cog = _SPIStartCog((void *) &this->m_mailbox);
         if (!this->is_running())
-            this->error(SPI::COG_NOT_STARTED);
+            spi_error(SPI::COG_NOT_STARTED);
 
         // Pass in all parameters
         PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
@@ -133,7 +133,6 @@ uint8_t SPI::wait (void) {
     // Wait for GAS cog to read in value and write -1
     while ((uint32_t) -1 != this->m_mailbox)
         if (abs(timeoutCnt - CNT) < SPI::TIMEOUT_WIGGLE_ROOM)
-            // Always use return instead of this->error() for private functions
             return SPI::TIMEOUT;
 
     return 0;
@@ -145,7 +144,7 @@ uint8_t SPI::wait_specific (const uint32_t value) {
     // Wait for GAS cog to read in value and write -1
     while (value == this->m_mailbox)
         if (abs(timeoutCnt - CNT) < SPI::TIMEOUT_WIGGLE_ROOM)
-            // Always use return instead of this->error() for private functions
+            // Always use return instead of spi_error() for private functions
             return SPI::TIMEOUT;
 
     return 0;
@@ -156,10 +155,10 @@ uint8_t SPI::set_mode (const SPI::Mode mode) {
     char str[] = "SPI::set_mode()";
 
     if (!this->is_running())
-        this->error(SPI::MODULE_NOT_RUNNING);
+        spi_error(SPI::MODULE_NOT_RUNNING);
 #ifdef SPI_OPTION_DEBUG_PARAMS
     if (SPI::MODES <= mode)
-        this->error(SPI::INVALID_MODE);
+        spi_error(SPI::INVALID_MODE);
 #endif
 
     // Wait for SPI cog to go idle
@@ -177,10 +176,10 @@ uint8_t SPI::set_bit_mode (const SPI::BitMode bitmode) {
     char str[] = "SPI::set_bit_mode()";
 
     if (!this->is_running())
-        this->error(SPI::MODULE_NOT_RUNNING);
+        spi_error(SPI::MODULE_NOT_RUNNING);
 #ifdef SPI_OPTION_DEBUG_PARAMS
     if (SPI::LSB_FIRST != bitmode && SPI::MSB_FIRST != bitmode)
-        this->error(SPI::INVALID_BITMODE);
+        spi_error(SPI::INVALID_BITMODE);
 #endif
 
     PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
@@ -196,10 +195,10 @@ uint8_t SPI::set_clock (const uint32_t frequency) {
     char str[] = "SPI::set_clock()";
 
     if (!this->is_running())
-        this->error(SPI::MODULE_NOT_RUNNING);
+        spi_error(SPI::MODULE_NOT_RUNNING);
 #ifdef SPI_OPTION_DEBUG_PARAMS
     if (SPI::MAX_CLOCK <= frequency)
-        this->error(SPI::INVALID_FREQ);
+        spi_error(SPI::INVALID_FREQ);
 #endif
 
     // Wait for SPI cog to go idle
@@ -221,7 +220,7 @@ uint8_t SPI::get_clock (uint32_t *frequency) {
 #ifdef SPI_OPTION_DEBUG_PARAMS
     // Check for errors
     if (!this->is_running())
-        this->error(SPI::MODULE_NOT_RUNNING);
+        spi_error(SPI::MODULE_NOT_RUNNING);
 #endif
 
     // Wait to ensure the SPI cog is in its idle state
@@ -244,9 +243,9 @@ uint8_t SPI::shift_out (uint8_t bits, uint32_t value) {
 #ifdef SPI_OPTION_DEBUG_PARAMS
     // Check for errors
     if (!this->is_running())
-        this->error(SPI::MODULE_NOT_RUNNING);
+        spi_error(SPI::MODULE_NOT_RUNNING);
     if (SPI::MAX_PAR_BITS < bits)
-        this->error(SPI::TOO_MANY_BITS);
+        spi_error(SPI::TOO_MANY_BITS);
 #endif
 
     // Wait to ensure the SPI cog is in its idle state
@@ -272,12 +271,12 @@ uint8_t SPI::shift_in (const uint8_t bits, void *data, const size_t bytes) {
     // Check for errors
 #ifdef SPI_OPTION_DEBUG_PARAMS
     if (!this->is_running())
-        this->error(SPI::MODULE_NOT_RUNNING);
+        spi_error(SPI::MODULE_NOT_RUNNING);
     if (SPI::MAX_PAR_BITS < bits)
-        this->error(SPI::TOO_MANY_BITS);
+        spi_error(SPI::TOO_MANY_BITS);
     if ((4 == bytes && ((uint32_t) data) % 4)
             || (2 == bytes && ((uint32_t) data) % 2))
-        this->error(SPI::ADDR_MISALIGN);
+        spi_error(SPI::ADDR_MISALIGN);
 #endif
 
     // Ensure SPI module is not busy
@@ -338,7 +337,7 @@ void SPI::shift_in_fast (const uint8_t bits, void *data, const uint8_t bytes) {
             break;
         default:
 #ifdef SPI_OPTION_DEBUG
-            this->error(SPI::INVALID_BYTE_SIZE);
+            spi_error(SPI::INVALID_BYTE_SIZE);
 #else
             return;
 #endif
@@ -390,7 +389,7 @@ uint8_t SPI::read_par (void *par, const size_t bytes) {
             *par32 = this->m_mailbox;
             break;
         default:
-            this->error(SPI::INVALID_BYTE_SIZE);
+            spi_error(SPI::INVALID_BYTE_SIZE);
             break;
     }
 
@@ -401,7 +400,7 @@ uint8_t SPI::read_par (void *par, const size_t bytes) {
 }
 
 #ifdef SPI_OPTION_DEBUG
-void SPI::error (const uint8_t err, ...) {
+void SPI::spi_error (const uint8_t err, ...) {
     va_list list;
     char str[18] = "SPI Error %u: %s\n";
 

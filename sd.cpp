@@ -47,7 +47,7 @@ const uint32_t SD::WIGGLE_ROOM = RESPONSE_TIMEOUT / 50;
  *
  * @param[in]   x   Any function that might throw an SD error
  */
-#define sd_check_errors(x)  if ((err = x)) this->error(err)
+#define sd_check_errors(x)  if ((err = x)) sd_error(err)
 
 /*********************************
  *** Public Method Definitions ***
@@ -78,7 +78,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
     // Start SPI module
     if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ, SD::SPI_MODE,
             SD::SPI_BITMODE)))
-        this->error(err);
+        sd_error(err);
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     printf("Starting SD card...\n");
@@ -117,7 +117,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
 #endif
         }
         if (SD::RESPONSE_IDLE != this->m_firstByteResponse)
-            this->error(SD::INVALID_INIT);
+            sd_error(SD::INVALID_INIT);
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
         printf("SD card in idle state. Now sending CMD8...\n");
@@ -146,7 +146,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
 
     // If CMD8 never succeeded, throw an error
     if (!stageCleared)
-        this->error(SD::CMD8_FAILURE);
+        sd_error(SD::CMD8_FAILURE);
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     printf("CMD8 succeeded. Requesting operating conditions...\n");
@@ -159,7 +159,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
     this->print_hex_block(response, SD::RESPONSE_LEN_R3);
 #endif
     if (SD::RESPONSE_IDLE != this->m_firstByteResponse)
-        this->error(SD::INVALID_INIT);
+        sd_error(SD::INVALID_INIT);
     // TODO: Parse the voltage bits to double-check that 3.3V is okay and ensure
     //       that bit 31 is low, indicating the card is done powering up
 
@@ -186,7 +186,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
 #endif
     }
     if (!stageCleared)
-        this->error(SD::INVALID_RESPONSE);
+        sd_error(SD::INVALID_RESPONSE);
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     printf("Activated!\n");
 #endif
@@ -267,7 +267,7 @@ uint8_t SD::mount (void) {
     numFATs = this->m_buf.buf[SD::NUM_FATS_ADDR];
 #ifdef SD_OPTION_FILE_WRITE
     if (2 != numFATs)
-        this->error(SD::TOO_MANY_FATS);
+        sd_error(SD::TOO_MANY_FATS);
 #endif
     rootEntryCount = this->read_rev_dat16(
             &(this->m_buf.buf[SD::ROOT_ENTRY_CNT_ADDR]));
@@ -307,7 +307,7 @@ uint8_t SD::mount (void) {
 
     // Determine and store FAT type
     if (SD::FAT12_CLSTR_CNT > clusterCount)
-        this->error(SD::INVALID_FILESYSTEM);
+        sd_error(SD::INVALID_FILESYSTEM);
     else if (SD::FAT16_CLSTR_CNT > clusterCount) {
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
         printf("\n***FAT type is FAT16***\n");
@@ -493,7 +493,7 @@ uint8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
 #endif
 
     if (NULL == f->buf)
-        this->error(SD::FILE_WITHOUT_BUFFER);
+        sd_error(SD::FILE_WITHOUT_BUFFER);
 
     f->id = this->m_fileID++;
     f->rPtr = 0;
@@ -534,13 +534,13 @@ uint8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
         } else
 #endif
             // SDFind returned unknown error - throw it
-            this->error(err);
+            sd_error(err);
     }
 
     // `name` was found successfully, determine if it is a file or directory
     if (SD::SUB_DIR
             & this->m_buf.buf[fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET])
-        this->error(SD::ENTRY_NOT_FILE);
+        sd_error(SD::ENTRY_NOT_FILE);
 
     // Passed the file-not-directory test, load it into the buffer and update
     // status variables
@@ -950,7 +950,7 @@ int8_t SD::shell_ls (void) {
                 if ((uint8_t) SD::EOC_END == err)
                     break;
                 else
-                    this->error(err);
+                    sd_error(err);
             }
 
             fileEntryOffset = 0;
@@ -968,7 +968,7 @@ int8_t SD::shell_cat (const char *name, SD::File *f) {
         if ((uint8_t) SD::EOC_END == err)
             return err;
         else
-            this->error(err);
+            sd_error(err);
     } else {
         // Loop over each character and print them to the screen one-by-one
         while (!this->feof(f))
@@ -2031,7 +2031,7 @@ void SD::print_file_attributes (const uint8_t flags) {
 #endif
 
 #ifdef SD_OPTION_DEBUG
-void SD::error (const uint8_t err) {
+void SD::sd_error (const uint8_t err) {
     char str[] = "SD Error %u: %s\n";
 
     switch (err) {

@@ -31,11 +31,6 @@
 #ifndef PROPWARE_H
 #define PROPWARE_H
 
-/**
- * @defgroup    _propware   PropWare
- * @{
- */
-
 #ifndef ASM_OBJ_FILE
 #include <propeller.h>
 #include <stdint.h>
@@ -195,8 +190,6 @@ uint8_t propware_count_bits (uint32_t par);
  */
 uint8_t propware_get_pin_num (const uint32_t pinMask);
 #endif
-
-/**@}*/
 
 #if defined(__cplusplus)
 }

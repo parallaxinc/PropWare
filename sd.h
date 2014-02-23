@@ -873,7 +873,7 @@ class SD {
          *
          * @param   err     Error number used to determine error string
          */
-        void error (const uint8_t err);
+        void sd_error (const uint8_t err);
 
         /**
          * @brief   Print to screen each status bit individually with human-readable
