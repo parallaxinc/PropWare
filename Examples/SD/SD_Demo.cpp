@@ -142,7 +142,7 @@ int main () {
 
 void error (const uint8_t err) {
 #ifdef DEBUG
-    if (SD_ERRORS_BASE <= err && err < SD_ERRORS_LIMIT)
+    if (SD_ERRORS_BASE <= err && err < PropWare::SD::ERRORS)
         printf("SD error %u\n", err - SD_ERRORS_BASE);
     else
         printf("Unknown error %u\n", err);

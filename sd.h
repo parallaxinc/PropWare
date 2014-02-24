@@ -187,8 +187,6 @@ class SD {
             /** End of the file */SEEK_END
         } FilePos;
 
-        /** Number of allocated error codes for SD */
-#define SD_ERRORS_LIMIT     32
         /** First SD error code */
 #define SD_ERRORS_BASE      16
         /**
@@ -214,7 +212,8 @@ class SD {
             /** SD Error 16 */TOO_MANY_FATS,
             /** SD Error 17 */READING_PAST_EOC,
             /** SD Error 18 */FILE_WITHOUT_BUFFER,
-            /** SD Error 19 */CMD8_FAILURE
+            /** SD Error 19 */CMD8_FAILURE,
+            /** Number of unique SD errors */ERRORS
         } ErrorCode;
 
         /**
@@ -579,10 +578,10 @@ class SD {
         int8_t print_hex_block (uint8_t *dat, uint16_t bytes);
 #endif
 
-        /*******************************************
-         *** Private SD Prototypes ***
-         *******************************************/
     private:
+        /***********************
+         *** Private Methods ***
+         ***********************/
         /**
          * @brief       Send a command and argument over SPI to the SD card
          *
@@ -898,7 +897,7 @@ class SD {
          *** Private Constants ***
          *************************/
         // SPI config
-        static const uint32_t SPI_INIT_FREQ = 200000;  // Run SD initialization at 200 kHz
+        static const uint32_t SPI_INIT_FREQ = 2000;  // Run SD initialization at 200 kHz
         static const SPI::Mode SPI_MODE = SPI::MODE_0;
         static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 

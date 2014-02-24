@@ -52,7 +52,7 @@
  */
 #define SPI_OPTION_DEBUG
 // This allows Doxygen to document the macro without permanently enabling it
-#undef SPI_OPTION_DEBUG
+//#undef SPI_OPTION_DEBUG
 /**
  * Parameter checking within each function call. I recommend you leave this
  * option enabled unless speed is critical
@@ -116,20 +116,21 @@ class SPI {
          * @note    Initial value is SPI_MODES + 1 making them easily distinguishable
          */
         typedef enum {
-            // Start the enumeration where SPI::Mode left off; this ensures no overlap
+            /**
+             * Start the enumeration where SPI::Mode left off; this ensures no
+             * overlap
+             */
             LSB_FIRST = SPI::MODES,
             MSB_FIRST,
             BIT_MODES
         } BitMode;
 
-        /** First SPI error code */
-#define SPI_ERRORS_BASE             0
-
         /**
          * Error codes - Proceeded by nothing
          */
         typedef enum {
-            /** SPI Error  0 */INVALID_PIN = SPI_ERRORS_BASE,
+            /** First SPI error */ERROR_BASE = 0,
+            /** SPI Error  0 */INVALID_PIN = ERROR_BASE,
             /** SPI Error  1 */INVALID_CLOCK_INIT,
             /** SPI Error  2 */INVALID_MODE,
             /** SPI Error  3 */INVALID_PIN_MASK,

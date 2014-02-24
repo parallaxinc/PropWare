@@ -406,47 +406,47 @@ void SPI::spi_error (const uint8_t err, ...) {
 
     switch (err) {
         case SPI::INVALID_PIN:
-            printf(str, (err - SPI_ERRORS_BASE), "Invalid pin");
+            printf(str, (err - SPI::ERROR_BASE), "Invalid pin");
             break;
         case SPI::INVALID_MODE:
-            printf(str, (err - SPI_ERRORS_BASE), "Invalid mode");
+            printf(str, (err - SPI::ERROR_BASE), "Invalid mode");
             break;
         case SPI::INVALID_PIN_MASK:
-            printf(str, (err - SPI_ERRORS_BASE), "Invalid pin mask");
+            printf(str, (err - SPI::ERROR_BASE), "Invalid pin mask");
             break;
         case SPI::TOO_MANY_BITS:
-            printf(str, (err - SPI_ERRORS_BASE),
+            printf(str, (err - SPI::ERROR_BASE),
                     "Incapable of handling so many bits in an argument");
             break;
         case SPI::TIMEOUT:
             va_start(list, err);
             printf("SPI Error %u: %s\n\tCalling function was %s\n",
-                    (err - SPI_ERRORS_BASE),
+                    (err - SPI::ERROR_BASE),
                     "Timed out during parameter passing", va_arg(list, char *));
             va_end(list);
             break;
         case SPI::TIMEOUT_RD:
-            printf(str, (err - SPI_ERRORS_BASE),
+            printf(str, (err - SPI::ERROR_BASE),
                     "Timed out during parameter read");
             break;
         case SPI::COG_NOT_STARTED:
-            printf(str, (err - SPI_ERRORS_BASE),
+            printf(str, (err - SPI::ERROR_BASE),
                     "SPI's GAS cog was not started");
             break;
         case SPI::MODULE_NOT_RUNNING:
-            printf(str, (err - SPI_ERRORS_BASE), "SPI GAS cog not running");
+            printf(str, (err - SPI::ERROR_BASE), "SPI GAS cog not running");
             break;
         case SPI::INVALID_FREQ:
-            printf(str, (err - SPI_ERRORS_BASE), "Frequency set too high");
+            printf(str, (err - SPI::ERROR_BASE), "Frequency set too high");
             break;
         case SPI::ADDR_MISALIGN:
-            printf(str, (err - SPI_ERRORS_BASE),
+            printf(str, (err - SPI::ERROR_BASE),
                     "Passed in address is miss aligned");
             break;
         default:
             // Is the error an SPI error?
-            if (err > SPI_ERRORS_BASE && err < (SPI_ERRORS_BASE + SPI::ERRORS))
-                printf("Unknown SPI error %u\n", (err - SPI_ERRORS_BASE));
+            if (err > SPI::ERROR_BASE && err < (SPI::ERROR_BASE + SPI::ERRORS))
+                printf("Unknown SPI error %u\n", (err - SPI::ERROR_BASE));
             else
                 printf("Unknown error %u\n", (err));
             break;
