@@ -1,9 +1,5 @@
 /**
  * @file    max6675.h
- */
-/**
- * @brief   MAX6675 K-type thermocouple amplifier driver using SPI communication
- *          for the Parallax Propeller
  *
  * @project PropWare
  *
@@ -37,6 +33,10 @@
 
 namespace PropWare {
 
+/**
+ * @brief   MAX6675 K-type thermocouple amplifier driver using SPI communication
+ *          for the Parallax Propeller
+ */
 class MAX6675 {
     public:
         MAX6675 ();

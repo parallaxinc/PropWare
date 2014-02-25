@@ -1,9 +1,5 @@
 /**
  * @file    l3g.h
- */
-/**
- * @brief   L3G gyroscope driver using SPI communication for the Parallax
- *          Propeller
  *
  * @project PropWare
  *
@@ -39,6 +35,10 @@
 
 namespace PropWare {
 
+/**
+ * @brief   L3G gyroscope driver using SPI communication for the Parallax
+ *          Propeller
+ */
 class L3G {
     public:
         /**

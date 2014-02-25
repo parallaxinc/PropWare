@@ -1,25 +1,9 @@
 /**
  * @file        sd.h
- */
-/**
- * @brief       SDHC driver for FAT16 and FAT32 for the Parallax Propeller
  *
  * @project     PropWare
  *
  * @author      David Zemon
- *
- * @date        Spring 2013
- *
- * @pre         The SD card must be SDHC v2 and must be formatted to FAT16 or
- *              FAT32
- *
- * @warning     Unknown result if card is not SDHC v2
- *
- * TODO:    Re-arrange errors in order of impact level; Allows the user to do
- *          something like:
- *              if ((SD_ERRORS_BASE + 6) < (err = SDFoo()))
- *                 throw(err);
- *          which would ignore any error less than 6
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -99,6 +83,20 @@ namespace PropWare {
 #define SD_OPTION_FILE_WRITE
 /** @} */
 
+/**
+ * @brief       SDHC driver for FAT16 and FAT32 for the Parallax Propeller
+ *
+ * @pre         The SD card must be SDHC v2 and must be formatted to FAT16 or
+ *              FAT32
+ *
+ * @warning     Unknown result if card is not SDHC v2
+ *
+ * TODO:    Re-arrange errors in order of impact level; Allows the user to do
+ *          something like:
+ *              if ((SD_ERRORS_BASE + 6) < (err = SDFoo()))
+ *                 throw(err);
+ *          which would ignore any error less than 6
+ */
 class SD {
     public:
         /** Number of characters printed to the terminal before a line break */

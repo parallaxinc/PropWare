@@ -1,14 +1,8 @@
 /**
  * @file    mcp300x.h
- */
-/**
- * @brief   MCP3004/MCP3008 ADC driver using SPI communication for the Parallax
- *          Propeller
  *
  * @author  David Zemon
  * @author  Collin Winans
- *
- * @note    MCP300x chips uses SPI mode 2 and shifts data MSB first
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -39,6 +33,12 @@
 
 namespace PropWare {
 
+/**
+ * @brief   MCP3004/MCP3008 ADC driver using SPI communication for the Parallax
+ *          Propeller
+ *
+ * @note    MCP300x chips uses SPI mode 2 and shifts data MSB first
+ */
 class MCP300x {
     public:
         /** Single-ended channels */

@@ -1,13 +1,5 @@
 /**
  * @file        spi.h
- */
-/**
- * @brief       SPI serial communications library; Core functionality comes from
- *              a dedicated assembly cog
- *
- * @detailed    This SPI module is not currently thread safe! Do not try to
- *              call SPI functions from more than one cog. Look for a lockable
- *              version in PropWare v3.0
  *
  * @project     PropWare
  *
@@ -81,6 +73,14 @@
 
 namespace PropWare {
 
+/**
+ * @brief       SPI serial communications library; Core functionality comes from
+ *              a dedicated assembly cog
+ *
+ * @detailed    This SPI module is not currently thread safe! Do not try to
+ *              call SPI functions from more than one cog. Look for a lockable
+ *              version in PropWare v3.0
+ */
 class SPI {
     public:
         /**

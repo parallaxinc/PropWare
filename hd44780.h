@@ -1,16 +1,10 @@
 /**
  * @file        hd44780.h
- */
-/**
- * @brief       Support for the common "character LCD" modules using the HD44780
- *              controller for the Parallax Propeller
  *
  * @project     PropWare
  *
  * @author      David Zemon
  * @author      Collin Winans
- *
- * @note        Does not natively support 40x4 or 24x4 character displays
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -52,6 +46,12 @@ namespace PropWare {
 #define HD44780_OPTION_DEBUG
 /** @} */
 
+/**
+ * @brief       Support for the common "character LCD" modules using the HD44780
+ *              controller for the Parallax Propeller
+ *
+ * @note        Does not natively support 40x4 or 24x4 character displays
+ */
 class HD44780 {
     public:
         /**
