@@ -81,8 +81,7 @@
 
     <!-- GCC -->
     <li class="windoze">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
-        the compiler of choice. I find the easiest way to install it is via Parallax's <a
-                target="_blank"
+        the compiler of choice. I find the easiest way to install it is via Parallax's <a target="_blank"
                 href="http://learn.parallax.com/propeller-c-set-simpleide/windows">Simple IDE</a>. If you prefer, you
         can also download PropGCC directly from <a target="_blank"
                                                    href="https://code.google.com/p/propgcc/downloads/list">here</a>.
@@ -92,14 +91,16 @@
         the compiler of choice. I find the easiest way to install it is via Parallax's <a
                 target="_blank"
                 href="http://learn.parallax.com/propeller-c-set-simpleide/linux">Simple IDE</a>. If you prefer, you can
-        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">
+            here</a>.
     </li>
 
     <li class="mac">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is the
         compiler of choice. I find the easiest way to install it is via Parallax's <a
                 target="_blank"
                 href="http://learn.parallax.com/propeller-c-set-simpleide/mac">Simple IDE</a>. If you prefer, you can
-        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">
+            here</a>.
     </li>
 
     <!-- GNU make -->
@@ -170,9 +171,9 @@
             <li>
                 I'm afraid I don't know anyone with a Mac to try this on, and I'm not 100% confident this works, but <a
                     target="_blank"
-                    href="https://stackoverflow.com/questions/5240628/how-to-set-environment-variable-for-root-user">here's
-                a link</a> that might help you. If you have trouble with building your projects via Eclipse or any
-                application not launched from the terminal, please let me know and I'll work with you to solve it
+                    href="https://stackoverflow.com/questions/5240628/how-to-set-environment-variable-for-root-user">
+                here's a link</a> that might help you. If you have trouble with building your projects via Eclipse or
+                any application not launched from the terminal, please let me know and I'll work with you to solve it
             </li>
 
             <li>Once you determine the correct file to edit, append a new line to the bottom with the full path to the
@@ -204,8 +205,8 @@
 <ul>
     <li>Enter the PropWare root directory at the command line</li>
 
-    <li>Run "make"; This will build the library file, libPropWare_*.a, for each memory model as well as executables for
-        each example project
+    <li>Run the following three lines in succession: "make clean", "make simple_clean", "make". This will build all
+        of the PropWare libraries as well as all of the Simple Libraries. There are a lot of files, please be patient.
     </li>
 </ul>
 
@@ -224,8 +225,8 @@
                 download the appropriate package
             </li>
 
-            <li>Create a new C or C++ project; "Project Type" should be Executable -&gt; Empty Project and "Toolchains"
-                should be set for cross compiler; On second page, select "Advanced settings..."
+            <li>Create a new C++ project; "Project Type" should be Executable -&gt; Empty Project and "Toolchains"
+                should be set for cross compiler; On the second page, select "Advanced settings..."
             </li>
 
             <li>In the left-pane, click on "C/C++ Build" menu option to the left and then find the "Builder Settings"
@@ -239,8 +240,9 @@
 
             <li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
                 "Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's
-                include folder (on Linux & Mac, /opt/parallax/propeller-elf/include)
+                include folder (on Linux & Mac, /opt/parallax/propeller-elf/include).
                 <ul>
+                    <li>Repeat this process for "Cross G++ Compiler"</li>
                     <li>This is done simply for the indexer that helps you keep track of included files - it will not
                         affect the build process and can be skipped (not recommended)
                     </li>
@@ -258,9 +260,9 @@
             <li>That's it! You now have Eclipse up and running with PropGCC and PropWare! All of its auto-completion,
                 code highlighting, and quick and easy compilation! Projects can be compiled with Eclipse's built-in
                 "Build Project" found in the "Project" menu. Though you can load your program to the Propeller via some
-                Eclipse magic, I find it's a lot more trouble than it's worth. Simply open a terminal, navigate to &lt;project
-                root&gt;/Debug and type either "make -f ../Makefile run" to test your application in RAM or "make -f
-                ../Makefile install" to load your application to EEPROM
+                Eclipse magic, I find it's a lot more trouble than it's worth. Simply open a terminal, navigate to &lt;
+                project root&gt;/Debug and type either "make -f ../Makefile run" to test your application in RAM or
+                "make -f ../Makefile install" to load your application to EEPROM
             </li>
         </ol>
     </li>
@@ -271,9 +273,9 @@
             <li>Create a project directory and your source files
                 <ul>
                     <li>All C/C++ files must have an accompanying header file with a similar name; (i.e., if you have a
-                        file main.c, you must have main.h as well); You are welcome to edit common.mk to not search for
-                        header files; See the comment near the top of the file for my reasoning behind including it and
-                        decide for yourself
+                        file main.cpp, you must have main.h as well); You are welcome to edit common.mk to not search
+                        for header files; See the comment near the top of the file for my reasoning behind including it
+                        and decide for yourself
                     </li>
                 </ul>
             </li>
@@ -338,7 +340,7 @@
 <h2 id="contribute">Developing and Contributing to PropWare</h2>
 <p>PropWare is developed by David Zemon.</p>
 <p>Contributions can be made by either <a target="_blank" href="http://david.zemon.name/professional/contact.shtml">
-contacting David Zemon</a> or forking the repository and creating a pull request.</p>
+    contacting David Zemon</a> or forking the repository and creating a pull request.</p>
 
 <h2 id="usefulLinks">Useful links</h2>
 
@@ -372,6 +374,7 @@ contacting David Zemon</a> or forking the repository and creating a pull request
 
 <script type="text/javascript">
     hideAll();
+
 </script>
 
 @endhtmlonly */
