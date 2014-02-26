@@ -14,6 +14,7 @@ import time
 from glob import glob
 from zipfile import ZipFile
 
+
 class CreateBinaryDistr:
     PROPWARE_ROOT = "../"
     SIMPLE_LIB_PATH = "simple/"
@@ -82,12 +83,15 @@ class CreateBinaryDistr:
     def compile():
         if 0 != os.system("make -j4"):
             raise MakeFailure()
+
+
 class MakeFailure(Exception):
     def __init__(self):
         pass
 
     def __str__(self):
         return "Make failed to finish executing"
+
 
 if "__main__" == __name__:
     runMe = CreateBinaryDistr()

@@ -35,11 +35,18 @@
     }
 </script>
 
+<style type="text/css">
+    .debian, .windoze, .mac, .os_independent {
+        display: none;
+    }
+</style>
+
 <h3 id="preReq">Prerequisites</h3>
 
 <ul>
     <li>
-        <label>Select your operating system: <select onchange="toggleStuffs()" onselect="toggleStuffs()" name="os_select">
+        <label>Select your operating system: <select onchange="toggleStuffs()" onselect="toggleStuffs()"
+                                                     name="os_select">
             <option selected value="none"></option>
 
             <option value="windoze">Windows</option>
@@ -55,9 +62,9 @@
     <!-- GCC -->
     <li class="windoze">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
         the compiler of choice. I find the easiest way to install it is via Parallax's <a target="_blank"
-                href="http://learn.parallax.com/propeller-c-set-simpleide/windows">Simple IDE</a>. If you prefer, you
-        can also download PropGCC directly from <a target="_blank"
-                                                   href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+                                                                                          href="http://learn.parallax.com/propeller-c-set-simpleide/windows">Simple
+            IDE</a>. If you prefer, you can also download PropGCC directly from <a target="_blank"
+                                                                                   href="https://code.google.com/p/propgcc/downloads/list">here</a>.
     </li>
 
     <li class="debian">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
@@ -178,10 +185,9 @@
 <ul>
     <li>Enter the PropWare root directory at the command line</li>
 
-    <li>Run the following three lines in succession: "make clean", "make simple_clean", "make". This will build all
-        of the PropWare libraries as well as all of the Simple Libraries. There are a lot of files, please be patient.
+    <li>Run the following three lines in succession: "make clean", "make simple_clean", "make". This will build all of
+        the PropWare libraries as well as all of the Simple Libraries. There are a lot of files, please be patient.
     </li>
 </ul>
-
 
 @endhtmlonly */
