@@ -131,9 +131,9 @@ int main () {
     printf("Execution complete!\n");
 #endif
 
-    gpio_set_dir(BIT_16, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(PropWare::GPIO::P16, PropWare::GPIO::OUT);
     while (1) {
-        gpio_pin_toggle(BIT_16);
+        PropWare::GPIO::pin_toggle(PropWare::GPIO::P16);
         waitcnt(CLKFREQ/2 + CNT);
     }
 

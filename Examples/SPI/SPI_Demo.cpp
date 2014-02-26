@@ -42,9 +42,9 @@ int main () {
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
-    gpio_set_dir(CS, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(CS, PropWare::GPIO::OUT);
 
-    gpio_set_dir(BYTE_2, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(PropWare::BYTE_2, PropWare::GPIO::OUT);
 
     while (1) {
         s = string;         // Set the pointer to the beginning of the string
@@ -52,20 +52,20 @@ int main () {
 
             waitcnt(CLKFREQ/100 + CNT);
 
-            gpio_pin_clear(CS);       // Enable the SPI slave attached to CS
+            PropWare::GPIO::pin_clear(CS);       // Enable the SPI slave attached to CS
             spi->shift_out(8, *s);  // Output the next character of the string
 
             // Be sure to wait until the SPI communication has FINISHED before
             // proceeding to set chip select high
             spi->wait();
-            gpio_pin_set(CS);
+            PropWare::GPIO::pin_set(CS);
 
             waitcnt(CLKFREQ/100 + CNT);
             in = 0xff;              // Reset input variable
             while (in != *s) {
-                gpio_pin_clear(CS);
+                PropWare::GPIO::pin_clear(CS);
                 spi->shift_in(8, &in, 1);  // Read in a value from the SPI device
-                gpio_pin_set(CS);
+                PropWare::GPIO::pin_set(CS);
             }
 
             // Increment the character pointer
@@ -76,7 +76,7 @@ int main () {
         }
 
         // Signal that the entire string has been sent
-        gpio_pin_toggle(BYTE_2);
+        PropWare::GPIO::pin_toggle(PropWare::BYTE_2);
     }
 
     return 0;

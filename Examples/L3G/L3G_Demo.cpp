@@ -63,12 +63,12 @@ void error (const int8_t err) {
     shiftedValue <<= 16;
 
     // Set the Quickstart LEDs for output (used to display the error code)
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     while (1) {
-        gpio_pin_write(DEBUG_LEDS, shiftedValue);
+        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
         waitcnt(CLKFREQ/5 + CNT);
-        gpio_pin_clear(DEBUG_LEDS);
+        PropWare::GPIO::pin_clear(DEBUG_LEDS);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }

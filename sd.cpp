@@ -63,8 +63,9 @@ SD::Buffer* SD::getGlobalBuffer () {
     return &(this->m_buf);
 }
 
-uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t cs, const int32_t freq) {
+uint8_t SD::start (const PropWare::GPIO::Pin mosi,
+        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+        const PropWare::GPIO::Pin cs, const int32_t freq) {
     uint8_t i, j, k, err;
     uint8_t response[16];
     uint8_t stageCleared;  // Flag to signal when one stage has completed
@@ -76,8 +77,8 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
     GPIO::pin_set(cs);
 
     // Start SPI module
-    if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ, SD::SPI_MODE,
-            SD::SPI_BITMODE)))
+    if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ,
+            SD::SPI_MODE, SD::SPI_BITMODE)))
         sd_error(err);
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
@@ -263,7 +264,8 @@ uint8_t SD::mount (void) {
         ++this->m_sectorsPerCluster_shift;
     }
     --this->m_sectorsPerCluster_shift;
-    rsvdSectorCount = this->read_rev_dat16(&((this->m_buf.buf)[SD::RSVD_SCTR_CNT_ADDR]));
+    rsvdSectorCount = this->read_rev_dat16(
+            &((this->m_buf.buf)[SD::RSVD_SCTR_CNT_ADDR]));
     numFATs = this->m_buf.buf[SD::NUM_FATS_ADDR];
 #ifdef SD_OPTION_FILE_WRITE
     if (2 != numFATs)
@@ -1147,7 +1149,9 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
             for (i = 0; i < 2; ++i) {
                 timeout = SD::RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(this->m_spi->shift_in(8, &checksum, sizeof(checksum)));
+                    check_errors(
+                            this->m_spi->shift_in(8, &checksum,
+                                    sizeof(checksum)));
 
                     // Check for timeout
                     if ((timeout - CNT) < SD::WIGGLE_ROOM)
@@ -2133,8 +2137,7 @@ void SD::sd_error (const uint8_t err) {
             break;
         default:
             // Is the error an SPI error?
-            if (err > SD_ERRORS_BASE
-                    && err < (SD_ERRORS_BASE + SD::ERRORS))
+            if (err > SD_ERRORS_BASE && err < (SD_ERRORS_BASE + SD::ERRORS))
                 printf("Unknown SD error %u\n", (err - SD_ERRORS_BASE));
             // If not, print unknown error
             else

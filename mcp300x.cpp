@@ -32,7 +32,6 @@
 namespace PropWare {
 
 MCP300x::MCP300x () {
-    this->m_cs = -1;
     this->m_alwaysSetMode = 0;
 }
 

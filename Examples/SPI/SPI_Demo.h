@@ -45,13 +45,13 @@
 
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI                BIT_0
+#define MOSI                PropWare::GPIO::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO                BIT_1
+#define MISO                PropWare::GPIO::P1
 /** Pin number for the clock signal */
-#define SCLK                BIT_2
+#define SCLK                PropWare::GPIO::P2
 /** Pin number for chip select */
-#define CS                  BIT_6
+#define CS                  PropWare::GPIO::P6
 
 /** Frequency (in hertz) to run the SPI module */
 #define FREQ                100000

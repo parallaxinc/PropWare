@@ -28,8 +28,8 @@
  * SOFTWARE.
  */
 
-#if (defined __cplusplus | defined __GNUC__)
-#error This file is for assembly files only; Please use PropWare.h instead
+#if (defined __cplusplus)
+#error "This file is for assembly files only; Please use PropWare.h instead"
 #endif
 
 #ifndef PROPWARE_H

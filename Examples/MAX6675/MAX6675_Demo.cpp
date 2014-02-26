@@ -73,12 +73,12 @@ void error (int8_t err) {
     // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
     shiftedValue <<= 16;
 
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     while (1) {
-        gpio_pin_write(DEBUG_LEDS, shiftedValue);
+        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
         waitcnt(CLKFREQ/5 + CNT);
-        gpio_pin_clear(DEBUG_LEDS);
+        PropWare::GPIO::pin_clear(DEBUG_LEDS);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }

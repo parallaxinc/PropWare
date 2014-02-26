@@ -42,15 +42,17 @@
 #include <PropWare.h>
 #include <hd44780.h>
 
-#define RS                  BIT_14
-#define RW                  BIT_12
-#define EN                  BIT_10
+#define RS                  P14
+#define RW                  P12
+#define EN                  P10
 
-#define DATA_H              BIT_26 | BIT_25 | BIT_24 | BIT_23
-//#define DATA_L            BIT_22 | BIT_21 | BIT_20 | BIT_19
+#define DATA_H              PropWare::GPIO::P26 | PropWare::GPIO::P25 | \
+                            PropWare::GPIO::P24 | PropWare::GPIO::P23
+//#define DATA_L            PropWare::GPIO::P22 | PropWare::GPIO::P21 | \
+                            PropWare::GPIO::P20 | PropWare::GPIO::P19
 
 #ifdef DATA_L
-#define BITMODE             HD44780::BM_8
+#define BITMODE             PropWare::HD44780::BM_8
 #define DATA                DATA_H | DATA_L
 #else
 #define BITMODE             PropWare::HD44780::BM_4

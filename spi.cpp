@@ -64,11 +64,11 @@ uint8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
 
 #ifdef SPI_OPTION_DEBUG_PARAMS
     // Ensure all pin-mask parameters have exactly 1 set bit
-    if (1 != propware_count_bits(mosi))
+    if (1 != PropWare::count_bits(mosi))
         spi_error(SPI::INVALID_PIN_MASK);
-    if (1 != propware_count_bits(miso))
+    if (1 != PropWare::count_bits(miso))
         spi_error(SPI::INVALID_PIN_MASK);
-    if (1 != propware_count_bits(sclk))
+    if (1 != PropWare::count_bits(sclk))
         spi_error(SPI::INVALID_PIN_MASK);
 
     // Check clock frequency
@@ -96,11 +96,11 @@ uint8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
         PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
         this->m_mailbox = mosi;
         PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
-        this->m_mailbox = propware_get_pin_num(mosi);
+        this->m_mailbox = PropWare::get_pin_num(mosi);
         PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
         this->m_mailbox = miso;
         PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
-        this->m_mailbox = propware_get_pin_num(miso);
+        this->m_mailbox = PropWare::get_pin_num(miso);
         PROPWARE_SPI_SAFETY_CHECK_STR(this->wait(), str);
         this->m_mailbox = sclk;
     }

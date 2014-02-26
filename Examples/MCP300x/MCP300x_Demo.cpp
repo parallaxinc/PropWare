@@ -44,7 +44,7 @@ int main () {
     PropWare::SPI::getSPI()->set_clock(FREQ);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
@@ -70,7 +70,7 @@ int main () {
             for (i = 0; i < scaledValue; ++i)
                 ledOutput = (ledOutput << 1) | 1;
             ledOutput <<= 16;
-            gpio_pin_write(DEBUG_LEDS, ledOutput);
+            PropWare::GPIO::pin_write(DEBUG_LEDS, ledOutput);
         }
 
         printf("Channel %u is reading: %u\n", CHANNEL, data);
@@ -83,12 +83,12 @@ void error (int8_t err) {
     uint32_t shiftedValue = err;
     shiftedValue <<= 16;  // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
 
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     while (1) {
-        gpio_pin_write(DEBUG_LEDS, shiftedValue);
+        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
         waitcnt(CLKFREQ/5 + CNT);
-        gpio_pin_clear(DEBUG_LEDS);
+        PropWare::GPIO::pin_clear(DEBUG_LEDS);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }

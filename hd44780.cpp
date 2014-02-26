@@ -72,20 +72,20 @@ int8_t HD44780::start (const uint32_t dataPinsMask, const GPIO::Pin rs,
     uint8_t i, bits;
     uint32_t tempMask;
 
-    if (1 != propware_count_bits(rw) || 1 != propware_count_bits(rs)
-            || 1 != propware_count_bits(en))
+    if (1 != PropWare::count_bits(rw) || 1 != PropWare::count_bits(rs)
+            || 1 != PropWare::count_bits(en))
         return HD44780::INVALID_CTRL_SGNL;
 
     // Ensure either 4 or 8 bits were sent in for the data mask
     switch (bitmode) {
         case HD44780::BM_8:
             bits = 8;
-            if (8 != propware_count_bits(dataPinsMask))
+            if (8 != PropWare::count_bits(dataPinsMask))
                 return HD44780::INVALID_DATA_MASK;
             break;
         case HD44780::BM_4:
             bits = 4;
-            if (4 != propware_count_bits(dataPinsMask))
+            if (4 != PropWare::count_bits(dataPinsMask))
                 return HD44780::INVALID_DATA_MASK;
             break;
         default:
@@ -137,7 +137,7 @@ int8_t HD44780::start (const uint32_t dataPinsMask, const GPIO::Pin rs,
         arg = 0x3;
     arg <<= this->m_dataLSBNum;
 
-    gpio_pin_write(this->m_dataMask, arg);
+    GPIO::pin_write(this->m_dataMask, arg);
     this->clock_pulse();
     waitcnt(100 * MILLISECOND + CNT);
 
@@ -237,7 +237,7 @@ void HD44780::putChar (const char c) {
     // And for everything else...
     else {
         //set RS to data and RW to write
-        gpio_pin_set(this->m_rs);
+        GPIO::pin_set(this->m_rs);
         this->write(c);
 
         // Insert a line wrap if necessary

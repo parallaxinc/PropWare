@@ -44,23 +44,25 @@
 #include <max6675.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI            BIT_0
+#define MOSI            PropWare::GPIO::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO            BIT_1
+#define MISO            PropWare::GPIO::P1
 /** Pin number for the clock signal */
-#define SCLK            BIT_2
+#define SCLK            PropWare::GPIO::P2
 /** Pin number for chip select */
-#define CS              BIT_5
+#define CS              PropWare::GPIO::P5
 #define FREQ            10000
 
-#define DEBUG_LEDS      BYTE_2
+#define DEBUG_LEDS      PropWare::BYTE_2
 
-#define RS              BIT_14
-#define RW              BIT_12
-#define EN              BIT_10
+#define RS              PropWare::GPIO::P14
+#define RW              PropWare::GPIO::P12
+#define EN              PropWare::GPIO::P10
 
-#define DATA_H          BIT_26 | BIT_25 | BIT_24 | BIT_23
-#define DATA_L          BIT_22 | BIT_21 | BIT_20 | BIT_19
+#define DATA_H          PropWare::GPIO::P26 | PropWare::GPIO::P25 | \
+                        PropWare::GPIO::P24 | PropWare::GPIO::P23
+#define DATA_L          PropWare::GPIO::P22 | PropWare::GPIO::P21 | \
+                        PropWare::GPIO::P20 | PropWare::GPIO::P19
 
 #ifdef DATA_L
 #define BITMODE         PropWare::HD44780::BM_8

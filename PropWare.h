@@ -30,7 +30,7 @@
 
 
 #ifdef ASM_OBJ_FILE
-#include <Propeller_asm.h>
+#include <PropWare_asm.h>
 #endif
 
 #ifndef PROPWARE_H
@@ -161,7 +161,7 @@ typedef enum {
  * @param[in]   dir         I/O direction to set selected pins; must be one of
  *                          GPIO_DIR_IN or GPIO_DIR_OUT
  */
-void set_dir (const uint32_t pins, PropWare::GPIO::Dir dir);
+void set_dir (const uint32_t pins, GPIO::Dir dir);
 
 /**
  * @brief       Set selected pins high
@@ -200,7 +200,7 @@ void pin_write (const uint32_t pins, const uint32_t value);
  *
  * @return      True if the pin is high, False if the pin is low
  */
-bool read_pin (const PropWare::GPIO::Pin pin);
+bool read_pin (const GPIO::Pin pin);
 
 /**
  * @brief       Allow easy reading of only selected pins from a port
@@ -222,7 +222,7 @@ uint32_t read_multi_pin (const uint32_t pins);
  *
  * @return      Returns 1 or 0 depending on whether the switch was pressed
  */
-bool gpio_read_switch_low (const PropWare::GPIO::Pin pin);
+bool read_switch_low (const GPIO::Pin pin);
 
 }
 
@@ -233,7 +233,7 @@ bool gpio_read_switch_low (const PropWare::GPIO::Pin pin);
  *
  * @return      Number of bits that are non-zero in par
  */
-uint8_t propware_count_bits (uint32_t par);
+uint8_t count_bits (uint32_t par);
 
 /**
  * @brief       Determine which pin number based on a pin mask
@@ -245,6 +245,8 @@ uint8_t propware_count_bits (uint32_t par);
  *
  * @return      Return the pin number of pinMask
  */
-uint8_t propware_get_pin_num (const uint32_t pinMask);
+uint8_t get_pin_num (const uint32_t pinMask);
+
+}
 
 #endif /* PROPWARE_H */

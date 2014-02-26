@@ -30,12 +30,11 @@
 namespace PropWare {
 
 MAX6675::MAX6675 () {
-    this->m_cs = -1;
     this->m_alwaysSetMode = 0;
 }
 
 int8_t MAX6675::start (const PropWare::GPIO::Pin mosi,
-        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin clk,
+        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs) {
     int8_t err;
 

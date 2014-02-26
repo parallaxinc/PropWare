@@ -34,16 +34,17 @@ L3G::L3G () {
     this->m_alwaysSetMode = false;
 }
 
-uint8_t L3G::start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t cs, const L3G::DPSMode dpsMode) {
+uint8_t L3G::start (const PropWare::GPIO::Pin mosi,
+        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+        const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode) {
     uint8_t err;
     this->m_spi = SPI::getSPI();
 
     // Ensure SPI module started
     if (!this->m_spi->is_running()) {
         check_errors(
-                this->m_spi->start(mosi, miso, sclk, L3G::SPI_DEFAULT_FREQ, L3G::SPI_MODE,
-                        L3G::SPI_BITMODE));
+                this->m_spi->start(mosi, miso, sclk, L3G::SPI_DEFAULT_FREQ,
+                        L3G::SPI_MODE, L3G::SPI_BITMODE));
 
     } else {
         check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
@@ -70,7 +71,7 @@ uint8_t L3G::read_x (int16_t *val) {
     return this->read16(L3G::OUT_X_L, val);
 }
 
-uint8_t L3G::read_y(int16_t *val) {
+uint8_t L3G::read_y (int16_t *val) {
     return this->read16(L3G::OUT_Y_L, val);
 }
 
@@ -96,9 +97,12 @@ uint8_t L3G::read_all (int16_t *val) {
 
     GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(8, addr));
-    check_errors(this->m_spi->shift_in(16, &(val[L3G::X]), sizeof(val[L3G::X])));
-    check_errors(this->m_spi->shift_in(16, &(val[L3G::Y]), sizeof(val[L3G::Y])));
-    check_errors(this->m_spi->shift_in(16, &(val[L3G::Z]), sizeof(val[L3G::Z])));
+    check_errors(
+            this->m_spi->shift_in(16, &(val[L3G::X]), sizeof(val[L3G::X])));
+    check_errors(
+            this->m_spi->shift_in(16, &(val[L3G::Y]), sizeof(val[L3G::Y])));
+    check_errors(
+            this->m_spi->shift_in(16, &(val[L3G::Z]), sizeof(val[L3G::Z])));
     GPIO::pin_set(this->m_cs);
 
     // err is useless at this point and will be used as a temporary 8-bit

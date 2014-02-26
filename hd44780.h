@@ -266,7 +266,7 @@ class HD44780 {
         void generate_mem_map (const HD44780::Dimensions dimensions);
 
     private:
-        PropWare::GPIO::Pinm_rs, m_rw, m_en;
+        PropWare::GPIO::Pin m_rs, m_rw, m_en;
         uint32_t m_dataMask;
         HD44780::Dimensions m_dim;
         HD44780::Bitmode m_bitmode;

@@ -27,6 +27,8 @@
 
 #include "HD44780_Demo.h"
 
+using namespace PropWare::GPIO;
+
 // Main function
 int main () {
     uint8_t err;
@@ -48,12 +50,12 @@ void error (const uint8_t err) {
     uint32_t out = err;
     out <<= 16;
 
-    gpio_set_dir(BYTE_2, GPIO_DIR_OUT);
+    set_dir(PropWare::BYTE_2, OUT);
 
     while (1) {
-        gpio_pin_write(BYTE_2, out);
+        pin_write(PropWare::BYTE_2, out);
         waitcnt(150*MILLISECOND + CNT);
-        gpio_pin_clear(BYTE_2);
+        pin_clear(PropWare::BYTE_2);
         waitcnt(150*MILLISECOND + CNT);
     }
 }
