@@ -114,38 +114,38 @@ namespace GPIO {
 #define DEBOUNCE_DELAY      3
 
 typedef enum {
-    P0 = BIT_0;
-    P1 = BIT_1;
-    P2 = BIT_2;
-    P3 = BIT_3;
-    P4 = BIT_4;
-    P5 = BIT_5;
-    P6 = BIT_6;
-    P7 = BIT_7;
-    P8 = BIT_8;
-    P9 = BIT_9;
-    P10 = BIT_10;
-    P11 = BIT_11;
-    P12 = BIT_12;
-    P13 = BIT_13;
-    P14 = BIT_14;
-    P15 = BIT_15;
-    P16 = BIT_16;
-    P17 = BIT_17;
-    P18 = BIT_18;
-    P19 = BIT_19;
-    P20 = BIT_20;
-    P21 = BIT_21;
-    P22 = BIT_22;
-    P23 = BIT_23;
-    P24 = BIT_24;
-    P25 = BIT_25;
-    P26 = BIT_26;
-    P27 = BIT_27;
-    P28 = BIT_28;
-    P29 = BIT_29;
-    P30 = BIT_30;
-    P31 = BIT_31;
+    P0 = BIT_0,
+    P1 = BIT_1,
+    P2 = BIT_2,
+    P3 = BIT_3,
+    P4 = BIT_4,
+    P5 = BIT_5,
+    P6 = BIT_6,
+    P7 = BIT_7,
+    P8 = BIT_8,
+    P9 = BIT_9,
+    P10 = BIT_10,
+    P11 = BIT_11,
+    P12 = BIT_12,
+    P13 = BIT_13,
+    P14 = BIT_14,
+    P15 = BIT_15,
+    P16 = BIT_16,
+    P17 = BIT_17,
+    P18 = BIT_18,
+    P19 = BIT_19,
+    P20 = BIT_20,
+    P21 = BIT_21,
+    P22 = BIT_22,
+    P23 = BIT_23,
+    P24 = BIT_24,
+    P25 = BIT_25,
+    P26 = BIT_26,
+    P27 = BIT_27,
+    P28 = BIT_28,
+    P29 = BIT_29,
+    P30 = BIT_30,
+    P31 = BIT_31
 } Pin;
 
 typedef enum {

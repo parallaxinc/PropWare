@@ -51,8 +51,9 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t start (const uint32_t mosi, const uint32_t miso,
-                const uint32_t sclk, const uint32_t cs);
+        int8_t start (const PropWare::GPIO::Pin mosi,
+                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin clk,
+                const PropWare::GPIO::Pin cs);
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode before
@@ -62,7 +63,7 @@ class MAX6675 {
          * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
          *                              always be set before a read or write routine
          */
-        void always_set_spi_mode (const uint8_t alwaysSetMode);
+        void always_set_spi_mode (const bool alwaysSetMode);
 
         /**
          * @brief       Read data in fixed-point form
@@ -103,8 +104,8 @@ class MAX6675 {
 
     private:
         SPI *m_spi;
-        uint32_t m_cs;
-        uint8_t m_alwaysSetMode;
+        PropWare::GPIO::Pin m_cs;
+        bool m_alwaysSetMode;
 };
 
 }

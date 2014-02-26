@@ -28,7 +28,7 @@
 #include <PropWare.h>
 
 void PropWare::GPIO::set_dir (const uint32_t pins, PropWare::GPIO::Dir dir) {
-    DIRA = (DIRA & (~pins)) | (pins & (int32_t) dir)
+    DIRA = (DIRA & (~pins)) | (pins & (int32_t) dir);
 }
 
 void PropWare::GPIO::pin_set (const uint32_t pins) {
@@ -84,3 +84,6 @@ uint8_t propware_get_pin_num (const uint32_t pinMask) {
         ;
     return --temp;
 }
+
+}
+

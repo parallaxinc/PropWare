@@ -54,8 +54,8 @@ SPI* SPI::getSPI () {
 }
 
 // Function definitions
-uint8_t SPI::start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t frequency, const SPI::Mode mode,
+uint8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
+        const GPIO::Pin sclk, const uint32_t frequency, const SPI::Mode mode,
         const SPI::BitMode bitmode) {
     uint8_t err;
 #ifdef SPI_OPTION_DEBUG
@@ -457,3 +457,4 @@ void SPI::spi_error (const uint8_t err, ...) {
 #endif
 
 }
+

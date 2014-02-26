@@ -165,23 +165,26 @@ class HD44780 {
         /**
          * @brief       Initialize an HD44780 LCD display
          *
-         * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires; NOTE:
-         *                              all pins must be consecutive and the LSB on the
-         *                              LCD must be the LSB in your data mask (i.e., if
-         *                              you are using pins 16-23 on the Propeller, pin
-         *                              16 must be connected to D0 on the LCD, NOT D7)
-         * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN signals
-         * @param[in]   bitmode         Select between HD44780_4BIT and HD44780_8BIT
-         *                              modes to determine whether you will need 4 data
-         *                              wires or 8 between the Propeller and your LCD
-         *                              device
-         * @param[in]   dimensions      Dimensions of your LCD device. Most common is
-         *                              HD44780_16x2
+         * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires;
+         *                              NOTE: all pins must be consecutive and
+         *                              the LSB on the LCD must be the LSB in
+         *                              your data mask (i.e., if you are using
+         *                              pins 16-23 on the Propeller, pin 16 must
+         *                              be connected to D0 on the LCD, NOT D7)
+         *
+         * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN
+         *                              signals
+         * @param[in]   bitmode         Select between HD44780::BM_4 and
+         *                              HD44780::BM_8 modes to determine whether
+         *                              you will need 4 data wires or 8 between
+         *                              the Propeller and your LCD device
+         * @param[in]   dimensions      Dimensions of your LCD device. Most
+         *                              common is HD44780::DIM_16x2
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t start (const uint32_t dataPinsMask, const uint32_t rs,
-                const uint32_t rw, const uint32_t en,
+        int8_t start (const uint32_t dataPinsMask, const GPIO::Pin rs,
+                const GPIO::Pin rw, const GPIO::Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions);
 
@@ -263,7 +266,7 @@ class HD44780 {
         void generate_mem_map (const HD44780::Dimensions dimensions);
 
     private:
-        uint32_t m_rs, m_rw, m_en;
+        PropWare::GPIO::Pinm_rs, m_rw, m_en;
         uint32_t m_dataMask;
         HD44780::Dimensions m_dim;
         HD44780::Bitmode m_bitmode;

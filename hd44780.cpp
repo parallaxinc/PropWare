@@ -63,8 +63,8 @@ HD44780::HD44780 () {
     this->m_curCol = 0;
 }
 
-int8_t HD44780::start (const uint32_t dataPinsMask, const uint32_t rs,
-        const uint32_t rw, const uint32_t en, const HD44780::Bitmode bitmode,
+int8_t HD44780::start (const uint32_t dataPinsMask, const GPIO::Pin rs,
+        const GPIO::Pin rw, const GPIO::Pin en, const HD44780::Bitmode bitmode,
         const HD44780::Dimensions dimensions) {
     uint8_t arg;
 
@@ -113,11 +113,11 @@ int8_t HD44780::start (const uint32_t dataPinsMask, const uint32_t rs,
     this->m_rs = rs;
     this->m_rw = rw;
     this->m_en = en;
-    gpio_set_dir(rs | rw | en, GPIO_DIR_OUT);
-    gpio_pin_clear(rs | rw | en);
+    GPIO::set_dir(rs | rw | en, GPIO::OUT);
+    GPIO::pin_clear(rs | rw | en);
 
     // Save data pin masks
-    gpio_set_dir(dataPinsMask, GPIO_DIR_OUT);
+    GPIO::set_dir(dataPinsMask, GPIO::OUT);
     this->m_dataMask = dataPinsMask;
 
     // Determine the data LSB
@@ -148,7 +148,7 @@ int8_t HD44780::start (const uint32_t dataPinsMask, const uint32_t rs,
     waitcnt(10 * MILLISECOND + CNT);
 
     if (HD44780::BM_4 == bitmode) {
-        gpio_pin_write(this->m_dataMask, 0x2 << this->m_dataLSBNum);
+        GPIO::pin_write(this->m_dataMask, 0x2 << this->m_dataLSBNum);
         this->clock_pulse();
     }
 
@@ -254,7 +254,7 @@ void HD44780::putChar (const char c) {
 
 void HD44780::cmd (const uint8_t c) {
     //set RS to command mode and RW to write
-    gpio_pin_clear(this->m_rs);
+    GPIO::pin_clear(this->m_rs);
     this->write(c);
 }
 
@@ -262,30 +262,30 @@ void HD44780::write (const uint8_t val) {
     uint32_t shiftedVal = val;
 
     // Clear RW to signal write value
-    gpio_pin_clear(this->m_rw);
+    GPIO::pin_clear(this->m_rw);
 
     if (HD44780::BM_4 == this->m_bitmode) {
         // shift out the high nibble
         shiftedVal <<= this->m_dataLSBNum - 4;
-        gpio_pin_write(this->m_dataMask, shiftedVal);
+        GPIO::pin_write(this->m_dataMask, shiftedVal);
         this->clock_pulse();
 
         // Shift out low nibble
         shiftedVal <<= 4;
-        gpio_pin_write(this->m_dataMask, shiftedVal);
+        GPIO::pin_write(this->m_dataMask, shiftedVal);
     }
     // Shift remaining four bits out
     else /* Implied: if (HD44780::8BIT == this->m_bitmode) */{
         shiftedVal <<= this->m_dataLSBNum;
-        gpio_pin_write(this->m_dataMask, shiftedVal);
+        GPIO::pin_write(this->m_dataMask, shiftedVal);
     }
     this->clock_pulse();
 }
 
 void HD44780::clock_pulse (void) {
-    gpio_pin_set(this->m_en);
+    GPIO::pin_set(this->m_en);
     waitcnt(MILLISECOND + CNT);
-    gpio_pin_clear(this->m_en);
+    GPIO::pin_clear(this->m_en);
 }
 
 void HD44780::generate_mem_map (const HD44780::Dimensions dimensions) {

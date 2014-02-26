@@ -175,9 +175,10 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        uint8_t start (const uint32_t mosi, const uint32_t miso,
-                const uint32_t sclk, const uint32_t frequency,
-                const SPI::Mode mode, const SPI::BitMode bitmode);
+        uint8_t start (const GPIO::Pin mosi,
+                const GPIO::Pin miso, const GPIO::Pin sclk,
+                const uint32_t frequency, const SPI::Mode mode,
+                const SPI::BitMode bitmode);
 
         /**
          * @brief   Stop a running SPI cog

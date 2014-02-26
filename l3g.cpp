@@ -31,8 +31,7 @@
 namespace PropWare {
 
 L3G::L3G () {
-    this->m_cs = -1;
-    this->m_alwaysSetMode = 0;
+    this->m_alwaysSetMode = false;
 }
 
 uint8_t L3G::start (const uint32_t mosi, const uint32_t miso,
@@ -52,8 +51,8 @@ uint8_t L3G::start (const uint32_t mosi, const uint32_t miso,
     }
 
     this->m_cs = cs;
-    gpio_set_dir(cs, GPIO_DIR_OUT);
-    gpio_pin_set(cs);
+    GPIO::set_dir(cs, GPIO::OUT);
+    GPIO::pin_set(cs);
 
     // NOTE L3G has high- and low-pass filters. Should they be enabled? (Page
     // 31)
@@ -63,7 +62,7 @@ uint8_t L3G::start (const uint32_t mosi, const uint32_t miso,
     return 0;
 }
 
-void L3G::always_set_spi_mode (const uint8_t alwaysSetMode) {
+void L3G::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
@@ -95,12 +94,12 @@ uint8_t L3G::read_all (int16_t *val) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(8, addr));
     check_errors(this->m_spi->shift_in(16, &(val[L3G::X]), sizeof(val[L3G::X])));
     check_errors(this->m_spi->shift_in(16, &(val[L3G::Y]), sizeof(val[L3G::Y])));
     check_errors(this->m_spi->shift_in(16, &(val[L3G::Z]), sizeof(val[L3G::Z])));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     // err is useless at this point and will be used as a temporary 8-bit
     // variable
@@ -157,10 +156,10 @@ uint8_t L3G::write8 (uint8_t addr, const uint8_t dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     err = this->m_spi->shift_out(16, outputValue);
     check_errors(this->m_spi->wait());
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return err;
 }
@@ -181,10 +180,10 @@ uint8_t L3G::write16 (uint8_t addr, const uint16_t dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(24, outputValue));
     check_errors(this->m_spi->wait());
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }
@@ -200,10 +199,10 @@ uint8_t L3G::read8 (uint8_t addr, int8_t *dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(8, addr));
     check_errors(this->m_spi->shift_in(8, dat, sizeof(*dat)));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }
@@ -219,10 +218,10 @@ uint8_t L3G::read16 (uint8_t addr, int16_t *dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(8, addr));
     check_errors(this->m_spi->shift_in(16, dat, sizeof(*dat)));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     // err is useless at this point and will be used as a temporary 8-bit
     // variable

@@ -122,9 +122,9 @@ class L3G {
          *
          * @return       Returns 0 upon success, error code otherwise
          */
-        uint8_t start (const uint32_t mosi, const uint32_t miso,
-                const uint32_t sclk, const uint32_t cs,
-                const L3G::DPSMode dpsMode);
+        uint8_t start (const PropWare::GPIO::Pin mosi,
+                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+                const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode);
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode before
@@ -134,7 +134,7 @@ class L3G {
          * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
          *                              always be set before a read or write routine
          */
-        void always_set_spi_mode (const uint8_t alwaysSetMode);
+        void always_set_spi_mode (const bool alwaysSetMode);
 
         /**
          * @brief       Read a specific axis's data
@@ -255,8 +255,8 @@ class L3G {
 
     private:
         SPI *m_spi;
-        uint32_t m_cs;
-        uint8_t m_alwaysSetMode;
+        PropWare::GPIO::Pin m_cs;
+        bool m_alwaysSetMode;
 };
 
 }

@@ -36,14 +36,15 @@ MCP300x::MCP300x () {
     this->m_alwaysSetMode = 0;
 }
 
-int8_t MCP300x::start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t cs) {
+int8_t MCP300x::start (const PropWare::GPIO::Pin mosi,
+        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+        const PropWare::GPIO::Pin cs) {
     int8_t err;
 
     this->m_spi = SPI::getSPI();
     this->m_cs = cs;
-    gpio_set_dir(cs, GPIO_DIR_OUT);
-    gpio_pin_set(cs);
+    GPIO::set_dir(cs, GPIO::OUT);
+    GPIO::pin_set(cs);
 
     if (!this->m_spi->is_running()) {
         check_errors(
@@ -56,7 +57,7 @@ int8_t MCP300x::start (const uint32_t mosi, const uint32_t miso,
     return 0;
 }
 
-void MCP300x::always_set_spi_mode (const uint8_t alwaysSetMode) {
+void MCP300x::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
@@ -71,10 +72,10 @@ int8_t MCP300x::read (const MCP300x::Channel channel, uint16_t *dat) {
         check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(MCP300x::OPTN_WIDTH, options));
     check_errors(this->m_spi->shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }
@@ -90,10 +91,10 @@ int8_t MCP300x::read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat) {
         check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
     }
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_out(MCP300x::OPTN_WIDTH, options));
     check_errors(this->m_spi->shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }

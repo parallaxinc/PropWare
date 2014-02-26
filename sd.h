@@ -304,8 +304,9 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t start (const uint32_t mosi, const uint32_t miso,
-                const uint32_t sclk, const uint32_t cs, const int32_t freq);
+        uint8_t start (const PropWare::GPIO::Pin mosi,
+                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+                const PropWare::GPIO::Pin cs, const int32_t freq);
 
         /**
          * @brief   Mount either FAT16 or FAT32 filesystem
@@ -1006,7 +1007,7 @@ class SD {
         /*** Global variable declarations ***/
         // Initialization variables
         SPI *m_spi;
-        uint32_t m_cs;  // Chip select pin mask
+        PropWare::GPIO::Pin m_cs;  // Chip select pin mask
         uint8_t m_filesystem;  // Filesystem type - one of SD::FAT_16 or SD::FAT_32
         uint8_t m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
         uint32_t m_rootDirSectors;  // Number of sectors for the root directory

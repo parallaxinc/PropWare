@@ -72,8 +72,8 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
     // Set CS for output and initialize high
     this->m_spi = SPI::getSPI();
     this->m_cs = cs;
-    gpio_set_dir(cs, GPIO_DIR_OUT);
-    gpio_pin_set(cs);
+    GPIO::set_dir(cs, GPIO::OUT);
+    GPIO::pin_set(cs);
 
     // Start SPI module
     if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ, SD::SPI_MODE,
@@ -92,7 +92,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
             waitcnt(CLKFREQ / 10 + CNT);
 
             // Send at least 72 clock cycles to enable the SD card
-            gpio_pin_set(cs);
+            GPIO::pin_set(cs);
             for (k = 0; k < 5; ++k)
                 check_errors(this->m_spi->shift_out(16, -1));
 
@@ -102,7 +102,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
             waitcnt(CLKFREQ / 10 + CNT);
 
             // Chip select goes low for the duration of this function
-            gpio_pin_clear(cs);
+            GPIO::pin_clear(cs);
 
             // Send SD into idle state, retrieve a response and ensure it is the
             // "idle" response
@@ -220,7 +220,7 @@ uint8_t SD::start (const uint32_t mosi, const uint32_t miso,
 
     // We're finally done initializing everything. Set chip select high again to
     // release the SPI port
-    gpio_pin_set(cs);
+    GPIO::pin_set(cs);
 
     // Initialization complete
     return 0;
@@ -1231,7 +1231,7 @@ int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
     printf("Reading block at sector address: 0x%08x / %u\n", address, address);
 #endif
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->send_command(SD::CMD_RD_BLOCK, address, SD::CRC_OTHER));
 
     if ((err = this->read_block(SD::SECTOR_SIZE, dat))) {
@@ -1240,7 +1240,7 @@ int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
 #endif
         return err;
     }
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }
@@ -1257,11 +1257,11 @@ int8_t SD::write_data_block (uint32_t address, uint8_t *dat) {
     printf("Writing block at address: 0x%08x / %u\n", address, address);
 #endif
 
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->send_command(SD::CMD_WR_BLOCK, address, SD::CRC_OTHER));
 
     check_errors(this->write_block(SD::SECTOR_SIZE, dat));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }

@@ -34,8 +34,9 @@ MAX6675::MAX6675 () {
     this->m_alwaysSetMode = 0;
 }
 
-int8_t MAX6675::start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t cs) {
+int8_t MAX6675::start (const PropWare::GPIO::Pin mosi,
+        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin clk,
+        const PropWare::GPIO::Pin cs) {
     int8_t err;
 
     this->m_spi = SPI::getSPI();
@@ -49,12 +50,12 @@ int8_t MAX6675::start (const uint32_t mosi, const uint32_t miso,
     }
 
     this->m_cs = cs;
-    gpio_set_dir(cs, GPIO_DIR_OUT);
+    GPIO::set_dir(cs, GPIO::OUT);
 
     return 0;
 }
 
-void MAX6675::always_set_spi_mode (const uint8_t alwaysSetMode) {
+void MAX6675::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
@@ -67,9 +68,9 @@ int8_t MAX6675::read (uint16_t *dat) {
     }
 
     *dat = 0;
-    gpio_pin_clear(this->m_cs);
+    GPIO::pin_clear(this->m_cs);
     check_errors(this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat, sizeof(*dat)));
-    gpio_pin_set(this->m_cs);
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }
