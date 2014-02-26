@@ -27,18 +27,46 @@
 
 #include <PropWare.h>
 
-uint8_t gpio_read_switch_low (const uint32_t pin) {
-    DIRA &= ~pin; // Set the pin as input
+void PropWare::GPIO::set_dir (const uint32_t pins, PropWare::GPIO::Dir dir) {
+    DIRA = (DIRA & (~pins)) | (pins & (int32_t) dir)
+}
+
+void PropWare::GPIO::pin_set (const uint32_t pins) {
+    OUTA |= pins;
+}
+
+void PropWare::GPIO::pin_clear (const uint32_t pins) {
+    OUTA &= ~pins;
+}
+
+void PropWare::GPIO::pin_toggle (const uint32_t pins) {
+    OUTA ^= pins;
+}
+
+void PropWare::GPIO::pin_write (const uint32_t pins, const uint32_t value) {
+    OUTA = (OUTA & ~pins) | (value & pins);
+}
+
+uint32_t PropWare::GPIO::read_multi_pin (const uint32_t pins) {
+    return INA & pins;
+}
+
+bool PropWare::GPIO::read_pin (const PropWare::GPIO::Pin pin) {
+    return INA & pin;
+}
+
+bool gpio_read_switch_low (const PropWare::GPIO::Pin pin) {
+    PropWare::GPIO::set_dir(pin, PropWare::GPIO::IN); // Set the pin as input
 
     if ((OUTA & pin) ^ pin) {   // If pin is grounded (aka, pressed)
         // Delay 3 ms
         waitcnt(CLKFREQ*DEBOUNCE_DELAY/100 + CNT);
 
         if ((OUTA & pin) ^ pin) // Check if it's still pressed
-            return 1;
+            return true;
     }
 
-    return 0;
+    return false;
 }
 
 uint8_t propware_count_bits (uint32_t par) {

@@ -28,17 +28,18 @@
  * SOFTWARE.
  */
 
+
+#ifdef ASM_OBJ_FILE
+#include <Propeller_asm.h>
+#endif
+
 #ifndef PROPWARE_H
 #define PROPWARE_H
 
-#ifndef ASM_OBJ_FILE
 #include <propeller.h>
 #include <stdint.h>
-#endif
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace PropWare {
 
 #ifdef DAREDEVIL
 #define check_errors(x)      x
@@ -50,60 +51,107 @@ extern "C" {
 #define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
 #define MICROSECOND         ((unsigned long long) (MILLISECOND / 1000))
 
-#define BIT_0               0x1
-#define BIT_1               0x2
-#define BIT_2               0x4
-#define BIT_3               0x8
-#define BIT_4               0x10
-#define BIT_5               0x20
-#define BIT_6               0x40
-#define BIT_7               0x80
-#define BIT_8               0x100
-#define BIT_9               0x200
-#define BIT_10              0x400
-#define BIT_11              0x800
-#define BIT_12              0x1000
-#define BIT_13              0x2000
-#define BIT_14              0x4000
-#define BIT_15              0x8000
-#define BIT_16              0x10000
-#define BIT_17              0x20000
-#define BIT_18              0x40000
-#define BIT_19              0x80000
-#define BIT_20              0x100000
-#define BIT_21              0x200000
-#define BIT_22              0x400000
-#define BIT_23              0x800000
-#define BIT_24              0x1000000
-#define BIT_25              0x2000000
-#define BIT_26              0x4000000
-#define BIT_27              0x8000000
-#define BIT_28              0x10000000
-#define BIT_29              0x20000000
-#define BIT_30              0x40000000
-#define BIT_31              0x80000000
+typedef enum {
+    BIT_0 = 0x1,
+    BIT_1 = 0x2,
+    BIT_2 = 0x4,
+    BIT_3 = 0x8,
+    BIT_4 = 0x10,
+    BIT_5 = 0x20,
+    BIT_6 = 0x40,
+    BIT_7 = 0x80,
+    BIT_8 = 0x100,
+    BIT_9 = 0x200,
+    BIT_10 = 0x400,
+    BIT_11 = 0x800,
+    BIT_12 = 0x1000,
+    BIT_13 = 0x2000,
+    BIT_14 = 0x4000,
+    BIT_15 = 0x8000,
+    BIT_16 = 0x10000,
+    BIT_17 = 0x20000,
+    BIT_18 = 0x40000,
+    BIT_19 = 0x80000,
+    BIT_20 = 0x100000,
+    BIT_21 = 0x200000,
+    BIT_22 = 0x400000,
+    BIT_23 = 0x800000,
+    BIT_24 = 0x1000000,
+    BIT_25 = 0x2000000,
+    BIT_26 = 0x4000000,
+    BIT_27 = 0x8000000,
+    BIT_28 = 0x10000000,
+    BIT_29 = 0x20000000,
+    BIT_30 = 0x40000000,
+    BIT_31 = 0x80000000
+} Bit;
 
-#define NIBBLE_0            0xf
-#define NIBBLE_1            0xf0
-#define NIBBLE_2            0xf00
-#define NIBBLE_3            0xf000
-#define NIBBLE_4            0xf0000
-#define NIBBLE_5            0xf00000
-#define NIBBLE_6            0xf000000
-#define NIBBLE_7            0xf0000000
+typedef enum {
+    NIBBLE_0 = 0xf,
+    NIBBLE_1 = 0xf0,
+    NIBBLE_2 = 0xf00,
+    NIBBLE_3 = 0xf000,
+    NIBBLE_4 = 0xf0000,
+    NIBBLE_5 = 0xf00000,
+    NIBBLE_6 = 0xf000000,
+    NIBBLE_7 = 0xf0000000
+} Nibble;
 
-#define BYTE_0              0xff
-#define BYTE_1              0xff00
-#define BYTE_2              0xff0000
-#define BYTE_3              0xff000000
+typedef enum {
+    BYTE_0 = 0xff,
+    BYTE_1 = 0xff00,
+    BYTE_2 = 0xff0000,
+    BYTE_3 = 0xff000000
+} Byte;
 
-#define WORD_0              0xffff
-#define WORD_1              0xffff0000
+typedef enum {
+    WORD_0 = 0xffff,
+    WORD_1 = 0xffff0000
+} Word;
+
+namespace GPIO {
 
 #define DEBOUNCE_DELAY      3
 
-#define GPIO_DIR_IN         0
-#define GPIO_DIR_OUT        -1
+typedef enum {
+    P0 = BIT_0;
+    P1 = BIT_1;
+    P2 = BIT_2;
+    P3 = BIT_3;
+    P4 = BIT_4;
+    P5 = BIT_5;
+    P6 = BIT_6;
+    P7 = BIT_7;
+    P8 = BIT_8;
+    P9 = BIT_9;
+    P10 = BIT_10;
+    P11 = BIT_11;
+    P12 = BIT_12;
+    P13 = BIT_13;
+    P14 = BIT_14;
+    P15 = BIT_15;
+    P16 = BIT_16;
+    P17 = BIT_17;
+    P18 = BIT_18;
+    P19 = BIT_19;
+    P20 = BIT_20;
+    P21 = BIT_21;
+    P22 = BIT_22;
+    P23 = BIT_23;
+    P24 = BIT_24;
+    P25 = BIT_25;
+    P26 = BIT_26;
+    P27 = BIT_27;
+    P28 = BIT_28;
+    P29 = BIT_29;
+    P30 = BIT_30;
+    P31 = BIT_31;
+} Pin;
+
+typedef enum {
+    IN = 0,
+    OUT = -1
+} Dir;
 
 /**
  * @brief       Set selected pins as either input or output
@@ -113,30 +161,21 @@ extern "C" {
  * @param[in]   dir         I/O direction to set selected pins; must be one of
  *                          GPIO_DIR_IN or GPIO_DIR_OUT
  */
-#define gpio_set_dir(pins,dir)    DIRA = (DIRA & (~(pins))) | ((pins) & dir)
+void set_dir (const uint32_t pins, PropWare::GPIO::Dir dir);
 
 /**
  * @brief       Set selected pins high
  *
  * @param[in]   pins        Bit mask to control which pins will be set high
  */
-#define gpio_pin_set(pins)            OUTA |= (pins)
+void pin_set (const uint32_t pins);
 
 /**
  * @brief       Clear selected output pins (set them 0)
  *
  * @param[in]   pins    Bit mask to control which pins will be cleared low
  */
-#define gpio_pin_clear(pins)          OUTA &= ~(pins)
-
-/**
- * @brief       Allow easy write to a port w/o destroying data elsewhere in the port
- *
- * @param[in]   pins    bit mask to control which pins will be written to
- * @param[in]   value   value to be bit-masked and then written to the port
- */
-#define gpio_pin_write(pins,value)    \
-    OUTA = (OUTA & (~(pins))) | ((value) & (pins))
+void pin_clear (const uint32_t pins);
 
 /**
  * @brief       Allow easy write to a port w/o destroying data elsewhere in the port
@@ -144,7 +183,24 @@ extern "C" {
  * @param[in]   port    Port # to write to (like 0, for P0 or 1 for P1)
  * @param[in]   pin     pin to toggle
  */
-#define gpio_pin_toggle(pins)         OUTA ^= pins
+void pin_toggle (const uint32_t pins);
+
+/**
+ * @brief       Allow easy write to a port w/o destroying data elsewhere in the port
+ *
+ * @param[in]   pins    bit mask to control which pins will be written to
+ * @param[in]   value   value to be bit-masked and then written to the port
+ */
+void pin_write (const uint32_t pins, const uint32_t value);
+
+/**
+ * @brief       Read the value from a single pin and return its state
+ *
+ * @param[in]   pin     A single pin to read
+ *
+ * @return      True if the pin is high, False if the pin is low
+ */
+bool read_pin (const PropWare::GPIO::Pin pin);
 
 /**
  * @brief       Allow easy reading of only selected pins from a port
@@ -154,9 +210,8 @@ extern "C" {
  *
  * @return      Value of INA masked by `pins` parameter
  */
-#define gpio_pin_read(pins)           (INA & (pins))
+uint32_t read_multi_pin (const uint32_t pins);
 
-#ifndef ASM_OBJ_FILE
 /**
  * @brief       Allow easy switch-press detection of any pin; Includes de-bounce
  *              protection
@@ -167,7 +222,9 @@ extern "C" {
  *
  * @return      Returns 1 or 0 depending on whether the switch was pressed
  */
-uint8_t gpio_read_switch_low (const uint32_t pin);
+bool gpio_read_switch_low (const PropWare::GPIO::Pin pin);
+
+}
 
 /**
  * @brief       Count the number of set bits in a parameter
@@ -189,10 +246,5 @@ uint8_t propware_count_bits (uint32_t par);
  * @return      Return the pin number of pinMask
  */
 uint8_t propware_get_pin_num (const uint32_t pinMask);
-#endif
-
-#if defined(__cplusplus)
-}
-#endif
 
 #endif /* PROPWARE_H */
