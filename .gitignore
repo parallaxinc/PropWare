@@ -1,4 +1,5 @@
-/docs
+/docs/html
+/docs/latex
 /Debug
 /.idea
 .cproject
@@ -10,5 +11,8 @@ makefile
 **.elf
 **.o
 **.a
+**.map
+**.rawmap
 **~
 **.swp
+**.zip

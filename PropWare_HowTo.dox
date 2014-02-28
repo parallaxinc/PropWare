@@ -1,0 +1,123 @@
+/**
+@page Deployment    Deploying a PropWare Application
+@htmlonly
+
+<p>PropWare makes building and running applications very easy. Below are three different methods for building and
+    deploying a PropGCC application using PropWare.</p>
+
+<!-- Eclipse -->
+<h3>From Eclipse (recommended)</h3>
+<ol>
+    <li>If you have Eclipse, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
+        "Eclipse IDE for C/C++ Developers" <a target="_blank"
+                                              href="http://www.eclipse.org/downloads/">here</a> and download the
+        appropriate package
+    </li>
+
+    <li>Create a new C++ project; "Project Type" should be Executable -&gt; Empty Project and "Toolchains" should be set
+        for cross compiler; On the second page, select "Advanced settings..."
+    </li>
+
+    <li>In the left-pane, click on "C/C++ Build" menu option to the left and then find the "Builder Settings" tab
+    </li>
+
+    <li>Uncheck "Use default build command" and ensure the "Build command" text box reads "make -f ../Makefile"
+    </li>
+
+    <li>In the left-pane, expand the "C/C++ Build" menu and select "Settings"</li>
+
+    <li>In the "Tool Settings" tab, find "Cross GCC Compiler" and then "Includes" beneath that. Add two lines to
+        "Include paths (-l)", one should be the path to PropWare, and another should be the path to PropGCC's include
+        folder (on Linux & Mac, /opt/parallax/propeller-elf/include).
+        <ul>
+            <li>Repeat this process for "Cross G++ Compiler"</li>
+            <li>This is done simply for the indexer that helps you keep track of included files - it will not affect the
+                build process and can be skipped (not recommended)
+            </li>
+        </ul>
+    </li>
+
+    <li>With the include paths set, you are done modifying settings and can click "OK" on the current dialogue and then
+        "Next &gt;" and "Finish" on the other
+    </li>
+
+    <li>Create your files based on the same rules as "At the Terminal" (steps 1 and 2) and add source and header files
+        where appropriate
+    </li>
+
+    <li>That's it! You now have Eclipse up and running with PropGCC and PropWare! All of its auto-completion, code
+        highlighting, and quick and easy compilation! Projects can be compiled with Eclipse's built-in "Build Project"
+        found in the "Project" menu. Though you can load your program to the Propeller via some Eclipse magic, I find
+        it's a lot more trouble than it's worth. Simply open a terminal, navigate to &lt; project root&gt;/Debug and
+        type either "make -f ../Makefile run" to test your application in RAM or "make -f ../Makefile install" to load
+        your application to EEPROM
+    </li>
+</ol>
+
+<!-- Terminal -->
+<h3>At the Terminal</h3>
+<ol>
+    <li>Create a project directory and your source files
+        <ul>
+            <li>All C/C++ files must have an accompanying header file with a similar name; (i.e., if you have a file
+                main.cpp, you must have main.h as well); You are welcome to edit common.mk to not search for header
+                files; See the comment near the top of the file for my reasoning behind including it and decide for
+                yourself
+            </li>
+        </ul>
+    </li>
+
+    <li>Create a Makefile for your project, following the template set under the Examples directory</li>
+
+    <li>Create a "Debug" folder in the project directory and run "make -f ../Makefile" within it
+        <ul>
+            <li>This Debug folder allows for seamless Eclipse integration; If you are certain you do not want to use
+                Eclipse, you can run make wherever you choose. The remaining steps assume you are running from within
+                the Debug directory
+            </li>
+        </ul>
+    </li>
+
+    <li>The "run" target for make will load your executable into the Propeller's RAM and begin running the application:
+        "make -f ../Makefile run"
+    </li>
+
+    <li>When you are ready to install the program to the Propeller's EEPROM, the "install" target will load your
+        executable into both EEPROM and RAM and then begin execution: "make -f ../Makefile install"
+    </li>
+</ol>
+
+<!-- Importing Examples -->
+<h3>Importing Example Projects into Eclipse</h3>
+<ol>
+    <li>All example projects can be imported into Eclipse simultaneously. You will need Eclipse and the CDT plugin as
+        described in "From Eclipse" step 1.
+    </li>
+
+    <li>In the "File" menu of Eclipse, select "Import..."; Under "General", you should find "Existing Projects into
+        Workspace"; Press "Next &gt;"
+    </li>
+
+    <li>In "Select root directory:", enter (or browse to) the Examples directory in PropWare
+        <ul>
+            <li>[Optional] After the projects appear in the "Projects:" windows, you can deselect any that you don't
+                want imported
+            </li>
+        </ul>
+    </li>
+
+    <li>Under "Options", ensure that "Copy projects into workspace" is selected and press "Finish" to close the dialogue
+        <ul>
+            <li>[Optional] You can unselect "Copy projects into workspace" if you do not wish to make copies of all
+                project files into the Eclipse workspace folder; This is only recommended if you will never make
+                modifications to the example files
+            </li>
+        </ul>
+    </li>
+
+    <li>Two minor modifications need to be made to the project settings; These modifications are detailed in steps 3
+        through 7 of "From Eclipse" above
+    </li>
+</ol>
+
+@endhtmlonly */

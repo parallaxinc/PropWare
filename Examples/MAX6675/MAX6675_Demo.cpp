@@ -1,7 +1,7 @@
 /**
- * @file    MCP300x_Demo.c
+ * @file    MAX6675_Demo.c
  *
- * @project MCP300x_Demo
+ * @project MAX6675_Demo
  *
  * @author  David Zemon
  *
@@ -25,66 +25,60 @@
  * SOFTWARE.
  */
 
-#include "MCP300x_Demo.h"
+#include "MAX6675_Demo.h"
 
-// Main function
-void main (void) {
+int main () {
     int8_t err;
     uint16_t data;
     uint32_t loopCounter;
-    uint16_t divisor = 1024 / 8;
-    uint8_t scaledValue, i;
-    uint32_t ledOutput;
+    char buffer[128];
 
-    if ((err = mcp300x_start(MOSI, MISO, SCLK, CS)))
+    PropWare::HD44780 lcd;
+    PropWare::MAX6675 thermo;
+
+    if ((err = thermo.start(MOSI, MISO, SCLK, CS)))
         error(err);
-    spi_set_clock(FREQ);
 
-    // Set the Quickstart LEDs for output (used as a secondary display)
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
+        error(err);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
-    // mcp300x_read* functions will always explicitly set the SPI modes before
+    // thermo.read* functions will always explicitly set the SPI modes before
     // each call, or assume that the SPI cog is still running in the proper
     // configuration
-    mcp300x_always_set_spi_mode(0);
+    thermo.always_set_spi_mode(1);
 
-    __simple_printf("Welcome to the MCP300x demo!\n");
+    lcd.putStr("Welcome to the MAX6675 demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
 
-        // Loop over the LED output very quickly, until we are within 1
-        // millisecond of total period
-        while (abs(loopCounter - CNT) > CLKFREQ / 1000) {
-            if ((err = mcp300x_read(CHANNEL, &data)))
-                error(err);
+        if ((err = thermo.read(&data)))
+            error(err);
 
-            // Turn on LEDs proportional to the analog value
-            scaledValue = (data + divisor / 2 - 1) / divisor;
-            ledOutput = 0;
-            for (i = 0; i < scaledValue; ++i)
-                ledOutput = (ledOutput << 1) | 1;
-            ledOutput <<= 16;
-            gpio_pin_write(DEBUG_LEDS, ledOutput);
-        }
+        lcd.clear();
+        sprintf(buffer, "Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
+        lcd.putStr(buffer);
 
-        __simple_printf("Channel %u is reading: %u\n", CHANNEL, data);
+        waitcnt(loopCounter);
     }
+
+    return 0;
 }
 
 void error (int8_t err) {
-    uint32_t shiftedValue = err;
-    shiftedValue <<= 16;  // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
+    uint32_t shiftedValue = (uint8_t) err;
 
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
+    shiftedValue <<= 16;
+
+    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     while (1) {
-        gpio_pin_write(DEBUG_LEDS, shiftedValue);
+        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
         waitcnt(CLKFREQ/5 + CNT);
-        gpio_pin_clear(DEBUG_LEDS);
+        PropWare::GPIO::pin_clear(DEBUG_LEDS);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }
-

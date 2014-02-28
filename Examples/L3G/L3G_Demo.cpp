@@ -1,7 +1,7 @@
 /**
- * @file    MAX6675_Demo.c
+ * @file    L3G_Demo.c
  *
- * @project MAX6675_Demo
+ * @project L3G_Demo
  *
  * @author  David Zemon
  *
@@ -25,55 +25,50 @@
  * SOFTWARE.
  */
 
-#include "MAX6675_Demo.h"
+// Includes
+#include <tinyio.h>
+#include "L3G_Demo.h"
 
-void main (void) {
+// Main function
+int main () {
     int8_t err;
-    uint16_t data;
-    char buffer[32];
-    uint32_t loopCounter;
+    int16_t gyroVals[3];
+    PropWare::L3G gyro;
 
-    if ((err = max6675_start(MOSI, MISO, SCLK, CS)))
-        error(err);
-
-    if ((err = hd44780_start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
+    if ((err = gyro.start(MOSI, MISO, SCLK, CS, PropWare::L3G::DPS_2000)))
         error(err);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
-    // max6675_read* functions will always explicitly set the SPI modes before
+    // l3g_read* functions will always explicitly set the SPI modes before
     // each call, or assume that the SPI cog is still running in the proper
     // configuration
-    max6675_always_set_spi_mode(1);
-
-    hd44780_puts("Welcome to the MAX6675 demo!\n");
+    gyro.always_set_spi_mode(1);
 
     while (1) {
-        loopCounter = CLKFREQ / 2 + CNT;
-
-        if ((err = max6675_read(&data)))
+        if ((err = gyro.read_all(gyroVals)))
             error(err);
-
-        sprintf(buffer, "Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
-        hd44780_clear();
-        hd44780_puts(buffer);
-
-        waitcnt(loopCounter);
+        printf("Gyro vals... X: %i\tY: %i\tZ: %i\n", gyroVals[0], gyroVals[1],
+                gyroVals[2]);
+        waitcnt(CLKFREQ/20 + CNT);
     }
+
+    return 0;
 }
 
-void error (int8_t err) {
+void error (const int8_t err) {
     uint32_t shiftedValue = (uint8_t) err;
 
     // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
     shiftedValue <<= 16;
 
-    gpio_set_dir(DEBUG_LEDS, GPIO_DIR_OUT);
+    // Set the Quickstart LEDs for output (used to display the error code)
+    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     while (1) {
-        gpio_pin_write(DEBUG_LEDS, shiftedValue);
+        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
         waitcnt(CLKFREQ/5 + CNT);
-        gpio_pin_clear(DEBUG_LEDS);
+        PropWare::GPIO::pin_clear(DEBUG_LEDS);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }

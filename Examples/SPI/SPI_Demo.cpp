@@ -30,20 +30,21 @@
 /**
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  */
-void main (void) {
+int main () {
     char string[] = "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     char in;    // Create an input variable to store received values from SPI
+    PropWare::SPI *spi = PropWare::SPI::getSPI();
 
     // Initialize SPI module, giving it pin masks for the physical pins,
     // frequency for the clock, mode of SPI, and bitmode
-    spi_start(MOSI, MISO, SCLK, FREQ, MODE, BITMODE);
+    spi->start(MOSI, MISO, SCLK, FREQ, MODE, BITMODE);
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
-    gpio_set_dir(CS, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(CS, PropWare::GPIO::OUT);
 
-    gpio_set_dir(BYTE_2, GPIO_DIR_OUT);
+    PropWare::GPIO::set_dir(PropWare::BYTE_2, PropWare::GPIO::OUT);
 
     while (1) {
         s = string;         // Set the pointer to the beginning of the string
@@ -51,20 +52,20 @@ void main (void) {
 
             waitcnt(CLKFREQ/100 + CNT);
 
-            gpio_pin_clear(CS);       // Enable the SPI slave attached to CS
-            spi_shift_out(8, *s);  // Output the next character of the string
+            PropWare::GPIO::pin_clear(CS);       // Enable the SPI slave attached to CS
+            spi->shift_out(8, *s);  // Output the next character of the string
 
             // Be sure to wait until the SPI communication has FINISHED before
             // proceeding to set chip select high
-            spi_wait();
-            gpio_pin_set(CS);
+            spi->wait();
+            PropWare::GPIO::pin_set(CS);
 
             waitcnt(CLKFREQ/100 + CNT);
             in = 0xff;              // Reset input variable
             while (in != *s) {
-                gpio_pin_clear(CS);
-                spi_shift_in(8, &in, 1);  // Read in a value from the SPI device
-                gpio_pin_set(CS);
+                PropWare::GPIO::pin_clear(CS);
+                spi->shift_in(8, &in, 1);  // Read in a value from the SPI device
+                PropWare::GPIO::pin_set(CS);
             }
 
             // Increment the character pointer
@@ -75,6 +76,8 @@ void main (void) {
         }
 
         // Signal that the entire string has been sent
-        gpio_pin_toggle(BYTE_2);
+        PropWare::GPIO::pin_toggle(PropWare::BYTE_2);
     }
+
+    return 0;
 }

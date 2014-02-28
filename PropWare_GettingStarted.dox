@@ -1,0 +1,193 @@
+/**
+@page GettingStarted    Getting Started
+@htmlonly
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<script type="text/javascript">
+    function showAll() {
+        $(".windoze").show();
+        $(".debian").show();
+        $(".mac").show();
+        $(".os_independent").show();
+    }
+
+    function hideAll() {
+        $(".windoze").hide();
+        $(".debian").hide();
+        $(".mac").hide();
+        $(".os_independent").hide();
+    }
+
+    function toggleStuffs() {
+        var selectBox = document.getElementsByName("os_select").item(0);
+        var selection = selectBox.options[selectBox.selectedIndex].value;
+
+        if ('all' == selection) {
+            showAll();
+        } else {
+            hideAll();
+            if ('none' != selection) {
+                $("." + selection).show();
+                $(".os_independent").show();
+            }
+        }
+    }
+</script>
+
+<style type="text/css">
+    .debian, .windoze, .mac, .os_independent {
+        display: none;
+    }
+</style>
+
+<h3 id="preReq">Prerequisites</h3>
+
+<ul>
+    <li>
+        <label>Select your operating system: <select onchange="toggleStuffs()" onselect="toggleStuffs()"
+                                                     name="os_select">
+            <option selected value="none"></option>
+
+            <option value="windoze">Windows</option>
+
+            <option value="debian">Debian Linux (Ubuntu)</option>
+
+            <option value="mac">Mac OS X</option>
+
+            <!--<option value="all">Show all</option>-->
+        </select> </label>
+    </li>
+
+    <!-- GCC -->
+    <li class="windoze">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
+        the compiler of choice. I find the easiest way to install it is via Parallax's <a target="_blank"
+                                                                                          href="http://learn.parallax.com/propeller-c-set-simpleide/windows">Simple
+            IDE</a>. If you prefer, you can also download PropGCC directly from <a target="_blank"
+                                                                                   href="https://code.google.com/p/propgcc/downloads/list">here</a>.
+    </li>
+
+    <li class="debian">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is
+        the compiler of choice. I find the easiest way to install it is via Parallax's <a
+                target="_blank"
+                href="http://learn.parallax.com/propeller-c-set-simpleide/linux">Simple IDE</a>. If you prefer, you can
+        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">
+            here</a>.
+    </li>
+
+    <li class="mac">PropGCC, a specially ported version of the GNU C compiler (GCC) for the Parallax Propeller, is the
+        compiler of choice. I find the easiest way to install it is via Parallax's <a
+                target="_blank"
+                href="http://learn.parallax.com/propeller-c-set-simpleide/mac">Simple IDE</a>. If you prefer, you can
+        also download PropGCC directly from <a target="_blank" href="https://code.google.com/p/propgcc/downloads/list">
+            here</a>.
+    </li>
+
+    <!-- GNU make -->
+    <li class="windoze">Install GNU Make: Download and install the <a target="_blank"
+                                                                      href="http://gnuwin32.sourceforge.net/downlinks/make.php">complete
+        package</a>
+    </li>
+
+    <li class="debian">Install GNU Make: type "sudo apt-get install make" at the terminal</li>
+
+    <li class="mac">Install GNU Make: You will need to install Make via Xcode on a Mac. <a
+            href="https://stackoverflow.com/questions/10265742/how-to-install-make-and-gcc-on-a-mac" target="_blank">Stack
+        Overflow</a> has good instructions on the topic.
+    </li>
+
+    <!-- PROP_GCC env var -->
+    <li class="windoze">[Optional] Add an environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;
+        <ul>
+            <li>Windows 2000, XP, Vista, and 7 users should see this well-written <a target="_blank"
+                                                                                     href="http://www.computerhope.com/issues/ch000549.htm">tutorial</a>
+                for accessing the "Environment Variables" window
+            </li>
+
+            <li>Windows 8/8.1 users can follow this <a target="_blank"
+                                                       href="http://www.c-sharpcorner.com/UploadFile/6cde20/use-of-environment-variable-in-windows-8/">tutorial</a>
+                with lots of pictures
+            </li>
+
+            <li>Once you have the "Environment Variables" window open, click "New..." under "System Variables" and enter
+                "PROPGCC_PREFIX" as the "Variable name" and the full path to the PropGCC folder as the "Variable value".
+                For example, if you installed PropGCC via SimpleIDE, your PropGCC path is likely to be "C:\Program Files
+                (x86)\SimpleIDE\propeller-gcc"
+            </li>
+
+            <li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
+                applications
+            </li>
+        </ul>
+    </li>
+
+    <li class="debian">[Optional] Add a root environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;
+        <ol>
+            <li>Enter "gksudo gedit /etc/environment" at the terminal</li>
+
+            <li>Append a new line to the bottom of the file with the full path to the PropGCC folder. For example, if
+                you are using GCC bundled with Simple IDE and you ran the setup script (setup.sh) in the Simple IDE
+                folder, then PropGCC would have been installed to /opt/parallax and you would append the line
+                "PROPGCC_PREFIX=/opt/parallax" (no spaces!)
+            </li>
+
+            <li>Save and exit the text editor</li>
+        </ol>
+        <ul>
+            <li>Note: Creating an environment variable at the root level is only necessary if you plan on using a
+                graphical IDE such as Eclipse; If you are compiling source from the terminal you should edit ~/.bashrc
+                instead of /etc/environment
+            </li>
+
+            <li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
+                applications
+            </li>
+        </ul>
+    </li>
+
+    <li class="mac">
+        [Optional] Add a root environment variable PROPGCC_PREFIX=&lt;propgcc root&gt;
+        <ul>
+            <li>
+                I'm afraid I don't know anyone with a Mac to try this on, and I'm not 100% confident this works, but <a
+                    target="_blank"
+                    href="https://stackoverflow.com/questions/5240628/how-to-set-environment-variable-for-root-user">
+                here's a link</a> that might help you. If you have trouble with building your projects via Eclipse or
+                any application not launched from the terminal, please let me know and I'll work with you to solve it
+            </li>
+
+            <li>Once you determine the correct file to edit, append a new line to the bottom with the full path to the
+                PropGCC folder. For example, if you are using GCC bundled with Simple IDE and Simple IDE was extracted
+                to /home/joe/SimpleIDE-0-9-45, then you would append the line
+                "PROPGCC_PREFIX=/home/joe/SimpleIDE-0-9-45/parallax" (no spaces!)
+            </li>
+
+            <li>Note: If you skip this step, you'll need to set PROPGCC_PREFIX in all makefiles used by Propeller
+                applications
+            </li>
+        </ul>
+    </li>
+
+    <!-- PROPWARE_PATH env var -->
+    <li class="os_independent">[Optional] Add another environment variable PROPWARE_PATH=&lt;PropWare root&gt;
+        <ul>
+            <li>Detailed instructions for creating environment variables can be found in the step above</li>
+
+            <li>Note: If you skip this step, you'll need to set PROPWARE_PATH in all makefiles used by PropWare
+                applications
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<h3 id="buildLib">Building the PropWare Static Libraries</h3>
+
+<ul>
+    <li>Enter the PropWare root directory at the command line</li>
+
+    <li>Run the following three lines in succession: "make clean", "make simple_clean", "make". This will build all of
+        the PropWare libraries as well as all of the Simple Libraries. There are a lot of files, please be patient.
+    </li>
+</ul>
+
+@endhtmlonly */

@@ -27,64 +27,72 @@
 
 #include <max6675.h>
 
-uint32_t g_max6675_cs = -1;
-uint8_t g_max6675_alwaysSetMode = 0;
+namespace PropWare {
 
-int8_t max6675_start (const uint32_t mosi, const uint32_t miso,
-        const uint32_t sclk, const uint32_t cs) {
+MAX6675::MAX6675 () {
+    this->m_alwaysSetMode = 0;
+}
+
+int8_t MAX6675::start (const PropWare::GPIO::Pin mosi,
+        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+        const PropWare::GPIO::Pin cs) {
     int8_t err;
 
-    if (!spi_is_running()) {
+    this->m_spi = SPI::getSPI();
+
+    if (!this->m_spi->is_running()) {
         check_errors(
-                spi_start(mosi, miso, sclk, MAX6675_SPI_DEFAULT_FREQ, MAX6675_SPI_MODE, MAX6675_SPI_BITMODE));
+                this->m_spi->start(mosi, miso, sclk, MAX6675::SPI_DEFAULT_FREQ, MAX6675::SPI_MODE, MAX6675::SPI_BITMODE));
     } else {
-        check_errors(spi_set_mode(MAX6675_SPI_MODE));
-        check_errors(spi_set_bit_mode(MAX6675_SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MAX6675::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MAX6675::SPI_BITMODE));
     }
 
-    g_max6675_cs = cs;
-    gpio_set_dir(cs, GPIO_DIR_OUT);
+    this->m_cs = cs;
+    GPIO::set_dir(cs, GPIO::OUT);
 
     return 0;
 }
 
-void max6675_always_set_spi_mode (const uint8_t alwaysSetMode) {
-    g_max6675_alwaysSetMode = alwaysSetMode;
+void MAX6675::always_set_spi_mode (const bool alwaysSetMode) {
+    this->m_alwaysSetMode = alwaysSetMode;
 }
 
-int8_t max6675_read (uint16_t *dat) {
+int8_t MAX6675::read (uint16_t *dat) {
     int8_t err;
 
-    if (g_max6675_alwaysSetMode) {
-        check_errors(spi_set_mode(MAX6675_SPI_MODE));
-        check_errors(spi_set_bit_mode(MAX6675_SPI_BITMODE));
+    if (this->m_alwaysSetMode) {
+        check_errors(this->m_spi->set_mode(MAX6675::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MAX6675::SPI_BITMODE));
     }
 
     *dat = 0;
-    gpio_pin_clear(g_max6675_cs);
-    check_errors(spi_shift_in(MAX6675_BIT_WIDTH, dat, sizeof(*dat)));
-    gpio_pin_set(g_max6675_cs);
+    GPIO::pin_clear(this->m_cs);
+    check_errors(this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat, sizeof(*dat)));
+    GPIO::pin_set(this->m_cs);
 
     return 0;
 }
 
-int8_t max6675_read_whole (uint16_t *dat) {
+int8_t MAX6675::read_whole (uint16_t *dat) {
     int8_t err;
 
-    check_errors(max6675_read(dat));
+    check_errors(this->read(dat));
     *dat >>= 2;
 
     return 0;
 }
 
-int8_t max6675_read_float (float *dat) {
+int8_t MAX6675::read_float (float *dat) {
     int8_t err;
     uint16_t temp;
 
-    check_errors(max6675_read(&temp));
+    check_errors(this->read(&temp));
 
     *dat = temp >> 2;
     *dat += ((float) (temp & (BIT_1 | BIT_0))) / 4;
 
     return 0;
+}
+
 }
