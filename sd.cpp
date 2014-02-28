@@ -31,7 +31,7 @@
 
 namespace PropWare {
 
-// Intialize string constants
+// Initialize string constants
 const char SD::SHELL_EXIT[] = "exit";
 const char SD::SHELL_LS[] = "ls";
 const char SD::SHELL_CAT[] = "cat";
@@ -39,7 +39,7 @@ const char SD::SHELL_CD[] = "cd";
 const char SD::SHELL_TOUCH[] = "touch";
 
 const uint32_t SD::RESPONSE_TIMEOUT = CLKFREQ / 10;
-const uint32_t SD::WIGGLE_ROOM = 1000;
+const uint32_t SD::WIGGLE_ROOM = 8000;
 
 /**
  * @brief       Short-hand for checking if a function through an error and
@@ -63,12 +63,11 @@ SD::Buffer* SD::getGlobalBuffer () {
     return &(this->m_buf);
 }
 
-uint8_t SD::start (const PropWare::GPIO::Pin mosi,
+int8_t SD::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs, const int32_t freq) {
-    uint8_t i, j, k, err;
+    int8_t err;
     uint8_t response[16];
-    uint8_t stageCleared;  // Flag to signal when one stage has completed
 
     // Set CS for output and initialize high
     this->m_spi = SPI::getSPI();
@@ -81,6 +80,30 @@ uint8_t SD::start (const PropWare::GPIO::Pin mosi,
             SD::SPI_MODE, SD::SPI_BITMODE)))
         sd_error(err);
 
+    // Try and get the card up and responding to commands first
+    sd_check_errors(this->reset_and_verify_v2_0(response));
+
+    sd_check_errors(this->send_active(response));
+
+    check_errors(this->increase_throttle(freq));
+
+#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+    sd_check_errors(this->print_init_debug_blocks(response));
+#endif
+
+    // We're finally done initializing everything. Set chip select high again to
+    // release the SPI port
+    GPIO::pin_set(cs);
+
+    // Initialization complete
+    return 0;
+}
+
+int8_t SD::reset_and_verify_v2_0 (uint8_t response[]) {
+    int8_t err;
+    uint8_t i, j;
+    bool stageCleared;
+
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     printf("Starting SD card...\n");
 #endif
@@ -89,95 +112,116 @@ uint8_t SD::start (const PropWare::GPIO::Pin mosi,
     stageCleared = false;
     for (i = 0; i < 10 && !stageCleared; ++i) {
         // Initialization loop (reset SD card)
-        for (j = 0; j < 10; ++j) {
-            waitcnt(CLKFREQ / 10 + CNT);
+        for (j = 0; j < 10 && !stageCleared; ++j) {
+            check_errors(this->power_up());
 
-            // Send at least 72 clock cycles to enable the SD card
-            GPIO::pin_set(cs);
-            for (k = 0; k < 5; ++k)
-                check_errors(this->m_spi->shift_out(16, -1));
-
-            // Be very super 100% sure that all clocks have finished ticking
-            // before setting chip select low
-            check_errors(this->m_spi->wait());
-            waitcnt(CLKFREQ / 10 + CNT);
-
-            // Chip select goes low for the duration of this function
-            GPIO::pin_clear(cs);
-
-            // Send SD into idle state, retrieve a response and ensure it is the
-            // "idle" response
-            sd_check_errors(this->send_command(SD::CMD_IDLE, 0, SD::CRC_IDLE));
-            this->get_response(SD::RESPONSE_LEN_R1, response);
-            if (SD::RESPONSE_IDLE == this->m_firstByteResponse)
-                j = 10;
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-            else
-                printf("Failed attempt at CMD0: 0x%02x\n",
-                        this->m_firstByteResponse);
-#endif
+            sd_check_errors(this->reset(response, &stageCleared));
         }
+
+        // If we couldn't go idle after 10 tries, give up
         if (SD::RESPONSE_IDLE != this->m_firstByteResponse)
             sd_error(SD::INVALID_INIT);
 
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-        printf("SD card in idle state. Now sending CMD8...\n");
-#endif
-
-        // Inform SD card that the Propeller uses the 2.7-3.6V range;
-        // An echo is expected as response
-        sd_check_errors(
-                this->send_command(SD::CMD_INTERFACE_COND, SD::ARG_CMD8,
-                        SD::CRC_CMD8));
-        sd_check_errors(this->get_response(SD::RESPONSE_LEN_R7, response));
-        if (SD::RESPONSE_IDLE == this->m_firstByteResponse) {
-            // The card is idle, that's good. Let's make sure we get the correct
-            // response back
-            if ((SD::HOST_VOLTAGE_3V3 == response[2])
-                    && (SD::R7_CHECK_PATTERN == response[3]))
-                // All responses were A-OKAY, exit the outer
-                stageCleared = true;
-        }
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-        if (!stageCleared)
-            printf("Failed attempt at CMD8: 0x%02x, 0x%02x, 0x%02x;\n",
-                    this->m_firstByteResponse, response[2], response[3]);
-#endif
+        sd_check_errors(this->verify_v2_0(response, &stageCleared));
     }
 
     // If CMD8 never succeeded, throw an error
     if (!stageCleared)
         sd_error(SD::CMD8_FAILURE);
 
+    // The card is idle, that's good. Let's make sure we get the correct
+    // response back
+    if ((SD::HOST_VOLTAGE_3V3 != response[2])
+            || (SD::R7_CHECK_PATTERN != response[3]))
+        sd_error(SD::CMD8_FAILURE);
+
+    return 0;
+}
+
+int8_t SD::power_up () {
+    uint8_t i;
+    int8_t err;
+
+    waitcnt(CLKFREQ / 10 + CNT);
+
+    // Send at least 72 clock cycles to enable the SD card
+    GPIO::pin_set(this->m_cs);
+    for (i = 0; i < 5; ++i)
+        check_errors(this->m_spi->shift_out(16, -1));
+
+    // Be very super 100% sure that all clocks have finished ticking
+    // before setting chip select low
+    check_errors(this->m_spi->wait());
+    waitcnt(CLKFREQ / 10 + CNT);
+
+    // Chip select goes low for the duration of this function
+    GPIO::pin_clear(this->m_cs);
+
+    return 0;
+}
+
+int8_t SD::reset (uint8_t response[], bool *isIdle) {
+    int8_t err;
+
+    // Send SD into idle state, retrieve a response and ensure it is the
+    // "idle" response
+    sd_check_errors(this->send_command(SD::CMD_IDLE, 0, SD::CRC_IDLE));
+    this->get_response(SD::RESPONSE_LEN_R1, response);
+
+    // Check if idle
+    if (SD::RESPONSE_IDLE == this->m_firstByteResponse)
+        *isIdle = true;
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-    printf("CMD8 succeeded. Requesting operating conditions...\n");
+    else
+        printf("Failed attempt at CMD0: 0x%02x\n", this->m_firstByteResponse);
 #endif
 
-    // Request operating conditions register and ensure response begins with R1
-    sd_check_errors(this->send_command(SD::CMD_READ_OCR, 0, SD::CRC_OTHER));
-    sd_check_errors(this->get_response(SD::RESPONSE_LEN_R3, response));
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-    this->print_hex_block(response, SD::RESPONSE_LEN_R3);
-#endif
-    if (SD::RESPONSE_IDLE != this->m_firstByteResponse)
-        sd_error(SD::INVALID_INIT);
-    // TODO: Parse the voltage bits to double-check that 3.3V is okay and ensure
-    //       that bit 31 is low, indicating the card is done powering up
+    return 0;
+}
 
-    // Spin up the card and bring to active state
+int8_t SD::verify_v2_0 (uint8_t response[], bool *stageCleared) {
+    int8_t err;
+
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-    printf("OCR read successfully. Sending into active state...\n");
+    printf("SD card in idle state. Now sending CMD8...\n");
 #endif
-    stageCleared = false;
+
+    // Inform SD card that the Propeller uses the 2.7-3.6V range;
+    sd_check_errors(
+            this->send_command(SD::CMD_INTERFACE_COND, SD::ARG_CMD8,
+                    SD::CRC_CMD8));
+    sd_check_errors(this->get_response(SD::RESPONSE_LEN_R7, response));
+    if (SD::RESPONSE_IDLE == this->m_firstByteResponse)
+        *stageCleared = true;
+
+    // Print an error message after every failure
+#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+    if (!stageCleared)
+        printf("Failed attempt at CMD8: 0x%02x, 0x%02x, 0x%02x;\n",
+                this->m_firstByteResponse, response[2], response[3]);
+#endif
+
+    return 0;
+}
+
+int8_t SD::send_active (uint8_t response[]) {
+    int8_t err;
+    uint8_t i;
+
+    bool stageCleared = false;
     for (i = 0; i < 8 && !stageCleared; ++i) {
         waitcnt(CLKFREQ / 10 + CNT);
+
+        // Send the application-specific pre-command
         sd_check_errors(this->send_command(SD::CMD_APP, 0, SD::CRC_OTHER));
-        sd_check_errors(this->get_response(1, response));
-        printf("Sent CMD55... ");
+        sd_check_errors(this->get_response(SD::RESPONSE_LEN_R1, response));
+
+        // Request that the SD card go active!
         sd_check_errors(
-                this->send_command(SD::CMD_WR_OP, /*BIT_30*/0, SD::CRC_OTHER));
-        sd_check_errors(this->get_response(1, response));
-        printf("Sent ACMD41\n");
+                this->send_command(SD::CMD_WR_OP, BIT_30, SD::CRC_OTHER));
+        sd_check_errors(this->get_response(SD::RESPONSE_LEN_R1, response));
+
+        // If the card ACKed with the active state, we're all good!
         if (SD::RESPONSE_ACTIVE == this->m_firstByteResponse)
             stageCleared = true;
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
@@ -186,22 +230,45 @@ uint8_t SD::start (const PropWare::GPIO::Pin mosi,
                     this->m_firstByteResponse);
 #endif
     }
+
+    // If we couldn't get the card to go active after 8 tries, give up
     if (!stageCleared)
-        sd_error(SD::INVALID_RESPONSE);
+        return SD::INVALID_RESPONSE;
+
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+    // We did it!
     printf("Activated!\n");
 #endif
 
+    return 0;
+}
+
+int8_t SD::increase_throttle (const int32_t freq) {
+    int8_t err;
+
     // Initialization nearly complete, increase clock
-//#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-//    printf("Increasing clock to full speed\n");
-//#endif
-//    if (-1 == freq || 0 == freq)
-//        this->m_spi->set_clock(SD::DEFAULT_SPI_FREQ);
-//    else
-//        this->m_spi->set_clock(freq);
+#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+    printf("Increasing clock to full speed\n");
+#endif
+    if (-1 == freq || 0 == freq) {
+        check_errors(this->m_spi->set_clock(SD::DEFAULT_SPI_FREQ));
+    } else {
+        check_errors(this->m_spi->set_clock(freq));
+    }
+
+    return 0;
+}
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+int8_t SD::print_init_debug_blocks (uint8_t response[]) {
+    int8_t err;
+
+    // Request operating conditions register and ensure response begins with R1
+    sd_check_errors(this->send_command(SD::CMD_READ_OCR, 0, SD::CRC_OTHER));
+    sd_check_errors(this->get_response(SD::RESPONSE_LEN_R3, response));
+    printf("Operating Conditions Register (OCR)...\n");
+    this->print_hex_block(response, SD::RESPONSE_LEN_R3);
+
     // If debugging requested, print to the screen CSD and CID registers from SD
     // card
     printf("Requesting CSD...\n");
@@ -217,18 +284,13 @@ uint8_t SD::start (const PropWare::GPIO::Pin mosi,
     printf("CID Contents:\n");
     this->print_hex_block(response, 16);
     putchar('\n');
-#endif
 
-    // We're finally done initializing everything. Set chip select high again to
-    // release the SPI port
-    GPIO::pin_set(cs);
-
-    // Initialization complete
     return 0;
 }
+#endif
 
-uint8_t SD::mount (void) {
-    uint8_t err, temp;
+int8_t SD::mount (void) {
+    int8_t err, temp;
 
     // FAT system determination variables:
     uint32_t rsvdSectorCount, numFATs, rootEntryCount, totalSectors, FATSize,
@@ -398,7 +460,7 @@ uint8_t SD::mount (void) {
 
 #ifdef SD_OPTION_FILE_WRITE
 uint8_t SD::unmount (void) {
-    uint8_t err;
+    int8_t err;
 
     // If the directory buffer was modified, write it
     if (this->m_buf.mod)
@@ -423,8 +485,8 @@ uint8_t SD::unmount (void) {
 }
 #endif
 
-uint8_t SD::chdir (const char *d) {
-    uint8_t err;
+int8_t SD::chdir (const char *d) {
+    int8_t err;
     uint16_t fileEntryOffset = 0;
 
     this->m_buf.id = SD::FOLDER_ID;
@@ -486,8 +548,8 @@ uint8_t SD::chdir (const char *d) {
     return 0;
 }
 
-uint8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
-    uint8_t err;
+int8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
+    int8_t err;
     uint16_t fileEntryOffset = 0;
 
 #if (defined SD_OPTION_DEBUG && defined SD_OPTION_VERBOSE)
@@ -607,7 +669,7 @@ uint8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
 
 #ifdef SD_OPTION_FILE_WRITE
 uint8_t SD::fclose (SD::File *f) {
-    uint8_t err;
+    int8_t err;
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     printf("Closing file...\n");
@@ -664,7 +726,7 @@ uint8_t SD::fclose (SD::File *f) {
 }
 
 uint8_t SD::fputc (const char c, SD::File *f) {
-    uint8_t err;
+    int8_t err;
     // Determines byte-offset within a sector
     uint16_t sectorPtr = f->wPtr % SD::SECTOR_SIZE;
     // Determine the needed file sector
@@ -713,7 +775,7 @@ uint8_t SD::fputc (const char c, SD::File *f) {
 }
 
 uint8_t SD::fputs (char *s, SD::File *f) {
-    uint8_t err;
+    int8_t err;
 
     while (*s)
         sd_check_errors(fputc(*(s++), f));
@@ -767,7 +829,7 @@ inline uint8_t SD::feof (SD::File *f) {
     return f->length == f->rPtr;
 }
 
-uint8_t SD::fseekr (SD::File *f, const int32_t offset,
+int8_t SD::fseekr (SD::File *f, const int32_t offset,
         const SD::FilePos origin) {
     switch (origin) {
         case SEEK_SET:
@@ -787,7 +849,7 @@ uint8_t SD::fseekr (SD::File *f, const int32_t offset,
     return 0;
 }
 
-uint8_t SD::fseekw (SD::File *f, const int32_t offset,
+int8_t SD::fseekw (SD::File *f, const int32_t offset,
         const SD::FilePos origin) {
     switch (origin) {
         case SEEK_SET:
@@ -807,11 +869,11 @@ uint8_t SD::fseekw (SD::File *f, const int32_t offset,
     return 0;
 }
 
-uint32_t SD::ftellr (const SD::File *f) {
+int32_t SD::ftellr (const SD::File *f) {
     return f->rPtr;
 }
 
-uint32_t SD::ftellw (const SD::File *f) {
+int32_t SD::ftellw (const SD::File *f) {
     return f->wPtr;
 }
 
@@ -905,7 +967,7 @@ int8_t SD::shell (SD::File *f) {
 }
 
 int8_t SD::shell_ls (void) {
-    uint8_t err;
+    int8_t err;
     uint16_t fileEntryOffset = 0;
     char string[SD_FILENAME_STR_LEN];  // Allocate space for a filename string
 
@@ -963,7 +1025,7 @@ int8_t SD::shell_ls (void) {
 }
 
 int8_t SD::shell_cat (const char *name, SD::File *f) {
-    uint8_t err;
+    int8_t err;
 
     // Attempt to find the file
     if ((err = this->fopen(name, f, SD::FILE_MODE_R))) {
@@ -987,7 +1049,7 @@ int8_t SD::shell_cat (const char *name, SD::File *f) {
 
 #ifdef SD_OPTION_FILE_WRITE
 int8_t SD::shell_touch (const char name[]) {
-    uint8_t err;
+    int8_t err;
     uint16_t fileEntryOffset;
 
     // Attempt to find the file if it already exists
@@ -1047,7 +1109,7 @@ int8_t SD::print_hex_block (uint8_t *dat, uint16_t bytes) {
  **********************************/
 int8_t SD::send_command (const uint8_t cmd, const uint32_t arg,
         const uint8_t crc) {
-    uint8_t err;
+    int8_t err;
 
     // Send out the command
     check_errors(this->m_spi->shift_out(8, cmd));
@@ -1063,7 +1125,7 @@ int8_t SD::send_command (const uint8_t cmd, const uint32_t arg,
 }
 
 int8_t SD::get_response (uint8_t bytes, uint8_t *dat) {
-    uint8_t err;
+    int8_t err;
     uint32_t timeout;
 
     // Read first byte - the R1 response
@@ -1171,7 +1233,7 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
 }
 
 int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
-    uint8_t err;
+    int8_t err;
     uint32_t timeout;
 
     // Read first byte - the R1 response
@@ -1224,7 +1286,7 @@ int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
 }
 
 int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
-    uint8_t err;
+    int8_t err;
     uint8_t temp = 0;
 
     // Wait until the SD card is no longer busy
@@ -1250,7 +1312,7 @@ int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
 }
 
 int8_t SD::write_data_block (uint32_t address, uint8_t *dat) {
-    uint8_t err;
+    int8_t err;
     uint8_t temp = 0;
 
     // Wait until the SD card is no longer busy
@@ -1314,7 +1376,7 @@ uint32_t SD::find_sector_from_alloc (uint32_t allocUnit) {
 }
 
 int8_t SD::get_fat_value (const uint32_t fatEntry, uint32_t *value) {
-    uint8_t err;
+    int8_t err;
     uint32_t firstAvailableAllocUnit;
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
@@ -1430,7 +1492,7 @@ int8_t SD::load_next_sector (SD::Buffer *buf) {
 }
 
 int8_t SD::load_sector_from_offset (SD::File *f, const uint32_t offset) {
-    uint8_t err;
+    int8_t err;
     uint32_t clusterOffset = offset >> this->m_sectorsPerCluster_shift;
 
 #ifdef SD_OPTION_FILE_WRITE
@@ -1493,7 +1555,7 @@ int8_t SD::load_sector_from_offset (SD::File *f, const uint32_t offset) {
 }
 
 int8_t SD::inc_cluster (SD::Buffer *buf) {
-    uint8_t err;
+    int8_t err;
 
 #ifdef SD_OPTION_FILE_WRITE
     // If the sector has been modified, write it back to the SD card before
@@ -1570,7 +1632,7 @@ void SD::get_filename (const uint8_t *buf, char *filename) {
 }
 
 int8_t SD::find (const char *filename, uint16_t *fileEntryOffset) {
-    uint8_t err;
+    int8_t err;
     char readEntryName[SD::FILENAME_STR_LEN];
 
 #ifdef SD_OPTION_FILE_WRITE
@@ -1640,7 +1702,7 @@ int8_t SD::find (const char *filename, uint16_t *fileEntryOffset) {
 }
 
 int8_t SD::reload_buf (SD::File *f) {
-    uint8_t err;
+    int8_t err;
 
     // Function is only called if it has already been determined that the buffer
     // needs to be loaded - no checks need to be run
@@ -1810,7 +1872,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
 }
 
 int8_t SD::extend_fat (SD::Buffer *buf) {
-    uint8_t err;
+    int8_t err;
     uint32_t newAllocUnit;
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
     printf("Extending file or directory now...\n");
@@ -2035,7 +2097,7 @@ void SD::print_file_attributes (const uint8_t flags) {
 #endif
 
 #ifdef SD_OPTION_DEBUG
-void SD::sd_error (const uint8_t err) {
+void SD::sd_error (const int8_t err) {
     char str[] = "SD Error %u: %s\n";
 
     switch (err) {

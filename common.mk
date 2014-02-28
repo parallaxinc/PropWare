@@ -68,11 +68,11 @@ ifneq ($(BOARD),)
 	BOARDFLAG=-b$(BOARD)
 endif
 
-CFLAGS_NO_MODEL := -Wall -m32bit-doubles -g
+CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
 CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
-LDFLAGS += -m$(MODEL) -fno-threadsafe-statics -Xlinker -Map=main.rawmap 
+LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap 
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -ltiny

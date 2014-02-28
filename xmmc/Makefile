@@ -1,4 +1,4 @@
-# Build the PropWare library with the extended memory model ?C?(XMMC)
+# Build the PropWare library with the extended memory model <word starting with C> (XMMC)
 PRJ = PropWare_xmmc
 
 LIBNAME = $(PRJ)

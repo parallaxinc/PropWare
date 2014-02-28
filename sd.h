@@ -84,12 +84,11 @@ namespace PropWare {
 /** @} */
 
 /**
- * @brief       SDHC driver for FAT16 and FAT32 for the Parallax Propeller
+ * @brief   SDHC driver for FAT16 and FAT32 for the Parallax Propeller
  *
- * @pre         The SD card must be SDHC v2 and must be formatted to FAT16 or
- *              FAT32
- *
- * @warning     Unknown result if card is not SDHC v2
+ * @pre     The SD card must be SDHC v2 and must be formatted to FAT16 or FAT32;
+ *          SD v1 cards will throw an error at SD::start(); non-FAT partitions
+ *          will yield unknown results
  *
  * TODO:    Re-arrange errors in order of impact level; Allows the user to do
  *          something like:
@@ -304,16 +303,20 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t start (const PropWare::GPIO::Pin mosi,
+        int8_t start (const PropWare::GPIO::Pin mosi,
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs, const int32_t freq);
+
+        int8_t start_old (const PropWare::GPIO::Pin mosi,
+                        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+                        const PropWare::GPIO::Pin cs, const int32_t freq);
 
         /**
          * @brief   Mount either FAT16 or FAT32 filesystem
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        uint8_t mount (void);
+        int8_t mount (void);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -339,7 +342,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t chdir (const char *d);
+        int8_t chdir (const char *d);
 
         /**
          * @brief       Open a file with a given name and load its information into the
@@ -366,7 +369,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fopen (const char *name, SD::File *f, const SD::FileMode mode);
+        int8_t fopen (const char *name, SD::File *f, const SD::FileMode mode);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -466,7 +469,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fseekr (SD::File *f, const int32_t offset,
+        int8_t fseekr (SD::File *f, const int32_t offset,
                 const SD::FilePos origin);
 
         /**
@@ -482,7 +485,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fseekw (SD::File *f, const int32_t offset,
+        int8_t fseekw (SD::File *f, const int32_t offset,
                 const SD::FilePos origin);
 
         /**
@@ -494,7 +497,7 @@ class SD {
          *
          * @return      Returns the byte offset (from beginning) of the read pointer
          */
-        uint32_t ftellr (const SD::File *f);
+        int32_t ftellr (const SD::File *f);
 
         /**
          * @brief       Retrieve the current position of the write pointer
@@ -505,7 +508,7 @@ class SD {
          *
          * @return      Returns the byte offset (from beginning) of the write pointer
          */
-        uint32_t ftellw (const SD::File *f);
+        int32_t ftellw (const SD::File *f);
 
 #ifdef SD_OPTION_SHELL
         /**
@@ -581,6 +584,25 @@ class SD {
         /***********************
          *** Private Methods ***
          ***********************/
+        /**
+         *
+         */
+        int8_t reset_and_verify_v2_0 (uint8_t response_param[]);
+
+        int8_t power_up ();
+
+        int8_t reset (uint8_t response[], bool *isIdle);
+
+        int8_t verify_v2_0 (uint8_t response[], bool *stageCleared);
+
+        int8_t send_active (uint8_t response[]);
+
+        int8_t increase_throttle (const int32_t freq);
+
+#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+        int8_t print_init_debug_blocks (uint8_t response[]);
+#endif
+
         /**
          * @brief       Send a command and argument over SPI to the SD card
          *
@@ -871,7 +893,7 @@ class SD {
          *
          * @param   err     Error number used to determine error string
          */
-        void sd_error (const uint8_t err);
+        void sd_error (const int8_t err);
 
         /**
          * @brief   Print to screen each status bit individually with human-readable
@@ -887,7 +909,7 @@ class SD {
          *
          * @param[in]   err     The error thrown by an SD function
          */
-#define error(err)                return err
+#define sd_error(err)                return err
 #endif
 #endif
 
@@ -896,7 +918,7 @@ class SD {
          *** Private Constants ***
          *************************/
         // SPI config
-        static const uint32_t SPI_INIT_FREQ = 2000;  // Run SD initialization at 200 kHz
+        static const uint32_t SPI_INIT_FREQ = 200000;  // Run SD initialization at 200 kHz
         static const SPI::Mode SPI_MODE = SPI::MODE_0;
         static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
@@ -906,7 +928,7 @@ class SD {
         static const uint8_t SECTOR_SIZE_SHIFT = 9;
 
         // SD Commands
-        static const uint8_t CMD_IDLE = 0x40 + 1;  // Send card into idle state
+        static const uint8_t CMD_IDLE = 0x40 + 0;  // Send card into idle state
         static const uint8_t CMD_INTERFACE_COND = 0x40 + 8;  // Send interface condition and host voltage range
         static const uint8_t CMD_RD_CSD = 0x40 + 9;  // Request "Card Specific Data" block contents
         static const uint8_t CMD_RD_CID = 0x40 + 10;  // Request "Card Identification" block contents

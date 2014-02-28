@@ -54,7 +54,7 @@ SPI* SPI::getSPI () {
 }
 
 // Function definitions
-uint8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
+int8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
         const GPIO::Pin sclk, const uint32_t frequency, const SPI::Mode mode,
         const SPI::BitMode bitmode) {
     uint8_t err;
@@ -112,7 +112,7 @@ uint8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
     return 0;
 }
 
-uint8_t SPI::stop (void) {
+int8_t SPI::stop (void) {
     if (!this->is_running())
         return 0;
 
@@ -123,11 +123,11 @@ uint8_t SPI::stop (void) {
     return 0;
 }
 
-int8_t SPI::is_running (void) {
-    return !(((int8_t) -1) == this->m_cog);
+bool SPI::is_running (void) {
+    return -1 != this->m_cog;
 }
 
-uint8_t SPI::wait (void) {
+int8_t SPI::wait (void) {
     const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
     // Wait for GAS cog to read in value and write -1
@@ -138,7 +138,7 @@ uint8_t SPI::wait (void) {
     return 0;
 }
 
-uint8_t SPI::wait_specific (const uint32_t value) {
+int8_t SPI::wait_specific (const uint32_t value) {
     const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
     // Wait for GAS cog to read in value and write -1
@@ -150,7 +150,7 @@ uint8_t SPI::wait_specific (const uint32_t value) {
     return 0;
 }
 
-uint8_t SPI::set_mode (const SPI::Mode mode) {
+int8_t SPI::set_mode (const SPI::Mode mode) {
     uint8_t err;
     char str[] = "SPI::set_mode()";
 
@@ -171,7 +171,7 @@ uint8_t SPI::set_mode (const SPI::Mode mode) {
     return 0;
 }
 
-uint8_t SPI::set_bit_mode (const SPI::BitMode bitmode) {
+int8_t SPI::set_bit_mode (const SPI::BitMode bitmode) {
     uint8_t err;
     char str[] = "SPI::set_bit_mode()";
 
@@ -190,7 +190,7 @@ uint8_t SPI::set_bit_mode (const SPI::BitMode bitmode) {
     return 0;
 }
 
-uint8_t SPI::set_clock (const uint32_t frequency) {
+int8_t SPI::set_clock (const uint32_t frequency) {
     uint8_t err;
     char str[] = "SPI::set_clock()";
 
@@ -208,12 +208,12 @@ uint8_t SPI::set_clock (const uint32_t frequency) {
     // Wait for the ready command
     PROPWARE_SPI_SAFETY_CHECK_STR(this->wait_specific(SPI::FUNC_SET_FREQ), str);
     // Send new frequency
-    this->m_mailbox = CLKFREQ / frequency;
+    this->m_mailbox = (CLKFREQ / frequency) >> 1;
 
     return 0;
 }
 
-uint8_t SPI::get_clock (uint32_t *frequency) {
+int8_t SPI::get_clock (uint32_t *frequency) {
     uint8_t err;
     char str[] = "SPI::get_clock()";
 
@@ -231,12 +231,12 @@ uint8_t SPI::get_clock (uint32_t *frequency) {
     PROPWARE_SPI_SAFETY_CHECK_STR(this->wait_specific(SPI::FUNC_GET_FREQ), str);
 
     this->read_par(frequency, sizeof(*frequency));
-    *frequency = CLKFREQ / *frequency;
+    *frequency = CLKFREQ / (*frequency << 1);
 
     return 0;
 }
 
-uint8_t SPI::shift_out (uint8_t bits, uint32_t value) {
+int8_t SPI::shift_out (uint8_t bits, uint32_t value) {
     uint8_t err;
     char str[] = "SPI::shift_out()";
 
@@ -264,7 +264,7 @@ uint8_t SPI::shift_out (uint8_t bits, uint32_t value) {
     return 0;
 }
 
-uint8_t SPI::shift_in (const uint8_t bits, void *data, const size_t bytes) {
+int8_t SPI::shift_in (const uint8_t bits, void *data, const size_t bytes) {
     uint8_t err;
     const char str[] = "SPI::shift_in()";
 
@@ -362,7 +362,7 @@ int8_t SPI::shift_in_sector (const uint8_t addr[], const uint8_t blocking) {
 }
 #endif
 
-uint8_t SPI::read_par (void *par, const size_t bytes) {
+int8_t SPI::read_par (void *par, const size_t bytes) {
     uint8_t *par8;
     uint16_t *par16;
     uint32_t *par32;

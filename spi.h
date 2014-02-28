@@ -175,7 +175,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        uint8_t start (const GPIO::Pin mosi,
+        int8_t start (const GPIO::Pin mosi,
                 const GPIO::Pin miso, const GPIO::Pin sclk,
                 const uint32_t frequency, const SPI::Mode mode,
                 const SPI::BitMode bitmode);
@@ -186,21 +186,21 @@ class SPI {
          * @return  Returns 0 upon success, otherwise error code (will return
          *          SPI::COG_NOT_STARTED if no cog has previously been started)
          */
-        uint8_t stop (void);
+        int8_t stop (void);
 
         /**
          * @brief    Determine if the SPI cog has already been initialized
          *
          * @return       Returns 1 if the SPI cog is up and running, 0 otherwise
          */
-        int8_t is_running (void);
+        bool is_running (void);
 
         /**
          * @brief   Wait for the SPI cog to signal that it is in the idle state
          *
          * @return  May return non-zero error code when a timeout occurs
          */
-        uint8_t wait (void);
+        int8_t wait (void);
 
         /**
          * @brief   Wait for a specific value from the assembly cog
@@ -209,7 +209,7 @@ class SPI {
          *
          * @return  May return non-zero error code when a timeout occurs
          */
-        uint8_t wait_specific (const uint32_t value);
+        int8_t wait_specific (const uint32_t value);
 
         /**
          * @brief       Set the mode of SPI communication
@@ -219,7 +219,7 @@ class SPI {
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        uint8_t set_mode (const SPI::Mode mode);
+        int8_t set_mode (const SPI::Mode mode);
 
         /**
          * @brief       Set the bitmode of SPI communication
@@ -229,7 +229,7 @@ class SPI {
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        uint8_t set_bit_mode (const SPI::BitMode bitmode);
+        int8_t set_bit_mode (const SPI::BitMode bitmode);
 
         /**
          * @brief       Change the SPI module's clock frequency
@@ -240,7 +240,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        uint8_t set_clock (const uint32_t frequency);
+        int8_t set_clock (const uint32_t frequency);
 
         /**
          * @brief       Retrieve the SPI module's clock frequency
@@ -249,7 +249,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        uint8_t get_clock (uint32_t *frequency);
+        int8_t get_clock (uint32_t *frequency);
 
         /**
          * @brief       Send a value out to a peripheral device
@@ -264,7 +264,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        uint8_t shift_out (uint8_t bits, uint32_t value);
+        int8_t shift_out (uint8_t bits, uint32_t value);
 
         /**
          * @brief       Receive a value in from a peripheral device
@@ -280,7 +280,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        uint8_t shift_in (const uint8_t bits, void *data, const size_t size);
+        int8_t shift_in (const uint8_t bits, void *data, const size_t size);
 
 #ifdef SPI_OPTION_FAST
         /**
@@ -369,7 +369,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read_par (void *par, const size_t size);
+        int8_t read_par (void *par, const size_t size);
 
 #ifdef SPI_OPTION_DEBUG
         /**

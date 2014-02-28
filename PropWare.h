@@ -1,8 +1,5 @@
 /**
  * @file    PropWare.h
- */
-/**
- * @brief   Generic definitions and functions for the Parallax Propeller
  *
  * @project PropWare
  *
@@ -39,6 +36,9 @@
 #include <propeller.h>
 #include <stdint.h>
 
+/**
+ * @brief   Generic definitions and functions for the Parallax Propeller
+ */
 namespace PropWare {
 
 #ifdef DAREDEVIL
@@ -109,48 +109,58 @@ typedef enum {
     WORD_1 = 0xffff0000
 } Word;
 
+/**
+ * @brief   General purpose I/O functions and definitions
+ */
 namespace GPIO {
 
+/** Number of milliseconds to delay during debounce */
 #define DEBOUNCE_DELAY      3
 
+/**
+ * Bit-mask of GPIO pins
+ */
 typedef enum {
-    P0 = BIT_0,
-    P1 = BIT_1,
-    P2 = BIT_2,
-    P3 = BIT_3,
-    P4 = BIT_4,
-    P5 = BIT_5,
-    P6 = BIT_6,
-    P7 = BIT_7,
-    P8 = BIT_8,
-    P9 = BIT_9,
-    P10 = BIT_10,
-    P11 = BIT_11,
-    P12 = BIT_12,
-    P13 = BIT_13,
-    P14 = BIT_14,
-    P15 = BIT_15,
-    P16 = BIT_16,
-    P17 = BIT_17,
-    P18 = BIT_18,
-    P19 = BIT_19,
-    P20 = BIT_20,
-    P21 = BIT_21,
-    P22 = BIT_22,
-    P23 = BIT_23,
-    P24 = BIT_24,
-    P25 = BIT_25,
-    P26 = BIT_26,
-    P27 = BIT_27,
-    P28 = BIT_28,
-    P29 = BIT_29,
-    P30 = BIT_30,
-    P31 = BIT_31
+    /** GPIO pin 0  */P0 = BIT_0,
+    /** GPIO pin 1  */P1 = BIT_1,
+    /** GPIO pin 2  */P2 = BIT_2,
+    /** GPIO pin 3  */P3 = BIT_3,
+    /** GPIO pin 4  */P4 = BIT_4,
+    /** GPIO pin 5  */P5 = BIT_5,
+    /** GPIO pin 6  */P6 = BIT_6,
+    /** GPIO pin 7  */P7 = BIT_7,
+    /** GPIO pin 8  */P8 = BIT_8,
+    /** GPIO pin 9  */P9 = BIT_9,
+    /** GPIO pin 10 */P10 = BIT_10,
+    /** GPIO pin 11 */P11 = BIT_11,
+    /** GPIO pin 12 */P12 = BIT_12,
+    /** GPIO pin 13 */P13 = BIT_13,
+    /** GPIO pin 14 */P14 = BIT_14,
+    /** GPIO pin 15 */P15 = BIT_15,
+    /** GPIO pin 16 */P16 = BIT_16,
+    /** GPIO pin 17 */P17 = BIT_17,
+    /** GPIO pin 18 */P18 = BIT_18,
+    /** GPIO pin 19 */P19 = BIT_19,
+    /** GPIO pin 20 */P20 = BIT_20,
+    /** GPIO pin 21 */P21 = BIT_21,
+    /** GPIO pin 22 */P22 = BIT_22,
+    /** GPIO pin 23 */P23 = BIT_23,
+    /** GPIO pin 24 */P24 = BIT_24,
+    /** GPIO pin 25 */P25 = BIT_25,
+    /** GPIO pin 26 */P26 = BIT_26,
+    /** GPIO pin 27 */P27 = BIT_27,
+    /** GPIO pin 28 */P28 = BIT_28,
+    /** GPIO pin 29 */P29 = BIT_29,
+    /** GPIO pin 30 */P30 = BIT_30,
+    /** GPIO pin 31 */P31 = BIT_31
 } Pin;
 
+/**
+ * Direction of GPIO pin
+ */
 typedef enum {
-    IN = 0,
-    OUT = -1
+    /** Set pin(s) as input */IN = 0,
+    /** Set pin(s) as output */OUT = -1
 } Dir;
 
 /**
