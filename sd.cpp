@@ -289,8 +289,8 @@ int8_t SD::print_init_debug_blocks (uint8_t response[]) {
 }
 #endif
 
-int8_t SD::mount (void) {
-    int8_t err, temp;
+int8_t SD::mount () {
+    int8_t err;
 
     // FAT system determination variables:
     uint32_t rsvdSectorCount, numFATs, rootEntryCount, totalSectors, FATSize,
@@ -298,25 +298,40 @@ int8_t SD::mount (void) {
     uint32_t bootSector = 0;
     uint32_t clusterCount;
 
+    sd_check_errors(this->read_boot_sector(&bootSector));
+
+    this->common_boot_sector_parser(&rsvdSectorCount, &numFATs,
+            &rootEntryCount);
+
+    return 0;
+}
+
+int8_t SD::read_boot_sector (uint32_t *bootSector) {
+    int8_t err;
     // Read in first sector
-    sd_check_errors(this->read_data_block(bootSector, this->m_buf.buf));
+    sd_check_errors(this->read_data_block(*bootSector, this->m_buf.buf));
     // Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector at
     // first partition
     if (SD::BOOT_SECTOR_ID != this->m_buf.buf[SD::BOOT_SECTOR_ID_ADDR]) {
-        bootSector = this->read_rev_dat32(
+        *bootSector = this->read_rev_dat32(
                 &(this->m_buf.buf[SD::BOOT_SECTOR_BACKUP]));
-        sd_check_errors(this->read_data_block(bootSector, this->m_buf.buf));
+        sd_check_errors(this->read_data_block(*bootSector, this->m_buf.buf));
     }
 
     // Print the boot sector if requested
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG && \
-        defined SD_OPTION_VERBOSE_BLOCKS)
+	        defined SD_OPTION_VERBOSE_BLOCKS)
     printf("***BOOT SECTOR***\n");
     this->print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
     putchar('\n');
 #endif
+}
 
-    // Do this whether it is FAT16 or FAT32
+void SD::common_boot_sector_parser (uint32_t *rsvdSectorCount,
+        uint32_t *numFATs, uint32_t *rootEntryCount) {
+    uint8_t temp;
+
+    // Determine number of sectors per cluster
     temp = this->m_buf.buf[SD::CLUSTER_SIZE_ADDR];
 #if (defined SD_OPTION_DEBUG && defined SD_OPTION_VERBOSE)
     printf("Preliminary sectors per cluster: %u\n", temp);
@@ -326,16 +341,26 @@ int8_t SD::mount (void) {
         ++this->m_sectorsPerCluster_shift;
     }
     --this->m_sectorsPerCluster_shift;
-    rsvdSectorCount = this->read_rev_dat16(
+
+    // Get the reserved sector count
+    *rsvdSectorCount = this->read_rev_dat16(
             &((this->m_buf.buf)[SD::RSVD_SCTR_CNT_ADDR]));
+
+    // Total number of FATs
     numFATs = this->m_buf.buf[SD::NUM_FATS_ADDR];
 #ifdef SD_OPTION_FILE_WRITE
     if (2 != numFATs)
         sd_error(SD::TOO_MANY_FATS);
 #endif
+
+    // Number of entries in the root directory
     rootEntryCount = this->read_rev_dat16(
             &(this->m_buf.buf[SD::ROOT_ENTRY_CNT_ADDR]));
+}
 
+void SD::determine_fat_type (uint32_t *FATSize, uint32_t *totalSectors,
+        uint32_t *rootEntryCount, uint32_t *dataSectors, uint32_t *rsvdSectorCount,
+        uint8_t *numFATs, uint32_t *clusterCount) {
     // Check if FAT size is valid in 16- or 32-bit location
     FATSize = this->read_rev_dat16(&(this->m_buf.buf[SD::FAT_SIZE_16_ADDR]));
     if (!FATSize)
@@ -354,6 +379,16 @@ int8_t SD::mount (void) {
     dataSectors = totalSectors
             - (rsvdSectorCount + numFATs * FATSize + rootEntryCount);
     clusterCount = dataSectors >> this->m_sectorsPerCluster_shift;
+}
+
+int8_t SD::mount_old () {
+    int8_t err, temp;
+
+    // FAT system determination variables:
+    uint32_t rsvdSectorCount, numFATs, rootEntryCount, totalSectors, FATSize,
+            dataSectors;
+    uint32_t bootSector = 0;
+    uint32_t clusterCount;
 
 #if (defined SD_OPTION_DEBUG && defined SD_OPTION_VERBOSE)
     printf("Sectors per cluster: %u\n", 1 << this->m_sectorsPerCluster_shift);
@@ -459,7 +494,7 @@ int8_t SD::mount (void) {
 }
 
 #ifdef SD_OPTION_FILE_WRITE
-uint8_t SD::unmount (void) {
+uint8_t SD::unmount () {
     int8_t err;
 
     // If the directory buffer was modified, write it
@@ -966,7 +1001,7 @@ int8_t SD::shell (SD::File *f) {
     return 0;
 }
 
-int8_t SD::shell_ls (void) {
+int8_t SD::shell_ls () {
     int8_t err;
     uint16_t fileEntryOffset = 0;
     char string[SD_FILENAME_STR_LEN];  // Allocate space for a filename string

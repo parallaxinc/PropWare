@@ -307,16 +307,19 @@ class SD {
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs, const int32_t freq);
 
-        int8_t start_old (const PropWare::GPIO::Pin mosi,
-                        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-                        const PropWare::GPIO::Pin cs, const int32_t freq);
-
         /**
-         * @brief   Mount either FAT16 or FAT32 filesystem
+         * @brief   Mount either FAT16 or FAT32 file system
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        int8_t mount (void);
+        int8_t mount ();
+
+        int8_t read_boot_sector (uint32_t *bootSector);
+
+        void common_boot_sector_parser(uint32_t *rsvdSectorCount, uint32_t *numFATs,
+        		uint32_t *rootEntryCount);
+
+        int8_t mount_old ();
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -326,7 +329,7 @@ class SD {
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        uint8_t unmount (void);
+        uint8_t unmount ();
 #endif
 
         /**
@@ -533,7 +536,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_ls (void);
+        int8_t shell_ls ();
 
         /**
          * @brief       Dump the contents of a file to the screen (similar to 'cat f');
