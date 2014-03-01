@@ -314,13 +314,6 @@ class SD {
          */
         int8_t mount ();
 
-        int8_t read_boot_sector (uint32_t *bootSector);
-
-        void common_boot_sector_parser(uint32_t *rsvdSectorCount, uint32_t *numFATs,
-        		uint32_t *rootEntryCount);
-
-        int8_t mount_old ();
-
 #ifdef SD_OPTION_FILE_WRITE
         /**
          * @brief   Stop all SD activities and write any modified buffers
@@ -584,23 +577,44 @@ class SD {
 #endif
 
     private:
+        typedef struct {
+            uint8_t numFATs;
+            uint32_t rsvdSectorCount;
+            uint32_t rootEntryCount;
+            uint32_t totalSectors;
+            uint32_t FATSize;
+            uint32_t dataSectors;
+            uint32_t bootSector;
+            uint32_t clusterCount;
+        } InitFATInfo;
+
+    private:
         /***********************
          *** Private Methods ***
          ***********************/
-        /**
-         *
-         */
-        int8_t reset_and_verify_v2_0 (uint8_t response_param[]);
+        inline int8_t reset_and_verify_v2_0 (uint8_t response_param[]);
 
-        int8_t power_up ();
+        inline int8_t power_up ();
 
-        int8_t reset (uint8_t response[], bool *isIdle);
+        inline int8_t reset (uint8_t response[], bool *isIdle);
 
-        int8_t verify_v2_0 (uint8_t response[], bool *stageCleared);
+        inline int8_t verify_v2_0 (uint8_t response[], bool *stageCleared);
 
-        int8_t send_active (uint8_t response[]);
+        inline int8_t send_active (uint8_t response[]);
 
-        int8_t increase_throttle (const int32_t freq);
+        inline int8_t increase_throttle (const int32_t freq);
+
+        inline int8_t read_boot_sector (InitFATInfo *fatInfo);
+
+        inline void common_boot_sector_parser(InitFATInfo *fatInfo);
+
+        inline void partition_info_parser (InitFATInfo *fatInfo);
+
+        inline int8_t determine_fat_type (InitFATInfo *fatInfo);
+
+        inline void store_root_info (InitFATInfo *fatInfo);
+
+        inline int8_t read_fat_and_root_sectors ();
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
         int8_t print_init_debug_blocks (uint8_t response[]);

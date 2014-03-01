@@ -293,29 +293,36 @@ int8_t SD::mount () {
     int8_t err;
 
     // FAT system determination variables:
-    uint32_t rsvdSectorCount, numFATs, rootEntryCount, totalSectors, FATSize,
-            dataSectors;
-    uint32_t bootSector = 0;
-    uint32_t clusterCount;
+    SD::InitFATInfo fatInfo;
+    fatInfo.bootSector = 0;
 
-    sd_check_errors(this->read_boot_sector(&bootSector));
+    sd_check_errors(this->read_boot_sector(&fatInfo));
 
-    this->common_boot_sector_parser(&rsvdSectorCount, &numFATs,
-            &rootEntryCount);
+    this->common_boot_sector_parser(&fatInfo);
+
+    this->partition_info_parser(&fatInfo);
+
+    sd_check_errors(this->determine_fat_type(&fatInfo));
+
+    this->store_root_info(&fatInfo);
+
+    sd_check_errors(this->read_fat_and_root_sectors());
 
     return 0;
 }
 
-int8_t SD::read_boot_sector (uint32_t *bootSector) {
+int8_t SD::read_boot_sector (InitFATInfo *fatInfo) {
     int8_t err;
     // Read in first sector
-    sd_check_errors(this->read_data_block(*bootSector, this->m_buf.buf));
+    sd_check_errors(
+            this->read_data_block(fatInfo->bootSector, this->m_buf.buf));
     // Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector at
     // first partition
     if (SD::BOOT_SECTOR_ID != this->m_buf.buf[SD::BOOT_SECTOR_ID_ADDR]) {
-        *bootSector = this->read_rev_dat32(
+        fatInfo->bootSector = this->read_rev_dat32(
                 &(this->m_buf.buf[SD::BOOT_SECTOR_BACKUP]));
-        sd_check_errors(this->read_data_block(*bootSector, this->m_buf.buf));
+        sd_check_errors(
+                this->read_data_block(fatInfo->bootSector, this->m_buf.buf));
     }
 
     // Print the boot sector if requested
@@ -325,10 +332,11 @@ int8_t SD::read_boot_sector (uint32_t *bootSector) {
     this->print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
     putchar('\n');
 #endif
+
+    return 0;
 }
 
-void SD::common_boot_sector_parser (uint32_t *rsvdSectorCount,
-        uint32_t *numFATs, uint32_t *rootEntryCount) {
+void SD::common_boot_sector_parser (InitFATInfo *fatInfo) {
     uint8_t temp;
 
     // Determine number of sectors per cluster
@@ -343,71 +351,69 @@ void SD::common_boot_sector_parser (uint32_t *rsvdSectorCount,
     --this->m_sectorsPerCluster_shift;
 
     // Get the reserved sector count
-    *rsvdSectorCount = this->read_rev_dat16(
+    fatInfo->rsvdSectorCount = this->read_rev_dat16(
             &((this->m_buf.buf)[SD::RSVD_SCTR_CNT_ADDR]));
 
     // Total number of FATs
-    numFATs = this->m_buf.buf[SD::NUM_FATS_ADDR];
+    fatInfo->numFATs = this->m_buf.buf[SD::NUM_FATS_ADDR];
 #ifdef SD_OPTION_FILE_WRITE
-    if (2 != numFATs)
+    if (2 != fatInfo->numFATs)
         sd_error(SD::TOO_MANY_FATS);
 #endif
 
     // Number of entries in the root directory
-    rootEntryCount = this->read_rev_dat16(
+    fatInfo->rootEntryCount = this->read_rev_dat16(
             &(this->m_buf.buf[SD::ROOT_ENTRY_CNT_ADDR]));
 }
 
-void SD::determine_fat_type (uint32_t *FATSize, uint32_t *totalSectors,
-        uint32_t *rootEntryCount, uint32_t *dataSectors, uint32_t *rsvdSectorCount,
-        uint8_t *numFATs, uint32_t *clusterCount) {
+void SD::partition_info_parser (InitFATInfo *fatInfo) {
     // Check if FAT size is valid in 16- or 32-bit location
-    FATSize = this->read_rev_dat16(&(this->m_buf.buf[SD::FAT_SIZE_16_ADDR]));
-    if (!FATSize)
-        FATSize = this->read_rev_dat32(
+    fatInfo->FATSize = this->read_rev_dat16(
+            &(this->m_buf.buf[SD::FAT_SIZE_16_ADDR]));
+    if (!(fatInfo->FATSize))
+        fatInfo->FATSize = this->read_rev_dat32(
                 &(this->m_buf.buf[SD::FAT_SIZE_32_ADDR]));
 
     // Check if FAT16 total sectors is valid
-    totalSectors = this->read_rev_dat16(
+    fatInfo->totalSectors = this->read_rev_dat16(
             &(this->m_buf.buf[SD::TOT_SCTR_16_ADDR]));
-    if (!totalSectors)
-        totalSectors = this->read_rev_dat32(
+    if (!(fatInfo->totalSectors))
+        fatInfo->totalSectors = this->read_rev_dat32(
                 &(this->m_buf.buf[SD::TOT_SCTR_32_ADDR]));
 
     // Compute necessary numbers to determine FAT type (12/16/32)
-    this->m_rootDirSectors = (rootEntryCount * 32) >> SD::SECTOR_SIZE_SHIFT;
-    dataSectors = totalSectors
-            - (rsvdSectorCount + numFATs * FATSize + rootEntryCount);
-    clusterCount = dataSectors >> this->m_sectorsPerCluster_shift;
-}
-
-int8_t SD::mount_old () {
-    int8_t err, temp;
-
-    // FAT system determination variables:
-    uint32_t rsvdSectorCount, numFATs, rootEntryCount, totalSectors, FATSize,
-            dataSectors;
-    uint32_t bootSector = 0;
-    uint32_t clusterCount;
+    this->m_rootDirSectors = (fatInfo->rootEntryCount * 32)
+            >> SD::SECTOR_SIZE_SHIFT;
+    fatInfo->dataSectors = fatInfo->totalSectors
+            - (fatInfo->rsvdSectorCount + fatInfo->numFATs * fatInfo->FATSize
+                    + fatInfo->rootEntryCount);
+    fatInfo->clusterCount = fatInfo->dataSectors
+            >> this->m_sectorsPerCluster_shift;
 
 #if (defined SD_OPTION_DEBUG && defined SD_OPTION_VERBOSE)
     printf("Sectors per cluster: %u\n", 1 << this->m_sectorsPerCluster_shift);
-    printf("Reserved sector count: 0x%08x / %u\n", rsvdSectorCount,
-            rsvdSectorCount);
-    printf("Number of FATs: 0x%02x / %u\n", numFATs, numFATs);
-    printf("Total sector count: 0x%08x / %u\n", totalSectors, totalSectors);
-    printf("Total cluster count: 0x%08x / %u\n", clusterCount, clusterCount);
-    printf("Total data sectors: 0x%08x / %u\n", dataSectors, dataSectors);
-    printf("FAT Size: 0x%04x / %u\n", FATSize, FATSize);
+    printf("Reserved sector count: 0x%08x / %u\n", fatInfo->rsvdSectorCount,
+            fatInfo->rsvdSectorCount);
+    printf("Number of FATs: 0x%02x / %u\n", fatInfo->numFATs, fatInfo->numFATs);
+    printf("Total sector count: 0x%08x / %u\n", fatInfo->totalSectors,
+            fatInfo->totalSectors);
+    printf("Total cluster count: 0x%08x / %u\n", fatInfo->clusterCount,
+            fatInfo->clusterCount);
+    printf("Total data sectors: 0x%08x / %u\n", fatInfo->dataSectors,
+            fatInfo->dataSectors);
+    printf("FAT Size: 0x%04x / %u\n", fatInfo->FATSize, fatInfo->FATSize);
     printf("Root directory sectors: 0x%08x / %u\n", this->m_rootDirSectors,
             this->m_rootDirSectors);
-    printf("Root entry count: 0x%08x / %u\n", rootEntryCount, rootEntryCount);
+    printf("Root entry count: 0x%08x / %u\n", fatInfo->rootEntryCount,
+            fatInfo->rootEntryCount);
 #endif
+}
 
+int8_t SD::determine_fat_type (InitFATInfo *fatInfo) {
     // Determine and store FAT type
-    if (SD::FAT12_CLSTR_CNT > clusterCount)
+    if (SD::FAT12_CLSTR_CNT > fatInfo->clusterCount)
         sd_error(SD::INVALID_FILESYSTEM);
-    else if (SD::FAT16_CLSTR_CNT > clusterCount) {
+    else if (SD::FAT16_CLSTR_CNT > fatInfo->clusterCount) {
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
         printf("\n***FAT type is FAT16***\n");
 #endif
@@ -421,28 +427,34 @@ int8_t SD::mount_old () {
         this->m_entriesPerFatSector_Shift = 7;
     }
 
+    return 0;
+}
+
+void SD::store_root_info (InitFATInfo *fatInfo) {
     // Find start of FAT
-    this->m_fatStart = bootSector + rsvdSectorCount;
+    this->m_fatStart = fatInfo->bootSector + fatInfo->rsvdSectorCount;
 
     //    this->m_filesystem = SD::FAT_16;
     // Find root directory address
     switch (this->m_filesystem) {
         case SD::FAT_16:
-            this->m_rootAddr = FATSize * numFATs + this->m_fatStart;
+            this->m_rootAddr = fatInfo->FATSize * fatInfo->numFATs
+                    + this->m_fatStart;
             this->m_firstDataAddr = this->m_rootAddr + this->m_rootDirSectors;
             break;
         case SD::FAT_32:
-            this->m_firstDataAddr = this->m_rootAddr = bootSector
-                    + rsvdSectorCount + FATSize * numFATs;
+            this->m_firstDataAddr = this->m_rootAddr = fatInfo->bootSector
+                    + fatInfo->rsvdSectorCount
+                    + fatInfo->FATSize * fatInfo->numFATs;
             this->m_rootAllocUnit = this->read_rev_dat32(
                     &(this->m_buf.buf[SD::ROOT_CLUSTER_ADDR]));
             break;
     }
 
 #ifdef SD_OPTION_FILE_WRITE
-    // If files will be written to, the second FAT must also be updated - the
-    // first sector address of which is stored here
-    this->m_fatSize = FATSize;
+    // If files will be writable, the second FAT must also be updated - the
+    // first sector's address is stored here
+    this->m_fatSize = fatInfo->FATSize;
 #endif
 
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
@@ -453,21 +465,25 @@ int8_t SD::mount_old () {
             this->find_sector_from_alloc(this->m_rootAllocUnit));
     printf("First data sector: 0x%08x\n", this->m_firstDataAddr);
 #endif
+}
+
+int8_t SD::read_fat_and_root_sectors () {
+    int8_t err;
 
     // Store the first sector of the FAT
-    sd_check_errors(this->read_data_block(this->m_fatStart, this->m_fat));
+    check_errors(this->read_data_block(this->m_fatStart, this->m_fat));
     this->m_curFatSector = 0;
 
     // Print FAT if desired
 #if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG && \
-        defined SD_OPTION_VERBOSE_BLOCKS)
+            defined SD_OPTION_VERBOSE_BLOCKS)
     printf("\n***First File Allocation Table***\n");
     this->print_hex_block(this->m_fat, SD::SECTOR_SIZE);
     putchar('\n');
 #endif
 
     // Read in the root directory, set root as current
-    sd_check_errors(this->read_data_block(this->m_rootAddr, this->m_buf.buf));
+    check_errors(this->read_data_block(this->m_rootAddr, this->m_buf.buf));
     this->m_buf.curClusterStartAddr = this->m_rootAddr;
     if (SD::FAT_16 == this->m_filesystem) {
         this->m_dir_firstAllocUnit = -1;
@@ -475,7 +491,7 @@ int8_t SD::mount_old () {
     } else {
         this->m_buf.curAllocUnit = this->m_dir_firstAllocUnit =
                 this->m_rootAllocUnit;
-        sd_check_errors(
+        check_errors(
                 this->get_fat_value(this->m_buf.curAllocUnit,
                         &this->m_buf.nextAllocUnit));
     }
@@ -484,7 +500,7 @@ int8_t SD::mount_old () {
 
     // Print root directory
 #if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE && \
-        defined SD_OPTION_DEBUG)
+            defined SD_OPTION_DEBUG)
     printf("***Root directory***\n");
     this->print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
     putchar('\n');
