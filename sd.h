@@ -40,15 +40,6 @@ namespace PropWare {
 /** @name   SD Extra Code Options
  * @{ */
 /**
- * Enables thorough debugging features similar to exceptions; Errors caught by
- * the program will enter an infinite debug loop
- * <p>
- * DEFAULT: Off
- */
-#define SD_OPTION_DEBUG
-// This allows Doxygen to document the macro without permanently enabling it
-//#undef SD_OPTION_DEBUG
-/**
  * Enables thorough debugging features similar to exceptions; Errors will be
  * caught the program will enter an infinite loop
  * <p>
@@ -64,7 +55,7 @@ namespace PropWare {
  */
 #define SD_OPTION_VERBOSE_BLOCKS
 // This allows Doxygen to document the macro without permanently enabling it
-//#undef SD_OPTION_VERBOSE_BLOCKS
+#undef SD_OPTION_VERBOSE_BLOCKS
 /**
  * Unix-like command-line arguments will be defined and available
  * <p>
@@ -80,7 +71,7 @@ namespace PropWare {
  * @note    Work-in-progress, code size is not necessarily at a minimum, nor is
  *          RAM usage
  */
-#define SD_OPTION_FILE_WRITE
+//#define SD_OPTION_FILE_WRITE
 /** @} */
 
 /**
@@ -108,7 +99,7 @@ class SD {
 #define SD_SECTOR_SIZE  512
         static const uint16_t SECTOR_SIZE = SD_SECTOR_SIZE;
         /** Default frequency to run the SPI module */
-        static const uint32_t DEFAULT_SPI_FREQ = 1800000;
+        static const uint32_t DEFAULT_SPI_FREQ = 900000;
 
         // Signal that the contents of a buffer are a directory
         static const int8_t FOLDER_ID = -1;
@@ -184,33 +175,37 @@ class SD {
             /** End of the file */SEEK_END
         } FilePos;
 
-        /** First SD error code */
-#define SD_ERRORS_BASE      16
         /**
          * Error codes - preceded by SPI
          */
         typedef enum {
-            /** SD Error  0 */INVALID_CMD = SD_ERRORS_BASE,
-            /** SD Error  1 */READ_TIMEOUT,
-            /** SD Error  2 */INVALID_NUM_BYTES,
-            /** SD Error  3 */INVALID_RESPONSE,
-            /** SD Error  4 */INVALID_INIT,
-            /** SD Error  5 */INVALID_FILESYSTEM,
-            /** SD Error  6 */INVALID_DAT_STRT_ID,
-            /** SD Error  7 */FILENAME_NOT_FOUND,
-            /** SD Error  8 */EMPTY_FAT_ENTRY,
-            /** SD Error  9 */CORRUPT_CLUSTER,
-            /** SD Error 10 */INVALID_PTR_ORIGIN,
-            /** SD Error 11 */ENTRY_NOT_FILE,
-            /** SD Error 12 */INVALID_FILENAME,
-            /** SD Error 13 */INVALID_FAT_APPEND,
-            /** SD Error 14 */FILE_ALREADY_EXISTS,
-            /** SD Error 15 */INVALID_FILE_MODE,
+            /** First SD error code */BEG_ERROR = SPI::END_ERROR + 1,
+            /** Begin user errors */ BEG_USER_ERROR = SD::BEG_ERROR,
+            /** SD Error  0 */FILE_ALREADY_EXISTS = SD::BEG_USER_ERROR,
+            /** SD Error  1 */INVALID_FILE_MODE,
+            /** SD Error  2 */ENTRY_NOT_FILE,
+            /** SD Error  3 */ENTRY_NOT_DIR,
+            /** SD Error  4 */FILENAME_NOT_FOUND,
+            /** End user errors */END_USER_ERRORS = SD::FILENAME_NOT_FOUND,
+            /** Begin system errors */BEG_SYS_ERROR,
+            /** SD Error  5 */CORRUPT_CLUSTER = SD::BEG_SYS_ERROR,
+            /** SD Error  6 */INVALID_FILENAME,
+            /** SD Error  7 */INVALID_CMD,
+            /** SD Error  8 */READ_TIMEOUT,
+            /** SD Error  9 */INVALID_NUM_BYTES,
+            /** SD Error 10 */INVALID_RESPONSE,
+            /** SD Error 11 */INVALID_INIT,
+            /** SD Error 12 */INVALID_DAT_STRT_ID,
+            /** SD Error 13 */EMPTY_FAT_ENTRY,
+            /** SD Error 14 */INVALID_PTR_ORIGIN,
+            /** SD Error 15 */INVALID_FAT_APPEND,
             /** SD Error 16 */TOO_MANY_FATS,
             /** SD Error 17 */READING_PAST_EOC,
             /** SD Error 18 */FILE_WITHOUT_BUFFER,
-            /** SD Error 19 */CMD8_FAILURE,
-            /** Number of unique SD errors */ERRORS
+            /** SD Error 19 */INVALID_FILESYSTEM,
+            /** SD Error 20 */CMD8_FAILURE,
+            /** End system errors */END_SYS_ERROR = SD::CMD8_FAILURE,
+            /** Last SD error code */END_ERROR = SD::END_SYS_ERROR
         } ErrorCode;
 
         /**
@@ -576,6 +571,14 @@ class SD {
         int8_t print_hex_block (uint8_t *dat, uint16_t bytes);
 #endif
 
+        /* @brief   Create a human-readable error string
+         *
+         * @param[in]   err         Error number used to determine error string
+         * @param[out]  errorStr    Allocated space where a string of no more
+         *                          than 128 characters can be printed
+         */
+        void get_error_str (const SD::ErrorCode err, char errorStr[]) const;
+
     private:
         typedef struct {
             uint8_t numFATs;
@@ -606,7 +609,7 @@ class SD {
 
         inline int8_t read_boot_sector (InitFATInfo *fatInfo);
 
-        inline void common_boot_sector_parser(InitFATInfo *fatInfo);
+        inline int8_t common_boot_sector_parser(InitFATInfo *fatInfo);
 
         inline void partition_info_parser (InitFATInfo *fatInfo);
 
@@ -616,7 +619,7 @@ class SD {
 
         inline int8_t read_fat_and_root_sectors ();
 
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
+#if (defined SD_OPTION_VERBOSE)
         int8_t print_init_debug_blocks (uint8_t response[]);
 #endif
 
@@ -866,7 +869,8 @@ class SD {
          */
         uint32_t find_empty_space (const uint8_t restore);
 
-        /* @brief       Enlarge a file or directory by one cluster
+        /**
+         * @brief       Enlarge a file or directory by one cluster
          *
          * @param[in]   *buf    Address of the buffer (containing information for a
          *                      file or directory) to be enlarged
@@ -904,30 +908,11 @@ class SD {
          */
         void print_file_attributes (const uint8_t flags);
 
-#ifdef SD_OPTION_DEBUG
-        /* @brief   Print an error through UART string followed by entering an infinite
-         *          loop
-         *
-         * @param   err     Error number used to determine error string
-         */
-        void sd_error (const int8_t err);
-
         /**
-         * @brief   Print to screen each status bit individually with human-readable
-         *          descriptions
-         *
-         * @param   response    first-byte response from the SD card
+         * @brief   Print to screen each status bit individually with
+         *          human-readable descriptions
          */
-        void first_byte_expansion (const uint8_t response);
-#else
-        /**
-         * @brief       Because SD_OPTION_DEBUG is not defined, we're simply going to
-         *              return the error
-         *
-         * @param[in]   err     The error thrown by an SD function
-         */
-#define sd_error(err)                return err
-#endif
+        void first_byte_expansion () const;
 #endif
 
     private:
@@ -965,6 +950,7 @@ class SD {
         // SD CRCs
         static const uint8_t CRC_IDLE = 0x95;
         static const uint8_t CRC_CMD8 = 0x87;  // CRC only valid for CMD8 argument of 0x000001AA
+        static const uint8_t CRC_ACMD_PREP = 0x65;
         static const uint8_t CRC_ACMD = 0x77;
         static const uint8_t CRC_OTHER = 0x01;
 

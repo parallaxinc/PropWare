@@ -38,7 +38,7 @@ namespace PropWare {
 // Constants that use CLKFREQ cannot be initialized in the header
 const uint32_t SPI::WR_TIMEOUT_VAL = CLKFREQ / 10;
 const uint32_t SPI::RD_TIMEOUT_VAL = CLKFREQ / 10;
-const uint32_t SPI::MAX_CLOCK = CLKFREQ >> 2;
+const int32_t SPI::MAX_CLOCK = CLKFREQ >> 3;
 
 #define PROPWARE_SPI_SAFETY_CHECK(x) if ((err = x)) spi_error(err)
 #define PROPWARE_SPI_SAFETY_CHECK_STR(x, y) if ((err = x)) spi_error(err, y)
@@ -55,7 +55,7 @@ SPI* SPI::getSPI () {
 
 // Function definitions
 int8_t SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
-        const GPIO::Pin sclk, const uint32_t frequency, const SPI::Mode mode,
+        const GPIO::Pin sclk, const int32_t frequency, const SPI::Mode mode,
         const SPI::BitMode bitmode) {
     uint8_t err;
 #ifdef SPI_OPTION_DEBUG
@@ -190,14 +190,14 @@ int8_t SPI::set_bit_mode (const SPI::BitMode bitmode) {
     return 0;
 }
 
-int8_t SPI::set_clock (const uint32_t frequency) {
+int8_t SPI::set_clock (const int32_t frequency) {
     uint8_t err;
     char str[] = "SPI::set_clock()";
 
     if (!this->is_running())
         spi_error(SPI::MODULE_NOT_RUNNING);
 #ifdef SPI_OPTION_DEBUG_PARAMS
-    if (SPI::MAX_CLOCK <= frequency)
+    if (SPI::MAX_CLOCK <= frequency || 0 > frequency)
         spi_error(SPI::INVALID_FREQ);
 #endif
 
@@ -213,7 +213,7 @@ int8_t SPI::set_clock (const uint32_t frequency) {
     return 0;
 }
 
-int8_t SPI::get_clock (uint32_t *frequency) {
+int8_t SPI::get_clock (int32_t *frequency) {
     uint8_t err;
     char str[] = "SPI::get_clock()";
 
@@ -406,47 +406,47 @@ void SPI::spi_error (const uint8_t err, ...) {
 
     switch (err) {
         case SPI::INVALID_PIN:
-            printf(str, (err - SPI::ERROR_BASE), "Invalid pin");
+            printf(str, (err - SPI::BEG_ERROR), "Invalid pin");
             break;
         case SPI::INVALID_MODE:
-            printf(str, (err - SPI::ERROR_BASE), "Invalid mode");
+            printf(str, (err - SPI::BEG_ERROR), "Invalid mode");
             break;
         case SPI::INVALID_PIN_MASK:
-            printf(str, (err - SPI::ERROR_BASE), "Invalid pin mask");
+            printf(str, (err - SPI::BEG_ERROR), "Invalid pin mask");
             break;
         case SPI::TOO_MANY_BITS:
-            printf(str, (err - SPI::ERROR_BASE),
+            printf(str, (err - SPI::BEG_ERROR),
                     "Incapable of handling so many bits in an argument");
             break;
         case SPI::TIMEOUT:
             va_start(list, err);
             printf("SPI Error %u: %s\n\tCalling function was %s\n",
-                    (err - SPI::ERROR_BASE),
+                    (err - SPI::BEG_ERROR),
                     "Timed out during parameter passing", va_arg(list, char *));
             va_end(list);
             break;
         case SPI::TIMEOUT_RD:
-            printf(str, (err - SPI::ERROR_BASE),
+            printf(str, (err - SPI::BEG_ERROR),
                     "Timed out during parameter read");
             break;
         case SPI::COG_NOT_STARTED:
-            printf(str, (err - SPI::ERROR_BASE),
+            printf(str, (err - SPI::BEG_ERROR),
                     "SPI's GAS cog was not started");
             break;
         case SPI::MODULE_NOT_RUNNING:
-            printf(str, (err - SPI::ERROR_BASE), "SPI GAS cog not running");
+            printf(str, (err - SPI::BEG_ERROR), "SPI GAS cog not running");
             break;
         case SPI::INVALID_FREQ:
-            printf(str, (err - SPI::ERROR_BASE), "Frequency set too high");
+            printf(str, (err - SPI::BEG_ERROR), "Frequency set too high");
             break;
         case SPI::ADDR_MISALIGN:
-            printf(str, (err - SPI::ERROR_BASE),
+            printf(str, (err - SPI::BEG_ERROR),
                     "Passed in address is miss aligned");
             break;
         default:
             // Is the error an SPI error?
-            if (err > SPI::ERROR_BASE && err < (SPI::ERROR_BASE + SPI::ERRORS))
-                printf("Unknown SPI error %u\n", (err - SPI::ERROR_BASE));
+            if (err > SPI::BEG_ERROR && err < (SPI::BEG_ERROR + SPI::END_ERROR))
+                printf("Unknown SPI error %u\n", (err - SPI::BEG_ERROR));
             else
                 printf("Unknown error %u\n", (err));
             break;

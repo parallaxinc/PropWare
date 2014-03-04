@@ -129,8 +129,8 @@ class SPI {
          * Error codes - Proceeded by nothing
          */
         typedef enum {
-            /** First SPI error */ERROR_BASE = 0,
-            /** SPI Error  0 */INVALID_PIN = ERROR_BASE,
+            /** First SPI error */BEG_ERROR = 0,
+            /** SPI Error  0 */INVALID_PIN = BEG_ERROR,
             /** SPI Error  1 */INVALID_CLOCK_INIT,
             /** SPI Error  2 */INVALID_MODE,
             /** SPI Error  3 */INVALID_PIN_MASK,
@@ -144,7 +144,7 @@ class SPI {
             /** SPI Error 11 */INVALID_BYTE_SIZE,
             /** SPI Error 12 */ADDR_MISALIGN,
             /** SPI Error 13 */INVALID_BITMODE,
-            /** Number of unique SPI errors */ERRORS
+            /** Last SPI error code + 1 */END_ERROR = SPI::INVALID_BITMODE
         } ErrorCode;
 
     public:
@@ -152,7 +152,7 @@ class SPI {
         static const uint32_t WR_TIMEOUT_VAL;
         static const uint32_t RD_TIMEOUT_VAL;
         static const uint8_t MAX_PAR_BITS = 31;
-        static const uint32_t MAX_CLOCK;
+        static const int32_t MAX_CLOCK;
 
     public:
         /**
@@ -177,7 +177,7 @@ class SPI {
          */
         int8_t start (const GPIO::Pin mosi,
                 const GPIO::Pin miso, const GPIO::Pin sclk,
-                const uint32_t frequency, const SPI::Mode mode,
+                const int32_t frequency, const SPI::Mode mode,
                 const SPI::BitMode bitmode);
 
         /**
@@ -240,7 +240,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t set_clock (const uint32_t frequency);
+        int8_t set_clock (const int32_t frequency);
 
         /**
          * @brief       Retrieve the SPI module's clock frequency
@@ -249,7 +249,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t get_clock (uint32_t *frequency);
+        int8_t get_clock (int32_t *frequency);
 
         /**
          * @brief       Send a value out to a peripheral device

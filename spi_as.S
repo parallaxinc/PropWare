@@ -211,6 +211,7 @@ lsb_first               // LSB_FIRST Routine
 
                         // SEND complete, return to loop
 SEND_complete           wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
+                        or outa, mosi                   '' Leave MOSI in the high state
                         jmp #LOOP
 
 /* FUNCTION: spi_shift_in() */
@@ -346,6 +347,7 @@ lsb_first_fast          // LSB_FIRST Routine
 
                         // SEND complete, return to loop
 SEND_complete_fast      wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
+                        or outa, mosi                   '' Leave MOSI in the high state
                         jmp #LOOP
 
 /* FUNCTION: spi_shift_in_fast() */
