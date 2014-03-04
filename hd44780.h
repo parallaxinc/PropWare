@@ -220,6 +220,8 @@ class HD44780 {
          */
         void putChar (const char c);
 
+        static void print_error_str (const HD44780::ErrorCode err);
+
     private:
         /**
          * Store metadata on the LCD device to determine when line-wraps should and

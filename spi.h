@@ -83,6 +83,10 @@ namespace PropWare {
  */
 class SPI {
     public:
+        /** Used as index for an array of PropWare objects */
+        static const uint8_t PROPWARE_OBJECT_NUMBER = 0;
+
+    public:
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
@@ -335,7 +339,7 @@ class SPI {
          *
          * @param   err     Error number used to determine error string
          */
-        inline void get_error_str (const SPI::ErrorCode err, char errorStr[]) const;
+        void print_error_str (const SPI::ErrorCode err) const;
 
     private:
         /************************************

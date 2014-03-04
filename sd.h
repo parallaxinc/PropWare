@@ -47,7 +47,7 @@ namespace PropWare {
  */
 #define SD_OPTION_VERBOSE
 // This allows Doxygen to document the macro without permanently enabling it
-//#undef SD_OPTION_VERBOSE
+#undef SD_OPTION_VERBOSE
 /**
  * Select data blocks/sectors will be display via UART for debugging purposes
  * <p>
@@ -88,6 +88,8 @@ namespace PropWare {
  *          which would ignore any error less than 6
  */
 class SD {
+    public:
+        static const uint8_t PROPWARE_OBJECT_NUMBER = 1;
     public:
         /** Number of characters printed to the terminal before a line break */
         static const uint8_t LINE_SIZE = 16;
@@ -575,7 +577,7 @@ class SD {
          * @param[out]  errorStr    Allocated space where a string of no more
          *                          than 128 characters can be printed
          */
-        inline void get_error_str (const SD::ErrorCode err, char errorStr[]) const;
+        void print_error_str (const SD::ErrorCode err) const;
 
     private:
         typedef struct {
@@ -1031,7 +1033,7 @@ class SD {
         // Initialization variables
         SPI *m_spi;
         PropWare::GPIO::Pin m_cs;  // Chip select pin mask
-        uint8_t m_filesystem;  // Filesystem type - one of SD::FAT_16 or SD::FAT_32
+        uint8_t m_filesystem;  // File system type - one of SD::FAT_16 or SD::FAT_32
         uint8_t m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
         uint32_t m_rootDirSectors;  // Number of sectors for the root directory
         uint32_t m_fatStart;  // Starting block address of the FAT
@@ -1039,7 +1041,7 @@ class SD {
         uint32_t m_rootAllocUnit;  // Allocation unit of root directory/first data sector (FAT32 only)
         uint32_t m_firstDataAddr;  // Starting block address of the first data cluster
 
-        // FAT filesystem variables
+        // FAT file system variables
         SD::Buffer m_buf;
         uint8_t m_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_OPTION_FILE_WRITE
@@ -1058,12 +1060,6 @@ class SD {
 
         // First byte response receives special treatment to allow for proper debugging
         uint8_t m_firstByteResponse;
-
-#ifdef SD_OPTION_DEBUG
-        // variable is needed to help determine what is causing seemingly random
-        // timeouts
-        uint32_t m_sectorRdAddress;
-#endif
 };
 
 }

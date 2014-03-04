@@ -83,12 +83,8 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
-    char errorStr[128];
-
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
-        spi->get_error_str((PropWare::SPI::ErrorCode) err,
-                errorStr);
-        printf("SPI error %u\n", err - PropWare::SPI::BEG_ERROR);
+        spi->print_error_str((PropWare::SPI::ErrorCode) err);
     } else
         printf("Unknown error %u\n", err);
 

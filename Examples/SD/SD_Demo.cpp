@@ -65,7 +65,7 @@ int main () {
 
     // Start your engines!!!
     if ((err = sd.start(MOSI, MISO, SCLK, CS, -1)))
-        error(err, &sd);
+    error(err, &sd);
 
 #ifdef DEBUG
     printf("SD routine started. Mounting now...\n");
@@ -141,22 +141,15 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
-    char errorStr[128];
-
 #ifdef DEBUG
-    if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR) {
-        sd->get_error_str((PropWare::SD::ErrorCode) err, errorStr);
-        printf("SD error %u\n", err - PropWare::SD::BEG_ERROR);
-    }
-    else if (PropWare::SPI::BEG_ERROR <= err
-            && err < PropWare::SPI::END_ERROR) {
-        PropWare::SPI::getSPI()->get_error_str((PropWare::SPI::ErrorCode) err,
-                errorStr);
-        printf("SPI error %u\n", err - PropWare::SPI::BEG_ERROR);
-    } else
-        printf("Unknown error %u\n", err);
+    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
+        PropWare::SPI::getSPI()->print_error_str(
+                (PropWare::SPI::ErrorCode) err);
+    else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
+        sd->print_error_str((PropWare::SD::ErrorCode) err);
 
 #endif
+
     while (1)
         ;
 }

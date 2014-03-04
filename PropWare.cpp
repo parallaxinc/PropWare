@@ -27,6 +27,15 @@
 
 #include <PropWare.h>
 
+#include <tinyio.h>
+
+#include <spi.h>
+#include <sd.h>
+#include <hd44780.h>
+#include <mcp300x.h>
+#include <max6675.h>
+#include <l3g.h>
+
 void PropWare::GPIO::set_dir (const uint32_t pins, PropWare::GPIO::Dir dir) {
     DIRA = (DIRA & (~pins)) | (pins & (int32_t) dir);
 }
@@ -83,12 +92,4 @@ uint8_t PropWare::get_pin_num (const uint32_t pinMask) {
     while (!(0x01 & (pinMask >> temp++)))
         ;
     return --temp;
-}
-
-void PropWare::strcpy (char *dest, char *src) {
-    while (*src) {
-        *dest = *src;
-        ++dest;
-        ++src;
-    }
 }

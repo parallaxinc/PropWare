@@ -929,7 +929,6 @@ PropWare::ErrorCode SD::shell (SD::File *f) {
     char cmd[SD_SHELL_CMD_LEN] = "";
     char arg[SD_SHELL_ARG_LEN] = "";
     char uppercaseName[SD_SHELL_ARG_LEN] = "";
-    char errorStr[128];
     uint8_t i, j;
     PropWare::ErrorCode err;
 
@@ -996,8 +995,7 @@ PropWare::ErrorCode SD::shell (SD::File *f) {
         // Handle errors; Print user errors and continue; Return system errors
         if (0 != err) {
             if (SD::BEG_ERROR <= err && err <= SD::END_USER_ERRORS) {
-                this->get_error_str((SD::ErrorCode) err, errorStr);
-                printf(errorStr);
+                SD::print_error_str((SD::ErrorCode) err);
             } else
                 return err;
         }
@@ -2132,30 +2130,30 @@ void SD::print_file_attributes (const uint8_t flags) {
 #endif
 
 
-inline void SD::get_error_str (const SD::ErrorCode err, char errorStr[]) const {
+void SD::print_error_str (const SD::ErrorCode err) const {
     const char str[] = "SD Error %u: %s\n";
-    const int8_t relativeError = err - SD::BEG_ERROR;
+    const uint8_t relativeError = err - SD::BEG_ERROR;
 
     switch (err) {
         case SD::INVALID_CMD:
-            sprintf(errorStr, str, relativeError, "Invalid command");
+            printf(str, relativeError, "Invalid command");
             break;
         case SD::READ_TIMEOUT:
-            sprintf(errorStr, str, relativeError, "Timed out "
+            printf(str, relativeError, "Timed out "
                     "during read");
             break;
         case SD::INVALID_NUM_BYTES:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Invalid number of bytes");
             break;
         case SD::INVALID_RESPONSE:
 #ifdef SD_OPTION_VERBOSE
-            sprintf(errorStr, "SD Error %u: %s0x%02x\nThe following bits are "
+            printf("SD Error %u: %s0x%02x\nThe following bits are "
                     "set:\n", relativeError,
                     "Invalid first-byte response\n\tReceived: ",
                     this->m_firstByteResponse);
 #else
-            sprintf(errorStr, "SD Error %u: %s%u\n", relativeError,
+            printf("SD Error %u: %s%u\n", relativeError,
                     "Invalid first-byte response\n\tReceived: ",
                     this->m_firstByteResponse);
 #endif
@@ -2163,91 +2161,91 @@ inline void SD::get_error_str (const SD::ErrorCode err, char errorStr[]) const {
             break;
         case SD::INVALID_INIT:
 #ifdef SD_OPTION_VERBOSE
-            sprintf(errorStr, "SD Error %u: %s\n\tResponse: 0x%02x\n",
+            printf("SD Error %u: %s\n\tResponse: 0x%02x\n",
                     relativeError,
                     "Invalid response during initialization",
                     this->m_firstByteResponse);
 #else
-            sprintf(errorStr, "SD Error %u: %s\n\tResponse: %u\n",
+            printf("SD Error %u: %s\n\tResponse: %u\n",
                     relativeError,
                     "Invalid response during initialization",
                     this->m_firstByteResponse);
 #endif
             break;
         case SD::INVALID_FILESYSTEM:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Invalid file system; Likely not"
                             " a FAT16 or FAT32 system");
             break;
         case SD::INVALID_DAT_STRT_ID:
 #ifdef SD_OPTION_VERBOSE
-            sprintf(errorStr, "SD Error %u: %s0x%02x\n", relativeError,
+            printf("SD Error %u: %s0x%02x\n", relativeError,
                     "Invalid data-start ID\n\tReceived: ",
                     this->m_firstByteResponse);
 #else
-            sprintf(errorStr, "SD Error %u: %s%u\n", relativeError,
+            printf("SD Error %u: %s%u\n", relativeError,
                     "Invalid data-start ID\n\tReceived: ",
                     this->m_firstByteResponse);
 #endif
             break;
         case SD::FILENAME_NOT_FOUND:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Filename not found");
             break;
         case SD::EMPTY_FAT_ENTRY:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "FAT points to empty entry");
             break;
         case SD::CORRUPT_CLUSTER:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "SD cluster is corrupt");
             break;
         case SD::INVALID_PTR_ORIGIN:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Invalid pointer origin");
             break;
         case SD::ENTRY_NOT_FILE:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Requested file entry is not a file");
             break;
         case SD::INVALID_FILENAME:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Invalid filename - please use 8.3 format");
             break;
         case SD::INVALID_FAT_APPEND:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "FAT entry append was attempted unnecessarily");
             break;
         case SD::FILE_ALREADY_EXISTS:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Attempting to create an already existing file");
             break;
         case SD::INVALID_FILE_MODE:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "Invalid file mode");
             break;
         case SD::TOO_MANY_FATS:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "This driver is only capable of writing files on FAT "
                             "partitions with two (2) copies of the FAT");
             break;
         case SD::FILE_WITHOUT_BUFFER:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "SDfopen() was passed a file struct with "
                             "an uninitialized buffer");
             break;
         case SD::CMD8_FAILURE:
-            sprintf(errorStr, str, relativeError,
+            printf(str, relativeError,
                     "CMD8 never received a proper response; This is most "
                             "likely to occur when the SD card does not "
                             "support the 3.3V I/O used by the Propeller");
             break;
         case SD::READING_PAST_EOC:
-            sprintf(errorStr, str, relativeError, "Reading past the"
+            printf(str, relativeError, "Reading past the"
                     " end-of-chain marker");
             break;
         case SD::ENTRY_NOT_DIR:
-            sprintf(errorStr, str, relativeError, "Requested name is not a"
+            printf(str, relativeError, "Requested name is not a"
                     " directory");
             break;
     }

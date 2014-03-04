@@ -27,9 +27,7 @@
  */
 
 #include <hd44780.h>
-#ifdef HD44780_OPTION_DEBUG
 #include <tinyio.h>
-#endif
 
 namespace PropWare {
 
@@ -63,9 +61,9 @@ HD44780::HD44780 () {
     this->m_curCol = 0;
 }
 
-PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask, const GPIO::Pin rs,
-        const GPIO::Pin rw, const GPIO::Pin en, const HD44780::Bitmode bitmode,
-        const HD44780::Dimensions dimensions) {
+PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask,
+        const GPIO::Pin rs, const GPIO::Pin rw, const GPIO::Pin en,
+        const HD44780::Bitmode bitmode, const HD44780::Dimensions dimensions) {
     uint8_t arg;
 
 #ifdef HD44780_OPTION_DEBUG
@@ -375,6 +373,23 @@ void HD44780::generate_mem_map (const HD44780::Dimensions dimensions) {
             this->m_memMap.ddramLineEnd = 40;
             break;
         default:
+            break;
+    }
+}
+
+void HD44780::print_error_str (const HD44780::ErrorCode err) {
+    char str[] = "HD44780 Error %u: %s\n";
+
+    switch (err) {
+        case HD44780::INVALID_CTRL_SGNL:
+            printf(str, "invalid control signal");
+            break;
+        case HD44780::INVALID_DATA_MASK:
+            printf(str, "invalid data-pins mask");
+            break;
+        case HD44780::INVALID_DIMENSIONS:
+            printf(str, "invalid LCD dimension; please choose from the "
+                    "HD44780::Dimensions type");
             break;
     }
 }

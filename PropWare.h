@@ -259,13 +259,6 @@ uint8_t count_bits (uint32_t par);
  */
 uint8_t get_pin_num (const uint32_t pinMask);
 
-/**
- * @brief       Copy a string into another buffer
- *
- * @param[out]  *dest    Destination
- * @param[in]   *src     Source string
- */
-void strcpy (char *dest, char *src);
 }
 
 #endif /* PROPWARE_H */
