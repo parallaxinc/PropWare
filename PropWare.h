@@ -51,6 +51,8 @@ namespace PropWare {
 #define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
 #define MICROSECOND         ((unsigned long long) (MILLISECOND / 1000))
 
+typedef int8_t ErrorCode;
+
 typedef enum {
     BIT_0 = 0x1,
     BIT_1 = 0x2,
@@ -257,6 +259,13 @@ uint8_t count_bits (uint32_t par);
  */
 uint8_t get_pin_num (const uint32_t pinMask);
 
+/**
+ * @brief       Copy a string into another buffer
+ *
+ * @param[out]  *dest    Destination
+ * @param[in]   *src     Source string
+ */
+void strcpy (char *dest, char *src);
 }
 
 #endif /* PROPWARE_H */

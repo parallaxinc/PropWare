@@ -84,3 +84,11 @@ uint8_t PropWare::get_pin_num (const uint32_t pinMask) {
         ;
     return --temp;
 }
+
+void PropWare::strcpy (char *dest, char *src) {
+    while (*src) {
+        *dest = *src;
+        ++dest;
+        ++src;
+    }
+}

@@ -140,7 +140,7 @@ int main () {
     return 0;
 }
 
-void error (const int8_t err, const PropWare::SD *sd) {
+void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
     char errorStr[128];
 
 #ifdef DEBUG
@@ -148,8 +148,14 @@ void error (const int8_t err, const PropWare::SD *sd) {
         sd->get_error_str((PropWare::SD::ErrorCode) err, errorStr);
         printf("SD error %u\n", err - PropWare::SD::BEG_ERROR);
     }
-    else
+    else if (PropWare::SPI::BEG_ERROR <= err
+            && err < PropWare::SPI::END_ERROR) {
+        PropWare::SPI::getSPI()->get_error_str((PropWare::SPI::ErrorCode) err,
+                errorStr);
+        printf("SPI error %u\n", err - PropWare::SPI::BEG_ERROR);
+    } else
         printf("Unknown error %u\n", err);
+
 #endif
     while (1)
         ;

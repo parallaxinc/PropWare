@@ -33,10 +33,10 @@ MAX6675::MAX6675 () {
     this->m_alwaysSetMode = 0;
 }
 
-int8_t MAX6675::start (const PropWare::GPIO::Pin mosi,
+PropWare::ErrorCode MAX6675::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs) {
-    int8_t err;
+    PropWare::ErrorCode err;
 
     this->m_spi = SPI::getSPI();
 
@@ -58,8 +58,8 @@ void MAX6675::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-int8_t MAX6675::read (uint16_t *dat) {
-    int8_t err;
+PropWare::ErrorCode MAX6675::read (uint16_t *dat) {
+    PropWare::ErrorCode err;
 
     if (this->m_alwaysSetMode) {
         check_errors(this->m_spi->set_mode(MAX6675::SPI_MODE));
@@ -74,8 +74,8 @@ int8_t MAX6675::read (uint16_t *dat) {
     return 0;
 }
 
-int8_t MAX6675::read_whole (uint16_t *dat) {
-    int8_t err;
+PropWare::ErrorCode MAX6675::read_whole (uint16_t *dat) {
+    PropWare::ErrorCode err;
 
     check_errors(this->read(dat));
     *dat >>= 2;
@@ -83,8 +83,8 @@ int8_t MAX6675::read_whole (uint16_t *dat) {
     return 0;
 }
 
-int8_t MAX6675::read_float (float *dat) {
-    int8_t err;
+PropWare::ErrorCode MAX6675::read_float (float *dat) {
+    PropWare::ErrorCode err;
     uint16_t temp;
 
     check_errors(this->read(&temp));

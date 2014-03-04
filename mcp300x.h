@@ -78,7 +78,7 @@ class MCP300x {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t start (const PropWare::GPIO::Pin mosi,
+        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs);
 
@@ -102,7 +102,7 @@ class MCP300x {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read (const MCP300x::Channel channel, uint16_t *dat);
+        PropWare::ErrorCode read (const MCP300x::Channel channel, uint16_t *dat);
 
         /**
          * @brief       Read a specific axis's data in differential mode
@@ -115,7 +115,7 @@ class MCP300x {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat);
+        PropWare::ErrorCode read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat);
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;

@@ -63,7 +63,7 @@ HD44780::HD44780 () {
     this->m_curCol = 0;
 }
 
-int8_t HD44780::start (const uint32_t dataPinsMask, const GPIO::Pin rs,
+PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask, const GPIO::Pin rs,
         const GPIO::Pin rw, const GPIO::Pin en, const HD44780::Bitmode bitmode,
         const HD44780::Dimensions dimensions) {
     uint8_t arg;

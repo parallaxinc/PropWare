@@ -71,7 +71,7 @@ namespace PropWare {
  * @note    Work-in-progress, code size is not necessarily at a minimum, nor is
  *          RAM usage
  */
-//#define SD_OPTION_FILE_WRITE
+#define SD_OPTION_FILE_WRITE
 /** @} */
 
 /**
@@ -298,7 +298,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t start (const PropWare::GPIO::Pin mosi,
+        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs, const int32_t freq);
 
@@ -307,7 +307,7 @@ class SD {
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        int8_t mount ();
+        PropWare::ErrorCode mount ();
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -317,7 +317,7 @@ class SD {
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        uint8_t unmount ();
+        PropWare::ErrorCode unmount ();
 #endif
 
         /**
@@ -333,7 +333,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t chdir (const char *d);
+        PropWare::ErrorCode chdir (const char *d);
 
         /**
          * @brief       Open a file with a given name and load its information into the
@@ -360,7 +360,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t fopen (const char *name, SD::File *f, const SD::FileMode mode);
+        PropWare::ErrorCode fopen (const char *name, SD::File *f, const SD::FileMode mode);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -370,7 +370,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fclose (SD::File *f);
+        PropWare::ErrorCode fclose (SD::File *f);
 
         /**
          * @brief       Insert a character into a given file
@@ -384,7 +384,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fputc (const char c, SD::File *f);
+        PropWare::ErrorCode fputc (const char c, SD::File *f);
 
         /**
          * @brief       Insert a c-string into a file
@@ -397,7 +397,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fputs (char *s, SD::File *f);
+        PropWare::ErrorCode fputs (char *s, SD::File *f);
 #endif
 
         /**
@@ -445,7 +445,7 @@ class SD {
          * @return      Returns true if the read pointer points to the end of the file,
          *              false otherwise
          */
-        inline uint8_t feof (SD::File *f);
+        inline bool feof (SD::File *f);
 
         /**
          * @brief       Set the read pointer for a given file to the position 'origin +
@@ -460,7 +460,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t fseekr (SD::File *f, const int32_t offset,
+        PropWare::ErrorCode fseekr (SD::File *f, const int32_t offset,
                 const SD::FilePos origin);
 
         /**
@@ -476,7 +476,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t fseekw (SD::File *f, const int32_t offset,
+        PropWare::ErrorCode fseekw (SD::File *f, const int32_t offset,
                 const SD::FilePos origin);
 
         /**
@@ -511,7 +511,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell (SD::File *f);
+        PropWare::ErrorCode shell (SD::File *f);
 
         /**
          * @brief       List the contents of a directory on the screen (similar to 'ls
@@ -524,7 +524,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_ls ();
+        PropWare::ErrorCode shell_ls ();
 
         /**
          * @brief       Dump the contents of a file to the screen (similar to 'cat f');
@@ -535,7 +535,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_cat (const char *name, SD::File *f);
+        PropWare::ErrorCode shell_cat (const char *name, SD::File *f);
 
         /**
          * @brief       Change the current working directory to *d (similar to 'cd dir');
@@ -544,7 +544,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_cd (const char *d);
+        PropWare::ErrorCode shell_cd (const char *d);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -554,7 +554,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_touch (const char name[]);
+        PropWare::ErrorCode shell_touch (const char name[]);
 #endif
 #endif
 
@@ -565,10 +565,8 @@ class SD {
          *
          * @param[in]   *dat       Pointer to the beginning of the data
          * @param[in]   bytes      Number of bytes to print
-         *
-         * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t print_hex_block (uint8_t *dat, uint16_t bytes);
+        void print_hex_block (uint8_t *dat, uint16_t bytes);
 #endif
 
         /* @brief   Create a human-readable error string
@@ -577,7 +575,7 @@ class SD {
          * @param[out]  errorStr    Allocated space where a string of no more
          *                          than 128 characters can be printed
          */
-        void get_error_str (const SD::ErrorCode err, char errorStr[]) const;
+        inline void get_error_str (const SD::ErrorCode err, char errorStr[]) const;
 
     private:
         typedef struct {
@@ -595,32 +593,32 @@ class SD {
         /***********************
          *** Private Methods ***
          ***********************/
-        inline int8_t reset_and_verify_v2_0 (uint8_t response_param[]);
+        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response_param[]);
 
-        inline int8_t power_up ();
+        inline PropWare::ErrorCode power_up ();
 
-        inline int8_t reset (uint8_t response[], bool *isIdle);
+        inline PropWare::ErrorCode reset (uint8_t response[], bool *isIdle);
 
-        inline int8_t verify_v2_0 (uint8_t response[], bool *stageCleared);
+        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared);
 
-        inline int8_t send_active (uint8_t response[]);
+        inline PropWare::ErrorCode send_active (uint8_t response[]);
 
-        inline int8_t increase_throttle (const int32_t freq);
+        inline PropWare::ErrorCode increase_throttle (const int32_t freq);
 
-        inline int8_t read_boot_sector (InitFATInfo *fatInfo);
+        inline PropWare::ErrorCode read_boot_sector (InitFATInfo *fatInfo);
 
-        inline int8_t common_boot_sector_parser(InitFATInfo *fatInfo);
+        inline PropWare::ErrorCode common_boot_sector_parser(InitFATInfo *fatInfo);
 
         inline void partition_info_parser (InitFATInfo *fatInfo);
 
-        inline int8_t determine_fat_type (InitFATInfo *fatInfo);
+        inline PropWare::ErrorCode determine_fat_type (InitFATInfo *fatInfo);
 
         inline void store_root_info (InitFATInfo *fatInfo);
 
-        inline int8_t read_fat_and_root_sectors ();
+        inline PropWare::ErrorCode read_fat_and_root_sectors ();
 
 #if (defined SD_OPTION_VERBOSE)
-        int8_t print_init_debug_blocks (uint8_t response[]);
+        PropWare::ErrorCode print_init_debug_blocks (uint8_t response[]);
 #endif
 
         /**
@@ -633,7 +631,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        int8_t send_command (const uint8_t cmd, const uint32_t arg,
+        PropWare::ErrorCode send_command (const uint8_t cmd, const uint32_t arg,
                 const uint8_t crc);
 
         /**
@@ -645,7 +643,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        int8_t get_response (const uint8_t numBytes, uint8_t *dat);
+        PropWare::ErrorCode get_response (const uint8_t numBytes, uint8_t *dat);
 
         /**
          * @brief       Receive data from SD card via SPI
@@ -656,7 +654,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        int8_t read_block (uint16_t bytes, uint8_t *dat);
+        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t *dat);
 
         /**
          * @brief       Write data to SD card via SPI
@@ -666,7 +664,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t write_block (uint16_t bytes, uint8_t *dat);
+        PropWare::ErrorCode write_block (uint16_t bytes, uint8_t *dat);
 
         /**
          * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
@@ -676,7 +674,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read_data_block (uint32_t address, uint8_t *dat);
+        PropWare::ErrorCode read_data_block (uint32_t address, uint8_t *dat);
 
         /**
          * @brief       Write SD_SECTOR_SIZE-byte data block to SD card
@@ -686,7 +684,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t write_data_block (uint32_t address, uint8_t *dat);
+        PropWare::ErrorCode write_data_block (uint32_t address, uint8_t *dat);
 
         /**
          * @brief       Return byte-reversed 16-bit variable (SD cards store bytes
@@ -768,7 +766,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t get_fat_value (const uint32_t fatEntry, uint32_t *value);
+        PropWare::ErrorCode get_fat_value (const uint32_t fatEntry, uint32_t *value);
 
         /**
          * @brief       Find the next sector in the FAT, directory, or file. When it is
@@ -779,7 +777,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t load_next_sector (SD::Buffer *buf);
+        PropWare::ErrorCode load_next_sector (SD::Buffer *buf);
 
         /**
          * @brief       Load a requested sector into the buffer independent of the
@@ -792,7 +790,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          *
          */
-        int8_t load_sector_from_offset (SD::File *f, const uint32_t offset);
+        PropWare::ErrorCode load_sector_from_offset (SD::File *f, const uint32_t offset);
 
         /**
          * @brief       Read the next sector from SD card into memory
@@ -806,7 +804,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t inc_cluster (SD::Buffer *buf);
+        PropWare::ErrorCode inc_cluster (SD::Buffer *buf);
 
         /**
          * @brief       Read the standard length name of a file entry. If an extension
@@ -839,7 +837,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise (common error code
          *              is SD_EOC_END for end-of-chain or file-not-found marker)
          */
-        int8_t find (const char *filename, uint16_t *fileEntryOffset);
+        PropWare::ErrorCode find (const char *filename, uint16_t *fileEntryOffset);
 
         /**
          * @brief       Reload the sector currently in use by a given file
@@ -848,7 +846,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t reload_buf (SD::File *f);
+        PropWare::ErrorCode reload_buf (SD::File *f);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -877,7 +875,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t extend_fat (SD::Buffer *buf);
+        PropWare::ErrorCode extend_fat (SD::Buffer *buf);
 
         /**
          * @brief       Allocate space for a new file
@@ -889,7 +887,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t create_file (const char *name, const uint16_t *fileEntryOffset);
+        PropWare::ErrorCode create_file (const char *name, const uint16_t *fileEntryOffset);
 #endif
 
 #if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)

@@ -183,7 +183,7 @@ class HD44780 {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t start (const uint32_t dataPinsMask, const GPIO::Pin rs,
+        PropWare::ErrorCode start (const uint32_t dataPinsMask, const GPIO::Pin rs,
                 const GPIO::Pin rw, const GPIO::Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions);

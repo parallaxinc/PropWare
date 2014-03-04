@@ -55,10 +55,10 @@ SD::Buffer* SD::getGlobalBuffer () {
     return &(this->m_buf);
 }
 
-int8_t SD::start (const PropWare::GPIO::Pin mosi,
+PropWare::ErrorCode SD::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs, const int32_t freq) {
-    int8_t err;
+    PropWare::ErrorCode err;
     uint8_t response[16];
 
     // Set CS for output and initialize high
@@ -91,8 +91,8 @@ int8_t SD::start (const PropWare::GPIO::Pin mosi,
     return 0;
 }
 
-int8_t SD::reset_and_verify_v2_0 (uint8_t response[]) {
-    int8_t err;
+PropWare::ErrorCode SD::reset_and_verify_v2_0 (uint8_t response[]) {
+    PropWare::ErrorCode err;
     uint8_t i, j;
     bool stageCleared;
 
@@ -131,9 +131,9 @@ int8_t SD::reset_and_verify_v2_0 (uint8_t response[]) {
     return 0;
 }
 
-int8_t SD::power_up () {
+PropWare::ErrorCode SD::power_up () {
     uint8_t i;
-    int8_t err;
+    PropWare::ErrorCode err;
 
     waitcnt(CLKFREQ / 10 + CNT);
 
@@ -153,8 +153,8 @@ int8_t SD::power_up () {
     return 0;
 }
 
-int8_t SD::reset (uint8_t response[], bool *isIdle) {
-    int8_t err;
+PropWare::ErrorCode SD::reset (uint8_t response[], bool *isIdle) {
+    PropWare::ErrorCode err;
 
     // Send SD into idle state, retrieve a response and ensure it is the
     // "idle" response
@@ -172,8 +172,8 @@ int8_t SD::reset (uint8_t response[], bool *isIdle) {
     return 0;
 }
 
-int8_t SD::verify_v2_0 (uint8_t response[], bool *stageCleared) {
-    int8_t err;
+PropWare::ErrorCode SD::verify_v2_0 (uint8_t response[], bool *stageCleared) {
+    PropWare::ErrorCode err;
 
 #ifdef SD_OPTION_VERBOSE
     printf("SD card in idle state. Now sending CMD8...\n");
@@ -197,8 +197,8 @@ int8_t SD::verify_v2_0 (uint8_t response[], bool *stageCleared) {
     return 0;
 }
 
-int8_t SD::send_active (uint8_t response[]) {
-    int8_t err;
+PropWare::ErrorCode SD::send_active (uint8_t response[]) {
+    PropWare::ErrorCode err;
     uint8_t i;
 
     bool stageCleared = false;
@@ -233,8 +233,8 @@ int8_t SD::send_active (uint8_t response[]) {
     return 0;
 }
 
-int8_t SD::increase_throttle (const int32_t freq) {
-    int8_t err;
+PropWare::ErrorCode SD::increase_throttle (const int32_t freq) {
+    PropWare::ErrorCode err;
 
     // Initialization nearly complete, increase clock
 #ifdef SD_OPTION_VERBOSE
@@ -250,8 +250,8 @@ int8_t SD::increase_throttle (const int32_t freq) {
 }
 
 #ifdef SD_OPTION_VERBOSE
-int8_t SD::print_init_debug_blocks (uint8_t response[]) {
-    int8_t err;
+PropWare::ErrorCode SD::print_init_debug_blocks (uint8_t response[]) {
+    PropWare::ErrorCode err;
 
     // Request operating conditions register and ensure response begins with R1
     check_errors(this->send_command(SD::CMD_READ_OCR, 0, SD::CRC_OTHER));
@@ -279,8 +279,8 @@ int8_t SD::print_init_debug_blocks (uint8_t response[]) {
 }
 #endif
 
-int8_t SD::mount () {
-    int8_t err;
+PropWare::ErrorCode SD::mount () {
+    PropWare::ErrorCode err;
 
     // FAT system determination variables:
     SD::InitFATInfo fatInfo;
@@ -301,8 +301,8 @@ int8_t SD::mount () {
     return 0;
 }
 
-int8_t SD::read_boot_sector (InitFATInfo *fatInfo) {
-    int8_t err;
+PropWare::ErrorCode SD::read_boot_sector (InitFATInfo *fatInfo) {
+    PropWare::ErrorCode err;
     // Read in first sector
     check_errors(this->read_data_block(fatInfo->bootSector, this->m_buf.buf));
     // Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector at
@@ -325,7 +325,7 @@ int8_t SD::read_boot_sector (InitFATInfo *fatInfo) {
     return 0;
 }
 
-int8_t SD::common_boot_sector_parser (InitFATInfo *fatInfo) {
+PropWare::ErrorCode SD::common_boot_sector_parser (InitFATInfo *fatInfo) {
     uint8_t temp;
 
     // Determine number of sectors per cluster
@@ -400,7 +400,7 @@ void SD::partition_info_parser (InitFATInfo *fatInfo) {
 #endif
 }
 
-int8_t SD::determine_fat_type (InitFATInfo *fatInfo) {
+PropWare::ErrorCode SD::determine_fat_type (InitFATInfo *fatInfo) {
     // Determine and store FAT type
     if (SD::FAT12_CLSTR_CNT > fatInfo->clusterCount)
         return SD::INVALID_FILESYSTEM;
@@ -458,8 +458,8 @@ void SD::store_root_info (InitFATInfo *fatInfo) {
 #endif
 }
 
-int8_t SD::read_fat_and_root_sectors () {
-    int8_t err;
+PropWare::ErrorCode SD::read_fat_and_root_sectors () {
+    PropWare::ErrorCode err;
 
     // Store the first sector of the FAT
     check_errors(this->read_data_block(this->m_fatStart, this->m_fat));
@@ -500,8 +500,8 @@ int8_t SD::read_fat_and_root_sectors () {
 }
 
 #ifdef SD_OPTION_FILE_WRITE
-uint8_t SD::unmount () {
-    int8_t err;
+PropWare::ErrorCode SD::unmount () {
+    PropWare::ErrorCode err;
 
     // If the directory buffer was modified, write it
     if (this->m_buf.mod)
@@ -526,8 +526,8 @@ uint8_t SD::unmount () {
 }
 #endif
 
-int8_t SD::chdir (const char *d) {
-    int8_t err;
+PropWare::ErrorCode SD::chdir (const char *d) {
+    PropWare::ErrorCode err;
     uint16_t fileEntryOffset = 0;
 
     this->m_buf.id = SD::FOLDER_ID;
@@ -594,8 +594,8 @@ int8_t SD::chdir (const char *d) {
     return 0;
 }
 
-int8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
-    int8_t err;
+PropWare::ErrorCode SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
+    PropWare::ErrorCode err;
     uint16_t fileEntryOffset = 0;
 
 #ifdef SD_OPTION_VERBOSE
@@ -714,8 +714,8 @@ int8_t SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
 }
 
 #ifdef SD_OPTION_FILE_WRITE
-uint8_t SD::fclose (SD::File *f) {
-    int8_t err;
+PropWare::ErrorCode SD::fclose (SD::File *f) {
+    PropWare::ErrorCode err;
 
 #ifdef SD_OPTION_VERBOSE
     printf("Closing file...\n");
@@ -771,8 +771,8 @@ uint8_t SD::fclose (SD::File *f) {
     return 0;
 }
 
-uint8_t SD::fputc (const char c, SD::File *f) {
-    int8_t err;
+PropWare::ErrorCode SD::fputc (const char c, SD::File *f) {
+    PropWare::ErrorCode err;
     // Determines byte-offset within a sector
     uint16_t sectorPtr = f->wPtr % SD::SECTOR_SIZE;
     // Determine the needed file sector
@@ -820,8 +820,8 @@ uint8_t SD::fputc (const char c, SD::File *f) {
     return 0;
 }
 
-uint8_t SD::fputs (char *s, SD::File *f) {
-    int8_t err;
+PropWare::ErrorCode SD::fputs (char *s, SD::File *f) {
+    PropWare::ErrorCode err;
 
     while (*s)
     check_errors(fputc(*(s++), f));
@@ -871,11 +871,11 @@ char * SD::fgets (char s[], uint32_t size, SD::File *f) {
     return (0 < count) ? s : NULL;
 }
 
-inline uint8_t SD::feof (SD::File *f) {
+inline bool SD::feof (SD::File *f) {
     return f->length == f->rPtr;
 }
 
-int8_t SD::fseekr (SD::File *f, const int32_t offset,
+PropWare::ErrorCode SD::fseekr (SD::File *f, const int32_t offset,
         const SD::FilePos origin) {
     switch (origin) {
         case SEEK_SET:
@@ -895,7 +895,7 @@ int8_t SD::fseekr (SD::File *f, const int32_t offset,
     return 0;
 }
 
-int8_t SD::fseekw (SD::File *f, const int32_t offset,
+PropWare::ErrorCode SD::fseekw (SD::File *f, const int32_t offset,
         const SD::FilePos origin) {
     switch (origin) {
         case SEEK_SET:
@@ -924,14 +924,14 @@ int32_t SD::ftellw (const SD::File *f) {
 }
 
 #ifdef SD_OPTION_SHELL
-int8_t SD::shell (SD::File *f) {
+PropWare::ErrorCode SD::shell (SD::File *f) {
     char usrInput[SD_SHELL_INPUT_LEN] = "";
     char cmd[SD_SHELL_CMD_LEN] = "";
     char arg[SD_SHELL_ARG_LEN] = "";
     char uppercaseName[SD_SHELL_ARG_LEN] = "";
     char errorStr[128];
     uint8_t i, j;
-    int8_t err;
+    PropWare::ErrorCode err;
 
     printf("Welcome to David's quick shell! "
             "There is no help, nor much to do.\n");
@@ -1013,8 +1013,8 @@ int8_t SD::shell (SD::File *f) {
     return 0;
 }
 
-int8_t SD::shell_ls () {
-    int8_t err;
+PropWare::ErrorCode SD::shell_ls () {
+    PropWare::ErrorCode err;
     uint16_t fileEntryOffset = 0;
     char string[SD_FILENAME_STR_LEN];  // Allocate space for a filename string
 
@@ -1071,8 +1071,8 @@ int8_t SD::shell_ls () {
     return 0;
 }
 
-int8_t SD::shell_cat (const char *name, SD::File *f) {
-    int8_t err;
+PropWare::ErrorCode SD::shell_cat (const char *name, SD::File *f) {
+    PropWare::ErrorCode err;
 
     // Attempt to find the file
     if ((err = this->fopen(name, f, SD::FILE_MODE_R))) {
@@ -1095,8 +1095,8 @@ int8_t SD::shell_cat (const char *name, SD::File *f) {
 }
 
 #ifdef SD_OPTION_FILE_WRITE
-int8_t SD::shell_touch (const char name[]) {
-    int8_t err;
+PropWare::ErrorCode SD::shell_touch (const char name[]) {
+    PropWare::ErrorCode err;
     uint16_t fileEntryOffset;
 
     // Attempt to find the file if it already exists
@@ -1116,7 +1116,7 @@ int8_t SD::shell_touch (const char name[]) {
 #endif
 
 #if (defined SD_OPTION_VERBOSE || defined SD_OPTION_VERBOSE_BLOCKS)
-int8_t SD::print_hex_block (uint8_t *dat, uint16_t bytes) {
+void SD::print_hex_block (uint8_t *dat, uint16_t bytes) {
     uint8_t i, j;
     uint8_t *s;
 
@@ -1146,17 +1146,15 @@ int8_t SD::print_hex_block (uint8_t *dat, uint16_t bytes) {
 
         putchar('\n');
     }
-
-    return 0;
 }
 #endif
 
 /**********************************
  *** Private Method Definitions ***
  **********************************/
-int8_t SD::send_command (const uint8_t cmd, const uint32_t arg,
+PropWare::ErrorCode SD::send_command (const uint8_t cmd, const uint32_t arg,
         const uint8_t crc) {
-    int8_t err;
+    PropWare::ErrorCode err;
 
     // Send out the command
     check_errors(this->m_spi->shift_out(8, cmd));
@@ -1171,8 +1169,8 @@ int8_t SD::send_command (const uint8_t cmd, const uint32_t arg,
     return 0;
 }
 
-int8_t SD::get_response (uint8_t bytes, uint8_t *dat) {
-    int8_t err;
+PropWare::ErrorCode SD::get_response (uint8_t bytes, uint8_t *dat) {
+    PropWare::ErrorCode err;
     uint32_t timeout;
 
     // Read first byte - the R1 response
@@ -1210,7 +1208,7 @@ int8_t SD::get_response (uint8_t bytes, uint8_t *dat) {
     return 0;
 }
 
-int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
+PropWare::ErrorCode SD::read_block (uint16_t bytes, uint8_t *dat) {
     uint8_t i, err, checksum;
     uint32_t timeout;
 
@@ -1280,8 +1278,8 @@ int8_t SD::read_block (uint16_t bytes, uint8_t *dat) {
     return 0;
 }
 
-int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
-    int8_t err;
+PropWare::ErrorCode SD::write_block (uint16_t bytes, uint8_t *dat) {
+    PropWare::ErrorCode err;
     uint32_t timeout;
 
     // Read first byte - the R1 response
@@ -1331,12 +1329,12 @@ int8_t SD::write_block (uint16_t bytes, uint8_t *dat) {
     return 0;
 }
 
-int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
+PropWare::ErrorCode SD::read_data_block (uint32_t address, uint8_t *dat) {
     /**
      * Special error handling is needed to ensure that, if an error is thrown,
      * chip select is set high again before returning the error
      */
-    int8_t err;
+    PropWare::ErrorCode err;
     uint8_t temp = 0;
 
     // Wait until the SD card is no longer busy
@@ -1361,8 +1359,8 @@ int8_t SD::read_data_block (uint32_t address, uint8_t *dat) {
     return 0;
 }
 
-int8_t SD::write_data_block (uint32_t address, uint8_t *dat) {
-    int8_t err;
+PropWare::ErrorCode SD::write_data_block (uint32_t address, uint8_t *dat) {
+    PropWare::ErrorCode err;
     uint8_t temp = 0;
 
     // Wait until the SD card is no longer busy
@@ -1425,8 +1423,8 @@ uint32_t SD::find_sector_from_alloc (uint32_t allocUnit) {
     return allocUnit;
 }
 
-int8_t SD::get_fat_value (const uint32_t fatEntry, uint32_t *value) {
-    int8_t err;
+PropWare::ErrorCode SD::get_fat_value (const uint32_t fatEntry, uint32_t *value) {
+    PropWare::ErrorCode err;
     uint32_t firstAvailableAllocUnit;
 
 #ifdef SD_OPTION_VERBOSE
@@ -1489,7 +1487,7 @@ int8_t SD::get_fat_value (const uint32_t fatEntry, uint32_t *value) {
     return 0;
 }
 
-int8_t SD::load_next_sector (SD::Buffer *buf) {
+PropWare::ErrorCode SD::load_next_sector (SD::Buffer *buf) {
 #ifdef SD_OPTION_FILE_WRITE
     if (buf->mod)
     this->write_data_block(buf->curClusterStartAddr + buf->curSectorOffset,
@@ -1539,8 +1537,8 @@ int8_t SD::load_next_sector (SD::Buffer *buf) {
     return 0;
 }
 
-int8_t SD::load_sector_from_offset (SD::File *f, const uint32_t offset) {
-    int8_t err;
+PropWare::ErrorCode SD::load_sector_from_offset (SD::File *f, const uint32_t offset) {
+    PropWare::ErrorCode err;
     uint32_t clusterOffset = offset >> this->m_sectorsPerCluster_shift;
 
 #ifdef SD_OPTION_FILE_WRITE
@@ -1602,8 +1600,8 @@ int8_t SD::load_sector_from_offset (SD::File *f, const uint32_t offset) {
     return 0;
 }
 
-int8_t SD::inc_cluster (SD::Buffer *buf) {
-    int8_t err;
+PropWare::ErrorCode SD::inc_cluster (SD::Buffer *buf) {
+    PropWare::ErrorCode err;
 
 #ifdef SD_OPTION_FILE_WRITE
     // If the sector has been modified, write it back to the SD card before
@@ -1678,8 +1676,8 @@ void SD::get_filename (const uint8_t *buf, char *filename) {
     filename[j] = 0;
 }
 
-int8_t SD::find (const char *filename, uint16_t *fileEntryOffset) {
-    int8_t err;
+PropWare::ErrorCode SD::find (const char *filename, uint16_t *fileEntryOffset) {
+    PropWare::ErrorCode err;
     char readEntryName[SD::FILENAME_STR_LEN];
 
 #ifdef SD_OPTION_FILE_WRITE
@@ -1748,8 +1746,8 @@ int8_t SD::find (const char *filename, uint16_t *fileEntryOffset) {
     return FILENAME_NOT_FOUND;
 }
 
-int8_t SD::reload_buf (SD::File *f) {
-    int8_t err;
+PropWare::ErrorCode SD::reload_buf (SD::File *f) {
+    PropWare::ErrorCode err;
 
     // Function is only called if it has already been determined that the buffer
     // needs to be loaded - no checks need to be run
@@ -1915,8 +1913,8 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
     return retVal;
 }
 
-int8_t SD::extend_fat (SD::Buffer *buf) {
-    int8_t err;
+PropWare::ErrorCode SD::extend_fat (SD::Buffer *buf) {
+    PropWare::ErrorCode err;
     uint32_t newAllocUnit;
 #ifdef SD_OPTION_VERBOSE
     printf("Extending file or directory now...\n");
@@ -1994,7 +1992,7 @@ int8_t SD::extend_fat (SD::Buffer *buf) {
     return 0;
 }
 
-int8_t SD::create_file (const char *name, const uint16_t *fileEntryOffset) {
+PropWare::ErrorCode SD::create_file (const char *name, const uint16_t *fileEntryOffset) {
     uint8_t i, j;
     // *name is only checked for uppercase
     char uppercaseName[SD::FILENAME_STR_LEN];
@@ -2134,7 +2132,7 @@ void SD::print_file_attributes (const uint8_t flags) {
 #endif
 
 
-void SD::get_error_str (const SD::ErrorCode err, char errorStr[]) const {
+inline void SD::get_error_str (const SD::ErrorCode err, char errorStr[]) const {
     const char str[] = "SD Error %u: %s\n";
     const int8_t relativeError = err - SD::BEG_ERROR;
 
@@ -2178,7 +2176,7 @@ void SD::get_error_str (const SD::ErrorCode err, char errorStr[]) const {
             break;
         case SD::INVALID_FILESYSTEM:
             sprintf(errorStr, str, relativeError,
-                    "Invalid filesystem; Likely not"
+                    "Invalid file system; Likely not"
                             " a FAT16 or FAT32 system");
             break;
         case SD::INVALID_DAT_STRT_ID:
