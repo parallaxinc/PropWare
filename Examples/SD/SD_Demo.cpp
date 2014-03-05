@@ -65,13 +65,13 @@ int main () {
 
     // Start your engines!!!
     if ((err = sd.start(MOSI, MISO, SCLK, CS, -1)))
-        error(err);
+    error(err, &sd);
 
 #ifdef DEBUG
     printf("SD routine started. Mounting now...\n");
 #endif
     if ((err = sd.mount()))
-        error(err);
+        error(err, &sd);
 #ifdef DEBUG
     printf("FAT partition mounted!\n");
 #endif
@@ -140,13 +140,16 @@ int main () {
     return 0;
 }
 
-void error (const uint8_t err) {
+void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
 #ifdef DEBUG
-    if (SD_ERRORS_BASE <= err && err < PropWare::SD::ERRORS)
-        printf("SD error %u\n", err - SD_ERRORS_BASE);
-    else
-        printf("Unknown error %u\n", err);
+    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
+        PropWare::SPI::getSPI()->print_error_str(
+                (PropWare::SPI::ErrorCode) err);
+    else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
+        sd->print_error_str((PropWare::SD::ErrorCode) err);
+
 #endif
+
     while (1)
         ;
 }

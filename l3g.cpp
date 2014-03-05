@@ -34,10 +34,10 @@ L3G::L3G () {
     this->m_alwaysSetMode = false;
 }
 
-uint8_t L3G::start (const PropWare::GPIO::Pin mosi,
+PropWare::ErrorCode L3G::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode) {
-    uint8_t err;
+    PropWare::ErrorCode err;
     this->m_spi = SPI::getSPI();
 
     // Ensure SPI module started
@@ -67,23 +67,23 @@ void L3G::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-uint8_t L3G::read_x (int16_t *val) {
+PropWare::ErrorCode L3G::read_x (int16_t *val) {
     return this->read16(L3G::OUT_X_L, val);
 }
 
-uint8_t L3G::read_y (int16_t *val) {
+PropWare::ErrorCode L3G::read_y (int16_t *val) {
     return this->read16(L3G::OUT_Y_L, val);
 }
 
-uint8_t L3G::read_z (int16_t *val) {
+PropWare::ErrorCode L3G::read_z (int16_t *val) {
     return this->read16(L3G::OUT_Z_L, val);
 }
 
-uint8_t L3G::read (const L3G::Axis axis, int16_t *val) {
+PropWare::ErrorCode L3G::read (const L3G::Axis axis, int16_t *val) {
     return this->read16(L3G::OUT_X_L + (axis << 1), val);
 }
 
-uint8_t L3G::read_all (int16_t *val) {
+PropWare::ErrorCode L3G::read_all (int16_t *val) {
     uint8_t err, i;
 
     uint8_t addr = L3G::OUT_X_L;
@@ -116,7 +116,7 @@ uint8_t L3G::read_all (int16_t *val) {
     return 0;
 }
 
-uint8_t L3G::ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
+PropWare::ErrorCode L3G::ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
         uint8_t *rdVal) {
     uint8_t err, oldValue;
 
@@ -146,8 +146,8 @@ uint8_t L3G::ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
 /*************************************
  *** Private Function Declarations ***
  *************************************/
-uint8_t L3G::write8 (uint8_t addr, const uint8_t dat) {
-    uint8_t err;
+PropWare::ErrorCode L3G::write8 (uint8_t addr, const uint8_t dat) {
+    PropWare::ErrorCode err;
     uint16_t outputValue;
 
     addr &= ~BIT_7;  // Clear the RW bit (write mode)
@@ -168,8 +168,8 @@ uint8_t L3G::write8 (uint8_t addr, const uint8_t dat) {
     return err;
 }
 
-uint8_t L3G::write16 (uint8_t addr, const uint16_t dat) {
-    uint8_t err;
+PropWare::ErrorCode L3G::write16 (uint8_t addr, const uint16_t dat) {
+    PropWare::ErrorCode err;
     uint16_t outputValue;
 
     addr &= ~BIT_7;  // Clear the RW bit (write mode)
@@ -192,8 +192,8 @@ uint8_t L3G::write16 (uint8_t addr, const uint16_t dat) {
     return 0;
 }
 
-uint8_t L3G::read8 (uint8_t addr, int8_t *dat) {
-    uint8_t err;
+PropWare::ErrorCode L3G::read8 (uint8_t addr, int8_t *dat) {
+    PropWare::ErrorCode err;
 
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
@@ -211,8 +211,8 @@ uint8_t L3G::read8 (uint8_t addr, int8_t *dat) {
     return 0;
 }
 
-uint8_t L3G::read16 (uint8_t addr, int16_t *dat) {
-    uint8_t err;
+PropWare::ErrorCode L3G::read16 (uint8_t addr, int16_t *dat) {
+    PropWare::ErrorCode err;
 
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment

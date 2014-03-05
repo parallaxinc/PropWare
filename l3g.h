@@ -122,7 +122,7 @@ class L3G {
          *
          * @return       Returns 0 upon success, error code otherwise
          */
-        uint8_t start (const PropWare::GPIO::Pin mosi,
+        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode);
 
@@ -144,7 +144,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read (const L3G::Axis axis, int16_t *val);
+        PropWare::ErrorCode read (const L3G::Axis axis, int16_t *val);
 
         /**
          * @brief       Read data from the X axis
@@ -153,7 +153,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read_x (int16_t *val);
+        PropWare::ErrorCode read_x (int16_t *val);
 
         /**
          * @brief       Read data from the Y axis
@@ -162,7 +162,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read_y (int16_t *val);
+        PropWare::ErrorCode read_y (int16_t *val);
 
         /**
          * @brief       Read data from the Z axis
@@ -171,7 +171,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read_z (int16_t *val);
+        PropWare::ErrorCode read_z (int16_t *val);
 
         /**
          * @brief       Read data from all three axes
@@ -181,7 +181,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read_all (int16_t *val);
+        PropWare::ErrorCode read_all (int16_t *val);
 
         /**
          * @brief       Allow numerous advanced functions to be performed on the L3G,
@@ -201,7 +201,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
+        PropWare::ErrorCode ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
                 uint8_t *rdVal);
 
     private:
@@ -221,7 +221,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t write8 (uint8_t addr, const uint8_t dat);
+        PropWare::ErrorCode write8 (uint8_t addr, const uint8_t dat);
 
         /**
          * @brief       Write one byte to the L3G module
@@ -231,7 +231,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t write16 (uint8_t addr, const uint16_t dat);
+        PropWare::ErrorCode write16 (uint8_t addr, const uint16_t dat);
 
         /**
          * @brief       Read one byte from the L3G module
@@ -241,7 +241,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read8 (uint8_t addr, int8_t *dat);
+        PropWare::ErrorCode read8 (uint8_t addr, int8_t *dat);
 
         /**
          * @brief       Read two bytes from the L3G module
@@ -251,7 +251,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read16 (uint8_t addr, int16_t *dat);
+        PropWare::ErrorCode read16 (uint8_t addr, int16_t *dat);
 
     private:
         SPI *m_spi;

@@ -52,7 +52,7 @@ int main () {
 
             waitcnt(CLKFREQ/100 + CNT);
 
-            PropWare::GPIO::pin_clear(CS);       // Enable the SPI slave attached to CS
+            PropWare::GPIO::pin_clear(CS);  // Enable the SPI slave attached to CS
             spi->shift_out(8, *s);  // Output the next character of the string
 
             // Be sure to wait until the SPI communication has FINISHED before
@@ -80,4 +80,14 @@ int main () {
     }
 
     return 0;
+}
+
+void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
+    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
+        spi->print_error_str((PropWare::SPI::ErrorCode) err);
+    } else
+        printf("Unknown error %u\n", err);
+
+    while (1)
+        ;
 }

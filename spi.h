@@ -83,6 +83,10 @@ namespace PropWare {
  */
 class SPI {
     public:
+        /** Used as index for an array of PropWare objects */
+        static const uint8_t PROPWARE_OBJECT_NUMBER = 0;
+
+    public:
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
@@ -129,8 +133,9 @@ class SPI {
          * Error codes - Proceeded by nothing
          */
         typedef enum {
-            /** First SPI error */ERROR_BASE = 0,
-            /** SPI Error  0 */INVALID_PIN = ERROR_BASE,
+            /** No error */NO_ERROR = 0,
+            /** First SPI error */BEG_ERROR,
+            /** SPI Error  0 */INVALID_PIN = BEG_ERROR,
             /** SPI Error  1 */INVALID_CLOCK_INIT,
             /** SPI Error  2 */INVALID_MODE,
             /** SPI Error  3 */INVALID_PIN_MASK,
@@ -144,7 +149,7 @@ class SPI {
             /** SPI Error 11 */INVALID_BYTE_SIZE,
             /** SPI Error 12 */ADDR_MISALIGN,
             /** SPI Error 13 */INVALID_BITMODE,
-            /** Number of unique SPI errors */ERRORS
+            /** Last SPI error code */END_ERROR = SPI::INVALID_BITMODE
         } ErrorCode;
 
     public:
@@ -152,7 +157,7 @@ class SPI {
         static const uint32_t WR_TIMEOUT_VAL;
         static const uint32_t RD_TIMEOUT_VAL;
         static const uint8_t MAX_PAR_BITS = 31;
-        static const uint32_t MAX_CLOCK;
+        static const int32_t MAX_CLOCK;
 
     public:
         /**
@@ -175,9 +180,9 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t start (const GPIO::Pin mosi,
+        PropWare::ErrorCode start (const GPIO::Pin mosi,
                 const GPIO::Pin miso, const GPIO::Pin sclk,
-                const uint32_t frequency, const SPI::Mode mode,
+                const int32_t frequency, const SPI::Mode mode,
                 const SPI::BitMode bitmode);
 
         /**
@@ -186,7 +191,7 @@ class SPI {
          * @return  Returns 0 upon success, otherwise error code (will return
          *          SPI::COG_NOT_STARTED if no cog has previously been started)
          */
-        int8_t stop (void);
+        PropWare::ErrorCode stop (void);
 
         /**
          * @brief    Determine if the SPI cog has already been initialized
@@ -200,7 +205,7 @@ class SPI {
          *
          * @return  May return non-zero error code when a timeout occurs
          */
-        int8_t wait (void);
+        PropWare::ErrorCode wait (void);
 
         /**
          * @brief   Wait for a specific value from the assembly cog
@@ -209,7 +214,7 @@ class SPI {
          *
          * @return  May return non-zero error code when a timeout occurs
          */
-        int8_t wait_specific (const uint32_t value);
+        PropWare::ErrorCode wait_specific (const uint32_t value);
 
         /**
          * @brief       Set the mode of SPI communication
@@ -219,7 +224,7 @@ class SPI {
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        int8_t set_mode (const SPI::Mode mode);
+        PropWare::ErrorCode set_mode (const SPI::Mode mode);
 
         /**
          * @brief       Set the bitmode of SPI communication
@@ -229,7 +234,7 @@ class SPI {
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        int8_t set_bit_mode (const SPI::BitMode bitmode);
+        PropWare::ErrorCode set_bit_mode (const SPI::BitMode bitmode);
 
         /**
          * @brief       Change the SPI module's clock frequency
@@ -240,7 +245,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t set_clock (const uint32_t frequency);
+        PropWare::ErrorCode set_clock (const int32_t frequency);
 
         /**
          * @brief       Retrieve the SPI module's clock frequency
@@ -249,7 +254,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t get_clock (uint32_t *frequency);
+        PropWare::ErrorCode get_clock (int32_t *frequency);
 
         /**
          * @brief       Send a value out to a peripheral device
@@ -264,7 +269,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t shift_out (uint8_t bits, uint32_t value);
+        PropWare::ErrorCode shift_out (uint8_t bits, uint32_t value);
 
         /**
          * @brief       Receive a value in from a peripheral device
@@ -280,7 +285,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t shift_in (const uint8_t bits, void *data, const size_t size);
+        PropWare::ErrorCode shift_in (const uint8_t bits, void *data, const size_t size);
 
 #ifdef SPI_OPTION_FAST
         /**
@@ -299,7 +304,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        void shift_out_fast (uint8_t bits, uint32_t value);
+        PropWare::ErrorCode shift_out_fast (uint8_t bits, uint32_t value);
 
         /**
          * @brief       Receive a value in from a peripheral device; Optimized for
@@ -316,7 +321,7 @@ class SPI {
          *                          int *newVal;
          *                          spi_shift_in_fast(8, newVal, sizeof(*newVal));
          */
-        void shift_in_fast (const uint8_t bits, void *data,
+        PropWare::ErrorCode shift_in_fast (const uint8_t bits, void *data,
                 const uint8_t bytes);
 
         /**
@@ -326,8 +331,15 @@ class SPI {
          * @param[in]   blocking    When set to non-zero, function will not return until
          *                          the data transfer is complete
          */
-        int8_t shift_in_sector (const uint8_t addr[], const uint8_t blocking);
+        PropWare::ErrorCode shift_in_sector (const uint8_t addr[], const uint8_t blocking);
 #endif
+        /**
+         * @brief   Print through UART an error string followed by entering an infinite
+         *          loop
+         *
+         * @param   err     Error number used to determine error string
+         */
+        void print_error_str (const SPI::ErrorCode err) const;
 
     private:
         /************************************
@@ -369,20 +381,7 @@ class SPI {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read_par (void *par, const size_t size);
-
-#ifdef SPI_OPTION_DEBUG
-        /**
-         * @brief   Print through UART an error string followed by entering an infinite
-         *          loop
-         *
-         * @param   err     Error number used to determine error string
-         */
-        void spi_error (const uint8_t err, ...);
-#else
-        // Exit calling function by returning 'err'
-#define spi_error(err,...)          return err
-#endif
+        PropWare::ErrorCode read_par (void *par, const size_t size);
 
     private:
         /********************************
@@ -390,6 +389,7 @@ class SPI {
          ********************************/
         volatile uint32_t m_mailbox;
         int8_t m_cog;
+        char m_errorInMethod[16];
 };
 
 }

@@ -51,7 +51,7 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t start (const PropWare::GPIO::Pin mosi,
+        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin clk,
                 const PropWare::GPIO::Pin cs);
 
@@ -76,7 +76,7 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read (uint16_t *dat);
+        PropWare::ErrorCode read (uint16_t *dat);
 
         /**
          * @brief       Read data and return integer value
@@ -85,7 +85,7 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read_whole (uint16_t *dat);
+        PropWare::ErrorCode read_whole (uint16_t *dat);
 
         /**
          * @brief       Read data in floating point form
@@ -94,7 +94,7 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read_float (float *dat);
+        PropWare::ErrorCode read_float (float *dat);
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 1000000;

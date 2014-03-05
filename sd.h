@@ -40,15 +40,6 @@ namespace PropWare {
 /** @name   SD Extra Code Options
  * @{ */
 /**
- * Enables thorough debugging features similar to exceptions; Errors caught by
- * the program will enter an infinite debug loop
- * <p>
- * DEFAULT: Off
- */
-#define SD_OPTION_DEBUG
-// This allows Doxygen to document the macro without permanently enabling it
-//#undef SD_OPTION_DEBUG
-/**
  * Enables thorough debugging features similar to exceptions; Errors will be
  * caught the program will enter an infinite loop
  * <p>
@@ -56,7 +47,7 @@ namespace PropWare {
  */
 #define SD_OPTION_VERBOSE
 // This allows Doxygen to document the macro without permanently enabling it
-//#undef SD_OPTION_VERBOSE
+#undef SD_OPTION_VERBOSE
 /**
  * Select data blocks/sectors will be display via UART for debugging purposes
  * <p>
@@ -64,7 +55,7 @@ namespace PropWare {
  */
 #define SD_OPTION_VERBOSE_BLOCKS
 // This allows Doxygen to document the macro without permanently enabling it
-//#undef SD_OPTION_VERBOSE_BLOCKS
+#undef SD_OPTION_VERBOSE_BLOCKS
 /**
  * Unix-like command-line arguments will be defined and available
  * <p>
@@ -98,6 +89,8 @@ namespace PropWare {
  */
 class SD {
     public:
+        static const uint8_t PROPWARE_OBJECT_NUMBER = 1;
+    public:
         /** Number of characters printed to the terminal before a line break */
         static const uint8_t LINE_SIZE = 16;
         /**
@@ -108,7 +101,7 @@ class SD {
 #define SD_SECTOR_SIZE  512
         static const uint16_t SECTOR_SIZE = SD_SECTOR_SIZE;
         /** Default frequency to run the SPI module */
-        static const uint32_t DEFAULT_SPI_FREQ = 1800000;
+        static const uint32_t DEFAULT_SPI_FREQ = 900000;
 
         // Signal that the contents of a buffer are a directory
         static const int8_t FOLDER_ID = -1;
@@ -184,33 +177,37 @@ class SD {
             /** End of the file */SEEK_END
         } FilePos;
 
-        /** First SD error code */
-#define SD_ERRORS_BASE      16
         /**
          * Error codes - preceded by SPI
          */
         typedef enum {
-            /** SD Error  0 */INVALID_CMD = SD_ERRORS_BASE,
-            /** SD Error  1 */READ_TIMEOUT,
-            /** SD Error  2 */INVALID_NUM_BYTES,
-            /** SD Error  3 */INVALID_RESPONSE,
-            /** SD Error  4 */INVALID_INIT,
-            /** SD Error  5 */INVALID_FILESYSTEM,
-            /** SD Error  6 */INVALID_DAT_STRT_ID,
-            /** SD Error  7 */FILENAME_NOT_FOUND,
-            /** SD Error  8 */EMPTY_FAT_ENTRY,
-            /** SD Error  9 */CORRUPT_CLUSTER,
-            /** SD Error 10 */INVALID_PTR_ORIGIN,
-            /** SD Error 11 */ENTRY_NOT_FILE,
-            /** SD Error 12 */INVALID_FILENAME,
-            /** SD Error 13 */INVALID_FAT_APPEND,
-            /** SD Error 14 */FILE_ALREADY_EXISTS,
-            /** SD Error 15 */INVALID_FILE_MODE,
+            /** First SD error code */BEG_ERROR = SPI::END_ERROR + 1,
+            /** Begin user errors */ BEG_USER_ERROR = SD::BEG_ERROR,
+            /** SD Error  0 */FILE_ALREADY_EXISTS = SD::BEG_USER_ERROR,
+            /** SD Error  1 */INVALID_FILE_MODE,
+            /** SD Error  2 */ENTRY_NOT_FILE,
+            /** SD Error  3 */ENTRY_NOT_DIR,
+            /** SD Error  4 */FILENAME_NOT_FOUND,
+            /** End user errors */END_USER_ERRORS = SD::FILENAME_NOT_FOUND,
+            /** Begin system errors */BEG_SYS_ERROR,
+            /** SD Error  5 */CORRUPT_CLUSTER = SD::BEG_SYS_ERROR,
+            /** SD Error  6 */INVALID_FILENAME,
+            /** SD Error  7 */INVALID_CMD,
+            /** SD Error  8 */READ_TIMEOUT,
+            /** SD Error  9 */INVALID_NUM_BYTES,
+            /** SD Error 10 */INVALID_RESPONSE,
+            /** SD Error 11 */INVALID_INIT,
+            /** SD Error 12 */INVALID_DAT_STRT_ID,
+            /** SD Error 13 */EMPTY_FAT_ENTRY,
+            /** SD Error 14 */INVALID_PTR_ORIGIN,
+            /** SD Error 15 */INVALID_FAT_APPEND,
             /** SD Error 16 */TOO_MANY_FATS,
             /** SD Error 17 */READING_PAST_EOC,
             /** SD Error 18 */FILE_WITHOUT_BUFFER,
-            /** SD Error 19 */CMD8_FAILURE,
-            /** Number of unique SD errors */ERRORS
+            /** SD Error 19 */INVALID_FILESYSTEM,
+            /** SD Error 20 */CMD8_FAILURE,
+            /** End system errors */END_SYS_ERROR = SD::CMD8_FAILURE,
+            /** Last SD error code */END_ERROR = SD::END_SYS_ERROR
         } ErrorCode;
 
         /**
@@ -303,20 +300,16 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t start (const PropWare::GPIO::Pin mosi,
+        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
                 const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs, const int32_t freq);
 
-        int8_t start_old (const PropWare::GPIO::Pin mosi,
-                        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-                        const PropWare::GPIO::Pin cs, const int32_t freq);
-
         /**
-         * @brief   Mount either FAT16 or FAT32 filesystem
+         * @brief   Mount either FAT16 or FAT32 file system
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        int8_t mount (void);
+        PropWare::ErrorCode mount ();
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -326,7 +319,7 @@ class SD {
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        uint8_t unmount (void);
+        PropWare::ErrorCode unmount ();
 #endif
 
         /**
@@ -342,7 +335,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t chdir (const char *d);
+        PropWare::ErrorCode chdir (const char *d);
 
         /**
          * @brief       Open a file with a given name and load its information into the
@@ -369,7 +362,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t fopen (const char *name, SD::File *f, const SD::FileMode mode);
+        PropWare::ErrorCode fopen (const char *name, SD::File *f, const SD::FileMode mode);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -379,7 +372,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fclose (SD::File *f);
+        PropWare::ErrorCode fclose (SD::File *f);
 
         /**
          * @brief       Insert a character into a given file
@@ -393,7 +386,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fputc (const char c, SD::File *f);
+        PropWare::ErrorCode fputc (const char c, SD::File *f);
 
         /**
          * @brief       Insert a c-string into a file
@@ -406,7 +399,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t fputs (char *s, SD::File *f);
+        PropWare::ErrorCode fputs (char *s, SD::File *f);
 #endif
 
         /**
@@ -454,7 +447,7 @@ class SD {
          * @return      Returns true if the read pointer points to the end of the file,
          *              false otherwise
          */
-        inline uint8_t feof (SD::File *f);
+        inline bool feof (SD::File *f);
 
         /**
          * @brief       Set the read pointer for a given file to the position 'origin +
@@ -469,7 +462,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t fseekr (SD::File *f, const int32_t offset,
+        PropWare::ErrorCode fseekr (SD::File *f, const int32_t offset,
                 const SD::FilePos origin);
 
         /**
@@ -485,7 +478,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t fseekw (SD::File *f, const int32_t offset,
+        PropWare::ErrorCode fseekw (SD::File *f, const int32_t offset,
                 const SD::FilePos origin);
 
         /**
@@ -520,7 +513,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell (SD::File *f);
+        PropWare::ErrorCode shell (SD::File *f);
 
         /**
          * @brief       List the contents of a directory on the screen (similar to 'ls
@@ -533,7 +526,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_ls (void);
+        PropWare::ErrorCode shell_ls ();
 
         /**
          * @brief       Dump the contents of a file to the screen (similar to 'cat f');
@@ -544,7 +537,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_cat (const char *name, SD::File *f);
+        PropWare::ErrorCode shell_cat (const char *name, SD::File *f);
 
         /**
          * @brief       Change the current working directory to *d (similar to 'cd dir');
@@ -553,7 +546,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_cd (const char *d);
+        PropWare::ErrorCode shell_cd (const char *d);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -563,7 +556,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t shell_touch (const char name[]);
+        PropWare::ErrorCode shell_touch (const char name[]);
 #endif
 #endif
 
@@ -574,33 +567,60 @@ class SD {
          *
          * @param[in]   *dat       Pointer to the beginning of the data
          * @param[in]   bytes      Number of bytes to print
-         *
-         * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t print_hex_block (uint8_t *dat, uint16_t bytes);
+        void print_hex_block (uint8_t *dat, uint16_t bytes);
 #endif
+
+        /* @brief   Create a human-readable error string
+         *
+         * @param[in]   err         Error number used to determine error string
+         * @param[out]  errorStr    Allocated space where a string of no more
+         *                          than 128 characters can be printed
+         */
+        void print_error_str (const SD::ErrorCode err) const;
+
+    private:
+        typedef struct {
+            uint8_t numFATs;
+            uint32_t rsvdSectorCount;
+            uint32_t rootEntryCount;
+            uint32_t totalSectors;
+            uint32_t FATSize;
+            uint32_t dataSectors;
+            uint32_t bootSector;
+            uint32_t clusterCount;
+        } InitFATInfo;
 
     private:
         /***********************
          *** Private Methods ***
          ***********************/
-        /**
-         *
-         */
-        int8_t reset_and_verify_v2_0 (uint8_t response_param[]);
+        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response_param[]);
 
-        int8_t power_up ();
+        inline PropWare::ErrorCode power_up ();
 
-        int8_t reset (uint8_t response[], bool *isIdle);
+        inline PropWare::ErrorCode reset (uint8_t response[], bool *isIdle);
 
-        int8_t verify_v2_0 (uint8_t response[], bool *stageCleared);
+        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared);
 
-        int8_t send_active (uint8_t response[]);
+        inline PropWare::ErrorCode send_active (uint8_t response[]);
 
-        int8_t increase_throttle (const int32_t freq);
+        inline PropWare::ErrorCode increase_throttle (const int32_t freq);
 
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_DEBUG)
-        int8_t print_init_debug_blocks (uint8_t response[]);
+        inline PropWare::ErrorCode read_boot_sector (InitFATInfo *fatInfo);
+
+        inline PropWare::ErrorCode common_boot_sector_parser(InitFATInfo *fatInfo);
+
+        inline void partition_info_parser (InitFATInfo *fatInfo);
+
+        inline PropWare::ErrorCode determine_fat_type (InitFATInfo *fatInfo);
+
+        inline void store_root_info (InitFATInfo *fatInfo);
+
+        inline PropWare::ErrorCode read_fat_and_root_sectors ();
+
+#if (defined SD_OPTION_VERBOSE)
+        PropWare::ErrorCode print_init_debug_blocks (uint8_t response[]);
 #endif
 
         /**
@@ -613,7 +633,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        int8_t send_command (const uint8_t cmd, const uint32_t arg,
+        PropWare::ErrorCode send_command (const uint8_t cmd, const uint32_t arg,
                 const uint8_t crc);
 
         /**
@@ -625,7 +645,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        int8_t get_response (const uint8_t numBytes, uint8_t *dat);
+        PropWare::ErrorCode get_response (const uint8_t numBytes, uint8_t *dat);
 
         /**
          * @brief       Receive data from SD card via SPI
@@ -636,7 +656,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        int8_t read_block (uint16_t bytes, uint8_t *dat);
+        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t *dat);
 
         /**
          * @brief       Write data to SD card via SPI
@@ -646,7 +666,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t write_block (uint16_t bytes, uint8_t *dat);
+        PropWare::ErrorCode write_block (uint16_t bytes, uint8_t *dat);
 
         /**
          * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
@@ -656,7 +676,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t read_data_block (uint32_t address, uint8_t *dat);
+        PropWare::ErrorCode read_data_block (uint32_t address, uint8_t *dat);
 
         /**
          * @brief       Write SD_SECTOR_SIZE-byte data block to SD card
@@ -666,7 +686,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t write_data_block (uint32_t address, uint8_t *dat);
+        PropWare::ErrorCode write_data_block (uint32_t address, uint8_t *dat);
 
         /**
          * @brief       Return byte-reversed 16-bit variable (SD cards store bytes
@@ -748,7 +768,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t get_fat_value (const uint32_t fatEntry, uint32_t *value);
+        PropWare::ErrorCode get_fat_value (const uint32_t fatEntry, uint32_t *value);
 
         /**
          * @brief       Find the next sector in the FAT, directory, or file. When it is
@@ -759,7 +779,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t load_next_sector (SD::Buffer *buf);
+        PropWare::ErrorCode load_next_sector (SD::Buffer *buf);
 
         /**
          * @brief       Load a requested sector into the buffer independent of the
@@ -772,7 +792,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          *
          */
-        int8_t load_sector_from_offset (SD::File *f, const uint32_t offset);
+        PropWare::ErrorCode load_sector_from_offset (SD::File *f, const uint32_t offset);
 
         /**
          * @brief       Read the next sector from SD card into memory
@@ -786,7 +806,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t inc_cluster (SD::Buffer *buf);
+        PropWare::ErrorCode inc_cluster (SD::Buffer *buf);
 
         /**
          * @brief       Read the standard length name of a file entry. If an extension
@@ -819,7 +839,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise (common error code
          *              is SD_EOC_END for end-of-chain or file-not-found marker)
          */
-        int8_t find (const char *filename, uint16_t *fileEntryOffset);
+        PropWare::ErrorCode find (const char *filename, uint16_t *fileEntryOffset);
 
         /**
          * @brief       Reload the sector currently in use by a given file
@@ -828,7 +848,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t reload_buf (SD::File *f);
+        PropWare::ErrorCode reload_buf (SD::File *f);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -849,14 +869,15 @@ class SD {
          */
         uint32_t find_empty_space (const uint8_t restore);
 
-        /* @brief       Enlarge a file or directory by one cluster
+        /**
+         * @brief       Enlarge a file or directory by one cluster
          *
          * @param[in]   *buf    Address of the buffer (containing information for a
          *                      file or directory) to be enlarged
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t extend_fat (SD::Buffer *buf);
+        PropWare::ErrorCode extend_fat (SD::Buffer *buf);
 
         /**
          * @brief       Allocate space for a new file
@@ -868,7 +889,7 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int8_t create_file (const char *name, const uint16_t *fileEntryOffset);
+        PropWare::ErrorCode create_file (const char *name, const uint16_t *fileEntryOffset);
 #endif
 
 #if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)
@@ -887,30 +908,11 @@ class SD {
          */
         void print_file_attributes (const uint8_t flags);
 
-#ifdef SD_OPTION_DEBUG
-        /* @brief   Print an error through UART string followed by entering an infinite
-         *          loop
-         *
-         * @param   err     Error number used to determine error string
-         */
-        void sd_error (const int8_t err);
-
         /**
-         * @brief   Print to screen each status bit individually with human-readable
-         *          descriptions
-         *
-         * @param   response    first-byte response from the SD card
+         * @brief   Print to screen each status bit individually with
+         *          human-readable descriptions
          */
-        void first_byte_expansion (const uint8_t response);
-#else
-        /**
-         * @brief       Because SD_OPTION_DEBUG is not defined, we're simply going to
-         *              return the error
-         *
-         * @param[in]   err     The error thrown by an SD function
-         */
-#define sd_error(err)                return err
-#endif
+        void first_byte_expansion () const;
 #endif
 
     private:
@@ -948,6 +950,7 @@ class SD {
         // SD CRCs
         static const uint8_t CRC_IDLE = 0x95;
         static const uint8_t CRC_CMD8 = 0x87;  // CRC only valid for CMD8 argument of 0x000001AA
+        static const uint8_t CRC_ACMD_PREP = 0x65;
         static const uint8_t CRC_ACMD = 0x77;
         static const uint8_t CRC_OTHER = 0x01;
 
@@ -1030,7 +1033,7 @@ class SD {
         // Initialization variables
         SPI *m_spi;
         PropWare::GPIO::Pin m_cs;  // Chip select pin mask
-        uint8_t m_filesystem;  // Filesystem type - one of SD::FAT_16 or SD::FAT_32
+        uint8_t m_filesystem;  // File system type - one of SD::FAT_16 or SD::FAT_32
         uint8_t m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
         uint32_t m_rootDirSectors;  // Number of sectors for the root directory
         uint32_t m_fatStart;  // Starting block address of the FAT
@@ -1038,7 +1041,7 @@ class SD {
         uint32_t m_rootAllocUnit;  // Allocation unit of root directory/first data sector (FAT32 only)
         uint32_t m_firstDataAddr;  // Starting block address of the first data cluster
 
-        // FAT filesystem variables
+        // FAT file system variables
         SD::Buffer m_buf;
         uint8_t m_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_OPTION_FILE_WRITE
@@ -1057,12 +1060,6 @@ class SD {
 
         // First byte response receives special treatment to allow for proper debugging
         uint8_t m_firstByteResponse;
-
-#ifdef SD_OPTION_DEBUG
-        // variable is needed to help determine what is causing seemingly random
-        // timeouts
-        uint32_t m_sectorRdAddress;
-#endif
 };
 
 }

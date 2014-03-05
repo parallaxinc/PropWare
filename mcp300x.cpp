@@ -35,10 +35,10 @@ MCP300x::MCP300x () {
     this->m_alwaysSetMode = 0;
 }
 
-int8_t MCP300x::start (const PropWare::GPIO::Pin mosi,
+PropWare::ErrorCode MCP300x::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs) {
-    int8_t err;
+    PropWare::ErrorCode err;
 
     this->m_spi = SPI::getSPI();
     this->m_cs = cs;
@@ -60,8 +60,9 @@ void MCP300x::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-int8_t MCP300x::read (const MCP300x::Channel channel, uint16_t *dat) {
-    int8_t err, options;
+PropWare::ErrorCode MCP300x::read (const MCP300x::Channel channel, uint16_t *dat) {
+    PropWare::ErrorCode err;
+    int8_t options;
 
     options = MCP300x::START | MCP300x::SINGLE_ENDED | channel;
     options <<= 2; // One dead bit between output and input - see page 19 of datasheet
@@ -79,7 +80,7 @@ int8_t MCP300x::read (const MCP300x::Channel channel, uint16_t *dat) {
     return 0;
 }
 
-int8_t MCP300x::read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat) {
+PropWare::ErrorCode MCP300x::read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat) {
     int8_t err, options;
 
     options = MCP300x::START | MCP300x::DIFFERENTIAL | channels;

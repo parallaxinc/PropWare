@@ -183,7 +183,7 @@ class HD44780 {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        int8_t start (const uint32_t dataPinsMask, const GPIO::Pin rs,
+        PropWare::ErrorCode start (const uint32_t dataPinsMask, const GPIO::Pin rs,
                 const GPIO::Pin rw, const GPIO::Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions);
@@ -219,6 +219,8 @@ class HD44780 {
          * @param[in]   c   Individual char to be printed
          */
         void putChar (const char c);
+
+        static void print_error_str (const HD44780::ErrorCode err);
 
     private:
         /**

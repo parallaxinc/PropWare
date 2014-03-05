@@ -60,6 +60,8 @@
 /** Determine if the LSB or MSB should be sent first for each byte */
 #define BITMODE             PropWare::SPI::MSB_FIRST
 
+void error (const PropWare::ErrorCode err, const PropWare::SPI *spi);
+
 /**@}*/
 
 #endif /* SPI_DEMO_H_ */

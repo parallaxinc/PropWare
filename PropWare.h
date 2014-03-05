@@ -51,6 +51,8 @@ namespace PropWare {
 #define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
 #define MICROSECOND         ((unsigned long long) (MILLISECOND / 1000))
 
+typedef int8_t ErrorCode;
+
 typedef enum {
     BIT_0 = 0x1,
     BIT_1 = 0x2,

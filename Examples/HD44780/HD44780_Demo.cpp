@@ -46,9 +46,11 @@ int main () {
     return 0;
 }
 
-void error (const uint8_t err) {
+void error (const PropWare::ErrorCode err) {
     uint32_t out = err;
     out <<= 16;
+
+    PropWare::HD44780::print_error_str((PropWare::HD44780::ErrorCode) err);
 
     set_dir(PropWare::BYTE_2, OUT);
 

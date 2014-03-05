@@ -66,7 +66,7 @@
  *
  * @param[in]   err     Error code
  */
-void error (const uint8_t err);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 
