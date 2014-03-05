@@ -26,8 +26,8 @@
  * SOFTWARE.
  */
 
-#include <hd44780.h>
 #include <tinyio.h>
+#include <PropWare/hd44780.h>
 
 namespace PropWare {
 

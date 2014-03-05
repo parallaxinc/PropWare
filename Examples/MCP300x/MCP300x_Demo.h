@@ -42,9 +42,9 @@
 #include <tinyio.h>
 #include <stdlib.h>
 
-#include <PropWare.h>
-#include <mcp300x.h>
-#include <safeSpi.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/mcp300x.h>
+#include <PropWare/safeSpi.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI            PropWare::GPIO::P0

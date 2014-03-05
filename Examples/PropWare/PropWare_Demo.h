@@ -52,7 +52,7 @@
 
 // Note the lack of an include for propeller.h; This is because PropWare.h will
 // include propeller.h for you
-#include "PropWare.h"
+#include <PropWare/PropWare.h>
 
 #define COGS            8
 #define STACK_SIZE      16

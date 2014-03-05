@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <tinyio.h>
 #include <stdarg.h>
-#include <PropWare.h>
+#include <PropWare/PropWare.h>
 
 /** @name   SPI Extra Code Options
  * @{ */

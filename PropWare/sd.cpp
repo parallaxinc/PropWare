@@ -27,7 +27,7 @@
  */
 
 // Includes
-#include <sd.h>
+#include <PropWare/sd.h>
 
 namespace PropWare {
 

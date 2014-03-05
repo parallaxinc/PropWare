@@ -45,16 +45,11 @@
 
 // Includes
 #include <propeller.h>
-#include <PropWare.h>
-#include <sd.h>
-
 #ifdef DEBUG
 #include <tinyio.h>
 #endif
-
-#if (!(defined SD_OPTION_VERBOSE) && !(defined SD_OPTION_VERBOSE_BLOCKS))
-#define printf      __simple_printf
-#endif
+#include <PropWare/PropWare.h>
+#include <PropWare/sd.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI                PropWare::GPIO::P0

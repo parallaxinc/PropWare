@@ -25,16 +25,9 @@
  * SOFTWARE.
  */
 
-#include <PropWare.h>
 
 #include <tinyio.h>
-
-#include <spi.h>
-#include <sd.h>
-#include <hd44780.h>
-#include <mcp300x.h>
-#include <max6675.h>
-#include <l3g.h>
+#include <PropWare/PropWare.h>
 
 void PropWare::GPIO::set_dir (const uint32_t pins, PropWare::GPIO::Dir dir) {
     DIRA = (DIRA & (~pins)) | (pins & (int32_t) dir);

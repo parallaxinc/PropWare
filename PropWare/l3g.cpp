@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-#include <l3g.h>
+#include <PropWare/l3g.h>
 
 namespace PropWare {
 

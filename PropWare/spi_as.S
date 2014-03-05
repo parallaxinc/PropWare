@@ -30,7 +30,7 @@
  */
 
 #define ASM_OBJ_FILE
-#include <PropWare.h>
+#include <PropWare/PropWare.h>
 
 /* NOTE: These definitions *MUST* match up with the SPI source file "spi.c" */
 // Different fuctions supported by this GAS module

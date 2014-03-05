@@ -25,7 +25,7 @@
  * SOFTWARE.
  */
 
-#include <safeSpi.h>
+#include <PropWare/safeSpi.h>
 
 namespace PropWare {
 

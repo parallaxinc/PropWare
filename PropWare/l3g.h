@@ -30,8 +30,8 @@
 #define L3G_H_
 
 #include <propeller.h>
-#include <PropWare.h>
-#include <spi.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/spi.h>
 
 namespace PropWare {
 

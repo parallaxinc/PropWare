@@ -27,7 +27,7 @@
 
 
 #ifdef ASM_OBJ_FILE
-#include <PropWare_asm.h>
+#include <PropWare/PropWare_asm.h>
 #endif
 
 #ifndef PROPWARE_H

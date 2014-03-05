@@ -39,8 +39,8 @@
 
 #include <propeller.h>
 #include <tinyio.h>
-#include <PropWare.h>
-#include <hd44780.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/hd44780.h>
 
 #define RS                  P14
 #define RW                  P12

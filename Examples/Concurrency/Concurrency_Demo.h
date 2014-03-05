@@ -9,7 +9,7 @@
 #ifndef CONCURRENCY_DEMO_H_
 #define CONCURRENCY_DEMO_H_
 
-#include <PropWare.h>
+#include <PropWare/PropWare.h>
 #include <simpletools.h>
 
 void blinkAnLEDSome (void);

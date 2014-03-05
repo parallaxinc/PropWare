@@ -25,7 +25,7 @@
  * SOFTWARE.
  */
 
-#include <max6675.h>
+#include <PropWare/max6675.h>
 
 namespace PropWare {
 

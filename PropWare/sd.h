@@ -32,8 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tinyio.h>
-#include <PropWare.h>
-#include <safeSpi.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/safeSpi.h>
 
 namespace PropWare {
 

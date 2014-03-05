@@ -32,7 +32,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <propeller.h>
-#include <PropWare.h>
+#include <PropWare/PropWare.h>
 
 namespace PropWare {
 

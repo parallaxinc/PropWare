@@ -28,7 +28,7 @@
 #ifndef SAFESPI_H_
 #define SAFESPI_H_
 
-#include <spi.h>
+#include <PropWare/spi.h>
 
 namespace PropWare {
 

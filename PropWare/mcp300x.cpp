@@ -27,7 +27,7 @@
  */
 
 // Includes
-#include <mcp300x.h>
+#include <PropWare/mcp300x.h>
 
 namespace PropWare {
 

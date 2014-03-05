@@ -81,7 +81,7 @@ else
 endif
 
 # Add the appropriate PropWare and Simple library folder to the search path
-LIB_INC += -L'$(PROPWARE_PATH)/$(MODEL)'
+LIB_INC += -L'$(PROPWARE_PATH)/PropWare/$(MODEL)'
 LIB_INC += -L'$(PROPWARE_PATH)/simple/$(MODEL)'
 
 ifneq ($(LDSCRIPT),)

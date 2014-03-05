@@ -28,8 +28,8 @@
 #ifndef MAX6675_H_
 #define MAX6675_H_
 
-#include <PropWare.h>
-#include <spi.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/spi.h>
 
 namespace PropWare {
 

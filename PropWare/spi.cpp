@@ -26,7 +26,7 @@
  */
 
 // Includes
-#include <spi.h>
+#include <PropWare/spi.h>
 
 // Symbol for assembly instructions to start a new SPI cog
 extern "C" {
