@@ -40,6 +40,9 @@ class ImportSimple:
                     if os.path.isdir(rootPath + categoryDir + '/' + subDir):
                         self.libraries[subDir[3:]] = rootPath + categoryDir + '/' + subDir
 
+        # Manually add the libsimpletools source folder
+        self.libraries['__simpletools'] = rootPath + "Utility/libsimpletools/source"
+
     @staticmethod
     def getRootPath():
         # Get the root path without the stupid extra slashes
@@ -70,12 +73,14 @@ class ImportSimple:
     def processLibrary(self, library):
         libraryDirectory = self.libraries[library] + '/'
 
+        demoFiles = ImportSimple.getDemoFileNames(library)
+
         # Copy all source and header files into PropWare's cheater directory
         for f in os.listdir(libraryDirectory):
             # Don't copy the demo files
-            if f not in ImportSimple.getDemoFileNames(library):
+            if f not in demoFiles:
                 if ImportSimple.isSourceFile(f):
-                    copy2(libraryDirectory + f, ImportSimple.PROPWARE_ROOT + ImportSimple.CHEATER_DIR)
+                    copy2(libraryDirectory + f, ImportSimple.CHEATER_DIR)
 
                     # Keep track of all the source files so we can make an object list later
                     self.sourceFiles.append(f)
@@ -84,7 +89,7 @@ class ImportSimple:
                     copy2(libraryDirectory + f, ImportSimple.PROPWARE_ROOT)
 
     def makeObjectList(self):
-        with open("simple/simpleObjects.mk", 'w') as f:
+        with open(ImportSimple.CHEATER_DIR + "simpleObjects.mk", 'w') as f:
             f.write("OBJS = ")
             for sourceFile in self.sourceFiles:
                 f.write(sourceFile[:-1] + "o ")
