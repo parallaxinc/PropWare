@@ -77,7 +77,7 @@ namespace PropWare {
  * @brief       SPI serial communications library; Core functionality comes from
  *              a dedicated assembly cog
  *
- * @detailed    This SPI module is not currently thread safe! Do not try to
+ * @detailed    This SPI module is not thread safe! Do not try to
  *              call SPI functions from more than one cog. Look for a lockable
  *              version in PropWare v3.0
  */
@@ -160,12 +160,7 @@ class SPI {
         static const int32_t MAX_CLOCK;
 
     public:
-        /**
-         * @brief   Retrieve an instance of the SPI module
-         *
-         * @return  Address of an SPI module
-         */
-        static SPI* getSPI ();
+        SPI ();
 
         /**
          * @brief       Initialize an SPI module by starting a new cog
@@ -363,8 +358,6 @@ class SPI {
         static const uint8_t BITMODE_BIT = BIT_2;  // MSB_FIRST == HIGH; LSB_FIRST == LOW
 
     private:
-        SPI ();
-
         /***********************************
          *** Private Method Declarations ***
          ***********************************/

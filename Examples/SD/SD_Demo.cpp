@@ -32,7 +32,8 @@ int main () {
     uint8_t err;
     char c;
 
-    PropWare::SD sd;
+    PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
+    PropWare::SD sd(spi);
     PropWare::SD::File f, f2;
 
 #ifndef LOW_RAM_MODE
@@ -143,7 +144,7 @@ int main () {
 void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
 #ifdef DEBUG
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        PropWare::SPI::getSPI()->print_error_str(
+        PropWare::SafeSPI::getSafeSPI()->print_error_str(
                 (PropWare::SPI::ErrorCode) err);
     else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
         sd->print_error_str((PropWare::SD::ErrorCode) err);

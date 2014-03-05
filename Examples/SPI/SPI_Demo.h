@@ -41,7 +41,7 @@
 #include <propeller.h>
 #include <tinyio.h>
 #include <PropWare.h>
-#include <spi.h>
+#include <safeSpi.h>
 
 
 /** Pin number for MOSI (master out - slave in) */

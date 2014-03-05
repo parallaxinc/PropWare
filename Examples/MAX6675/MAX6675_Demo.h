@@ -39,9 +39,9 @@
 
 #include <tinyio.h>
 #include <PropWare.h>
-#include <spi.h>
 #include <hd44780.h>
 #include <max6675.h>
+#include <safeSpi.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI            PropWare::GPIO::P0

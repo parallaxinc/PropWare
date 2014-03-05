@@ -107,7 +107,7 @@ class L3G {
         static const uint8_t INT1_DURATION = 0x38;
 
     public:
-        L3G ();
+        L3G (SPI *spi);
 
         /**
          * @brief       Initialize an L3G module

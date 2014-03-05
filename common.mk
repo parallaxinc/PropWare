@@ -11,8 +11,6 @@
 #
 #  Then set up a default "all" target (normally this will be
 #    all: $(NAME).elf
-#  and finally
-#    include $(PROPLIB)/demo.mk
 #
 # Copyright (c) 2011 Parallax Inc.
 # All rights MIT licensed
@@ -22,7 +20,7 @@
 # Modification by David Zemon...
 #
 # !!! NOTE !!!
-# All C source files must have an accompanying header file
+# All C/C++ source files must have an accompanying header file
 # in the same directory as the source.
 # Without this mod, changes in header files would be ignored
 # until the source file was modified (and therefore rebuilt)
@@ -32,8 +30,6 @@
 # #########################################################
 # Variable Definitions
 # #########################################################
-# where we installed the propeller binaries and libraries
-
 # Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
@@ -46,7 +42,7 @@ else
 	CLEAN=rm -f
 endif
 
-# Find PropGCC
+# where we installed the propeller binaries and libraries
 ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /opt/parallax
 endif
@@ -71,7 +67,7 @@ endif
 CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
-CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
+CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics '-D SD_SAFE_SPI=$(SD_SAFE_SPI)'
 LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap 
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'

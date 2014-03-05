@@ -40,6 +40,7 @@
 #include <propeller.h>
 #include <PropWare.h>
 #include <l3g.h>
+#include <safeSpi.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI                PropWare::GPIO::P0

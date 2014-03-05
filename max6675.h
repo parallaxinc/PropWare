@@ -39,7 +39,7 @@ namespace PropWare {
  */
 class MAX6675 {
     public:
-        MAX6675 ();
+        MAX6675 (SPI *spi);
 
         /**
          * @brief       Initialize communication with an MAX6675 device

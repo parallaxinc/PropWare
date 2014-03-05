@@ -1,5 +1,5 @@
 /**
- * @file    spi.c
+ * @file    spi.cpp
  *
  * @project PropWare
  *
@@ -48,11 +48,6 @@ const int32_t SPI::MAX_CLOCK = CLKFREQ >> 3;
 SPI::SPI () {
     this->m_mailbox = -1;
     this->m_cog = -1;
-}
-
-SPI* SPI::getSPI () {
-    static SPI instance;
-    return &instance;
 }
 
 // Function definitions

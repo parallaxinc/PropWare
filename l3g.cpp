@@ -30,7 +30,8 @@
 
 namespace PropWare {
 
-L3G::L3G () {
+L3G::L3G (SPI *spi) {
+    this->m_spi = spi;
     this->m_alwaysSetMode = false;
 }
 
@@ -38,8 +39,6 @@ PropWare::ErrorCode L3G::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode) {
     PropWare::ErrorCode err;
-    this->m_spi = SPI::getSPI();
-
     // Ensure SPI module started
     if (!this->m_spi->is_running()) {
         check_errors(

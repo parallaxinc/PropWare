@@ -44,7 +44,8 @@ const uint32_t SD::WIGGLE_ROOM = 1000;
 /*********************************
  *** Public Method Definitions ***
  *********************************/
-SD::SD () {
+SD::SD (SPI *spi) {
+    this->m_spi = spi;
     this->m_fileID = 0;
 #ifdef SD_OPTION_FILE_WRITE
     this->m_fatMod = false;
@@ -62,7 +63,6 @@ PropWare::ErrorCode SD::start (const PropWare::GPIO::Pin mosi,
     uint8_t response[16];
 
     // Set CS for output and initialize high
-    this->m_spi = SPI::getSPI();
     this->m_cs = cs;
     GPIO::set_dir(cs, GPIO::OUT);
     GPIO::pin_set(cs);
@@ -505,11 +505,11 @@ PropWare::ErrorCode SD::unmount () {
 
     // If the directory buffer was modified, write it
     if (this->m_buf.mod)
-    check_errors(
-            this->write_data_block(
-                    this->m_buf.curClusterStartAddr
-                    + this->m_buf.curSectorOffset,
-                    this->m_buf.buf));
+        check_errors(
+                this->write_data_block(
+                        this->m_buf.curClusterStartAddr
+                                + this->m_buf.curSectorOffset,
+                        this->m_buf.buf));
 
     // If the FAT sector was modified, write it
     if (this->m_fatMod) {
@@ -519,7 +519,7 @@ PropWare::ErrorCode SD::unmount () {
         check_errors(
                 this->write_data_block(
                         this->m_curFatSector + this->m_fatStart
-                        + this->m_fatSize, this->m_fat));
+                                + this->m_fatSize, this->m_fat));
     }
 
     return 0;
@@ -536,17 +536,17 @@ PropWare::ErrorCode SD::chdir (const char *d) {
     check_errors(this->find(d, &fileEntryOffset));
 
     // If the returned entry isn't a file, throw an error
-    if (!(SD::SUB_DIR & this->m_buf.buf[fileEntryOffset
-                                        + SD::FILE_ATTRIBUTE_OFFSET]))
+    if (!(SD::SUB_DIR
+            & this->m_buf.buf[fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET]))
         return SD::ENTRY_NOT_DIR;
 
 #ifdef SD_OPTION_FILE_WRITE
     // If the previous sector was modified, write it back to the SD card
     // before reading
     if (this->m_buf.mod)
-    this->write_data_block(
-            this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset,
-            this->m_buf.buf);
+        this->write_data_block(
+                this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset,
+                this->m_buf.buf);
     this->m_buf.mod = false;
 #endif
 
@@ -594,7 +594,8 @@ PropWare::ErrorCode SD::chdir (const char *d) {
     return 0;
 }
 
-PropWare::ErrorCode SD::fopen (const char *name, SD::File *f, const SD::FileMode mode) {
+PropWare::ErrorCode SD::fopen (const char *name, SD::File *f,
+        const SD::FileMode mode) {
     PropWare::ErrorCode err;
     uint16_t fileEntryOffset = 0;
 
@@ -610,7 +611,7 @@ PropWare::ErrorCode SD::fopen (const char *name, SD::File *f, const SD::FileMode
     f->wPtr = 0;
 #ifndef SD_OPTION_FILE_WRITE
     if (FILE_MODE_R != mode)
-        return SD::INVALID_FILE_MODE;
+    return SD::INVALID_FILE_MODE;
 #endif
     f->mode = mode;
     f->mod = false;
@@ -621,7 +622,7 @@ PropWare::ErrorCode SD::fopen (const char *name, SD::File *f, const SD::FileMode
         // If the file didn't exist and you're trying to read from it, that's a
         // problem
         if (SD::FILE_MODE_R == mode)
-        return err;
+            return err;
 
         // Find returned an error, ensure it was either file-not-found or EOC
         // and then create the file
@@ -643,8 +644,8 @@ PropWare::ErrorCode SD::fopen (const char *name, SD::File *f, const SD::FileMode
             check_errors(this->create_file(name, &fileEntryOffset));
         } else
 #endif
-        // SDFind returned unknown error - throw it
-        return err;
+            // SDFind returned unknown error - throw it
+            return err;
     }
 
     // `name` was found successfully, determine if it is a file or directory
@@ -687,9 +688,9 @@ PropWare::ErrorCode SD::fopen (const char *name, SD::File *f, const SD::FileMode
     // in the case that the file needs to be extended
     f->maxSectors = f->length >> SD::SECTOR_SIZE_SHIFT;
     if (!(f->maxSectors))
-    f->maxSectors = 1 << this->m_sectorsPerCluster_shift;
+        f->maxSectors = 1 << this->m_sectorsPerCluster_shift;
     while (f->maxSectors % (1 << this->m_sectorsPerCluster_shift))
-    ++(f->maxSectors);
+        ++(f->maxSectors);
     f->buf->mod = false;
 #endif
     check_errors(
@@ -752,12 +753,12 @@ PropWare::ErrorCode SD::fclose (SD::File *f) {
                 != f->dirSectorAddr) {
             // If it isn't, load it...
             if (this->m_buf.mod)
-            // And if it's been modified since the last read, save it...
-            check_errors(
-                    this->write_data_block(
-                            this->m_buf.curClusterStartAddr
-                            + this->m_buf.curSectorOffset,
-                            this->m_buf.buf));
+                // And if it's been modified since the last read, save it...
+                check_errors(
+                        this->write_data_block(
+                                this->m_buf.curClusterStartAddr
+                                        + this->m_buf.curSectorOffset,
+                                this->m_buf.buf));
             check_errors(
                     this->read_data_block(f->dirSectorAddr, this->m_buf.buf));
         }
@@ -780,7 +781,7 @@ PropWare::ErrorCode SD::fputc (const char c, SD::File *f) {
 
     // Determine if the correct sector is loaded
     if (f->buf->id != f->id)
-    check_errors(this->reload_buf(f));
+        check_errors(this->reload_buf(f));
 
     // Even the the buffer was just reloaded, this snippet needs to be called in
     // order to extend the FAT if needed
@@ -824,7 +825,7 @@ PropWare::ErrorCode SD::fputs (char *s, SD::File *f) {
     PropWare::ErrorCode err;
 
     while (*s)
-    check_errors(fputc(*(s++), f));
+        check_errors(fputc(*(s++), f));
 
     return 0;
 }
@@ -981,7 +982,7 @@ PropWare::ErrorCode SD::shell (SD::File *f) {
             err = this->chdir(uppercaseName);
 #ifdef SD_OPTION_FILE_WRITE
         else if (!strcmp(cmd, this->SHELL_CAT))
-        err = this->shell_touch(uppercaseName);
+            err = this->shell_touch(uppercaseName);
 #endif
 #ifdef SD_OPTION_VERBOSE_BLOCKS
         else if (!strcmp(cmd, "d"))
@@ -1101,8 +1102,8 @@ PropWare::ErrorCode SD::shell_touch (const char name[]) {
     if ((err = this->find(name, &fileEntryOffset))) {
         // Error occured - hopefully it was a "file not found" error
         if (SD::FILENAME_NOT_FOUND == err)
-        // File wasn't found, let's create it
-        err = this->create_file(name, &fileEntryOffset);
+            // File wasn't found, let's create it
+            err = this->create_file(name, &fileEntryOffset);
         return err;
     }
 
@@ -1421,7 +1422,8 @@ uint32_t SD::find_sector_from_alloc (uint32_t allocUnit) {
     return allocUnit;
 }
 
-PropWare::ErrorCode SD::get_fat_value (const uint32_t fatEntry, uint32_t *value) {
+PropWare::ErrorCode SD::get_fat_value (const uint32_t fatEntry,
+        uint32_t *value) {
     PropWare::ErrorCode err;
     uint32_t firstAvailableAllocUnit;
 
@@ -1488,8 +1490,8 @@ PropWare::ErrorCode SD::get_fat_value (const uint32_t fatEntry, uint32_t *value)
 PropWare::ErrorCode SD::load_next_sector (SD::Buffer *buf) {
 #ifdef SD_OPTION_FILE_WRITE
     if (buf->mod)
-    this->write_data_block(buf->curClusterStartAddr + buf->curSectorOffset,
-            buf->buf);
+        this->write_data_block(buf->curClusterStartAddr + buf->curSectorOffset,
+                buf->buf);
 #endif
 
     // Check for the end-of-chain marker (end of file)
@@ -1535,7 +1537,8 @@ PropWare::ErrorCode SD::load_next_sector (SD::Buffer *buf) {
     return 0;
 }
 
-PropWare::ErrorCode SD::load_sector_from_offset (SD::File *f, const uint32_t offset) {
+PropWare::ErrorCode SD::load_sector_from_offset (SD::File *f,
+        const uint32_t offset) {
     PropWare::ErrorCode err;
     uint32_t clusterOffset = offset >> this->m_sectorsPerCluster_shift;
 
@@ -1684,7 +1687,7 @@ PropWare::ErrorCode SD::find (const char *filename, uint16_t *fileEntryOffset) {
         check_errors(
                 this->write_data_block(
                         this->m_buf.curClusterStartAddr
-                        + this->m_buf.curSectorOffset,
+                                + this->m_buf.curSectorOffset,
                         this->m_buf.buf));
         this->m_buf.mod = false;
     }
@@ -1804,7 +1807,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
             // empty cluster
             while (this->read_rev_dat16(&(this->m_fat[allocOffset]))
                     && (SD::SECTOR_SIZE > allocOffset))
-            allocOffset += SD::FAT_16;
+                allocOffset += SD::FAT_16;
             // If we reached the end of a sector...
             if (SD::SECTOR_SIZE <= allocOffset) {
                 // If the currently loaded FAT sector has been modified, save it
@@ -1836,7 +1839,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
         // In FAT32, the first 7 usable clusters seem to be un-officially
         // reserved for the root directory
         if (0 == this->m_curFatSector)
-        allocOffset = 9 * this->m_filesystem;
+            allocOffset = 9 * this->m_filesystem;
 
         // Loop until we find an empty cluster
         while (this->read_rev_dat32(&(this->m_fat[allocOffset])) & 0x0fffffff) {
@@ -1847,8 +1850,8 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
             // Stop when we either reach the end of the current block or find an
             // empty cluster
             while ((this->read_rev_dat32(&(this->m_fat[allocOffset]))
-                            & 0x0fffffff) && (SD::SECTOR_SIZE > allocOffset))
-            allocOffset += SD::FAT_32;
+                    & 0x0fffffff) && (SD::SECTOR_SIZE > allocOffset))
+                allocOffset += SD::FAT_32;
 
 #ifdef SD_OPTION_VERBOSE
             printf("Broke while loop... why? Offset = 0x%04x / %u\n",
@@ -1865,7 +1868,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
                             this->m_fat);
                     this->write_data_block(
                             this->m_curFatSector + this->m_fatStart
-                            + this->m_fatSize, this->m_fat);
+                                    + this->m_fatSize, this->m_fat);
 #ifdef SD_OPTION_VERBOSE
                     printf("done!\n");
 #endif
@@ -1903,7 +1906,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
         this->read_data_block(this->m_curFatSector + this->m_fatStart,
                 this->m_fat);
     } else
-    this->m_curFatSector = fatSectorAddr - this->m_fatStart;
+        this->m_curFatSector = fatSectorAddr - this->m_fatStart;
 
     // Return new address to end-of-chain
     retVal = this->m_curFatSector << this->m_entriesPerFatSector_Shift;
@@ -1942,7 +1945,7 @@ PropWare::ErrorCode SD::extend_fat (SD::Buffer *buf) {
         }
         // And load the new one...
         this->m_curFatSector = buf->curAllocUnit
-        >> this->m_entriesPerFatSector_Shift;
+                >> this->m_entriesPerFatSector_Shift;
         check_errors(
                 this->read_data_block(this->m_curFatSector + this->m_fatStart,
                         this->m_fat));
@@ -1971,12 +1974,12 @@ PropWare::ErrorCode SD::extend_fat (SD::Buffer *buf) {
     if (SD::FAT_16 == this->m_filesystem) {
         this->write_rev_dat16(
                 &(this->m_fat[(buf->curAllocUnit
-                                % (1 << this->m_entriesPerFatSector_Shift))
+                        % (1 << this->m_entriesPerFatSector_Shift))
                         * this->m_filesystem]), (uint16_t) newAllocUnit);
     } else {
         this->write_rev_dat32(
                 &(this->m_fat[(buf->curAllocUnit
-                                % (1 << this->m_entriesPerFatSector_Shift))
+                        % (1 << this->m_entriesPerFatSector_Shift))
                         * this->m_filesystem]), newAllocUnit);
     }
     buf->nextAllocUnit = newAllocUnit;
@@ -1990,7 +1993,8 @@ PropWare::ErrorCode SD::extend_fat (SD::Buffer *buf) {
     return 0;
 }
 
-PropWare::ErrorCode SD::create_file (const char *name, const uint16_t *fileEntryOffset) {
+PropWare::ErrorCode SD::create_file (const char *name,
+        const uint16_t *fileEntryOffset) {
     uint8_t i, j;
     // *name is only checked for uppercase
     char uppercaseName[SD::FILENAME_STR_LEN];
@@ -2002,51 +2006,51 @@ PropWare::ErrorCode SD::create_file (const char *name, const uint16_t *fileEntry
 
     // Parameter checking...
     if (SD::FILENAME_STR_LEN < strlen(name))
-    return SD::INVALID_FILENAME;
+        return SD::INVALID_FILENAME;
 
     // Convert the name to uppercase
     for (i = 0; name[i]; ++i)
-    if ('a' <= name[i] && 'z' >= name[i])
-    uppercaseName[i] = name[i] + 'A' - 'a';
-    else
-    uppercaseName[i] = name[i];
+        if ('a' <= name[i] && 'z' >= name[i])
+            uppercaseName[i] = name[i] + 'A' - 'a';
+        else
+            uppercaseName[i] = name[i];
 
     // Write the file fields in order...
 
     /* 1) Short file name */
     // Write first section
     for (i = 0; '.' != name[i] && 0 != name[i]; ++i)
-    this->m_buf.buf[*fileEntryOffset + i] = name[i];
+        this->m_buf.buf[*fileEntryOffset + i] = name[i];
     // Check if there is an extension
     if (name[i]) {
         // There might be an extension - pad first name with spaces
         for (j = i; j < SD::FILE_NAME_LEN; ++j)
-        this->m_buf.buf[*fileEntryOffset + j] = ' ';
+            this->m_buf.buf[*fileEntryOffset + j] = ' ';
         // Check if there is a period, as one would expect for a file name with
         // an extension
         if ('.' == name[i]) {
             // Extension exists, write it
-            ++i;// Skip the period
+            ++i;        // Skip the period
             // Insert extension, character-by-character
             for (j = SD::FILE_NAME_LEN; name[i]; ++j)
-            this->m_buf.buf[*fileEntryOffset + j] = name[i++];
+                this->m_buf.buf[*fileEntryOffset + j] = name[i++];
             // Pad extension with spaces
             for (; j < SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN; ++j)
-            this->m_buf.buf[*fileEntryOffset + j] = ' ';
+                this->m_buf.buf[*fileEntryOffset + j] = ' ';
         }
         // If it wasn't a period or null terminator, throw an error
         else
-        return SD::INVALID_FILENAME;
+            return SD::INVALID_FILENAME;
     }
     // No extension, pad with spaces
     else
-    for (; i < (SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN); ++i)
-    this->m_buf.buf[*fileEntryOffset + i] = ' ';
+        for (; i < (SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN); ++i)
+            this->m_buf.buf[*fileEntryOffset + i] = ' ';
 
     /* 2) Write attribute field... */
     // TODO: Allow for file attribute flags to be set, such as SD::READ_ONLY,
     //       SD::SUB_DIR, etc
-    this->m_buf.buf[*fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET] = SD::ARCHIVE;// Archive flag should be set because the file is new
+    this->m_buf.buf[*fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET] = SD::ARCHIVE;  // Archive flag should be set because the file is new
     this->m_buf.mod = true;
 
 #ifdef SD_OPTION_VERBOSE
@@ -2065,9 +2069,9 @@ PropWare::ErrorCode SD::create_file (const char *name, const uint16_t *fileEntry
             &(this->m_buf.buf[*fileEntryOffset + SD::FILE_START_CLSTR_LOW]),
             (uint16_t) allocUnit);
     if (SD::FAT_32 == this->m_filesystem)
-    this->write_rev_dat16(
-            &(this->m_buf.buf[*fileEntryOffset + SD::FILE_START_CLSTR_HIGH]),
-            (uint16_t) (allocUnit >> 16));
+        this->write_rev_dat16(
+                &(this->m_buf.buf[*fileEntryOffset + SD::FILE_START_CLSTR_HIGH]),
+                (uint16_t) (allocUnit >> 16));
 
     /* 4) Write the size of the file (currently 0) */
     this->write_rev_dat32(
@@ -2129,7 +2133,6 @@ void SD::print_file_attributes (const uint8_t flags) {
 }
 #endif
 
-
 void SD::print_error_str (const SD::ErrorCode err) const {
     const char str[] = "SD Error %u: %s\n";
     const uint8_t relativeError = err - SD::BEG_ERROR;
@@ -2143,8 +2146,7 @@ void SD::print_error_str (const SD::ErrorCode err) const {
                     "during read");
             break;
         case SD::INVALID_NUM_BYTES:
-            printf(str, relativeError,
-                    "Invalid number of bytes");
+            printf(str, relativeError, "Invalid number of bytes");
             break;
         case SD::INVALID_RESPONSE:
 #ifdef SD_OPTION_VERBOSE
@@ -2166,16 +2168,14 @@ void SD::print_error_str (const SD::ErrorCode err) const {
                     "Invalid response during initialization",
                     this->m_firstByteResponse);
 #else
-            printf("SD Error %u: %s\n\tResponse: %u\n",
-                    relativeError,
+            printf("SD Error %u: %s\n\tResponse: %u\n", relativeError,
                     "Invalid response during initialization",
                     this->m_firstByteResponse);
 #endif
             break;
         case SD::INVALID_FILESYSTEM:
-            printf(str, relativeError,
-                    "Invalid file system; Likely not"
-                            " a FAT16 or FAT32 system");
+            printf(str, relativeError, "Invalid file system; Likely not"
+                    " a FAT16 or FAT32 system");
             break;
         case SD::INVALID_DAT_STRT_ID:
 #ifdef SD_OPTION_VERBOSE
@@ -2189,24 +2189,19 @@ void SD::print_error_str (const SD::ErrorCode err) const {
 #endif
             break;
         case SD::FILENAME_NOT_FOUND:
-            printf(str, relativeError,
-                    "Filename not found");
+            printf(str, relativeError, "Filename not found");
             break;
         case SD::EMPTY_FAT_ENTRY:
-            printf(str, relativeError,
-                    "FAT points to empty entry");
+            printf(str, relativeError, "FAT points to empty entry");
             break;
         case SD::CORRUPT_CLUSTER:
-            printf(str, relativeError,
-                    "SD cluster is corrupt");
+            printf(str, relativeError, "SD cluster is corrupt");
             break;
         case SD::INVALID_PTR_ORIGIN:
-            printf(str, relativeError,
-                    "Invalid pointer origin");
+            printf(str, relativeError, "Invalid pointer origin");
             break;
         case SD::ENTRY_NOT_FILE:
-            printf(str, relativeError,
-                    "Requested file entry is not a file");
+            printf(str, relativeError, "Requested file entry is not a file");
             break;
         case SD::INVALID_FILENAME:
             printf(str, relativeError,
@@ -2221,8 +2216,7 @@ void SD::print_error_str (const SD::ErrorCode err) const {
                     "Attempting to create an already existing file");
             break;
         case SD::INVALID_FILE_MODE:
-            printf(str, relativeError,
-                    "Invalid file mode");
+            printf(str, relativeError, "Invalid file mode");
             break;
         case SD::TOO_MANY_FATS:
             printf(str, relativeError,

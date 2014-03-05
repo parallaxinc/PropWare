@@ -29,7 +29,8 @@
 
 namespace PropWare {
 
-MAX6675::MAX6675 () {
+MAX6675::MAX6675 (SPI *spi) {
+    this->m_spi = spi;
     this->m_alwaysSetMode = 0;
 }
 
@@ -37,8 +38,6 @@ PropWare::ErrorCode MAX6675::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs) {
     PropWare::ErrorCode err;
-
-    this->m_spi = SPI::getSPI();
 
     if (!this->m_spi->is_running()) {
         check_errors(

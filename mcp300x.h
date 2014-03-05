@@ -66,7 +66,7 @@ class MCP300x {
         } ChannelDiff;
 
     public:
-        MCP300x ();
+        MCP300x (SPI *spi);
 
         /**
          * @brief       Initialize communication with an MCP300x device

@@ -35,13 +35,14 @@ int main () {
     uint16_t divisor = 1024 / 8;
     uint8_t scaledValue, i;
     uint32_t ledOutput;
-    PropWare::MCP300x adc;
+    PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
+    PropWare::MCP300x adc(spi);
 
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
         error(err);
 
     // Retrieve the SPI module and manually set the clock frequency
-    PropWare::SPI::getSPI()->set_clock(FREQ);
+    spi->set_clock(FREQ);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);

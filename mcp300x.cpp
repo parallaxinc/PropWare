@@ -31,7 +31,8 @@
 
 namespace PropWare {
 
-MCP300x::MCP300x () {
+MCP300x::MCP300x (SPI *spi) {
+    this->m_spi = spi;
     this->m_alwaysSetMode = 0;
 }
 
@@ -40,7 +41,6 @@ PropWare::ErrorCode MCP300x::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin cs) {
     PropWare::ErrorCode err;
 
-    this->m_spi = SPI::getSPI();
     this->m_cs = cs;
     GPIO::set_dir(cs, GPIO::OUT);
     GPIO::pin_set(cs);

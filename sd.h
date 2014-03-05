@@ -33,7 +33,7 @@
 #include <string.h>
 #include <tinyio.h>
 #include <PropWare.h>
-#include <spi.h>
+#include <safeSpi.h>
 
 namespace PropWare {
 
@@ -274,7 +274,7 @@ class SD {
         /**
          * @brief       Construct an SD object; Set two simple member variables
          */
-        SD ();
+        SD (SPI *spi);
 
         /**
          * @brief   Give access to the internal buffer in case the user wants to

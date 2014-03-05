@@ -44,6 +44,7 @@
 
 #include <PropWare.h>
 #include <mcp300x.h>
+#include <safeSpi.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI            PropWare::GPIO::P0
