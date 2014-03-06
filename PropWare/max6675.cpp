@@ -1,5 +1,5 @@
 /**
- * @file    max6675.c
+ * @file    max6675.cpp
  *
  * @project PropWare
  *

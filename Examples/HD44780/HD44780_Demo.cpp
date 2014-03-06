@@ -1,5 +1,5 @@
 /**
- * @file    HD44780_Demo.c
+ * @file    HD44780_Demo.cpp
  *
  * @project HD44780_Demo
  *

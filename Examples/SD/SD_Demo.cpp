@@ -1,5 +1,5 @@
 /**
- * @file    SD_Demo.c
+ * @file    SD_Demo.cpp
  *
  * @project SD_Demo
  *

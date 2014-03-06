@@ -1,5 +1,5 @@
 /**
- * @file    MCP300x_Demo.c
+ * @file    MCP300x_Demo.cpp
  *
  * @project MCP300x_Demo
  *

@@ -1,5 +1,5 @@
 /**
- * @file libsimpletext.h
+ * @file libsimpletext.c
  * Project and Test harness for library simpletext
  *
  * Copyright (c) 2013, Parallax Inc. MIT license.
@@ -161,7 +161,7 @@ int main(void)
   sprint(buffer, "%s %d %x %f %f\n", sval, ival, xval, fval, fval2);
   writeLine(text, "");
   writeLine(text, buffer);
-  
+
   writeLine(text, "All done.");
   serial_close(text);
 

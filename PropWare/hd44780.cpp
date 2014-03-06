@@ -1,5 +1,5 @@
 /**
- * @file    hd44780.c
+ * @file    hd44780.cpp
  *
  * @project PropWare
  *

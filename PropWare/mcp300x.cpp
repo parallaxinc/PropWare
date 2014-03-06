@@ -1,5 +1,5 @@
 /**
- * @file    mcp300x.c
+ * @file    mcp300x.cpp
  *
  * @project PropWare
  *

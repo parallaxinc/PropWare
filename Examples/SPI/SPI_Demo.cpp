@@ -1,5 +1,5 @@
 /**
- * @file    SPI_Demo.c
+ * @file    SPI_Demo.cpp
  *
  * @project SPI_Demo
  *

@@ -1,5 +1,5 @@
 /*
-* @file libsimplei2c.c
+* @file I2C_Demo.c
 *
 * @author Steve Denson
 *

@@ -1,5 +1,5 @@
 /**
- * @file    MAX6675_Demo.c
+ * @file    MAX6675_Demo.cpp
  *
  * @project MAX6675_Demo
  *

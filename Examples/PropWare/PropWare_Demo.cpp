@@ -1,5 +1,5 @@
 /**
- * @file    PropWare_Demo.c
+ * @file    PropWare_Demo.cpp
  *
  * @project PropWare_Demo
  *

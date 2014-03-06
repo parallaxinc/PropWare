@@ -1,5 +1,5 @@
 /**
- * @file    l3g.c
+ * @file    l3g.cpp
  *
  * @project PropWare
  *
