@@ -39,7 +39,8 @@ const char SD::SHELL_CD[] = "cd";
 const char SD::SHELL_TOUCH[] = "touch";
 
 const uint32_t SD::RESPONSE_TIMEOUT = 100 * MILLISECOND;
-const uint32_t SD::WIGGLE_ROOM = 1000;
+const uint32_t SD::SEND_ACTIVE_TIMEOUT = 500 * MILLISECOND;
+const uint32_t SD::WIGGLE_ROOM = 2000;
 
 /*********************************
  *** Public Method Definitions ***
@@ -199,10 +200,13 @@ PropWare::ErrorCode SD::verify_v2_0 (uint8_t response[], bool *stageCleared) {
 
 PropWare::ErrorCode SD::send_active (uint8_t response[]) {
     PropWare::ErrorCode err;
-    uint8_t i;
-
+    uint32_t timeout;
+    uint32_t longWiggleRoom = SD::WIGGLE_ROOM * 10;
     bool stageCleared = false;
-    for (i = 0; i < 8 && !stageCleared; ++i) {
+
+    // Attempt to send active
+    timeout = SD::SEND_ACTIVE_TIMEOUT + CNT;  //
+    do {
         // Send the application-specific pre-command
         check_errors(this->send_command(SD::CMD_APP, 0, SD::CRC_ACMD_PREP));
         check_errors(this->get_response(SD::RESPONSE_LEN_R1, response));
@@ -214,16 +218,11 @@ PropWare::ErrorCode SD::send_active (uint8_t response[]) {
         // If the card ACKed with the active state, we're all good!
         if (SD::RESPONSE_ACTIVE == this->m_firstByteResponse)
             stageCleared = true;
-#ifdef SD_OPTION_VERBOSE
-        else
-        printf("Failed attempt at active state: 0x%02x\n",
-                this->m_firstByteResponse);
-#endif
-    }
 
-    // If we couldn't get the card to go active after 8 tries, give up
-    if (!stageCleared)
-        return SD::INVALID_RESPONSE;
+        // Check for timeout
+        if (abs(timeout - CNT) < longWiggleRoom)
+            return SD::READ_TIMEOUT;
+    } while (!stageCleared);  // Wait until we have received the active response
 
 #ifdef SD_OPTION_VERBOSE
     // We did it!

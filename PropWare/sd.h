@@ -926,6 +926,7 @@ class SD {
 
         // Misc. SD Definitions
         static const uint32_t RESPONSE_TIMEOUT;  // Wait 0.1 seconds for a response before timing out
+        static const uint32_t SEND_ACTIVE_TIMEOUT;
         static const uint32_t WIGGLE_ROOM;
         static const uint8_t SECTOR_SIZE_SHIFT = 9;
 
