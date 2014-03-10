@@ -23,8 +23,14 @@ class ImportLibpropeller:
     @staticmethod
     def run():
         libpropellerPath = os.environ[ImportLibpropeller.LIBPROPELLER_ENV_VAR]
+
+        # Update the git repository
         subprocess.Popen(["git", "pull"], cwd=libpropellerPath)
+
+        # Clean the old directory
         rmtree(ImportLibpropeller.DESTINATION)
+
+        # Copy over the new one
         copytree(libpropellerPath + "/libpropeller", ImportLibpropeller.DESTINATION)
 
 if "__main__" == __name__:

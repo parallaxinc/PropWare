@@ -23,11 +23,9 @@ class ImportSimple:
         self.sourceFiles = []
 
     def run(self):
-        rootPath = ImportSimple.getRootPath()
-
         ImportSimple.clean()
 
-        self.getLibraries(rootPath)
+        self.getLibraries(ImportSimple.getRootPath())
 
         # Process every library that was found
         for library in self.libraries.keys():
@@ -93,6 +91,9 @@ class ImportSimple:
                     copy2(libraryDirectory + f, ImportSimple.PROPWARE_ROOT)
 
     def makeObjectList(self):
+        # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run
+        # in any guaranteed order)
+        self.sourceFiles.sort()
         with open(ImportSimple.CHEATER_DIR + "simpleObjects.mk", 'w') as f:
             f.write("OBJS = ")
             for sourceFile in self.sourceFiles:
@@ -100,14 +101,17 @@ class ImportSimple:
 
     @staticmethod
     def clean():
+        rmList = []
         for fname in os.listdir(ImportSimple.PROPWARE_ROOT):
             if ".h" == fname[-2:]:
-                os.remove(fname)
+                rmList.append(ImportSimple.PROPWARE_ROOT + fname)
 
         for fname in os.listdir(ImportSimple.CHEATER_DIR):
             if ".c" == fname[-2:]:
-                os.remove(fname)
+                rmList.append(ImportSimple.CHEATER_DIR + fname)
 
+        for fname in rmList:
+            os.remove(fname)
 
 if "__main__" == __name__:
     ImportSimple().run()
