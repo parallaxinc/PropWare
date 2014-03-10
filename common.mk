@@ -62,6 +62,7 @@ CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
 CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
+CXXSTANDARD = -std=gnu++0x
 LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
@@ -123,7 +124,7 @@ endif
 %.o: ../%.cpp ../%.h
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropG++ Compiler'
-	$(CC) $(INC) $(CXXFLAGS) -o $@ -c $<
+	$(CC) $(INC) $(CXXFLAGS) $(CXXSTANDARD) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 

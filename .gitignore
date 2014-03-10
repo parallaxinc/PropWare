@@ -3,6 +3,7 @@
 /docs/latex
 /Debug
 /.idea
+__pycache__
 .cproject
 .project
 objects.mk
