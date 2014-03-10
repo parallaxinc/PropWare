@@ -9,61 +9,89 @@
 @description:
 """
 import os
-from shutil import copytree, rmtree, copy2
+import shutil
 import subprocess
 import sys
-from filecmp import dircmp
 
 __author__ = 'david'
-
 
 class ImportLibpropeller:
     PROPWARE_ROOT = "../"
     DESTINATION = PROPWARE_ROOT + "libpropeller/"
     DESTINATION_SOURCES = DESTINATION + "source/"
     LIBPROPELLER_ENV_VAR = "LIBPROPELLER_PATH"
+    CLEAN_EXCLUDES = ["cmm", "lmm", "xmm", "xmmc", "objects.mk", "Makefile"]
 
-    @staticmethod
-    def run():
-        libpropellerPath = os.environ[ImportLibpropeller.LIBPROPELLER_ENV_VAR]
+    def __init__(self):
+        self.libpropellerPath = \
+            os.environ[ImportLibpropeller.LIBPROPELLER_ENV_VAR]
 
-        # Update the git repository
-        try:
-            subprocess.Popen(["git", "pull"], cwd=libpropellerPath)
-        except:
-            print("Unable to update git repo - possibly using old files",
-                  file=sys.stderr)
+    def run(self):
+        ImportLibpropeller.updateGit()
 
-        # Clean the old directory
-        rmtree(ImportLibpropeller.DESTINATION)
+        self.clean()
 
-        # Copy over the new one
-        copytree(libpropellerPath + "/libpropeller",
+        # Copy over the new files
+        self.copytree(self.libpropellerPath + "/libpropeller",
                  ImportLibpropeller.DESTINATION)
 
         # Copy all source files into a source directory so we can create the
         # library
-        ImportLibpropeller.copySourceFiles()
+        self.copySourceFiles()
 
-    @staticmethod
-    def copySourceFiles():
+    def clean(self):
+        """
+        Clean the old directory
+        """
+        if os.path.exists(ImportLibpropeller.DESTINATION):
+            for entry in os.listdir(ImportLibpropeller.DESTINATION):
+                if entry not in ImportLibpropeller.CLEAN_EXCLUDES:
+                    removable = ImportLibpropeller.DESTINATION + entry
+                    if os.path.isdir(removable):
+                        shutil.rmtree(removable)
+                    else:
+                        os.remove(removable)
+
+    @classmethod
+    def copytree(cls, src, dst):
+        for item in os.listdir(src):
+            s = os.path.join(src, item)
+            d = os.path.join(dst, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d)
+            else:
+                shutil.copy2(s, d)
+
+    @classmethod
+    def copySourceFiles(cls):
         os.mkdir(ImportLibpropeller.DESTINATION_SOURCES)
 
         for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION):
-            if not dircmp(root, ImportLibpropeller.DESTINATION_SOURCES):
+            if os.path.abspath(root) != os.path.abspath(ImportLibpropeller
+                .DESTINATION_SOURCES):
                 for fname in files:
                     if ImportLibpropeller.isSourceFile(fname):
-                        copy2(root + '/' + fname, ImportLibpropeller
+                        shutil.copy2(root + '/' + fname, ImportLibpropeller
                             .DESTINATION_SOURCES + fname)
 
-    @staticmethod
-    def isSourceFile(f):
+    @classmethod
+    def isSourceFile(cls, f):
         try:
             extension = f.split(".")[1]
         except IndexError:
             return False
 
         return extension in ["S", "s", "c", "cpp", "cxx", "cc"]
+
+    @classmethod
+    def updateGit(cls):
+        # Update the git repository
+        try:
+            subprocess.Popen(["git", "pull"], cwd=self.libpropellerPath)
+        except:
+            print("Unable to update git repo - possibly using old files",
+                  file=sys.stderr)
+
 
 if "__main__" == __name__:
     importer = ImportLibpropeller()
