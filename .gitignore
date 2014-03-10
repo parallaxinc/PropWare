@@ -5,7 +5,7 @@
 /.idea
 __pycache__
 .cproject
-.project
+.**project
 objects.mk
 sources.mk
 subdir.mk
