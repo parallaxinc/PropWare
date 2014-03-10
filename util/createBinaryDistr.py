@@ -19,14 +19,14 @@ class CreateBinaryDistr:
     PROPWARE_ROOT = "../"
     SIMPLE_LIB_PATH = "simple/"
     EXAMPLES_PATH = "Examples/"
-    ARCHIVE_FILE_NAME = ""
+    ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     MEM_MODS = ["cmm", "lmm", "xmm", "xmmc"]
     PROPWARE_LIB_STR = "libPropWare_%s.a"
     SIMPLE_LIB_STR = "libSimple_%s.a"
 
     def __init__(self):
         self.archive = None
-        CreateBinaryDistr.ARCHIVE_FILE_NAME = "PropWare_%s.zip" % time.strftime("%Y-%m-%d")
+        CreateBinaryDistr.ARCHIVE_FILE_NAME = CreateBinaryDistr.ARCHIVE_FILE_NAME % time.strftime("%Y-%m-%d")
 
     def run(self):
         os.chdir(CreateBinaryDistr.PROPWARE_ROOT)
@@ -82,10 +82,10 @@ class CreateBinaryDistr:
     @staticmethod
     def compile():
         if 0 != os.system("make -j4"):
-            raise MakeFailure()
+            raise MakeErrorException()
 
 
-class MakeFailure(Exception):
+class MakeErrorException(Exception):
     def __init__(self):
         pass
 

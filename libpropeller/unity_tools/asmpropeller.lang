@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language id="asmpropeller" _name="Assembler (Propeller GCC)" version="2.0" _section="Sources">
+	<metadata>
+	      <property name="mimetypes">text/x-asm;text/x-assembler</property>
+	      <property name="globs">*.S</property>
+	      <property name="line-comment-start">//</property>
+	      <property name="block-comment-start">/*</property>
+	      <property name="block-comment-end">*/</property>
+	</metadata>
+    <styles>
+      <style id="string" _name="String" map-to="def:string"/>
+      <style id="escaped-character" _name="Escaped Character" map-to="def:special-char"/>
+      <style id="preprocessor" _name="Preprocessor" map-to="def:preprocessor"/>
+      <style id="included-file" _name="Included File" map-to="def:string"/>
+      <style id="char" _name="Character" map-to="def:character"/>
+      <style id="keyword" _name="Keyword" map-to="def:keyword"/>
+      <style id="type" _name="Data Type" map-to="def:type"/>
+      <style id="comment" _name="Comment" map-to="def:comment"/>
+      <style id="operator" _name="Operator" map-to="def:operator"/>
+      <style id="directive" _name="Directive" map-to="def:keyword"/>
+    </styles>
+
+  <default-regex-options case-sensitive="false"/>
+
+    <definitions>
+        <context id="asmpropeller">
+            <include>
+
+                <context id="comment" style-ref="comment">
+                    <start>\/\/</start>
+                    <end>$</end>
+                </context>
+
+                <context id="string" end-at-line-end="true"
+                        style-ref="string">
+                    <start>"</start>
+                    <end>"</end>
+                    <include>
+                        <context id="escaped-character" style-ref="escaped-character">
+                            <match>\\.</match>
+                        </context>
+                    </include>
+                </context>
+
+                <context id="comment-multiline"
+                            style-ref="comment">
+                    <start>\/\*</start>
+                    <end>\*\/</end>
+                    <include>
+                        <context ref="def:in-comment"/>
+                    </include>
+                </context>
+
+                <context id="char" end-at-line-end="true" style-ref="char">
+                    <start>'</start>
+                    <end>'</end>
+                    <include>
+                        <context ref="escaped-character"/>
+                    </include>
+                </context>
+
+                <context ref="def:decimal"/>
+                <context ref="def:float"/>
+
+                <context id="keywords" style-ref="keyword">
+                    <!-- Assembly Effects -->
+		  <keyword>wc</keyword>
+		  <keyword>wz</keyword>
+		  <keyword>wr</keyword>
+		  <keyword>nr</keyword>
+		  <!-- Assembly Instructions -->
+		  <keyword>wrbyte</keyword>
+		  <keyword>rdbyte</keyword>
+		  <keyword>wrword</keyword>
+		  <keyword>rdword</keyword>
+		  <keyword>wrlong</keyword>
+		  <keyword>rdlong</keyword>
+		  <keyword>hubop</keyword>
+		  <keyword>clkset</keyword>
+		  <keyword>cogid</keyword>
+		  <keyword>coginit</keyword>
+		  <keyword>cogstop</keyword>
+		  <keyword>locknew</keyword>
+		  <keyword>lockret</keyword>
+		  <keyword>lockset</keyword>
+		  <keyword>lockclr</keyword>
+		  <keyword>mul</keyword>
+		  <keyword>muls</keyword>
+		  <keyword>enc</keyword>
+		  <keyword>ones</keyword>
+		  <keyword>ror</keyword>
+		  <keyword>rol</keyword>
+		  <keyword>shr</keyword>
+		  <keyword>shl</keyword>
+		  <keyword>rcr</keyword>
+		  <keyword>rcl</keyword>
+		  <keyword>sar</keyword>
+		  <keyword>rev</keyword>
+		  <keyword>mins</keyword>
+		  <keyword>maxs</keyword>
+		  <keyword>min</keyword>
+		  <keyword>max</keyword>
+		  <keyword>movs</keyword>
+		  <keyword>movd</keyword>
+		  <keyword>movi</keyword>
+		  <keyword>jmpret</keyword>
+		  <keyword>jmp</keyword>
+		  <keyword>call</keyword>
+		  <keyword>ret</keyword>
+		  <keyword>test</keyword>
+		  <keyword>testin</keyword>
+		  <keyword>and</keyword>
+		  <keyword>andn</keyword>
+		  <keyword>or</keyword>
+		  <keyword>xor</keyword>
+		  <keyword>muxc</keyword>
+		  <keyword>muxnc</keyword>
+		  <keyword>muxz</keyword>
+		  <keyword>muxnz</keyword>
+		  <keyword>add</keyword>
+		  <keyword>sub</keyword>
+		  <keyword>cmp</keyword>
+		  <keyword>addabs</keyword>
+		  <keyword>subabs</keyword>
+		  <keyword>sumc</keyword>
+		  <keyword>sumz</keyword>
+		  <keyword>sumnz</keyword>
+		  <keyword>mov</keyword>
+		  <keyword>neg</keyword>
+		  <keyword>abs</keyword>
+		  <keyword>absneg</keyword>
+		  <keyword>negc</keyword>
+		  <keyword>negnc</keyword>
+		  <keyword>negz</keyword>
+		  <keyword>negnz</keyword>
+		  <keyword>cmps</keyword>
+		  <keyword>cmpsx</keyword>
+		  <keyword>addx</keyword>
+		  <keyword>subx</keyword>
+		  <keyword>cmpx</keyword>
+		  <keyword>adds</keyword>
+		  <keyword>subs</keyword>
+		  <keyword>addsx</keyword>
+		  <keyword>subsx</keyword>
+		  <keyword>cmpsub</keyword>
+		  <keyword>djnz</keyword>
+		  <keyword>tjnz</keyword>
+		  <keyword>tjz</keyword>
+		  <keyword>waitpeq</keyword>
+		  <keyword>waitpne</keyword>
+		  <keyword>waitcnt</keyword>
+		  <keyword>waitvid</keyword>
+		  <keyword>nop</keyword>
+                </context>
+
+                <context id="conditionals" style-ref="operator">
+                  	  <keyword>if_always</keyword>
+			  <keyword>if_never</keyword>
+			  <keyword>if_e</keyword>
+			  <keyword>if_ne</keyword>
+			  <keyword>if_a</keyword>
+			  <keyword>if_b</keyword>
+			  <keyword>if_ae</keyword>
+			  <keyword>if_be</keyword>
+			  <keyword>if_c</keyword>
+			  <keyword>if_nc</keyword>
+			  <keyword>if_z</keyword>
+			  <keyword>if_nz</keyword>
+			  <keyword>if_c_eq_z</keyword>
+			  <keyword>if_c_ne_z</keyword>
+			  <keyword>if_c_and_z</keyword>
+			  <keyword>if_c_and_nz</keyword>
+			  <keyword>if_nc_and_z</keyword>
+			  <keyword>if_nc_and_nz</keyword>
+			  <keyword>if_c_or_z</keyword>
+			  <keyword>if_c_or_nz</keyword>
+			  <keyword>if_nc_or_z</keyword>
+			  <keyword>if_nc_or_nz</keyword>
+			  <keyword>if_z_eq_c</keyword>
+			  <keyword>if_z_ne_c</keyword>
+			  <keyword>if_z_and_c</keyword>
+			  <keyword>if_z_and_nc</keyword>
+			  <keyword>if_nz_and_c</keyword>
+			  <keyword>if_nz_and_nc</keyword>
+			  <keyword>if_z_or_c</keyword>
+			  <keyword>if_z_or_nc</keyword>
+			  <keyword>if_nz_or_c</keyword>
+			  <keyword>if_nz_or_nc</keyword>
+		</context>
+
+		<context id="registers" style-ref="type">
+			<keyword>dira</keyword>
+			<keyword>dirb</keyword>
+			<keyword>ina</keyword>
+			<keyword>inb</keyword>
+			<keyword>outa</keyword>
+			<keyword>outb</keyword>
+			<keyword>cnt</keyword>
+			<keyword>ctra</keyword>
+			<keyword>ctrb</keyword>
+			<keyword>frqa</keyword>
+			<keyword>frqb</keyword>
+			<keyword>phsa</keyword>
+			<keyword>phsb</keyword>
+			<keyword>vcfg</keyword>
+			<keyword>vscl</keyword>
+			<keyword>par</keyword>
+			<keyword>spr</keyword>
+
+                </context>
+
+		<context id="directives" style-ref="directive">
+			<keyword>.cog_ram</keyword>
+			<keyword>.compress</keyword>
+			<keyword>.fit</keyword>
+			<keyword>.hub_ram</keyword>
+			<keyword>.res</keyword>
+			<keyword>.section</keyword>
+			<keyword>.long</keyword>
+			<keyword>.global</keyword>
+			<keyword>.res</keyword>
+			<keyword>.ord</keyword>
+			<keyword>.equ</keyword>
+		</context>
+
+
+
+
+                <context id="preprocessor"
+                            style-ref="preprocessor">
+                    <prefix>^#</prefix>
+
+                    <keyword>define</keyword>
+                    <keyword>undef</keyword>
+                    <keyword>if(n?def)?</keyword>
+                    <keyword>else</keyword>
+                    <keyword>elif</keyword>
+                    <keyword>endif</keyword>
+                </context>
+
+                <context id="if0-comment" style-ref="comment">
+                    <start>^#if 0\b</start>
+                    <end>^#(endif|else|elif)\b</end>
+                    <include>
+                        <context id="if-in-if0">
+                            <start>^#if(n?def)?\b</start>
+                            <end>^#endif\b</end>
+                            <include>
+                                <context ref="if-in-if0"/>
+                            </include>
+                        </context>
+                    </include>
+                </context>
+
+                <context id="include" style-ref="preprocessor">
+                    <match>^#include (".*"|&lt;.*&gt;)</match>
+                    <include>
+                        <context id="included-file" 
+                                sub-pattern="1"
+                                style-ref="included-file"/>
+                    </include>
+                </context>
+
+            </include>
+        </context>
+    </definitions>
+</language>
+
+
+
+
+

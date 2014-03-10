@@ -23,7 +23,11 @@ class ImportSimple:
         self.sourceFiles = []
 
     def run(self):
-        self.getLibraries(ImportSimple.getRootPath())
+        rootPath = ImportSimple.getRootPath()
+
+        ImportSimple.clean()
+
+        self.getLibraries(rootPath)
 
         # Process every library that was found
         for library in self.libraries.keys():
@@ -93,6 +97,17 @@ class ImportSimple:
             f.write("OBJS = ")
             for sourceFile in self.sourceFiles:
                 f.write(sourceFile[:-1] + "o ")
+
+    @staticmethod
+    def clean():
+        for fname in os.listdir(ImportSimple.PROPWARE_ROOT):
+            if ".h" == fname[-2:]:
+                os.remove(fname)
+
+        for fname in os.listdir(ImportSimple.CHEATER_DIR):
+            if ".c" == fname[-2:]:
+                os.remove(fname)
+
 
 if "__main__" == __name__:
     ImportSimple().run()
