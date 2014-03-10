@@ -15,6 +15,7 @@ makefile
 **.a
 **.map
 **.rawmap
+**.pyc
 **~
 **.swp
 **.zip
