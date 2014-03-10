@@ -43,22 +43,16 @@ else
 endif
 
 # where we installed the propeller binaries and libraries
-ifndef PROPGCC_PREFIX
-	PROPGCC_PREFIX = /opt/parallax
-endif
+PROPGCC_PREFIX ?= /opt/parallax
 
 # libgcc directory
 LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 
 # Define a default memory model
-ifndef MODEL
-	MODEL=lmm
-endif
+MODEL ?= lmm
 
 # Define a default board
-ifndef BOARD
-	BOARD=$(PROPELLER_LOAD_BOARD)
-endif
+BOARD ?= $(PROPELLER_LOAD_BOARD)
 
 ifneq ($(BOARD),)
 	BOARDFLAG=-b$(BOARD)
@@ -67,8 +61,8 @@ endif
 CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
-CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics '-D SD_SAFE_SPI=$(SD_SAFE_SPI)'
-LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap 
+CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
+LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -ltiny
