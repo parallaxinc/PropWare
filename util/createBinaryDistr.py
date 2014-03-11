@@ -16,59 +16,41 @@ from zipfile import ZipFile
 
 
 class CreateBinaryDistr:
-    PROPWARE_ROOT = "../"
+    PROPWARE_SOURCES = "PropWare/"
     SIMPLE_LIB_PATH = "simple/"
     EXAMPLES_PATH = "Examples/"
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     MEM_MODS = ["cmm", "lmm", "xmm", "xmmc"]
     PROPWARE_LIB_STR = "libPropWare_%s.a"
     SIMPLE_LIB_STR = "libSimple_%s.a"
+    WHITELISTED_FILES = ["Makefile", "Doxyfile", "README", "run_all_tests", "run_unit"]
+    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "txt", "rb", "jpg",
+                            "lang", "pdf", "png"]
+    BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git"]
 
     def __init__(self):
         self.archive = None
         CreateBinaryDistr.ARCHIVE_FILE_NAME = CreateBinaryDistr.ARCHIVE_FILE_NAME % time.strftime("%Y-%m-%d")
 
     def run(self):
-        os.chdir(CreateBinaryDistr.PROPWARE_ROOT)
+        self.checkProperInitDirectory()
+        os.chdir("..")  # File must be run from within <propware root>/util directory
 
         CreateBinaryDistr.clean()
         CreateBinaryDistr.compile()
 
         with ZipFile(CreateBinaryDistr.ARCHIVE_FILE_NAME, 'w') as self.archive:
-            self.addSourceFiles()
-            self.addPropWareLibs()
-            self.addSimpleLibs()
-            self.addExamples()
+            for root, dirs, files in os.walk('.'):
+                rootList = root.split('/')
+                try:
+                    isBlacklisted = rootList[1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
+                except IndexError:
+                    isBlacklisted = False
 
-    def addSourceFiles(self):
-        # Add all files in the root directory
-        rootDirList = glob("./*")
-        for entry in rootDirList:
-            if os.path.isfile(entry) and entry[-3:] != "zip":
-                self.archive.write(entry)
-
-        # Add all files in the simple library directory
-        simpleFileList = glob(CreateBinaryDistr.SIMPLE_LIB_PATH + "*")
-        for entry in simpleFileList:
-            if os.path.isfile(entry):
-                self.archive.write(entry)
-
-    def addPropWareLibs(self):
-        for memMode in CreateBinaryDistr.MEM_MODS:
-            libName = CreateBinaryDistr.PROPWARE_LIB_STR % memMode
-            self.archive.write(memMode + '/' + libName)
-
-    def addSimpleLibs(self):
-        for memMode in CreateBinaryDistr.MEM_MODS:
-            simpleLibPath = CreateBinaryDistr.SIMPLE_LIB_PATH + memMode + '/'
-            libName = CreateBinaryDistr.SIMPLE_LIB_STR % memMode
-            self.archive.write(simpleLibPath + libName)
-
-    def addExamples(self):
-        # Add everything in the Examples folder
-        for root, subdirs, files in os.walk(CreateBinaryDistr.EXAMPLES_PATH):
-            for f in files:
-                self.archive.write(os.path.join(root, f))
+                if not isBlacklisted:
+                    for file in files:
+                        if self.isWhitelisted(file):
+                            self.archive.write(root + '/' + file)
 
     @staticmethod
     def clean():
@@ -84,6 +66,23 @@ class CreateBinaryDistr:
         if 0 != os.system("make -j4"):
             raise MakeErrorException()
 
+    @staticmethod
+    def checkProperInitDirectory():
+        if "createBinaryDistr.py" not in os.listdir('.'):
+            raise IncorrectStartingDirectoryException()
+
+    @staticmethod
+    def isWhitelisted(filename):
+        if filename in CreateBinaryDistr.WHITELISTED_FILES:
+            return True
+        else:
+            filename = filename.split('.')
+            if 2 == len(filename) and 0 != len(filename[0]):
+                if filename[1].lower() in CreateBinaryDistr.WHITELIST_EXTENSIONS:
+                    return True
+
+        return False
+
 
 class MakeErrorException(Exception):
     def __init__(self):
@@ -91,6 +90,14 @@ class MakeErrorException(Exception):
 
     def __str__(self):
         return "Make failed to finish executing"
+
+
+class IncorrectStartingDirectoryException(Exception):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "Must be executed from within <propware root>/util"
 
 
 if "__main__" == __name__:
