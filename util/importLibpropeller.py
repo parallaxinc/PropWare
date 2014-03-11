@@ -8,6 +8,7 @@
 """
 @description:
 """
+from __future__ import print_function
 import os
 import shutil
 import subprocess
@@ -68,9 +69,10 @@ class ImportLibpropeller:
                 shutil.copy2(s, d)
 
     def copySourceFiles(self):
+        # noinspection PyBroadException
         try:
             os.mkdir(ImportLibpropeller.DESTINATION_SOURCES)
-        except FileExistsError:
+        except:  # When Python3 is standard, we can specify FileExistsError... but it's not in Python2
             pass  # Don't care if the file already exists
 
         for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION):
