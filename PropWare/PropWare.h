@@ -252,12 +252,23 @@ uint8_t count_bits (uint32_t par);
  *
  * @note        Return value is 0-indexed
  *
- * @param[in]   pinMask     Value with only a single bit set high representing
- *                          Propeller pin (i.e.: 0x80 would be pin 7)
+ * @param[in]   pin     Value with only a single bit set high representing
+ *                      Propeller pin (i.e.: 0x80 would be pin 7)
  *
- * @return      Return the pin number of pinMask
+ * @return      Return the pin number of pin
  */
-uint8_t get_pin_num (const uint32_t pinMask);
+uint8_t get_pin_num (const GPIO::Pin pin);
+
+/**
+ * @brief       Return a PropWare::GPIO::Pin type based on a pin number
+ *
+ * @note        Value is 0-indexed
+ *
+ * @param[in]   pinNum  Pin number
+ *
+ * @return      Pin represented by a bit-mask
+ */
+GPIO::Pin get_pin_from_num (const uint8_t pinNum);
 
 }
 

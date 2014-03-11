@@ -80,9 +80,78 @@ uint8_t PropWare::count_bits (uint32_t par) {
     return c;
 }
 
-uint8_t PropWare::get_pin_num (const uint32_t pinMask) {
+uint8_t PropWare::get_pin_num (const PropWare::GPIO::Pin pin) {
     uint8_t temp = 0;
-    while (!(0x01 & (pinMask >> temp++)))
+    while (!(0x01 & (pin >> temp++)))
         ;
     return --temp;
+}
+
+PropWare::GPIO::Pin get_pin_from_num (const uint8_t pinNum) {
+    switch (pinNum) {
+        case 0:
+            return PropWare::GPIO::P0;
+        case 1:
+            return PropWare::GPIO::P1;
+        case 2:
+            return PropWare::GPIO::P2;
+        case 3:
+            return PropWare::GPIO::P3;
+        case 4:
+            return PropWare::GPIO::P4;
+        case 5:
+            return PropWare::GPIO::P5;
+        case 6:
+            return PropWare::GPIO::P6;
+        case 7:
+            return PropWare::GPIO::P7;
+        case 8:
+            return PropWare::GPIO::P8;
+        case 9:
+            return PropWare::GPIO::P9;
+        case 10:
+            return PropWare::GPIO::P10;
+        case 11:
+            return PropWare::GPIO::P11;
+        case 12:
+            return PropWare::GPIO::P12;
+        case 13:
+            return PropWare::GPIO::P13;
+        case 14:
+            return PropWare::GPIO::P14;
+        case 15:
+            return PropWare::GPIO::P15;
+        case 16:
+            return PropWare::GPIO::P16;
+        case 17:
+            return PropWare::GPIO::P17;
+        case 18:
+            return PropWare::GPIO::P18;
+        case 19:
+            return PropWare::GPIO::P19;
+        case 20:
+            return PropWare::GPIO::P20;
+        case 21:
+            return PropWare::GPIO::P21;
+        case 22:
+            return PropWare::GPIO::P22;
+        case 23:
+            return PropWare::GPIO::P23;
+        case 24:
+            return PropWare::GPIO::P24;
+        case 25:
+            return PropWare::GPIO::P25;
+        case 26:
+            return PropWare::GPIO::P26;
+        case 27:
+            return PropWare::GPIO::P27;
+        case 28:
+            return PropWare::GPIO::P28;
+        case 29:
+            return PropWare::GPIO::P29;
+        case 30:
+            return PropWare::GPIO::P30;
+        case 31:
+            return PropWare::GPIO::P31;
+    }
 }
