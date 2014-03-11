@@ -15,31 +15,36 @@ import sys
 
 __author__ = 'david'
 
+
 class ImportLibpropeller:
     PROPWARE_ROOT = "../"
     DESTINATION = PROPWARE_ROOT + "libpropeller/"
-    DESTINATION_SOURCES = DESTINATION + "source/"
+    SOURCE_DROPBOX = "source"
+    DESTINATION_SOURCES = DESTINATION + SOURCE_DROPBOX + '/'
     LIBPROPELLER_ENV_VAR = "LIBPROPELLER_PATH"
-    CLEAN_EXCLUDES = ["cmm", "lmm", "xmm", "xmmc", "objects.mk", "Makefile"]
+    SOURCE_OBJECT_LIST = "libpropellerObjects.mk"
+    CLEAN_EXCLUDES = ["cmm", "lmm", "xmm", "xmmc", "Makefile", SOURCE_DROPBOX]
 
     def __init__(self):
-        self.libpropellerPath = \
-            os.environ[ImportLibpropeller.LIBPROPELLER_ENV_VAR]
+        self.libpropellerPath = os.environ[ImportLibpropeller.LIBPROPELLER_ENV_VAR]
+        self.sourceFiles = []
 
     def run(self):
-        ImportLibpropeller.updateGit()
+        self.updateGit()
 
         self.clean()
 
         # Copy over the new files
-        self.copytree(self.libpropellerPath + "/libpropeller",
-                 ImportLibpropeller.DESTINATION)
+        self.copytree(self.libpropellerPath + "/libpropeller", ImportLibpropeller.DESTINATION)
 
         # Copy all source files into a source directory so we can create the
         # library
         self.copySourceFiles()
 
-    def clean(self):
+        self.makeObjectList()
+
+    @staticmethod
+    def clean():
         """
         Clean the old directory
         """
@@ -52,8 +57,8 @@ class ImportLibpropeller:
                     else:
                         os.remove(removable)
 
-    @classmethod
-    def copytree(cls, src, dst):
+    @staticmethod
+    def copytree(src, dst):
         for item in os.listdir(src):
             s = os.path.join(src, item)
             d = os.path.join(dst, item)
@@ -62,35 +67,45 @@ class ImportLibpropeller:
             else:
                 shutil.copy2(s, d)
 
-    @classmethod
-    def copySourceFiles(cls):
-        os.mkdir(ImportLibpropeller.DESTINATION_SOURCES)
+    def copySourceFiles(self):
+        try:
+            os.mkdir(ImportLibpropeller.DESTINATION_SOURCES)
+        except FileExistsError:
+            pass  # Don't care if the file already exists
 
         for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION):
-            if os.path.abspath(root) != os.path.abspath(ImportLibpropeller
-                .DESTINATION_SOURCES):
-                for fname in files:
-                    if ImportLibpropeller.isSourceFile(fname):
-                        shutil.copy2(root + '/' + fname, ImportLibpropeller
-                            .DESTINATION_SOURCES + fname)
+            if os.path.abspath(root) != os.path.abspath(ImportLibpropeller.DESTINATION_SOURCES):
+                for f in files:
+                    if ImportLibpropeller.isAsmFile(f):
+                        shutil.copy2(root + '/' + f, ImportLibpropeller.DESTINATION_SOURCES + f)
+                        self.sourceFiles.append(f)
 
-    @classmethod
-    def isSourceFile(cls, f):
+    def makeObjectList(self):
+        # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run
+        # in any guaranteed order)
+        self.sourceFiles.sort()
+        with open(ImportLibpropeller.DESTINATION_SOURCES + ImportLibpropeller.SOURCE_OBJECT_LIST, 'w') as f:
+            f.write("OBJS = ")
+            for sourceFile in self.sourceFiles:
+                sourceFile = sourceFile.split('.')[0]  # Remove the extension
+                f.write(sourceFile + ".o ")
+
+    @staticmethod
+    def isAsmFile(f):
         try:
             extension = f.split(".")[1]
         except IndexError:
             return False
 
-        return extension in ["S", "s", "c", "cpp", "cxx", "cc"]
+        return extension in ["S", "s"]
 
-    @classmethod
-    def updateGit(cls):
+    def updateGit(self):
         # Update the git repository
+        # noinspection PyBroadException
         try:
             subprocess.Popen(["git", "pull"], cwd=self.libpropellerPath)
         except:
-            print("Unable to update git repo - possibly using old files",
-                  file=sys.stderr)
+            print("Unable to update git repo - possibly using old files", file=sys.stderr)
 
 
 if "__main__" == __name__:

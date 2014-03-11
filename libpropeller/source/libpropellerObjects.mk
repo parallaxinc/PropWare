@@ -1,0 +1,1 @@
+OBJS = full_duplex_serial.o full_duplex_serial.o mcp3208.o mcp3208.o pulse_width_reader.o pulse_width_reader.o pulse_width_reader.o pulse_width_reader.o pwm2.o pwm2.o pwm2.o quadrature_encoder.o quadrature_encoder.o serial.o serial.o serial.o serial.o 

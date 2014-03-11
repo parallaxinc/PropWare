@@ -38,9 +38,9 @@
  * @{
  */
 
-#define DEBUG
+//#define DEBUG
 //#define LOW_RAM_MODE
-#define TEST_WRITE
+//#define TEST_WRITE
 #define TEST_SHELL
 
 // Includes
@@ -52,13 +52,13 @@
 #include <PropWare/sd.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI                PropWare::GPIO::P0
+#define MOSI        PropWare::GPIO::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO                PropWare::GPIO::P1
+#define MISO        PropWare::GPIO::P1
 /** Pin number for the clock signal */
-#define SCLK                PropWare::GPIO::P2
+#define SCLK        PropWare::GPIO::P2
 /** Pin number for chip select */
-#define CS                  PropWare::GPIO::P4
+#define CS          PropWare::GPIO::P4
 
 #define OLD_FILE    "STUFF.TXT"
 #define NEW_FILE    "TEST.TXT"

@@ -66,7 +66,7 @@ int main () {
 
     // Start your engines!!!
     if ((err = sd.start(MOSI, MISO, SCLK, CS, -1)))
-    error(err, &sd);
+        error(err, &sd);
 
 #ifdef DEBUG
     printf("SD routine started. Mounting now...\n");
@@ -142,15 +142,20 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
-#ifdef DEBUG
+    uint32_t leds = err;
+
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
         PropWare::SafeSPI::getSafeSPI()->print_error_str(
                 (PropWare::SPI::ErrorCode) err);
     else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
         sd->print_error_str((PropWare::SD::ErrorCode) err);
 
-#endif
-
-    while (1)
-        ;
+    PropWare::GPIO::set_dir(PropWare::BYTE_2, PropWare::GPIO::OUT);
+    leds <<= 16;
+    while (1) {
+        PropWare::GPIO::pin_write(PropWare::BYTE_2, leds);
+        waitcnt(100*MILLISECOND);
+        PropWare::GPIO::pin_clear(PropWare::BYTE_2);
+        waitcnt(100*MILLISECOND);
+    }
 }

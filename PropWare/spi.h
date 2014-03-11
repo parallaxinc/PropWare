@@ -36,13 +36,6 @@
 
 /** @name   SPI Extra Code Options
  * @{ */
-/**
- * Debugging features similar to exceptions; Errors will be caught the program
- * will enter an infinite loop
- * <p>
- * DEFAULT: Off
- */
-#define SPI_OPTION_DEBUG
 // This allows Doxygen to document the macro without permanently enabling it
 //#undef SPI_OPTION_DEBUG
 /**

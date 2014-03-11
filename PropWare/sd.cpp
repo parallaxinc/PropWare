@@ -40,7 +40,7 @@ const char SD::SHELL_TOUCH[] = "touch";
 
 const uint32_t SD::RESPONSE_TIMEOUT = 100 * MILLISECOND;
 const uint32_t SD::SEND_ACTIVE_TIMEOUT = 500 * MILLISECOND;
-const uint32_t SD::WIGGLE_ROOM = 2000;
+const uint32_t SD::SINGLE_BYTE_WIGGLE_ROOM = 150*MICROSECOND;
 
 /*********************************
  *** Public Method Definitions ***
@@ -201,7 +201,7 @@ PropWare::ErrorCode SD::verify_v2_0 (uint8_t response[], bool *stageCleared) {
 PropWare::ErrorCode SD::send_active (uint8_t response[]) {
     PropWare::ErrorCode err;
     uint32_t timeout;
-    uint32_t longWiggleRoom = SD::WIGGLE_ROOM * 10;
+    uint32_t longWiggleRoom = 3*MILLISECOND;
     bool stageCleared = false;
 
     // Attempt to send active
@@ -1179,7 +1179,7 @@ PropWare::ErrorCode SD::get_response (uint8_t bytes, uint8_t *dat) {
                         sizeof(this->m_firstByteResponse)));
 
         // Check for timeout
-        if (abs(timeout - CNT) < SD::WIGGLE_ROOM)
+        if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
             return SD::READ_TIMEOUT;
     } while (0xff == this->m_firstByteResponse);  // wait for transmission end
 
@@ -1218,7 +1218,7 @@ PropWare::ErrorCode SD::read_block (uint16_t bytes, uint8_t *dat) {
                         sizeof(this->m_firstByteResponse)));
 
         // Check for timeout
-        if (abs(timeout - CNT) < SD::WIGGLE_ROOM)
+        if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
             return SD::READ_TIMEOUT;
     } while (0xff == this->m_firstByteResponse);  // wait for transmission end
 
@@ -1230,7 +1230,7 @@ PropWare::ErrorCode SD::read_block (uint16_t bytes, uint8_t *dat) {
             check_errors(this->m_spi->shift_in(8, dat, sizeof(*dat)));
 
             // Check for timeout
-            if (abs(timeout - CNT) < SD::WIGGLE_ROOM)
+            if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
                 return SD::READ_TIMEOUT;
         } while (SD::DATA_START_ID != *dat);  // wait for transmission end
 
@@ -1244,7 +1244,7 @@ PropWare::ErrorCode SD::read_block (uint16_t bytes, uint8_t *dat) {
             }
 #endif
             while (bytes--) {
-#ifdef SPI_FAST
+#ifdef SPI_OPTION_FAST
                 check_errors(this->m_spi->shift_in_fast(8, dat++, sizeof(*dat)));
 #else
                 check_errors(this->m_spi->shift_in(8, dat++, sizeof(*dat)));
@@ -1260,7 +1260,7 @@ PropWare::ErrorCode SD::read_block (uint16_t bytes, uint8_t *dat) {
                                     sizeof(checksum)));
 
                     // Check for timeout
-                    if ((timeout - CNT) < SD::WIGGLE_ROOM)
+                    if ((timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
                         return SD::READ_TIMEOUT;
                 } while (0xff == checksum);  // wait for transmission end
             }
@@ -1288,7 +1288,7 @@ PropWare::ErrorCode SD::write_block (uint16_t bytes, uint8_t *dat) {
                         sizeof(this->m_firstByteResponse)));
 
         // Check for timeout
-        if (abs(timeout - CNT) < SD::WIGGLE_ROOM)
+        if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
             return SD::READ_TIMEOUT;
     } while (0xff == this->m_firstByteResponse);  // wait for transmission end
 
@@ -1301,8 +1301,8 @@ PropWare::ErrorCode SD::write_block (uint16_t bytes, uint8_t *dat) {
 
         // Send all bytes
         while (bytes--) {
-#ifdef SPI_FAST
-            this->m_spi->shift_out_fast(8, *(dat++));
+#ifdef SPI_OPTION_FAST
+            check_errors(this->m_spi->shift_out_fast(8, *(dat++)));
 #else
             check_errors(this->m_spi->shift_out(8, *(dat++)));
 #endif
@@ -1316,7 +1316,7 @@ PropWare::ErrorCode SD::write_block (uint16_t bytes, uint8_t *dat) {
                             sizeof(this->m_firstByteResponse)));
 
             // Check for timeout
-            if (abs(timeout - CNT) < SD::WIGGLE_ROOM)
+            if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
                 return SD::READ_TIMEOUT;
         } while (0xff == this->m_firstByteResponse);  // wait for transmission end
         if (SD::RSPNS_TKN_ACCPT
@@ -1337,7 +1337,7 @@ PropWare::ErrorCode SD::read_data_block (uint32_t address, uint8_t *dat) {
 
     // Wait until the SD card is no longer busy
     while (!temp)
-        this->m_spi->shift_in(8, &temp, 1);
+        this->m_spi->shift_in(8, &temp, sizeof(temp));
 
 #ifdef SD_OPTION_VERBOSE
     printf("Reading block at sector address: 0x%08x / %u\n", address, address);

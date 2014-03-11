@@ -55,9 +55,7 @@ PropWare::ErrorCode SPI::start (const GPIO::Pin mosi, const GPIO::Pin miso,
         const GPIO::Pin sclk, const int32_t frequency, const SPI::Mode mode,
         const SPI::BitMode bitmode) {
     PropWare::ErrorCode err;
-#ifdef SPI_OPTION_DEBUG
     const char str[] = "start";
-#endif
 
 #ifdef SPI_OPTION_DEBUG_PARAMS
     // Ensure all pin-mask parameters have exactly 1 set bit
