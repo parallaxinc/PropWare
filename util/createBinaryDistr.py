@@ -13,6 +13,8 @@ import os
 import time
 from glob import glob
 from zipfile import ZipFile
+from importLibpropeller import ImportLibpropeller
+from importSimple import ImportSimple
 
 
 class CreateBinaryDistr:
@@ -34,6 +36,15 @@ class CreateBinaryDistr:
 
     def run(self):
         self.checkProperInitDirectory()
+
+        # Import libpropeller
+        libpropellerImporter = ImportLibpropeller()
+        libpropellerImporter.run()
+
+        # Import simple libraries
+        simpleImporter = ImportSimple()
+        simpleImporter.run()
+
         os.chdir("..")  # File must be run from within <propware root>/util directory
 
         CreateBinaryDistr.clean()
