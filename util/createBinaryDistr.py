@@ -46,6 +46,7 @@ class CreateBinaryDistr:
 
         # The remainder of this script needs to be run from the PropWare root directory
         os.chdir("..")
+        CreateBinaryDistr.cleanOldArchives()
 
         try:
             for branch in CreateBinaryDistr.BRANCHES:
@@ -60,7 +61,6 @@ class CreateBinaryDistr:
     def runInBranch(self, branch):
         # Clean any leftover crud
         CreateBinaryDistr.clean()
-        CreateBinaryDistr.cleanOldArchives()
 
         # Attempt to checkout the next branch
         if 0 == CreateBinaryDistr.checkout(branch):
