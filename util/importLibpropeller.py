@@ -105,9 +105,11 @@ class ImportLibpropeller:
         # Update the git repository
         # noinspection PyBroadException
         try:
-            subprocess.Popen(["git", "pull"], cwd=self.libpropellerPath)
-        except:
-            print("Unable to update git repo - possibly using old files", file=sys.stderr)
+            subprocess.check_output("git pull", cwd=self.libpropellerPath, shell=True)
+        except subprocess.CalledProcessError as e:
+            print("Looks like I can't update the git repository for libpropeller. Sorry!")
+            print("Caused by: " + str(e), file=sys.stderr)
+            print(e.output.decode(), file=sys.stderr)
 
 
 if "__main__" == __name__:
