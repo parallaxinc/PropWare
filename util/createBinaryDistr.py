@@ -17,6 +17,7 @@ from zipfile import ZipFile
 import subprocess
 from importLibpropeller import ImportLibpropeller
 from importSimple import ImportSimple
+from time import sleep
 
 
 class CreateBinaryDistr:
@@ -25,12 +26,12 @@ class CreateBinaryDistr:
     WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "txt", "rb", "jpg",
                             "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git"]
-    USEFUL_GIT_BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
-    CURRENT_SUGGESTION = ("current", "release-2.0")
+    BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
+    CURRENT_SUGGESTION = "release-2.0"
 
     def __init__(self):
-        self.branches = CreateBinaryDistr.USEFUL_GIT_BRANCHES
-        self.branches.append(CreateBinaryDistr.CURRENT_SUGGESTION[0])
+        CreateBinaryDistr.BRANCHES.sort()
+        self.successes = []
 
     def run(self):
         self.checkProperWorkingDirectory()
@@ -47,12 +48,14 @@ class CreateBinaryDistr:
         os.chdir("..")
 
         try:
-            for branch in self.branches:
+            for branch in CreateBinaryDistr.BRANCHES:
                 self.runInBranch(branch)
         except Exception as e:
             print(e, file=sys.stderr)
         finally:
             CreateBinaryDistr.attemptCleanExit()
+
+        self.printSummary()
 
     def runInBranch(self, branch):
         # Clean any leftover crud
@@ -84,6 +87,10 @@ class CreateBinaryDistr:
                         for file in files:
                             if self.isWhitelisted(file):
                                 archive.write(root + '/' + file)
+
+            self.successes.append(branch)
+            if CreateBinaryDistr.CURRENT_SUGGESTION == branch:
+                self.successes.append("current")
 
         # Clean again. Cleaning is good. You should clean your house more often too!
         CreateBinaryDistr.clean()
@@ -133,11 +140,23 @@ class CreateBinaryDistr:
     @staticmethod
     def attemptCleanExit():
         try:
-            subprocess.check_output("git checkout " + CreateBinaryDistr.CURRENT_SUGGESTION[1], shell=True)
+            subprocess.check_output("git checkout " + CreateBinaryDistr.CURRENT_SUGGESTION, shell=True)
         except subprocess.CalledProcessError as e:
             print("Failed to return git repository to 'current' branch", file=sys.stderr)
             print("Caused by: " + str(e), file=sys.stderr)
             print(e.output.decode(), file=sys.stderr)
+
+    def printSummary(self):
+        # Let the stdout and stderr buffers catch up
+        sleep(1)
+
+        print("\n\nSummary:")
+        self.successes.sort()
+        for branch in self.successes:
+            print("\tPASS: " + branch)
+        for branch in CreateBinaryDistr.BRANCHES:
+            if branch not in self.successes:
+                print("\tFAIL: " + branch)
 
 
 class MakeErrorException(Exception):
