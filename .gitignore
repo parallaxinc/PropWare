@@ -2,6 +2,8 @@
 /docs/latex
 /Debug
 /.idea
+/simple
+/libpropeller
 .cproject
 .project
 objects.mk
