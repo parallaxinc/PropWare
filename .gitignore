@@ -22,3 +22,6 @@ makefile
 **.swp
 **.zip
 **.iml
+
+# Ignore the Simple header files in the root directory
+/*.h
