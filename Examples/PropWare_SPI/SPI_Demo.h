@@ -1,22 +1,12 @@
 /**
- * @file        PropWare_Demo.h
+ * @file    SPI_Demo.h
  */
 /**
- * @brief       Blink an LED on each of the 8 Propeller cogs
+ * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  *
- * @detailed    This file is nearly a direct copy of SimpleIDE's blinkcogs.c.
- *              Some changes were made to highlight the helpfulness of PropWare.
+ * @project SPI_Demo
  *
- *              Make all propeller cogs blink assigned pins at exactly the same
- *              rate and time to demonstrate the precision of the
- *              _start_cog_thread method. This program and method uses 8 LMM C
- *              program COG "threads" of execution simultaneously.
- *
- *              This program should be compiled with the LMM memory model.
- *
- * @project     PropWare_Demo
- *
- * @author      Modified by David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -38,32 +28,40 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_DEMO_H_
-#define PROPWARE_DEMO_H_
+#ifndef SPI_DEMO_H_
+#define SPI_DEMO_H_
 
 /**
- * @defgroup    _propware_example_propware  PropWare Basics
+ * @defgroup    _propware_example_spi   SPI Demo
  * @ingroup     _propware_examples
  * @{
  */
 
+// Includes
+#include <propeller.h>
 #include <tinyio.h>
-#include <sys/thread.h>
-
-// Note the lack of an include for propeller.h; This is because PropWare.h will
-// include propeller.h for you
 #include <PropWare/PropWare.h>
+#include <PropWare/safeSpi.h>
 
-#define COGS            8
-#define STACK_SIZE      16
 
-/**
- * @brief       Toggle thread function gets started in an LMM COG.
- *
- * @param[in]   *arg    pin number to toggle
- */
-void do_toggle (void *arg);
+/** Pin number for MOSI (master out - slave in) */
+#define MOSI                PropWare::GPIO::P0
+/** Pin number for MISO (master in - slave out) */
+#define MISO                PropWare::GPIO::P1
+/** Pin number for the clock signal */
+#define SCLK                PropWare::GPIO::P2
+/** Pin number for chip select */
+#define CS                  PropWare::GPIO::P6
 
-/*@}*/
+/** Frequency (in hertz) to run the SPI module */
+#define FREQ                100000
+/** The SPI mode to run */
+#define MODE                PropWare::SPI::MODE_0
+/** Determine if the LSB or MSB should be sent first for each byte */
+#define BITMODE             PropWare::SPI::MSB_FIRST
 
-#endif /* PROPWARE_DEMO_H_ */
+void error (const PropWare::ErrorCode err, const PropWare::SPI *spi);
+
+/**@}*/
+
+#endif /* SPI_DEMO_H_ */

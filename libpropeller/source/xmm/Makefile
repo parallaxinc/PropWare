@@ -1,9 +1,9 @@
-# Build the Simple library with the compressed memory model (CMM)
-PRJ = Simple_cmm
+# Build the Simple library with the extended memory model (XMM)
+PRJ = Libpropeller_xmm
 
 LIBNAME = $(PRJ)
-include ../simpleObjects.mk
-MODEL = cmm
+include ../libpropellerObjects.mk
+MODEL = xmm
 CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
@@ -17,4 +17,4 @@ ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
 
-include ../simple.mk
+include ../libpropeller.mk

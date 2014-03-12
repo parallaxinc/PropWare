@@ -1,11 +1,11 @@
+/.settings
 /docs/html
 /docs/latex
 /Debug
 /.idea
 /simple
 /libpropeller
-.cproject
-.project
+.**project
 objects.mk
 sources.mk
 subdir.mk
@@ -15,9 +15,11 @@ makefile
 **.a
 **.map
 **.rawmap
+**.pyc
 **~
 **.swp
 **.zip
+**.iml
 
 # Ignore the header files in the root directory
 /*.h

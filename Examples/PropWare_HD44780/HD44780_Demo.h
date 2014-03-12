@@ -1,22 +1,12 @@
 /**
- * @file        PropWare_Demo.h
+ * @file    HD44780_Demo.h
  */
 /**
- * @brief       Blink an LED on each of the 8 Propeller cogs
+ * @brief   Display "Hello world" on LCD screen and demonstrate line-wrapping
  *
- * @detailed    This file is nearly a direct copy of SimpleIDE's blinkcogs.c.
- *              Some changes were made to highlight the helpfulness of PropWare.
+ * @project HD44780_Demo
  *
- *              Make all propeller cogs blink assigned pins at exactly the same
- *              rate and time to demonstrate the precision of the
- *              _start_cog_thread method. This program and method uses 8 LMM C
- *              program COG "threads" of execution simultaneously.
- *
- *              This program should be compiled with the LMM memory model.
- *
- * @project     PropWare_Demo
- *
- * @author      Modified by David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -38,32 +28,48 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_DEMO_H_
-#define PROPWARE_DEMO_H_
+#ifndef HD44780_DEMO_H_
+#define HD44780_DEMO_H_
 
 /**
- * @defgroup    _propware_example_propware  PropWare Basics
- * @ingroup     _propware_examples
+ * @defgroup _propware_examples_hd44780 Character LCD Demo
+ * @ingroup _propware_examples
  * @{
  */
 
+#include <propeller.h>
 #include <tinyio.h>
-#include <sys/thread.h>
-
-// Note the lack of an include for propeller.h; This is because PropWare.h will
-// include propeller.h for you
 #include <PropWare/PropWare.h>
+#include <PropWare/hd44780.h>
 
-#define COGS            8
-#define STACK_SIZE      16
+#define RS                  P14
+#define RW                  P12
+#define EN                  P10
+
+#define DATA_H              PropWare::GPIO::P26 | PropWare::GPIO::P25 | \
+                            PropWare::GPIO::P24 | PropWare::GPIO::P23
+//#define DATA_L            PropWare::GPIO::P22 | PropWare::GPIO::P21 | \
+                            PropWare::GPIO::P20 | PropWare::GPIO::P19
+
+#ifdef DATA_L
+#define BITMODE             PropWare::HD44780::BM_8
+#define DATA                DATA_H | DATA_L
+#else
+#define BITMODE             PropWare::HD44780::BM_4
+#define DATA                DATA_H
+#endif
+#define DIMENSIONS          PropWare::HD44780::DIM_16x2
 
 /**
- * @brief       Toggle thread function gets started in an LMM COG.
+ * @brief       Enter an infinite loop that blinks the error code on the
+ *              QUICKSTART's 8 onboard LEDs
  *
- * @param[in]   *arg    pin number to toggle
+ * @param[in]   err     Error code
  */
-void do_toggle (void *arg);
+void error (const PropWare::ErrorCode err);
+
+/**@}*/
 
 /*@}*/
 
-#endif /* PROPWARE_DEMO_H_ */
+#endif /* HD44780_DEMO_H_ */

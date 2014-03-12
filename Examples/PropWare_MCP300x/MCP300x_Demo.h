@@ -1,22 +1,13 @@
 /**
- * @file        PropWare_Demo.h
+ * @file    MCP300x_Demo.h
  */
 /**
- * @brief       Blink an LED on each of the 8 Propeller cogs
+ * @brief   Display the value of an analog channel on stdout and as a bar graph
+ *          over the 8 LEDs of the QUICKSTART board
  *
- * @detailed    This file is nearly a direct copy of SimpleIDE's blinkcogs.c.
- *              Some changes were made to highlight the helpfulness of PropWare.
+ * @project MCP300x_Demo
  *
- *              Make all propeller cogs blink assigned pins at exactly the same
- *              rate and time to demonstrate the precision of the
- *              _start_cog_thread method. This program and method uses 8 LMM C
- *              program COG "threads" of execution simultaneously.
- *
- *              This program should be compiled with the LMM memory model.
- *
- * @project     PropWare_Demo
- *
- * @author      Modified by David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -38,32 +29,46 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_DEMO_H_
-#define PROPWARE_DEMO_H_
+#ifndef MCP300X_DEMO_H_
+#define MCP300X_DEMO_H_
 
 /**
- * @defgroup    _propware_example_propware  PropWare Basics
+ * @defgroup    _propware_example_mcp300x   MCP300x Demo
  * @ingroup     _propware_examples
  * @{
  */
 
+#include <propeller.h>
 #include <tinyio.h>
-#include <sys/thread.h>
+#include <stdlib.h>
 
-// Note the lack of an include for propeller.h; This is because PropWare.h will
-// include propeller.h for you
 #include <PropWare/PropWare.h>
+#include <PropWare/mcp300x.h>
+#include <PropWare/safeSpi.h>
 
-#define COGS            8
-#define STACK_SIZE      16
+/** Pin number for MOSI (master out - slave in) */
+#define MOSI            PropWare::GPIO::P0
+/** Pin number for MISO (master in - slave out) */
+#define MISO            PropWare::GPIO::P1
+/** Pin number for the clock signal */
+#define SCLK            PropWare::GPIO::P2
+/** Pin number for chip select */
+#define CS              PropWare::GPIO::P3
+#define FREQ            100000
+
+// We're going to read from just channel 1 in this demo, but feel free to read
+// from any that you like
+#define CHANNEL         PropWare::MCP300x::CHANNEL_1
+
+#define DEBUG_LEDS      PropWare::BYTE_2
 
 /**
- * @brief       Toggle thread function gets started in an LMM COG.
+ * @brief       Report errors to the Debug LEDs for user interpretation
  *
- * @param[in]   *arg    pin number to toggle
+ * @param[in]   err     Error value
  */
-void do_toggle (void *arg);
+void error (int8_t err);
 
-/*@}*/
+/**@}*/
 
-#endif /* PROPWARE_DEMO_H_ */
+#endif /* MCP300X_DEMO_H_ */

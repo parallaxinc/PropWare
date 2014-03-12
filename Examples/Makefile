@@ -1,6 +1,5 @@
 ifeq ($(OS), Windows_NT)
 	DIR_DIV=\\\\
-	
 # When the Windows command mkdir tries to create a directory that already
 # exists, an error is thrown. Though this does not cause any problems for Make,
 # it does clutter up the terminal significantly. These "errors" can be safely
@@ -12,57 +11,64 @@ else
 endif
 
 all:
-	$(shell mkdir $(MKDIR_FLAG) HD44780$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C HD44780/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) L3G$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C L3G/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) MAX6675$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C MAX6675/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) MCP300x$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C MCP300x/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) SD$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C SD/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) SPI$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C SPI/Debug -f ../Makefile
-	
+	$(shell mkdir $(MKDIR_FLAG) PropWare_HD44780$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_HD44780/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_L3G$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_L3G/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_MAX6675$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_MAX6675/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_MCP300x$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_MCP300x/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_SD$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_SD/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_SPI$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_SPI/Debug -f ../Makefile
+
 	$(shell mkdir $(MKDIR_FLAG) PropWare$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) I2C$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C I2C/Debug -f ../Makefile
-	
-	$(shell mkdir $(MKDIR_FLAG) SimpleText$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C SimpleText/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) Simple_I2C$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Simple_I2C/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) Simple_SimpleText$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Simple_SimpleText/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) Concurrency$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Concurrency/Debug -f ../Makefile
 
 clean:
-	$(shell mkdir $(MKDIR_FLAG) HD44780$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C HD44780/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) L3G$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C L3G/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) MAX6675$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C MAX6675/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) MCP300x$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C MCP300x/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) SD$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C SD/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) SPI$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C SPI/Debug -f ../Makefile clean
-	
+	$(shell mkdir $(MKDIR_FLAG) PropWare_HD44780$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_HD44780/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_L3G$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_L3G/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_MAX6675$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_MAX6675/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_MCP300x$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_MCP300x/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_SD$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_SD/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_SPI$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_SPI/Debug -f ../Makefile clean
+
 	$(shell mkdir $(MKDIR_FLAG) PropWare$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) I2C$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C I2C/Debug -f ../Makefile clean
-	
-	$(shell mkdir $(MKDIR_FLAG) SimpleText$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C SimpleText/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) Simple_I2C$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Simple_I2C/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) Simple_SimpleText$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Simple_SimpleText/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) Concurrency$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Concurrency/Debug -f ../Makefile clean
+

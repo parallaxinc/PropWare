@@ -47,9 +47,7 @@ else
 endif
 
 # Find PropGCC
-ifndef PROPGCC_PREFIX
-	PROPGCC_PREFIX = /opt/parallax
-endif
+PROPGCC_PREFIX ?= /opt/parallax
 
 # libgcc directory
 LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1

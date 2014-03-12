@@ -9,88 +9,172 @@
 @brief  Create a binary distribution of PropWare
 """
 
+from __future__ import print_function
+import sys
 import os
-import time
 from glob import glob
 from zipfile import ZipFile
+import subprocess
+from importLibpropeller import ImportLibpropeller
+from importSimple import ImportSimple
+from time import sleep
+from shutil import copy2
 
 
 class CreateBinaryDistr:
-    PROPWARE_ROOT = "../"
-    SIMPLE_LIB_PATH = "simple/"
-    EXAMPLES_PATH = "Examples/"
-    ARCHIVE_FILE_NAME = ""
-    MEM_MODS = ["cmm", "lmm", "xmm", "xmmc"]
-    PROPWARE_LIB_STR = "libPropWare_%s.a"
-    SIMPLE_LIB_STR = "libSimple_%s.a"
+    ARCHIVE_FILE_NAME = "PropWare_%s.zip"
+    WHITELISTED_FILES = ["Makefile", "Doxyfile", "README", "run_all_tests", "run_unit"]
+    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "txt", "rb", "jpg",
+                            "lang", "pdf", "png"]
+    BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git"]
+    BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
+    CURRENT_SUGGESTION = "release-2.0"
 
     def __init__(self):
-        self.archive = None
-        CreateBinaryDistr.ARCHIVE_FILE_NAME = "PropWare_%s.zip" % time.strftime("%Y-%m-%d")
+        CreateBinaryDistr.BRANCHES.sort()
+        self.successes = []
 
     def run(self):
-        os.chdir(CreateBinaryDistr.PROPWARE_ROOT)
+        self.checkProperWorkingDirectory()
 
+        # Import libpropeller
+        libpropellerImporter = ImportLibpropeller()
+        libpropellerImporter.run()
+
+        # Import simple libraries
+        simpleImporter = ImportSimple()
+        simpleImporter.run()
+
+        # The remainder of this script needs to be run from the PropWare root directory
+        os.chdir("..")
+        CreateBinaryDistr.cleanOldArchives()
+
+        try:
+            for branch in CreateBinaryDistr.BRANCHES:
+                self.runInBranch(branch)
+        except Exception as e:
+            print(e, file=sys.stderr)
+        finally:
+            CreateBinaryDistr.attemptCleanExit()
+
+        self.printSummary()
+
+    def runInBranch(self, branch):
+        # Clean any leftover crud
         CreateBinaryDistr.clean()
-        CreateBinaryDistr.compile()
 
-        with ZipFile(CreateBinaryDistr.ARCHIVE_FILE_NAME, 'w') as self.archive:
-            self.addSourceFiles()
-            self.addPropWareLibs()
-            self.addSimpleLibs()
-            self.addExamples()
+        # Attempt to checkout the next branch
+        if 0 == CreateBinaryDistr.checkout(branch):
+            # Compile the static libraries and example projects
+            CreateBinaryDistr.compile()
 
-    def addSourceFiles(self):
-        # Add all files in the root directory
-        rootDirList = glob("./*")
-        for entry in rootDirList:
-            if os.path.isfile(entry) and entry[-3:] != "zip":
-                self.archive.write(entry)
+            # Generate the archive file name
+            archiveName = CreateBinaryDistr.ARCHIVE_FILE_NAME % branch
+            with ZipFile(archiveName, 'w') as archive:
+                # Add all whitelisted files (see CreateBinaryDistr.isWhitelisted() ) so long as they are not within a
+                # blacklisted directory
+                for root, dirs, files in os.walk('.'):
+                    # First, determine whether or not the directory we are iterating over is blacklisted...
+                    rootList = root.split('/')
+                    try:
+                        # Currently, the only blacklisted directories are direct children of the PropWare root
+                        isBlacklisted = rootList[1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
+                    except IndexError:
+                        # Obviously, if rootList[1] throws an error, we aren't looking at a blacklisted directory
+                        isBlacklisted = False
 
-        # Add all files in the simple library directory
-        simpleFileList = glob(CreateBinaryDistr.SIMPLE_LIB_PATH + "*")
-        for entry in simpleFileList:
-            if os.path.isfile(entry):
-                self.archive.write(entry)
+                    # Finally, check each file within the directory and see if it is whitelisted
+                    if not isBlacklisted:
+                        for file in files:
+                            if self.isWhitelisted(file):
+                                archive.write(root + '/' + file)
 
-    def addPropWareLibs(self):
-        for memMode in CreateBinaryDistr.MEM_MODS:
-            libName = CreateBinaryDistr.PROPWARE_LIB_STR % memMode
-            self.archive.write(memMode + '/' + libName)
+            self.successes.append(branch)
+            if CreateBinaryDistr.CURRENT_SUGGESTION == branch:
+                self.successes.append("current")
+                copy2(archiveName, CreateBinaryDistr.ARCHIVE_FILE_NAME % "current")
 
-    def addSimpleLibs(self):
-        for memMode in CreateBinaryDistr.MEM_MODS:
-            simpleLibPath = CreateBinaryDistr.SIMPLE_LIB_PATH + memMode + '/'
-            libName = CreateBinaryDistr.SIMPLE_LIB_STR % memMode
-            self.archive.write(simpleLibPath + libName)
-
-    def addExamples(self):
-        # Add everything in the Examples folder
-        for root, subdirs, files in os.walk(CreateBinaryDistr.EXAMPLES_PATH):
-            for f in files:
-                self.archive.write(os.path.join(root, f))
+        # Clean again. Cleaning is good. You should clean your house more often too!
+        CreateBinaryDistr.clean()
 
     @staticmethod
-    def clean():
+    def cleanOldArchives():
         files = glob("./PropWare_*.zip")
         for f in files:
             os.remove(f)
 
-        os.system("make clean")
-        os.system("make simple_clean")
+    @staticmethod
+    def clean():
+        subprocess.call("make clean --silent", shell=True)
+        subprocess.call("make simple_clean --silent", shell=True)
+
+    @staticmethod
+    def checkout(branch):
+        try:
+            subprocess.check_output(["git", "checkout", branch])
+            return 0
+        except subprocess.CalledProcessError:
+            print("Failed to checkout " + branch, file=sys.stderr)
+            return 1
 
     @staticmethod
     def compile():
-        if 0 != os.system("make -j4"):
-            raise MakeFailure()
+        if 0 != subprocess.call("make -j4 --silent", shell=True):
+            raise MakeErrorException()
+
+    @staticmethod
+    def checkProperWorkingDirectory():
+        if "createBinaryDistr.py" not in os.listdir('.'):
+            raise IncorrectStartingDirectoryException()
+
+    @staticmethod
+    def isWhitelisted(filename):
+        if filename in CreateBinaryDistr.WHITELISTED_FILES:
+            return True
+        else:
+            filename = filename.split('.')
+            if 2 == len(filename) and 0 != len(filename[0]):
+                if filename[1].lower() in CreateBinaryDistr.WHITELIST_EXTENSIONS:
+                    return True
+
+        return False
+
+    @staticmethod
+    def attemptCleanExit():
+        try:
+            subprocess.check_output("git checkout " + CreateBinaryDistr.CURRENT_SUGGESTION, shell=True)
+        except subprocess.CalledProcessError as e:
+            print("Failed to return git repository to 'current' branch", file=sys.stderr)
+            print("Caused by: " + str(e), file=sys.stderr)
+            print(e.output.decode(), file=sys.stderr)
+
+    def printSummary(self):
+        # Let the stdout and stderr buffers catch up
+        sleep(1)
+
+        print("\n\nSummary:")
+        self.successes.sort()
+        for branch in self.successes:
+            print("\tPASS: " + branch)
+        for branch in CreateBinaryDistr.BRANCHES:
+            if branch not in self.successes:
+                print("\tFAIL: " + branch)
 
 
-class MakeFailure(Exception):
+class MakeErrorException(Exception):
     def __init__(self):
         pass
 
     def __str__(self):
         return "Make failed to finish executing"
+
+
+class IncorrectStartingDirectoryException(Exception):
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "Must be executed from within <propware root>/util"
 
 
 if "__main__" == __name__:

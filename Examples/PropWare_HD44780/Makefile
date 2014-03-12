@@ -1,9 +1,9 @@
 # @file     Makefile
 #
 # @author   David Zemon
-# @project  PropWare_Demo
+# @project  HD44780_Demo
 
-PRJ = PropWare_Demo
+PRJ = HD44780_Demo
 
 NAME = $(PRJ)
 OBJS = $(PRJ).o

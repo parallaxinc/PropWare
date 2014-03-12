@@ -11,6 +11,8 @@
 #
 #  Then set up a default "all" target (normally this will be
 #    all: $(NAME).elf
+#  and finally
+#    include $(PROPLIB)/demo.mk
 #
 # Copyright (c) 2011 Parallax Inc.
 # All rights MIT licensed
@@ -20,7 +22,7 @@
 # Modification by David Zemon...
 #
 # !!! NOTE !!!
-# All C/C++ source files must have an accompanying header file
+# All C source files must have an accompanying header file
 # in the same directory as the source.
 # Without this mod, changes in header files would be ignored
 # until the source file was modified (and therefore rebuilt)
@@ -30,6 +32,8 @@
 # #########################################################
 # Variable Definitions
 # #########################################################
+# where we installed the propeller binaries and libraries
+
 # Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
@@ -42,31 +46,19 @@ else
 	CLEAN=rm -f
 endif
 
-# where we installed the propeller binaries and libraries
+# Find PropGCC
 PROPGCC_PREFIX ?= /opt/parallax
 
 # libgcc directory
 LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
-
-# Define a default memory model
-MODEL ?= lmm
-
-# Define a default board
-BOARD ?= $(PROPELLER_LOAD_BOARD)
-
-ifneq ($(BOARD),)
-	BOARDFLAG=-b$(BOARD)
-endif
 
 CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
 CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
 CXXSTANDARD = -std=gnu++0x
-LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
-LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -lLibpropeller_$(MODEL) -ltiny
 
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
@@ -75,19 +67,10 @@ else
 	LIB_INC += -L'$(PROPGCC_PREFIX)/propeller-elf/lib'
 endif
 
-# Add the appropriate PropWare and Simple library folder to the search path
-LIB_INC += -L'$(PROPWARE_PATH)/PropWare/$(MODEL)'
-LIB_INC += -L'$(PROPWARE_PATH)/simple/$(MODEL)'
-LIB_INC += -L'$(PROPWARE_PATH)/libpropeller/source/$(MODEL)'
-
-ifneq ($(LDSCRIPT),)
-	LDFLAGS += -T '$(LDSCRIPT)'
-endif
-
 # basic gnu tools
 GCC_PATH = $(PROPGCC_PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
-CXX = $(GCC_PATH)/propeller-elf-gcc
+CXX = $(GCC_PATH)/propeller-elf-g++
 LD = $(GCC_PATH)/propeller-elf-ld
 AS = $(GCC_PATH)/propeller-elf-as
 AR = $(GCC_PATH)/propeller-elf-ar
@@ -101,28 +84,19 @@ SPINDIR=.
 # #########################################################
 # Build Commands
 # #########################################################
-ifneq ($(NAME),)
-$(NAME).elf: $(OBJS)
-	@echo 'Building target: $@'
-	@echo 'Invoking: PropGCC Linker'
-	$(CC) $(LDFLAGS) $(LIB_INC) -o $@ $(OBJS) $(LIBS)
-	@echo 'Finished building target: $@'
-	@echo ' '
-endif
-
 ifneq ($(LIBNAME),)
 lib$(LIBNAME).a: $(OBJS)
 	$(AR) rs $@ $(OBJS)
 endif
 
-%.o: ../%.c ../%.h
+%.o: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS) $(CSTANDARD) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.o: ../%.cpp ../%.h
+%.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropG++ Compiler'
 	$(CC) $(INC) $(CXXFLAGS) $(CXXSTANDARD) -o $@ -c $<
@@ -148,7 +122,7 @@ endif
 # run in a COG separate from the main program; i.e., it's a COG
 # driver that the linker will place in the .text section.
 #
-%.cog: ../%.c ../%.h
+%.cog: ../%.c
 	@echo "Building file: $<'
 	@echo "Invoking: PropGCC Compiler"
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
@@ -156,7 +130,7 @@ endif
 	@echo "Finished building: $<'
 	@echo ' '
 
-%.cog: ../%.cogc ../%.h
+%.cog: ../%.cogc
 	@echo "Building file: $<'
 	@echo "Invoking: PropGCC Compiler"
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
@@ -170,7 +144,7 @@ endif
 # driver that the linker will place in the .drivers section which
 # gets loaded to high EEPROM space above 0x8000.
 #
-%.ecog: ../%.c ../%.h
+%.ecog: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
@@ -179,7 +153,7 @@ endif
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.ecog: ../%.ecogc ../%.h
+%.ecog: ../%.ecogc
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
@@ -210,16 +184,4 @@ endif
 	@echo ' '
 
 clean:
-	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary *.map *.rawmap $(NULL)
-
-# #########################################################
-# how to run on RAM
-# #########################################################
-run: $(NAME).elf
-	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t
-
-# #########################################################
-# how to run on ROM
-# #########################################################
-install: $(NAME).elf
-	$(LOADER) $(BOARDFLAG) $(NAME).elf -r -t -e
+	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary $(NULL)

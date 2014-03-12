@@ -1,9 +1,9 @@
 # @file     Makefile
 #
 # @author   David Zemon
-# @project  PropWare_Demo
+# @project  I2C_Demo
 
-PRJ = PropWare_Demo
+PRJ = I2C_Demo
 
 NAME = $(PRJ)
 OBJS = $(PRJ).o
