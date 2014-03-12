@@ -3,6 +3,8 @@
 /docs/latex
 /Debug
 /.idea
+/simple
+/libpropeller
 __pycache__
 .cproject
 .**project
