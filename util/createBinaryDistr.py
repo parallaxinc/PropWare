@@ -18,6 +18,7 @@ import subprocess
 from importLibpropeller import ImportLibpropeller
 from importSimple import ImportSimple
 from time import sleep
+from shutil import copy2
 
 
 class CreateBinaryDistr:
@@ -91,6 +92,7 @@ class CreateBinaryDistr:
             self.successes.append(branch)
             if CreateBinaryDistr.CURRENT_SUGGESTION == branch:
                 self.successes.append("current")
+                copy2(archiveName, CreateBinaryDistr.ARCHIVE_FILE_NAME % "current")
 
         # Clean again. Cleaning is good. You should clean your house more often too!
         CreateBinaryDistr.clean()
