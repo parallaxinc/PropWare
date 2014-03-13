@@ -112,9 +112,14 @@ class CreateBinaryDistr:
     def checkout(branch):
         try:
             subprocess.check_output(["git", "checkout", branch])
-            return 0
         except subprocess.CalledProcessError:
             print("Failed to checkout " + branch, file=sys.stderr)
+            return 1
+
+        try:
+            subprocess.check_output(["git", "pull"])
+        except subprocess.CalledProcessError:
+            print("Failed to pull latest sources", file=sys.stderr)
             return 1
 
     @staticmethod
