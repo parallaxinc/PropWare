@@ -106,7 +106,12 @@ class CreateBinaryDistr:
     @staticmethod
     def clean():
         subprocess.call("make clean --silent", shell=True)
-        subprocess.call("make simple_clean --silent", shell=True)
+        try:
+            subprocess.check_output("make simple_clean --silent", shell=True)
+        except subprocess.CalledProcessError as e:
+            # If we can't "make simple_clean", that probably just means we're on an old branch that didn't have Simple
+            if e.output != "make: *** No rule to make target `simple_clean'.  Stop.":
+                raise e
 
     @staticmethod
     def checkout(branch):
