@@ -19,13 +19,15 @@ from importLibpropeller import ImportLibpropeller
 from importSimple import ImportSimple
 from time import sleep
 from shutil import copy2
+from tempfile import gettempdir
+import imp
 
 
 class CreateBinaryDistr:
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     WHITELISTED_FILES = ["Makefile", "Doxyfile", "README", "run_all_tests", "run_unit"]
-    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "txt", "rb", "jpg",
-                            "lang", "pdf", "png"]
+    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "mk", "dox", "md", "py", "pl", "elf", "txt", "rb",
+                            "jpg", "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git"]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     CURRENT_SUGGESTION = "release-2.0"
@@ -106,16 +108,29 @@ class CreateBinaryDistr:
     @staticmethod
     def clean():
         subprocess.call("make clean --silent", shell=True)
-        subprocess.call("make simple_clean --silent", shell=True)
+
+        # If we can't "make simple_clean", that probably just means we're on an old branch that didn't have Simple
+        try:
+            subprocess.check_output("make simple_clean --silent", shell=True)
+        except subprocess.CalledProcessError as e:
+            if 2 != e.returncode:
+                raise e
 
     @staticmethod
     def checkout(branch):
         try:
             subprocess.check_output(["git", "checkout", branch])
-            return 0
         except subprocess.CalledProcessError:
             print("Failed to checkout " + branch, file=sys.stderr)
             return 1
+
+        try:
+            subprocess.check_output(["git", "pull"])
+        except subprocess.CalledProcessError:
+            print("Failed to pull latest sources", file=sys.stderr)
+            return 1
+
+        return 0
 
     @staticmethod
     def compile():
@@ -178,5 +193,10 @@ class IncorrectStartingDirectoryException(Exception):
 
 
 if "__main__" == __name__:
+    # Copy script to temporary directory for safe keeping while it gets deleted by git checkout
+    # temporaryPath = gettempdir() + "/createBinaryDistr.py"
+    # copy2("./createBinaryDistr.py", temporaryPath)
+    # binaryDistributor = imp.load_source("CreateBinaryDistr", temporaryPath)
+
     runMe = CreateBinaryDistr()
     runMe.run()
