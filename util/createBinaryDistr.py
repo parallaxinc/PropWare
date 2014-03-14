@@ -19,6 +19,8 @@ from importLibpropeller import ImportLibpropeller
 from importSimple import ImportSimple
 from time import sleep
 from shutil import copy2
+from tempfile import gettempdir
+import imp
 
 
 class CreateBinaryDistr:
@@ -106,11 +108,12 @@ class CreateBinaryDistr:
     @staticmethod
     def clean():
         subprocess.call("make clean --silent", shell=True)
+
+        # If we can't "make simple_clean", that probably just means we're on an old branch that didn't have Simple
         try:
             subprocess.check_output("make simple_clean --silent", shell=True)
         except subprocess.CalledProcessError as e:
-            # If we can't "make simple_clean", that probably just means we're on an old branch that didn't have Simple
-            if e.output != "make: *** No rule to make target `simple_clean'.  Stop.":
+            if 2 != e.returncode:
                 raise e
 
     @staticmethod
@@ -190,5 +193,10 @@ class IncorrectStartingDirectoryException(Exception):
 
 
 if "__main__" == __name__:
+    # Copy script to temporary directory for safe keeping while it gets deleted by git checkout
+    # temporaryPath = gettempdir() + "/createBinaryDistr.py"
+    # copy2("./createBinaryDistr.py", temporaryPath)
+    # binaryDistributor = imp.load_source("CreateBinaryDistr", temporaryPath)
+
     runMe = CreateBinaryDistr()
     runMe.run()
