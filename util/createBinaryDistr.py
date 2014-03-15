@@ -19,8 +19,6 @@ from importLibpropeller import ImportLibpropeller
 from importSimple import ImportSimple
 from time import sleep
 from shutil import copy2
-from tempfile import gettempdir
-import imp
 
 
 class CreateBinaryDistr:
@@ -193,10 +191,5 @@ class IncorrectStartingDirectoryException(Exception):
 
 
 if "__main__" == __name__:
-    # Copy script to temporary directory for safe keeping while it gets deleted by git checkout
-    # temporaryPath = gettempdir() + "/createBinaryDistr.py"
-    # copy2("./createBinaryDistr.py", temporaryPath)
-    # binaryDistributor = imp.load_source("CreateBinaryDistr", temporaryPath)
-
     runMe = CreateBinaryDistr()
     runMe.run()

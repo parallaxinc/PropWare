@@ -37,9 +37,9 @@ namespace PropWare {
  * @brief   MCP3004/MCP3008 ADC driver using SPI communication for the Parallax
  *          Propeller
  *
- * @note    MCP300x chips uses SPI mode 2 and shifts data MSB first
+ * @note    MCP3000 chips uses SPI mode 2 and shifts data MSB first
  */
-class MCP300x {
+class MCP3000 {
     public:
         /** Single-ended channels */
         typedef enum {
@@ -65,11 +65,21 @@ class MCP300x {
             /** CH7+, CH6- (MCP3008 only) */DIFF_7_6
         } ChannelDiff;
 
+        typedef enum {
+            /** 10-bit ADC, includes MCP3004 and MCP3008 */MCP300x = 11,
+            /** 12-bit ADC, includes MCP3204 and MCP3208 */MCP320x = 13,
+            /** 13-bit ADC, includes MCP3304 and MCP3308 */MCP330x = 14
+        } PartNumber;
+
     public:
-        MCP300x (SPI *spi);
+        /**
+         *
+         * @param[in]   partNumber  Determine bit-width of the ADC channels
+         */
+        MCP3000 (SPI *spi, MCP3000::PartNumber partNumber);
 
         /**
-         * @brief       Initialize communication with an MCP300x device
+         * @brief       Initialize communication with an MCP3000 device
          *
          * @param[in]   mosi        Pin mask for MOSI
          * @param[in]   miso        Pin mask for MISO
@@ -79,7 +89,8 @@ class MCP300x {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
+                const PropWare::GPIO::Pin miso,
+                const PropWare::GPIO::Pin sclk,
                 const PropWare::GPIO::Pin cs);
 
         /**
@@ -102,7 +113,7 @@ class MCP300x {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const MCP300x::Channel channel, uint16_t *dat);
+        PropWare::ErrorCode read (const MCP3000::Channel channel, uint16_t *dat);
 
         /**
          * @brief       Read a specific axis's data in differential mode
@@ -115,7 +126,7 @@ class MCP300x {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat);
+        PropWare::ErrorCode read_diff (const MCP3000::ChannelDiff channels, uint16_t *dat);
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;
@@ -126,12 +137,12 @@ class MCP300x {
         static const uint8_t SINGLE_ENDED = BIT_3;
         static const uint8_t DIFFERENTIAL = 0;
         static const uint8_t OPTN_WIDTH = 7;
-        static const uint8_t DATA_WIDTH = 11;
 
     private:
         SPI *m_spi;
         PropWare::GPIO::Pin m_cs;
         bool m_alwaysSetMode;
+        uint8_t m_dataWidth;
 };
 
 }

@@ -1,9 +1,9 @@
 # @file     Makefile
 #
 # @author   David Zemon
-# @project  MCP300x_Demo
+# @project  MCP3000_Demo
 
-PRJ = MCP300x_Demo
+PRJ = MCP3000_Demo
 
 NAME = $(PRJ)
 OBJS = $(PRJ).o
