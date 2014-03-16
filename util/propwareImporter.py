@@ -12,11 +12,19 @@ __author__ = 'david'
 
 from importLibpropeller import ImportLibpropeller
 from importSimple import ImportSimple
+import propwareUtils
 
-# Import libpropeller
-libpropellerImporter = ImportLibpropeller()
-libpropellerImporter.run()
 
-#import simple libraries
-simpleImporter = ImportSimple()
-simpleImporter.run()
+def importAll():
+    propwareUtils.checkProperWorkingDirectory()
+
+    # Import libpropeller
+    libpropellerImporter = ImportLibpropeller()
+    libpropellerImporter.run()
+
+    #import simple libraries
+    simpleImporter = ImportSimple()
+    simpleImporter.run()
+
+if "__main__" == __name__:
+    importAll()

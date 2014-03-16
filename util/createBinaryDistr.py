@@ -15,10 +15,11 @@ import os
 from glob import glob
 from zipfile import ZipFile
 import subprocess
-from importLibpropeller import ImportLibpropeller
-from importSimple import ImportSimple
 from time import sleep
 from shutil import copy2
+
+from propwareImporter import importAll
+import propwareUtils
 
 
 class CreateBinaryDistr:
@@ -26,7 +27,7 @@ class CreateBinaryDistr:
     WHITELISTED_FILES = ["Makefile", "Doxyfile", "README", "run_all_tests", "run_unit"]
     WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "mk", "dox", "md", "py", "pl", "elf", "txt", "rb",
                             "jpg", "lang", "pdf", "png"]
-    BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git"]
+    BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     CURRENT_SUGGESTION = "release-2.0"
 
@@ -35,15 +36,10 @@ class CreateBinaryDistr:
         self.successes = []
 
     def run(self):
-        self.checkProperWorkingDirectory()
+        propwareUtils.checkProperWorkingDirectory()
 
-        # Import libpropeller
-        libpropellerImporter = ImportLibpropeller()
-        libpropellerImporter.run()
-
-        # Import simple libraries
-        simpleImporter = ImportSimple()
-        simpleImporter.run()
+        # Import all extra libraries
+        importAll()
 
         # The remainder of this script needs to be run from the PropWare root directory
         os.chdir("..")
@@ -135,10 +131,7 @@ class CreateBinaryDistr:
         if 0 != subprocess.call("make -j4 --silent", shell=True):
             raise MakeErrorException()
 
-    @staticmethod
-    def checkProperWorkingDirectory():
-        if "createBinaryDistr.py" not in os.listdir('.'):
-            raise IncorrectStartingDirectoryException()
+
 
     @staticmethod
     def isWhitelisted(filename):
@@ -180,14 +173,6 @@ class MakeErrorException(Exception):
 
     def __str__(self):
         return "Make failed to finish executing"
-
-
-class IncorrectStartingDirectoryException(Exception):
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return "Must be executed from within <propware root>/util"
 
 
 if "__main__" == __name__:
