@@ -5,6 +5,7 @@
 /.idea
 /simple
 /libpropeller
+/.external_downloads
 __pycache__
 .cproject
 .**project
