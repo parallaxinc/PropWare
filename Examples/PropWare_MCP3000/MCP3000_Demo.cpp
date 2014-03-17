@@ -1,7 +1,7 @@
 /**
- * @file    MCP300x_Demo.cpp
+ * @file    MCP3000_Demo.cpp
  *
- * @project MCP300x_Demo
+ * @project MCP3000_Demo
  *
  * @author  David Zemon
  *
@@ -25,7 +25,7 @@
  * SOFTWARE.
  */
 
-#include "MCP300x_Demo.h"
+#include "MCP3000_Demo.h"
 
 // Main function
 int main () {
@@ -36,7 +36,7 @@ int main () {
     uint8_t scaledValue, i;
     uint32_t ledOutput;
     PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
-    PropWare::MCP300x adc(spi);
+    PropWare::MCP3000 adc(spi, PART_NUMBER);
 
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
         error(err);
@@ -54,7 +54,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    puts("Welcome to the MCP300x demo!\n");
+    puts("Welcome to the MCP3000 demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;

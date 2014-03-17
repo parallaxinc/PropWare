@@ -27,16 +27,17 @@
  */
 
 // Includes
-#include <PropWare/mcp300x.h>
+#include <PropWare/mcp3000.h>
 
 namespace PropWare {
 
-MCP300x::MCP300x (SPI *spi) {
+MCP3000::MCP3000 (SPI *spi, PropWare::MCP3000::PartNumber partNumber) {
     this->m_spi = spi;
     this->m_alwaysSetMode = 0;
+    this->m_dataWidth = partNumber;
 }
 
-PropWare::ErrorCode MCP300x::start (const PropWare::GPIO::Pin mosi,
+PropWare::ErrorCode MCP3000::start (const PropWare::GPIO::Pin mosi,
         const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
         const PropWare::GPIO::Pin cs) {
     PropWare::ErrorCode err;
@@ -47,53 +48,53 @@ PropWare::ErrorCode MCP300x::start (const PropWare::GPIO::Pin mosi,
 
     if (!this->m_spi->is_running()) {
         check_errors(
-                this->m_spi->start(mosi, miso, sclk, MCP300x::SPI_DEFAULT_FREQ, MCP300x::SPI_MODE, MCP300x::SPI_BITMODE));
+                this->m_spi->start(mosi, miso, sclk, MCP3000::SPI_DEFAULT_FREQ, MCP3000::SPI_MODE, MCP3000::SPI_BITMODE));
     } else {
-        check_errors(this->m_spi->set_mode(MCP300x::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
     }
 
     return 0;
 }
 
-void MCP300x::always_set_spi_mode (const bool alwaysSetMode) {
+void MCP3000::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-PropWare::ErrorCode MCP300x::read (const MCP300x::Channel channel, uint16_t *dat) {
+PropWare::ErrorCode MCP3000::read (const MCP3000::Channel channel, uint16_t *dat) {
     PropWare::ErrorCode err;
     int8_t options;
 
-    options = MCP300x::START | MCP300x::SINGLE_ENDED | channel;
+    options = MCP3000::START | MCP3000::SINGLE_ENDED | channel;
     options <<= 2; // One dead bit between output and input - see page 19 of datasheet
 
     if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(MCP300x::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
     }
 
     GPIO::pin_clear(this->m_cs);
-    check_errors(this->m_spi->shift_out(MCP300x::OPTN_WIDTH, options));
-    check_errors(this->m_spi->shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
+    check_errors(this->m_spi->shift_out(MCP3000::OPTN_WIDTH, options));
+    check_errors(this->m_spi->shift_in(this->m_dataWidth, dat, sizeof(*dat)));
     GPIO::pin_set(this->m_cs);
 
     return 0;
 }
 
-PropWare::ErrorCode MCP300x::read_diff (const MCP300x::ChannelDiff channels, uint16_t *dat) {
+PropWare::ErrorCode MCP3000::read_diff (const MCP3000::ChannelDiff channels, uint16_t *dat) {
     int8_t err, options;
 
-    options = MCP300x::START | MCP300x::DIFFERENTIAL | channels;
+    options = MCP3000::START | MCP3000::DIFFERENTIAL | channels;
     options <<= 2; // One dead bit between output and input - see page 19 of datasheet
 
     if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(MCP300x::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(MCP300x::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
     }
 
     GPIO::pin_clear(this->m_cs);
-    check_errors(this->m_spi->shift_out(MCP300x::OPTN_WIDTH, options));
-    check_errors(this->m_spi->shift_in(MCP300x::DATA_WIDTH, dat, sizeof(*dat)));
+    check_errors(this->m_spi->shift_out(MCP3000::OPTN_WIDTH, options));
+    check_errors(this->m_spi->shift_in(this->m_dataWidth, dat, sizeof(*dat)));
     GPIO::pin_set(this->m_cs);
 
     return 0;

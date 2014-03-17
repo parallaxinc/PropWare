@@ -1,11 +1,11 @@
 /**
- * @file    MCP300x_Demo.h
+ * @file    MCP3000_Demo.h
  */
 /**
  * @brief   Display the value of an analog channel on stdout and as a bar graph
  *          over the 8 LEDs of the QUICKSTART board
  *
- * @project MCP300x_Demo
+ * @project MCP3000_Demo
  *
  * @author  David Zemon
  *
@@ -29,11 +29,11 @@
  * SOFTWARE.
  */
 
-#ifndef MCP300X_DEMO_H_
-#define MCP300X_DEMO_H_
+#ifndef MCP3000_DEMO_H_
+#define MCP3000_DEMO_H_
 
 /**
- * @defgroup    _propware_example_mcp300x   MCP300x Demo
+ * @defgroup    _propware_example_mcp300x   MCP3000 Demo
  * @ingroup     _propware_examples
  * @{
  */
@@ -43,8 +43,11 @@
 #include <stdlib.h>
 
 #include <PropWare/PropWare.h>
-#include <PropWare/mcp300x.h>
+#include <PropWare/mcp3000.h>
 #include <PropWare/safeSpi.h>
+
+/** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
+#define PART_NUMBER     PropWare::MCP3000::MCP300x
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI            PropWare::GPIO::P0
@@ -58,7 +61,7 @@
 
 // We're going to read from just channel 1 in this demo, but feel free to read
 // from any that you like
-#define CHANNEL         PropWare::MCP300x::CHANNEL_1
+#define CHANNEL         PropWare::MCP3000::CHANNEL_1
 
 #define DEBUG_LEDS      PropWare::BYTE_2
 
@@ -71,4 +74,4 @@ void error (int8_t err);
 
 /**@}*/
 
-#endif /* MCP300X_DEMO_H_ */
+#endif /* MCP3000_DEMO_H_ */

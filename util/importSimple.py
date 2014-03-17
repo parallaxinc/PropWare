@@ -11,21 +11,30 @@
 
 import os
 from shutil import copy2
+import zipfile
+
+import propwareUtils
 
 
 class ImportSimple:
-    PROPWARE_ROOT = "../"
-    CHEATER_DIR = PROPWARE_ROOT + "simple/"
-    LEARN_ENV_VAR = "PROP_LEARN_PATH"
+    PROPWARE_ROOT = os.path.abspath("..") + os.sep
+    CHEATER_DIR = PROPWARE_ROOT + "simple" + os.sep
+    LEARN_DOWNLOAD_LINK = "http://learn.parallax.com/sites/default/files/content/propeller-c-tutorials/" \
+                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.02.27.zip"
+    LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep
 
     def __init__(self):
         self.libraries = {}
         self.sourceFiles = []
 
     def run(self):
+        propwareUtils.checkProperWorkingDirectory()
+
         ImportSimple.clean()
 
-        self.getLibraries(ImportSimple.getRootPath())
+        libraryPath = self.downloadLearn()
+
+        self.getLibraries(libraryPath)
 
         # Process every library that was found
         for library in self.libraries.keys():
@@ -45,33 +54,6 @@ class ImportSimple:
         # Manually add the libsimpletools source folder
         self.libraries['__simpletools'] = rootPath + "Utility/libsimpletools/source"
 
-    @staticmethod
-    def getRootPath():
-        # Get the root path without the stupid extra slashes
-        propLearnPath = os.environ[ImportSimple.LEARN_ENV_VAR].split('\\')
-        return ''.join(propLearnPath) + '/Simple Libraries/'
-
-    @staticmethod
-    def isSourceOrHeaderFile(f):
-        return ImportSimple.isSourceFile(f) or ImportSimple.isHeaderFile(f)
-
-    @staticmethod
-    def isSourceFile(f):
-        assert (isinstance(f, str))
-        return f[-2:] == ".c"
-
-    @staticmethod
-    def isHeaderFile(f):
-        assert (isinstance(f, str))
-        return f[-2:] == ".h"
-
-    @staticmethod
-    def getDemoFileNames(library):
-        names = []
-        for ext in [".c", ".h"]:
-            names.append("lib" + library + ext)
-        return names
-
     def processLibrary(self, library):
         libraryDirectory = self.libraries[library] + '/'
 
@@ -81,13 +63,13 @@ class ImportSimple:
         for f in os.listdir(libraryDirectory):
             # Don't copy the demo files
             if f not in demoFiles:
-                if ImportSimple.isSourceFile(f):
+                if propwareUtils.isSourceFile(f):
                     copy2(libraryDirectory + f, ImportSimple.CHEATER_DIR)
 
                     # Keep track of all the source files so we can make an object list later
                     self.sourceFiles.append(f)
 
-                elif ImportSimple.isHeaderFile(f):
+                elif propwareUtils.isHeaderFile(f):
                     copy2(libraryDirectory + f, ImportSimple.PROPWARE_ROOT)
 
     def makeObjectList(self):
@@ -100,18 +82,42 @@ class ImportSimple:
                 f.write(sourceFile[:-1] + "o ")
 
     @staticmethod
+    def downloadLearn():
+        propwareUtils.initDownloadsFolder(ImportSimple.PROPWARE_ROOT)
+
+        zipFileName = propwareUtils.downloadFile(ImportSimple.getDownloadLink(),
+                                                 ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)[0]
+        zipFile = zipfile.ZipFile(zipFileName, mode='r')
+        zipFile.extractall(ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
+
+        return ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep + "Simple Libraries"\
+               + os.sep
+
+    @staticmethod
     def clean():
         rmList = []
-        for fname in os.listdir(ImportSimple.PROPWARE_ROOT):
-            if ".h" == fname[-2:]:
-                rmList.append(ImportSimple.PROPWARE_ROOT + fname)
+        for fileName in os.listdir(ImportSimple.PROPWARE_ROOT):
+            if ".h" == fileName[-2:]:
+                rmList.append(ImportSimple.PROPWARE_ROOT + fileName)
 
-        for fname in os.listdir(ImportSimple.CHEATER_DIR):
-            if ".c" == fname[-2:]:
-                rmList.append(ImportSimple.CHEATER_DIR + fname)
+        for fileName in os.listdir(ImportSimple.CHEATER_DIR):
+            if ".c" == fileName[-2:]:
+                rmList.append(ImportSimple.CHEATER_DIR + fileName)
 
-        for fname in rmList:
-            os.remove(fname)
+        for fileName in rmList:
+            os.remove(fileName)
+
+    @staticmethod
+    def getDemoFileNames(library):
+        names = []
+        for ext in [".c", ".h"]:
+            names.append("lib" + library + ext)
+        return names
+
+    @staticmethod
+    def getDownloadLink():
+        return ImportSimple.LEARN_DOWNLOAD_LINK
+
 
 if "__main__" == __name__:
     ImportSimple().run()

@@ -20,8 +20,8 @@ all:
 	$(shell mkdir $(MKDIR_FLAG) PropWare_MAX6675$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_MAX6675/Debug -f ../Makefile
 
-	$(shell mkdir $(MKDIR_FLAG) PropWare_MCP300x$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C PropWare_MCP300x/Debug -f ../Makefile
+	$(shell mkdir $(MKDIR_FLAG) PropWare_MCP3000$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_MCP3000/Debug -f ../Makefile
 
 	$(shell mkdir $(MKDIR_FLAG) PropWare_SD$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_SD/Debug -f ../Makefile
@@ -51,8 +51,8 @@ clean:
 	$(shell mkdir $(MKDIR_FLAG) PropWare_MAX6675$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_MAX6675/Debug -f ../Makefile clean
 
-	$(shell mkdir $(MKDIR_FLAG) PropWare_MCP300x$(DIR_DIV)Debug $(NULL))
-	$(MAKE) -C PropWare_MCP300x/Debug -f ../Makefile clean
+	$(shell mkdir $(MKDIR_FLAG) PropWare_MCP3000$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_MCP3000/Debug -f ../Makefile clean
 
 	$(shell mkdir $(MKDIR_FLAG) PropWare_SD$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_SD/Debug -f ../Makefile clean
