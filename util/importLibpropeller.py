@@ -39,16 +39,17 @@ class ImportLibpropeller:
 
         propwareUtils.initDownloadsFolder(ImportLibpropeller.PROPWARE_ROOT)
 
-        self.createAndUpdateGit()
+        if self.createAndUpdateGit():
+            # Copy over the new files
+            propwareUtils.copytree(self.LIBPROPELLER_PATH + os.sep + "libpropeller", ImportLibpropeller.DESTINATION)
 
-        # Copy over the new files
-        propwareUtils.copytree(self.LIBPROPELLER_PATH + os.sep + "libpropeller", ImportLibpropeller.DESTINATION)
+            # Copy all source files into a source directory so we can create the
+            # library
+            self.copySourceFiles()
 
-        # Copy all source files into a source directory so we can create the
-        # library
-        self.copySourceFiles()
-
-        self.makeObjectList()
+            self.makeObjectList()
+        else:
+            print("Failed to import libpropeller.", file=sys.stderr)
 
     def copySourceFiles(self):
         # If the source directory doesn't exist yet, create it
@@ -74,24 +75,34 @@ class ImportLibpropeller:
                 f.write(sourceFile + ".o ")
 
     def createAndUpdateGit(self):
+        """
+        @return Tue if the libpropeller folder exists, false otherwise
+        """
         # Ensure git exists in the path
-        if not propwareUtils.which("git"):
-            print("Looks like I can't update the git repository for libpropeller. Sorry!", file=sys.stderr)
-            print("Caused by: 'git' is not in the PATH", file=sys.stderr)
-        else:
+        if propwareUtils.which("git"):
             try:
-                # If the git repository doesn't exist, create it
-                if not os.path.exists(self.LIBPROPELLER_PATH):
+                # Update the git repository if it already exists
+                if os.path.exists(self.LIBPROPELLER_PATH):
+                    subprocess.check_output("git pull", cwd=self.LIBPROPELLER_PATH, shell=True)
+                # Otherwise, create it
+                else:
                     subprocess.check_output("git clone https://github.com/libpropeller/libpropeller.git",
                                             cwd=ImportLibpropeller.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY,
                                             shell=True)
-                # Otherwise, update the git repository
-                else:
-                    subprocess.check_output("git pull", cwd=self.LIBPROPELLER_PATH, shell=True)
+
             except subprocess.CalledProcessError as e:
                 print("Looks like I can't clone or update the git repository for libpropeller. Sorry!", file=sys.stderr)
                 print("Caused by: " + str(e), file=sys.stderr)
                 print(e.output.decode(), file=sys.stderr)
+        else:
+            print("Looks like I can't update the git repository for libpropeller. Sorry!", file=sys.stderr)
+            print("Caused by: 'git' is not in the PATH", file=sys.stderr)
+
+        # Is there *some* version of libpropeller downloaded?
+        if os.path.exists(self.LIBPROPELLER_PATH):
+            return True
+        else:
+            return False
 
     @staticmethod
     def clean():

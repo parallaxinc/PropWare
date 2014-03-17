@@ -20,7 +20,12 @@ DOWNLOADS_DIRECTORY = ".external_downloads" + os.sep
 
 def which(program):
     def is_exe(filePath):
-        return os.path.isfile(filePath) and os.access(filePath, os.X_OK)
+        if os.path.isfile(filePath) and os.access(filePath, os.X_OK):
+            return True
+        elif "nt" == os.name and ".exe" != filePath[-4:]:
+            return is_exe(filePath + ".exe")
+        else:
+            return False
 
     directory, fileName = os.path.split(program)
     if directory:
