@@ -32,6 +32,8 @@ int main () {
     uint8_t err;
     char c;
 
+    PropWare::Pin statusLED(PropWare::Pin::P16, PropWare::Pin::OUT);
+
     PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
     PropWare::SD sd(spi);
     PropWare::SD::File f, f2;
@@ -132,9 +134,8 @@ int main () {
     printf("Execution complete!\n");
 #endif
 
-    PropWare::GPIO::set_dir(PropWare::GPIO::P16, PropWare::GPIO::OUT);
     while (1) {
-        PropWare::GPIO::pin_toggle(PropWare::GPIO::P16);
+        statusLED.toggle();
         waitcnt(CLKFREQ/2 + CNT);
     }
 
@@ -142,7 +143,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
-    uint32_t leds = err;
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
         PropWare::SafeSPI::getSafeSPI()->print_error_str(
@@ -150,12 +151,10 @@ void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
     else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
         sd->print_error_str((PropWare::SD::ErrorCode) err);
 
-    PropWare::GPIO::set_dir(PropWare::BYTE_2, PropWare::GPIO::OUT);
-    leds <<= 16;
     while (1) {
-        PropWare::GPIO::pin_write(PropWare::BYTE_2, leds);
+        debugLEDs.write(err);
         waitcnt(100*MILLISECOND);
-        PropWare::GPIO::pin_clear(PropWare::BYTE_2);
+        debugLEDs.write(0);
         waitcnt(100*MILLISECOND);
     }
 }

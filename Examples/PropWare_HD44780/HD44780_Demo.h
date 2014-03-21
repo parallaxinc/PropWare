@@ -42,23 +42,13 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/hd44780.h>
 
-#define RS                  P14
-#define RW                  P12
-#define EN                  P10
+#define RS                  PropWare::Pin::P14
+#define RW                  PropWare::Pin::P12
+#define EN                  PropWare::Pin::P10
 
-#define DATA_H              PropWare::GPIO::P26 | PropWare::GPIO::P25 | \
-                            PropWare::GPIO::P24 | PropWare::GPIO::P23
-//#define DATA_L            PropWare::GPIO::P22 | PropWare::GPIO::P21 | \
-                            PropWare::GPIO::P20 | PropWare::GPIO::P19
-
-#ifdef DATA_L
-#define BITMODE             PropWare::HD44780::BM_8
-#define DATA                DATA_H | DATA_L
-#else
-#define BITMODE             PropWare::HD44780::BM_4
-#define DATA                DATA_H
-#endif
+#define FIRST_DATA_PIN      PropWare::Pin::P19
 #define DIMENSIONS          PropWare::HD44780::DIM_16x2
+#define BITMODE             PropWare::HD44780::BM_8
 
 /**
  * @brief       Enter an infinite loop that blinks the error code on the

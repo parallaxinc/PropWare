@@ -24,8 +24,8 @@
  * SOFTWARE.
  */
 
-#ifndef MCP300X_H_
-#define MCP300X_H_
+#ifndef PROPWARE_MCP300X_H_
+#define PROPWARE_MCP300X_H_
 
 #include <propeller.h>
 #include <PropWare/PropWare.h>
@@ -81,17 +81,16 @@ class MCP3000 {
         /**
          * @brief       Initialize communication with an MCP3000 device
          *
-         * @param[in]   mosi        Pin mask for MOSI
-         * @param[in]   miso        Pin mask for MISO
-         * @param[in]   sclk        Pin mask for SCLK
-         * @param[in]   cs          Pin mask for CS
+         * @param[in]   mosi        PinNum mask for MOSI
+         * @param[in]   miso        PinNum mask for MISO
+         * @param[in]   sclk        PinNum mask for SCLK
+         * @param[in]   cs          PinNum mask for CS
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso,
-                const PropWare::GPIO::Pin sclk,
-                const PropWare::GPIO::Pin cs);
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+                const PropWare::Pin::Mask cs);
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode before
@@ -140,11 +139,11 @@ class MCP3000 {
 
     private:
         SPI *m_spi;
-        PropWare::GPIO::Pin m_cs;
+        PropWare::Pin m_cs;
         bool m_alwaysSetMode;
         uint8_t m_dataWidth;
 };
 
 }
 
-#endif /* MCP300X_H_ */
+#endif /* PROPWARE_MCP300X_H_ */

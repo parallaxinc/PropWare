@@ -89,8 +89,6 @@
 #define WORD_0              0xffff
 #define WORD_1              0xffff0000
 
-#define DEBOUNCE_DELAY      3
-
 #define GPIO_DIR_IN         0
 #define GPIO_DIR_OUT        -1
 

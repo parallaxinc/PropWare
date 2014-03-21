@@ -45,18 +45,20 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/mcp3000.h>
 #include <PropWare/safeSpi.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
 #define PART_NUMBER     PropWare::MCP3000::MCP300x
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI            PropWare::GPIO::P0
+#define MOSI            PropWare::Pin::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO            PropWare::GPIO::P1
+#define MISO            PropWare::Pin::P1
 /** Pin number for the clock signal */
-#define SCLK            PropWare::GPIO::P2
+#define SCLK            PropWare::Pin::P2
 /** Pin number for chip select */
-#define CS              PropWare::GPIO::P3
+#define CS              PropWare::Pin::P3
 #define FREQ            100000
 
 // We're going to read from just channel 1 in this demo, but feel free to read

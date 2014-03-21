@@ -25,14 +25,15 @@
  * SOFTWARE.
  */
 
-#ifndef SPI_H_
-#define SPI_H_
+#ifndef PROPWARE_SPI_H_
+#define PROPWARE_SPI_H_
 
 #include <propeller.h>
 #include <stdlib.h>
 #include <tinyio.h>
 #include <stdarg.h>
 #include <PropWare/PropWare.h>
+#include <PropWare/pin.h>
 
 /** @name   SPI Extra Code Options
  * @{ */
@@ -158,18 +159,18 @@ class SPI {
         /**
          * @brief       Initialize an SPI module by starting a new cog
          *
-         * @param[in]   mosi        Pin mask for MOSI
-         * @param[in]   miso        Pin mask for MISO
-         * @param[in]   sclk        Pin mask for SCLK
-         * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must be less
-         *                          than CLKFREQ/4
-         * @param[in]   polarity    Polarity of the clock - idle low or high; must be
-         *                          one of SPI_POLARITY_LOW or SPI_POLARITY_HIGH
+         * @param[in]   mosi        PinNum mask for MOSI
+         * @param[in]   miso        PinNum mask for MISO
+         * @param[in]   sclk        PinNum mask for SCLK
+         * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must
+         *                          be less than CLKFREQ/4
+         * @param[in]   polarity    Polarity of the clock - idle low or high;
+         *                          must be one of SPI_POLARITY_LOW or SPI_POLARITY_HIGH
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode start (const GPIO::Pin mosi,
-                const GPIO::Pin miso, const GPIO::Pin sclk,
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
                 const int32_t frequency, const SPI::Mode mode,
                 const SPI::BitMode bitmode);
 
@@ -380,4 +381,4 @@ class SPI {
 
 }
 
-#endif /* SPI_H_ */
+#endif /* PROPWARE_SPI_H_ */

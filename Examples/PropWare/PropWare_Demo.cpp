@@ -18,15 +18,16 @@ volatile int8_t syncstart;
 int main (int argc, char* argv[]) {
     int8_t n;
     int8_t cog;
-    static volatile PropWare::GPIO::Pin pin[] = {
-            PropWare::GPIO::P16,
-            PropWare::GPIO::P17,
-            PropWare::GPIO::P18,
-            PropWare::GPIO::P19,
-            PropWare::GPIO::P20,
-            PropWare::GPIO::P21,
-            PropWare::GPIO::P22,
-            PropWare::GPIO::P23 };
+    PropWare::Pin pin;
+    static volatile PropWare::Pin::Mask pins[] = {
+            PropWare::Pin::P16,
+            PropWare::Pin::P17,
+            PropWare::Pin::P18,
+            PropWare::Pin::P19,
+            PropWare::Pin::P20,
+            PropWare::Pin::P21,
+            PropWare::Pin::P22,
+            PropWare::Pin::P23 };
     uint32_t nextcnt;
 
     wait_time = 50 * MILLISECOND;
@@ -35,29 +36,31 @@ int main (int argc, char* argv[]) {
 
     for (n = 1; n < COGS; n++) {
         cog = _start_cog_thread(cog_stack[n] + STACK_SIZE, do_toggle,
-                (void *) &pin[n], &thread_data);
+                (void *) &pins[n], &thread_data);
         printf("Toggle COG %d Started\n", cog);
     }
 
-    PropWare::GPIO::set_dir(pin[0], PropWare::GPIO::OUT);
+    pin.set_mask(pins[0]);
+    pin.set_dir(PropWare::Pin::OUT);
 
     startcnt = CNT;
     syncstart = 1;
     nextcnt = wait_time + startcnt;
     while (1) {
-        PropWare::GPIO::pin_set(pin[0]);
+        pin.set();
         nextcnt = waitcnt2(nextcnt, wait_time);
-        PropWare::GPIO::pin_clear(pin[0]);
+        pin.clear();
         nextcnt = waitcnt2(nextcnt, wait_time);
     }
     return 0;
 }
 
 void do_toggle (void *arg) {
-    PropWare::GPIO::Pin *pin = (PropWare::GPIO::Pin *) arg;
+    PropWare::Pin pin;
     uint32_t nextcnt;
 
-    PropWare::GPIO::set_dir(*pin, PropWare::GPIO::OUT);
+    pin.set_mask(*(PropWare::Pin::Mask *) arg);
+    pin.set_dir(PropWare::Pin::OUT);
 
     // wait for start signal from main cog
     while (syncstart == 0)
@@ -65,7 +68,7 @@ void do_toggle (void *arg) {
 
     nextcnt = wait_time + startcnt;
     while (1) {
-        PropWare::GPIO::pin_toggle(*pin);
+        pin.toggle();
         nextcnt = waitcnt2(nextcnt, wait_time);
     }
 }

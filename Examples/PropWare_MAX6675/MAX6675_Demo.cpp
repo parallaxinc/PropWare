@@ -36,11 +36,12 @@ int main () {
     PropWare::HD44780 lcd;
     PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
     PropWare::MAX6675 thermo(spi);
+    PropWare::SimplePort lcdDataPort(FIRST_DATA_PIN, 8);
 
     if ((err = thermo.start(MOSI, MISO, SCLK, CS)))
         error(err);
 
-    if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
+    if ((err = lcd.start(lcdDataPort, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
     // Though this functional call is not necessary (default value is 0), I
@@ -68,18 +69,14 @@ int main () {
     return 0;
 }
 
-void error (int8_t err) {
-    uint32_t shiftedValue = (uint8_t) err;
-
-    // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
-    shiftedValue <<= 16;
-
-    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
+void error (const int8_t err) {
+    // Set the Quickstart LEDs for output (used to display the error code)
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
-        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
+        debugLEDs.write(err);
         waitcnt(CLKFREQ/5 + CNT);
-        PropWare::GPIO::pin_clear(DEBUG_LEDS);
+        debugLEDs.write(0);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }

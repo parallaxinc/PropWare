@@ -38,14 +38,14 @@ int main () {
     PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
     PropWare::MCP3000 adc(spi, PART_NUMBER);
 
+    // Set the Quickstart LEDs for output (used as a secondary display)
+    PropWare::SimplePort scale(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
         error(err);
 
     // Retrieve the SPI module and manually set the clock frequency
     spi->set_clock(FREQ);
-
-    // Set the Quickstart LEDs for output (used as a secondary display)
-    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
@@ -70,8 +70,7 @@ int main () {
             ledOutput = 0;
             for (i = 0; i < scaledValue; ++i)
                 ledOutput = (ledOutput << 1) | 1;
-            ledOutput <<= 16;
-            PropWare::GPIO::pin_write(DEBUG_LEDS, ledOutput);
+            scale.write(ledOutput);
         }
 
         printf("Channel %u is reading: %u\n", CHANNEL, data);
@@ -80,17 +79,14 @@ int main () {
     return 0;
 }
 
-void error (int8_t err) {
-    uint32_t shiftedValue = err;
-    shiftedValue <<= 16;  // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
-
-    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
+void error (const PropWare::ErrorCode err) {
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
-        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
-        waitcnt(CLKFREQ/5 + CNT);
-        PropWare::GPIO::pin_clear(DEBUG_LEDS);
-        waitcnt(CLKFREQ/5 + CNT);
+        debugLEDs.write(err);
+        waitcnt(150*MILLISECOND + CNT);
+        debugLEDs.write(0);
+        waitcnt(150*MILLISECOND + CNT);
     }
 }
 

@@ -41,15 +41,17 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/l3g.h>
 #include <PropWare/safeSpi.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI                PropWare::GPIO::P0
+#define MOSI                PropWare::Pin::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO                PropWare::GPIO::P1
+#define MISO                PropWare::Pin::P1
 /** Pin number for the clock signal */
-#define SCLK                PropWare::GPIO::P2
+#define SCLK                PropWare::Pin::P2
 /** Pin number for chip select */
-#define CS                  PropWare::GPIO::P4
+#define CS                  PropWare::Pin::P4
 /** Frequency (in Hertz) to run the SPI protocol */
 #define FREQ                10000
 

@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef SD_H_
-#define SD_H_
+#ifndef PROPWARE_SD_H_
+#define PROPWARE_SD_H_
 
 #include <propeller.h>
 #include <stdlib.h>
@@ -34,6 +34,7 @@
 #include <tinyio.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/safeSpi.h>
+#include <PropWare/pin.h>
 
 namespace PropWare {
 
@@ -291,18 +292,18 @@ class SD {
          *              If one has been started, only the cs and freq parameter will
          *              have effect
          *
-         * @param[in]   mosi        Pin mask for MOSI pin
-         * @param[in]   miso        Pin mask for MISO pin
-         * @param[in]   sclk        Pin mask for SCLK pin
-         * @param[in]   cs          Pin mask for CS pin
+         * @param[in]   mosi        PinNum mask for MOSI pin
+         * @param[in]   miso        PinNum mask for MISO pin
+         * @param[in]   sclk        PinNum mask for SCLK pin
+         * @param[in]   cs          PinNum mask for CS pin
          * @param[in]   freq        Frequency to run the clock after initialization; if
          *                          -1 or 0 is passed in, a system default will be used
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-                const PropWare::GPIO::Pin cs, const int32_t freq);
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+                const PropWare::Pin::Mask cs, const int32_t freq);
 
         /**
          * @brief   Mount either FAT16 or FAT32 file system
@@ -1033,7 +1034,7 @@ class SD {
         /*** Global variable declarations ***/
         // Initialization variables
         SPI *m_spi;
-        PropWare::GPIO::Pin m_cs;  // Chip select pin mask
+        PropWare::Pin m_cs;  // Chip select pin mask
         uint8_t m_filesystem;  // File system type - one of SD::FAT_16 or SD::FAT_32
         uint8_t m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
         uint32_t m_rootDirSectors;  // Number of sectors for the root directory
@@ -1065,4 +1066,4 @@ class SD {
 
 }
 
-#endif /* SD_H_ */
+#endif /* PROPWARE_SD_H_ */

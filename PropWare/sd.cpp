@@ -57,16 +57,16 @@ SD::Buffer* SD::getGlobalBuffer () {
     return &(this->m_buf);
 }
 
-PropWare::ErrorCode SD::start (const PropWare::GPIO::Pin mosi,
-        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-        const PropWare::GPIO::Pin cs, const int32_t freq) {
+PropWare::ErrorCode SD::start (const PropWare::Pin::Mask mosi,
+        const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+        const PropWare::Pin::Mask cs, const int32_t freq) {
     PropWare::ErrorCode err;
     uint8_t response[16];
 
     // Set CS for output and initialize high
-    this->m_cs = cs;
-    GPIO::set_dir(cs, GPIO::OUT);
-    GPIO::pin_set(cs);
+    this->m_cs.set_mask(cs);
+    this->m_cs.set_dir(PropWare::Pin::OUT);
+    this->m_cs.set();
 
     // Start SPI module
     if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ,
@@ -86,7 +86,7 @@ PropWare::ErrorCode SD::start (const PropWare::GPIO::Pin mosi,
 
     // We're finally done initializing everything. Set chip select high again to
     // release the SPI port
-    GPIO::pin_set(cs);
+    this->m_cs.set();
 
     // Initialization complete
     return 0;
@@ -139,7 +139,7 @@ PropWare::ErrorCode SD::power_up () {
     waitcnt(CLKFREQ / 10 + CNT);
 
     // Send at least 72 clock cycles to enable the SD card
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
     for (i = 0; i < 128; ++i)
         check_errors(this->m_spi->shift_out(16, -1));
 
@@ -149,7 +149,7 @@ PropWare::ErrorCode SD::power_up () {
     waitcnt(10*MILLISECOND + CNT);
 
     // Chip select goes low for the duration of this function
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
 
     return 0;
 }
@@ -1343,13 +1343,13 @@ PropWare::ErrorCode SD::read_data_block (uint32_t address, uint8_t *dat) {
     printf("Reading block at sector address: 0x%08x / %u\n", address, address);
 #endif
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
 
     err = this->send_command(SD::CMD_RD_BLOCK, address, SD::CRC_OTHER);
     if (!err)
         err = this->read_block(SD::SECTOR_SIZE, dat);
 
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     if (err)
         return err;
@@ -1369,11 +1369,11 @@ PropWare::ErrorCode SD::write_data_block (uint32_t address, uint8_t *dat) {
     printf("Writing block at address: 0x%08x / %u\n", address, address);
 #endif
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     check_errors(this->send_command(SD::CMD_WR_BLOCK, address, SD::CRC_OTHER));
 
     check_errors(this->write_block(SD::SECTOR_SIZE, dat));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return 0;
 }

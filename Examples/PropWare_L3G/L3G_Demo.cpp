@@ -58,18 +58,13 @@ int main () {
 }
 
 void error (const int8_t err) {
-    uint32_t shiftedValue = (uint8_t) err;
-
-    // Shift the error bits by 16 to put them atop the QUICKSTART LEDs
-    shiftedValue <<= 16;
-
     // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::GPIO::set_dir(DEBUG_LEDS, PropWare::GPIO::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
-        PropWare::GPIO::pin_write(DEBUG_LEDS, shiftedValue);
+        debugLEDs.write(err);
         waitcnt(CLKFREQ/5 + CNT);
-        PropWare::GPIO::pin_clear(DEBUG_LEDS);
+        debugLEDs.write(0);
         waitcnt(CLKFREQ/5 + CNT);
     }
 }

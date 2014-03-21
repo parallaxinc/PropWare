@@ -26,13 +26,15 @@
  * SOFTWARE.
  */
 
-#ifndef HD44780_H_
-#define HD44780_H_
+#ifndef PROPWARE_HD44780_H_
+#define PROPWARE_HD44780_H_
 
 #include <stdarg.h>
 #include <stdlib.h>
 #include <propeller.h>
 #include <PropWare/PropWare.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
 
 namespace PropWare {
 
@@ -98,9 +100,11 @@ class HD44780 {
          * Error codes - Proceeded by SD, SPI
          */
         typedef enum {
-            /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780_ERRORS_BASE,
+            /** First HD44780 error */BEG_ERROR = HD44780_ERRORS_BASE,
+            /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780::BEG_ERROR,
             /** HD44780 Error 1 */INVALID_DATA_MASK,
-            /** HD44780 Error 2 */INVALID_DIMENSIONS
+            /** HD44780 Error 2 */INVALID_DIMENSIONS,
+            /** Last HD44780 error */END_ERROR = HD44780::INVALID_DIMENSIONS
         } ErrorCode;
 
     public:
@@ -165,15 +169,15 @@ class HD44780 {
         /**
          * @brief       Initialize an HD44780 LCD display
          *
-         * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires;
+         * @param[in]   dataPinsMask    PinNum mask for all 4 or all 8 data wires;
          *                              NOTE: all pins must be consecutive and
          *                              the LSB on the LCD must be the LSB in
          *                              your data mask (i.e., if you are using
          *                              pins 16-23 on the Propeller, pin 16 must
          *                              be connected to D0 on the LCD, NOT D7)
          *
-         * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN
-         *                              signals
+         * @param[in]   rs, rw, en      PropWare::Pin instances for each of the
+         *                              RS, RW, and EN signals
          * @param[in]   bitmode         Select between HD44780::BM_4 and
          *                              HD44780::BM_8 modes to determine whether
          *                              you will need 4 data wires or 8 between
@@ -183,8 +187,8 @@ class HD44780 {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode start (const uint32_t dataPinsMask, const GPIO::Pin rs,
-                const GPIO::Pin rw, const GPIO::Pin en,
+        PropWare::ErrorCode start (SimplePort dataPort, const Pin rs,
+                const Pin rw, const Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions);
 
@@ -268,11 +272,10 @@ class HD44780 {
         void generate_mem_map (const HD44780::Dimensions dimensions);
 
     private:
-        PropWare::GPIO::Pin m_rs, m_rw, m_en;
-        uint32_t m_dataMask;
+        PropWare::Pin m_rs, m_rw, m_en;
+        PropWare::SimplePort m_dataPort;
         HD44780::Dimensions m_dim;
         HD44780::Bitmode m_bitmode;
-        uint8_t m_dataLSBNum;
         uint8_t m_curRow;
         uint8_t m_curCol;
         HD44780::MemMap m_memMap;
@@ -280,4 +283,4 @@ class HD44780 {
 
 }
 
-#endif /* HD44780_H_ */
+#endif /* PROPWARE_HD44780_H_ */

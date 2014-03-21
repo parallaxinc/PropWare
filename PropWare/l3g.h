@@ -26,8 +26,8 @@
  * SOFTWARE.
  */
 
-#ifndef L3G_H_
-#define L3G_H_
+#ifndef PROPWARE_L3G_H_
+#define PROPWARE_L3G_H_
 
 #include <propeller.h>
 #include <PropWare/PropWare.h>
@@ -112,19 +112,19 @@ class L3G {
         /**
          * @brief       Initialize an L3G module
          *
-         * @param[in]   mosi        Pin mask for MOSI
-         * @param[in]   miso        Pin mask for MISO
-         * @param[in]   sclk        Pin mask for SCLK
-         * @param[in]   cs          Pin mask for CS
+         * @param[in]   mosi        PinNum mask for MOSI
+         * @param[in]   miso        PinNum mask for MISO
+         * @param[in]   sclk        PinNum mask for SCLK
+         * @param[in]   cs          PinNum mask for CS
          * @param[in]   dpsMode     One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS;
          *                          Determines the resolution of the L3G device in terms
          *                          of degrees per second
          *
          * @return       Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-                const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode);
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+                const PropWare::Pin::Mask cs, const L3G::DPSMode dpsMode);
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode before
@@ -255,10 +255,10 @@ class L3G {
 
     private:
         SPI *m_spi;
-        PropWare::GPIO::Pin m_cs;
+        PropWare::Pin m_cs;
         bool m_alwaysSetMode;
 };
 
 }
 
-#endif /* L3G_H_ */
+#endif /* PROPWARE_L3G_H_ */

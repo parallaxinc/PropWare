@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef SAFESPI_H_
-#define SAFESPI_H_
+#ifndef PROPWARE_SAFESPI_H_
+#define PROPWARE_SAFESPI_H_
 
 #include <PropWare/spi.h>
 
@@ -49,4 +49,4 @@ class SafeSPI: public SPI {
 
 }
 
-#endif /* SAFESPI_H_ */
+#endif /* PROPWARE_SAFESPI_H_ */

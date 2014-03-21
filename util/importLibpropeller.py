@@ -26,11 +26,12 @@ class ImportLibpropeller:
     DESTINATION_SOURCES = DESTINATION + SOURCE_DROPBOX + os.sep
     SOURCE_OBJECT_LIST = "libpropellerObjects.mk"
     CLEAN_EXCLUDES = ["cmm", "lmm", "xmm", "xmmc", "Makefile", "libpropeller.mk"]
+    WHITELISTED_SOURCE_FILES = ["numbers.cpp"]
 
     def __init__(self):
         self.sourceFiles = []
-        self.LIBPROPELLER_PATH = ImportLibpropeller.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY \
-                                 + "libpropeller" + os.sep
+        self.LIBPROPELLER_PATH = ImportLibpropeller.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + \
+                                 "libpropeller" + os.sep
 
     def run(self):
         propwareUtils.checkProperWorkingDirectory()
@@ -59,7 +60,7 @@ class ImportLibpropeller:
             # Skip the root git directory and move into its subdirectories
             if not os.path.samefile(root, ImportLibpropeller.DESTINATION_SOURCES):
                 for f in files:
-                    if propwareUtils.isAsmFile(f) and f not in self.sourceFiles:
+                    if self.isWorthyFile(f):
                         shutil.copy2(root + '/' + f, ImportLibpropeller.DESTINATION_SOURCES + f)
                         self.sourceFiles.append(f)
 
@@ -92,6 +93,12 @@ class ImportLibpropeller:
                 print("Looks like I can't clone or update the git repository for libpropeller. Sorry!", file=sys.stderr)
                 print("Caused by: " + str(e), file=sys.stderr)
                 print(e.output.decode(), file=sys.stderr)
+
+    def isWorthyFile(self, fileName):
+        isWhiteListed = fileName in ImportLibpropeller.WHITELISTED_SOURCE_FILES
+        isAssembly = propwareUtils.isAsmFile(fileName)
+        isNew = fileName not in self.sourceFiles
+        return (isWhiteListed or isAssembly) and isNew
 
     @staticmethod
     def clean():

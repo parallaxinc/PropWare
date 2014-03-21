@@ -42,9 +42,9 @@ int main () {
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
-    PropWare::GPIO::set_dir(CS, PropWare::GPIO::OUT);
+    PropWare::Pin cs(CS, PropWare::Pin::OUT);
 
-    PropWare::GPIO::set_dir(PropWare::BYTE_2, PropWare::GPIO::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
         s = string;         // Set the pointer to the beginning of the string
@@ -52,20 +52,20 @@ int main () {
 
             waitcnt(CLKFREQ/100 + CNT);
 
-            PropWare::GPIO::pin_clear(CS);  // Enable the SPI slave attached to CS
+            cs.clear();  // Enable the SPI slave attached to CS
             spi->shift_out(8, *s);  // Output the next character of the string
 
             // Be sure to wait until the SPI communication has FINISHED before
             // proceeding to set chip select high
             spi->wait();
-            PropWare::GPIO::pin_set(CS);
+            cs.set();
 
             waitcnt(CLKFREQ/100 + CNT);
             in = 0xff;              // Reset input variable
             while (in != *s) {
-                PropWare::GPIO::pin_clear(CS);
+                cs.clear();
                 spi->shift_in(8, &in, 1);  // Read in a value from the SPI device
-                PropWare::GPIO::pin_set(CS);
+                cs.set();
             }
 
             // Increment the character pointer
@@ -76,18 +76,24 @@ int main () {
         }
 
         // Signal that the entire string has been sent
-        PropWare::GPIO::pin_toggle(PropWare::BYTE_2);
+        debugLEDs.toggle();
     }
 
     return 0;
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
         spi->print_error_str((PropWare::SPI::ErrorCode) err);
     } else
         printf("Unknown error %u\n", err);
 
-    while (1)
-        ;
+    while (1) {
+        debugLEDs.write(err);
+        waitcnt(100*MILLISECOND);
+        debugLEDs.write(0);
+        waitcnt(100*MILLISECOND);
+    }
 }
