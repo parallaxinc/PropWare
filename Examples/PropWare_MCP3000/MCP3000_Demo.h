@@ -72,7 +72,7 @@
  *
  * @param[in]   err     Error value
  */
-void error (int8_t err);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 

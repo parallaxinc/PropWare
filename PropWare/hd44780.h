@@ -38,16 +38,6 @@
 
 namespace PropWare {
 
-/** @name   HD44780 Extra Code Options
- * @{ */
-/**
- * Enable or disable error checking on parameters
- * <p>
- * DEFAULT: On
- */
-#define HD44780_OPTION_DEBUG
-/** @} */
-
 /**
  * @brief       Support for the common "character LCD" modules using the HD44780
  *              controller for the Parallax Propeller
@@ -60,9 +50,8 @@ class HD44780 {
          * @brief   LCD databus width
          */
         typedef enum {
-            /** 4-bit mode */BM_4,
-            /** 8-bit mode */BM_8,
-            /** Number of unique bitmodes */BITMODES
+            /** 4-bit mode */BM_4 = 4,
+            /** 8-bit mode */BM_8 = 8,
         } Bitmode;
 
         /**
@@ -88,7 +77,6 @@ class HD44780 {
             /** 24x2 */DIM_24x2,
             /** 40x1 */DIM_40x1,
             /** 40x2 */DIM_40x2,
-            /** Number of unique dimensions supported */DIMENSIONS
         } Dimensions;
 
         /** Number of allocated error codes for HD44780 */
@@ -169,26 +157,24 @@ class HD44780 {
         /**
          * @brief       Initialize an HD44780 LCD display
          *
-         * @param[in]   dataPinsMask    PinNum mask for all 4 or all 8 data wires;
-         *                              NOTE: all pins must be consecutive and
-         *                              the LSB on the LCD must be the LSB in
-         *                              your data mask (i.e., if you are using
-         *                              pins 16-23 on the Propeller, pin 16 must
-         *                              be connected to D0 on the LCD, NOT D7)
+         * @note        A 250 ms delay is called while the LCD does internal
+         *              initialization
          *
-         * @param[in]   rs, rw, en      PropWare::Pin instances for each of the
-         *                              RS, RW, and EN signals
-         * @param[in]   bitmode         Select between HD44780::BM_4 and
-         *                              HD44780::BM_8 modes to determine whether
-         *                              you will need 4 data wires or 8 between
-         *                              the Propeller and your LCD device
-         * @param[in]   dimensions      Dimensions of your LCD device. Most
-         *                              common is HD44780::DIM_16x2
+         * @param[in]   lsbDataPin  Pin mask for the least significant pin of
+         *                          the data port
+         * @param[in]   rs, rw, en  PropWare::Pin::Mask instances for each of
+         *                          the RS, RW, and EN signals
+         * @param[in]   bitmode     Select between HD44780::BM_4 and
+         *                          HD44780::BM_8 modes to determine whether you
+         *                          will need 4 data wires or 8 between the
+         *                          Propeller and your LCD device
+         * @param[in]   dimensions  Dimensions of your LCD device. Most common
+         *                          is HD44780::DIM_16x2
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode start (SimplePort dataPort, const Pin rs,
-                const Pin rw, const Pin en,
+        PropWare::ErrorCode start (const PropWare::Pin::Mask lsbDataPin,
+                const Pin rs, const Pin rw, const Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions);
 
@@ -208,8 +194,8 @@ class HD44780 {
         /**
          * @brief       Print a string to the LCD
          *
-         * @detailed    Via a series of calls to HD44780_putchar, prints each character
-         *              individually
+         * @detailed    Via a series of calls to HD44780_putchar, prints each
+         *              character individually
          *
          * @param[in]   *s  Address where c-string can be found (must be
          *                  null-terminated)
@@ -234,7 +220,7 @@ class HD44780 {
         typedef struct {
                 /** How many characters can be displayed on a single row */
                 uint8_t charRows;
-                /** How many characters can be dispayed in a single column */
+                /** How many characters can be displayed in a single column */
                 uint8_t charColumns;
                 /** How many contiguous bytes of memory per visible character row */
                 uint8_t ddramCharRowBreak;

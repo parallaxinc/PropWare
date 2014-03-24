@@ -29,7 +29,7 @@
 
 // Main function
 int main () {
-    uint8_t err;
+    PropWare::ErrorCode err;
     char c;
 
     PropWare::Pin statusLED(PropWare::Pin::P16, PropWare::Pin::OUT);

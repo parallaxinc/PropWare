@@ -87,7 +87,8 @@ PropWare::ErrorCode PropWare::MCP3000::read (
 
 PropWare::ErrorCode PropWare::MCP3000::read_diff (
         const PropWare::MCP3000::ChannelDiff channels, uint16_t *dat) {
-    int8_t err, options;
+    PropWare::ErrorCode err;
+    int8_t options;
 
     options = PropWare::MCP3000::START | PropWare::MCP3000::DIFFERENTIAL
             | channels;

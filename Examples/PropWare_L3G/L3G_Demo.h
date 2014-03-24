@@ -57,7 +57,7 @@
 
 #define DEBUG_LEDS          PropWare::BYTE_2
 
-void error (const int8_t err);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 

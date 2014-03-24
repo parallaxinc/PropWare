@@ -47,8 +47,8 @@
 #define EN                  PropWare::Pin::P10
 
 #define FIRST_DATA_PIN      PropWare::Pin::P19
-#define DIMENSIONS          PropWare::HD44780::DIM_16x2
 #define BITMODE             PropWare::HD44780::BM_8
+#define DIMENSIONS          PropWare::HD44780::DIM_16x2
 
 /**
  * @brief       Enter an infinite loop that blinks the error code on the

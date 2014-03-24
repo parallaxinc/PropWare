@@ -64,7 +64,7 @@
 
 #define DIMENSIONS      PropWare::HD44780::DIM_16x2
 
-void error (int8_t err);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 

@@ -65,7 +65,7 @@
 #define OLD_FILE    "STUFF.TXT"
 #define NEW_FILE    "TEST.TXT"
 
-void error (const int8_t err, const PropWare::SD *sd);
+void error (const PropWare::ErrorCode err, const PropWare::SD *sd);
 
 /**@}*/
 

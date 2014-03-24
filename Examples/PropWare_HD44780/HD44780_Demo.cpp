@@ -29,14 +29,13 @@
 
 // Main function
 int main () {
-    uint8_t err;
+    PropWare::ErrorCode err;
 
     char buffer[128];
 
     PropWare::HD44780 lcd;
-    PropWare::SimplePort dataPort(FIRST_DATA_PIN, 8);
 
-    if ((err = lcd.start(dataPort, RS, RW, EN, BITMODE, DIMENSIONS)))
+    if ((err = lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
     sprintf(buffer, "%u %s%07d 0x%x", 123456789, "Hello!", -12345, 0xabcdef);

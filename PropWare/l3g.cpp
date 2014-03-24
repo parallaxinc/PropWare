@@ -81,7 +81,8 @@ PropWare::ErrorCode PropWare::L3G::read (const L3G::Axis axis, int16_t *val) {
 }
 
 PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) {
-    uint8_t err, i;
+    PropWare::ErrorCode err;
+    uint8_t i;
 
     uint8_t addr = L3G::OUT_X_L;
     addr |= BIT_7;  // Set RW bit (
@@ -115,7 +116,8 @@ PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) {
 
 PropWare::ErrorCode PropWare::L3G::ioctl (const L3G::IoctlFunction func,
         const uint8_t wrVal, uint8_t *rdVal) {
-    uint8_t err, oldValue;
+    PropWare::ErrorCode err;
+    uint8_t oldValue;
 
     if (this->m_alwaysSetMode) {
         check_errors(this->m_spi->set_mode(L3G::SPI_MODE));

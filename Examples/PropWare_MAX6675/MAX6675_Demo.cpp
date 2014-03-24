@@ -28,7 +28,7 @@
 #include "MAX6675_Demo.h"
 
 int main () {
-    int8_t err;
+    PropWare::ErrorCode err;
     uint16_t data;
     uint32_t loopCounter;
     char buffer[128];
@@ -36,12 +36,11 @@ int main () {
     PropWare::HD44780 lcd;
     PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
     PropWare::MAX6675 thermo(spi);
-    PropWare::SimplePort lcdDataPort(FIRST_DATA_PIN, 8);
 
     if ((err = thermo.start(MOSI, MISO, SCLK, CS)))
         error(err);
 
-    if ((err = lcd.start(lcdDataPort, RS, RW, EN, BITMODE, DIMENSIONS)))
+    if ((err = lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
     // Though this functional call is not necessary (default value is 0), I
@@ -69,7 +68,7 @@ int main () {
     return 0;
 }
 
-void error (const int8_t err) {
+void error (const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
     PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 

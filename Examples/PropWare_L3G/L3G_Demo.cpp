@@ -31,7 +31,7 @@
 
 // Main function
 int main () {
-    int8_t err;
+    PropWare::ErrorCode err;
     int16_t gyroVals[3];
     PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
     PropWare::L3G gyro(spi);
@@ -57,7 +57,7 @@ int main () {
     return 0;
 }
 
-void error (const int8_t err) {
+void error (const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
     PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 

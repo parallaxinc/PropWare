@@ -59,35 +59,11 @@ PropWare::HD44780::HD44780 () {
     this->m_curCol = 0;
 }
 
-PropWare::ErrorCode PropWare::HD44780::start (PropWare::SimplePort dataPort,
+PropWare::ErrorCode PropWare::HD44780::start (const PropWare::Pin::Mask lsbDataPin,
         const PropWare::Pin rs, const PropWare::Pin rw,
         const PropWare::Pin en, const PropWare::HD44780::Bitmode bitmode,
         const PropWare::HD44780::Dimensions dimensions) {
     uint8_t arg;
-
-#ifdef HD44780_OPTION_DEBUG
-    uint8_t i, bits;
-    uint32_t tempMask;
-
-    // Ensure either 4 or 8 bits were sent in for the data mask
-    switch (bitmode) {
-        case PropWare::HD44780::BM_8:
-            bits = 8;
-            if (8 != PropWare::count_bits(dataPort.get_mask()))
-                return HD44780::INVALID_DATA_MASK;
-            break;
-        case PropWare::HD44780::BM_4:
-            bits = 4;
-            if (4 != PropWare::count_bits(dataPort.get_mask()))
-                return PropWare::HD44780::INVALID_DATA_MASK;
-            break;
-        default:
-            return PropWare::HD44780::INVALID_DATA_MASK;
-    }
-
-    if (PropWare::HD44780::DIMENSIONS <= dimensions)
-        return PropWare::HD44780::INVALID_DIMENSIONS;
-#endif
 
     // Wait for a couple years until the LCD has done internal initialization
     waitcnt(250 * MILLISECOND + CNT);
@@ -104,7 +80,7 @@ PropWare::ErrorCode PropWare::HD44780::start (PropWare::SimplePort dataPort,
     this->m_en.clear();
 
     // Save data port
-    this->m_dataPort = dataPort;
+    this->m_dataPort.set_mask(lsbDataPin, bitmode);
     this->m_dataPort.set_dir(PropWare::Pin::OUT);
 
     // Save the modes
@@ -116,7 +92,7 @@ PropWare::ErrorCode PropWare::HD44780::start (PropWare::SimplePort dataPort,
     if (HD44780::BM_8 == bitmode)
         arg = 0x30;
     else
-        /* Implied: "if (HD44780::4BIT == bitmode)" */
+        /* Implied: "if (HD44780::BM_4 == bitmode)" */
         arg = 0x3;
 
     this->m_dataPort.write(arg);

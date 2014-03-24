@@ -29,7 +29,7 @@
 
 // Main function
 int main () {
-    int8_t err;
+    PropWare::ErrorCode err;
     uint16_t data;
     uint32_t loopCounter;
     uint16_t divisor = 1024 / 8;
@@ -57,11 +57,11 @@ int main () {
     puts("Welcome to the MCP3000 demo!\n");
 
     while (1) {
-        loopCounter = CLKFREQ / 2 + CNT;
+        loopCounter = SECOND / 2 + CNT;
 
         // Loop over the LED output very quickly, until we are within 1
         // millisecond of total period
-        while (abs(loopCounter - CNT) > CLKFREQ / 1000) {
+        while (abs(loopCounter - CNT) > MILLISECOND) {
             if ((err = adc.read(CHANNEL, &data)))
                 error(err);
 
