@@ -41,7 +41,7 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/hd44780.h>
 #include <PropWare/max6675.h>
-#include <PropWare/safeSpi.h>
+#include <PropWare/spi.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI            PropWare::Pin::P0

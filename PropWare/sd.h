@@ -33,7 +33,7 @@
 #include <string.h>
 #include <tinyio.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/safeSpi.h>
+#include <PropWare/spi.h>
 #include <PropWare/pin.h>
 
 namespace PropWare {
@@ -182,6 +182,7 @@ class SD {
          * Error codes - preceded by SPI
          */
         typedef enum {
+            /** No error */NO_ERROR = 0,
             /** First SD error code */BEG_ERROR = SPI::END_ERROR + 1,
             /** Begin user errors */ BEG_USER_ERROR = SD::BEG_ERROR,
             /** SD Error  0 */FILE_ALREADY_EXISTS = SD::BEG_USER_ERROR,
@@ -1027,12 +1028,10 @@ class SD {
         static const char ARCHIVE_CHAR = 'a';
         static const char ARCHIVE_CHAR_ = '.';
 
+    private:
         /*******************************
          *** Private Member Variable ***
          *******************************/
-    private:
-        /*** Global variable declarations ***/
-        // Initialization variables
         SPI *m_spi;
         PropWare::Pin m_cs;  // Chip select pin mask
         uint8_t m_filesystem;  // File system type - one of SD::FAT_16 or SD::FAT_32

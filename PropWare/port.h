@@ -67,20 +67,21 @@ class Port {
         Port ();
 
         /**
-         * @brief       Allow easy write to a port w/o destroying data elsewhere
-         *              in the port
+         * @brief       Allow easy writing to a port w/o destroying data
+         *              elsewhere in the port; No shift is performed to align
+         *              data with the desired output pins
          *
          * @param[in]   value   value to be bit-masked and then written to the
          *                      port
          */
-        void write (const uint32_t value) const;
+        void writeFast (const uint32_t value) const;
 
         /**
          * @brief       Allow easy reading of only selected pins from a port
          *
          * @return      Value of INA masked by the port mask
          */
-        uint32_t read () const;
+        uint32_t readFast () const;
 
     protected:
         uint32_t m_mask;
@@ -95,15 +96,83 @@ class SimplePort: public Port {
                 Port() {
             this->m_firstPinNum = 0;
         }
+
+        /**
+         * @brief       Initialize a port and configures its bit-mask
+         *
+         * @param[in]   firstPin    Least significant pin in the data port mask
+         * @param[in]   portWidth   The number of pins in the data port
+         */
         SimplePort (const PropWare::Pin::Mask firstPin, uint8_t portWidth);
+
+        /**
+         * @brief       Initialize a port and configures its bit-mask and
+         *              direction
+         *
+         * @param[in]   firstPin    Least significant pin in the data port mask
+         * @param[in]   portWidth   The number of pins in the data port
+         * @param[in[   direction   Determine input or output for the port
+         */
         SimplePort (const PropWare::Pin::Mask firstPin, uint8_t portWidth,
                 const PropWare::Pin::Dir direction);
+
+        /**
+         * @brief       Initialize a port and configures its bit-mask
+         *
+         * @param[in]   firstPin    Least significant pin in the data port;
+         *                          0-indexed
+         * @param[in]   portWidth   The number of pins in the data port
+         */
         SimplePort (const uint8_t firstPin, uint8_t portWidth);
+
+        /**
+         * @brief       Initialize a port and configures its bit-mask and
+         *              direction
+         *
+         * @param[in]   firstPin    Least significant pin in the data port;
+         *                          0-indexed
+         * @param[in]   portWidth   The number of pins in the data port
+         * @param[in[   direction   Determine input or output for the port
+         */
         SimplePort (const uint8_t firstPin, uint8_t portWidth,
                 const PropWare::Pin::Dir direction);
+
+        /**
+         * @brief       Configure a port's bit-mask
+         *
+         * @param[in]   firstPin    Least significant pin in the data port mask
+         * @param[in]   portWidth   The number of pins in the data port
+         */
         void set_mask (const PropWare::Pin::Mask firstPin, uint8_t portWidth);
+
+        /**
+         * @brief       Configure a port's bit-mask
+         *
+         * @param[in]   firstPin    Least significant pin in the data port;
+         *                          0-indexed
+         * @param[in]   portWidth   The number of pins in the data port
+         */
         void set_mask (const uint8_t firstPin, uint8_t portWidth);
+
+        /**
+         * @brief       Allow easy writing to a port w/o destroying data
+         *              elsewhere in the port; A shift is performed before
+         *              writing to align the LSB of the input parameter with the
+         *              least significant pin in the data port
+         *
+         * @param[in]   value   value to be bit-masked and then written to the
+         *                      port
+         */
         void write (uint32_t value);
+
+        /**
+         * @brief   Allow easy reading of only selected pins from a port
+         *
+         * @pre     Port direction must be set to input
+         *
+         * @return  No manipulation of the return value is necessary (such as
+         *          shifting to the right or masking)
+         */
         uint32_t read ();
 
     protected:
@@ -175,14 +244,14 @@ class FlexPort: public Port {
         void add_pins (const uint32_t mask);
 
         /**
-         * @brief   @see PropWare::Port::write()
+         * @brief   @see PropWare::Port::writeFast()
          */
-        void write (const uint32_t value) const;
+        void writeFast (const uint32_t value) const;
 
         /**
          * @brief   @see PropWare::Port::read()
          */
-        uint32_t read () const;
+        uint32_t readFast () const;
 
         FlexPort& operator= (SimplePort &rhs);
 };

@@ -40,7 +40,7 @@
 #include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/l3g.h>
-#include <PropWare/safeSpi.h>
+#include <PropWare/spi.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
 

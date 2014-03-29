@@ -71,9 +71,13 @@ namespace PropWare {
  * @brief       SPI serial communications library; Core functionality comes from
  *              a dedicated assembly cog
  *
- * @detailed    This SPI module is not thread safe! Do not try to
- *              call SPI functions from more than one cog. Look for a lockable
- *              version in PropWare v3.0
+ * @detailed    Generally, multiple instances of the SPI class are not desired.
+ *              To avoid the programmer from accidently creating multiple
+ *              instances, this class is set up as a singleton. A static
+ *              instance can be retrieved with PropWare::SPI::getInstance(). If
+ *              multiple instances of PropWare::SPI are desired, the PropWare
+ *              library (and your project) should be built from source with
+ *              PROPWARE_NO_SAFE_SPI defined
  */
 class SPI {
     public:
@@ -84,12 +88,13 @@ class SPI {
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
-         * @detailed    CPOL 0 refers to a low polarity (where the clock idles in the
-         *              low state) and CPOL 1 is for high polarity.
+         * @detailed    CPOL 0 refers to a low polarity (where the clock idles
+         *              in the low state) and CPOL 1 is for high polarity.
          *              TODO: Describe phase
-         * <table><tr><td>SPI Mode</td><td>CPOL</td><td>CPHA</td></tr><tr><td>0</td>
-         * <td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>2
-         * </td><td>1</td><td>0</td></tr><tr><td>3</td><td>1</td><td>1</td></tr></table>
+         * <table><tr><td>SPI Mode</td><td>CPOL</td><td>CPHA</td></tr><tr>
+         * <td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td>
+         * </tr><tr><td>2</td><td>1</td><td>0</td></tr><tr><td>3</td><td>1</td>
+         * <td>1</td></tr></table>
          */
         /* Raw text version of the above HTML table
          *
@@ -153,8 +158,27 @@ class SPI {
         static const uint8_t MAX_PAR_BITS = 31;
         static const int32_t MAX_CLOCK;
 
+#ifndef PROPWARE_NO_SAFE_SPI
+    private:
+#else
     public:
+#endif
+        /**
+         * @brief   Create a new instance of SPI which will, upon calling
+         *          SPI::start(), will start a new assembly cog. Creating
+         *          multiple instances of PropWare::SPI allows the user to have
+         *          multiple, independent SPI modules for simultaneous
+         *          communication
+         */
         SPI ();
+
+    public:
+        /**
+         * @brief   Retrieve an instance of the SPI module
+         *
+         * @return  Address of an SPI module
+         */
+        static SPI* getInstance ();
 
         /**
          * @brief       Initialize an SPI module by starting a new cog

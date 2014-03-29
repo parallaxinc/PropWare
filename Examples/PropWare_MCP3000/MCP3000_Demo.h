@@ -44,7 +44,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/mcp3000.h>
-#include <PropWare/safeSpi.h>
+#include <PropWare/spi.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
 

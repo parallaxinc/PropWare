@@ -34,7 +34,7 @@ int main () {
     char buffer[128];
 
     PropWare::HD44780 lcd;
-    PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
+    PropWare::SPI *spi = PropWare::SPI::getInstance();
     PropWare::MAX6675 thermo(spi);
 
     if ((err = thermo.start(MOSI, MISO, SCLK, CS)))

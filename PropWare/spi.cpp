@@ -43,6 +43,14 @@ const int32_t PropWare::SPI::MAX_CLOCK = CLKFREQ >> 3;
         strcpy(this->m_errorInMethod, y); \
         return err;}
 
+#ifndef PROPWARE_NO_SAFE_SPI
+PropWare::SPI* PropWare::SPI::getInstance () {
+    // TODO: Add a lock to make this thread-safe
+    static SPI instance;
+    return &instance;
+}
+#endif
+
 PropWare::SPI::SPI () {
     this->m_mailbox = -1;
     this->m_cog = -1;

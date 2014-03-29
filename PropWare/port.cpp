@@ -40,7 +40,7 @@ void PropWare::Port::set_dir (const PropWare::Pin::Dir direction) const {
             | (this->m_mask & (int32_t) direction);
 }
 
-void PropWare::Port::write (const uint32_t value) const {
+void PropWare::Port::writeFast (const uint32_t value) const {
     OUTA = ((OUTA & ~(this->m_mask)) | (value & this->m_mask));
 }
 
@@ -48,7 +48,7 @@ void PropWare::Port::toggle () const {
     OUTA ^= this->m_mask;
 }
 
-uint32_t PropWare::Port::read () const {
+uint32_t PropWare::Port::readFast () const {
     return INA & this->m_mask;
 }
 
@@ -90,11 +90,11 @@ void PropWare::SimplePort::set_mask (const uint8_t firstPin,
 }
 
 void PropWare::SimplePort::write (uint32_t value) {
-    this->Port::write(value << this->m_firstPinNum);
+    this->Port::writeFast(value << this->m_firstPinNum);
 }
 
 uint32_t PropWare::SimplePort::read () {
-    return this->Port::read() >> this->m_firstPinNum;
+    return this->Port::readFast() >> this->m_firstPinNum;
 }
 
 PropWare::FlexPort::FlexPort (const uint32_t portMask) {
@@ -132,12 +132,12 @@ void PropWare::FlexPort::add_pins (const uint32_t mask) {
     this->m_mask |= mask;
 }
 
-void PropWare::FlexPort::write (const uint32_t value) const {
-    this->Port::write(value);
+void PropWare::FlexPort::writeFast (const uint32_t value) const {
+    this->Port::writeFast(value);
 }
 
-uint32_t PropWare::FlexPort::read () const {
-    return this->Port::read();
+uint32_t PropWare::FlexPort::readFast () const {
+    return this->Port::readFast();
 }
 
 PropWare::FlexPort& PropWare::FlexPort::operator= (SimplePort &rhs) {

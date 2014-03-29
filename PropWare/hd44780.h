@@ -88,6 +88,7 @@ class HD44780 {
          * Error codes - Proceeded by SD, SPI
          */
         typedef enum {
+            /** No error */NO_ERROR = 0,
             /** First HD44780 error */BEG_ERROR = HD44780_ERRORS_BASE,
             /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780::BEG_ERROR,
             /** HD44780 Error 1 */INVALID_DATA_MASK,

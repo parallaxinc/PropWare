@@ -33,7 +33,7 @@
 int main () {
     PropWare::ErrorCode err;
     int16_t gyroVals[3];
-    PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
+    PropWare::SPI *spi = PropWare::SPI::getInstance();
     PropWare::L3G gyro(spi);
 
     if ((err = gyro.start(MOSI, MISO, SCLK, CS, PropWare::L3G::DPS_2000)))

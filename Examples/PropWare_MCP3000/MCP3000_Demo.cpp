@@ -35,7 +35,7 @@ int main () {
     uint16_t divisor = 1024 / 8;
     uint8_t scaledValue, i;
     uint32_t ledOutput;
-    PropWare::SafeSPI *spi = PropWare::SafeSPI::getSafeSPI();
+    PropWare::SPI *spi = PropWare::SPI::getInstance();
     PropWare::MCP3000 adc(spi, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)

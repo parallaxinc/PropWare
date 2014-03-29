@@ -209,10 +209,10 @@ class L3G {
         static const SPI::Mode SPI_MODE = SPI::MODE_3;
         static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
+    private:
         /***********************************
          *** Private Method Declarations ***
          ***********************************/
-    private:
         /**
          * @brief       Write one byte to the L3G module
          *
