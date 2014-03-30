@@ -45,14 +45,16 @@ class CreateBinaryDistr:
         os.chdir("..")
         CreateBinaryDistr.cleanOldArchives()
 
-    def run(self, branches):
+    def run(self, branches, areTags=False):
         assert (isinstance(branches, list))
+        assert (isinstance(areTags, bool))
+
         branches.sort()
         self.successes = []
 
         try:
             for branch in branches:
-                self.runInBranch(branch)
+                self.runInBranch(branch, areTags)
         except Exception as e:
             print(e, file=sys.stderr)
         finally:
@@ -60,12 +62,12 @@ class CreateBinaryDistr:
 
         self.printSummary(branches)
 
-    def runInBranch(self, branch):
+    def runInBranch(self, branch, isTag):
         # Clean any leftover crud
         CreateBinaryDistr.clean()
 
         # Attempt to checkout the next branch
-        if 0 == CreateBinaryDistr.checkout(branch):
+        if 0 == CreateBinaryDistr.checkout(branch, isTag):
             # Compile the static libraries and example projects
             CreateBinaryDistr.compile()
 
@@ -116,18 +118,21 @@ class CreateBinaryDistr:
                 raise e
 
     @staticmethod
-    def checkout(branch):
+    def checkout(branch, isTag=False):
+        assert (isinstance(isTag, bool))
+
         try:
             subprocess.check_output(["git", "checkout", branch])
         except subprocess.CalledProcessError:
             print("Failed to checkout " + branch, file=sys.stderr)
             return 1
 
-        try:
-            subprocess.check_output(["git", "pull"])
-        except subprocess.CalledProcessError:
-            print("Failed to pull latest sources", file=sys.stderr)
-            return 1
+        if not isTag:
+            try:
+                subprocess.check_output(["git", "pull"])
+            except subprocess.CalledProcessError:
+                print("Failed to pull latest sources", file=sys.stderr)
+                return 1
 
         return 0
 
@@ -191,4 +196,4 @@ if "__main__" == __name__:
     runMe.run(CreateBinaryDistr.BRANCHES)
 
     if args.tags:
-        runMe.run(CreateBinaryDistr.TAGS)
+        runMe.run(CreateBinaryDistr.TAGS, True)
