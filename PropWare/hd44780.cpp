@@ -59,9 +59,10 @@ PropWare::HD44780::HD44780 () {
     this->m_curCol = 0;
 }
 
-PropWare::ErrorCode PropWare::HD44780::start (const PropWare::Pin::Mask lsbDataPin,
-        const PropWare::Pin rs, const PropWare::Pin rw,
-        const PropWare::Pin en, const PropWare::HD44780::Bitmode bitmode,
+PropWare::ErrorCode PropWare::HD44780::start (
+        const PropWare::Pin::Mask lsbDataPin, const PropWare::Pin rs,
+        const PropWare::Pin rw, const PropWare::Pin en,
+        const PropWare::HD44780::Bitmode bitmode,
         const PropWare::HD44780::Dimensions dimensions) {
     uint8_t arg;
 
@@ -339,14 +340,13 @@ void PropWare::HD44780::print_error_str (
 
     switch (err) {
         case PropWare::HD44780::INVALID_CTRL_SGNL:
-            printf(str, err - PropWare::HD44780::BEG_ERROR, "invalid control signal");
-            break;
-        case PropWare::HD44780::INVALID_DATA_MASK:
-            printf(str, err - PropWare::HD44780::BEG_ERROR, "invalid data-pins mask");
+            printf(str, err - PropWare::HD44780::BEG_ERROR,
+                    "invalid control signal");
             break;
         case PropWare::HD44780::INVALID_DIMENSIONS:
-            printf(str, err - PropWare::HD44780::BEG_ERROR, "invalid LCD dimension; please choose from the "
-                    "HD44780::Dimensions type");
+            printf(str, err - PropWare::HD44780::BEG_ERROR, "invalid LCD "
+                    "dimension; please choose from the HD44780::Dimensions "
+                    "type");
             break;
     }
 }

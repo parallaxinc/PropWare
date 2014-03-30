@@ -73,7 +73,10 @@ class MCP3000 {
 
     public:
         /**
+         * @brief       Construction requires an instance of the SPI module;
+         *              the SPI module does not need to be started
          *
+         * @param[in]   *spi    Constructed SPI module
          * @param[in]   partNumber  Determine bit-width of the ADC channels
          */
         MCP3000 (SPI *spi, MCP3000::PartNumber partNumber);
@@ -93,21 +96,22 @@ class MCP3000 {
                 const PropWare::Pin::Mask cs);
 
         /**
-         * @brief       Choose whether to always set the SPI mode and bitmode before
-         *              reading or writing to the ADC; Useful when multiple devices are
-         *              connected to the SPI bus
+         * @brief       Choose whether to always set the SPI mode and bitmode
+         *              before reading or writing to the ADC; Useful when
+         *              multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
-         *                              always be set before a read or write routine
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes
+         *                              will always be set before a read or
+         *                              write routine
          */
         void always_set_spi_mode (const bool alwaysSetMode);
 
         /**
          * @brief       Read a specific channel's data in single-ended mode
          *
-         * @param[in]   axis    One of MCP_CHANNEL_<x>, where <x> is a number 0 through
-         *                      3 (or 0 through 7 for the MCP3008); Selects the channel
-         *                      to be read
+         * @param[in]   axis    One of MCP_CHANNEL_<x>, where <x> is a number 0
+         *                      through 3 (or 0 through 7 for the MCP3008);
+         *                      Selects the channel to be read
          * @param[out]  *val    Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
@@ -117,15 +121,16 @@ class MCP3000 {
         /**
          * @brief       Read a specific axis's data in differential mode
          *
-         * @param[in]   axis    One of DIFF_<x>_<y>, where <x> is a number 0 through 3
-         *                      (or 0 through 7 for the MCP3008) and <y> is
-         *                      <x> + (<x> + 1)%2 (See above defined enum or datasheet
-         *                      for details)
+         * @param[in]   axis    One of DIFF_<x>_<y>, where <x> is a number 0
+         *                      through 3 (or 0 through 7 for the MCP3008) and
+         *                      <y> is <x> + (<x> + 1)%2 (See above defined enum
+         *                      or datasheet for details)
          * @param[out]  *val    Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_diff (const MCP3000::ChannelDiff channels, uint16_t *dat);
+        PropWare::ErrorCode read_diff (const MCP3000::ChannelDiff channels,
+                uint16_t *dat);
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;

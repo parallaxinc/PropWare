@@ -55,12 +55,14 @@ class HD44780 {
         } Bitmode;
 
         /**
-         * @brief   Supported LCD dimensions; Used for determining cursor placement
+         * @brief   Supported LCD dimensions; Used for determining cursor
+         *          placement
          *
-         * @note    There are two variations of 16x1 character LCDs; if you're unsure
-         *          which version you have, try 16x1_1 first, it is more common. 16x1_1
-         *          uses both DDRAM lines of the controller, 8-characters on each line;
-         *          16x1_2 places all 16 characters are a single line of DDRAM.
+         * @note    There are two variations of 16x1 character LCDs; if you're
+         *          unsure which version you have, try 16x1_1 first, it is more
+         *          common. 16x1_1 uses both DDRAM lines of the controller,
+         *          8-characters on each line; 16x1_2 places all 16 characters
+         *          are a single line of DDRAM.
          */
         typedef enum {
             /** 8x1 */DIM_8x1,
@@ -91,8 +93,7 @@ class HD44780 {
             /** No error */NO_ERROR = 0,
             /** First HD44780 error */BEG_ERROR = HD44780_ERRORS_BASE,
             /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780::BEG_ERROR,
-            /** HD44780 Error 1 */INVALID_DATA_MASK,
-            /** HD44780 Error 2 */INVALID_DIMENSIONS,
+            /** HD44780 Error 1 */INVALID_DIMENSIONS,
             /** Last HD44780 error */END_ERROR = HD44780::INVALID_DIMENSIONS
         } ErrorCode;
 
@@ -102,8 +103,8 @@ class HD44780 {
 
         /**
          * @name    Commands
-         * @note    Must be combined with arguments below to create a parameter for the
-         *          HD44780
+         * @note    Must be combined with arguments below to create a parameter
+         *          for the HD44780
          */
         static const uint8_t CLEAR;
         static const uint8_t RET_HOME;
@@ -215,15 +216,17 @@ class HD44780 {
 
     private:
         /**
-         * Store metadata on the LCD device to determine when line-wraps should and
-         * shouldn't occur
+         * Store metadata on the LCD device to determine when line-wraps should
+         * and shouldn't occur
          */
         typedef struct {
                 /** How many characters can be displayed on a single row */
                 uint8_t charRows;
                 /** How many characters can be displayed in a single column */
                 uint8_t charColumns;
-                /** How many contiguous bytes of memory per visible character row */
+                /**
+                 * How many contiguous bytes of memory per visible character row
+                 */
                 uint8_t ddramCharRowBreak;
                 /** Last byte of memory used in each DDRAM line */
                 uint8_t ddramLineEnd;
@@ -248,13 +251,14 @@ class HD44780 {
         void write (const uint8_t val);
 
         /**
-         * @brief   Toggle the enable pin, inducing a write to the LCD's register
+         * @brief   Toggle the enable pin, inducing a write to the LCD's
+         *          register
          */
         void clock_pulse (void);
 
         /**
-         * @brief   The memory map is used to determine where line wraps should and
-         *          shouldn't occur
+         * @brief   The memory map is used to determine where line wraps should
+         *          and shouldn't occur
          */
         void generate_mem_map (const HD44780::Dimensions dimensions);
 

@@ -39,6 +39,12 @@ namespace PropWare {
  */
 class MAX6675 {
     public:
+        /**
+         * @brief       Construction requires an instance of the SPI module;
+         *              the SPI module does not need to be started
+         *
+         * @param[in]   *spi    Constructed SPI module
+         */
         MAX6675 (SPI *spi);
 
         /**
@@ -56,21 +62,22 @@ class MAX6675 {
                 const PropWare::Pin::Mask cs);
 
         /**
-         * @brief       Choose whether to always set the SPI mode and bitmode before
-         *              reading or writing to the chip; Useful when multiple devices are
-         *              connected to the SPI bus
+         * @brief       Choose whether to always set the SPI mode and bitmode
+         *              before reading or writing to the chip; Useful when
+         *              multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
-         *                              always be set before a read or write routine
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes
+         *                              will always be set before a read or
+         *                              write routine
          */
         void always_set_spi_mode (const bool alwaysSetMode);
 
         /**
          * @brief       Read data in fixed-point form
          *
-         * @detailed    12-bit data is stored where lower 2 bits are fractional and
-         *              upper 10 bits are the whole number. Value presented in degrees
-         *              Celsius
+         * @detailed    12-bit data is stored where lower 2 bits are fractional
+         *              and upper 10 bits are the whole number. Value presented
+         *              in degrees Celsius
          *
          * @param[out]  *dat    Address where data should be stored
          *

@@ -1318,7 +1318,9 @@ PropWare::ErrorCode SD::write_block (uint16_t bytes, uint8_t *dat) {
             // Check for timeout
             if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
                 return SD::READ_TIMEOUT;
-        } while (0xff == this->m_firstByteResponse);  // wait for transmission end
+
+        // wait for transmission end
+        } while (0xff == this->m_firstByteResponse);
         if (SD::RSPNS_TKN_ACCPT
                 != (this->m_firstByteResponse & (uint8_t) SD::RSPNS_TKN_BITS))
             return SD::INVALID_RESPONSE;
@@ -1522,7 +1524,8 @@ PropWare::ErrorCode SD::load_next_sector (SD::Buffer *buf) {
                     ++(buf->curSectorOffset) + buf->curClusterStartAddr,
                     buf->buf);
         }
-        // End of generic data cluster; Look through the FAT to find the next cluster
+        // End of generic data cluster; Look through the FAT to find the next
+        // cluster
         else
             return this->inc_cluster(buf);
     }
@@ -1718,8 +1721,8 @@ PropWare::ErrorCode SD::find (const char *filename, uint16_t *fileEntryOffset) {
 
     // Loop through all entries in the current directory until we find the
     // correct one
-    // Function will exit normally with SD::EOC_END error code if the file is not
-    // found
+    // Function will exit normally with SD::EOC_END error code if the file is
+    // not found
     while (this->m_buf.buf[*fileEntryOffset]) {
         // Check if file is valid, retrieve the name if it is
         if (!(SD::DELETED_FILE_MARK == this->m_buf.buf[*fileEntryOffset])) {
@@ -1834,7 +1837,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
         this->write_rev_dat16(this->m_fat + allocOffset,
                 (uint16_t) SD::EOC_END);
         this->m_fatMod = true;
-    } else /* Implied and not needed: "if (SD::FAT_32 == this->m_filesystem)" */{
+    } else /* Implied: "if (SD::FAT_32 == this->m_filesystem)" */{
         // In FAT32, the first 7 usable clusters seem to be un-officially
         // reserved for the root directory
         if (0 == this->m_curFatSector)
@@ -2049,7 +2052,8 @@ PropWare::ErrorCode SD::create_file (const char *name,
     /* 2) Write attribute field... */
     // TODO: Allow for file attribute flags to be set, such as SD::READ_ONLY,
     //       SD::SUB_DIR, etc
-    this->m_buf.buf[*fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET] = SD::ARCHIVE;  // Archive flag should be set because the file is new
+    // Archive flag should be set because the file is new
+    this->m_buf.buf[*fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET] = SD::ARCHIVE;
     this->m_buf.mod = true;
 
 #ifdef SD_OPTION_VERBOSE
@@ -2069,8 +2073,8 @@ PropWare::ErrorCode SD::create_file (const char *name,
             (uint16_t) allocUnit);
     if (SD::FAT_32 == this->m_filesystem)
         this->write_rev_dat16(
-                &(this->m_buf.buf[*fileEntryOffset + SD::FILE_START_CLSTR_HIGH]),
-                (uint16_t) (allocUnit >> 16));
+                &(this->m_buf.buf[*fileEntryOffset +
+                SD::FILE_START_CLSTR_HIGH]), (uint16_t) (allocUnit >> 16));
 
     /* 4) Write the size of the file (currently 0) */
     this->write_rev_dat32(

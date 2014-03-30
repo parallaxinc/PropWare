@@ -98,16 +98,6 @@ PropWare::SimplePort::SimplePort (const PropWare::Pin::Mask firstPin,
     this->set_dir(direction);
 }
 
-PropWare::SimplePort::SimplePort (const uint8_t firstPin, uint8_t portWidth) {
-    this->set_mask(firstPin, portWidth);
-}
-
-PropWare::SimplePort::SimplePort (const uint8_t firstPin, uint8_t portWidth,
-        const PropWare::Pin::Dir direction) {
-    this->set_mask(firstPin, portWidth);
-    this->set_dir(direction);
-}
-
 void PropWare::SimplePort::set_mask (const PropWare::Pin::Mask firstPin,
         uint8_t width) {
     this->m_mask = firstPin;
@@ -117,11 +107,6 @@ void PropWare::SimplePort::set_mask (const PropWare::Pin::Mask firstPin,
     while (--width)
         // Add the next pin to the mask
         this->m_mask |= this->m_mask << 1;
-}
-
-void PropWare::SimplePort::set_mask (const uint8_t firstPin,
-        uint8_t portWidth) {
-    this->set_mask(PropWare::Pin::convert(firstPin), portWidth);
 }
 
 void PropWare::SimplePort::write (uint32_t value) {

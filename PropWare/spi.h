@@ -113,10 +113,11 @@ class SPI {
         } Mode;
 
         /**
-         * @brief   Determine if data is communicated with the LSB or MSB sent/received
-         *          first
+         * @brief   Determine if data is communicated with the LSB or MSB
+         *          sent/received first
          *
-         * @note    Initial value is SPI_MODES + 1 making them easily distinguishable
+         * @note    Initial value is SPI_MODES + 1 making them easily
+         *          distinguishable
          */
         typedef enum {
             /**
@@ -152,7 +153,8 @@ class SPI {
         } ErrorCode;
 
     public:
-        // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout error
+        // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout
+        // error
         static const uint32_t WR_TIMEOUT_VAL;
         static const uint32_t RD_TIMEOUT_VAL;
         static const uint8_t MAX_PAR_BITS = 31;
@@ -189,7 +191,8 @@ class SPI {
          * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must
          *                          be less than CLKFREQ/4
          * @param[in]   polarity    Polarity of the clock - idle low or high;
-         *                          must be one of SPI_POLARITY_LOW or SPI_POLARITY_HIGH
+         *                          must be one of SPI_POLARITY_LOW or
+         *                          SPI_POLARITY_HIGH
          *
          * @return      Returns 0 upon success, otherwise error code
          */
@@ -232,8 +235,8 @@ class SPI {
         /**
          * @brief       Set the mode of SPI communication
          *
-         * @param[in]   mode    Sets the SPI mode to one SPI::MODE_0, SPI::MODE_1,
-         *                      SPI::MODE_2, or SPI::MODE_3
+         * @param[in]   mode    Sets the SPI mode to one SPI::MODE_0,
+         *                      SPI::MODE_1, SPI::MODE_2, or SPI::MODE_3
          *
          * @return      Can return non-zero in the case of a timeout
          */
@@ -242,8 +245,8 @@ class SPI {
         /**
          * @brief       Set the bitmode of SPI communication
          *
-         * @param[in]   mode    Select one of SPI::LSB_FIRST or SPI::MSB_FIRST to choose
-         *                      which bit will be shifted out first
+         * @param[in]   mode    Select one of SPI::LSB_FIRST or SPI::MSB_FIRST
+         *                      to choose which bit will be shifted out first
          *
          * @return      Can return non-zero in the case of a timeout
          */
@@ -252,9 +255,9 @@ class SPI {
         /**
          * @brief       Change the SPI module's clock frequency
          *
-         * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must be less
-         *                          than CLKFREQ/4 (for 80 MHz, 1.9 MHz is the fastest
-         *                          I've tested successfully)
+         * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must
+         *                          be less than CLKFREQ/4 (for 80 MHz, 900 kHz
+         *                          is the fastest I've tested successfully)
          *
          * @return      Returns 0 upon success, otherwise error code
          */
@@ -263,7 +266,8 @@ class SPI {
         /**
          * @brief       Retrieve the SPI module's clock frequency
          *
-         * @param[out]  *frequency  Frequency, in Hz, that the SPI object is running
+         * @param[out]  *frequency  Frequency, in Hz, that the SPI module is
+         *                          running
          *
          * @return      Returns 0 upon success, otherwise error code
          */
@@ -290,26 +294,28 @@ class SPI {
          * @param[in]   bits        Number of bits to be shifted in
          * @param[out]  *data       Received data will be stored at this address
          * @param[in]   bytes       Number of bytes allocated to *data; Example:
-         *                              int newVal;
-         *                              spi_shift_in(8, &newVal, sizeof(newVal));
+         *                            int newVal;
+         *                            spi.shift_in(8, &newVal, sizeof(newVal));
          *                          Or if using a pointer:
-         *                              int *newVal;
-         *                              spi_shift_in(8, newVal, sizeof(*newVal));
+         *                            int *newVal;
+         *                            spi.shift_in(8, newVal, sizeof(*newVal));
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode shift_in (const uint8_t bits, void *data, const size_t size);
+        PropWare::ErrorCode shift_in (const uint8_t bits, void *data,
+                const size_t size);
 
 #ifdef SPI_OPTION_FAST
         /**
          * @brief       Send a value out to a peripheral device
          *
-         * @detailed    Pass a value and mode into the assembly cog to be sent to the
-         *              peripheral; NOTE: this function is non-blocking and chip-select
-         *              should not be set inactive immediately after the return (you
-         *              should call spi_wait() before setting chip-select inactive);
-         *              Optimized for fastest possible clock speed; No error checking is
-         *              performed; 'Timeout' event will never be thrown and possible
+         * @detailed    Pass a value and mode into the assembly cog to be sent
+         *              to the peripheral; NOTE: this function is non-blocking
+         *              and chip-select should not be set inactive immediately
+         *              after the return (you should call spi_wait() before
+         *              setting chip-select inactive); Optimized for fastest
+         *              possible clock speed; No error checking is performed;
+         *              'Timeout' event will never be thrown and possible
          *              infinite loop can happen
          *
          * @param[in]   bits        Number of bits to be shifted out
@@ -320,19 +326,20 @@ class SPI {
         PropWare::ErrorCode shift_out_fast (uint8_t bits, uint32_t value);
 
         /**
-         * @brief       Receive a value in from a peripheral device; Optimized for
-         *              fastest possible clock speed; No error checking is performed;
-         *              'Timeout' event will never be thrown and possible infinite loop
-         *              can happen
+         * @brief       Quickly receive a value in from a peripheral device
+         *
+         * Optimized for fastest possible clock speed; No error checking is
+         * performed; 'Timeout' event will never be thrown and possible infinite
+         * loop can happen
          *
          * @param[in]   bits    Number of bits to be shifted in
          * @param[out]  *data   Received data will be stored at this address
          * @param[in]   bytes   Number of bytes allocated to *data; Example:
-         *                          int newVal;
-         *                          spi_shift_in_fast(8, &newVal, sizeof(newVal));
+         *                        int newVal;
+         *                        spi.shift_in_fast(8, &newVal, sizeof(newVal));
          *                      Or if using a pointer:
-         *                          int *newVal;
-         *                          spi_shift_in_fast(8, newVal, sizeof(*newVal));
+         *                        int *newVal;
+         *                        spi.shift_in_fast(8, newVal, sizeof(*newVal));
          */
         PropWare::ErrorCode shift_in_fast (const uint8_t bits, void *data,
                 const uint8_t bytes);
@@ -340,15 +347,17 @@ class SPI {
         /**
          * @brief       Read an entire sector of data in from an SD card
          *
-         * @param[out]  *addr       First hub address where the data should be written
-         * @param[in]   blocking    When set to non-zero, function will not return until
-         *                          the data transfer is complete
+         * @param[out]  *addr       First hub address where the data should be
+         *                          written
+         * @param[in]   blocking    When set to non-zero, function will not
+         *                          return until the data transfer is complete
          */
-        PropWare::ErrorCode shift_in_sector (const uint8_t addr[], const uint8_t blocking);
+        PropWare::ErrorCode shift_in_sector (const uint8_t addr[],
+                const uint8_t blocking);
 #endif
         /**
-         * @brief   Print through UART an error string followed by entering an infinite
-         *          loop
+         * @brief   Print through UART an error string followed by entering an
+         *          infinite loop
          *
          * @param   err     Error number used to determine error string
          */
@@ -372,8 +381,10 @@ class SPI {
         static const uint8_t BITS_OFFSET = 8;
 
         static const uint8_t PHASE_BIT = BIT_0;
-        static const uint8_t POLARITY_BIT = BIT_1;  // Idle high == HIGH; Idle low == LOW
-        static const uint8_t BITMODE_BIT = BIT_2;  // MSB_FIRST == HIGH; LSB_FIRST == LOW
+        // Idle high == HIGH; Idle low == LOW
+        static const uint8_t POLARITY_BIT = BIT_1;
+        // MSB_FIRST == HIGH; LSB_FIRST == LOW
+        static const uint8_t BITMODE_BIT = BIT_2;
 
     private:
         /***********************************
@@ -384,11 +395,11 @@ class SPI {
          *
          * @param[out]  *par    Address to store the parameter
          * @param[in]   bytes   Number of bytes allocated to *data; Example:
-         *                          int newVal;
-         *                          spi_read_par(&newVal, sizeof(newVal));
+         *                        int newVal;
+         *                        spi.read_par(&newVal, sizeof(newVal));
          *                      Or if using a pointer:
-         *                          int *newVal;
-         *                          spi_read_par(newVal, sizeof(*newVal));
+         *                        int *newVal;
+         *                        spi.read_par(newVal, sizeof(*newVal));
          *
          * @return      Returns 0 upon success, error code otherwise
          */

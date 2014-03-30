@@ -258,7 +258,8 @@ PropWare::ErrorCode PropWare::SPI::shift_out (uint8_t bits, uint32_t value) {
     return SPI::NO_ERROR;
 }
 
-PropWare::ErrorCode PropWare::SPI::shift_in (const uint8_t bits, void *data, const size_t bytes) {
+PropWare::ErrorCode PropWare::SPI::shift_in (const uint8_t bits, void *data,
+        const size_t bytes) {
     PropWare::ErrorCode err;
     const char str[] = "shift_in";
 
@@ -286,7 +287,8 @@ PropWare::ErrorCode PropWare::SPI::shift_in (const uint8_t bits, void *data, con
 }
 
 #ifdef SPI_OPTION_FAST
-PropWare::ErrorCode PropWare::SPI::shift_out_fast (uint8_t bits, uint32_t value) {
+PropWare::ErrorCode PropWare::SPI::shift_out_fast (const uint8_t bits,
+        const uint32_t value) {
     // NOTE: No debugging within this function to allow for fastest possible
     // execution time
     // Wait to ensure the SPI cog is in its idle state

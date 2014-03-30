@@ -29,7 +29,8 @@
 // Includes
 #include <PropWare/mcp3000.h>
 
-PropWare::MCP3000::MCP3000 (SPI *spi, PropWare::MCP3000::PartNumber partNumber) {
+PropWare::MCP3000::MCP3000 (SPI *spi,
+        PropWare::MCP3000::PartNumber partNumber) {
     this->m_spi = spi;
     this->m_alwaysSetMode = 0;
     this->m_dataWidth = partNumber;
@@ -69,7 +70,9 @@ PropWare::ErrorCode PropWare::MCP3000::read (
 
     options = PropWare::MCP3000::START | PropWare::MCP3000::SINGLE_ENDED
             | channel;
-    options <<= 2; // One dead bit between output and input - see page 19 of datasheet
+
+    // Two dead bits between output and input - see page 19 of datasheet
+    options <<= 2;
 
     if (this->m_alwaysSetMode) {
         check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
@@ -92,7 +95,9 @@ PropWare::ErrorCode PropWare::MCP3000::read_diff (
 
     options = PropWare::MCP3000::START | PropWare::MCP3000::DIFFERENTIAL
             | channels;
-    options <<= 2; // One dead bit between output and input - see page 19 of datasheet
+
+    // Two dead bits between output and input - see page 19 of datasheet
+    options <<= 2;
 
     if (this->m_alwaysSetMode) {
         check_errors(this->m_spi->set_mode(PropWare::MCP3000::SPI_MODE));

@@ -177,42 +177,12 @@ class SimplePort: public Port {
                 const PropWare::Pin::Dir direction);
 
         /**
-         * @brief       Initialize a port and configures its bit-mask
-         *
-         * @param[in]   firstPin    Least significant pin in the data port;
-         *                          0-indexed
-         * @param[in]   portWidth   The number of pins in the data port
-         */
-        SimplePort (const uint8_t firstPin, uint8_t portWidth);
-
-        /**
-         * @brief       Initialize a port and configures its bit-mask and
-         *              direction
-         *
-         * @param[in]   firstPin    Least significant pin in the data port;
-         *                          0-indexed
-         * @param[in]   portWidth   The number of pins in the data port
-         * @param[in[   direction   Determine input or output for the port
-         */
-        SimplePort (const uint8_t firstPin, uint8_t portWidth,
-                const PropWare::Pin::Dir direction);
-
-        /**
          * @brief       Configure a port's bit-mask
          *
          * @param[in]   firstPin    Least significant pin in the data port mask
          * @param[in]   portWidth   The number of pins in the data port
          */
         void set_mask (const PropWare::Pin::Mask firstPin, uint8_t portWidth);
-
-        /**
-         * @brief       Configure a port's bit-mask
-         *
-         * @param[in]   firstPin    Least significant pin in the data port;
-         *                          0-indexed
-         * @param[in]   portWidth   The number of pins in the data port
-         */
-        void set_mask (const uint8_t firstPin, uint8_t portWidth);
 
         /**
          * @brief       Allow easy writing to a port w/o destroying data
