@@ -29,80 +29,42 @@
 #include <tinyio.h>
 #include <PropWare/hd44780.h>
 
-namespace PropWare {
+const uint8_t PropWare::HD44780::TAB_WIDTH = 4;
 
-const uint8_t HD44780::TAB_WIDTH = 4;
+const uint8_t PropWare::HD44780::CLEAR = BIT_0;
+const uint8_t PropWare::HD44780::RET_HOME = BIT_1;
+const uint8_t PropWare::HD44780::ENTRY_MODE_SET = BIT_2;
+const uint8_t PropWare::HD44780::DISPLAY_CTRL = BIT_3;
+const uint8_t PropWare::HD44780::SHIFT = BIT_4;
+const uint8_t PropWare::HD44780::FUNCTION_SET = BIT_5;
+const uint8_t PropWare::HD44780::SET_CGRAM_ADDR = BIT_6;
+const uint8_t PropWare::HD44780::SET_DDRAM_ADDR = BIT_7;
 
-const uint8_t HD44780::CLEAR = BIT_0;
-const uint8_t HD44780::RET_HOME = BIT_1;
-const uint8_t HD44780::ENTRY_MODE_SET = BIT_2;
-const uint8_t HD44780::DISPLAY_CTRL = BIT_3;
-const uint8_t HD44780::SHIFT = BIT_4;
-const uint8_t HD44780::FUNCTION_SET = BIT_5;
-const uint8_t HD44780::SET_CGRAM_ADDR = BIT_6;
-const uint8_t HD44780::SET_DDRAM_ADDR = BIT_7;
+const uint8_t PropWare::HD44780::SHIFT_INC = BIT_1;
+const uint8_t PropWare::HD44780::SHIFT_EN = BIT_0;
 
-const uint8_t HD44780::SHIFT_INC = BIT_1;
-const uint8_t HD44780::SHIFT_EN = BIT_0;
+const uint8_t PropWare::HD44780::DISPLAY_PWR = BIT_2;
+const uint8_t PropWare::HD44780::CURSOR = BIT_1;
+const uint8_t PropWare::HD44780::BLINK = BIT_0;
 
-const uint8_t HD44780::DISPLAY_PWR = BIT_2;
-const uint8_t HD44780::CURSOR = BIT_1;
-const uint8_t HD44780::BLINK = BIT_0;
+const uint8_t PropWare::HD44780::SHIFT_DISPLAY = BIT_3;
+const uint8_t PropWare::HD44780::SHIFT_RIGHT = BIT_2;
 
-const uint8_t HD44780::SHIFT_DISPLAY = BIT_3;
-const uint8_t HD44780::SHIFT_RIGHT = BIT_2;
+const uint8_t PropWare::HD44780::FUNC_8BIT_MODE = BIT_4;
+const uint8_t PropWare::HD44780::FUNC_2LINE_MODE = BIT_3;
+const uint8_t PropWare::HD44780::FUNC_5x10_CHAR = BIT_2;
 
-const uint8_t HD44780::FUNC_8BIT_MODE = BIT_4;
-const uint8_t HD44780::FUNC_2LINE_MODE = BIT_3;
-const uint8_t HD44780::FUNC_5x10_CHAR = BIT_2;
-
-HD44780::HD44780 () {
+PropWare::HD44780::HD44780 () {
     this->m_curRow = 0;
     this->m_curCol = 0;
 }
 
-PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask,
-        const GPIO::Pin rs, const GPIO::Pin rw, const GPIO::Pin en,
-        const HD44780::Bitmode bitmode, const HD44780::Dimensions dimensions) {
+PropWare::ErrorCode PropWare::HD44780::start (
+        const PropWare::Pin::Mask lsbDataPin, const PropWare::Pin rs,
+        const PropWare::Pin rw, const PropWare::Pin en,
+        const PropWare::HD44780::Bitmode bitmode,
+        const PropWare::HD44780::Dimensions dimensions) {
     uint8_t arg;
-
-#ifdef HD44780_OPTION_DEBUG
-    uint8_t i, bits;
-    uint32_t tempMask;
-
-    if (1 != PropWare::count_bits(rw) || 1 != PropWare::count_bits(rs)
-            || 1 != PropWare::count_bits(en))
-        return HD44780::INVALID_CTRL_SGNL;
-
-    // Ensure either 4 or 8 bits were sent in for the data mask
-    switch (bitmode) {
-        case HD44780::BM_8:
-            bits = 8;
-            if (8 != PropWare::count_bits(dataPinsMask))
-                return HD44780::INVALID_DATA_MASK;
-            break;
-        case HD44780::BM_4:
-            bits = 4;
-            if (4 != PropWare::count_bits(dataPinsMask))
-                return HD44780::INVALID_DATA_MASK;
-            break;
-        default:
-            return HD44780::INVALID_DATA_MASK;
-    }
-
-    // Ensure that all 4 or 8 bits are consecutive
-    tempMask = dataPinsMask;
-    while (0 == (BIT_0 & tempMask))
-        tempMask >>= 1;
-    for (i = 0; i < bits; ++i)
-        if (0 == (BIT_0 & tempMask))
-            return HD44780::INVALID_DATA_MASK;
-        else
-            tempMask >>= 1;
-
-    if (HD44780::DIMENSIONS <= dimensions)
-        return HD44780::INVALID_DIMENSIONS;
-#endif
 
     // Wait for a couple years until the LCD has done internal initialization
     waitcnt(250 * MILLISECOND + CNT);
@@ -111,16 +73,16 @@ PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask,
     this->m_rs = rs;
     this->m_rw = rw;
     this->m_en = en;
-    GPIO::set_dir(rs | rw | en, GPIO::OUT);
-    GPIO::pin_clear(rs | rw | en);
+    this->m_rs.set_dir(PropWare::Pin::OUT);
+    this->m_rw.set_dir(PropWare::Pin::OUT);
+    this->m_en.set_dir(PropWare::Pin::OUT);
+    this->m_rs.clear();
+    this->m_rw.clear();
+    this->m_en.clear();
 
-    // Save data pin masks
-    GPIO::set_dir(dataPinsMask, GPIO::OUT);
-    this->m_dataMask = dataPinsMask;
-
-    // Determine the data LSB
-    while (!(BIT_0 & (dataPinsMask >> this->m_dataLSBNum)))
-        this->m_dataLSBNum++;
+    // Save data port
+    this->m_dataPort.set_mask(lsbDataPin, bitmode);
+    this->m_dataPort.set_dir(PropWare::Pin::OUT);
 
     // Save the modes
     this->m_dim = dimensions;
@@ -131,11 +93,10 @@ PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask,
     if (HD44780::BM_8 == bitmode)
         arg = 0x30;
     else
-        /* Implied: "if (HD44780::4BIT == bitmode)" */
+        /* Implied: "if (HD44780::BM_4 == bitmode)" */
         arg = 0x3;
-    arg <<= this->m_dataLSBNum;
 
-    GPIO::pin_write(this->m_dataMask, arg);
+    this->m_dataPort.write(arg);
     this->clock_pulse();
     waitcnt(100 * MILLISECOND + CNT);
 
@@ -145,29 +106,29 @@ PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask,
     this->clock_pulse();
     waitcnt(10 * MILLISECOND + CNT);
 
-    if (HD44780::BM_4 == bitmode) {
-        GPIO::pin_write(this->m_dataMask, 0x2 << this->m_dataLSBNum);
+    if (PropWare::HD44780::BM_4 == bitmode) {
+        this->m_dataPort.write(0x2);
         this->clock_pulse();
     }
 
     // Default functions during initialization
-    arg = HD44780::FUNCTION_SET;
-    if (HD44780::BM_8 == bitmode)
-        arg |= HD44780::FUNC_8BIT_MODE;
+    arg = PropWare::HD44780::FUNCTION_SET;
+    if (PropWare::HD44780::BM_8 == bitmode)
+        arg |= PropWare::HD44780::FUNC_8BIT_MODE;
     if (0 != dimensions % 3)
-        arg |= HD44780::FUNC_2LINE_MODE;
+        arg |= PropWare::HD44780::FUNC_2LINE_MODE;
     this->cmd(arg);
 
     // Turn off display shift (set cursor shift) and leave default of shift-left
-    arg = HD44780::SHIFT;
+    arg = PropWare::HD44780::SHIFT;
     this->cmd(arg);
 
     // Turn the display on; Leave cursor off and not blinking
-    arg = HD44780::DISPLAY_CTRL | HD44780::DISPLAY_PWR;
+    arg = PropWare::HD44780::DISPLAY_CTRL | PropWare::HD44780::DISPLAY_PWR;
     this->cmd(arg);
 
     // Set cursor to auto-increment upon writing a character
-    arg = HD44780::ENTRY_MODE_SET | HD44780::SHIFT_INC;
+    arg = PropWare::HD44780::ENTRY_MODE_SET | PropWare::HD44780::SHIFT_INC;
     this->cmd(arg);
 
     this->clear();
@@ -175,14 +136,14 @@ PropWare::ErrorCode HD44780::start (const uint32_t dataPinsMask,
     return 0;
 }
 
-void HD44780::clear (void) {
-    this->cmd(HD44780::CLEAR);
+void PropWare::HD44780::clear (void) {
+    this->cmd(PropWare::HD44780::CLEAR);
     this->m_curRow = 0;
     this->m_curCol = 0;
     waitcnt(1530*MICROSECOND + CNT);
 }
 
-void HD44780::move (const uint8_t row, const uint8_t col) {
+void PropWare::HD44780::move (const uint8_t row, const uint8_t col) {
     uint8_t ddramLine, addr = 0;
 
     // Handle weird special case where a single row LCD is split across
@@ -206,12 +167,12 @@ void HD44780::move (const uint8_t row, const uint8_t col) {
         addr |= col;
     }
 
-    this->cmd(addr | HD44780::SET_DDRAM_ADDR);
+    this->cmd(addr | PropWare::HD44780::SET_DDRAM_ADDR);
     this->m_curRow = row;
     this->m_curCol = col;
 }
 
-void HD44780::putStr (const char str[]) {
+void PropWare::HD44780::putStr (const char str[]) {
     const char *s = str;
 
     while (*s) {
@@ -220,7 +181,7 @@ void HD44780::putStr (const char str[]) {
     }
 }
 
-void HD44780::putChar (const char c) {
+void PropWare::HD44780::putChar (const char c) {
     // For manual new-line characters...
     if ('\n' == c) {
         if (++this->m_curRow == this->m_memMap.charRows)
@@ -230,12 +191,12 @@ void HD44780::putChar (const char c) {
     } else if ('\t' == c) {
         do {
             this->putChar(' ');
-        } while (this->m_curCol % HD44780::TAB_WIDTH);
+        } while (this->m_curCol % PropWare::HD44780::TAB_WIDTH);
     }
     // And for everything else...
     else {
         //set RS to data and RW to write
-        GPIO::pin_set(this->m_rs);
+        this->m_rs.set();
         this->write(c);
 
         // Insert a line wrap if necessary
@@ -250,123 +211,119 @@ void HD44780::putChar (const char c) {
     }
 }
 
-void HD44780::cmd (const uint8_t c) {
+void PropWare::HD44780::cmd (const uint8_t c) {
     //set RS to command mode and RW to write
-    GPIO::pin_clear(this->m_rs);
+    this->m_rs.clear();
     this->write(c);
 }
 
-void HD44780::write (const uint8_t val) {
-    uint32_t shiftedVal = val;
-
+void PropWare::HD44780::write (const uint8_t val) {
     // Clear RW to signal write value
-    GPIO::pin_clear(this->m_rw);
+    this->m_rw.clear();
 
-    if (HD44780::BM_4 == this->m_bitmode) {
+    if (PropWare::HD44780::BM_4 == this->m_bitmode) {
         // shift out the high nibble
-        shiftedVal <<= this->m_dataLSBNum - 4;
-        GPIO::pin_write(this->m_dataMask, shiftedVal);
+        this->m_dataPort.write(val >> 4);
         this->clock_pulse();
 
         // Shift out low nibble
-        shiftedVal <<= 4;
-        GPIO::pin_write(this->m_dataMask, shiftedVal);
+        this->m_dataPort.write(val);
     }
     // Shift remaining four bits out
     else /* Implied: if (HD44780::8BIT == this->m_bitmode) */{
-        shiftedVal <<= this->m_dataLSBNum;
-        GPIO::pin_write(this->m_dataMask, shiftedVal);
+        this->m_dataPort.write(val);
     }
     this->clock_pulse();
 }
 
-void HD44780::clock_pulse (void) {
-    GPIO::pin_set(this->m_en);
+void PropWare::HD44780::clock_pulse (void) {
+    this->m_en.set();
     waitcnt(MILLISECOND + CNT);
-    GPIO::pin_clear(this->m_en);
+    this->m_en.clear();
 }
 
-void HD44780::generate_mem_map (const HD44780::Dimensions dimensions) {
+void PropWare::HD44780::generate_mem_map (
+        const PropWare::HD44780::Dimensions dimensions) {
     switch (dimensions) {
-        case HD44780::DIM_8x1:
+        case PropWare::HD44780::DIM_8x1:
             this->m_memMap.charRows = 1;
             this->m_memMap.charColumns = 8;
             this->m_memMap.ddramCharRowBreak = 8;
             this->m_memMap.ddramLineEnd = 8;
             break;
-        case HD44780::DIM_8x2:
+        case PropWare::HD44780::DIM_8x2:
             this->m_memMap.charRows = 2;
             this->m_memMap.charColumns = 8;
             this->m_memMap.ddramCharRowBreak = 8;
             this->m_memMap.ddramLineEnd = 8;
             break;
-        case HD44780::DIM_8x4:
+        case PropWare::HD44780::DIM_8x4:
             this->m_memMap.charRows = 4;
             this->m_memMap.charColumns = 8;
             this->m_memMap.ddramCharRowBreak = 8;
             this->m_memMap.ddramLineEnd = 16;
             break;
-        case HD44780::DIM_16x1_1:
+        case PropWare::HD44780::DIM_16x1_1:
             this->m_memMap.charRows = 1;
             this->m_memMap.charColumns = 16;
             this->m_memMap.ddramCharRowBreak = 8;
             this->m_memMap.ddramLineEnd = 8;
             break;
-        case HD44780::DIM_16x1_2:
+        case PropWare::HD44780::DIM_16x1_2:
             this->m_memMap.charRows = 1;
             this->m_memMap.charColumns = 16;
             this->m_memMap.ddramCharRowBreak = 16;
             this->m_memMap.ddramLineEnd = 16;
             break;
-        case HD44780::DIM_16x2:
+        case PropWare::HD44780::DIM_16x2:
             this->m_memMap.charRows = 2;
             this->m_memMap.charColumns = 16;
             this->m_memMap.ddramCharRowBreak = 16;
             this->m_memMap.ddramLineEnd = 16;
             break;
-        case HD44780::DIM_16x4:
+        case PropWare::HD44780::DIM_16x4:
             this->m_memMap.charRows = 4;
             this->m_memMap.charColumns = 16;
             this->m_memMap.ddramCharRowBreak = 16;
             this->m_memMap.ddramLineEnd = 32;
             break;
-        case HD44780::DIM_20x1:
+        case PropWare::HD44780::DIM_20x1:
             this->m_memMap.charRows = 1;
             this->m_memMap.charColumns = 20;
             this->m_memMap.ddramCharRowBreak = 20;
             this->m_memMap.ddramLineEnd = 20;
             break;
-        case HD44780::DIM_20x2:
+        case PropWare::HD44780::DIM_20x2:
             this->m_memMap.charRows = 2;
             this->m_memMap.charColumns = 20;
             this->m_memMap.ddramCharRowBreak = 20;
             this->m_memMap.ddramLineEnd = 20;
             break;
-        case HD44780::DIM_20x4:
+        case PropWare::HD44780::DIM_20x4:
             this->m_memMap.charRows = 4;
             this->m_memMap.charColumns = 8;
             this->m_memMap.ddramCharRowBreak = 8;
             this->m_memMap.ddramLineEnd = 20;
             break;
-        case HD44780::DIM_24x1:
+        case PropWare::HD44780::DIM_24x1:
             this->m_memMap.charRows = 1;
             this->m_memMap.charColumns = 24;
             this->m_memMap.ddramCharRowBreak = 24;
             this->m_memMap.ddramLineEnd = 24;
             break;
-        case HD44780::DIM_24x2:
+        case PropWare::HD44780::DIM_24x2:
             this->m_memMap.charRows = 2;
             this->m_memMap.charColumns = 24;
             this->m_memMap.ddramCharRowBreak = 24;
             this->m_memMap.ddramLineEnd = 24;
             break;
-        case HD44780::DIM_40x1:
+        case PropWare::HD44780::DIM_40x1:
             this->m_memMap.charRows = 1;
             this->m_memMap.charColumns = 40;
             this->m_memMap.ddramCharRowBreak = 40;
             this->m_memMap.ddramLineEnd = 40;
             break;
-        case HD44780::DIM_40x2:
+        case PropWare::HD44780::DIM_40x2:
             this->m_memMap.charRows = 2;
             this->m_memMap.charColumns = 40;
             this->m_memMap.ddramCharRowBreak = 40;
@@ -377,21 +334,19 @@ void HD44780::generate_mem_map (const HD44780::Dimensions dimensions) {
     }
 }
 
-void HD44780::print_error_str (const HD44780::ErrorCode err) {
+void PropWare::HD44780::print_error_str (
+        const PropWare::HD44780::ErrorCode err) {
     char str[] = "HD44780 Error %u: %s\n";
 
     switch (err) {
-        case HD44780::INVALID_CTRL_SGNL:
-            printf(str, "invalid control signal");
+        case PropWare::HD44780::INVALID_CTRL_SGNL:
+            printf(str, err - PropWare::HD44780::BEG_ERROR,
+                    "invalid control signal");
             break;
-        case HD44780::INVALID_DATA_MASK:
-            printf(str, "invalid data-pins mask");
-            break;
-        case HD44780::INVALID_DIMENSIONS:
-            printf(str, "invalid LCD dimension; please choose from the "
-                    "HD44780::Dimensions type");
+        case PropWare::HD44780::INVALID_DIMENSIONS:
+            printf(str, err - PropWare::HD44780::BEG_ERROR, "invalid LCD "
+                    "dimension; please choose from the HD44780::Dimensions "
+                    "type");
             break;
     }
-}
-
 }

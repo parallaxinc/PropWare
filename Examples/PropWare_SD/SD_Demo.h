@@ -50,20 +50,22 @@
 #endif
 #include <PropWare/PropWare.h>
 #include <PropWare/sd.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI        PropWare::GPIO::P0
+#define MOSI        PropWare::Pin::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO        PropWare::GPIO::P1
+#define MISO        PropWare::Pin::P1
 /** Pin number for the clock signal */
-#define SCLK        PropWare::GPIO::P2
+#define SCLK        PropWare::Pin::P2
 /** Pin number for chip select */
-#define CS          PropWare::GPIO::P4
+#define CS          PropWare::Pin::P4
 
 #define OLD_FILE    "STUFF.TXT"
 #define NEW_FILE    "TEST.TXT"
 
-void error (const int8_t err, const PropWare::SD *sd);
+void error (const PropWare::ErrorCode err, const PropWare::SD *sd);
 
 /**@}*/
 

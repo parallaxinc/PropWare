@@ -41,40 +41,30 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/hd44780.h>
 #include <PropWare/max6675.h>
-#include <PropWare/safeSpi.h>
+#include <PropWare/spi.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI            PropWare::GPIO::P0
+#define MOSI            PropWare::Pin::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO            PropWare::GPIO::P1
+#define MISO            PropWare::Pin::P1
 /** Pin number for the clock signal */
-#define SCLK            PropWare::GPIO::P2
+#define SCLK            PropWare::Pin::P2
 /** Pin number for chip select */
-#define CS              PropWare::GPIO::P5
+#define CS              PropWare::Pin::P5
 #define FREQ            10000
 
 #define DEBUG_LEDS      PropWare::BYTE_2
 
-#define RS              PropWare::GPIO::P14
-#define RW              PropWare::GPIO::P12
-#define EN              PropWare::GPIO::P10
+#define RS              PropWare::Pin::P14
+#define RW              PropWare::Pin::P12
+#define EN              PropWare::Pin::P10
 
-#define DATA_H          PropWare::GPIO::P26 | PropWare::GPIO::P25 | \
-                        PropWare::GPIO::P24 | PropWare::GPIO::P23
-#define DATA_L          PropWare::GPIO::P22 | PropWare::GPIO::P21 | \
-                        PropWare::GPIO::P20 | PropWare::GPIO::P19
-
-#ifdef DATA_L
+#define FIRST_DATA_PIN  PropWare::Pin::P19
 #define BITMODE         PropWare::HD44780::BM_8
-#define DATA            DATA_H | DATA_L
-#else
-#define BITMODE         HD44780_4BIT
-#define DATA            DATA_H
-#endif
 
 #define DIMENSIONS      PropWare::HD44780::DIM_16x2
 
-void error (int8_t err);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 

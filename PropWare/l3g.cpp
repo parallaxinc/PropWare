@@ -28,16 +28,14 @@
 
 #include <PropWare/l3g.h>
 
-namespace PropWare {
-
-L3G::L3G (SPI *spi) {
+PropWare::L3G::L3G (SPI *spi) {
     this->m_spi = spi;
     this->m_alwaysSetMode = false;
 }
 
-PropWare::ErrorCode L3G::start (const PropWare::GPIO::Pin mosi,
-        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-        const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode) {
+PropWare::ErrorCode PropWare::L3G::start (const PropWare::Pin::Mask mosi,
+        const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+        const PropWare::Pin::Mask cs, const L3G::DPSMode dpsMode) {
     PropWare::ErrorCode err;
     // Ensure SPI module started
     if (!this->m_spi->is_running()) {
@@ -50,9 +48,9 @@ PropWare::ErrorCode L3G::start (const PropWare::GPIO::Pin mosi,
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    this->m_cs = cs;
-    GPIO::set_dir(cs, GPIO::OUT);
-    GPIO::pin_set(cs);
+    this->m_cs.set_mask(cs);
+    this->m_cs.set_dir(PropWare::Pin::OUT);
+    this->m_cs.set();
 
     // NOTE L3G has high- and low-pass filters. Should they be enabled? (Page
     // 31)
@@ -62,28 +60,29 @@ PropWare::ErrorCode L3G::start (const PropWare::GPIO::Pin mosi,
     return 0;
 }
 
-void L3G::always_set_spi_mode (const bool alwaysSetMode) {
+void PropWare::L3G::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-PropWare::ErrorCode L3G::read_x (int16_t *val) {
+PropWare::ErrorCode PropWare::L3G::read_x (int16_t *val) {
     return this->read16(L3G::OUT_X_L, val);
 }
 
-PropWare::ErrorCode L3G::read_y (int16_t *val) {
+PropWare::ErrorCode PropWare::L3G::read_y (int16_t *val) {
     return this->read16(L3G::OUT_Y_L, val);
 }
 
-PropWare::ErrorCode L3G::read_z (int16_t *val) {
+PropWare::ErrorCode PropWare::L3G::read_z (int16_t *val) {
     return this->read16(L3G::OUT_Z_L, val);
 }
 
-PropWare::ErrorCode L3G::read (const L3G::Axis axis, int16_t *val) {
+PropWare::ErrorCode PropWare::L3G::read (const L3G::Axis axis, int16_t *val) {
     return this->read16(L3G::OUT_X_L + (axis << 1), val);
 }
 
-PropWare::ErrorCode L3G::read_all (int16_t *val) {
-    uint8_t err, i;
+PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) {
+    PropWare::ErrorCode err;
+    uint8_t i;
 
     uint8_t addr = L3G::OUT_X_L;
     addr |= BIT_7;  // Set RW bit (
@@ -94,7 +93,7 @@ PropWare::ErrorCode L3G::read_all (int16_t *val) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     check_errors(this->m_spi->shift_out(8, addr));
     check_errors(
             this->m_spi->shift_in(16, &(val[L3G::X]), sizeof(val[L3G::X])));
@@ -102,7 +101,7 @@ PropWare::ErrorCode L3G::read_all (int16_t *val) {
             this->m_spi->shift_in(16, &(val[L3G::Y]), sizeof(val[L3G::Y])));
     check_errors(
             this->m_spi->shift_in(16, &(val[L3G::Z]), sizeof(val[L3G::Z])));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     // err is useless at this point and will be used as a temporary 8-bit
     // variable
@@ -115,9 +114,10 @@ PropWare::ErrorCode L3G::read_all (int16_t *val) {
     return 0;
 }
 
-PropWare::ErrorCode L3G::ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
-        uint8_t *rdVal) {
-    uint8_t err, oldValue;
+PropWare::ErrorCode PropWare::L3G::ioctl (const L3G::IoctlFunction func,
+        const uint8_t wrVal, uint8_t *rdVal) {
+    PropWare::ErrorCode err;
+    uint8_t oldValue;
 
     if (this->m_alwaysSetMode) {
         check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
@@ -145,7 +145,7 @@ PropWare::ErrorCode L3G::ioctl (const L3G::IoctlFunction func, const uint8_t wrV
 /*************************************
  *** Private Function Declarations ***
  *************************************/
-PropWare::ErrorCode L3G::write8 (uint8_t addr, const uint8_t dat) {
+PropWare::ErrorCode PropWare::L3G::write8 (uint8_t addr, const uint8_t dat) {
     PropWare::ErrorCode err;
     uint16_t outputValue;
 
@@ -159,15 +159,15 @@ PropWare::ErrorCode L3G::write8 (uint8_t addr, const uint8_t dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     err = this->m_spi->shift_out(16, outputValue);
     check_errors(this->m_spi->wait());
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return err;
 }
 
-PropWare::ErrorCode L3G::write16 (uint8_t addr, const uint16_t dat) {
+PropWare::ErrorCode PropWare::L3G::write16 (uint8_t addr, const uint16_t dat) {
     PropWare::ErrorCode err;
     uint16_t outputValue;
 
@@ -183,15 +183,15 @@ PropWare::ErrorCode L3G::write16 (uint8_t addr, const uint16_t dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     check_errors(this->m_spi->shift_out(24, outputValue));
     check_errors(this->m_spi->wait());
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return 0;
 }
 
-PropWare::ErrorCode L3G::read8 (uint8_t addr, int8_t *dat) {
+PropWare::ErrorCode PropWare::L3G::read8 (uint8_t addr, int8_t *dat) {
     PropWare::ErrorCode err;
 
     addr |= BIT_7;  // Set RW bit (
@@ -202,15 +202,15 @@ PropWare::ErrorCode L3G::read8 (uint8_t addr, int8_t *dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     check_errors(this->m_spi->shift_out(8, addr));
     check_errors(this->m_spi->shift_in(8, dat, sizeof(*dat)));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return 0;
 }
 
-PropWare::ErrorCode L3G::read16 (uint8_t addr, int16_t *dat) {
+PropWare::ErrorCode PropWare::L3G::read16 (uint8_t addr, int16_t *dat) {
     PropWare::ErrorCode err;
 
     addr |= BIT_7;  // Set RW bit (
@@ -221,10 +221,10 @@ PropWare::ErrorCode L3G::read16 (uint8_t addr, int16_t *dat) {
         check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     check_errors(this->m_spi->shift_out(8, addr));
     check_errors(this->m_spi->shift_in(16, dat, sizeof(*dat)));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     // err is useless at this point and will be used as a temporary 8-bit
     // variable
@@ -233,6 +233,4 @@ PropWare::ErrorCode L3G::read16 (uint8_t addr, int16_t *dat) {
     *dat |= err;
 
     return 0;
-}
-
 }

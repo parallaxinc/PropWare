@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef MAX6675_H_
-#define MAX6675_H_
+#ifndef PROPWARE_MAX6675_H_
+#define PROPWARE_MAX6675_H_
 
 #include <PropWare/PropWare.h>
 #include <PropWare/spi.h>
@@ -39,38 +39,45 @@ namespace PropWare {
  */
 class MAX6675 {
     public:
+        /**
+         * @brief       Construction requires an instance of the SPI module;
+         *              the SPI module does not need to be started
+         *
+         * @param[in]   *spi    Constructed SPI module
+         */
         MAX6675 (SPI *spi);
 
         /**
          * @brief       Initialize communication with an MAX6675 device
          *
-         * @param[in]   mosi        Pin mask for MOSI
-         * @param[in]   miso        Pin mask for MISO
-         * @param[in]   sclk        Pin mask for SCLK
-         * @param[in]   cs          Pin mask for CS
+         * @param[in]   mosi        PinNum mask for MOSI
+         * @param[in]   miso        PinNum mask for MISO
+         * @param[in]   sclk        PinNum mask for SCLK
+         * @param[in]   cs          PinNum mask for CS
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin clk,
-                const PropWare::GPIO::Pin cs);
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask clk,
+                const PropWare::Pin::Mask cs);
 
         /**
-         * @brief       Choose whether to always set the SPI mode and bitmode before
-         *              reading or writing to the chip; Useful when multiple devices are
-         *              connected to the SPI bus
+         * @brief       Choose whether to always set the SPI mode and bitmode
+         *              before reading or writing to the chip; Useful when
+         *              multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
-         *                              always be set before a read or write routine
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes
+         *                              will always be set before a read or
+         *                              write routine
          */
         void always_set_spi_mode (const bool alwaysSetMode);
 
         /**
          * @brief       Read data in fixed-point form
          *
-         * @detailed    12-bit data is stored where lower 2 bits are fractional and
-         *              upper 10 bits are the whole number. Value presented in degrees
-         *              Celsius
+         * @detailed    12-bit data is stored where lower 2 bits are fractional
+         *              and upper 10 bits are the whole number. Value presented
+         *              in degrees Celsius
          *
          * @param[out]  *dat    Address where data should be stored
          *
@@ -104,10 +111,10 @@ class MAX6675 {
 
     private:
         SPI *m_spi;
-        PropWare::GPIO::Pin m_cs;
+        PropWare::Pin m_cs;
         bool m_alwaysSetMode;
 };
 
 }
 
-#endif /* MAX6675_H_ */
+#endif /* PROPWARE_MAX6675_H_ */

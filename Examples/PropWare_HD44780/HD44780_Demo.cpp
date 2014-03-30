@@ -27,17 +27,15 @@
 
 #include "HD44780_Demo.h"
 
-using namespace PropWare::GPIO;
-
 // Main function
 int main () {
-    uint8_t err;
+    PropWare::ErrorCode err;
 
     char buffer[128];
 
     PropWare::HD44780 lcd;
 
-    if ((err = lcd.start(DATA, RS, RW, EN, BITMODE, DIMENSIONS)))
+    if ((err = lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS)))
         error(err);
 
     sprintf(buffer, "%u %s%07d 0x%x", 123456789, "Hello!", -12345, 0xabcdef);
@@ -47,17 +45,14 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err) {
-    uint32_t out = err;
-    out <<= 16;
+    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
 
     PropWare::HD44780::print_error_str((PropWare::HD44780::ErrorCode) err);
 
-    set_dir(PropWare::BYTE_2, OUT);
-
     while (1) {
-        pin_write(PropWare::BYTE_2, out);
+        debugLEDs.write(err);
         waitcnt(150*MILLISECOND + CNT);
-        pin_clear(PropWare::BYTE_2);
+        debugLEDs.write(0);
         waitcnt(150*MILLISECOND + CNT);
     }
 }

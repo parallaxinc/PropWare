@@ -25,15 +25,16 @@
  * SOFTWARE.
  */
 
-#ifndef SD_H_
-#define SD_H_
+#ifndef PROPWARE_SD_H_
+#define PROPWARE_SD_H_
 
 #include <propeller.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tinyio.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/safeSpi.h>
+#include <PropWare/spi.h>
+#include <PropWare/pin.h>
 
 namespace PropWare {
 
@@ -115,8 +116,8 @@ class SD {
 #define SD_SHELL_INPUT_LEN  128
         static const uint8_t SHELL_INPUT_LEN = SD_SHELL_INPUT_LEN;
         /**
-         * Maximum number of characters for an individual command (does not include
-         * parameters
+         * Maximum number of characters for an individual command (does not
+         * include parameters
          */
 #define SD_SHELL_CMD_LEN    8
         static const uint8_t SHELL_CMD_LEN = SD_SHELL_CMD_LEN;
@@ -125,11 +126,20 @@ class SD {
         static const uint8_t SHELL_ARG_LEN = SD_SHELL_ARG_LEN;
         /** String defining the "exit" command to quit the SD_Shell() function*/
         static const char SHELL_EXIT[];
-        /** String defining the "ls" command to call SD_Shell_ls(); List dir contents */
+        /**
+         * String defining the "ls" command to call SD_Shell_ls(); List dir
+         * contents
+         */
         static const char SHELL_LS[];
-        /** String defining the "cat" command to call SD_Shell_cat(); Prints a file */
+        /**
+         * String defining the "cat" command to call SD_Shell_cat(); Prints a
+         * file
+         */
         static const char SHELL_CAT[];
-        /** String defining the "cd" command to call SD_Shell_cd(); Change directory */
+        /**
+         * String defining the "cd" command to call SD_Shell_cd(); Change
+         * directory
+         */
         static const char SHELL_CD[];
         /** String defining the "touch" command; Creates an empty file */
         static const char SHELL_TOUCH[];
@@ -140,8 +150,8 @@ class SD {
         /**
          * File modes
          *
-         * TODO: Learn what these modes *should* do and do it; At the moment, these modes
-         *       essentially aren't used for anything
+         * TODO: Learn what these modes *should* do and do it; At the moment,
+         *       these modes essentially aren't used for anything
          */
         typedef enum {
             /**
@@ -159,8 +169,8 @@ class SD {
              */
             FILE_MODE_A,
             /**
-             * Append+ (read + write); Write pointer starts at last character + 1, read
-             * pointer starts at first character
+             * Append+ (read + write); Write pointer starts at last character
+             * + 1, read pointer starts at first character
              */
             FILE_MODE_A_PLUS,
 #endif
@@ -181,8 +191,9 @@ class SD {
          * Error codes - preceded by SPI
          */
         typedef enum {
+            /** No error */NO_ERROR = 0,
             /** First SD error code */BEG_ERROR = SPI::END_ERROR + 1,
-            /** Begin user errors */ BEG_USER_ERROR = SD::BEG_ERROR,
+            /** Begin user errors */BEG_USER_ERROR = SD::BEG_ERROR,
             /** SD Error  0 */FILE_ALREADY_EXISTS = SD::BEG_USER_ERROR,
             /** SD Error  1 */INVALID_FILE_MODE,
             /** SD Error  2 */ENTRY_NOT_FILE,
@@ -211,8 +222,8 @@ class SD {
         } ErrorCode;
 
         /**
-         * Buffer object used for storing SD data; Each instance uses 527 bytes (526
-         * if SD_OPTION_FILE_WRITE is disabled)
+         * Buffer object used for storing SD data; Each instance uses 527 bytes
+         * (526 if SD_OPTION_FILE_WRITE is disabled)
          */
         struct Buffer {
                 /**  Buffer for SD card contents */
@@ -221,7 +232,10 @@ class SD {
                 uint8_t id;
                 /** Store the current cluster's starting sector number */
                 uint32_t curClusterStartAddr;
-                /** Store the current sector offset from the beginning of the cluster */
+                /**
+                 * Store the current sector offset from the beginning of the
+                 * cluster
+                 */
                 uint8_t curSectorOffset;
                 /** Store the current allocation unit */
                 uint32_t curAllocUnit;
@@ -229,8 +243,8 @@ class SD {
                 uint32_t nextAllocUnit;
 #ifdef SD_OPTION_FILE_WRITE
                 /**
-                 * When set, the currently loaded sector has been modified since it was
-                 * read from the SD card
+                 * When set, the currently loaded sector has been modified since
+                 * it was read from the SD card
                  */
                 uint8_t mod;
 #endif
@@ -239,9 +253,9 @@ class SD {
         /**
          * SD file object
          *
-         * @note    Must be initialized with an sd_buffer object before use; If one has
-         *          not been explicitly created then the global buffer, m_buf, can be
-         *          used at the expense of decreased performance
+         * @note    Must be initialized with an sd_buffer object before use; If
+         *          one has not been explicitly created then the global buffer,
+         *          m_buf, can be used at the expense of decreased performance
          */
         struct File {
                 SD::Buffer *buf;
@@ -254,17 +268,22 @@ class SD {
                 /** Maximum number of sectors currently allocated to a file */
                 uint32_t maxSectors;
                 /**
-                 * When the length of a file is changed, this variable will be set,
-                 * otherwise cleared
+                 * When the length of a file is changed, this variable will be
+                 * set, otherwise cleared
                  */
                 uint8_t mod;
                 /** File's starting allocation unit */
                 uint32_t firstAllocUnit;
-                /** like curSectorOffset, but does not reset upon loading a new cluster */
+                /**
+                 * like curSectorOffset, but does not reset upon loading a new
+                 * cluster
+                 */
                 uint32_t curSector;
                 /** like curSector, but for allocation units */
                 uint32_t curCluster;
-                /** Which sector of the SD card contains this file's meta-data */
+                /**
+                 * Which sector of the SD card contains this file's meta-data
+                 */
                 uint32_t dirSectorAddr;
                 /** Address within the sector of this file's entry */
                 uint16_t fileEntryOffset;
@@ -285,24 +304,26 @@ class SD {
         SD::Buffer* getGlobalBuffer ();
 
         /**
-         * @brief       Initialize SD card communication over SPI for 3.3V configuration
+         * @brief       Initialize SD card communication over SPI for 3.3V
+         *              configuration
          *
-         * @detailed    Starts an SPI cog IFF an SPI cog has not already been started;
-         *              If one has been started, only the cs and freq parameter will
-         *              have effect
+         * @detailed    Starts an SPI cog IFF an SPI cog has not already been
+         *              started; If one has been started, only the cs and freq
+         *              parameter will have effect
          *
-         * @param[in]   mosi        Pin mask for MOSI pin
-         * @param[in]   miso        Pin mask for MISO pin
-         * @param[in]   sclk        Pin mask for SCLK pin
-         * @param[in]   cs          Pin mask for CS pin
-         * @param[in]   freq        Frequency to run the clock after initialization; if
-         *                          -1 or 0 is passed in, a system default will be used
+         * @param[in]   mosi        PinNum mask for MOSI pin
+         * @param[in]   miso        PinNum mask for MISO pin
+         * @param[in]   sclk        PinNum mask for SCLK pin
+         * @param[in]   cs          PinNum mask for CS pin
+         * @param[in]   freq        Frequency to run the clock after
+         *                          initialization; if -1 or 0 is passed in, a
+         *                          system default will be used
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-                const PropWare::GPIO::Pin cs, const int32_t freq);
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+                const PropWare::Pin::Mask cs, const int32_t freq);
 
         /**
          * @brief   Mount either FAT16 or FAT32 file system
@@ -323,13 +344,15 @@ class SD {
 #endif
 
         /**
-         * @brief       Change the current working directory to *d (similar to 'cd dir')
+         * @brief       Change the current working directory to *d (similar to
+         *              'cd dir')
          *
-         * @detailed    At the moment, the target directory must be an immediate child
-         *              of the current directory ("." and ".." are allowed). I hope to
-         *              implement the ability to change to any directory soon (such as
-         *              "cd ../siblingDirectory") but attempting to do this now would
-         *              currently result in an SD_FILENAME_NOT_FOUND error
+         * @detailed    At the moment, the target directory must be an immediate
+         *              child of the current directory ("." and ".." are
+         *              allowed). I hope to implement the ability to change to
+         *              any directory soon (such as "cd ../siblingDirectory")
+         *              but attempting to do this now would currently result in
+         *              an SD_FILENAME_NOT_FOUND error
          *
          * @param[in]   *d     Short filename of directory to change to
          *
@@ -338,31 +361,34 @@ class SD {
         PropWare::ErrorCode chdir (const char *d);
 
         /**
-         * @brief       Open a file with a given name and load its information into the
-         *              file pointer
+         * @brief       Open a file with a given name and load its information
+         *              into the file pointer
          *
-         * @detailed    Load the first sector of a file into the file buffer; Initialize
-         *              global character pointers; NOTE: currently, only one file mode
-         *              is supported and is best described as "r+"; NOTE: two position
-         *              pointers are used, one for writing and one for reading, this may
-         *              be changed later to comply with POSIX standards but is useful
-         *              for my own purposes at the moment
-         *              NOTE: This driver does not include any provision for timestamps;
-         *              Niether file modification or creation will changed file's
-         *              timestamp data (creation times are random and uninitialized)
+         * @detailed    Load the first sector of a file into the file buffer;
+         *              Initialize global character pointers; NOTE: currently,
+         *              only one file mode is supported and is best described as
+         *              "r+"; NOTE: two position pointers are used, one for
+         *              writing and one for reading, this may be changed later
+         *              to comply with POSIX standards but is useful for my own
+         *              purposes at the moment
+         *              NOTE: This driver does not include any provision for
+         *              timestamps; Neither file modification or creation will
+         *              change a file's timestamp data (creation times are
+         *              random and uninitialized)
          *
          * @pre         Files cannot be created in the root directory of a FAT16
          *              filesystem
          *              TODO: Fix this
          *
          * @param[in]   *name   C-string containing the filename to open
-         * @param[in]   *f      Address where file information (such as the first
-         *                      allocation unit) can be stored. Multiple files opened
-         *                      simultaneously is allowed.
+         * @param[in]   *f      Address where file information (such as the
+         *                      first allocation unit) can be stored. Opening
+         *                      multiple files simultaneously is allowed.
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode fopen (const char *name, SD::File *f, const SD::FileMode mode);
+        PropWare::ErrorCode fopen (const char *name, SD::File *f,
+                const SD::FileMode mode);
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
@@ -377,9 +403,9 @@ class SD {
         /**
          * @brief       Insert a character into a given file
          *
-         * @detailed    Insert 'c' at the location pointed to by the file's write
-         *              pointer; Note: the read and write pointers may be merged into
-         *              one at a later date
+         * @detailed    Insert 'c' at the location pointed to by the file's
+         *              write pointer; Note: the read and write pointers may be
+         *              merged into one at a later date
          *
          * @param[in]   c       Character to be inserted
          * @param[in]   *f      Address of the desired file object
@@ -391,8 +417,9 @@ class SD {
         /**
          * @brief       Insert a c-string into a file
          *
-         * @detailed    Insert an array of bytes into the file object pointed to by 'f'
-         *              beginning at address 's' until the value 0 is reached
+         * @detailed    Insert an array of bytes into the file object pointed to
+         *              by 'f' beginning at address 's' until the value 0 is
+         *              reached
          *
          * @param[in]   *s  C-string to be inserted
          * @param[in]   *f  Address of file object
@@ -408,28 +435,29 @@ class SD {
          * @detailed    NOTE: This function does not include error checking
          *
          * @pre         *f must point to a currently opened and valid file
-         * @pre         The file must have at least one byte left - no error checking is
-         *              performed to stop the user from reading past the end of a file
-         *              (call SDfeof() for end-of-file check)
+         * @pre         The file must have at least one byte left - no error
+         *              checking is performed to stop the user from reading past
+         *              the end of a file (call SDfeof() for end-of-file check)
          *
-         * @param[in]   *f  Address where file information (such as the first allocation
-         *                  unit) can be stored.
+         * @param[in]   *f  Address where file information (such as the first
+         *                  allocation unit) can be stored.
          *
          * @return      Returns the character pointed to by the m_rPtr pointer
          */
         char fgetc (SD::File *f);
 
         /**
-         * @brief       Read a line from a file until either 'size' characters have been
-         *              read or a newline is found; Parameters should match tinyio.h's
-         *              fgets except for the file pointer
+         * @brief       Read a line from a file until either 'size' characters
+         *              have been read or a newline is found; Parameters should
+         *              match tinyio.h's fgets except for the file pointer
          *
          * @note        This function does not include error checking
          *
          * @pre         *f must point to a currently opened and valid file
          *
          * @param[out]  s[]     Character array to store file characters
-         * @param[in]   size    Maximum number of characters to read from the file
+         * @param[in]   size    Maximum number of characters to read from the
+         *                      file
          * @param[in]   *f      Address with the currently opened file
          *
          * @return      Returns character memory location of character array
@@ -437,28 +465,28 @@ class SD {
         char * fgets (char s[], uint32_t size, SD::File *f);
 
         /**
-         * @brief       Determine whether the read pointer has reached the end of the
-         *              file
+         * @brief       Determine whether the read pointer has reached the end
+         *              of the file
          *
          * @pre         *f must point to a currently opened and valid file
          *
          * @param[in]   *f  Address of the requested file
          *
-         * @return      Returns true if the read pointer points to the end of the file,
-         *              false otherwise
+         * @return      Returns true if the read pointer points to the end of
+         *              the file, false otherwise
          */
         inline bool feof (SD::File *f);
 
         /**
-         * @brief       Set the read pointer for a given file to the position 'origin +
-         *              offset'
+         * @brief       Set the read pointer for a given file to the position
+         *              'origin + offset'
          *
          * @pre         *f must be an opened file
          *
          * @param[in]   *f      Address of the file object being referenced
          * @param[in]   offset  Bytes beyond 'origin' to set the pointer to
-         * @param[in]   origin  Gives a reference to the offset; can be one of SEEK_SET,
-         *                      SEEK_CUR, SEEK_END
+         * @param[in]   origin  Gives a reference to the offset; can be one of
+         *                      SEEK_SET, SEEK_CUR, SEEK_END
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -466,15 +494,15 @@ class SD {
                 const SD::FilePos origin);
 
         /**
-         * @brief       Set the write pointer for a given file to the position 'origin +
-         *              offset'
+         * @brief       Set the write pointer for a given file to the position
+         *              'origin + offset'
          *
          * @pre         *f must be an opened file
          *
          * @param[in]   *f      Address of the file object being referenced
          * @param[in]   offset  Bytes beyond 'origin' to set the pointer to
-         * @param[in]   origin  Gives a reference to the offset; can be one of SEEK_SET,
-         *                      SEEK_CUR, SEEK_END
+         * @param[in]   origin  Gives a reference to the offset; can be one of
+         *                      SEEK_SET, SEEK_CUR, SEEK_END
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -488,7 +516,8 @@ class SD {
          *
          * @param[in]   *f  Address of the file object being referenced
          *
-         * @return      Returns the byte offset (from beginning) of the read pointer
+         * @return      Returns the byte offset (from beginning) of the read
+         *              pointer
          */
         int32_t ftellr (const SD::File *f);
 
@@ -499,14 +528,16 @@ class SD {
          *
          * @param[in]   *f  Address of the file object being referenced
          *
-         * @return      Returns the byte offset (from beginning) of the write pointer
+         * @return      Returns the byte offset (from beginning) of the write
+         *              pointer
          */
         int32_t ftellw (const SD::File *f);
 
 #ifdef SD_OPTION_SHELL
         /**
          * @brief       Provide the user with a very basic Unix-like shell. The
-         *              following commands are available to the user: ls, cat, cd.
+         *              following commands are available to the user: ls, cat,
+         *              cd.
          *
          * @param[in]   *f  If a file is opened via a command such as 'cat', its
          *                  information will be stored at this address
@@ -516,8 +547,8 @@ class SD {
         PropWare::ErrorCode shell (SD::File *f);
 
         /**
-         * @brief       List the contents of a directory on the screen (similar to 'ls
-         *              .')
+         * @brief       List the contents of a directory on the screen (similar
+         *              to 'ls .')
          *
          * @note        TODO: Implement *abspath when SDGetSectorFromPath() is
          *              functional
@@ -529,7 +560,8 @@ class SD {
         PropWare::ErrorCode shell_ls ();
 
         /**
-         * @brief       Dump the contents of a file to the screen (similar to 'cat f');
+         * @brief       Dump the contents of a file to the screen (similar to
+         *              'cat f');
          *
          * @note        Does not currently follow paths
          *
@@ -540,7 +572,8 @@ class SD {
         PropWare::ErrorCode shell_cat (const char *name, SD::File *f);
 
         /**
-         * @brief       Change the current working directory to *d (similar to 'cd dir');
+         * @brief       Change the current working directory to *d (similar to
+         *              'cd dir');
          *
          * @param[in]   *d  Short filename of directory to change to
          *
@@ -571,7 +604,8 @@ class SD {
         void print_hex_block (uint8_t *dat, uint16_t bytes);
 #endif
 
-        /* @brief   Create a human-readable error string
+        /**
+         * @brief   Create a human-readable error string
          *
          * @param[in]   err         Error number used to determine error string
          * @param[out]  errorStr    Allocated space where a string of no more
@@ -581,27 +615,30 @@ class SD {
 
     private:
         typedef struct {
-            uint8_t numFATs;
-            uint32_t rsvdSectorCount;
-            uint32_t rootEntryCount;
-            uint32_t totalSectors;
-            uint32_t FATSize;
-            uint32_t dataSectors;
-            uint32_t bootSector;
-            uint32_t clusterCount;
+            public:
+                uint8_t numFATs;
+                uint32_t rsvdSectorCount;
+                uint32_t rootEntryCount;
+                uint32_t totalSectors;
+                uint32_t FATSize;
+                uint32_t dataSectors;
+                uint32_t bootSector;
+                uint32_t clusterCount;
         } InitFATInfo;
 
     private:
         /***********************
          *** Private Methods ***
          ***********************/
-        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response_param[]);
+        inline PropWare::ErrorCode reset_and_verify_v2_0 (
+                uint8_t response_param[]);
 
         inline PropWare::ErrorCode power_up ();
 
         inline PropWare::ErrorCode reset (uint8_t response[], bool *isIdle);
 
-        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared);
+        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[],
+                bool *stageCleared);
 
         inline PropWare::ErrorCode send_active (uint8_t response[]);
 
@@ -609,7 +646,8 @@ class SD {
 
         inline PropWare::ErrorCode read_boot_sector (InitFATInfo *fatInfo);
 
-        inline PropWare::ErrorCode common_boot_sector_parser(InitFATInfo *fatInfo);
+        inline PropWare::ErrorCode common_boot_sector_parser (
+                InitFATInfo *fatInfo);
 
         inline void partition_info_parser (InitFATInfo *fatInfo);
 
@@ -626,8 +664,8 @@ class SD {
         /**
          * @brief       Send a command and argument over SPI to the SD card
          *
-         * @param[in]   command     6-bit value representing the command sent to the SD
-         *                          card
+         * @param[in]   command     6-bit value representing the command sent to
+         *                          the SD card
          * @param[in]   arg         Any argument applicable to the command
          * @param[in]   crc         CRC for the command and argument
          *
@@ -640,8 +678,8 @@ class SD {
          * @brief       receive response and data from SD card over SPI
          *
          * @param[in]   bytes   Number of bytes to receive
-         * @param[out]  *data   Location in memory with enough space to store `bytes`
-         *                      bytes of data
+         * @param[out]  *data   Location in memory with enough space to store
+         *                      `bytes` bytes of data
          *
          * @return      Returns 0 for success, else error code
          */
@@ -651,8 +689,8 @@ class SD {
          * @brief       Receive data from SD card via SPI
          *
          * @param[in]   bytes   Number of bytes to receive
-         * @param[out]  *data   Location in memory with enough space to store `bytes`
-         *                      bytes of data
+         * @param[out]  *data   Location in memory with enough space to store
+         *                      `bytes` bytes of data
          *
          * @return      Returns 0 for success, else error code
          */
@@ -689,9 +727,9 @@ class SD {
         PropWare::ErrorCode write_data_block (uint32_t address, uint8_t *dat);
 
         /**
-         * @brief       Return byte-reversed 16-bit variable (SD cards store bytes
-         *              little-endian therefore we must reverse them to use multi-byte
-         *              variables)
+         * @brief       Return byte-reversed 16-bit variable (SD cards store
+         *              bytes little-endian therefore we must reverse them to
+         *              use multi-byte variables)
          *
          * @param[in]   buf[]   Address of first byte of data
          *
@@ -700,9 +738,9 @@ class SD {
         uint16_t read_rev_dat16 (const uint8_t buf[]);
 
         /**
-         * @brief       Return byte-reversed 32-bit variable (SD cards store bytes
-         *              little-endian therefore we must reverse them to use multi-byte
-         *              variables)
+         * @brief       Return byte-reversed 32-bit variable (SD cards store
+         *              bytes little-endian therefore we must reverse them to
+         *              use multi-byte variables)
          *
          * @param[in]   buf[]   Address of first byte of data
          *
@@ -712,32 +750,32 @@ class SD {
 
 #ifdef SD_OPTION_FILE_WRITE
         /**
-         * @brief       Write a byte-reversed 16-bit variable (SD cards store bytes
-         *              little-endian therefore we must reverse them to use multi-byte
-         *              variables)
+         * @brief       Write a byte-reversed 16-bit variable (SD cards store
+         *              bytes little-endian therefore we must reverse them to
+         *              use multi-byte variables)
          *
          * @param[out]  buf[]   Address to store the first byte of data
-         * @param[in]   dat     Normal, 16-bit variable to be written to RAM in reverse
-         *                      endian
+         * @param[in]   dat     Normal, 16-bit variable to be written to RAM in
+         *                      reverse endian
          */
         void write_rev_dat16 (uint8_t buf[], const uint16_t dat);
 
         /**
-         * @brief       Write a byte-reversed 32-bit variable (SD cards store bytes
-         *              little-endian therefore we must reverse them to use multi-byte
-         *              variables)
+         * @brief       Write a byte-reversed 32-bit variable (SD cards store
+         *              bytes little-endian therefore we must reverse them to
+         *              use multi-byte variables)
          *
          * @param[out]  buf[]   Address to store the first byte of data
-         * @param[in]   dat     Normal, 32-bit variable to be written to RAM in reverse
-         *                      endian
+         * @param[in]   dat     Normal, 32-bit variable to be written to RAM in
+         *                      reverse endian
          */
         void write_rev_dat32 (uint8_t buf[], const uint32_t dat);
 #endif
 
         /**
-         * @brief       Find and return the starting sector's address for a directory
-         *              path given in a c-string. Use Unix-style path names (like
-         *              /foo/bar/)
+         * @brief       Find and return the starting sector's address for a
+         *              directory path given in a c-string. Use Unix-style path
+         *              names (like /foo/bar/)
          *
          * @note        !!!Not yet implemented!!!
          *
@@ -750,8 +788,8 @@ class SD {
         uint32_t find_sector_from_path (const char *path);
 
         /**
-         * @brief       Find and return the starting sector's address for a given
-         *              allocation unit (note - not cluster)
+         * @brief       Find and return the starting sector's address for a
+         *              given allocation unit (note - not cluster)
          *
          * @param[in]   allocUnit   Allocation unit in FAT filesystem
          *
@@ -762,84 +800,95 @@ class SD {
         /**
          * @brief       Read an entry from the FAT
          *
-         * @param[in]   fatEntry    Entry number (allocation unit) to read in the FAT
-         * @param[out]  *value      Address to store the value into (the next allocation
-         *                          unit)
+         * @param[in]   fatEntry    Entry number (allocation unit) to read in
+         *                          the FAT
+         * @param[out]  *value      Address to store the value into (the next
+         *                          allocation unit)
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode get_fat_value (const uint32_t fatEntry, uint32_t *value);
+        PropWare::ErrorCode get_fat_value (const uint32_t fatEntry,
+                uint32_t *value);
 
         /**
-         * @brief       Find the next sector in the FAT, directory, or file. When it is
-         *              found, load it into the appropriate global buffer
+         * @brief       Find the next sector in the FAT, directory, or file.
+         *              When it is found, load it into the appropriate global
+         *              buffer
          *
-         * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes that can be filled with
-         *                      the requested sector
+         * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes that can be
+         *                      filled with the requested sector
          *
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode load_next_sector (SD::Buffer *buf);
 
         /**
-         * @brief       Load a requested sector into the buffer independent of the
-         *              current sector or cluster
+         * @brief       Load a requested sector into the buffer independent of
+         *              the current sector or cluster
          *
          * @param[out]  *f      Address of the sd_buffer object to be updated
-         * @param[in]   offset  How many sectors past the first one should be skipped
-         *                      (sector number of the file)
+         * @param[in]   offset  How many sectors past the first one should be
+         *                      skipped (sector number of the file)
          *
          * @return      Returns 0 upon success, error code otherwise
          *
          */
-        PropWare::ErrorCode load_sector_from_offset (SD::File *f, const uint32_t offset);
+        PropWare::ErrorCode load_sector_from_offset (SD::File *f,
+                const uint32_t offset);
 
         /**
          * @brief       Read the next sector from SD card into memory
-         * @detailed    When the final sector of a cluster is finished, SDIncCluster can
-         *              be called. The appropriate global variables will be set
-         *              according (incremented or set by the FAT) and the first sector
-         *              of the next cluster will be read into the desired buffer.
+         * @detailed    When the final sector of a cluster is finished,
+         *              SDIncCluster can be called. The appropriate global
+         *              variables will be set according (incremented or set by
+         *              the FAT) and the first sector of the next cluster will
+         *              be read into the desired buffer.
          *
-         * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes used to hold a sector
-         *                      from the SD card
+         * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes used to hold a
+         *                      sector from the SD card
          *
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode inc_cluster (SD::Buffer *buf);
 
         /**
-         * @brief       Read the standard length name of a file entry. If an extension
-         *              exists, a period will be inserted before the extension. A null-
-         *              terminator is always appended to the end
+         * @brief       Read the standard length name of a file entry. If an
+         *              extension exists, a period will be inserted before the
+         *              extension. A null-terminator is always appended to the
+         *              end
          *
-         * @pre         *buf must point to the first byte in a FAT entry - no error
-         *              checking is executed on buf
-         * @pre         Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of memory
-         *              are not allocated for filename
+         * @pre         *buf must point to the first byte in a FAT entry - no
+         *              error checking is executed on buf
+         * @pre         Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of
+         *              memory are not allocated for filename
          *
-         * @param[in]   *buf        First byte in local memory containing a FAT entry
-         * @param[out]  *filename   Address in memory where the filename string will be
-         *                          stored
+         * @param[in]   *buf        First byte in local memory containing a FAT
+         *                          entry
+         * @param[out]  *filename   Address in memory where the filename string
+         *                          will be stored
          */
         void get_filename (const uint8_t *buf, char *filename);
 
         /**
          * @brief       Find a file entry (file or sub-directory)
          *
-         * @detailed    Find a file or directory that matches the name in *filename in
-         *              the current directory; its relative location is communicated by
-         *              placing it in the address of *fileEntryOffset
+         * @detailed    Find a file or directory that matches the name in
+         *              *filename in the current directory; its relative
+         *              location is communicated by placing it in the address of
+         *              *fileEntryOffset
          *
-         * @param[in]   *filename           C-string representing the short (standard)
-         *                                  filename
-         * @param[out]  *fileEntryOffset    The buffer offset will be returned via this
-         *                                  address if the file is found
+         * @param[in]   *filename           C-string representing the short
+         *                                  (standard) filename
+         * @param[out]  *fileEntryOffset    The buffer offset will be returned
+         *                                  via this address if the file is
+         *                                  found
          *
-         * @return      Returns 0 upon success, error code otherwise (common error code
-         *              is SD_EOC_END for end-of-chain or file-not-found marker)
+         * @return      Returns 0 upon success, error code otherwise (common
+         *              error code is SD_EOC_END for end-of-chain or
+         *              file-not-found marker)
          */
-        PropWare::ErrorCode find (const char *filename, uint16_t *fileEntryOffset);
+        PropWare::ErrorCode find (const char *filename,
+                uint16_t *fileEntryOffset);
 
         /**
          * @brief       Reload the sector currently in use by a given file
@@ -854,16 +903,18 @@ class SD {
         /**
          * @brief       Find the first empty allocation unit in the FAT
          *
-         * @detailed    The value of the first empty allocation unit is returned and its
-         *              location will contain the end-of-chain marker, SD_EOC_END.
-         *              NOTE: It is important to realize that, though the new entry now
-         *              contains an EOC marker, this function does not know what cluster
-         *              is being extended and therefore the calling function must
-         *              modify the previous EOC to contain the return value
+         * @detailed    The value of the first empty allocation unit is returned
+         *              and its location will contain the end-of-chain marker,
+         *              SD_EOC_END.
+         *              NOTE: It is important to realize that, though the new
+         *              entry now contains an EOC marker, this function does not
+         *              know what cluster is being extended and therefore the
+         *              calling function must modify the previous EOC to contain
+         *              the return value
          *
          * @param[in]   restore     If non-zero, the original fat-sector will be
-         *                          restored to m_fat before returning; if zero, the
-         *                          last-used sector will remain loaded
+         *                          restored to m_fat before returning; if zero,
+         *                          the last-used sector will remain loaded
          *
          * @return      Returns the number of the first unused allocation unit
          */
@@ -872,8 +923,8 @@ class SD {
         /**
          * @brief       Enlarge a file or directory by one cluster
          *
-         * @param[in]   *buf    Address of the buffer (containing information for a
-         *                      file or directory) to be enlarged
+         * @param[in]   *buf    Address of the buffer (containing information
+         *                      for a file or directory) to be enlarged
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -883,13 +934,14 @@ class SD {
          * @brief       Allocate space for a new file
          *
          * @param[in]   *name               Character array for the new file
-         * @param[in]   *fileEntryOffset    Offset from the currently loaded directory
-         *                                  entry where the file's metadata should be
-         *                                  written
+         * @param[in]   *fileEntryOffset    Offset from the currently loaded
+         *                                  directory entry where the file's
+         *                                  metadata should be written
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode create_file (const char *name, const uint16_t *fileEntryOffset);
+        PropWare::ErrorCode create_file (const char *name,
+                const uint16_t *fileEntryOffset);
 #endif
 
 #if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)
@@ -897,7 +949,8 @@ class SD {
          * @brief       Print the attributes and name of a file entry
          *
          * @param[in]   *fileEntry  Address of the first byte of the file entry
-         * @param[out]  *filename   Allocated space for the filename string to be stored
+         * @param[out]  *filename   Allocated space for the filename string to
+         *                          be stored
          */
         void print_file_entry (const uint8_t *fileEntry, char filename[]);
 
@@ -1026,14 +1079,12 @@ class SD {
         static const char ARCHIVE_CHAR = 'a';
         static const char ARCHIVE_CHAR_ = '.';
 
+    private:
         /*******************************
          *** Private Member Variable ***
          *******************************/
-    private:
-        /*** Global variable declarations ***/
-        // Initialization variables
         SPI *m_spi;
-        PropWare::GPIO::Pin m_cs;  // Chip select pin mask
+        PropWare::Pin m_cs;  // Chip select pin mask
         uint8_t m_filesystem;  // File system type - one of SD::FAT_16 or SD::FAT_32
         uint8_t m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
         uint32_t m_rootDirSectors;  // Number of sectors for the root directory
@@ -1065,4 +1116,4 @@ class SD {
 
 }
 
-#endif /* SD_H_ */
+#endif /* PROPWARE_SD_H_ */

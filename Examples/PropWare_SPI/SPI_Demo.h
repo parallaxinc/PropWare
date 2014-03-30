@@ -41,17 +41,18 @@
 #include <propeller.h>
 #include <tinyio.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/safeSpi.h>
-
+#include <PropWare/spi.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI                PropWare::GPIO::P0
+#define MOSI                PropWare::Pin::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO                PropWare::GPIO::P1
+#define MISO                PropWare::Pin::P1
 /** Pin number for the clock signal */
-#define SCLK                PropWare::GPIO::P2
+#define SCLK                PropWare::Pin::P2
 /** Pin number for chip select */
-#define CS                  PropWare::GPIO::P6
+#define CS                  PropWare::Pin::P6
 
 /** Frequency (in hertz) to run the SPI module */
 #define FREQ                100000

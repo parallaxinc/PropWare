@@ -26,25 +26,17 @@
  * SOFTWARE.
  */
 
-#ifndef HD44780_H_
-#define HD44780_H_
+#ifndef PROPWARE_HD44780_H_
+#define PROPWARE_HD44780_H_
 
 #include <stdarg.h>
 #include <stdlib.h>
 #include <propeller.h>
 #include <PropWare/PropWare.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
 
 namespace PropWare {
-
-/** @name   HD44780 Extra Code Options
- * @{ */
-/**
- * Enable or disable error checking on parameters
- * <p>
- * DEFAULT: On
- */
-#define HD44780_OPTION_DEBUG
-/** @} */
 
 /**
  * @brief       Support for the common "character LCD" modules using the HD44780
@@ -58,18 +50,19 @@ class HD44780 {
          * @brief   LCD databus width
          */
         typedef enum {
-            /** 4-bit mode */BM_4,
-            /** 8-bit mode */BM_8,
-            /** Number of unique bitmodes */BITMODES
+            /** 4-bit mode */BM_4 = 4,
+            /** 8-bit mode */BM_8 = 8,
         } Bitmode;
 
         /**
-         * @brief   Supported LCD dimensions; Used for determining cursor placement
+         * @brief   Supported LCD dimensions; Used for determining cursor
+         *          placement
          *
-         * @note    There are two variations of 16x1 character LCDs; if you're unsure
-         *          which version you have, try 16x1_1 first, it is more common. 16x1_1
-         *          uses both DDRAM lines of the controller, 8-characters on each line;
-         *          16x1_2 places all 16 characters are a single line of DDRAM.
+         * @note    There are two variations of 16x1 character LCDs; if you're
+         *          unsure which version you have, try 16x1_1 first, it is more
+         *          common. 16x1_1 uses both DDRAM lines of the controller,
+         *          8-characters on each line; 16x1_2 places all 16 characters
+         *          are a single line of DDRAM.
          */
         typedef enum {
             /** 8x1 */DIM_8x1,
@@ -86,7 +79,6 @@ class HD44780 {
             /** 24x2 */DIM_24x2,
             /** 40x1 */DIM_40x1,
             /** 40x2 */DIM_40x2,
-            /** Number of unique dimensions supported */DIMENSIONS
         } Dimensions;
 
         /** Number of allocated error codes for HD44780 */
@@ -98,9 +90,11 @@ class HD44780 {
          * Error codes - Proceeded by SD, SPI
          */
         typedef enum {
-            /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780_ERRORS_BASE,
-            /** HD44780 Error 1 */INVALID_DATA_MASK,
-            /** HD44780 Error 2 */INVALID_DIMENSIONS
+            /** No error */NO_ERROR = 0,
+            /** First HD44780 error */BEG_ERROR = HD44780_ERRORS_BASE,
+            /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780::BEG_ERROR,
+            /** HD44780 Error 1 */INVALID_DIMENSIONS,
+            /** Last HD44780 error */END_ERROR = HD44780::INVALID_DIMENSIONS
         } ErrorCode;
 
     public:
@@ -109,8 +103,8 @@ class HD44780 {
 
         /**
          * @name    Commands
-         * @note    Must be combined with arguments below to create a parameter for the
-         *          HD44780
+         * @note    Must be combined with arguments below to create a parameter
+         *          for the HD44780
          */
         static const uint8_t CLEAR;
         static const uint8_t RET_HOME;
@@ -165,26 +159,24 @@ class HD44780 {
         /**
          * @brief       Initialize an HD44780 LCD display
          *
-         * @param[in]   dataPinsMask    Pin mask for all 4 or all 8 data wires;
-         *                              NOTE: all pins must be consecutive and
-         *                              the LSB on the LCD must be the LSB in
-         *                              your data mask (i.e., if you are using
-         *                              pins 16-23 on the Propeller, pin 16 must
-         *                              be connected to D0 on the LCD, NOT D7)
+         * @note        A 250 ms delay is called while the LCD does internal
+         *              initialization
          *
-         * @param[in]   rs, rw, en      Pin masks for each of the RS, RW, and EN
-         *                              signals
-         * @param[in]   bitmode         Select between HD44780::BM_4 and
-         *                              HD44780::BM_8 modes to determine whether
-         *                              you will need 4 data wires or 8 between
-         *                              the Propeller and your LCD device
-         * @param[in]   dimensions      Dimensions of your LCD device. Most
-         *                              common is HD44780::DIM_16x2
+         * @param[in]   lsbDataPin  Pin mask for the least significant pin of
+         *                          the data port
+         * @param[in]   rs, rw, en  PropWare::Pin::Mask instances for each of
+         *                          the RS, RW, and EN signals
+         * @param[in]   bitmode     Select between HD44780::BM_4 and
+         *                          HD44780::BM_8 modes to determine whether you
+         *                          will need 4 data wires or 8 between the
+         *                          Propeller and your LCD device
+         * @param[in]   dimensions  Dimensions of your LCD device. Most common
+         *                          is HD44780::DIM_16x2
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode start (const uint32_t dataPinsMask, const GPIO::Pin rs,
-                const GPIO::Pin rw, const GPIO::Pin en,
+        PropWare::ErrorCode start (const PropWare::Pin::Mask lsbDataPin,
+                const Pin rs, const Pin rw, const Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions);
 
@@ -204,8 +196,8 @@ class HD44780 {
         /**
          * @brief       Print a string to the LCD
          *
-         * @detailed    Via a series of calls to HD44780_putchar, prints each character
-         *              individually
+         * @detailed    Via a series of calls to HD44780_putchar, prints each
+         *              character individually
          *
          * @param[in]   *s  Address where c-string can be found (must be
          *                  null-terminated)
@@ -224,15 +216,17 @@ class HD44780 {
 
     private:
         /**
-         * Store metadata on the LCD device to determine when line-wraps should and
-         * shouldn't occur
+         * Store metadata on the LCD device to determine when line-wraps should
+         * and shouldn't occur
          */
         typedef struct {
                 /** How many characters can be displayed on a single row */
                 uint8_t charRows;
-                /** How many characters can be dispayed in a single column */
+                /** How many characters can be displayed in a single column */
                 uint8_t charColumns;
-                /** How many contiguous bytes of memory per visible character row */
+                /**
+                 * How many contiguous bytes of memory per visible character row
+                 */
                 uint8_t ddramCharRowBreak;
                 /** Last byte of memory used in each DDRAM line */
                 uint8_t ddramLineEnd;
@@ -257,22 +251,22 @@ class HD44780 {
         void write (const uint8_t val);
 
         /**
-         * @brief   Toggle the enable pin, inducing a write to the LCD's register
+         * @brief   Toggle the enable pin, inducing a write to the LCD's
+         *          register
          */
         void clock_pulse (void);
 
         /**
-         * @brief   The memory map is used to determine where line wraps should and
-         *          shouldn't occur
+         * @brief   The memory map is used to determine where line wraps should
+         *          and shouldn't occur
          */
         void generate_mem_map (const HD44780::Dimensions dimensions);
 
     private:
-        PropWare::GPIO::Pin m_rs, m_rw, m_en;
-        uint32_t m_dataMask;
+        PropWare::Pin m_rs, m_rw, m_en;
+        PropWare::SimplePort m_dataPort;
         HD44780::Dimensions m_dim;
         HD44780::Bitmode m_bitmode;
-        uint8_t m_dataLSBNum;
         uint8_t m_curRow;
         uint8_t m_curCol;
         HD44780::MemMap m_memMap;
@@ -280,4 +274,4 @@ class HD44780 {
 
 }
 
-#endif /* HD44780_H_ */
+#endif /* PROPWARE_HD44780_H_ */

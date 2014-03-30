@@ -29,75 +29,86 @@
 // Includes
 #include <PropWare/mcp3000.h>
 
-namespace PropWare {
-
-MCP3000::MCP3000 (SPI *spi, PropWare::MCP3000::PartNumber partNumber) {
+PropWare::MCP3000::MCP3000 (SPI *spi,
+        PropWare::MCP3000::PartNumber partNumber) {
     this->m_spi = spi;
     this->m_alwaysSetMode = 0;
     this->m_dataWidth = partNumber;
 }
 
-PropWare::ErrorCode MCP3000::start (const PropWare::GPIO::Pin mosi,
-        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-        const PropWare::GPIO::Pin cs) {
+PropWare::ErrorCode PropWare::MCP3000::start (const PropWare::Pin::Mask mosi,
+        const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+        const PropWare::Pin::Mask cs) {
     PropWare::ErrorCode err;
 
-    this->m_cs = cs;
-    GPIO::set_dir(cs, GPIO::OUT);
-    GPIO::pin_set(cs);
+    this->m_cs.set_mask(cs);
+    this->m_cs.set_dir(PropWare::Pin::OUT);
+    this->m_cs.set();
 
     if (!this->m_spi->is_running()) {
         check_errors(
-                this->m_spi->start(mosi, miso, sclk, MCP3000::SPI_DEFAULT_FREQ, MCP3000::SPI_MODE, MCP3000::SPI_BITMODE));
+                this->m_spi->start(mosi, miso, sclk,
+                        PropWare::MCP3000::SPI_DEFAULT_FREQ,
+                        PropWare::MCP3000::SPI_MODE,
+                        PropWare::MCP3000::SPI_BITMODE));
     } else {
-        check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(PropWare::MCP3000::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(PropWare::MCP3000::SPI_BITMODE));
     }
 
     return 0;
 }
 
-void MCP3000::always_set_spi_mode (const bool alwaysSetMode) {
+void PropWare::MCP3000::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-PropWare::ErrorCode MCP3000::read (const MCP3000::Channel channel, uint16_t *dat) {
+PropWare::ErrorCode PropWare::MCP3000::read (
+        const PropWare::MCP3000::Channel channel, uint16_t *dat) {
     PropWare::ErrorCode err;
     int8_t options;
 
-    options = MCP3000::START | MCP3000::SINGLE_ENDED | channel;
-    options <<= 2; // One dead bit between output and input - see page 19 of datasheet
+    options = PropWare::MCP3000::START | PropWare::MCP3000::SINGLE_ENDED
+            | channel;
+
+    // Two dead bits between output and input - see page 19 of datasheet
+    options <<= 2;
 
     if (this->m_alwaysSetMode) {
         check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
         check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
-    check_errors(this->m_spi->shift_out(MCP3000::OPTN_WIDTH, options));
+    this->m_cs.clear();
+    check_errors(this->m_spi->shift_out(
+            PropWare::MCP3000::OPTN_WIDTH, options));
     check_errors(this->m_spi->shift_in(this->m_dataWidth, dat, sizeof(*dat)));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return 0;
 }
 
-PropWare::ErrorCode MCP3000::read_diff (const MCP3000::ChannelDiff channels, uint16_t *dat) {
-    int8_t err, options;
+PropWare::ErrorCode PropWare::MCP3000::read_diff (
+        const PropWare::MCP3000::ChannelDiff channels, uint16_t *dat) {
+    PropWare::ErrorCode err;
+    int8_t options;
 
-    options = MCP3000::START | MCP3000::DIFFERENTIAL | channels;
-    options <<= 2; // One dead bit between output and input - see page 19 of datasheet
+    options = PropWare::MCP3000::START | PropWare::MCP3000::DIFFERENTIAL
+            | channels;
+
+    // Two dead bits between output and input - see page 19 of datasheet
+    options <<= 2;
 
     if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
+        check_errors(this->m_spi->set_mode(PropWare::MCP3000::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(PropWare::MCP3000::SPI_BITMODE));
     }
 
-    GPIO::pin_clear(this->m_cs);
-    check_errors(this->m_spi->shift_out(MCP3000::OPTN_WIDTH, options));
+    this->m_cs.clear();
+    check_errors(this->m_spi->shift_out(
+            PropWare::MCP3000::OPTN_WIDTH, options));
     check_errors(this->m_spi->shift_in(this->m_dataWidth, dat, sizeof(*dat)));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return 0;
-}
-
 }

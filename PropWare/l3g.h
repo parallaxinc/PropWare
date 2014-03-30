@@ -26,8 +26,8 @@
  * SOFTWARE.
  */
 
-#ifndef L3G_H_
-#define L3G_H_
+#ifndef PROPWARE_L3G_H_
+#define PROPWARE_L3G_H_
 
 #include <propeller.h>
 #include <PropWare/PropWare.h>
@@ -51,11 +51,14 @@ class L3G {
         } Axis;
 
         /**
-         * Extra functions available on the L3G device; Callable by passing one as the
-         * first parameter to @ref L3G::ioctl
+         * Extra functions available on the L3G device; Callable by passing one
+         * as the first parameter to @ref L3G::ioctl
          */
         typedef enum {
-            /** Set the sensitivity of input values; must be one of L3G_DPSMode */
+            /**
+             * Set the sensitivity of input values; must be one of
+             * PropWare::L3G::DPSMode
+             */
             FUNC_MOD_DPS,
             /** Read the value on any internal register */
             FUNC_RD_REG,
@@ -107,39 +110,45 @@ class L3G {
         static const uint8_t INT1_DURATION = 0x38;
 
     public:
+        /**
+         * @brief       Construction requires an instance of the SPI module;
+         *              the SPI module does not need to be started
+         *
+         * @param[in]   *spi    Constructed SPI module
+         */
         L3G (SPI *spi);
 
         /**
          * @brief       Initialize an L3G module
          *
-         * @param[in]   mosi        Pin mask for MOSI
-         * @param[in]   miso        Pin mask for MISO
-         * @param[in]   sclk        Pin mask for SCLK
-         * @param[in]   cs          Pin mask for CS
-         * @param[in]   dpsMode     One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS;
-         *                          Determines the resolution of the L3G device in terms
-         *                          of degrees per second
+         * @param[in]   mosi        PinNum mask for MOSI
+         * @param[in]   miso        PinNum mask for MISO
+         * @param[in]   sclk        PinNum mask for SCLK
+         * @param[in]   cs          PinNum mask for CS
+         * @param[in]   dpsMode     Determines the resolution of the L3G device
+         *                          in units of degrees per second
          *
          * @return       Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::GPIO::Pin mosi,
-                const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-                const PropWare::GPIO::Pin cs, const L3G::DPSMode dpsMode);
+        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
+                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+                const PropWare::Pin::Mask cs, const L3G::DPSMode dpsMode);
 
         /**
-         * @brief       Choose whether to always set the SPI mode and bitmode before
-         *              reading or writing to the L3G module; Useful when multiple
-         *              devices are connected to the SPI bus
+         * @brief       Choose whether to always set the SPI mode and bitmode
+         *              before reading or writing to the L3G module; Useful when
+         *              multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will
-         *                              always be set before a read or write routine
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes
+         *                              will always be set before a read or
+         *                              write routine
          */
         void always_set_spi_mode (const bool alwaysSetMode);
 
         /**
          * @brief       Read a specific axis's data
          *
-         * @param[in]   axis    One of L3G_X, L3G_Y, L3G_Z; Selects the axis to be read
+         * @param[in]   axis    Selects the axis to be read
          * @param[out]  *val    Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
@@ -176,48 +185,52 @@ class L3G {
         /**
          * @brief       Read data from all three axes
          *
-         * @param[out]  *val    Starting address for data to be placed; 6 contiguous
-         *                      bytes of space are required for the read routine
+         * @param[out]  *val    Starting address for data to be placed; 6
+         *                      contiguous bytes of space are required for the
+         *                      read routine
          *
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode read_all (int16_t *val);
 
         /**
-         * @brief       Allow numerous advanced functions to be performed on the L3G,
-         *              depending on the value of the first parameter
+         * @brief       Allow numerous advanced functions to be performed on the
+         *              L3G, depending on the value of the first parameter
          *
          *
-         * @detailed    <strong>L3G_FUNC_MOD_DPS:</strong> Modify the precision of L3G
-         *              in terms of degrees per second
-         * @param[in]   func    Descriptor for which function should be performed
+         * <strong>L3G_FUNC_MOD_DPS:</strong> Modify the precision of L3G in
+         * units of degrees per second
+         * @param[in]   func    Descriptor for which function should be
+         *                      performed
          * @param[in]   wrVal   One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS
          * @param[out]  *rdVal  Unused
          *
-         * @detailed    <strong>L3G_FUNC_RD_REG:</strong> Read any register from the L3G
-         * @param[in]   func    Descriptor for which function should be performed
+         * <strong>L3G_FUNC_RD_REG:</strong> Read any register from the L3G
+         * @param[in]   func    Descriptor for which function should be
+         *                      performed
          * @param[in]   wrVal   Address of the desired register
          * @param[out]  *rdVal  Resulting value will be stored in rdVal
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode ioctl (const L3G::IoctlFunction func, const uint8_t wrVal,
-                uint8_t *rdVal);
+        PropWare::ErrorCode ioctl (const L3G::IoctlFunction func,
+                const uint8_t wrVal, uint8_t *rdVal);
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;
         static const SPI::Mode SPI_MODE = SPI::MODE_3;
         static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
+    private:
         /***********************************
          *** Private Method Declarations ***
          ***********************************/
-    private:
         /**
          * @brief       Write one byte to the L3G module
          *
          * @param[in]   address     Destination register address
-         * @param[in]   dat         Data to be written to the destination register
+         * @param[in]   dat         Data to be written to the destination
+         *                          register
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -227,7 +240,8 @@ class L3G {
          * @brief       Write one byte to the L3G module
          *
          * @param[in]   address     Destination register address
-         * @param[in]   dat         Data to be written to the destination register
+         * @param[in]   dat         Data to be written to the destination
+         *                          register
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -255,10 +269,10 @@ class L3G {
 
     private:
         SPI *m_spi;
-        PropWare::GPIO::Pin m_cs;
+        PropWare::Pin m_cs;
         bool m_alwaysSetMode;
 };
 
 }
 
-#endif /* L3G_H_ */
+#endif /* PROPWARE_L3G_H_ */

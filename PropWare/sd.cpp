@@ -57,16 +57,16 @@ SD::Buffer* SD::getGlobalBuffer () {
     return &(this->m_buf);
 }
 
-PropWare::ErrorCode SD::start (const PropWare::GPIO::Pin mosi,
-        const PropWare::GPIO::Pin miso, const PropWare::GPIO::Pin sclk,
-        const PropWare::GPIO::Pin cs, const int32_t freq) {
+PropWare::ErrorCode SD::start (const PropWare::Pin::Mask mosi,
+        const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+        const PropWare::Pin::Mask cs, const int32_t freq) {
     PropWare::ErrorCode err;
     uint8_t response[16];
 
     // Set CS for output and initialize high
-    this->m_cs = cs;
-    GPIO::set_dir(cs, GPIO::OUT);
-    GPIO::pin_set(cs);
+    this->m_cs.set_mask(cs);
+    this->m_cs.set_dir(PropWare::Pin::OUT);
+    this->m_cs.set();
 
     // Start SPI module
     if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ,
@@ -86,7 +86,7 @@ PropWare::ErrorCode SD::start (const PropWare::GPIO::Pin mosi,
 
     // We're finally done initializing everything. Set chip select high again to
     // release the SPI port
-    GPIO::pin_set(cs);
+    this->m_cs.set();
 
     // Initialization complete
     return 0;
@@ -139,7 +139,7 @@ PropWare::ErrorCode SD::power_up () {
     waitcnt(CLKFREQ / 10 + CNT);
 
     // Send at least 72 clock cycles to enable the SD card
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
     for (i = 0; i < 128; ++i)
         check_errors(this->m_spi->shift_out(16, -1));
 
@@ -149,7 +149,7 @@ PropWare::ErrorCode SD::power_up () {
     waitcnt(10*MILLISECOND + CNT);
 
     // Chip select goes low for the duration of this function
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
 
     return 0;
 }
@@ -1318,7 +1318,9 @@ PropWare::ErrorCode SD::write_block (uint16_t bytes, uint8_t *dat) {
             // Check for timeout
             if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
                 return SD::READ_TIMEOUT;
-        } while (0xff == this->m_firstByteResponse);  // wait for transmission end
+
+        // wait for transmission end
+        } while (0xff == this->m_firstByteResponse);
         if (SD::RSPNS_TKN_ACCPT
                 != (this->m_firstByteResponse & (uint8_t) SD::RSPNS_TKN_BITS))
             return SD::INVALID_RESPONSE;
@@ -1343,13 +1345,13 @@ PropWare::ErrorCode SD::read_data_block (uint32_t address, uint8_t *dat) {
     printf("Reading block at sector address: 0x%08x / %u\n", address, address);
 #endif
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
 
     err = this->send_command(SD::CMD_RD_BLOCK, address, SD::CRC_OTHER);
     if (!err)
         err = this->read_block(SD::SECTOR_SIZE, dat);
 
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     if (err)
         return err;
@@ -1369,11 +1371,11 @@ PropWare::ErrorCode SD::write_data_block (uint32_t address, uint8_t *dat) {
     printf("Writing block at address: 0x%08x / %u\n", address, address);
 #endif
 
-    GPIO::pin_clear(this->m_cs);
+    this->m_cs.clear();
     check_errors(this->send_command(SD::CMD_WR_BLOCK, address, SD::CRC_OTHER));
 
     check_errors(this->write_block(SD::SECTOR_SIZE, dat));
-    GPIO::pin_set(this->m_cs);
+    this->m_cs.set();
 
     return 0;
 }
@@ -1522,7 +1524,8 @@ PropWare::ErrorCode SD::load_next_sector (SD::Buffer *buf) {
                     ++(buf->curSectorOffset) + buf->curClusterStartAddr,
                     buf->buf);
         }
-        // End of generic data cluster; Look through the FAT to find the next cluster
+        // End of generic data cluster; Look through the FAT to find the next
+        // cluster
         else
             return this->inc_cluster(buf);
     }
@@ -1718,8 +1721,8 @@ PropWare::ErrorCode SD::find (const char *filename, uint16_t *fileEntryOffset) {
 
     // Loop through all entries in the current directory until we find the
     // correct one
-    // Function will exit normally with SD::EOC_END error code if the file is not
-    // found
+    // Function will exit normally with SD::EOC_END error code if the file is
+    // not found
     while (this->m_buf.buf[*fileEntryOffset]) {
         // Check if file is valid, retrieve the name if it is
         if (!(SD::DELETED_FILE_MARK == this->m_buf.buf[*fileEntryOffset])) {
@@ -1834,7 +1837,7 @@ uint32_t SD::find_empty_space (const uint8_t restore) {
         this->write_rev_dat16(this->m_fat + allocOffset,
                 (uint16_t) SD::EOC_END);
         this->m_fatMod = true;
-    } else /* Implied and not needed: "if (SD::FAT_32 == this->m_filesystem)" */{
+    } else /* Implied: "if (SD::FAT_32 == this->m_filesystem)" */{
         // In FAT32, the first 7 usable clusters seem to be un-officially
         // reserved for the root directory
         if (0 == this->m_curFatSector)
@@ -2049,7 +2052,8 @@ PropWare::ErrorCode SD::create_file (const char *name,
     /* 2) Write attribute field... */
     // TODO: Allow for file attribute flags to be set, such as SD::READ_ONLY,
     //       SD::SUB_DIR, etc
-    this->m_buf.buf[*fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET] = SD::ARCHIVE;  // Archive flag should be set because the file is new
+    // Archive flag should be set because the file is new
+    this->m_buf.buf[*fileEntryOffset + SD::FILE_ATTRIBUTE_OFFSET] = SD::ARCHIVE;
     this->m_buf.mod = true;
 
 #ifdef SD_OPTION_VERBOSE
@@ -2069,8 +2073,8 @@ PropWare::ErrorCode SD::create_file (const char *name,
             (uint16_t) allocUnit);
     if (SD::FAT_32 == this->m_filesystem)
         this->write_rev_dat16(
-                &(this->m_buf.buf[*fileEntryOffset + SD::FILE_START_CLSTR_HIGH]),
-                (uint16_t) (allocUnit >> 16));
+                &(this->m_buf.buf[*fileEntryOffset +
+                SD::FILE_START_CLSTR_HIGH]), (uint16_t) (allocUnit >> 16));
 
     /* 4) Write the size of the file (currently 0) */
     this->write_rev_dat32(

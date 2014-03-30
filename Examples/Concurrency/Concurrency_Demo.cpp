@@ -9,12 +9,10 @@
 // Includes
 #include "Concurrency_Demo.h"
 
-using namespace PropWare::GPIO;
-
 volatile int lock = locknew();
 
-const Pin g_pin1 = P23;
-const Pin g_pin2 = P16;
+const PropWare::Pin g_pin1(PropWare::Pin::P23, PropWare::Pin::OUT);
+const PropWare::Pin g_pin2(PropWare::Pin::P16, PropWare::Pin::OUT);
 const int g_someStackSpace = 64;
 
 // Main function
@@ -24,11 +22,9 @@ int main () {
 
     while(lockset(lock));
 
-    set_dir(g_pin2, OUT);
-
     for (int i = 0; i < 40; ++i) {
         waitcnt(50 * MILLISECOND + CNT);
-        pin_toggle(g_pin2);
+        g_pin2.toggle();
     }
 
     lockclr(lock);
@@ -39,11 +35,9 @@ int main () {
 void blinkAnLEDSome (void) {
     while(lockset(lock));
 
-    set_dir(g_pin1, OUT);
-
     for (int i = 0; i < 40; ++i) {
         waitcnt(50 * MILLISECOND + CNT);
-        pin_toggle(g_pin1);
+        g_pin1.toggle();
     }
 
     lockclr(lock);
