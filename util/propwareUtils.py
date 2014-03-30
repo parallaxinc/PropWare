@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 # File:    ${file}
 # Author:  David Zemon
 # Project: PropWare

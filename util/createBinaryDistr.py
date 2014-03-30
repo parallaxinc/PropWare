@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 # @file    createBinaryDistr.py
 # @author  David Zemon
 # @project PropWare
