@@ -34,16 +34,79 @@
 namespace PropWare {
 
 /**
- * @brief   Utility class to handle a conglomerate of pins all used together
+ * @brief   Flexible port that can have any pin enabled or disabled. Pins are
+ *          independent of each other.
  */
 class Port {
     public:
+        /**
+         * @brief   No-arg constructor; Useful for using a Port as an instance
+         *          in another class where you do not want to instantiate it
+         *          in the constructor
+         */
+        Port ();
+
+        /**
+         * @brief       Initialize a port with a pre-configured port mask
+         *
+         * @param[in]   portMask    Each bit set high represents a Pin on the
+         *                          port
+         */
+        Port (const uint32_t portMask);
+
+        /**
+         * @brief       Initialize a port with a pre-configured port mask and
+         *              direction
+         *
+         * @param[in]   portMask    Each bit set high represents a Pin on the
+         *                          port
+         * @param[in]   direction   One of PropWare::Pin::OUT or
+         *                          PropWare::Pin::IN
+         */
+        Port (const uint32_t portMask, const PropWare::Pin::Dir direction);
+
+        /**
+         * @brief       Initialize a port with an array of PropWare::Pin
+         *              variables
+         *
+         * @param[in]   *pins       Array of PropWare::Pin variables; Last
+         *                          element MUST BE PropWare::Pin::NULL_PIN or
+         *                          segfault will occur
+         */
+        Port (PropWare::Pin *pins);
+
+        /**
+         * @brief       Initialize a port with an array of PropWare::Pin
+         *              variables
+         *
+         * @param[in]   *pins       Array of PropWare::Pin variables; Last
+         *                          element MUST BE PropWare::Pin::NULL_PIN or
+         *                          segfault will occur
+         * @param[in]   direction   One of PropWare::Pin::OUT or
+         *                          PropWare::Pin::IN
+         */
+        Port (PropWare::Pin *pins, const PropWare::Pin::Dir direction);
+        /**
+         * @brief       Set the mask for this port
+         *
+         * @param[in]   mask    Pin mask
+         */
+        void set_mask (const uint32_t mask);
+
         /**
          * @brief   Return the full pin mask of all pins in the port
          *
          * @return  A combination mask of all pins used in this port
          */
         uint32_t get_mask ();
+
+
+        /**
+         * @brief       Add pins to the current mask
+         *
+         * @param[in]   mask    Additional pins to be ORed with current mask
+         */
+        void add_pins (const uint32_t mask);
 
         /**
          * @brief       Set selected pins as either input or output
@@ -52,19 +115,6 @@ class Port {
          *                      of PropWare::Pin::IN or PropWare::Pin::OUT
          */
         void set_dir (const PropWare::Pin::Dir direction) const;
-
-        /**
-         * @brief   Toggle the output on all pins in the port
-         */
-        void toggle () const;
-
-    protected:
-        /**
-         * @brief   No-arg constructor; Useful for using a Port as an instance
-         *          in another class where you do not want to instantiate it
-         *          in the constructor
-         */
-        Port ();
 
         /**
          * @brief       Allow easy writing to a port w/o destroying data
@@ -83,10 +133,20 @@ class Port {
          */
         uint32_t readFast () const;
 
+        /**
+         * @brief   Toggle the output on all pins in the port
+         */
+        void toggle () const;
+
     protected:
         uint32_t m_mask;
 };
 
+/**
+ * @brief   The PropWare::SimplePort is the recommended way to use data ports on
+ *          the Propeller. All pins are consecutive, which allows for some
+ *          simple shortcuts in reading, writing, and initialization
+ */
 class SimplePort: public Port {
     public:
         /**
@@ -177,83 +237,6 @@ class SimplePort: public Port {
 
     protected:
         uint8_t m_firstPinNum;
-};
-
-class FlexPort: public Port {
-    public:
-        /**
-         * @brief   @see PropWare::Port::Port()
-         */
-        FlexPort () :
-                Port() {
-        }
-
-        /**
-         * @brief       Initialize a port with a pre-configured port mask
-         *
-         * @param[in]   portMask    Each bit set high represents a Pin on the
-         *                          port
-         */
-        FlexPort (const uint32_t portMask);
-
-        /**
-         * @brief       Initialize a port with a pre-configured port mask and
-         *              direction
-         *
-         * @param[in]   portMask    Each bit set high represents a Pin on the
-         *                          port
-         * @param[in]   direction   One of PropWare::Pin::OUT or
-         *                          PropWare::Pin::IN
-         */
-        FlexPort (const uint32_t portMask, const PropWare::Pin::Dir direction);
-
-        /**
-         * @brief       Initialize a port with an array of PropWare::Pin
-         *              variables
-         *
-         * @param[in]   *pins       Array of PropWare::Pin variables; Last
-         *                          element MUST BE PropWare::Pin::NULL_PIN or
-         *                          segfault will occur
-         */
-        FlexPort (PropWare::Pin *pins);
-
-        /**
-         * @brief       Initialize a port with an array of PropWare::Pin
-         *              variables
-         *
-         * @param[in]   *pins       Array of PropWare::Pin variables; Last
-         *                          element MUST BE PropWare::Pin::NULL_PIN or
-         *                          segfault will occur
-         * @param[in]   direction   One of PropWare::Pin::OUT or
-         *                          PropWare::Pin::IN
-         */
-        FlexPort (PropWare::Pin *pins, const PropWare::Pin::Dir direction);
-
-        /**
-         * @brief       Set the mask for this port
-         *
-         * @param[in]   mask    Pin mask
-         */
-        void set_mask (const uint32_t mask);
-
-        /**
-         * @brief       Add pins to the current mask
-         *
-         * @param[in]   mask    Additional pins to be ORed with current mask
-         */
-        void add_pins (const uint32_t mask);
-
-        /**
-         * @brief   @see PropWare::Port::writeFast()
-         */
-        void writeFast (const uint32_t value) const;
-
-        /**
-         * @brief   @see PropWare::Port::read()
-         */
-        uint32_t readFast () const;
-
-        FlexPort& operator= (SimplePort &rhs);
 };
 
 }

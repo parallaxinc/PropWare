@@ -31,6 +31,37 @@ PropWare::Port::Port () {
     this->m_mask = 0;
 }
 
+PropWare::Port::Port (const uint32_t portMask) {
+    this->m_mask = portMask;
+}
+
+PropWare::Port::Port (const uint32_t portMask,
+        const PropWare::Pin::Dir direction) {
+    this->m_mask = portMask;
+    this->set_dir(direction);
+}
+
+PropWare::Port::Port (PropWare::Pin *pins) {
+    while (PropWare::Pin::NULL_PIN != pins->get_mask()) {
+        this->m_mask |= pins->get_mask();
+        ++pins;
+    }
+}
+
+PropWare::Port::Port (PropWare::Pin *pins,
+        const PropWare::Pin::Dir direction) {
+    while (PropWare::Pin::NULL_PIN != pins->get_mask()) {
+        this->m_mask |= pins->get_mask();
+        ++pins;
+    }
+
+    this->set_dir(direction);
+}
+
+void PropWare::Port::set_mask (const uint32_t mask) {
+    this->m_mask = mask;
+}
+
 uint32_t PropWare::Port::get_mask () {
     return this->m_mask;
 }
@@ -38,6 +69,10 @@ uint32_t PropWare::Port::get_mask () {
 void PropWare::Port::set_dir (const PropWare::Pin::Dir direction) const {
     DIRA = (DIRA & ~(this->m_mask))
             | (this->m_mask & (int32_t) direction);
+}
+
+void PropWare::Port::add_pins (const uint32_t mask) {
+    this->m_mask |= mask;
 }
 
 void PropWare::Port::writeFast (const uint32_t value) const {
@@ -95,52 +130,4 @@ void PropWare::SimplePort::write (uint32_t value) {
 
 uint32_t PropWare::SimplePort::read () {
     return this->Port::readFast() >> this->m_firstPinNum;
-}
-
-PropWare::FlexPort::FlexPort (const uint32_t portMask) {
-    this->m_mask = portMask;
-}
-
-PropWare::FlexPort::FlexPort (const uint32_t portMask,
-        const PropWare::Pin::Dir direction) {
-    this->m_mask = portMask;
-    this->set_dir(direction);
-}
-
-PropWare::FlexPort::FlexPort (PropWare::Pin *pins) {
-    while (PropWare::Pin::NULL_PIN != pins->get_mask()) {
-        this->m_mask |= pins->get_mask();
-        ++pins;
-    }
-}
-
-PropWare::FlexPort::FlexPort (PropWare::Pin *pins,
-        const PropWare::Pin::Dir direction) {
-    while (PropWare::Pin::NULL_PIN != pins->get_mask()) {
-        this->m_mask |= pins->get_mask();
-        ++pins;
-    }
-
-    this->set_dir(direction);
-}
-
-void PropWare::FlexPort::set_mask (const uint32_t mask) {
-    this->m_mask = mask;
-}
-
-void PropWare::FlexPort::add_pins (const uint32_t mask) {
-    this->m_mask |= mask;
-}
-
-void PropWare::FlexPort::writeFast (const uint32_t value) const {
-    this->Port::writeFast(value);
-}
-
-uint32_t PropWare::FlexPort::readFast () const {
-    return this->Port::readFast();
-}
-
-PropWare::FlexPort& PropWare::FlexPort::operator= (SimplePort &rhs) {
-    this->m_mask = rhs.get_mask();
-    return *this;
 }
