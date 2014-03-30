@@ -17,6 +17,7 @@ from zipfile import ZipFile
 import subprocess
 from time import sleep
 from shutil import copy2
+import argparse
 
 from propwareImporter import importAll
 import propwareUtils
@@ -29,13 +30,14 @@ class CreateBinaryDistr:
                             "jpg", "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
+    TAGS = ["v1.0", "v1.1", "v1.2", "v2.0-beta1"]
     CURRENT_SUGGESTION = "release-2.0"
 
     def __init__(self):
         CreateBinaryDistr.BRANCHES.sort()
         self.successes = []
 
-    def run(self):
+    def run(self, branches):
         propwareUtils.checkProperWorkingDirectory()
 
         # Import all extra libraries
@@ -46,14 +48,14 @@ class CreateBinaryDistr:
         CreateBinaryDistr.cleanOldArchives()
 
         try:
-            for branch in CreateBinaryDistr.BRANCHES:
+            for branch in branches:
                 self.runInBranch(branch)
         except Exception as e:
             print(e, file=sys.stderr)
         finally:
             CreateBinaryDistr.attemptCleanExit()
 
-        self.printSummary()
+        self.printSummary(branches)
 
     def runInBranch(self, branch):
         # Clean any leftover crud
@@ -154,7 +156,7 @@ class CreateBinaryDistr:
             print("Caused by: " + str(e), file=sys.stderr)
             print(e.output.decode(), file=sys.stderr)
 
-    def printSummary(self):
+    def printSummary(self, branches):
         # Let the stdout and stderr buffers catch up
         sleep(1)
 
@@ -162,7 +164,7 @@ class CreateBinaryDistr:
         self.successes.sort()
         for branch in self.successes:
             print("\tPASS: " + branch)
-        for branch in CreateBinaryDistr.BRANCHES:
+        for branch in branches:
             if branch not in self.successes:
                 print("\tFAIL: " + branch)
 
@@ -176,5 +178,13 @@ class MakeErrorException(Exception):
 
 
 if "__main__" == __name__:
+    parser = argparse.ArgumentParser(description="Create binary distributions of all branches (and optionally tags too)"
+                                                 " of PropWare")
+    parser.add_argument("-t", "--tags", help="Create binary distributions for all tagged commits as well")
+    args = vars(parser.parse_args())
+
     runMe = CreateBinaryDistr()
-    runMe.run()
+    runMe.run(CreateBinaryDistr.BRANCHES)
+
+    if args["tags"]:
+        runMe.run(CreateBinaryDistr.TAGS)
