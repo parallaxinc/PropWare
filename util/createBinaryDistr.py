@@ -34,10 +34,8 @@ class CreateBinaryDistr:
     CURRENT_SUGGESTION = "release-2.0"
 
     def __init__(self):
-        CreateBinaryDistr.BRANCHES.sort()
         self.successes = []
 
-    def run(self, branches):
         propwareUtils.checkProperWorkingDirectory()
 
         # Import all extra libraries
@@ -46,6 +44,11 @@ class CreateBinaryDistr:
         # The remainder of this script needs to be run from the PropWare root directory
         os.chdir("..")
         CreateBinaryDistr.cleanOldArchives()
+
+    def run(self, branches):
+        assert (isinstance(branches, list))
+        branches.sort()
+        self.successes = []
 
         try:
             for branch in branches:
