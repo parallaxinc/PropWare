@@ -183,11 +183,12 @@ class MakeErrorException(Exception):
 if "__main__" == __name__:
     parser = argparse.ArgumentParser(description="Create binary distributions of all branches (and optionally tags too)"
                                                  " of PropWare")
-    parser.add_argument("-t", "--tags", help="Create binary distributions for all tagged commits as well")
-    args = vars(parser.parse_args())
+    parser.add_argument("--tags", action="store_true",
+                        help="Create binary distributions for all tagged commits as well")
+    args = parser.parse_args()
 
     runMe = CreateBinaryDistr()
     runMe.run(CreateBinaryDistr.BRANCHES)
 
-    if args["tags"]:
+    if args.tags:
         runMe.run(CreateBinaryDistr.TAGS)
