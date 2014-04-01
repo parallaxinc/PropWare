@@ -51,7 +51,7 @@
 /** Pin number for the clock signal */
 #define SCLK                PropWare::Pin::P2
 /** Pin number for chip select */
-#define CS                  PropWare::Pin::P4
+#define CS                  PropWare::Pin::P6
 /** Frequency (in Hertz) to run the SPI protocol */
 #define FREQ                10000
 

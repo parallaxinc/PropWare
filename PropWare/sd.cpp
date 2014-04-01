@@ -28,6 +28,7 @@
 
 // Includes
 #include <PropWare/sd.h>
+#include <tinyio.h>
 
 namespace PropWare {
 

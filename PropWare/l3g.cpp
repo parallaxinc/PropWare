@@ -35,17 +35,17 @@ PropWare::L3G::L3G (SPI *spi) {
 
 PropWare::ErrorCode PropWare::L3G::start (const PropWare::Pin::Mask mosi,
         const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
-        const PropWare::Pin::Mask cs, const L3G::DPSMode dpsMode) {
+        const PropWare::Pin::Mask cs) {
     PropWare::ErrorCode err;
+
     // Ensure SPI module started
-    if (!this->m_spi->is_running()) {
+    if (this->m_spi->is_running()) {
+        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
+    } else {
         check_errors(
                 this->m_spi->start(mosi, miso, sclk, L3G::SPI_DEFAULT_FREQ,
                         L3G::SPI_MODE, L3G::SPI_BITMODE));
-
-    } else {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
     }
 
     this->m_cs.set_mask(cs);
@@ -55,7 +55,7 @@ PropWare::ErrorCode PropWare::L3G::start (const PropWare::Pin::Mask mosi,
     // NOTE L3G has high- and low-pass filters. Should they be enabled? (Page
     // 31)
     check_errors(this->write8(L3G::CTRL_REG1, NIBBLE_0));
-    check_errors(this->write8(L3G::CTRL_REG4, dpsMode | BIT_7));
+    check_errors(this->write8(L3G::CTRL_REG4, BIT_7));
 
     return 0;
 }
@@ -88,10 +88,7 @@ PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) {
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
 
-    if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
-    }
+    check_errors(this->maybe_set_spi_mode());
 
     this->m_cs.clear();
     check_errors(this->m_spi->shift_out(8, addr));
@@ -114,32 +111,36 @@ PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) {
     return 0;
 }
 
-PropWare::ErrorCode PropWare::L3G::ioctl (const L3G::IoctlFunction func,
-        const uint8_t wrVal, uint8_t *rdVal) {
+PropWare::ErrorCode PropWare::L3G::set_dps (
+        const PropWare::L3G::DPSMode dpsMode) {
     PropWare::ErrorCode err;
     uint8_t oldValue;
 
-    if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
-    }
+    this->m_dpsMode = dpsMode;
+    check_errors(this->maybe_set_spi_mode());
 
-    switch (func) {
-        // All functions follow the read-modify-write routine
-        case L3G::FUNC_MOD_DPS:
-            check_errors(this->read8(L3G::CTRL_REG4, (int8_t * ) &oldValue));
-            oldValue &= ~(BIT_6 | BIT_5);
-            oldValue |= wrVal << 5;
-            check_errors(this->write8(L3G::CTRL_REG4, oldValue));
-            break;
-        case L3G::FUNC_RD_REG:
-            check_errors(this->read8(wrVal, (int8_t * ) rdVal));
-            break;
-        default:
-            return -1;  // TODO: Create a real error code
-    }
+    check_errors(this->read8(L3G::CTRL_REG4, (int8_t * ) &oldValue));
+    oldValue &= ~(BIT_5 | BIT_4);
+    oldValue |= dpsMode;
+    check_errors(this->write8(L3G::CTRL_REG4, oldValue));
 
     return 0;
+}
+
+PropWare::L3G::DPSMode PropWare::L3G::get_dps () const {
+    return this->m_dpsMode;
+}
+
+int32_t PropWare::L3G::convert_to_dps (const int16_t rawValue) const {
+    // TODO: Finish this
+    switch (this->m_dpsMode) {
+        case PropWare::L3G::DPS_250:
+            return 0;//rawValue;
+        case PropWare::L3G::DPS_500:
+            return 0;//rawValue;
+        case PropWare::L3G::DPS_2000:
+            return rawValue * 0.07;
+    }
 }
 
 /*************************************
@@ -154,10 +155,7 @@ PropWare::ErrorCode PropWare::L3G::write8 (uint8_t addr, const uint8_t dat) {
     outputValue = ((uint16_t) addr) << 8;
     outputValue |= dat;
 
-    if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
-    }
+    check_errors(this->maybe_set_spi_mode());
 
     this->m_cs.clear();
     err = this->m_spi->shift_out(16, outputValue);
@@ -178,10 +176,7 @@ PropWare::ErrorCode PropWare::L3G::write16 (uint8_t addr, const uint16_t dat) {
     outputValue |= ((uint16_t) ((uint8_t) dat)) << 8;
     outputValue |= (uint8_t) (dat >> 8);
 
-    if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
-    }
+    check_errors(this->maybe_set_spi_mode());
 
     this->m_cs.clear();
     check_errors(this->m_spi->shift_out(24, outputValue));
@@ -197,10 +192,7 @@ PropWare::ErrorCode PropWare::L3G::read8 (uint8_t addr, int8_t *dat) {
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
 
-    if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
-    }
+    check_errors(this->maybe_set_spi_mode());
 
     this->m_cs.clear();
     check_errors(this->m_spi->shift_out(8, addr));
@@ -216,10 +208,7 @@ PropWare::ErrorCode PropWare::L3G::read16 (uint8_t addr, int16_t *dat) {
     addr |= BIT_7;  // Set RW bit (
     addr |= BIT_6;  // Enable address auto-increment
 
-    if (this->m_alwaysSetMode) {
-        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
-    }
+    check_errors(this->maybe_set_spi_mode());
 
     this->m_cs.clear();
     check_errors(this->m_spi->shift_out(8, addr));
@@ -231,6 +220,17 @@ PropWare::ErrorCode PropWare::L3G::read16 (uint8_t addr, int16_t *dat) {
     err = *dat >> 8;
     *dat <<= 8;
     *dat |= err;
+
+    return 0;
+}
+
+PropWare::ErrorCode PropWare::L3G::maybe_set_spi_mode () {
+    PropWare::ErrorCode err;
+
+    if (this->m_alwaysSetMode) {
+        check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
+        check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
+    }
 
     return 0;
 }

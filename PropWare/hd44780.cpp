@@ -211,10 +211,10 @@ void PropWare::HD44780::putChar (const char c) {
     }
 }
 
-void PropWare::HD44780::cmd (const uint8_t c) {
+void PropWare::HD44780::cmd (const uint8_t command) {
     //set RS to command mode and RW to write
     this->m_rs.clear();
-    this->write(c);
+    this->write(command);
 }
 
 void PropWare::HD44780::write (const uint8_t val) {

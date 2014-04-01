@@ -31,7 +31,6 @@
 #include <propeller.h>
 #include <stdlib.h>
 #include <string.h>
-#include <tinyio.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>

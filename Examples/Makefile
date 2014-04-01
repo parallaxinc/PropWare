@@ -29,6 +29,9 @@ all:
 	$(shell mkdir $(MKDIR_FLAG) PropWare_SPI$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_SPI/Debug -f ../Makefile
 
+	$(shell mkdir $(MKDIR_FLAG) PropWare_I2C_HD44780$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Concurrency/Debug -f ../Makefile
+
 	$(shell mkdir $(MKDIR_FLAG) PropWare$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare/Debug -f ../Makefile
 
@@ -59,6 +62,9 @@ clean:
 
 	$(shell mkdir $(MKDIR_FLAG) PropWare_SPI$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_SPI/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_I2C_HD44780$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C Concurrency/Debug -f ../Makefile clean
 
 	$(shell mkdir $(MKDIR_FLAG) PropWare$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare/Debug -f ../Makefile clean

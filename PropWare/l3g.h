@@ -62,8 +62,6 @@ class L3G {
             FUNC_MOD_DPS,
             /** Read the value on any internal register */
             FUNC_RD_REG,
-            /** Total number of advanced functions */
-            FUNCS
         } IoctlFunction;
 
         /**
@@ -132,7 +130,7 @@ class L3G {
          */
         PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
                 const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
-                const PropWare::Pin::Mask cs, const L3G::DPSMode dpsMode);
+                const PropWare::Pin::Mask cs);
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode
@@ -194,17 +192,19 @@ class L3G {
         PropWare::ErrorCode read_all (int16_t *val);
 
         /**
-         * @brief       Allow numerous advanced functions to be performed on the
-         *              L3G, depending on the value of the first parameter
+         * @brief       Modify the scale of L3G in units of degrees per second
          *
+         * @param[in]   dpsMode     Desired full-scale mode
          *
-         * <strong>L3G_FUNC_MOD_DPS:</strong> Modify the precision of L3G in
-         * units of degrees per second
-         * @param[in]   func    Descriptor for which function should be
-         *                      performed
-         * @param[in]   wrVal   One of L3G_250_DPS, L3G_500_DPS, L3G_2000_DPS
-         * @param[out]  *rdVal  Unused
-         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode set_dps (const PropWare::L3G::DPSMode dpsMode);
+
+        PropWare::L3G::DPSMode get_dps () const;
+
+        int32_t convert_to_dps (const int16_t rawValue) const;
+
+        /**
          * <strong>L3G_FUNC_RD_REG:</strong> Read any register from the L3G
          * @param[in]   func    Descriptor for which function should be
          *                      performed
@@ -267,9 +267,12 @@ class L3G {
          */
         PropWare::ErrorCode read16 (uint8_t addr, int16_t *dat);
 
+        PropWare::ErrorCode maybe_set_spi_mode ();
+
     private:
         SPI *m_spi;
         PropWare::Pin m_cs;
+        DPSMode m_dpsMode;
         bool m_alwaysSetMode;
 };
 

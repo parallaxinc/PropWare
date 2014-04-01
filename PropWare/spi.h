@@ -30,7 +30,6 @@
 
 #include <propeller.h>
 #include <stdlib.h>
-#include <tinyio.h>
 #include <stdarg.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>

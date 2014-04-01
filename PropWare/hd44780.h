@@ -150,10 +150,10 @@ class HD44780 {
         static const uint8_t FUNC_5x10_CHAR;  // 0 = 5x8 dot mode
         /**@}*/
 
+    public:
         /************************
          *** Public Functions ***
          ************************/
-    public:
         HD44780 ();
 
         /**
@@ -212,9 +212,16 @@ class HD44780 {
          */
         void putChar (const char c);
 
+        /**
+         * @brief      Send a control command to the LCD module
+         *
+         * @param[in]  command  8-bit command to send to the LCD
+         */
+        void cmd (const uint8_t command);
+
         static void print_error_str (const HD44780::ErrorCode err);
 
-    private:
+    protected:
         /**
          * Store metadata on the LCD device to determine when line-wraps should
          * and shouldn't occur
@@ -232,17 +239,10 @@ class HD44780 {
                 uint8_t ddramLineEnd;
         } MemMap;
 
-        /*************************
-         *** Private Functions ***
-         *************************/
-    private:
-        /**
-         * @brief      Send a control command to the LCD module
-         *
-         * @param[in]  c   8-bit command to send to the LCD
-         */
-        void cmd (const uint8_t c);
-
+    protected:
+        /***************************
+         *** Protected Functions ***
+         ***************************/
         /**
          * @brief       Write a single byte to the LCD - instruction or data
          *
@@ -262,14 +262,15 @@ class HD44780 {
          */
         void generate_mem_map (const HD44780::Dimensions dimensions);
 
-    private:
-        PropWare::Pin m_rs, m_rw, m_en;
-        PropWare::SimplePort m_dataPort;
+    protected:
         HD44780::Dimensions m_dim;
-        HD44780::Bitmode m_bitmode;
         uint8_t m_curRow;
         uint8_t m_curCol;
         HD44780::MemMap m_memMap;
+    private:
+        PropWare::Pin m_rs, m_rw, m_en;
+        PropWare::SimplePort m_dataPort;
+        HD44780::Bitmode m_bitmode;
 };
 
 }
