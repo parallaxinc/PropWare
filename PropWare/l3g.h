@@ -151,7 +151,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const L3G::Axis axis, int16_t *val);
+        PropWare::ErrorCode read (const L3G::Axis axis, int16_t *val) const;
 
         /**
          * @brief       Read data from the X axis
@@ -160,7 +160,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_x (int16_t *val);
+        PropWare::ErrorCode read_x (int16_t *val) const;
 
         /**
          * @brief       Read data from the Y axis
@@ -169,7 +169,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_y (int16_t *val);
+        PropWare::ErrorCode read_y (int16_t *val) const;
 
         /**
          * @brief       Read data from the Z axis
@@ -178,7 +178,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_z (int16_t *val);
+        PropWare::ErrorCode read_z (int16_t *val) const;
 
         /**
          * @brief       Read data from all three axes
@@ -189,7 +189,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_all (int16_t *val);
+        PropWare::ErrorCode read_all (int16_t *val) const;
 
         /**
          * @brief       Modify the scale of L3G in units of degrees per second
@@ -200,9 +200,43 @@ class L3G {
          */
         PropWare::ErrorCode set_dps (const PropWare::L3G::DPSMode dpsMode);
 
+        /**
+         * @brief   Retrieve the current DPS setting
+         *
+         * @return  Returns what the L3G module is using for DPS mode
+         */
         PropWare::L3G::DPSMode get_dps () const;
 
-        int32_t convert_to_dps (const int16_t rawValue) const;
+        /**
+         * @brief       Convert the raw, integer value from the gyro into units
+         *              of degrees-per-second
+         *
+         * @pre         Input value must have been read in when the DPS setting
+         *              was set to the same value as it is during this function
+         *              execution. If the input value was read with a different
+         *              DPS setting, use
+         *              PropWare::L3G::convert_to_dps(const int16_t rawValue,
+         *              const PropWare::L3G::DPSMode dpsMode) to specify the
+         *              correct DPS setting
+         *
+         * @param[in]   rawValue    Value from the gyroscope
+         *
+         * @return      Returns the rotational value in degrees-per-second
+         */
+        float convert_to_dps (const int16_t rawValue) const;
+
+        /**
+         * @brief       Convert the raw, integer value from the gyro into units
+         *              of degrees-per-second
+         *
+         * @param[in]   rawValue    Value from the gyroscope
+         * @param[in]   dpsMode     The DPS setting used at the time of reading
+         *                          rawValue
+         *
+         * @return      Returns the rotational value in degrees-per-second
+         */
+        static float convert_to_dps (const int16_t rawValue,
+                const PropWare::L3G::DPSMode dpsMode);
 
         /**
          * <strong>L3G_FUNC_RD_REG:</strong> Read any register from the L3G
@@ -217,7 +251,7 @@ class L3G {
                 const uint8_t wrVal, uint8_t *rdVal);
 
     private:
-        static const uint32_t SPI_DEFAULT_FREQ = 100000;
+        static const uint32_t SPI_DEFAULT_FREQ = 900000;
         static const SPI::Mode SPI_MODE = SPI::MODE_3;
         static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
@@ -234,7 +268,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write8 (uint8_t addr, const uint8_t dat);
+        PropWare::ErrorCode write8 (uint8_t addr, const uint8_t dat) const;
 
         /**
          * @brief       Write one byte to the L3G module
@@ -245,7 +279,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write16 (uint8_t addr, const uint16_t dat);
+        PropWare::ErrorCode write16 (uint8_t addr, const uint16_t dat) const;
 
         /**
          * @brief       Read one byte from the L3G module
@@ -255,7 +289,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read8 (uint8_t addr, int8_t *dat);
+        PropWare::ErrorCode read8 (uint8_t addr, int8_t *dat) const;
 
         /**
          * @brief       Read two bytes from the L3G module
@@ -265,9 +299,14 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read16 (uint8_t addr, int16_t *dat);
+        PropWare::ErrorCode read16 (uint8_t addr, int16_t *dat) const;
 
-        PropWare::ErrorCode maybe_set_spi_mode ();
+        /**
+         * @brief   Set the SPI mode iff PropWare::L3G::m_alwaysSetMode is true
+         *
+         * @return  Returns 0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode maybe_set_spi_mode () const;
 
     private:
         SPI *m_spi;

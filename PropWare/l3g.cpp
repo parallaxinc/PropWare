@@ -64,23 +64,23 @@ void PropWare::L3G::always_set_spi_mode (const bool alwaysSetMode) {
     this->m_alwaysSetMode = alwaysSetMode;
 }
 
-PropWare::ErrorCode PropWare::L3G::read_x (int16_t *val) {
-    return this->read16(L3G::OUT_X_L, val);
-}
-
-PropWare::ErrorCode PropWare::L3G::read_y (int16_t *val) {
-    return this->read16(L3G::OUT_Y_L, val);
-}
-
-PropWare::ErrorCode PropWare::L3G::read_z (int16_t *val) {
-    return this->read16(L3G::OUT_Z_L, val);
-}
-
-PropWare::ErrorCode PropWare::L3G::read (const L3G::Axis axis, int16_t *val) {
+PropWare::ErrorCode PropWare::L3G::read (const L3G::Axis axis, int16_t *val) const {
     return this->read16(L3G::OUT_X_L + (axis << 1), val);
 }
 
-PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) {
+PropWare::ErrorCode PropWare::L3G::read_x (int16_t *val) const {
+    return this->read16(L3G::OUT_X_L, val);
+}
+
+PropWare::ErrorCode PropWare::L3G::read_y (int16_t *val) const {
+    return this->read16(L3G::OUT_Y_L, val);
+}
+
+PropWare::ErrorCode PropWare::L3G::read_z (int16_t *val) const {
+    return this->read16(L3G::OUT_Z_L, val);
+}
+
+PropWare::ErrorCode PropWare::L3G::read_all (int16_t *val) const {
     PropWare::ErrorCode err;
     uint8_t i;
 
@@ -131,22 +131,27 @@ PropWare::L3G::DPSMode PropWare::L3G::get_dps () const {
     return this->m_dpsMode;
 }
 
-int32_t PropWare::L3G::convert_to_dps (const int16_t rawValue) const {
-    // TODO: Finish this
-    switch (this->m_dpsMode) {
+float PropWare::L3G::convert_to_dps (const int16_t rawValue) const {
+    return PropWare::L3G::convert_to_dps(rawValue, this->m_dpsMode);
+}
+
+float PropWare::L3G::convert_to_dps (const int16_t rawValue,
+        const PropWare::L3G::DPSMode dpsMode) {
+    switch (dpsMode) {
         case PropWare::L3G::DPS_250:
-            return 0;//rawValue;
+            return rawValue * 0.00875;
         case PropWare::L3G::DPS_500:
-            return 0;//rawValue;
+            return rawValue * 0.01750;
         case PropWare::L3G::DPS_2000:
-            return rawValue * 0.07;
+            return rawValue * 0.07000;
     }
 }
 
 /*************************************
  *** Private Function Declarations ***
  *************************************/
-PropWare::ErrorCode PropWare::L3G::write8 (uint8_t addr, const uint8_t dat) {
+PropWare::ErrorCode PropWare::L3G::write8 (uint8_t addr,
+        const uint8_t dat) const {
     PropWare::ErrorCode err;
     uint16_t outputValue;
 
@@ -165,7 +170,8 @@ PropWare::ErrorCode PropWare::L3G::write8 (uint8_t addr, const uint8_t dat) {
     return err;
 }
 
-PropWare::ErrorCode PropWare::L3G::write16 (uint8_t addr, const uint16_t dat) {
+PropWare::ErrorCode PropWare::L3G::write16 (uint8_t addr,
+        const uint16_t dat) const {
     PropWare::ErrorCode err;
     uint16_t outputValue;
 
@@ -186,7 +192,7 @@ PropWare::ErrorCode PropWare::L3G::write16 (uint8_t addr, const uint16_t dat) {
     return 0;
 }
 
-PropWare::ErrorCode PropWare::L3G::read8 (uint8_t addr, int8_t *dat) {
+PropWare::ErrorCode PropWare::L3G::read8 (uint8_t addr, int8_t *dat) const {
     PropWare::ErrorCode err;
 
     addr |= BIT_7;  // Set RW bit (
@@ -202,7 +208,7 @@ PropWare::ErrorCode PropWare::L3G::read8 (uint8_t addr, int8_t *dat) {
     return 0;
 }
 
-PropWare::ErrorCode PropWare::L3G::read16 (uint8_t addr, int16_t *dat) {
+PropWare::ErrorCode PropWare::L3G::read16 (uint8_t addr, int16_t *dat) const {
     PropWare::ErrorCode err;
 
     addr |= BIT_7;  // Set RW bit (
@@ -224,7 +230,7 @@ PropWare::ErrorCode PropWare::L3G::read16 (uint8_t addr, int16_t *dat) {
     return 0;
 }
 
-PropWare::ErrorCode PropWare::L3G::maybe_set_spi_mode () {
+PropWare::ErrorCode PropWare::L3G::maybe_set_spi_mode () const {
     PropWare::ErrorCode err;
 
     if (this->m_alwaysSetMode) {
