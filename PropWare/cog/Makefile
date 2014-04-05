@@ -2,8 +2,6 @@
 PRJ = PropWare_cog
 
 LIBNAME = $(PRJ)
-OBJS = PropWare.o spi.o sd.o l3g.o mcp3000.o hd44780.o max6675.o \
-		pin.o port.o
 BOARD = QUICKSTART
 MODEL = cog
 CFLAGS = -Os
@@ -19,4 +17,5 @@ ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
 
+include ../PropWareObjects.mk
 include ../../common.mk

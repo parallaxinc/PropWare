@@ -76,9 +76,9 @@ class Pin: public PropWare::Port {
          *
          * @param[in]   pinNum  0-indexed integer value representing pin-number
          */
-        Pin (const uint8_t pinNum){
-                                      this->m_mask = PropWare::Pin::convert(number);
-                                  }
+        Pin (const uint8_t pinNum) {
+            this->m_mask = PropWare::Port::convert(pinNum);
+        }
 
         /**
          * @brief       Create a Pin variable
@@ -88,26 +88,26 @@ class Pin: public PropWare::Port {
          * @param[in]   direction   Direction to initialize pin; One of
          *                          PropWare::Pin::Dir
          */
-        Pin (const uint8_t pinNum, const Pin::Dir direction){
-                                                                 this->m_mask = PropWare::Pin::convert(number);
-                                                                 this->set_dir(direction);
-                                                             }
+        Pin (const uint8_t pinNum, const Pin::Dir direction) {
+            this->m_mask = PropWare::Port::convert(pinNum);
+            this->set_dir(direction);
+        }
 
         /**
          * @see PropWare::Port::set_mask()
          */
-        void set_mask (const PropWare::Port::Mask mask){
-                                                           this->PropWare::Port::set_mask(mask);
-                                                       }
+        void set_mask (const PropWare::Port::Mask mask) {
+            this->PropWare::Port::set_mask(mask);
+        }
 
         /**
          * @brief   Read the value from a single pin and return its state
          *
          * @return  True if the pin is high, False if the pin is low
          */
-        bool read () const{
-                              return (bool) this->read_fast();
-                          }
+        bool read () const {
+            return (bool) this->read_fast();
+        }
 
         /**
          * @brief   Allow easy switch-press detection of any pin; Includes
@@ -115,9 +115,9 @@ class Pin: public PropWare::Port {
          *
          * @return  Returns 1 or 0 depending on whether the switch was pressed
          */
-        bool is_switch_low () const{
-                                       return this->is_switch_low(PropWare::Pin::DEBOUNCE_DELAY);
-                                   }
+        bool is_switch_low () const {
+            return this->is_switch_low(PropWare::Pin::DEBOUNCE_DELAY);
+        }
 
         /**
          * @brief       Allow easy switch-press detection of any pin; Includes
@@ -129,36 +129,36 @@ class Pin: public PropWare::Port {
          * @return      Returns 1 or 0 depending on whether the switch was
          *              pressed
          */
-        bool is_switch_low (const uint16_t debounceDelayInMillis) const{
-                                                                           this->set_dir(PropWare::Pin::IN);  // Set the pin as input
+        bool is_switch_low (const uint16_t debounceDelayInMillis) const {
+            this->set_dir(PropWare::Pin::IN);  // Set the pin as input
 
-                                                                           if (!(this->read())) {   // If pin is grounded (aka, pressed)
-                                                                               // Delay 3 ms
-                                                                               waitcnt(debounceDelayInMillis*MILLISECOND + CNT);
+            if (!(this->read())) {   // If pin is grounded (aka, pressed)
+                // Delay 3 ms
+                waitcnt(debounceDelayInMillis*MILLISECOND + CNT);
 
-                                                                               return !(this->read());  // Check if it's still pressed
-                                                                           }
+                return !(this->read());  // Check if it's still pressed
+            }
 
-                                                                           return false;
-                                                                       }
+            return false;
+        }
 
     public:
         /**
          * @brief   Copy one pin object into another; Only copies pin mask, not
          *          I/O direction
          */
-        PropWare::Pin* operator= (const PropWare::Pin &rhs){
-                                                               this->m_mask = rhs.m_mask;
-                                                               return this;
-                                                           }
+        PropWare::Pin* operator= (const PropWare::Pin &rhs) {
+            this->m_mask = rhs.m_mask;
+            return this;
+        }
 
         /**
          * @Brief   Compare the pin mask of two pin objects. Does not compare
          *          I/O direction
          */
-        bool operator== (const PropWare::Pin &rhs){
-                                                      return this->m_mask == rhs.m_mask;
-                                                  }
+        bool operator== (const PropWare::Pin &rhs) {
+            return this->m_mask == rhs.m_mask;
+        }
 
     private:
         /****************************************
