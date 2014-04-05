@@ -320,9 +320,9 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
-                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
-                const PropWare::Pin::Mask cs, const int32_t freq);
+        PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
+                const PropWare::Port::Mask miso, const PropWare::Port::Mask sclk,
+                const PropWare::Port::Mask cs, const int32_t freq);
 
         /**
          * @brief   Mount either FAT16 or FAT32 file system

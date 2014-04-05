@@ -195,8 +195,8 @@ class SPI {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
-                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
+        PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
+                const PropWare::Port::Mask miso, const PropWare::Port::Mask sclk,
                 const int32_t frequency, const SPI::Mode mode,
                 const SPI::BitMode bitmode);
 

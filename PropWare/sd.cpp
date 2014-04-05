@@ -58,9 +58,9 @@ SD::Buffer* SD::getGlobalBuffer () {
     return &(this->m_buf);
 }
 
-PropWare::ErrorCode SD::start (const PropWare::Pin::Mask mosi,
-        const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
-        const PropWare::Pin::Mask cs, const int32_t freq) {
+PropWare::ErrorCode SD::start (const PropWare::Port::Mask mosi,
+        const PropWare::Port::Mask miso, const PropWare::Port::Mask sclk,
+        const PropWare::Port::Mask cs, const int32_t freq) {
     PropWare::ErrorCode err;
     uint8_t response[16];
 
