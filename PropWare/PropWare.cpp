@@ -26,7 +26,6 @@
  */
 
 
-#include <tinyio.h>
 #include <PropWare/PropWare.h>
 
 uint8_t PropWare::count_bits (uint32_t par) {
