@@ -45,21 +45,46 @@ class MAX6675 {
          *
          * @param[in]   *spi    Constructed SPI module
          */
-        MAX6675 (SPI *spi);
+        MAX6675 (SPI *spi) {
+            this->m_spi = spi;
+            this->m_alwaysSetMode = 0;
+        }
 
         /**
          * @brief       Initialize communication with an MAX6675 device
          *
-         * @param[in]   mosi        PinNum mask for MOSI
-         * @param[in]   miso        PinNum mask for MISO
-         * @param[in]   sclk        PinNum mask for SCLK
-         * @param[in]   cs          PinNum mask for CS
+         * @param[in]   mosi    PinNum mask for MOSI
+         * @param[in]   miso    PinNum mask for MISO
+         * @param[in]   sclk    PinNum mask for SCLK
+         * @param[in]   cs      PinNum mask for CS
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
-                const PropWare::Pin::Mask miso, const PropWare::Pin::Mask clk,
-                const PropWare::Pin::Mask cs);
+        PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
+                const PropWare::Port::Mask miso, const PropWare::Port::Mask clk,
+                const PropWare::Port::Mask cs) {
+            PropWare::ErrorCode err;
+
+            if (!this->m_spi->is_running()) {
+                check_errors(
+                        this->m_spi->start(mosi, miso, sclk,
+                                PropWare::MAX6675::SPI_DEFAULT_FREQ,
+                                PropWare::MAX6675::SPI_MODE,
+                                PropWare::MAX6675::SPI_BITMODE));
+            } else {
+                check_errors(
+                        this->m_spi->set_mode(PropWare::MAX6675::SPI_MODE));
+                check_errors(
+                        this->m_spi->set_bit_mode(
+                                PropWare::MAX6675::SPI_BITMODE));
+            }
+
+            this->m_cs.set_mask(cs);
+            this->m_cs.set_dir(PropWare::Pin::OUT);
+            this->m_cs.set();
+
+            return 0;
+        }
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode
@@ -70,7 +95,9 @@ class MAX6675 {
          *                              will always be set before a read or
          *                              write routine
          */
-        void always_set_spi_mode (const bool alwaysSetMode);
+        void always_set_spi_mode (const bool alwaysSetMode) {
+            this->m_alwaysSetMode = alwaysSetMode;
+        }
 
         /**
          * @brief       Read data in fixed-point form
@@ -83,7 +110,26 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (uint16_t *dat);
+        PropWare::ErrorCode read (uint16_t *dat) {
+            PropWare::ErrorCode err;
+
+            if (this->m_alwaysSetMode) {
+                check_errors(
+                        this->m_spi->set_mode(PropWare::MAX6675::SPI_MODE));
+                check_errors(
+                        this->m_spi->set_bit_mode(
+                                PropWare::MAX6675::SPI_BITMODE));
+            }
+
+            *dat = 0;
+            this->m_cs.clear();
+            check_errors(
+                    this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat,
+                            sizeof(*dat)));
+            this->m_cs.set();
+
+            return 0;
+        }
 
         /**
          * @brief       Read data and return integer value
@@ -92,7 +138,14 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_whole (uint16_t *dat);
+        PropWare::ErrorCode read_whole (uint16_t *dat) {
+            PropWare::ErrorCode err;
+
+            check_errors(this->read(dat));
+            *dat >>= 2;
+
+            return 0;
+        }
 
         /**
          * @brief       Read data in floating point form
@@ -101,7 +154,17 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_float (float *dat);
+        PropWare::ErrorCode read_float (float *dat) {
+            PropWare::ErrorCode err;
+            uint16_t temp;
+
+            check_errors(this->read(&temp));
+
+            *dat = temp >> 2;
+            *dat += ((float) (temp & (BIT_1 | BIT_0))) / 4;
+
+            return 0;
+        }
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 1000000;

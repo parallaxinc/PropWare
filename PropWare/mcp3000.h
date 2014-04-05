@@ -79,7 +79,11 @@ class MCP3000 {
          * @param[in]   *spi    Constructed SPI module
          * @param[in]   partNumber  Determine bit-width of the ADC channels
          */
-        MCP3000 (SPI *spi, MCP3000::PartNumber partNumber);
+        MCP3000 (SPI *spi, MCP3000::PartNumber partNumber) {
+            this->m_spi = spi;
+            this->m_alwaysSetMode = 0;
+            this->m_dataWidth = partNumber;
+        }
 
         /**
          * @brief       Initialize communication with an MCP3000 device
@@ -93,7 +97,29 @@ class MCP3000 {
          */
         PropWare::ErrorCode start (const PropWare::Pin::Mask mosi,
                 const PropWare::Pin::Mask miso, const PropWare::Pin::Mask sclk,
-                const PropWare::Pin::Mask cs);
+                const PropWare::Pin::Mask cs) {
+            PropWare::ErrorCode err;
+
+            this->m_cs.set_mask(cs);
+            this->m_cs.set_dir(PropWare::Pin::OUT);
+            this->m_cs.set();
+
+            if (!this->m_spi->is_running()) {
+                check_errors(
+                        this->m_spi->start(mosi, miso, sclk,
+                                PropWare::MCP3000::SPI_DEFAULT_FREQ,
+                                PropWare::MCP3000::SPI_MODE,
+                                PropWare::MCP3000::SPI_BITMODE));
+            } else {
+                check_errors(
+                        this->m_spi->set_mode(PropWare::MCP3000::SPI_MODE));
+                check_errors(
+                        this->m_spi->set_bit_mode(
+                                PropWare::MCP3000::SPI_BITMODE));
+            }
+
+            return 0;
+        }
 
         /**
          * @brief       Choose whether to always set the SPI mode and bitmode
@@ -104,7 +130,9 @@ class MCP3000 {
          *                              will always be set before a read or
          *                              write routine
          */
-        void always_set_spi_mode (const bool alwaysSetMode);
+        void always_set_spi_mode (const bool alwaysSetMode) {
+            this->m_alwaysSetMode = alwaysSetMode;
+        }
 
         /**
          * @brief       Read a specific channel's data in single-ended mode
@@ -116,7 +144,33 @@ class MCP3000 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const MCP3000::Channel channel, uint16_t *dat);
+        PropWare::ErrorCode read (const MCP3000::Channel channel,
+                uint16_t *dat) {
+            PropWare::ErrorCode err;
+            int8_t options;
+
+            options = PropWare::MCP3000::START | PropWare::MCP3000::SINGLE_ENDED
+                    | channel;
+
+            // Two dead bits between output and input - see page 19 of datasheet
+            options <<= 2;
+
+            if (this->m_alwaysSetMode) {
+                check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
+                check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
+            }
+
+            this->m_cs.clear();
+            check_errors(
+                    this->m_spi->shift_out(PropWare::MCP3000::OPTN_WIDTH,
+                            options));
+            check_errors(
+                    this->m_spi->shift_in(this->m_dataWidth, dat,
+                            sizeof(*dat)));
+            this->m_cs.set();
+
+            return 0;
+        }
 
         /**
          * @brief       Read a specific axis's data in differential mode
@@ -130,7 +184,35 @@ class MCP3000 {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode read_diff (const MCP3000::ChannelDiff channels,
-                uint16_t *dat);
+                uint16_t *dat) {
+            PropWare::ErrorCode err;
+            int8_t options;
+
+            options = PropWare::MCP3000::START | PropWare::MCP3000::DIFFERENTIAL
+                    | channels;
+
+            // Two dead bits between output and input - see page 19 of datasheet
+            options <<= 2;
+
+            if (this->m_alwaysSetMode) {
+                check_errors(
+                        this->m_spi->set_mode(PropWare::MCP3000::SPI_MODE));
+                check_errors(
+                        this->m_spi->set_bit_mode(
+                                PropWare::MCP3000::SPI_BITMODE));
+            }
+
+            this->m_cs.clear();
+            check_errors(
+                    this->m_spi->shift_out(PropWare::MCP3000::OPTN_WIDTH,
+                            options));
+            check_errors(
+                    this->m_spi->shift_in(this->m_dataWidth, dat,
+                            sizeof(*dat)));
+            this->m_cs.set();
+
+            return 0;
+        }
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 100000;
