@@ -28,7 +28,6 @@
 #ifndef PROPWARE_SD_H_
 #define PROPWARE_SD_H_
 
-#include <propeller.h>
 #include <stdlib.h>
 #include <string.h>
 #include <PropWare/PropWare.h>
@@ -475,7 +474,8 @@ class SD {
 #ifdef SD_OPTION_VERBOSE
             printf("%s found at offset 0x%04x from address 0x%08x\n", d,
                     fileEntryOffset,
-                    this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset);
+                    this->m_buf.curClusterStartAddr +
+                    this->m_buf.curSectorOffset);
 #endif
 
             // File entry was found successfully, load it into the buffer and
@@ -1799,7 +1799,8 @@ class SD {
 
             // Request operating conditions register and ensure response begins
             // with R1
-            check_errors(this->send_command(SD::CMD_READ_OCR, 0, SD::CRC_OTHER));
+            check_errors(this->send_command(SD::CMD_READ_OCR, 0,
+                            SD::CRC_OTHER));
             check_errors(this->get_response(SD::RESPONSE_LEN_R3, response));
             printf("Operating Conditions Register (OCR)...\n");
             this->print_hex_block(response, SD::RESPONSE_LEN_R3);
@@ -2500,8 +2501,8 @@ class SD {
 
 #ifdef SD_OPTION_VERBOSE
             printf("Incrementing the cluster. New parameters are:\n");
-            printf("\tCurrent allocation unit: 0x%08x / %u\n", buf->curAllocUnit,
-                    buf->curAllocUnit);
+            printf("\tCurrent allocation unit: 0x%08x / %u\n",
+                    buf->curAllocUnit, buf->curAllocUnit);
             printf("\tNext allocation unit: 0x%08x / %u\n", buf->nextAllocUnit,
                     buf->nextAllocUnit);
             printf("\tCurrent cluster starting address: 0x%08x / %u\n",
@@ -2509,7 +2510,8 @@ class SD {
 #endif
 
 #if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-            check_errors(this->read_data_block(buf->curClusterStartAddr, buf->buf));
+            check_errors(this->read_data_block(buf->curClusterStartAddr,
+                            buf->buf));
             this->print_hex_block(buf->buf, SD::SECTOR_SIZE);
             return 0;
 #else
@@ -2603,7 +2605,7 @@ class SD {
                     || (this->find_sector_from_alloc(this->m_dir_firstAllocUnit)
                             != this->m_buf.curClusterStartAddr)) {
 #ifdef SD_OPTION_VERBOSE
-                printf("'find' requires a backtrack to beginning of directory's "
+                printf("'find' requires a backtrack to beginning of "
                         "cluster\n");
 #endif
                 this->m_buf.curClusterStartAddr = this->find_sector_from_alloc(
@@ -2718,7 +2720,8 @@ class SD {
             uint32_t fatSectorAddr = this->m_curFatSector + this->m_fatStart;
             uint32_t retVal;
             // NOTE: this->m_curFatSector is not modified until end of function
-            // - it is used throughout this function as the original starting point
+            // - it is used throughout this function as the original starting
+            // point
 
 #if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
             printf("\n*** SDFindEmptySpace() initialized with FAT sector "

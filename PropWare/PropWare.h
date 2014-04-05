@@ -34,6 +34,7 @@
 #define PROPWARE_H
 
 #include <propeller.h>
+#include <sys/null.h>
 #include <stdint.h>
 
 /**
