@@ -64,7 +64,7 @@ int main () {
 
 void error (const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
         debugLEDs.write(err);

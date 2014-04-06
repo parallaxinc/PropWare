@@ -20,14 +20,14 @@ int main (int argc, char* argv[]) {
     int8_t cog;
     PropWare::Pin pin;
     static volatile PropWare::Pin::Mask pins[] = {
-            PropWare::Pin::P16,
-            PropWare::Pin::P17,
-            PropWare::Pin::P18,
-            PropWare::Pin::P19,
-            PropWare::Pin::P20,
-            PropWare::Pin::P21,
-            PropWare::Pin::P22,
-            PropWare::Pin::P23 };
+            PropWare::Port::P16,
+            PropWare::Port::P17,
+            PropWare::Port::P18,
+            PropWare::Port::P19,
+            PropWare::Port::P20,
+            PropWare::Port::P21,
+            PropWare::Port::P22,
+            PropWare::Port::P23 };
     uint32_t nextcnt;
 
     wait_time = 50 * MILLISECOND;

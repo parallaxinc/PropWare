@@ -61,7 +61,8 @@ class MAX6675 {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
-                const PropWare::Port::Mask miso, const PropWare::Port::Mask clk,
+                const PropWare::Port::Mask miso,
+                const PropWare::Port::Mask sclk,
                 const PropWare::Port::Mask cs) {
             PropWare::ErrorCode err;
 

@@ -5,6 +5,7 @@ LIBNAME = $(PRJ)
 BOARD = QUICKSTART
 MODEL = cog
 CFLAGS = -Os
+OBJS = PropWare.o sd.o
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH
@@ -17,5 +18,4 @@ ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
 
-include ../PropWareObjects.mk
 include ../../common.mk

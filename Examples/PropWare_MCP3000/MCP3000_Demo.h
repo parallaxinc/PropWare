@@ -52,13 +52,13 @@
 #define PART_NUMBER     PropWare::MCP3000::MCP300x
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI            PropWare::Pin::P0
+#define MOSI            PropWare::Port::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO            PropWare::Pin::P1
+#define MISO            PropWare::Port::P1
 /** Pin number for the clock signal */
-#define SCLK            PropWare::Pin::P2
+#define SCLK            PropWare::Port::P2
 /** Pin number for chip select */
-#define CS              PropWare::Pin::P3
+#define CS              PropWare::Port::P3
 #define FREQ            100000
 
 // We're going to read from just channel 1 in this demo, but feel free to read

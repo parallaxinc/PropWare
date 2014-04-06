@@ -11,8 +11,8 @@
 
 volatile int lock = locknew();
 
-const PropWare::Pin g_pin1(PropWare::Pin::P23, PropWare::Pin::OUT);
-const PropWare::Pin g_pin2(PropWare::Pin::P16, PropWare::Pin::OUT);
+const PropWare::Pin g_pin1(PropWare::Port::P23, PropWare::Pin::OUT);
+const PropWare::Pin g_pin2(PropWare::Port::P16, PropWare::Pin::OUT);
 const int g_someStackSpace = 64;
 
 // Main function

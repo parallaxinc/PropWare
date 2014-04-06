@@ -28,16 +28,21 @@
 #ifndef PROPWARE_SPI_H_
 #define PROPWARE_SPI_H_
 
-#include <propeller.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 
+#ifdef USE_PRINTF && (!(defined __TINY_IO_H) && !(_STDIO_H))
+extern int printf(const char *fmt, ...);
+#else
+#include <simpletext.h>
+#define printf print
+#endif
+
 /** @name   SPI Extra Code Options
  * @{ */
-// This allows Doxygen to document the macro without permanently enabling it
-//#undef SPI_OPTION_DEBUG
 /**
  * Parameter checking within each function call. I recommend you leave this
  * option enabled unless speed is critical
@@ -66,6 +71,11 @@
 
 namespace PropWare {
 
+// Symbol for assembly instructions to start a new SPI cog
+extern "C" {
+extern uint32_t _SPIStartCog (void *arg);
+}
+
 /**
  * @brief       SPI serial communications library; Core functionality comes from
  *              a dedicated assembly cog
@@ -81,7 +91,8 @@ namespace PropWare {
 class SPI {
 #define check_errors_w_str(x, y) \
     if ((err = x)) { \
-        strcpy(this->m_errorInMethod, y); \
+         \
+        strcpy(this->m_errorInMethod, y);  \
         return err;}
 
     public:
@@ -232,7 +243,7 @@ class SPI {
                 // Set the mailbox to 0 (anything other than -1) so that we know
                 // when the SPI cog has started
                 this->m_mailbox = 0;
-                this->m_cog = _SPIStartCog((void *) &this->m_mailbox);
+                this->m_cog = PropWare::_SPIStartCog((void *) &this->m_mailbox);
                 if (!this->is_running())
                     return SPI::COG_NOT_STARTED;
 
@@ -659,13 +670,11 @@ class SPI {
                 case PropWare::SPI::TOO_MANY_BITS:
                     printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Incapable of handling so many bits in an "
-                            "argument");
+                                    "argument");
                     break;
                 case PropWare::SPI::TIMEOUT:
-                    printf(
-                            "SPI Error %u: %s\n\tCalling function was "
-                            "SPI::%s()\n",
-                            (err - PropWare::SPI::BEG_ERROR),
+                    printf("SPI Error %u: %s\n\tCalling function was "
+                            "SPI::%s()\n", (err - PropWare::SPI::BEG_ERROR),
                             "Timed out during parameter passing",
                             this->m_errorInMethod);
                     break;

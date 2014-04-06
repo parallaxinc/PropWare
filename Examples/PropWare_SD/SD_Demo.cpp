@@ -32,7 +32,7 @@ int main () {
     PropWare::ErrorCode err;
     char c;
 
-    PropWare::Pin statusLED(PropWare::Pin::P16, PropWare::Pin::OUT);
+    PropWare::Pin statusLED(PropWare::Port::P16, PropWare::Pin::OUT);
 
     PropWare::SPI *spi = PropWare::SPI::getInstance();
     PropWare::SD sd(spi);
@@ -58,8 +58,8 @@ int main () {
      * decreased when multiple files are used often.
      *
      */
-    f.buf = sd.getGlobalBuffer();
-    f2.buf = sd.getGlobalBuffer();
+    f.buf = sd.get_global_buffer();
+    f2.buf = sd.get_global_buffer();
 #endif
 
 #ifdef DEBUG
@@ -83,16 +83,16 @@ int main () {
     sd.shell(&f);
 #elif (defined TEST_WRITE)
     // Create a blank file and copy the contents of STUFF.TXT into it
-    SDfopen(OLD_FILE, &f, SD_FILE_MODE_R);
-    SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R_PLUS);
+    sd.fopen(OLD_FILE, &f, PropWare::SD::FILE_MODE_R);
+    sd.fopen(NEW_FILE, &f2, PropWare::SD::FILE_MODE_R_PLUS);
 
 #ifdef DEBUG
     printf("Both files opened...\n");
 #endif
 
-    while (!SDfeof(&f)) {
-        c = SDfgetc(&f);
-        SDfputc(c, &f2);
+    while (!sd.feof(&f)) {
+        c = sd.fgetc(&f);
+        sd.fputc(c, &f2);
 #ifdef _STDIO_H
         putchar(SDfgetc(&f2));
 #endif
@@ -103,30 +103,30 @@ int main () {
 
     printf("Now closing read-only file!\n");
 #endif
-    SDfclose(&f);
+    sd.fclose(&f);
 #ifdef DEBUG
     printf("***Now closing the modified file!***\n");
 #endif
-    SDfclose(&f2);
+    sd.fclose(&f2);
 
 #ifdef DEBUG
     printf("Files closed...\n");
 
-    SDfopen(NEW_FILE, &f2, SD_FILE_MODE_R);
+    sd.fopen(NEW_FILE, &f2, PropWare::SD::FILE_MODE_R);
     printf("File opened for a second time, now printing new contents...\n");
-    while (!SDfeof(&f2))
-    putchar(SDfgetc(&f2));
-    SDfclose(&f2);
+    while (!sd.feof(&f2))
+    putchar(sd.fgetc(&f2));
+    sd.fclose(&f2);
 #endif
 
-    SDUnmount();
+    sd.unmount();
 #else
-    SDchdir("JAZZ");
-    SDfopen("DESKTOP.INI", &f, SD_FILE_MODE_R);
+    sd.chdir("JAZZ");
+    sd.fopen("DESKTOP.INI", &f, PropWare::SD::FILE_MODE_R);
 
-    while (!SDfeof(&f))
+    while (!sd.feof(&f))
 #ifdef DEBUG
-    putchar(SDfgetc(&f));
+    putchar(sd.fgetc(&f));
 #endif
 #endif
 
@@ -143,13 +143,14 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
-    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
         PropWare::SPI::getInstance()->print_error_str(
                 (PropWare::SPI::ErrorCode) err);
     else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
-        sd->print_error_str((PropWare::SD::ErrorCode) err);
+//        sd->print_error_str((PropWare::SD::ErrorCode) err);
+        ;
 
     while (1) {
         debugLEDs.write(err);

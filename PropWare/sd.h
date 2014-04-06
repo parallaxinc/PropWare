@@ -34,8 +34,17 @@
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>
 
-// stdio is needed for the EOF flag. Rather than include the whole file for
-// for that one definition, it will be defined here:
+// Rather than include all of stdio.h, only these definitions will be declared
+#if (defined USE_PRINTF)
+#if (!(defined __TINY_IO_H || _STDIO_H))
+extern char * gets(char *s);
+#endif
+#else
+#include <simpletext.h>
+#define printf print
+#define putchar putChar
+#endif
+
 #ifndef EOF
 #define EOF (-1)
 #endif
@@ -197,15 +206,15 @@ class SD {
         typedef enum {
             /** No error */NO_ERROR = 0,
             /** First SD error code */BEG_ERROR = SPI::END_ERROR + 1,
-            /** Begin user errors */BEG_USER_ERROR = SD::BEG_ERROR,
-            /** SD Error  0 */FILE_ALREADY_EXISTS = SD::BEG_USER_ERROR,
+            /** Begin user errors */BEG_USER_ERROR = PropWare::SD::BEG_ERROR,
+            /** SD Error  0 */FILE_ALREADY_EXISTS = PropWare::SD::BEG_USER_ERROR,
             /** SD Error  1 */INVALID_FILE_MODE,
             /** SD Error  2 */ENTRY_NOT_FILE,
             /** SD Error  3 */ENTRY_NOT_DIR,
             /** SD Error  4 */FILENAME_NOT_FOUND,
-            /** End user errors */END_USER_ERRORS = SD::FILENAME_NOT_FOUND,
+            /** End user errors */END_USER_ERRORS = PropWare::SD::FILENAME_NOT_FOUND,
             /** Begin system errors */BEG_SYS_ERROR,
-            /** SD Error  5 */CORRUPT_CLUSTER = SD::BEG_SYS_ERROR,
+            /** SD Error  5 */CORRUPT_CLUSTER = PropWare::SD::BEG_SYS_ERROR,
             /** SD Error  6 */INVALID_FILENAME,
             /** SD Error  7 */INVALID_CMD,
             /** SD Error  8 */READ_TIMEOUT,
@@ -221,15 +230,16 @@ class SD {
             /** SD Error 18 */FILE_WITHOUT_BUFFER,
             /** SD Error 19 */INVALID_FILESYSTEM,
             /** SD Error 20 */CMD8_FAILURE,
-            /** End system errors */END_SYS_ERROR = SD::CMD8_FAILURE,
-            /** Last SD error code */END_ERROR = SD::END_SYS_ERROR
+            /** End system errors */END_SYS_ERROR = PropWare::SD::CMD8_FAILURE,
+            /** Last SD error code */END_ERROR = PropWare::SD::END_SYS_ERROR
         } ErrorCode;
 
         /**
          * Buffer object used for storing SD data; Each instance uses 527 bytes
          * (526 if SD_OPTION_FILE_WRITE is disabled)
          */
-        struct Buffer {
+        class Buffer {
+            public:
                 /**  Buffer for SD card contents */
                 uint8_t buf[SD_SECTOR_SIZE];
                 /** Buffer ID - determine who owns the current information */
@@ -261,13 +271,14 @@ class SD {
          *          one has not been explicitly created then the global buffer,
          *          m_buf, can be used at the expense of decreased performance
          */
-        struct File {
-                SD::Buffer *buf;
+        class File {
+            public:
+                PropWare::SD::Buffer *buf;
                 /** determine if the buffer is owned by this file */
                 uint8_t id;  //
                 uint32_t wPtr;
                 uint32_t rPtr;
-                SD::FileMode mode;
+                PropWare::SD::FileMode mode;
                 uint32_t length;
                 /** Maximum number of sectors currently allocated to a file */
                 uint32_t maxSectors;
@@ -821,7 +832,7 @@ class SD {
             PropWare::ErrorCode err;
 
             while (*s)
-                check_errors(fputc(*(s++), f));
+                check_errors(this->fputc(*(s++), f));
 
             return 0;
         }
@@ -930,7 +941,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode fseekr (SD::File *f, const int32_t offset,
-                const SD::FilePos origin) {
+                const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
                     f->rPtr = offset;
@@ -963,7 +974,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode fseekw (SD::File *f, const int32_t offset,
-                const SD::FilePos origin) {
+                const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
                     f->wPtr = offset;
@@ -1036,7 +1047,11 @@ class SD {
             // Loop until the user types the SD::SHELL_EXIT string
             while (strcmp(usrInput, this->SHELL_EXIT)) {
                 printf(">>> ");
+#ifdef USE_PRINTF
                 gets(usrInput);
+#else
+                getStr(usrInput, SD_SHELL_INPUT_LEN - 1);
+#endif
 
 #ifdef SD_OPTION_VERBOSE
                 printf("Received \"%s\" as the complete line\n", usrInput);
@@ -1091,10 +1106,11 @@ class SD {
 
                 // Handle errors; Print user errors and continue; Return system
                 // errors
-                if (0 != err) {
-                    if (SD::BEG_ERROR <= err && err <= SD::END_USER_ERRORS) {
-                        SD::print_error_str((SD::ErrorCode) err);
-                    } else
+                if (err) {
+                    if (SD::BEG_ERROR <= err && err <= SD::END_USER_ERRORS)
+//                        SD::print_error_str((SD::ErrorCode) err);
+                        ;
+                    else
                         return err;
                 }
 
@@ -1125,7 +1141,7 @@ class SD {
             uint16_t fileEntryOffset = 0;
 
             // Allocate space for a filename string
-            char string[SD_FILENAME_STR_LEN];
+            char string[PropWare::SD::FILENAME_STR_LEN];
 
             // If we aren't looking at the beginning of a cluster, we must
             // backtrack to the beginning and then begin listing files
@@ -1192,7 +1208,8 @@ class SD {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode shell_cat (const char *name, SD::File *f) {
+        PropWare::ErrorCode shell_cat (const char *name,
+                PropWare::SD::File *f) {
             PropWare::ErrorCode err;
 
             // Attempt to find the file
@@ -1230,7 +1247,7 @@ class SD {
 
             // Attempt to find the file if it already exists
             if ((err = this->find(name, &fileEntryOffset))) {
-                // Error occured - hopefully it was a "file not found" error
+                // Error occurred - hopefully it was a "file not found" error
                 if (SD::FILENAME_NOT_FOUND == err)
                     // File wasn't found, let's create it
                     err = this->create_file(name, &fileEntryOffset);
@@ -1404,6 +1421,8 @@ class SD {
                     printf(str, relativeError, "Requested name is not a"
                             " directory");
                     break;
+                default:
+                    return;
             }
         }
 
@@ -1861,8 +1880,7 @@ class SD {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode get_response (const uint8_t numBytes,
-                uint8_t *dat) {
+        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t *dat) {
             PropWare::ErrorCode err;
             uint32_t timeout;
 
@@ -3076,7 +3094,7 @@ class SD {
             this->get_filename(fileEntry, filename);
             printf("\t\t%s", filename);
             if (SD::SUB_DIR & fileEntry[SD::FILE_ATTRIBUTE_OFFSET])
-                putchar('/');
+                putchar((int ) '/');
             putchar('\n');
         }
 
@@ -3220,7 +3238,7 @@ class SD {
         static const uint8_t FILE_NAME_LEN = SD_FILE_NAME_LEN;  // 8 characters in the standard file name
 #define SD_FILE_EXTENSION_LEN   3
         static const uint8_t FILE_EXTENSION_LEN = SD_FILE_EXTENSION_LEN;  // 3 character file name extension
-#define SD_FILENAME_STR_LEN     (SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2)
+#define SD_FILENAME_STR_LEN     SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2
         static const uint8_t FILENAME_STR_LEN = SD_FILENAME_STR_LEN;
         static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
         static const uint8_t FILE_START_CLSTR_LOW = 0x1A;  // Starting cluster number

@@ -28,11 +28,6 @@
 // Includes
 #include <PropWare/spi.h>
 
-// Symbol for assembly instructions to start a new SPI cog
-extern "C" {
-extern uint32_t _SPIStartCog (void *arg);
-}
-
 // Constants that use CLKFREQ cannot be initialized in the header
 const uint32_t PropWare::SPI::WR_TIMEOUT_VAL = CLKFREQ / 10;
 const uint32_t PropWare::SPI::RD_TIMEOUT_VAL = CLKFREQ / 10;

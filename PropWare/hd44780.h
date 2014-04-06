@@ -97,64 +97,85 @@ class HD44780 {
             /** Last HD44780 error */END_ERROR = HD44780::INVALID_DIMENSIONS
         } ErrorCode;
 
+    protected:
+            /**
+             * Store metadata on the LCD device to determine when line-wraps should
+             * and shouldn't occur
+             */
+            typedef struct {
+                    /** How many characters can be displayed on a single row */
+                    uint8_t charRows;
+                    /** How many characters can be displayed in a single column */
+                    uint8_t charColumns;
+                    /**
+                     * How many contiguous bytes of memory per visible character row
+                     */
+                    uint8_t ddramCharRowBreak;
+                    /** Last byte of memory used in each DDRAM line */
+                    uint8_t ddramLineEnd;
+            } MemMap;
+
     public:
         /** Number of spaces inserted for '\\t' */
-        static const uint8_t TAB_WIDTH;
+        static const uint8_t TAB_WIDTH = 4;
 
         /**
          * @name    Commands
          * @note    Must be combined with arguments below to create a parameter
          *          for the HD44780
          */
-        static const uint8_t CLEAR;
-        static const uint8_t RET_HOME;
-        static const uint8_t ENTRY_MODE_SET;
-        static const uint8_t DISPLAY_CTRL;
-        static const uint8_t SHIFT;
-        static const uint8_t FUNCTION_SET;
-        static const uint8_t SET_CGRAM_ADDR;
-        static const uint8_t SET_DDRAM_ADDR;
+        static const uint8_t CLEAR = BIT_0;
+        static const uint8_t RET_HOME = BIT_1;
+        static const uint8_t ENTRY_MODE_SET = BIT_2;
+        static const uint8_t DISPLAY_CTRL = BIT_3;
+        static const uint8_t SHIFT = BIT_4;
+        static const uint8_t FUNCTION_SET = BIT_5;
+        static const uint8_t SET_CGRAM_ADDR = BIT_6;
+        static const uint8_t SET_DDRAM_ADDR = BIT_7;
         /**@}*/
 
         /**
          * @name    Entry mode arguments
          * @{
          */
-        static const uint8_t SHIFT_INC;
-        static const uint8_t SHIFT_EN;
+        static const uint8_t SHIFT_INC = BIT_1;
+        static const uint8_t SHIFT_EN = BIT_0;
         /**@}*/
 
         /**
          * @name    Display control arguments
          * @{
          */
-        static const uint8_t DISPLAY_PWR;
-        static const uint8_t CURSOR;
-        static const uint8_t BLINK;
+        static const uint8_t DISPLAY_PWR = BIT_2;
+        static const uint8_t CURSOR = BIT_1;
+        static const uint8_t BLINK = BIT_0;
         /**@}*/
 
         /**
          * @name    Cursor/display shift arguments
          * @{
          */
-        static const uint8_t SHIFT_DISPLAY;  // 0 = shift cursor
-        static const uint8_t SHIFT_RIGHT;  // 0 = shift left
+        static const uint8_t SHIFT_DISPLAY = BIT_3;  // 0 = shift cursor
+        static const uint8_t SHIFT_RIGHT = BIT_2;  // 0 = shift left
         /**@}*/
 
         /**
          * @name Function set arguments
          * @{
          */
-        static const uint8_t FUNC_8BIT_MODE;  // 0 = 4-bit mode
-        static const uint8_t FUNC_2LINE_MODE;  // 0 = 1-line mode
-        static const uint8_t FUNC_5x10_CHAR;  // 0 = 5x8 dot mode
+        static const uint8_t FUNC_8BIT_MODE = BIT_4;  // 0 = 4-bit mode
+        static const uint8_t FUNC_2LINE_MODE = BIT_3;  // 0 = 1-line mode
+        static const uint8_t FUNC_5x10_CHAR = BIT_2;  // 0 = 5x8 dot mode
         /**@}*/
 
     public:
         /************************
          *** Public Functions ***
          ************************/
-        HD44780 ();
+        HD44780 () {
+            this->m_curRow = 0;
+            this->m_curCol = 0;
+        }
 
         /**
          * @brief       Initialize an HD44780 LCD display
@@ -382,24 +403,6 @@ class HD44780 {
                     break;
             }
         }
-
-    protected:
-        /**
-         * Store metadata on the LCD device to determine when line-wraps should
-         * and shouldn't occur
-         */
-        typedef struct {
-                /** How many characters can be displayed on a single row */
-                uint8_t charRows;
-                /** How many characters can be displayed in a single column */
-                uint8_t charColumns;
-                /**
-                 * How many contiguous bytes of memory per visible character row
-                 */
-                uint8_t ddramCharRowBreak;
-                /** Last byte of memory used in each DDRAM line */
-                uint8_t ddramLineEnd;
-        } MemMap;
 
     protected:
         /***************************

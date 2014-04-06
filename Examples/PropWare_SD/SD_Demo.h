@@ -43,24 +43,29 @@
 //#define TEST_WRITE
 #define TEST_SHELL
 
+//#define USE_PRINTF
+
+#ifdef USE_PRINTF
+#include <tinyio.h>
+#else
+#include <simpletext.h>
+#endif
+
 // Includes
 #include <propeller.h>
-#ifdef DEBUG
-#include <tinyio.h>
-#endif
 #include <PropWare/PropWare.h>
 #include <PropWare/sd.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI        PropWare::Pin::P0
+#define MOSI        PropWare::Port::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO        PropWare::Pin::P1
+#define MISO        PropWare::Port::P1
 /** Pin number for the clock signal */
-#define SCLK        PropWare::Pin::P2
+#define SCLK        PropWare::Port::P2
 /** Pin number for chip select */
-#define CS          PropWare::Pin::P4
+#define CS          PropWare::Port::P4
 
 #define OLD_FILE    "STUFF.TXT"
 #define NEW_FILE    "TEST.TXT"

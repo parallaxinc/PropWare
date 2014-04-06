@@ -44,7 +44,7 @@ int main () {
     // select)
     PropWare::Pin cs(CS, PropWare::Pin::OUT);
 
-    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
         s = string;         // Set the pointer to the beginning of the string
@@ -83,7 +83,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
-    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
         spi->print_error_str((PropWare::SPI::ErrorCode) err);
