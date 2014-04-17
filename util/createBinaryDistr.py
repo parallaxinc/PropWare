@@ -30,7 +30,7 @@ class CreateBinaryDistr:
                             "jpg", "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
-    TAGS = ["v1.1", "v1.2", "v2.0-beta1"]
+    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2"]
     CURRENT_SUGGESTION = "release-2.0"
 
     def __init__(self):
