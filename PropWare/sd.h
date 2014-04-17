@@ -187,8 +187,6 @@ class SD {
              */
             FILE_MODE_A_PLUS,
 #endif
-            /** Total number of different file modes */
-            FILE_MODES
         } FileMode;
 
         /**
@@ -536,13 +534,15 @@ class SD {
          *              into the file pointer
          *
          * @detailed    Load the first sector of a file into the file buffer;
-         *              Initialize global character pointers; NOTE: currently,
-         *              only one file mode is supported and is best described as
-         *              "r+"; NOTE: two position pointers are used, one for
-         *              writing and one for reading, this may be changed later
-         *              to comply with POSIX standards but is useful for my own
-         *              purposes at the moment
-         *              NOTE: This driver does not include any provision for
+         *              Initialize global character pointers
+         *
+         * @note        Currently, only one file mode is supported and is best
+         *              described as "r+"
+         * @note        Two position pointers are used, one for writing and one
+         *              for reading, this may be changed later to comply with
+         *              POSIX standards but is useful for my own purposes at the
+         *              moment
+         * @note        This driver does not include any provision for
          *              timestamps; Neither file modification or creation will
          *              change a file's timestamp data (creation times are
          *              random and uninitialized)
@@ -556,7 +556,8 @@ class SD {
          *                      first allocation unit) can be stored. Opening
          *                      multiple files simultaneously is allowed.
          *
-         * @return      Returns 0 upon success, error code otherwise
+         * @return      Returns 0 upon success, error code otherwise; Look for
+         *              PropWare::SD::
          */
         PropWare::ErrorCode fopen (const char *name, SD::File *f,
                 const SD::FileMode mode) {
@@ -583,21 +584,21 @@ class SD {
             // Attempt to find the file
             if ((err = this->find(name, &fileEntryOffset))) {
 #ifdef SD_OPTION_FILE_WRITE
-                // If the file didn't exist and you're trying to read from it,
-                // that's a problem
-                if (SD::FILE_MODE_R == mode)
-                    return err;
-
-                // Find returned an error, ensure it was either file-not-found
-                // or EOC and then create the file
+                // Find returned an error; ensure it was EOC...
                 if (SD::EOC_END == err) {
-                    // File wasn't found and the cluster is full; add another
-                    // to the directory
+                    // And return a FILE_NOT_FOUND error if using read only mode
+                    if (SD::FILE_MODE_R == mode)
+                        return PropWare::SD::FILENAME_NOT_FOUND;
+                    // Or create the file for any other mode
+                    else {
+                        // File wasn't found and the cluster is full; add another
+                        // to the directory
 #ifdef SD_OPTION_VERBOSE
-                    printf("Directory cluster was full, adding another...\n");
+                        printf("Directory cluster was full, adding another...\n");
 #endif
-                    check_errors(this->extend_fat(&this->m_buf));
-                    check_errors(this->load_next_sector(&this->m_buf));
+                        check_errors(this->extend_fat(&this->m_buf));
+                        check_errors(this->load_next_sector(&this->m_buf));
+                    }
                 }
                 if (SD::EOC_END == err || SD::FILENAME_NOT_FOUND == err) {
                     // File wasn't found, but there is still room in this
@@ -1108,8 +1109,7 @@ class SD {
                 // errors
                 if (err) {
                     if (SD::BEG_ERROR <= err && err <= SD::END_USER_ERRORS)
-//                        SD::print_error_str((SD::ErrorCode) err);
-                        ;
+                        SD::print_error_str((SD::ErrorCode) err);
                     else
                         return err;
                 }
@@ -3094,7 +3094,7 @@ class SD {
             this->get_filename(fileEntry, filename);
             printf("\t\t%s", filename);
             if (SD::SUB_DIR & fileEntry[SD::FILE_ATTRIBUTE_OFFSET])
-                putchar((int ) '/');
+                putchar((int) '/');
             putchar('\n');
         }
 
@@ -3135,6 +3135,7 @@ class SD {
             else
                 putchar(SD::ARCHIVE_CHAR_);
         }
+#endif
 
         /**
          * @brief   Print to screen each status bit individually with
@@ -3159,7 +3160,6 @@ class SD {
                 printf("\t7: Something is really screwed up. This should "
                         "always be 0.\n");
         }
-#endif
 
     private:
         /*************************

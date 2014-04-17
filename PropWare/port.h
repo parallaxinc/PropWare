@@ -131,7 +131,7 @@ class Port {
          *          in the constructor
          */
         Port () {
-            this->m_mask = 0;
+            this->m_mask = PropWare::Port::NULL_PIN;
         }
 
         /**

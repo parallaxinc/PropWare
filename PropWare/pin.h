@@ -56,8 +56,8 @@ class Pin: public PropWare::Port {
          *
          * @param[in]   mask    Bit-mask of pin; One of PropWare::Pin::Mask
          */
-        Pin (const Pin::Mask mask) :
-                PropWare::Port((uint32_t) mask) {
+        Pin (const PropWare::Port::Mask mask) :
+                PropWare::Port(mask) {
         }
 
         /**
@@ -67,8 +67,8 @@ class Pin: public PropWare::Port {
          * @param[in]   direction   Direction to initialize pin; One of
          *                          PropWare::Pin::Dir
          */
-        Pin (const Pin::Mask mask, const Pin::Dir direction) :
-                PropWare::Port((uint32_t) mask, direction) {
+        Pin (const PropWare::Port::Mask mask, const PropWare::Port::Dir direction) :
+                PropWare::Port(mask, direction) {
         }
 
         /**
@@ -180,7 +180,7 @@ class Pin: public PropWare::Port {
          * Hide from user - should not be accessible within PropWare::Pin
          */
         uint32_t read_fast () const {
-            return 0;
+            return this->PropWare::Port::read_fast();
         }
 };
 

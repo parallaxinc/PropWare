@@ -34,8 +34,10 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 
-#ifdef USE_PRINTF && (!(defined __TINY_IO_H) && !(_STDIO_H))
+#if (defined USE_PRINTF)
+#if (!(defined __TINY_IO_H || _STDIO_H))
 extern int printf(const char *fmt, ...);
+#endif
 #else
 #include <simpletext.h>
 #define printf print

@@ -29,12 +29,14 @@
 // Includes
 #include <PropWare/sd.h>
 
+#ifdef SD_OPTION_SHELL
 // Initialize string constants
 const char PropWare::SD::SHELL_EXIT[] = "exit";
 const char PropWare::SD::SHELL_LS[] = "ls";
 const char PropWare::SD::SHELL_CAT[] = "cat";
 const char PropWare::SD::SHELL_CD[] = "cd";
 const char PropWare::SD::SHELL_TOUCH[] = "touch";
+#endif
 
 const uint32_t PropWare::SD::RESPONSE_TIMEOUT = 100 * MILLISECOND;
 const uint32_t PropWare::SD::SEND_ACTIVE_TIMEOUT = 500 * MILLISECOND;
