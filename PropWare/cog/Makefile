@@ -1,10 +1,11 @@
-# Build the PropWare library with the extended memory model <word starting with C> (XMMC)
-PRJ = PropWare_xmmc
+# Build the PropWare library with the cog memory model (CMM)
+PRJ = PropWare_cog
 
 LIBNAME = $(PRJ)
 BOARD = QUICKSTART
-MODEL = xmmc
+MODEL = cog
 CFLAGS = -Os
+OBJS = PropWare.o sd.o
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
 ifndef PROPWARE_PATH
@@ -17,5 +18,4 @@ ifndef PROPGCC_PREFIX
 	PROPGCC_PREFIX = /path/to/compiler/directory
 endif
 
-include ../PropWareObjects.mk
 include ../../common.mk

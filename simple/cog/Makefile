@@ -1,23 +1,16 @@
-# @file     Makefile
-#
-# @author   David Zemon
-# @project  SD_Demo
+# Build the Simple library with the long memory model (LMM)
+PRJ = Simple_cog
 
-PRJ = SD_Demo
-
-NAME = $(PRJ)
-OBJS = $(PRJ).o
-BOARD = QUICKSTART
-MODEL = cmm
+LIBNAME = $(PRJ)
+include ../simpleObjects.mk
+MODEL = cog
 CFLAGS = -Os
 
 # Insert your own path here - it should be the same directory that contains "common.mk"
-PROPWARE_PATH ?= ../../..
+PROPWARE_PATH ?= ..
 
 # Optionally, specify where your compiler is installed
 # Default = /opt/parallax
 PROPGCC_PREFIX ?= /path/to/compiler/directory
 
-all: $(NAME).elf
-
-include $(PROPWARE_PATH)/common.mk
+include ../simple.mk

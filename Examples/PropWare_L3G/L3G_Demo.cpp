@@ -26,7 +26,7 @@
  */
 
 // Includes
-#include <tinyio.h>
+#include <simpletools.h>
 #include "L3G_Demo.h"
 
 // Main function
@@ -36,7 +36,9 @@ int main () {
     PropWare::SPI *spi = PropWare::SPI::getInstance();
     PropWare::L3G gyro(spi);
 
-    if ((err = gyro.start(MOSI, MISO, SCLK, CS, PropWare::L3G::DPS_2000)))
+    if ((err = gyro.start(MOSI, MISO, SCLK, CS)))
+        error(err);
+    if ((err = gyro.set_dps(PropWare::L3G::DPS_500)))
         error(err);
 
     // Though this functional call is not necessary (default value is 0), I
@@ -49,9 +51,12 @@ int main () {
     while (1) {
         if ((err = gyro.read_all(gyroVals)))
             error(err);
-        printf("Gyro vals... X: %i\tY: %i\tZ: %i\n", gyroVals[0], gyroVals[1],
-                gyroVals[2]);
-        waitcnt(CLKFREQ/20 + CNT);
+        print("Gyro vals DPS... X: %2.3f\tY: %2.3f\tZ: %2.3f\n",
+                gyro.convert_to_dps(gyroVals[0]),
+                gyro.convert_to_dps(gyroVals[1]),
+                gyro.convert_to_dps(gyroVals[2]));
+
+//        waitcnt(50*MILLISECOND + CNT);
     }
 
     return 0;
@@ -59,7 +64,7 @@ int main () {
 
 void error (const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
         debugLEDs.write(err);

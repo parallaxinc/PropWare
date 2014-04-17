@@ -39,7 +39,7 @@ int main () {
     PropWare::MCP3000 adc(spi, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
-    PropWare::SimplePort scale(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
         error(err);
@@ -80,7 +80,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Pin::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
         debugLEDs.write(err);

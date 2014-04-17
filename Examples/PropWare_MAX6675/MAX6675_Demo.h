@@ -44,22 +44,22 @@
 #include <PropWare/spi.h>
 
 /** Pin number for MOSI (master out - slave in) */
-#define MOSI            PropWare::Pin::P0
+#define MOSI            PropWare::Port::P0
 /** Pin number for MISO (master in - slave out) */
-#define MISO            PropWare::Pin::P1
+#define MISO            PropWare::Port::P1
 /** Pin number for the clock signal */
-#define SCLK            PropWare::Pin::P2
+#define SCLK            PropWare::Port::P2
 /** Pin number for chip select */
-#define CS              PropWare::Pin::P5
+#define CS              PropWare::Port::P5
 #define FREQ            10000
 
 #define DEBUG_LEDS      PropWare::BYTE_2
 
-#define RS              PropWare::Pin::P14
-#define RW              PropWare::Pin::P12
-#define EN              PropWare::Pin::P10
+#define RS              PropWare::Port::P14
+#define RW              PropWare::Port::P12
+#define EN              PropWare::Port::P10
 
-#define FIRST_DATA_PIN  PropWare::Pin::P19
+#define FIRST_DATA_PIN  PropWare::Port::P19
 #define BITMODE         PropWare::HD44780::BM_8
 
 #define DIMENSIONS      PropWare::HD44780::DIM_16x2

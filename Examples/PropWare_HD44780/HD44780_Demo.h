@@ -42,11 +42,11 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/hd44780.h>
 
-#define RS                  PropWare::Pin::P14
-#define RW                  PropWare::Pin::P12
-#define EN                  PropWare::Pin::P10
+#define RS                  PropWare::Port::P14
+#define RW                  PropWare::Port::P12
+#define EN                  PropWare::Port::P10
 
-#define FIRST_DATA_PIN      PropWare::Pin::P19
+#define FIRST_DATA_PIN      PropWare::Port::P19
 #define BITMODE             PropWare::HD44780::BM_8
 #define DIMENSIONS          PropWare::HD44780::DIM_16x2
 

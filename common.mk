@@ -66,7 +66,22 @@ CXXSTANDARD = -std=gnu++0x
 LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
-LIBS += -lPropWare_$(MODEL) -lSimple_$(MODEL) -lLibpropeller_$(MODEL) -ltiny
+
+ifndef NO_LIB_PROPWARE
+	LIBS += -lPropWare_$(MODEL)
+endif
+
+ifndef NO_LIB_SIMPLE
+	LIBS += -lSimple_$(MODEL)
+endif
+
+ifndef NO_LIB_LIBPROPELLER
+	LIBS += -lLibpropeller_$(MODEL)
+endif 
+
+ifndef NO_LIB_TINY
+	LIBS += -ltiny
+endif
 
 # Add the propeller library to the search path
 ifeq ($(MODEL), cmm)
