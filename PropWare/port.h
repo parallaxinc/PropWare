@@ -318,7 +318,7 @@ class SimplePort: public Port {
          *
          * @param[in]   firstPin    Least significant pin in the data port mask
          * @param[in]   portWidth   The number of pins in the data port
-         * @param[in[   direction   Determine input or output for the port
+         * @param[in]   direction   Determine input or output for the port
          */
         SimplePort (const PropWare::Port::Mask firstPin, uint8_t portWidth,
                 const PropWare::Port::Dir direction) {

@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/thread.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 
@@ -180,7 +181,7 @@ class SPI {
 #ifndef PROPWARE_NO_SAFE_SPI
     private:
 #else
-        public:
+    public:
 #endif
         /**
          * @brief   Create a new instance of SPI which will, upon calling
@@ -275,7 +276,7 @@ class SPI {
          * @return  Returns 0 upon success, otherwise error code (will return
          *          SPI::COG_NOT_STARTED if no cog has previously been started)
          */
-        PropWare::ErrorCode stop (void) {
+        PropWare::ErrorCode stop () {
             if (!this->is_running())
                 return SPI::NO_ERROR;
 
@@ -291,7 +292,7 @@ class SPI {
          *
          * @return       Returns 1 if the SPI cog is up and running, 0 otherwise
          */
-        bool is_running (void) {
+        bool is_running () {
             return -1 != this->m_cog;
         }
 
@@ -300,7 +301,7 @@ class SPI {
          *
          * @return  May return non-zero error code when a timeout occurs
          */
-        PropWare::ErrorCode wait (void) {
+        PropWare::ErrorCode wait () {
             const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
@@ -795,7 +796,7 @@ class SPI {
         /********************************
          *** Private Member Variables ***
          ********************************/
-        volatile uint32_t m_mailbox;
+        atomic_t m_mailbox;
         int8_t m_cog;
         char m_errorInMethod[16];
 };
