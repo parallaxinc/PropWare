@@ -31,7 +31,7 @@
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  */
 int main () {
-    char string[] = "Hello world!\n";  // Create the test string
+    char string[] = {0x01, 0x02, 0x03, 0x45, 0xe5, 0xaa, 0xff, 0x80, 0x00};// "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     PropWare::SimplexUART uart(TX);
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
@@ -41,16 +41,10 @@ int main () {
     uart.set_stop_bit_width(1);
     uart.set_parity(PropWare::UART::NO_PARITY);
 
-    printf("Stop bit mask: 0x%04x\n", uart.m_stopBitMask);
-    printf("Data mask: 0x%04x\n", uart.m_dataMask);
-    printf("Total bits: %u\n", uart.m_totalBits);
-
     while (1) {
         s = string;         // Set the pointer to the beginning of the string
         while (*s) {        // Loop until we read the null-terminator
             uart.send(*s);  // Output the next character of the string
-
-            waitcnt(CLKFREQ/4 + CNT);
 
             // Increment the character pointer
             ++s;

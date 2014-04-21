@@ -29,8 +29,6 @@
 #define PROPWARE_UART_H_
 
 #include <sys/thread.h>
-#include <tinyio.h> // TODO: DEBUG LINE; delete
-#include <simpletext.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
@@ -130,10 +128,6 @@ class UART {
         }
 
         HUBTEXT void send (uint16_t data) {
-            printf("Original data: 0x%04x, %u\n", data, data);
-            putBin(data);
-            printf("\n");
-
             // Add parity bit
             this->m_parityMask = 1 << this->m_dataWidth;
             if (PropWare::UART::EVEN == this->m_parity) {
@@ -150,21 +144,11 @@ class UART {
                           [_parityMask] "r" (this->m_parityMask));
             }
 
-            printf("Parity mask: 0x%04x\n", this->m_parityMask);
-            printf("Data after parity: 0x%04x\n", data);
-
             // Add stop bits
             data |= this->m_stopBitMask;
 
-            printf("Data after stop bits: 0x%04x\n", data);
-
             // Add start bit
             data <<= 1;
-
-            printf("Final data: 0x%04x\n", data);
-            printf("                    ");
-            putBin(data);
-            printf("\n");
 
             uint32_t waitCycles = CNT + this->m_bitCycles;
             for (uint8_t i = 0; i < this->m_totalBits; i++) {
@@ -175,9 +159,6 @@ class UART {
                         "muxc outa, %[_mask]"
                         : [_data] "+r" (data)
                         : [_mask] "r" (this->m_tx.get_mask()));
-//                printf("Data after sending: ");
-//                putBin(data);
-//                printf("\n");
             }
         }
 
@@ -213,7 +194,7 @@ class UART {
             this->m_parityMask = 1 << this->m_dataWidth;
         }
 
-    public: // TODO: DEBUG LINE; change to 'protected'
+    protected:
         PropWare::Pin m_tx;
         uint8_t m_dataWidth;
         uint16_t m_dataMask;
