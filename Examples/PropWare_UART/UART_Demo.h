@@ -44,12 +44,6 @@
 #include <PropWare/uart.h>
 #include <PropWare/port.h>
 
-/** Pin mask for TX (transmit/output) pin */
-#define TX                PropWare::Port::P16
-
-/** Frequency (in hertz) to run the SPI module */
-#define BAUD                115200
-
 void error (const PropWare::ErrorCode err, const PropWare::UART *uart);
 
 /**@}*/

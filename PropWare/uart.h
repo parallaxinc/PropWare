@@ -79,8 +79,8 @@ class UART {
             for (uint8_t i = 0; i < this->m_dataWidth; ++i)
                 this->m_dataMask |= 1 << i;
 
-            this->set_total_bits();
             this->set_parity_mask();
+            this->set_total_bits();
         }
 
         uint8_t get_set_data_width () const {
@@ -89,8 +89,9 @@ class UART {
 
         void set_parity (const PropWare::UART::Parity parity) {
             this->m_parity = parity;
-            this->set_total_bits();
             this->set_parity_mask();
+            this->set_stop_bit_mask();
+            this->set_total_bits();
         }
 
         PropWare::UART::Parity get_parity () const {

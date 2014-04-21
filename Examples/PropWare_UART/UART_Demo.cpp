@@ -33,10 +33,9 @@
 int main () {
     char string[] = {0x01, 0x02, 0x03, 0x45, 0xe5, 0xaa, 0xff, 0x80, 0x00};// "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
-    PropWare::SimplexUART uart(TX);
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplexUART uart(PropWare::Port::P16);
 
-    uart.set_baud_rate(BAUD);
+    uart.set_baud_rate(115200);
     uart.set_data_width(8);
     uart.set_stop_bit_width(1);
     uart.set_parity(PropWare::UART::NO_PARITY);
@@ -50,8 +49,7 @@ int main () {
             ++s;
         }
 
-        // Signal that the entire string has been sent
-//        debugLEDs.toggle();
+        waitcnt(SECOND / 2 + CNT);
     }
 
     return 0;
