@@ -134,7 +134,7 @@ SET_MODE                // Set the current SPI polarity, If polarity high, initi
                         mov clkPhase, mailbox           '' Store the phase
                         and clkPhase, #SPI_PHASE_BIT    '' Clear the clock polarity bit
 
-                        test mailbox, #BIT_1 wz         '' TODO: WHY IS "SPI_POLARITY_BIT" NOT WORKING!?!?!?!?!?!?
+                        test mailbox, #BIT_1 wz
                         muxnz outa, sclk
 
                         jmp #LOOP
