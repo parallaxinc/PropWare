@@ -103,8 +103,6 @@ namespace PropWare {
  */
 class SD {
     public:
-        static const uint8_t PROPWARE_OBJECT_NUMBER = 1;
-    public:
         /** Number of characters printed to the terminal before a line break */
         static const uint8_t LINE_SIZE = 16;
         /**

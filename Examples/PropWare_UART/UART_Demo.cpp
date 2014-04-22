@@ -31,8 +31,26 @@
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  */
 int main () {
-    char string[] = {0x01, 0x02, 0x03, 0x45, 0xe5, 0xaa, 0xff, 0x80, 0x00};// "Hello world!\n";  // Create the test string
-    char *s;    // Create a pointer variable that can be incremented in a loop
+    // Create an easy-to-test number pattern - useful when testing with a logic
+    // analyzer
+    uint8_t numberPattern[] = {
+            0x01,
+            0x02,
+            0x03,
+            0x45,
+            0xe5,
+            0xaa,
+            0xff,
+            0x80,
+            0x00 };
+
+    // Create the test string - useful when testing with a terminal
+    char string[] = "Hello world!\n\r";
+
+    // Create pointer variables that can be incremented in a loop
+    uint8_t *s1;
+    char *s2;
+
     PropWare::SimplexUART uart(PropWare::Port::P16);
 
     uart.set_baud_rate(115200);
@@ -41,12 +59,22 @@ int main () {
     uart.set_parity(PropWare::UART::NO_PARITY);
 
     while (1) {
-        s = string;         // Set the pointer to the beginning of the string
-        while (*s) {        // Loop until we read the null-terminator
-            uart.send(*s);  // Output the next character of the string
+        s1 = numberPattern;         // Set the pointer to the beginning of the string
+        while (*s1) {        // Loop until we read the null-terminator
+            uart.send(*s1);  // Output the next character of the string
 
             // Increment the character pointer
-            ++s;
+            ++s1;
+        }
+
+        waitcnt(MILLISECOND + CNT);
+
+        s2 = string;         // Set the pointer to the beginning of the string
+        while (*s2) {        // Loop until we read the null-terminator
+            uart.send(*s2);  // Output the next character of the string
+
+            // Increment the character pointer
+            ++s2;
         }
 
         waitcnt(SECOND / 2 + CNT);

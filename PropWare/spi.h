@@ -99,10 +99,6 @@ class SPI {
         return err;}
 
     public:
-        /** Used as index for an array of PropWare objects */
-        static const uint8_t PROPWARE_OBJECT_NUMBER = 0;
-
-    public:
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
