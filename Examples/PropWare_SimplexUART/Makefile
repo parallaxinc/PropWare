@@ -1,9 +1,9 @@
 # @file     Makefile
 #
 # @author   David Zemon
-# @project  UART_Demo
+# @project  SimplexUART_Demo
 
-PRJ = UART_Demo
+PRJ = SimplexUART_Demo
 
 NAME = $(PRJ)
 OBJS = $(PRJ).o

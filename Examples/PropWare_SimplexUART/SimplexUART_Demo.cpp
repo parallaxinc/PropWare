@@ -1,7 +1,7 @@
 /**
- * @file    UART_Demo.cpp
+ * @file    SimplexUART_Demo.cpp
  *
- * @project UART_Demo
+ * @project SimplexUART_Demo
  *
  * @author  David Zemon
  *
@@ -25,7 +25,7 @@
  * SOFTWARE.
  */
 
-#include "UART_Demo.h"
+#include "SimplexUART_Demo.h"
 
 /**
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
@@ -53,6 +53,7 @@ int main () {
 
     PropWare::SimplexUART uart(PropWare::Port::P16);
 
+    // Typical RS232 settings (default settings for PropGCC serial comms)
     uart.set_baud_rate(115200);
     uart.set_data_width(8);
     uart.set_stop_bit_width(1);

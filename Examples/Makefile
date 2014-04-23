@@ -29,7 +29,10 @@ all:
 	$(shell mkdir $(MKDIR_FLAG) PropWare_SPI$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_SPI/Debug -f ../Makefile
 
-	$(shell mkdir $(MKDIR_FLAG) PropWare_UART$(DIR_DIV)Debug $(NULL))
+	$(shell mkdir $(MKDIR_FLAG) PropWare_SimplexUART$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_UART/Debug -f ../Makefile
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_DuplexUART$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_UART/Debug -f ../Makefile
 
 	$(shell mkdir $(MKDIR_FLAG) PropWare_I2C_HD44780$(DIR_DIV)Debug $(NULL))
@@ -66,7 +69,10 @@ clean:
 	$(shell mkdir $(MKDIR_FLAG) PropWare_SPI$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_SPI/Debug -f ../Makefile clean
 
-	$(shell mkdir $(MKDIR_FLAG) PropWare_UART$(DIR_DIV)Debug $(NULL))
+	$(shell mkdir $(MKDIR_FLAG) PropWare_SimplexUART$(DIR_DIV)Debug $(NULL))
+	$(MAKE) -C PropWare_UART/Debug -f ../Makefile clean
+
+	$(shell mkdir $(MKDIR_FLAG) PropWare_DuplexUART$(DIR_DIV)Debug $(NULL))
 	$(MAKE) -C PropWare_UART/Debug -f ../Makefile clean
 
 	$(shell mkdir $(MKDIR_FLAG) PropWare_I2C_HD44780$(DIR_DIV)Debug $(NULL))

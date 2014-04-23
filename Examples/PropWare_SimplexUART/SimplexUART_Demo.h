@@ -1,10 +1,10 @@
 /**
- * @file    UART_Demo.h
+ * @file    SimplexUART_Demo.h
  */
 /**
  * @brief   Write "Hello world!\n" out via UART protocol
  *
- * @project UART_Demo
+ * @project SimplexUART_Demo
  *
  * @author  David Zemon
  *
@@ -28,11 +28,11 @@
  * SOFTWARE.
  */
 
-#ifndef UART_DEMO_H_
-#define UART_DEMO_H_
+#ifndef SimplexUART_DEMO_H_
+#define SimplexUART_DEMO_H_
 
 /**
- * @defgroup    _propware_example_uart   UART Demo
+ * @defgroup    _propware_example_simplexUart   SimplexUART Demo
  * @ingroup     _propware_examples
  * @{
  */
@@ -48,4 +48,4 @@ void error (const PropWare::ErrorCode err, const PropWare::UART *uart);
 
 /**@}*/
 
-#endif /* SPI_DEMO_H_ */
+#endif /* SimplexUART_DEMO_H_ */
