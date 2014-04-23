@@ -36,7 +36,7 @@
 namespace PropWare {
 
 /**
- * Abstract base class for all UART devices
+ * @brief   Abstract base class for all UART devices
  *
  * TODO: Finish documenting this class
  */
@@ -77,7 +77,7 @@ class UART {
         static const uint8_t DEFAULT_STOP_BIT_WIDTH = 1;
         static const uint32_t DEFAULT_BAUD = 115200;
 
-        static const uint32_t MAX_BAUD = -1; // TODO: What is the maximum baud?
+        static const uint32_t MAX_BAUD = -1;  // TODO: What is the maximum baud?
 
     public:
         /**
@@ -110,7 +110,7 @@ class UART {
          *
          * @return  Returns a numbers between 1 and 16, inclusive
          */
-        uint8_t get_set_data_width () const {
+        uint8_t get_data_width () const {
             return this->m_dataWidth;
         }
 
@@ -200,11 +200,18 @@ class UART {
         }
 
         /**
-         * @note    The core loop is taken directly from PropGCC's putchar()
-         *          function in tinyio; A big thanks to the PropGCC team for the
-         *          simple and elegant algorithm!
+         * @brief       Send a word of data out the serial port
+         *
+         * @pre         Note to UART developers, not users: this->m_tx must be
+         *              already configured as output
+         *
+         * @note        The core loop is taken directly from PropGCC's putchar()
+         *              function in tinyio; A big thanks to the PropGCC team for
+         *              the simple and elegant algorithm!
+         *
+         * @param[in]   originalData    Data word to send out the serial port
          */
-        HUBTEXT void send (uint16_t originalData) {
+        HUBTEXT void send (uint16_t originalData) const {
             uint32_t wideData = originalData;
 
             // Add parity bit
@@ -214,13 +221,13 @@ class UART {
                         "muxc %[_data], %[_parityMask]"
                         : [_data] "+r" (wideData)
                         : [_dataMask] "r" (this->m_dataMask),
-                          [_parityMask] "r" (this->m_parityMask));
+                        [_parityMask] "r" (this->m_parityMask));
             } else if (PropWare::UART::ODD_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                         "muxnc %[_data], %[_parityMask]"
                         : [_data] "+r" (wideData)
                         : [_dataMask] "r" (this->m_dataMask),
-                          [_parityMask] "r" (this->m_parityMask));
+                        [_parityMask] "r" (this->m_parityMask));
             }
 
             // Add stop bits
@@ -304,7 +311,7 @@ class UART {
 };
 
 /**
- * An easy-to-use class for simplex (transmit only) UART communication
+ * @brief   An easy-to-use class for simplex (transmit only) UART communication
  *
  * TODO: Finish documenting this class
  */
@@ -321,6 +328,126 @@ class SimplexUART: public PropWare::UART {
             this->m_tx.set_mask(tx);
             this->m_tx.set_dir(PropWare::Port::OUT);
             this->m_tx.set();
+        }
+};
+
+/**
+ * @brief   Full duplex UART communication module
+ *
+ * Because this class does not use an independent cog for receiving,
+ * "Full duplex" may be an exaggeration. Though two pins separate pins can be
+ * used for communication, transmitting and receiving can not happen
+ * simultaneously and all receiving calls are indefinitely blocking.
+ * PropWare::FullDuplexUART::receive() will not return until after the RX pin is
+ * low and all data, parity (if applicable) and stop bits have been read.
+ */
+class FullDuplexUART: public PropWare::UART {
+    public:
+        HUBTEXT uint32_t receive () const {
+            uint16_t rxVal;
+            uint32_t parityResult;
+
+            /* wait for a start bit */
+            this->m_rx.wait_until_low();
+
+            /* sync for one half bit */
+            uint32_t waitCycles = CNT + this->m_bitCycles
+                    >> 1 + this->m_bitCycles;
+
+            for (uint8_t i = 0; i < this->m_receivableBits; i++) {
+                waitCycles = waitcnt2(waitCycles, this->m_bitCycles);
+
+                // value = ( (0 != (_INA & rxmask)) << 7) | (value >> 1);
+                __asm__ volatile("shr %[_value],# 1\n\t"
+                        "test %[_mask],ina wz \n\t"
+                        "muxnz %[_value], %[_msbMask]"
+                        : [_value] "+r" (rxVal)
+                        : [_mask] "r" (this->m_rx.get_mask()),
+                        [_msbMask] "r" (this->m_msbMask));
+            }
+
+            // Wait for the stop bit
+            this->m_rx.wait_until_high();
+
+            // Check parity bit
+            if (this->m_parity) {
+                __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
+                        "muxc %[_parityResult], %[_parityMask]"
+                        : [_parityResult] "+r" (parityResult)
+                        : [_data] "r" (rxVal),
+                        [_dataMask] "r" (this->m_dataMask),
+                        [_parityMask] "r" (this->m_parityMask));
+                if (parityResult != rxVal & this->m_parityMask)
+                    return -1;
+            }
+
+            return rxVal;
+        }
+
+    protected:
+        FullDuplexUART () :
+                UART() {
+        }
+
+        FullDuplexUART (PropWare::Port::Mask tx, PropWare::Port::Mask rx) :
+                FullDuplexUART() {
+            // Set rx direction second first so that, in the case of
+            // half-duplex, the pin floats high
+            this->m_rx.set_mask(rx);
+            this->m_tx.set_mask(tx);
+            this->m_tx.set_dir(PropWare::Port::OUT);
+            this->m_rx.set_dir(PropWare::Port::IN);
+            this->m_tx.set();
+        }
+
+        PropWare::ErrorCode set_data_width (const uint8_t dataWidth) {
+            PropWare::ErrorCode err = this->UART::set_data_width(dataWidth);
+            if (err)
+                return err;
+
+            this->m_msbMask = 1 << this->m_dataWidth;
+            return 0;
+        }
+
+        void set_parity (const PropWare::UART::Parity parity) {
+            this->UART::set_parity(parity);
+            if (parity)
+                this->m_receivableBits = this->m_dataWidth + 1;
+            else
+                this->m_receivableBits = this->m_dataWidth;
+        }
+
+    protected:
+        PropWare::Pin m_rx;
+        PropWare::Port::Mask m_msbMask;
+        uint8_t m_receivableBits;
+};
+
+/**
+ * @brief   Simple wrapper for full duplex that provides half duplex capability
+ *
+ * It is important to note that, just like PropWare::FullDuplexUART, receiving
+ * data is an indefinitely blocking call
+ */
+class HalfDuplexUART: public PropWare::FullDuplexUART {
+    public:
+        HalfDuplexUART () :
+                FullDuplexUART() {
+        }
+
+        HalfDuplexUART (PropWare::Port::Mask pinMask) :
+            FullDuplexUART(pinMask, pinMask) {
+        }
+
+        HUBTEXT void send (uint16_t originalData) {
+            this->m_tx.set_dir(PropWare::Port::OUT);
+            this->FullDuplexUART::send(originalData);
+            this->m_tx.set_dir(PropWare::Port::IN);
+        }
+
+        HUBTEXT uint32_t receive () {
+            this->m_rx.set_dir(PropWare::Port::IN);
+            return this->FullDuplexUART::receive();
         }
 };
 
