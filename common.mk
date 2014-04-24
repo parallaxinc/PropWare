@@ -61,7 +61,7 @@ endif
 CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
-CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
+CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics -fno-rtti
 CXXSTANDARD = -std=gnu++0x
 LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp

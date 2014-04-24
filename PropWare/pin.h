@@ -101,6 +101,10 @@ class Pin: public PropWare::Port {
             this->PropWare::Port::set_mask(mask);
         }
 
+        PropWare::Port::Mask get_mask () const {
+            return (PropWare::Port::Mask) this->m_mask;
+        }
+
         /**
          * @brief   Read the value from a single pin and return its state
          *
