@@ -29,6 +29,7 @@
 #define PROPWARE_UART_H_
 
 #include <sys/thread.h>
+#include <stdlib.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
@@ -215,7 +216,6 @@ class UART {
             uint32_t wideData = originalData;
 
             // Add parity bit
-            this->m_parityMask = 1 << this->m_dataWidth;
             if (PropWare::UART::EVEN_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                         "muxc %[_data], %[_parityMask]"
@@ -343,6 +343,34 @@ class SimplexUART: public PropWare::UART {
  */
 class FullDuplexUART: public PropWare::UART {
     public:
+        FullDuplexUART (PropWare::Port::Mask tx, PropWare::Port::Mask rx) :
+                PropWare::UART() {
+            // Set rx direction second first so that, in the case of
+            // half-duplex, the pin floats high
+            this->m_rx.set_mask(rx);
+            this->m_tx.set_mask(tx);
+            this->m_tx.set_dir(PropWare::Port::OUT);
+            this->m_rx.set_dir(PropWare::Port::IN);
+            this->m_tx.set();
+        }
+
+        PropWare::ErrorCode set_data_width (const uint8_t dataWidth) {
+            PropWare::ErrorCode err = this->UART::set_data_width(dataWidth);
+            if (err)
+                return err;
+
+            this->m_msbMask = (PropWare::Port::Mask) (1 << this->m_dataWidth);
+            return 0;
+        }
+
+        void set_parity (const PropWare::UART::Parity parity) {
+            this->UART::set_parity(parity);
+            if (parity)
+                this->m_receivableBits = this->m_dataWidth + 1;
+            else
+                this->m_receivableBits = this->m_dataWidth;
+        }
+
         HUBTEXT uint32_t receive () const {
             uint16_t rxVal;
             uint32_t parityResult;
@@ -351,8 +379,8 @@ class FullDuplexUART: public PropWare::UART {
             this->m_rx.wait_until_low();
 
             /* sync for one half bit */
-            uint32_t waitCycles = CNT + this->m_bitCycles
-                    >> 1 + this->m_bitCycles;
+            uint32_t waitCycles = CNT + (this->m_bitCycles >> 1)
+                    + this->m_bitCycles;
 
             for (uint8_t i = 0; i < this->m_receivableBits; i++) {
                 waitCycles = waitcnt2(waitCycles, this->m_bitCycles);
@@ -377,7 +405,7 @@ class FullDuplexUART: public PropWare::UART {
                         : [_data] "r" (rxVal),
                         [_dataMask] "r" (this->m_dataMask),
                         [_parityMask] "r" (this->m_parityMask));
-                if (parityResult != rxVal & this->m_parityMask)
+                if (parityResult != (rxVal & this->m_parityMask))
                     return -1;
             }
 
@@ -387,34 +415,6 @@ class FullDuplexUART: public PropWare::UART {
     protected:
         FullDuplexUART () :
                 UART() {
-        }
-
-        FullDuplexUART (PropWare::Port::Mask tx, PropWare::Port::Mask rx) :
-                FullDuplexUART() {
-            // Set rx direction second first so that, in the case of
-            // half-duplex, the pin floats high
-            this->m_rx.set_mask(rx);
-            this->m_tx.set_mask(tx);
-            this->m_tx.set_dir(PropWare::Port::OUT);
-            this->m_rx.set_dir(PropWare::Port::IN);
-            this->m_tx.set();
-        }
-
-        PropWare::ErrorCode set_data_width (const uint8_t dataWidth) {
-            PropWare::ErrorCode err = this->UART::set_data_width(dataWidth);
-            if (err)
-                return err;
-
-            this->m_msbMask = 1 << this->m_dataWidth;
-            return 0;
-        }
-
-        void set_parity (const PropWare::UART::Parity parity) {
-            this->UART::set_parity(parity);
-            if (parity)
-                this->m_receivableBits = this->m_dataWidth + 1;
-            else
-                this->m_receivableBits = this->m_dataWidth;
         }
 
     protected:
@@ -436,7 +436,7 @@ class HalfDuplexUART: public PropWare::FullDuplexUART {
         }
 
         HalfDuplexUART (PropWare::Port::Mask pinMask) :
-            FullDuplexUART(pinMask, pinMask) {
+                FullDuplexUART(pinMask, pinMask) {
         }
 
         HUBTEXT void send (uint16_t originalData) {
