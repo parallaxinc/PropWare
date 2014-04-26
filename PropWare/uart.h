@@ -38,8 +38,21 @@ namespace PropWare {
 /**
  * @brief   Abstract base class for all UART devices
  *
- * No independent cog is needed for execution and therefore all communication methods are blocking (cog execution will
- * not return from the method until the relevant data has been received/sent)
+ * Configurable with the following options:
+ * <ul><li>Data width: 1-16 bits</li>
+ * <li>Parity: No parity, odd parity, even parity</li>
+ * <li>Stop bits: Any number of stop bits between 1 and 14
+ * </li></ul>
+ *
+ * @note    Total number of bits within start, data, parity, and stop cannot
+ *          exceed 32. For instance, a configuration of 16 data bits, even or
+ *          odd parity, and 2 stop bits would be 1 + 16 + 1 + 2 = 20 (this is
+ *          allowed). A configuration of 30 data bits, no parity, and 2 stop
+ *          bits would be 1 + 30 + 2 = 33 (not allowed).
+ *
+ * @note    No independent cog is needed for execution and therefore all
+ *          communication methods are blocking (cog execution will not return
+ *          from the method until the relevant data has been received/sent)
  */
 class UART {
     public:
