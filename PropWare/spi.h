@@ -711,7 +711,7 @@ class SPI {
             }
         }
 
-    private:
+    protected:
         /************************************
          *** Private Constant Definitions ***
          ************************************/
@@ -734,7 +734,7 @@ class SPI {
         // MSB_FIRST == HIGH; LSB_FIRST == LOW
         static const uint8_t BITMODE_BIT = BIT_2;
 
-    private:
+    protected:
         /***********************************
          *** Private Method Declarations ***
          ***********************************/
@@ -788,11 +788,11 @@ class SPI {
             return SPI::NO_ERROR;
         }
 
-    private:
+    protected:
         /********************************
          *** Private Member Variables ***
          ********************************/
-        atomic_t m_mailbox;
+        volatile atomic_t m_mailbox;
         int8_t m_cog;
         char m_errorInMethod[16];
 };
