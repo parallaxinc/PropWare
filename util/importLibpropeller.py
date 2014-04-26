@@ -25,7 +25,7 @@ class ImportLibpropeller:
     SOURCE_DROPBOX = "source"
     DESTINATION_SOURCES = DESTINATION + SOURCE_DROPBOX + os.sep
     SOURCE_OBJECT_LIST = "libpropellerObjects.mk"
-    CLEAN_EXCLUDES = ["cmm", "lmm", "xmm", "xmmc", "Makefile", "libpropeller.mk"]
+    CLEAN_EXCLUDES = ["cmm", "lmm", "xmm-split-split-split-split", "xmm-split-split-split-single", "xmmc", "Makefile", "libpropeller.mk"]
     WHITELISTED_SOURCE_FILES = ["numbers.cpp"]
 
     def __init__(self):

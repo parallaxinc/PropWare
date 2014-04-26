@@ -51,6 +51,12 @@ LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 # Define a default memory model
 MODEL ?= lmm
 
+# XMM is deprecated and now means "xmm-split"; To ensure that the proper library
+# is linked, 'xmm' will be re-mapped to xmm-split
+ifeq ($(MODEL), xmm)
+	MODEL=xmm-split
+endif
+
 # Define a default board
 BOARD ?= $(PROPELLER_LOAD_BOARD)
 
