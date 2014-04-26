@@ -38,7 +38,8 @@ namespace PropWare {
 /**
  * @brief   Abstract base class for all UART devices
  *
- * TODO: Finish documenting this class
+ * No independent cog is needed for execution and therefore all communication methods are blocking (cog execution will
+ * not return from the method until the relevant data has been received/sent)
  */
 class UART {
     public:
@@ -77,7 +78,7 @@ class UART {
         static const uint8_t DEFAULT_STOP_BIT_WIDTH = 1;
         static const uint32_t DEFAULT_BAUD = 115200;
 
-        static const uint32_t MAX_BAUD = 122000;  // TODO: What is the maximum baud?
+        static const uint32_t MAX_BAUD = 122000;
 
     public:
         /**
@@ -92,7 +93,7 @@ class UART {
         }
 
         /**
-         * @brief   Retrieve the currently configured trasmit (TX) pin mask
+         * @brief   Retrieve the currently configured transmit (TX) pin mask
          *
          * @return  Pin mask of the transmit (TX) pin
          */
@@ -331,8 +332,6 @@ class UART {
 
 /**
  * @brief   An easy-to-use class for simplex (transmit only) UART communication
- *
- * TODO: Finish documenting this class
  */
 class SimplexUART: public PropWare::UART {
     public:
@@ -360,11 +359,13 @@ class SimplexUART: public PropWare::UART {
  * @brief   Full duplex UART communication module
  *
  * Because this class does not use an independent cog for receiving,
- * "Full duplex" may be an exaggeration. Though two pins separate pins can be
+ * "Full duplex" may be an exaggeration. Though two separate pins can be
  * used for communication, transmitting and receiving can not happen
- * simultaneously and all receiving calls are indefinitely blocking.
- * PropWare::FullDuplexUART::receive() will not return until after the RX pin is
- * low and all data, parity (if applicable) and stop bits have been read.
+ * simultaneously, all receiving calls are indefinitely blocking and there is no
+ * receive buffer (data sent to the Propeller will be ignored if execution is
+ * not in the receive() method) PropWare::FullDuplexUART::receive() will not
+ * return until after the RX pin is low and all data, parity (if applicable) and
+ * stop bits have been read.
  */
 class FullDuplexUART: public PropWare::SimplexUART {
     public:
@@ -376,6 +377,12 @@ class FullDuplexUART: public PropWare::SimplexUART {
             this->set_data_width(this->m_dataWidth);
         }
 
+        /**
+         * @brief       Initialize a UART module with both pin masks
+         *
+         * @param[in]   tx  Pin mask for TX (transmit) pin
+         * @param[in]   rx  Pin mask for RX (receive) pin
+         */
         FullDuplexUART (const PropWare::Port::Mask tx,
                 const PropWare::Port::Mask rx) :
                 PropWare::SimplexUART(tx) {
@@ -408,7 +415,7 @@ class FullDuplexUART: public PropWare::SimplexUART {
         /**
          * @see PropWare::UART::set_data_width()
          */
-        PropWare::ErrorCode set_data_width (const uint8_t dataWidth) {
+        virtual PropWare::ErrorCode set_data_width (const uint8_t dataWidth) {
             PropWare::ErrorCode err = this->UART::set_data_width(dataWidth);
             if (err)
                 return err;
@@ -422,12 +429,24 @@ class FullDuplexUART: public PropWare::SimplexUART {
         /**
          * @see PropWare::UART::set_parity()
          */
-        void set_parity (const PropWare::UART::Parity parity) {
+        virtual void set_parity (const PropWare::UART::Parity parity) {
             this->UART::set_parity(parity);
             this->set_msb_mask();
             this->set_receivable_bits();
         }
 
+        /**
+         * @brief   Receive one word of data; Will block until word is received
+         *
+         * Cog execution will be blocked by this call and there is no timeout;
+         * Execution will not resume until the RX pin is driven low
+         *
+         * @pre     RX pin mask must be set
+         *
+         * @return  Data word will be returned unless parity is value is
+         *          incorrect; An invalid parity bit will result in -1 being
+         *          returned
+         */
         HUBTEXT virtual uint32_t receive () const {
             uint32_t rxVal;
             uint32_t evenParityResult;
@@ -477,6 +496,10 @@ class FullDuplexUART: public PropWare::SimplexUART {
         }
 
     protected:
+        /**
+         * @brief   Set a bit-mask for the data word's MSB (assuming LSB is bit
+         *          0 - the start bit is not taken into account)
+         */
         void set_msb_mask () {
             if (this->m_parity)
                 this->m_msbMask =
@@ -485,6 +508,11 @@ class FullDuplexUART: public PropWare::SimplexUART {
                 this->m_msbMask = (PropWare::Port::Mask) (1
                         << (this->m_dataWidth - 1));
         }
+
+        /**
+         * @brief   Set the number of receivable bits - based on data width and
+         *          parity selection
+         */
         void set_receivable_bits () {
             if (this->m_parity)
                 this->m_receivableBits = this->m_dataWidth + 1;
@@ -513,6 +541,9 @@ class HalfDuplexUART: public PropWare::FullDuplexUART {
                 FullDuplexUART() {
         }
 
+        /**
+         * @see PropWare::FullDuplexUART::FullDuplexUART()
+         */
         HalfDuplexUART (const PropWare::Port::Mask pinMask) :
                 FullDuplexUART(pinMask, pinMask) {
         }
@@ -520,7 +551,7 @@ class HalfDuplexUART: public PropWare::FullDuplexUART {
         /**
          * @see PropWare::UART::send()
          */
-        HUBTEXT void send (uint16_t originalData) {
+        HUBTEXT virtual void send (uint16_t originalData) {
             this->m_tx.set_dir(PropWare::Port::OUT);
             this->FullDuplexUART::send(originalData);
             this->m_tx.set_dir(PropWare::Port::IN);
@@ -529,7 +560,7 @@ class HalfDuplexUART: public PropWare::FullDuplexUART {
         /**
          * @see PropWare::FullDuplexUART::receive()
          */
-        HUBTEXT uint32_t receive () {
+        HUBTEXT virtual uint32_t receive () {
             this->m_rx.set_dir(PropWare::Port::IN);
             return this->FullDuplexUART::receive();
         }
