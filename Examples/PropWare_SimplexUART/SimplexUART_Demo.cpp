@@ -31,9 +31,11 @@
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  */
 int main () {
+    PropWare::ErrorCode err;
+
     // Create an easy-to-test number pattern - useful when testing with a logic
     // analyzer
-    uint8_t numberPattern[] = {
+    char numberPattern[] = {
             0x01,
             0x02,
             0x03,
@@ -48,37 +50,33 @@ int main () {
     char string[] = "Hello world!\n\r";
 
     // Create pointer variables that can be incremented in a loop
-    uint8_t *s1;
-    char *s2;
+    char *s;
 
     PropWare::SimplexUART uart(PropWare::Port::P16);
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
-    uart.set_baud_rate(115200);
-    uart.set_data_width(8);
-    uart.set_stop_bit_width(1);
+    if ((err = uart.set_baud_rate(800000)))
+        error(err);
+    if ((err = uart.set_data_width(8)))
+        error(err);
+    if ((err = uart.set_stop_bit_width(1)))
+        error(err);
     uart.set_parity(PropWare::UART::NO_PARITY);
 
     while (1) {
-        s1 = numberPattern;         // Set the pointer to the beginning of the string
-        while (*s1) {        // Loop until we read the null-terminator
-            uart.send(*s1);  // Output the next character of the string
+        s = string;         // Set the pointer to the beginning of the string
+        while (*s) {        // Loop until we read the null-terminator
+            uart.send(*s);  // Output the next character of the string
 
             // Increment the character pointer
-            ++s1;
+            ++s;
         }
 
         waitcnt(MILLISECOND + CNT);
 
-        s2 = string;         // Set the pointer to the beginning of the string
-        while (*s2) {        // Loop until we read the null-terminator
-            uart.send(*s2);  // Output the next character of the string
+        uart.puts(string);
 
-            // Increment the character pointer
-            ++s2;
-        }
-
-        waitcnt(SECOND / 2 + CNT);
+        waitcnt(MILLISECOND + CNT);
     }
 
     return 0;

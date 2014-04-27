@@ -79,7 +79,7 @@ class UART {
             BAUD_TOO_HIGH = BEG_ERROR,
             /** The requested data width is not between 1 and 16 (inclusive) */
             INVALID_DATA_WIDTH,
-            /** Valid stop bit width can not be 0 */
+            /** The requested stop bit width is not between 1 and 14 (inclusive) */
             INVALID_STOP_BIT_WIDTH,
             /** Last error code used by PropWare::UART */
             END_ERROR = PropWare::UART::INVALID_STOP_BIT_WIDTH
@@ -91,7 +91,8 @@ class UART {
         static const uint8_t DEFAULT_STOP_BIT_WIDTH = 1;
         static const uint32_t DEFAULT_BAUD = 115200;
 
-        static const uint32_t MAX_BAUD = 122000;
+        // Sends have been verified as fast as 800,000 (haven't tested anything higher), receive has failed above 122,000
+        static const uint32_t MAX_BAUD = -1;
 
     public:
         /**
@@ -269,15 +270,83 @@ class UART {
             // Add start bit
             wideData <<= 1;
 
-            uint32_t waitCycles = CNT + this->m_bitCycles;
-            for (uint8_t i = 0; i < this->m_totalBits; i++) {
-                waitCycles = waitcnt2(waitCycles, this->m_bitCycles);
+            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles,
+                    this->m_tx.get_mask());
+        }
 
-                // if (value & 1) OUTA |= this->m_tx else OUTA &= ~this->m_tx; value = value >> 1;
-                __asm__ volatile("shr %[_data],#1 wc \n\t"
-                        "muxc outa, %[_mask]"
-                        : [_data] "+r" (wideData)
-                        : [_mask] "r" (this->m_tx.get_mask()));
+        virtual void puts (char *string) const {
+            register uint32_t wideData;
+            register uint32_t dataMask = this->m_dataMask;
+            register uint32_t parityMask = this->m_parityMask;
+            register uint32_t stopBitMask = this->m_stopBitMask;
+            register uint32_t totalBits = this->m_totalBits;
+            register uint32_t bitCycles = this->m_bitCycles;
+            register uint32_t txMask = this->m_tx.get_mask();
+
+            switch (this->m_parity) {
+                case PropWare::UART::NO_PARITY:
+                    while (*string) {
+                        // Add stop bits
+                        wideData = this->m_stopBitMask | *string;
+
+                        // Add start bit
+                        wideData <<= 1;
+
+                        this->shift_out_data(wideData, totalBits, bitCycles,
+                                txMask);
+
+                        // Increment the character pointer
+                        ++string;
+                    }
+                    break;
+                case PropWare::UART::EVEN_PARITY:
+                    while (*string) {
+                        wideData = *string;
+
+                        // Add parity
+                        __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
+                                "muxnc %[_data], %[_parityMask]"
+                                : [_data] "+r" (wideData)
+                                : [_dataMask] "r" (dataMask),
+                                [_parityMask] "r" (parityMask));
+
+                        // Add stop bits
+                        wideData |= stopBitMask;
+
+                        // Add start bit
+                        wideData <<= 1;
+
+                        this->shift_out_data(wideData, totalBits, bitCycles,
+                                txMask);
+
+                        // Increment the character pointer
+                        ++string;
+                    }
+                    break;
+                case PropWare::UART::ODD_PARITY:
+                    while (*string) {
+                        wideData = *string;
+
+                        // Add parity
+                        __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
+                                "muxc %[_data], %[_parityMask]"
+                                : [_data] "+r" (wideData)
+                                : [_dataMask] "r" (this->m_dataMask),
+                                [_parityMask] "r" (this->m_parityMask));
+
+                        // Add stop bits
+                        wideData |= this->m_stopBitMask;
+
+                        // Add start bit
+                        wideData <<= 1;
+
+                        this->shift_out_data(wideData, totalBits, bitCycles,
+                                txMask);
+
+                        // Increment the character pointer
+                        ++string;
+                    }
+                    break;
             }
         }
 
@@ -331,6 +400,38 @@ class UART {
                 ++this->m_totalBits;
         }
 
+        /**
+         * @brief       Shift out one word of data
+         *
+         * @pre         Start, stop, and parity bits must already be set in the
+         *              data word
+         *
+         * @param[in]   data    A full configured, ready-to-go, data word
+         */
+        __attribute__ ((fcache)) void shift_out_data (register uint32_t data,
+                register uint32_t bits, const register uint32_t bitCycles,
+                const register uint32_t txMask) const {
+            uint32_t waitCycles;
+
+            __asm__ volatile (
+                    "       mov %[_waitCycles], %[_bitCycles]\n\t"
+                    "       add %[_waitCycles], CNT \n\t"
+                    :  // Outputs
+                    [_waitCycles] "+r" (waitCycles)
+                    :// Inputs
+                    [_bitCycles] "r" (bitCycles));
+
+            do {
+                __asm__ volatile("waitcnt %[_waitCycles], %[_bitCycles]\n\t"
+                        "shr %[_data],#1 wc \n\t"
+                        "muxc outa, %[_mask]"
+                        : [_data] "+r" (data),
+                        [_waitCycles] "+r" (waitCycles)
+                        : [_mask] "r" (txMask),
+                        [_bitCycles] "r" (bitCycles));
+            } while (--bits);
+        }
+
     protected:
         PropWare::Pin m_tx;
         uint8_t m_dataWidth;
@@ -338,7 +439,7 @@ class UART {
         PropWare::UART::Parity m_parity;
         uint16_t m_parityMask;
         uint8_t m_stopBitWidth;
-        uint32_t m_stopBitMask;  // Does not take into account parity bit!
+        uint32_t m_stopBitMask;
         uint32_t m_bitCycles;
         uint8_t m_totalBits;
 };

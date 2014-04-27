@@ -34,7 +34,7 @@
 
 #include <propeller.h>
 #include <sys/null.h>
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller

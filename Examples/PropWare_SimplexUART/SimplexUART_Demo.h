@@ -44,7 +44,7 @@
 #include <PropWare/uart.h>
 #include <PropWare/port.h>
 
-void error (const PropWare::ErrorCode err, const PropWare::UART *uart);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 
