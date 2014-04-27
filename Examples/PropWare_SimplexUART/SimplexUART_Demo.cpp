@@ -64,7 +64,7 @@ int main () {
     uart.set_parity(PropWare::UART::NO_PARITY);
 
     while (1) {
-        s = string;         // Set the pointer to the beginning of the string
+        s = numberPattern;         // Set the pointer to the beginning of the string
         while (*s) {        // Loop until we read the null-terminator
             uart.send(*s);  // Output the next character of the string
 

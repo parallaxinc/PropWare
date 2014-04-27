@@ -53,6 +53,28 @@ namespace PropWare {
  * @note    No independent cog is needed for execution and therefore all
  *          communication methods are blocking (cog execution will not return
  *          from the method until the relevant data has been received/sent)
+ *
+ * Speed tests:
+<ul>
+    <li>All tests performed with PropWare::SimplexUART running at 80 MHz</li>
+        <li>PropWare::UART::send() vs PropWare::UART::puts() delay between each character
+            <ul>
+                <li>CMM:
+                    <ul>
+                        <li>send: 40.6 us</li>
+                        <li>puts: 17.3 us</li>
+                    </ul>
+                </li>
+                <li>LMM:
+                    <ul>
+                        <li>send: 11.3 us</li>
+                        <li>puts: 5.75 us</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </li>
+</ul>
  */
 class UART {
     public:
@@ -274,7 +296,29 @@ class UART {
                     this->m_tx.get_mask());
         }
 
-        virtual void puts (char *string) const {
+        /**
+         * @brief       Send a null-terminated character array
+         *
+         * @pre         *string must be terminated with a null terminator, just
+         *              like printf or any other string function
+         *
+         * @param[in]   *string     Array of data words with the final word
+         *                          being 0 - the null terminator
+         */
+        void puts (char *string) const {
+            const uint32_t length = strlen(string);
+            this->send_array(string, length);
+        }
+
+        /**
+         * @brief       Send a null-terminated character array
+         *
+         * @pre         words must be greater than 0
+         *
+         * @param[in]   *array  Array of data words
+         * @param[in]   words   Number of words to be sent
+         */
+        HUBTEXT virtual void send_array (char *array, uint32_t words) const {
             register uint32_t wideData;
             register uint32_t dataMask = this->m_dataMask;
             register uint32_t parityMask = this->m_parityMask;
@@ -285,9 +329,9 @@ class UART {
 
             switch (this->m_parity) {
                 case PropWare::UART::NO_PARITY:
-                    while (*string) {
+                    do {
                         // Add stop bits
-                        wideData = this->m_stopBitMask | *string;
+                        wideData = this->m_stopBitMask | *array;
 
                         // Add start bit
                         wideData <<= 1;
@@ -296,12 +340,12 @@ class UART {
                                 txMask);
 
                         // Increment the character pointer
-                        ++string;
-                    }
+                        ++array;
+                    } while (--words);
                     break;
                 case PropWare::UART::EVEN_PARITY:
-                    while (*string) {
-                        wideData = *string;
+                    do {
+                        wideData = *array;
 
                         // Add parity
                         __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
@@ -320,12 +364,12 @@ class UART {
                                 txMask);
 
                         // Increment the character pointer
-                        ++string;
-                    }
+                        ++array;
+                    } while (--words);
                     break;
                 case PropWare::UART::ODD_PARITY:
-                    while (*string) {
-                        wideData = *string;
+                    do {
+                        wideData = *array;
 
                         // Add parity
                         __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
@@ -344,8 +388,8 @@ class UART {
                                 txMask);
 
                         // Increment the character pointer
-                        ++string;
-                    }
+                        ++array;
+                    } while (--words);
                     break;
             }
         }
@@ -403,10 +447,10 @@ class UART {
         /**
          * @brief       Shift out one word of data
          *
-         * @pre         Start, stop, and parity bits must already be set in the
-         *              data word
-         *
-         * @param[in]   data    A full configured, ready-to-go, data word
+         * @param[in]   data        A fully configured, ready-to-go, data word
+         * @param[in]   bits        Number of shiftable bits in the data word
+         * @param[in]   bitCycles   Delay between each bit; Unit is clock cycles
+         * @param[in]   txMask      Pin mask of the TX pin
          */
         __attribute__ ((fcache)) void shift_out_data (register uint32_t data,
                 register uint32_t bits, const register uint32_t bitCycles,
@@ -414,15 +458,16 @@ class UART {
             uint32_t waitCycles;
 
             __asm__ volatile (
-                    "       mov %[_waitCycles], %[_bitCycles]\n\t"
-                    "       add %[_waitCycles], CNT \n\t"
+                    "mov %[_waitCycles], %[_bitCycles]\n\t"
+                    "add %[_waitCycles], CNT \n\t"
                     :  // Outputs
                     [_waitCycles] "+r" (waitCycles)
                     :// Inputs
                     [_bitCycles] "r" (bitCycles));
 
             do {
-                __asm__ volatile("waitcnt %[_waitCycles], %[_bitCycles]\n\t"
+                __asm__ volatile(
+                        "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
                         "shr %[_data],#1 wc \n\t"
                         "muxc outa, %[_mask]"
                         : [_data] "+r" (data),
