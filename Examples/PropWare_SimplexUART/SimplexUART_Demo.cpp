@@ -55,7 +55,7 @@ int main () {
     PropWare::SimplexUART uart(PropWare::Port::P16);
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
-    if ((err = uart.set_baud_rate(800000)))
+    if ((err = uart.set_baud_rate(115200)))
         error(err);
     if ((err = uart.set_data_width(8)))
         error(err);

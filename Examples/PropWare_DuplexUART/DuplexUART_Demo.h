@@ -45,7 +45,7 @@
 #include <PropWare/uart.h>
 #include <PropWare/port.h>
 
-#define STACK_SIZE      96
+#define STACK_SIZE      256
 
 void sendBytes (const PropWare::UART &uart, const char *buffer);
 

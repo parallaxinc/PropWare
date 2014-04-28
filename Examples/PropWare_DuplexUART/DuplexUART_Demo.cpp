@@ -41,7 +41,9 @@ char g_numberPattern[] = {
         0x00 };
 
 // Create the test string - useful when testing with a terminal
-char g_string[] = "Hello world!\n\r";
+char g_string[] = "Hello world! This is a really freaking long sentence!!!\n\r";
+const uint32_t BAUD_RATE = 150000;
+uint8_t g_stringLength;
 
 /**
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
@@ -50,12 +52,18 @@ int main () {
     static uint32_t threadStack[STACK_SIZE];
     static _thread_state_t threadData;
     PropWare::SimplexUART uart(PropWare::Port::P16);
+    uart.set_baud_rate(BAUD_RATE);
+
+    g_stringLength = strlen(g_string);
 
     uint8_t cog = _start_cog_thread(threadStack + STACK_SIZE, receiveSilently,
             (void *) NULL, &threadData);
 
     while (1) {
-        waitcnt(100*MILLISECOND + CNT);
+        waitcnt(200*MILLISECOND + CNT);
+        sendBytes(uart, g_string);
+        sendBytes(uart, g_string);
+        sendBytes(uart, g_string);
         sendBytes(uart, g_string);
     }
 
@@ -72,18 +80,20 @@ void sendBytes (const PropWare::UART &uart, const char buffer[]) {
 }
 
 void receiveSilently (void *arg) {
-    char buffer[32];
+    char buffer[256];
     char *s;
 
     PropWare::HalfDuplexUART uart(PropWare::Port::P17);
+    uart.set_baud_rate(BAUD_RATE);
 
     printf("Ready to receive!!!\n");
 
     while (1) {
-        for (uint8_t i = 0; i < 14; ++i)
+        uint8_t words = g_stringLength << 2;
+        for (uint8_t i = 0; i < words; ++i)
             buffer[i] = uart.receive();
 
-        buffer[14] = 0;
+        buffer[g_stringLength << 2] = 0;
 
         printf(buffer);
     }
