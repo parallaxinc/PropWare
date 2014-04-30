@@ -7,6 +7,9 @@
 /libpropeller
 /Examples/TestApp
 /.external_downloads
+/CMakeFiles
+/Makefile
+CMakeCache.txt
 __pycache__
 .cproject
 .**project

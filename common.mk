@@ -45,9 +45,6 @@ endif
 # where we installed the propeller binaries and libraries
 PROPGCC_PREFIX ?= /opt/parallax
 
-# libgcc directory
-LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
-
 # Define a default memory model
 MODEL ?= lmm
 
