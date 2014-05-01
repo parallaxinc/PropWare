@@ -1,9 +1,9 @@
 set(can_use_assembler TRUE)
 
 SET(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_BUILD_TYPE None)
 
 # specify the cross compiler
-set(PROPGCC_PREFIX /opt/parallax)
 set(GCC_PATH ${PROPGCC_PREFIX}/bin)
 set(CMAKE_ASM_COMPILER   ${GCC_PATH}/propeller-elf-as)
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)

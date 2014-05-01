@@ -92,11 +92,7 @@ extern uint32_t _SPIStartCog (void *arg);
  *              PROPWARE_NO_SAFE_SPI defined
  */
 class SPI {
-#define check_errors_w_str(x, y) \
-    if ((err = x)) { \
-         \
-        strcpy(this->m_errorInMethod, y);  \
-        return err;}
+#define check_errors_w_str(x, y) if ((err = x)) {strcpy(this->m_errorInMethod, y);return err;}
 
     public:
         /**
@@ -123,7 +119,6 @@ class SPI {
             /** Mode 1 */MODE_1,
             /** Mode 2 */MODE_2,
             /** Mode 3 */MODE_3,
-            /** Number of SPI modes */MODES
         } Mode;
 
         /**
@@ -138,9 +133,8 @@ class SPI {
              * Start the enumeration where SPI::Mode left off; this ensures no
              * overlap
              */
-            LSB_FIRST = SPI::MODES,
-            MSB_FIRST,
-            BIT_MODES
+            LSB_FIRST = SPI::MODE_3 + 1,
+            MSB_FIRST
         } BitMode;
 
         /**
@@ -170,7 +164,6 @@ class SPI {
         // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout
         // error
         static const uint32_t WR_TIMEOUT_VAL;
-        static const uint32_t RD_TIMEOUT_VAL;
         static const uint8_t MAX_PAR_BITS = 31;
         static const int32_t MAX_CLOCK;
 
@@ -228,11 +221,6 @@ class SPI {
             // Check clock frequency
             if (SPI::MAX_CLOCK <= frequency)
                 return SPI::INVALID_FREQ;
-
-            if (SPI::MODES <= mode)
-                return SPI::INVALID_MODE;
-            if (SPI::LSB_FIRST != bitmode && SPI::MSB_FIRST != bitmode)
-                return SPI::INVALID_BITMODE;
 #endif
 
             // If cog already started, do not start another
@@ -242,7 +230,7 @@ class SPI {
                 // Set the mailbox to 0 (anything other than -1) so that we know
                 // when the SPI cog has started
                 this->m_mailbox = 0;
-                this->m_cog = PropWare::_SPIStartCog((void *) &this->m_mailbox);
+                this->m_cog = (int8_t) PropWare::_SPIStartCog((void *) &this->m_mailbox);
                 if (!this->is_running())
                     return SPI::COG_NOT_STARTED;
 
@@ -301,7 +289,7 @@ class SPI {
             const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
-            while ((uint32_t) -1 != this->m_mailbox)
+            while (-1 != this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < SPI::TIMEOUT_WIGGLE_ROOM)
                     return SPI::TIMEOUT;
 
@@ -319,7 +307,7 @@ class SPI {
             const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
-            while (value == this->m_mailbox)
+            while (value == (uint32_t) this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < SPI::TIMEOUT_WIGGLE_ROOM)
                     // Always use return instead of spi_error() for private
                     // f0unctions
@@ -342,10 +330,6 @@ class SPI {
 
             if (!this->is_running())
                 return SPI::MODULE_NOT_RUNNING;
-#ifdef SPI_OPTION_DEBUG_PARAMS
-            if (SPI::MODES <= mode)
-                return SPI::INVALID_MODE;
-#endif
 
             // Wait for SPI cog to go idle
             check_errors_w_str(this->wait(), str);
@@ -596,7 +580,7 @@ class SPI {
                     | (bits << PropWare::SPI::BITS_OFFSET);
 
             // Wait for a value to be written
-            while ((uint32_t) -1 == this->m_mailbox)
+            while (-1 == this->m_mailbox)
                 waitcnt(PropWare::SPI::TIMEOUT_WIGGLE_ROOM + CNT);
 
             // Determine if output variable is char, short or long and write
@@ -604,15 +588,15 @@ class SPI {
             switch (bytes) {
                 case sizeof(uint8_t):
                     par8 = (uint8_t *) data;
-                    *par8 = this->m_mailbox;
+                    *par8 = (uint8_t) this->m_mailbox;
                     break;
                 case sizeof(uint16_t):
                     par16 = (uint16_t *) data;
-                    *par16 = this->m_mailbox;
+                    *par16 = (uint16_t) this->m_mailbox;
                     break;
                 case sizeof(uint32_t):
                     par32 = (uint32_t *) data;
-                    *par32 = this->m_mailbox;
+                    *par32 = (uint32_t) this->m_mailbox;
                     break;
                 default:
                     return PropWare::SPI::INVALID_BYTE_SIZE;
@@ -758,7 +742,7 @@ class SPI {
             const uint32_t timeoutCnt = PropWare::SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for a value to be written
-            while ((uint32_t) -1 == this->m_mailbox)
+            while (-1 == this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < PropWare::SPI::TIMEOUT_WIGGLE_ROOM)
                     return PropWare::SPI::TIMEOUT_RD;
 
@@ -767,15 +751,15 @@ class SPI {
             switch (size) {
                 case sizeof(uint8_t):
                     par8 = (uint8_t *) par;
-                    *par8 = this->m_mailbox;
+                    *par8 = (uint8_t) this->m_mailbox;
                     break;
                 case sizeof(uint16_t):
                     par16 = (uint16_t *) par;
-                    *par16 = this->m_mailbox;
+                    *par16 = (uint16_t) this->m_mailbox;
                     break;
                 case sizeof(uint32_t):
                     par32 = (uint32_t *) par;
-                    *par32 = this->m_mailbox;
+                    *par32 = (uint32_t) this->m_mailbox;
                     break;
                 default:
                     return PropWare::SPI::INVALID_BYTE_SIZE;

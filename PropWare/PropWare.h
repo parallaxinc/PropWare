@@ -47,9 +47,9 @@ namespace PropWare {
 #define check_errors(x)      if ((err = x)) return err
 #endif
 
-#define SECOND              ((unsigned long long) CLKFREQ)
-#define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
-#define MICROSECOND         ((unsigned long long) (MILLISECOND / 1000))
+#define SECOND              ((uint64_t) CLKFREQ)
+#define MILLISECOND         ((uint64_t) (CLKFREQ / 1000))
+#define MICROSECOND         ((uint64_t) (MILLISECOND / 1000))
 
 typedef int8_t ErrorCode;
 

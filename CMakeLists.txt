@@ -1,8 +1,4 @@
-cmake_minimum_required (VERSION 2.8.4)
-project (PropWare)
+cmake_minimum_required (VERSION 2.6.4)
 
-set(CFLAGS "-Os")
-
-add_executable(${CMAKE_PROJECT_NAME} myFile.cpp)
-
-include(CMake_header.cmake)
+add_subdirectory(PropWare)
+add_subdirectory(Examples)

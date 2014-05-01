@@ -7,9 +7,10 @@
 /libpropeller
 /Examples/TestApp
 /.external_downloads
-/CMakeFiles
 /Makefile
+CMakeFiles/
 CMakeCache.txt
+cmake_install.cmake
 __pycache__
 .cproject
 .**project
@@ -27,6 +28,7 @@ makefile
 **.swp
 **.zip
 **.iml
+**_Demo
 
 # Ignore the Simple header files in the root directory
 /*.h
