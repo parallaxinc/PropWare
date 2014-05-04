@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.6.4)
 project(MCP3000_Demo)
 set(CMAKE_PROJECT_NAME MCP3000_Demo)
 
-add_executable(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}.cpp)
+add_executable(${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.cpp)
 
 set(BOARD QUICKSTART)
 set(MODEL lmm)

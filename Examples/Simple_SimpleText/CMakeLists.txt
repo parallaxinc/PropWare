@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.6.4)
 project(SimpleText_Demo)
 set(CMAKE_PROJECT_NAME SimpleText_Demo)
 
-add_executable(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}.c)
+add_executable(${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.c)
 
 set(BOARD QUICKSTART)
 set(MODEL lmm)

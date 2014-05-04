@@ -332,6 +332,7 @@ class L3G {
                 case PropWare::L3G::DPS_2000:
                     return rawValue * 0.07000;
             }
+            return 0;
         }
 
         /**

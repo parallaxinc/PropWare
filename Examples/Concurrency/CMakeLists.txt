@@ -14,8 +14,3 @@ if (NOT DEFINED PROPWARE_PATH)
 endif (NOT DEFINED PROPWARE_PATH)
 
 include(${PROPWARE_PATH}/CMake_header.cmake)
-
-target_link_libraries(${CMAKE_PROJECT_NAME}.elf ${PROPWARE_LIB})
-target_link_libraries(${CMAKE_PROJECT_NAME}.elf ${SIMPLE_LIB})
-target_link_libraries(${CMAKE_PROJECT_NAME}.elf ${LIBPROPELLER_LIB})
-target_link_libraries(${CMAKE_PROJECT_NAME}.elf tiny)

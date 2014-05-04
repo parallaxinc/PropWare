@@ -1,10 +1,12 @@
 cmake_minimum_required (VERSION 2.6.4)
 
-set(MODEL xmm-split)
-project(PropWare_${MODEL})
-set(CMAKE_PROJECT_NAME PropWare_${MODEL})
+set(MODEL cmm)
+project(Libpropeller_${MODEL})
+set(CMAKE_PROJECT_NAME Libpropeller_${MODEL})
 
-add_library(${CMAKE_PROJECT_NAME} STATIC ../PropWare ../spi ../spi_as.S ../sd)
+include(../libpropellerObjects.cmake)
+
+add_library(${CMAKE_PROJECT_NAME} STATIC ${LIBPROPELLER_OBJECTS})
 
 set(BOARD QUICKSTART)
 set(CFLAGS "-Os")

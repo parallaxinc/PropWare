@@ -256,7 +256,7 @@ class SD {
                  * When set, the currently loaded sector has been modified since
                  * it was read from the SD card
                  */
-                uint8_t mod;
+                bool mod;
 #endif
         };
 
@@ -3003,21 +3003,23 @@ class SD {
 
             /* 1) Short file name */
             // Write first section
-            for (i = 0; '.' != name[i] && 0 != name[i]; ++i)
-                this->m_buf.buf[*fileEntryOffset + i] = name[i];
+            for (i = 0; '.' != uppercaseName[i] && 0 != uppercaseName[i]; ++i)
+                this->m_buf.buf[*fileEntryOffset + i] =
+                        (uint8_t) uppercaseName[i];
             // Check if there is an extension
-            if (name[i]) {
+            if (uppercaseName[i]) {
                 // There might be an extension - pad first name with spaces
                 for (j = i; j < SD::FILE_NAME_LEN; ++j)
                     this->m_buf.buf[*fileEntryOffset + j] = ' ';
                 // Check if there is a period, as one would expect for a file
                 // name with an extension
-                if ('.' == name[i]) {
+                if ('.' == uppercaseName[i]) {
                     // Extension exists, write it
                     ++i;        // Skip the period
                     // Insert extension, character-by-character
-                    for (j = SD::FILE_NAME_LEN; name[i]; ++j)
-                        this->m_buf.buf[*fileEntryOffset + j] = name[i++];
+                    for (j = SD::FILE_NAME_LEN; uppercaseName[i]; ++j)
+                        this->m_buf.buf[*fileEntryOffset + j] =
+                                (uint8_t) uppercaseName[i++];
                     // Pad extension with spaces
                     for (; j < SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN; ++j)
                         this->m_buf.buf[*fileEntryOffset + j] = ' ';
@@ -3073,7 +3075,7 @@ class SD {
             SD::print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
 #endif
 
-            this->m_buf.mod = 1;
+            this->m_buf.mod = true;
 
             return 0;
         }
