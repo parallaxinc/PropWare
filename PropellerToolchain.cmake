@@ -33,6 +33,7 @@ set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_AR ${GCC_PATH}/propeller-elf-ar)
 set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib)
+set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load)
 
 set(CMAKE_FIND_ROOT_PATH ${PROPGCC_PREFIX} ${PROPWARE_PATH})
 

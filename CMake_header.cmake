@@ -10,6 +10,16 @@ endif(DEFINED BOARD)
 
 include(${PROPWARE_PATH}/PropellerToolchain.cmake)
 
+# Add target for run (load to RAM and start terminal)
+add_custom_target(run
+        ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${CMAKE_PROJECT_NAME}.elf -r -t
+        DEPENDS ${CMAKE_PROJECT_NAME}.elf)
+
+# Add target for install (load to EEPROM and start terminal)
+add_custom_target(install
+        ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${CMAKE_PROJECT_NAME}.elf -r -t -e
+        DEPENDS ${CMAKE_PROJECT_NAME}.elf)
+
 # Check for a linker script
 if (DEFINED LDSCRIPT)
     set(LDFLAGS "${LDFLAGS} -T '${LDSCRIPT}'")
