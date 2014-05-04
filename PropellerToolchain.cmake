@@ -18,9 +18,9 @@ if (NOT DEFINED MODEL)
     set(MODEL lmm)
 endif (NOT DEFINED MODEL)
 
-if (${MODEL} MATCHES xmm)
+if (${MODEL} STREQUAL xmm)
     set(MODEL xmm-split)
-endif (${MODEL} MATCHES xmm)
+endif (${MODEL} STREQUAL xmm)
 
 enable_language(ASM)
 
