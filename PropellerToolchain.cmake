@@ -27,7 +27,7 @@ SET(CMAKE_SYSTEM_NAME Propeller)
 
 # specify the cross compiler
 set(GCC_PATH ${PROPGCC_PREFIX}/bin)
-set(CMAKE_ASM_COMPILER   ${GCC_PATH}/propeller-elf-gcccd )
+set(CMAKE_ASM_COMPILER   ${GCC_PATH}/propeller-elf-gcc )
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_AR ${GCC_PATH}/propeller-elf-ar)
