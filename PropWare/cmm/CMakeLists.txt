@@ -4,7 +4,7 @@ set(MODEL cmm)
 project(PropWare_${MODEL})
 set(CMAKE_PROJECT_NAME PropWare_${MODEL})
 
-add_library(${CMAKE_PROJECT_NAME} STATIC ../PropWare ../spi ../spi_as.S ../sd)
+add_library(${CMAKE_PROJECT_NAME} STATIC ../PropWare ../sd ../spi ../spi_as.S)
 
 set(BOARD QUICKSTART)
 set(CFLAGS "-Os")

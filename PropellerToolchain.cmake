@@ -21,12 +21,13 @@ if (${MODEL} MATCHES xmm)
 endif (${MODEL} MATCHES xmm)
 
 set(CAN_USE_ASSEMBLER TRUE)
+enable_language(ASM)
 
 SET(CMAKE_SYSTEM_NAME Propeller)
 
 # specify the cross compiler
 set(GCC_PATH ${PROPGCC_PREFIX}/bin)
-set(CMAKE_ASM_COMPILER   ${GCC_PATH}/propeller-elf-as)
+set(CMAKE_ASM_COMPILER   ${GCC_PATH}/propeller-elf-gcccd )
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_AR ${GCC_PATH}/propeller-elf-ar)
@@ -49,7 +50,7 @@ set(CXXFLAGS "${CXXFLAGS} ${CFLAGS} -fno-threadsafe-statics -fno-rtti")
 set(CXXSTANDARD "-std=gnu++0x")
 
 # Set flags
-set(CMAKE_AS_FLAGS ${ASFLAGS})
+set(CMAKE_ASM_FLAGS ${ASFLAGS})
 set(CMAKE_C_FLAGS "${CFLAGS} ${CSTANDARD}")
 set(CMAKE_CXX_FLAGS "${CXXFLAGS} ${CXXSTANDARD}")
 set(LDFLAGS "-Xlinker -Map=main.rawmap")
