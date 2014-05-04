@@ -5,6 +5,8 @@ if (NOT DEFINED PROPGCC_PREFIX)
     endif (NOT PROPGCC_PREFIX)
 endif (NOT DEFINED PROPGCC_PREFIX)
 
+# PROPWARE_PATH must be defined here so that the header files are included in
+# the search path
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
     if (NOT PROPWARE_PATH)
@@ -20,7 +22,6 @@ if (${MODEL} MATCHES xmm)
     set(MODEL xmm-split)
 endif (${MODEL} MATCHES xmm)
 
-set(CAN_USE_ASSEMBLER TRUE)
 enable_language(ASM)
 
 SET(CMAKE_SYSTEM_NAME Propeller)
