@@ -2,7 +2,7 @@
 /docs/html
 /docs/latex
 /Debug
-/.idea
+.idea/
 /simple
 /libpropeller
 /Examples/TestApp

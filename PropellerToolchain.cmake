@@ -58,3 +58,14 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS} ${CXXSTANDARD}")
 set(LDFLAGS "-Xlinker -Map=main.rawmap")
 
 include_directories(${PROPWARE_PATH})
+
+################################################################################
+# Custom commands for non-standard files
+################################################################################
+#ADD_CUSTOM_COMMAND(
+#    OUTPUT ${temp}.cog
+#    COMMAND ${CMAKE_C_COMPILER}
+#    ARGS -r -mcog ${COGC_SOURCE_FLAGS} -o ${CMAKE_CURRENT_BINARY_DIR}/${temp}
+#    .cog ${CMAKE_CURRENT_SOURCE_DIR}/${file}
+#    COMMAND ${CMAKE_OBJECT_COPIER}
+#    ARGS --localize-text --rename-section .text=${temp}.cogc ${temp}.cog)
