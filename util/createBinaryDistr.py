@@ -29,7 +29,7 @@ class CreateBinaryDistr:
     WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "mk", "dox", "md", "py", "pl", "elf", "txt", "rb",
                             "jpg", "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
-    BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
+    BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly", "cmake"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2"]
     CURRENT_SUGGESTION = "release-2.0"
 
