@@ -92,7 +92,8 @@ extern uint32_t _SPIStartCog (void *arg);
  *              PROPWARE_NO_SAFE_SPI defined
  */
 class SPI {
-#define check_errors_w_str(x, y) if ((err = x)) {strcpy(this->m_errorInMethod, y);return err;}
+#define check_errors_w_str(x, y) \
+        if ((err = x)) {strcpy(this->m_errorInMethod, y);return err;}
 
     public:
         /**

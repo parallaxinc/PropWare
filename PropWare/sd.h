@@ -239,7 +239,7 @@ class SD {
                 /**  Buffer for SD card contents */
                 uint8_t buf[SD_SECTOR_SIZE];
                 /** Buffer ID - determine who owns the current information */
-                uint8_t id;
+                int8_t id;
                 /** Store the current cluster's starting sector number */
                 uint32_t curClusterStartAddr;
                 /**
@@ -282,7 +282,7 @@ class SD {
                  * When the length of a file is changed, this variable will be
                  * set, otherwise cleared
                  */
-                uint8_t mod;
+                bool mod;
                 /** File's starting allocation unit */
                 uint32_t firstAllocUnit;
                 /**
@@ -504,7 +504,7 @@ class SD {
             this->get_fat_value(this->m_buf.curAllocUnit,
                     &(this->m_buf.nextAllocUnit));
             if (0 == this->m_buf.curAllocUnit) {
-                this->m_buf.curAllocUnit = -1;
+                this->m_buf.curAllocUnit = (uint32_t) -1;
                 this->m_dir_firstAllocUnit = this->m_rootAllocUnit;
             } else
                 this->m_dir_firstAllocUnit = this->m_buf.curAllocUnit;
@@ -607,7 +607,7 @@ class SD {
                     check_errors(this->create_file(name, &fileEntryOffset));
                 } else
 #endif
-                    // SDFind returned unknown error - throw it
+                    // SD::find returned unknown error - throw it
                     return err;
             }
 
@@ -655,7 +655,7 @@ class SD {
             // useful in the case that the file needs to be extended
             f->maxSectors = f->length >> SD::SECTOR_SIZE_SHIFT;
             if (!(f->maxSectors))
-                f->maxSectors = 1 << this->m_sectorsPerCluster_shift;
+                f->maxSectors = (uint32_t) (1 << this->m_sectorsPerCluster_shift);
             while (f->maxSectors % (1 << this->m_sectorsPerCluster_shift))
                 ++(f->maxSectors);
             f->buf->mod = false;
@@ -768,7 +768,7 @@ class SD {
         PropWare::ErrorCode fputc (const char c, SD::File *f) {
             PropWare::ErrorCode err;
             // Determines byte-offset within a sector
-            uint16_t sectorPtr = f->wPtr % SD::SECTOR_SIZE;
+            uint16_t sectorPtr = (uint16_t) (f->wPtr % SD::SECTOR_SIZE);
             // Determine the needed file sector
             uint32_t sectorOffset = (f->wPtr >> SD::SECTOR_SIZE_SHIFT);
 
@@ -809,7 +809,7 @@ class SD {
                 ++(f->length);
                 f->mod = true;
             }
-            f->buf->buf[sectorPtr] = c;
+            f->buf->buf[sectorPtr] = (uint8_t) c;
             f->buf->mod = true;
 
             return 0;
@@ -854,7 +854,7 @@ class SD {
          */
         char fgetc (SD::File *f) {
             char c;
-            uint16_t ptr = f->rPtr % SD::SECTOR_SIZE;
+            uint16_t ptr = (uint16_t) (f->rPtr % SD::SECTOR_SIZE);
 
             // Determine if the currently loaded sector is what we need
             uint32_t sectorOffset = (f->rPtr >> SD::SECTOR_SIZE_SHIFT);
@@ -900,10 +900,10 @@ class SD {
 
             --size;
             while (count < size) {
-                c = this->fgetc(f);
+                c = (uint32_t) this->fgetc(f);
                 if ((uint32_t) EOF == c)
                     break;
-                s[count++] = c;
+                s[count++] = (char) c;
                 if ('\n' == c)
                     break;
             }
@@ -943,7 +943,7 @@ class SD {
                 const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
-                    f->rPtr = offset;
+                    f->rPtr = (uint32_t) offset;
                     break;
                 case SEEK_CUR:
                     f->rPtr = f->rPtr + offset;
@@ -976,7 +976,7 @@ class SD {
                 const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
-                    f->wPtr = offset;
+                    f->wPtr = (uint32_t) offset;
                     break;
                 case SEEK_CUR:
                     f->wPtr += offset;
@@ -1037,7 +1037,7 @@ class SD {
             char arg[SD_SHELL_ARG_LEN] = "";
             char uppercaseName[SD_SHELL_ARG_LEN] = "";
             uint8_t i, j;
-            PropWare::ErrorCode err;
+            PropWare::ErrorCode err = 0;
 
             printf("Welcome to David's quick shell! "
                     "There is no help, nor much to do.\n");
@@ -1212,10 +1212,7 @@ class SD {
 
             // Attempt to find the file
             if ((err = this->fopen(name, f, SD::FILE_MODE_R))) {
-                if ((uint8_t) SD::EOC_END == err)
-                    return err;
-                else
-                    return err;
+                return err;
             } else {
                 // Loop over each character and print them to the screen
                 // one-by-one
@@ -1490,7 +1487,7 @@ class SD {
             // Send at least 72 clock cycles to enable the SD card
             this->m_cs.set();
             for (i = 0; i < 128; ++i)
-                check_errors(this->m_spi->shift_out(16, -1));
+                check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
 
             // Be very super 100% sure that all clocks have finished ticking
             // before setting chip select low
@@ -1552,7 +1549,7 @@ class SD {
         inline PropWare::ErrorCode send_active (uint8_t response[]) {
             PropWare::ErrorCode err;
             uint32_t timeout;
-            uint32_t longWiggleRoom = 3 * MILLISECOND;
+            uint32_t longWiggleRoom = (uint32_t) (3 * MILLISECOND);
             bool stageCleared = false;
 
             // Attempt to send active
@@ -1788,8 +1785,8 @@ class SD {
                     this->read_data_block(this->m_rootAddr, this->m_buf.buf));
             this->m_buf.curClusterStartAddr = this->m_rootAddr;
             if (SD::FAT_16 == this->m_filesystem) {
-                this->m_dir_firstAllocUnit = -1;
-                this->m_buf.curAllocUnit = -1;
+                this->m_dir_firstAllocUnit = (uint32_t) -1;
+                this->m_buf.curAllocUnit = (uint32_t) -1;
             } else {
                 this->m_buf.curAllocUnit = this->m_dir_firstAllocUnit =
                         this->m_rootAllocUnit;
@@ -1911,10 +1908,10 @@ class SD {
 
             // Responses should always be followed up by outputting 8 clocks
             // with MOSI high
-            check_errors(this->m_spi->shift_out(16, -1));
-            check_errors(this->m_spi->shift_out(16, -1));
-            check_errors(this->m_spi->shift_out(16, -1));
-            check_errors(this->m_spi->shift_out(16, -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
 
             return 0;
         }
@@ -2460,8 +2457,8 @@ class SD {
             }
 
             // Followed by finding the correct sector
-            f->buf->curSectorOffset = offset
-                    % (1 << this->m_sectorsPerCluster_shift);
+            f->buf->curSectorOffset = (uint8_t) (offset
+                    % (1 << this->m_sectorsPerCluster_shift));
             f->curSector = offset;
             this->read_data_block(
                     f->buf->curClusterStartAddr + f->buf->curSectorOffset,
@@ -2558,7 +2555,7 @@ class SD {
             // 8 characters have been read, whichever comes first
             for (i = 0; i < SD::FILE_NAME_LEN; ++i) {
                 if (0x05 == buf[i])
-                    filename[j++] = 0xe5;
+                    filename[j++] = (char) 0xe5;
                 else if (' ' != buf[i])
                     filename[j++] = buf[i];
             }
@@ -2643,7 +2640,7 @@ class SD {
             // file is not found
             while (this->m_buf.buf[*fileEntryOffset]) {
                 // Check if file is valid, retrieve the name if it is
-                if (!(SD::DELETED_FILE_MARK == this->m_buf.buf[*fileEntryOffset])) {
+                if (SD::DELETED_FILE_MARK != this->m_buf.buf[*fileEntryOffset]) {
                     this->get_filename(&(this->m_buf.buf[*fileEntryOffset]),
                             readEntryName);
                     if (!strcmp(filename, readEntryName))
@@ -2794,7 +2791,7 @@ class SD {
                 // In FAT32, the first 7 usable clusters seem to be
                 // un-officially reserved for the root directory
                 if (0 == this->m_curFatSector)
-                    allocOffset = 9 * this->m_filesystem;
+                    allocOffset = (uint16_t) (9 * this->m_filesystem);
 
                 // Loop until we find an empty cluster
                 while (this->read_rev_dat32(&(this->m_fat[allocOffset]))
@@ -2923,9 +2920,10 @@ class SD {
 
             // This function should only be called when a file or directory has
             // reached the end of its cluster chain
-            uint16_t entriesPerFatSector = 1
-                    << this->m_entriesPerFatSector_Shift;
-            uint16_t allocUnitOffset = buf->curAllocUnit % entriesPerFatSector;
+            uint16_t entriesPerFatSector = (uint16_t) (1
+                    << this->m_entriesPerFatSector_Shift);
+            uint16_t allocUnitOffset = (uint16_t)
+                    (buf->curAllocUnit % entriesPerFatSector);
             uint16_t fatPointerAddress = allocUnitOffset * this->m_filesystem;
             uint32_t nxtSctr = this->read_rev_dat32(
                     &(this->m_fat[fatPointerAddress]));
@@ -3290,7 +3288,7 @@ class SD {
         SD::Buffer m_buf;
         uint8_t m_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_OPTION_FILE_WRITE
-        uint8_t m_fatMod;  // Has the currently loaded FAT sector been modified
+        bool m_fatMod;  // Has the currently loaded FAT sector been modified
         uint32_t m_fatSize;
 #endif
         uint16_t m_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
