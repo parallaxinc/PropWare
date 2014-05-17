@@ -1,6 +1,8 @@
 /.settings
 /docs/html
 /docs/latex
+/docs/man
+/docs/rtf
 /Debug
 /.idea
 /simple
