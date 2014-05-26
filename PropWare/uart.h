@@ -58,6 +58,21 @@ namespace PropWare {
 @htmlonly
 <ul>
     <li>All tests performed with PropWare::SimplexUART running at 80 MHz</li>
+    <li>Max speed [baud]:
+        <ul>
+            <li>Send
+                <ul>
+                    <li>LMM: </li>
+                </ul>
+            </li>
+            <li>Receive
+                <ul>
+                	<li>CMM: 559,000</li>
+                    <li>LMM: 559,000</li>
+                </ul>
+            </li>
+        </ul>
+    </li>
     <li>PropWare::UART::send() vs PropWare::UART::puts() delay between each
     character
          <ul>
@@ -771,38 +786,45 @@ class FullDuplexUART: public PropWare::SimplexUART {
             volatile register uint32_t data = 0;
             volatile register uint32_t bitIdx = bits;
             volatile register uint32_t waitCycles;
-            volatile register uint32_t initWaitCycles = bitCycles
-                    + (bitCycles << 1);
+            volatile register uint32_t initWaitCycles = (bitCycles >> 1)
+                    + bitCycles;
 
             do {
                 /**
                  *  Receive one word
                  */
 
+                // Initialize variables
                 __asm__ volatile (
-                        // Initialize the waitCycles variable
-                        "mov %[_waitCycles], %[_bitCycles]\n\t"
-                        "shr %[_waitCycles], #1\n\t"
-                        "add %[_waitCycles], %[_bitCycles]\n\t"
+                        // Initialize the index variable
+                        "mov %[_bitIdx], %[_bits]\n\t"
+
+                        // Re-initialize the timer
+                        "mov %[_waitCycles], %[_initWaitCycles]\n\t"
 
                         // Wait for the start bit
                         "waitpne %[_rxMask], %[_rxMask]\n\t"
 
                         // Begin the timer
                         "add %[_waitCycles], CNT \n\t"
+
                         :// Outputs
+                        [_bitIdx] "+r" (bitIdx),
                         [_waitCycles] "+r" (waitCycles)
                         :// Inputs
                         [_rxMask] "r" (rxMask),
-                        [_bitCycles] "r" (bitCycles));
+                        [_bits] "r" (bits),
+                        [_bitCycles] "r" (bitCycles),
+                        [_initWaitCycles] "r" (initWaitCycles));
 
+                // Perform receive loop
                 do {
                     __asm__ volatile (
                             // Wait for the next bit
                             "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
                             "shr %[_data],# 1\n\t"
                             "test %[_rxMask],ina wz \n\t"
-                            "muxnz %[_data], %[_msbMask]"
+                            "muxnz %[_data], %[_msbMask]\n\t"
                             :// Outputs
                             [_waitCycles] "+r" (waitCycles),
                             [_data] "+r" (data)
@@ -812,15 +834,23 @@ class FullDuplexUART: public PropWare::SimplexUART {
                             [_msbMask] "r" (msbMask));
                 } while (--bitIdx);
 
-                bitIdx = bits;
+                __asm__ volatile (
+                        // Write the word back to the buffer in HUB memory
+                        "wrbyte %[_data], %[_bufAdr]\n\t"
 
-                __asm__ volatile ("waitpeq %[_rxMask], %[_rxMask]"
-                        :  // No outputs
+                        // Wait for the stop bits
+                        "waitpeq %[_rxMask], %[_rxMask]\n\t"
+
+                        // Clear the data register
+                        "mov %[_data], #0\n\t"
+
+                        // Increment the buffer address
+                        "add %[_bufAdr], #1"
+
+                        :// Outputs
+                        [_bufAdr] "+r" (bufferAddr),
+                        [_data] "+r" (data)
                         : [_rxMask] "r" (rxMask));
-
-                *((uint8_t *) bufferAddr) = data;
-                data = 0;
-                ++bufferAddr;
             } while (--words);
         }
 

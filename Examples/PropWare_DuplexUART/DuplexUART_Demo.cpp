@@ -41,8 +41,8 @@ char g_numberPattern[] = {
         0x00 };
 
 // Create the test string - useful when testing with a terminal
-char g_string[] = "Hello world!";
-const uint32_t BAUD_RATE = 100;
+char g_string[] = "Hello world! This is David Zemon. I'm here to rescue you! But I don't know if this will actually work :(";
+const uint32_t BAUD_RATE = 559000;
 volatile uint8_t g_stringLength;
 
 /**
@@ -86,16 +86,10 @@ void receiveSilently (void *arg) {
     printf("Ready to receive!!!\n");
 
     while (1) {
-#if 1
         uart.receive_array(buffer, g_stringLength);
-#else
-        for (int i = 0; i < g_stringLength; ++i)
-            buffer[i] = uart.receive();
-#endif
-
         buffer[g_stringLength] = 0;
+
         printf("Data: '%s'\n", buffer);
-//        printf("------ Break ----------\n");
     }
 }
 
