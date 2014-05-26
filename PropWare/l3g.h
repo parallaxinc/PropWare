@@ -253,7 +253,7 @@ class L3G {
             // err is useless at this point and will be used as a temporary
             // 8-bit variable
             for (i = 0; i < 3; ++i) {
-                err = val[i] >> 8;
+                err = (ErrorCode) (val[i] >> 8);
                 val[i] <<= 8;
                 val[i] |= err;
             }
@@ -326,25 +326,14 @@ class L3G {
                 const PropWare::L3G::DPSMode dpsMode) {
             switch (dpsMode) {
                 case PropWare::L3G::DPS_250:
-                    return rawValue * 0.00875;
+                    return (float) (rawValue * 0.00875);
                 case PropWare::L3G::DPS_500:
-                    return rawValue * 0.01750;
+                    return (float) (rawValue * 0.01750);
                 case PropWare::L3G::DPS_2000:
-                    return rawValue * 0.07000;
+                    return (float) (rawValue * 0.07000);
             }
+            return 0;
         }
-
-        /**
-         * <strong>L3G_FUNC_RD_REG:</strong> Read any register from the L3G
-         * @param[in]   func    Descriptor for which function should be
-         *                      performed
-         * @param[in]   wrVal   Address of the desired register
-         * @param[out]  *rdVal  Resulting value will be stored in rdVal
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode ioctl (const L3G::IoctlFunction func,
-                const uint8_t wrVal, uint8_t *rdVal);
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 900000;
@@ -376,7 +365,7 @@ class L3G {
             check_errors(this->maybe_set_spi_mode());
 
             this->m_cs.clear();
-            err = this->m_spi->shift_out(16, outputValue);
+            check_errors(this->m_spi->shift_out(16, outputValue));
             check_errors(this->m_spi->wait());
             this->m_cs.set();
 
@@ -460,7 +449,7 @@ class L3G {
 
             // err is useless at this point and will be used as a temporary
             // 8-bit variable
-            err = *dat >> 8;
+            err = (ErrorCode) (*dat >> 8);
             *dat <<= 8;
             *dat |= err;
 

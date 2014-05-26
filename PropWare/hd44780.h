@@ -362,7 +362,7 @@ class HD44780 {
             else {
                 //set RS to data and RW to write
                 this->m_rs.set();
-                this->write(c);
+                this->write((const uint8_t) c);
 
                 // Insert a line wrap if necessary
                 ++this->m_curCol;

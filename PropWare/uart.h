@@ -360,7 +360,7 @@ class UART {
                     break;
                 case PropWare::UART::EVEN_PARITY:
                     do {
-                        wideData = *array;
+                        wideData = (uint32_t) *array;
 
                         // Add parity
                         __asm__ volatile(
@@ -385,7 +385,7 @@ class UART {
                     break;
                 case PropWare::UART::ODD_PARITY:
                     do {
-                        wideData = *array;
+                        wideData = (uint32_t) *array;
 
                         // Add parity
                         __asm__ volatile(
@@ -445,7 +445,7 @@ class UART {
          *          data
          */
         void set_parity_mask () {
-            this->m_parityMask = 1 << this->m_dataWidth;
+            this->m_parityMask = (uint16_t) (1 << this->m_dataWidth);
         }
 
         /**
@@ -456,7 +456,7 @@ class UART {
          */
         void set_total_bits () {
             // Total bits = start + data + parity + stop bits
-            this->m_totalBits = 1 + this->m_dataWidth + this->m_stopBitWidth;
+            this->m_totalBits = (uint8_t) (1 + this->m_dataWidth + this->m_stopBitWidth);
             if (PropWare::UART::NO_PARITY != this->m_parity)
                 ++this->m_totalBits;
         }
@@ -644,9 +644,9 @@ class FullDuplexUART: public PropWare::SimplexUART {
 
                 if (PropWare::UART::EVEN_PARITY == this->m_parity) {
                     if (evenParityResult != (rxVal & this->m_parityMask))
-                        return -1;
+                        return (uint32_t) -1;
                 } else if (evenParityResult == (rxVal & this->m_parityMask))
-                    return -1;
+                    return (uint32_t) -1;
             }
 
             return rxVal & wideDataMask;
@@ -716,7 +716,7 @@ class FullDuplexUART: public PropWare::SimplexUART {
          */
         void set_receivable_bits () {
             if (this->m_parity)
-                this->m_receivableBits = this->m_dataWidth + 1;
+                this->m_receivableBits = (uint8_t) (this->m_dataWidth + 1);
             else
                 this->m_receivableBits = this->m_dataWidth;
         }

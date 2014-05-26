@@ -30,11 +30,14 @@
 
 uint8_t PropWare::count_bits (uint32_t par) {
     /* Brian Kernighan's method for counting set bits in a variable */
-    uint32_t c;                     // c accumulates the total bits set in par
-    for (c = 0; par; ++c)
-        par &= par - 1;             // clear the least significant bit set
+    uint8_t totalBits = 0;
 
-    return c;
+    while (par) {
+        par &= par - 1; // clear the least significant bit set
+        ++totalBits;
+    }
+
+    return totalBits;
 }
 
 uint32_t PropWare::measure_time_interval (const register uint32_t start) {

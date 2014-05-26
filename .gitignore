@@ -4,18 +4,24 @@
 /docs/man
 /docs/rtf
 /Debug
-/.idea
+.idea/
 /simple
 /libpropeller
 /Examples/TestApp
 /.external_downloads
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CMakeLists.txt.user
 __pycache__
 .cproject
 .**project
+**.cbp
 objects.mk
 sources.mk
 subdir.mk
 makefile
+Makefile
 **.elf
 **.o
 **.a
@@ -26,6 +32,7 @@ makefile
 **.swp
 **.zip
 **.iml
+**_Demo
 
 # Ignore the Simple header files in the root directory
 /*.h
