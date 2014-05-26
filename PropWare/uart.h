@@ -773,44 +773,36 @@ class FullDuplexUART: public PropWare::SimplexUART {
             volatile register uint32_t waitCycles;
             volatile register uint32_t initWaitCycles = bitCycles
                     + (bitCycles << 1);
-            PropWare::Pin poop(PropWare::Port::P23, PropWare::Port::OUT);
 
             do {
                 /**
                  *  Receive one word
                  */
 
-                // Initialize variables
                 __asm__ volatile (
-                        // Initialize the index variable
-                        "mov %[_bitIdx], %[_bits]\n\t"
-
-                        // Re-initialize the timer
-                        "mov %[_waitCycles], %[_initWaitCycles]\n\t"
+                        // Initialize the waitCycles variable
+                        "mov %[_waitCycles], %[_bitCycles]\n\t"
+                        "shr %[_waitCycles], #1\n\t"
+                        "add %[_waitCycles], %[_bitCycles]\n\t"
 
                         // Wait for the start bit
                         "waitpne %[_rxMask], %[_rxMask]\n\t"
 
                         // Begin the timer
                         "add %[_waitCycles], CNT \n\t"
-
                         :// Outputs
-                        [_bitIdx] "+r" (bitIdx),
                         [_waitCycles] "+r" (waitCycles)
                         :// Inputs
                         [_rxMask] "r" (rxMask),
-                        [_bits] "r" (bits),
-                        [_bitCycles] "r" (bitCycles),
-                        [_initWaitCycles] "r" (initWaitCycles));
+                        [_bitCycles] "r" (bitCycles));
 
-                // Perform receive loop
                 do {
                     __asm__ volatile (
                             // Wait for the next bit
                             "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
                             "shr %[_data],# 1\n\t"
                             "test %[_rxMask],ina wz \n\t"
-                            "muxnz %[_data], %[_msbMask]\n\t"
+                            "muxnz %[_data], %[_msbMask]"
                             :// Outputs
                             [_waitCycles] "+r" (waitCycles),
                             [_data] "+r" (data)
@@ -818,30 +810,17 @@ class FullDuplexUART: public PropWare::SimplexUART {
                             [_bitCycles] "r" (bitCycles),
                             [_rxMask] "r" (rxMask),
                             [_msbMask] "r" (msbMask));
-
-
-                    printf("%02x ", data);
                 } while (--bitIdx);
 
-                printf(" - %c\n", data);
+                bitIdx = bits;
 
-                __asm__ volatile (
-                        // Write the word back to the buffer in HUB memory
-                        "wrbyte %[_data], %[_bufAdr]\n\t"
-
-                        // Wait for the stop bits
-                        "waitpeq %[_rxMask], %[_rxMask]\n\t"
-
-                        // Clear the data register
-                        "mov %[_data], #0\n\t"
-
-                        // Increment the buffer address
-                        "add %[_bufAdr], #1"
-
-                        :// Outputs
-                        [_bufAdr] "+r" (bufferAddr),
-                        [_data] "+r" (data)
+                __asm__ volatile ("waitpeq %[_rxMask], %[_rxMask]"
+                        :  // No outputs
                         : [_rxMask] "r" (rxMask));
+
+                *((uint8_t *) bufferAddr) = data;
+                data = 0;
+                ++bufferAddr;
             } while (--words);
         }
 
