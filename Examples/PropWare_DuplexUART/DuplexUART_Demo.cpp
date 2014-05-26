@@ -41,9 +41,9 @@ char g_numberPattern[] = {
         0x00 };
 
 // Create the test string - useful when testing with a terminal
-char g_string[] = "Hello world! This is a really freaking long sentence!!!\n\r";
-const uint32_t BAUD_RATE = 150000;
-uint8_t g_stringLength;
+char g_string[] = "Hello world!";
+const uint32_t BAUD_RATE = 100;
+volatile uint8_t g_stringLength;
 
 /**
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
@@ -60,10 +60,7 @@ int main () {
             (void *) NULL, &threadData);
 
     while (1) {
-        waitcnt(200*MILLISECOND + CNT);
-        sendBytes(uart, g_string);
-        sendBytes(uart, g_string);
-        sendBytes(uart, g_string);
+        waitcnt(500*MILLISECOND + CNT);
         sendBytes(uart, g_string);
     }
 
@@ -89,13 +86,16 @@ void receiveSilently (void *arg) {
     printf("Ready to receive!!!\n");
 
     while (1) {
-        uint8_t words = g_stringLength << 2;
-        for (uint8_t i = 0; i < words; ++i)
+#if 1
+        uart.receive_array(buffer, g_stringLength);
+#else
+        for (int i = 0; i < g_stringLength; ++i)
             buffer[i] = uart.receive();
+#endif
 
-        buffer[g_stringLength << 2] = 0;
-
-        printf(buffer);
+        buffer[g_stringLength] = 0;
+        printf("Data: '%s'\n", buffer);
+//        printf("------ Break ----------\n");
     }
 }
 

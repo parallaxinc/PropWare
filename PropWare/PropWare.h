@@ -120,6 +120,16 @@ typedef enum {
  */
 uint8_t count_bits (uint32_t par);
 
+/**
+ * @brief       Determine the number of microseconds passed since a starting
+ *              point
+ *
+ * @param[in]   start   A value from the system counter (CNT)
+ *
+ * @return      Microseconds since start
+ */
+uint32_t measure_time_interval (const register uint32_t start);
+
 }
 
 #endif /* PROPWARE_H */

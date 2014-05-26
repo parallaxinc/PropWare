@@ -103,9 +103,8 @@ class MAX6675 {
         /**
          * @brief       Read data in fixed-point form
          *
-         * @detailed    12-bit data is stored where lower 2 bits are fractional
-         *              and upper 10 bits are the whole number. Value presented
-         *              in degrees Celsius
+         * 12-bit data is stored where lower 2 bits are fractional and upper
+         * 10 bits are the whole number. Value presented in degrees Celsius
          *
          * @param[out]  *dat    Address where data should be stored
          *

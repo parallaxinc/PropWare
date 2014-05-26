@@ -4,15 +4,15 @@
 /**
  * @brief       Blink an LED on each of the 8 Propeller cogs
  *
- * @detailed    This file is nearly a direct copy of SimpleIDE's blinkcogs.c.
- *              Some changes were made to highlight the helpfulness of PropWare.
+ * This file is nearly a direct copy of SimpleIDE's blinkcogs.c. Some changes
+ * were made to highlight the helpfulness of PropWare.
  *
- *              Make all propeller cogs blink assigned pins at exactly the same
- *              rate and time to demonstrate the precision of the
- *              _start_cog_thread method. This program and method uses 8 LMM C
- *              program COG "threads" of execution simultaneously.
+ * Make all propeller cogs blink assigned pins at exactly the same rate and
+ * time to demonstrate the precision of the _start_cog_thread method. This
+ * program and method uses 8 LMM C program COG "threads" of execution
+ * simultaneously.
  *
- *              This program should be compiled with the LMM memory model.
+ * This program should be compiled with the LMM memory model.
  *
  * @project     PropWare_Demo
  *

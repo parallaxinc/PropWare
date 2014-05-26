@@ -325,8 +325,8 @@ class HD44780 {
         /**
          * @brief       Print a string to the LCD
          *
-         * @detailed    Via a series of calls to HD44780_putchar, prints each
-         *              character individually
+         * Via a series of calls to HD44780_putchar, prints each character
+         * individually
          *
          * @param[in]   *s  Address where c-string can be found (must be
          *                  null-terminated)

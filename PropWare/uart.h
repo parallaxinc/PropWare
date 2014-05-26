@@ -55,26 +55,28 @@ namespace PropWare {
  *          from the method until the relevant data has been received/sent)
  *
  * Speed tests:
- <ul>
- <li>All tests performed with PropWare::SimplexUART running at 80 MHz</li>
- <li>PropWare::UART::send() vs PropWare::UART::puts() delay between each character
- <ul>
- <li>CMM:
- <ul>
- <li>send: 40.6 us</li>
- <li>puts: 17.3 us</li>
+@htmlonly
+<ul>
+    <li>All tests performed with PropWare::SimplexUART running at 80 MHz</li>
+    <li>PropWare::UART::send() vs PropWare::UART::puts() delay between each
+    character
+         <ul>
+             <li>CMM:
+                 <ul>
+                     <li>send: 40.6 us</li>
+                     <li>puts: 17.3 us</li>
+                 </ul>
+             </li>
+             <li>LMM:
+                 <ul>
+                     <li>send: 11.3 us</li>
+                     <li>puts: 5.75 us</li>
+                 </ul>
+             </li>
+         </ul>
+     </li>
  </ul>
- </li>
- <li>LMM:
- <ul>
- <li>send: 11.3 us</li>
- <li>puts: 5.75 us</li>
- </ul>
- </li>
- </ul>
- </li>
- </li>
- </ul>
+@endhtmlonly
  */
 class UART {
     public:
@@ -99,9 +101,15 @@ class UART {
             BEG_ERROR = UART_ERRORS_BASE,
             /** The requested baud rate is too high */
             BAUD_TOO_HIGH = BEG_ERROR,
-            /** The requested data width is not between 1 and 16 (inclusive) */
+            /** A parity error has occurred during read */
+            PARITY_ERROR,
+            /**
+             * The requested data width is not between 1 and 16 (inclusive)
+             */
             INVALID_DATA_WIDTH,
-            /** The requested stop bit width is not between 1 and 14 (inclusive) */
+            /**
+             * The requested stop bit width is not between 1 and 14 (inclusive)
+             */
             INVALID_STOP_BIT_WIDTH,
             /** Last error code used by PropWare::UART */
             END_ERROR = PropWare::UART::INVALID_STOP_BIT_WIDTH
@@ -112,10 +120,6 @@ class UART {
         static const PropWare::UART::Parity DEFAULT_PARITY = NO_PARITY;
         static const uint8_t DEFAULT_STOP_BIT_WIDTH = 1;
         static const uint32_t DEFAULT_BAUD = 115200;
-
-        // Sends have been verified as fast as 800,000 (haven't tested anything
-        // higher), receive has failed above 150,000
-        static const uint32_t MAX_BAUD = 800000;
 
     public:
         /**
@@ -239,16 +243,12 @@ class UART {
          *              when baudRate is set too high for the Propeller's clock
          *              frequency
          */
-        virtual PropWare::ErrorCode set_baud_rate (const uint32_t baudRate) {
-            if (PropWare::UART::MAX_BAUD < baudRate)
-                return PropWare::UART::BAUD_TOO_HIGH;
-
+        virtual void set_baud_rate (const uint32_t baudRate) {
             this->m_bitCycles = CLKFREQ / baudRate;
-            return NO_ERROR;
         }
 
         /**
-         * @brief   Retrieve the current buad rate
+         * @brief   Retrieve the current baud rate
          *
          * @return  Returns an approximation  of the current baud rate; Value is
          *          not exact due to integer math
@@ -300,8 +300,7 @@ class UART {
         /**
          * @brief       Send a null-terminated character array
          *
-         * @pre         *string must be terminated with a null terminator, just
-         *              like printf or any other string function
+         * @pre         *string must be terminated with a null terminator
          *
          * @param[in]   *string     Array of data words with the final word
          *                          being 0 - the null terminator
@@ -349,7 +348,8 @@ class UART {
                         wideData = *array;
 
                         // Add parity
-                        __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
+                        __asm__ volatile(
+                                "test %[_data], %[_dataMask] wc \n\t"
                                 "muxnc %[_data], %[_parityMask]"
                                 : [_data] "+r" (wideData)
                                 : [_dataMask] "r" (dataMask),
@@ -373,7 +373,8 @@ class UART {
                         wideData = *array;
 
                         // Add parity
-                        __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
+                        __asm__ volatile(
+                                "test %[_data], %[_dataMask] wc \n\t"
                                 "muxc %[_data], %[_parityMask]"
                                 : [_data] "+r" (wideData)
                                 : [_dataMask] "r" (this->m_dataMask),
@@ -435,8 +436,8 @@ class UART {
         /**
          * @brief       Determine the total number of bits shifted out or in
          *
-         * @detailed    Takes into account the start bit, the width of the data,
-         *              if there is a parity bit and the number of stop bits
+         * Takes into account the start bit, the width of the data, if there is
+         * a parity bit and the number of stop bits
          */
         void set_total_bits () {
             // Total bits = start + data + parity + stop bits
@@ -456,7 +457,7 @@ class UART {
         __attribute__ ((fcache)) void shift_out_data (register uint32_t data,
                 register uint32_t bits, const register uint32_t bitCycles,
                 const register uint32_t txMask) const {
-            uint32_t waitCycles;
+            volatile uint32_t waitCycles;
 
             __asm__ volatile (
                     "mov %[_waitCycles], %[_bitCycles]\n\t"
@@ -507,7 +508,7 @@ class SimplexUART: public PropWare::UART {
          * @brief       Construct a UART instance capable of simplex serial
          *              communications
          *
-         * @param[in]   Bit mask used for the TX (transmit) pin
+         * @param[in]   tx  Bit mask used for the TX (transmit) pin
          */
         SimplexUART (const PropWare::Port::Mask tx) :
                 PropWare::UART() {
@@ -528,9 +529,6 @@ class SimplexUART: public PropWare::UART {
  * stop bits have been read.
  */
 class FullDuplexUART: public PropWare::SimplexUART {
-    public:
-        static const uint32_t MAX_BAUD = 150000;
-
     public:
         /**
          * @see PropWare::SimplexUART::SimplexUART()
@@ -559,7 +557,7 @@ class FullDuplexUART: public PropWare::SimplexUART {
         /**
          * @brief       Set the pin mask for RX pin
          *
-         * @param[in]   Pin mask for the receive (RX) pin
+         * @param[in]   rx  Pin mask for the receive (RX) pin
          */
         void set_rx_mask (const PropWare::Port::Mask rx) {
             this->m_rx.set_mask(rx);
@@ -599,17 +597,6 @@ class FullDuplexUART: public PropWare::SimplexUART {
         }
 
         /**
-         * @see     PropWare::UART::set_baud_rate()
-         */
-        PropWare::ErrorCode set_baud_rate (const uint32_t baudRate) {
-            if (PropWare::FullDuplexUART::MAX_BAUD < baudRate)
-                return PropWare::UART::BAUD_TOO_HIGH;
-
-            this->m_bitCycles = CLKFREQ / baudRate;
-            return NO_ERROR;
-        }
-
-        /**
          * @brief   Receive one word of data; Will block until word is received
          *
          * Cog execution will be blocked by this call and there is no timeout;
@@ -627,9 +614,8 @@ class FullDuplexUART: public PropWare::SimplexUART {
             uint32_t wideParityMask = this->m_parityMask;
             uint32_t wideDataMask = this->m_dataMask;
 
-            rxVal = PropWare::FullDuplexUART::shift_in_data(
-                    this->m_receivableBits, this->m_bitCycles,
-                    this->m_rx.get_mask(), this->m_msbMask);
+            rxVal = this->shift_in_data(this->m_receivableBits,
+                    this->m_bitCycles, this->m_rx.get_mask(), this->m_msbMask);
 
             // Check parity bit
             if (this->m_parity) {
@@ -649,6 +635,50 @@ class FullDuplexUART: public PropWare::SimplexUART {
             }
 
             return rxVal & wideDataMask;
+        }
+
+        /**
+         * @brief       Receive an array of data words
+         *
+         * Cog execution will be blocked by this call and there is no timeout;
+         * Execution will not resume until all data words have been received
+         *
+         * Current configuration must be data width + parity width <= 8 bits. If
+         * receivable bits is greater than 8, an error will be thrown without
+         * any regard for the data being sent to the Propeller
+         *
+         * @pre         RX pin mask must be set
+         *
+         * @param[out]  *buffer     Address to begin storing data words
+         * @param[in]   words       Number of words to receive
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        HUBTEXT virtual PropWare::ErrorCode receive_array (char *buffer,
+                uint32_t words) const {
+            // Check if the total receivable bits can fit within a byte
+            if (8 >= this->m_receivableBits) {
+                this->shift_in_array((uint32_t) buffer, words,
+                        this->m_receivableBits, this->m_bitCycles,
+                        this->m_rx.get_mask(), this->m_msbMask);
+
+                // TODO: Check parity bits
+            }
+            // If total receivable bits does not fit within a byte, shift in
+            // one word at a time (this offers no speed improvement - it is
+            // only here for user convenience)
+            else {
+                do {
+                    *buffer = this->shift_in_data(this->m_receivableBits,
+                            this->m_bitCycles, this->m_rx.get_mask(),
+                            this->m_msbMask);
+                    if (-1 == *buffer)
+                        return PropWare::UART::PARITY_ERROR;
+                    ++buffer;
+                } while (--words);
+            }
+
+            return 0;
         }
 
     protected:
@@ -689,7 +719,7 @@ class FullDuplexUART: public PropWare::SimplexUART {
                     "shr %[_waitCycles], #1\n\t"
                     "add %[_waitCycles], %[_bitCycles]\n\t"
 
-                    // Wait until for the start bit
+                    // Wait for the start bit
                     "waitpne %[_rxMask], %[_rxMask]\n\t"
 
                     // Begin the timer
@@ -721,6 +751,98 @@ class FullDuplexUART: public PropWare::SimplexUART {
                     : [_rxMask] "r" (rxMask));
 
             return data;
+        }
+
+        /**
+         * @brief
+         *
+         * @param[in]   bufferAddr
+         * @param[in]   words
+         * @param[in]   bits
+         * @param[in]   bitCycles
+         * @param[in]   rxMask
+         * @param[in]   msbMask
+         */
+        __attribute ((fcache)) void shift_in_array (
+                register uint32_t bufferAddr, register uint32_t words,
+                const register uint32_t bits, const register uint32_t bitCycles,
+                const register uint32_t rxMask,
+                const register uint32_t msbMask) const {
+            volatile register uint32_t data = 0;
+            volatile register uint32_t bitIdx = bits;
+            volatile register uint32_t waitCycles;
+            volatile register uint32_t initWaitCycles = bitCycles
+                    + (bitCycles << 1);
+            PropWare::Pin poop(PropWare::Port::P23, PropWare::Port::OUT);
+
+            do {
+                /**
+                 *  Receive one word
+                 */
+
+                // Initialize variables
+                __asm__ volatile (
+                        // Initialize the index variable
+                        "mov %[_bitIdx], %[_bits]\n\t"
+
+                        // Re-initialize the timer
+                        "mov %[_waitCycles], %[_initWaitCycles]\n\t"
+
+                        // Wait for the start bit
+                        "waitpne %[_rxMask], %[_rxMask]\n\t"
+
+                        // Begin the timer
+                        "add %[_waitCycles], CNT \n\t"
+
+                        :// Outputs
+                        [_bitIdx] "+r" (bitIdx),
+                        [_waitCycles] "+r" (waitCycles)
+                        :// Inputs
+                        [_rxMask] "r" (rxMask),
+                        [_bits] "r" (bits),
+                        [_bitCycles] "r" (bitCycles),
+                        [_initWaitCycles] "r" (initWaitCycles));
+
+                // Perform receive loop
+                do {
+                    __asm__ volatile (
+                            // Wait for the next bit
+                            "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
+                            "shr %[_data],# 1\n\t"
+                            "test %[_rxMask],ina wz \n\t"
+                            "muxnz %[_data], %[_msbMask]\n\t"
+                            :// Outputs
+                            [_waitCycles] "+r" (waitCycles),
+                            [_data] "+r" (data)
+                            :// Inputs
+                            [_bitCycles] "r" (bitCycles),
+                            [_rxMask] "r" (rxMask),
+                            [_msbMask] "r" (msbMask));
+
+
+                    printf("%02x ", data);
+                } while (--bitIdx);
+
+                printf(" - %c\n", data);
+
+                __asm__ volatile (
+                        // Write the word back to the buffer in HUB memory
+                        "wrbyte %[_data], %[_bufAdr]\n\t"
+
+                        // Wait for the stop bits
+                        "waitpeq %[_rxMask], %[_rxMask]\n\t"
+
+                        // Clear the data register
+                        "mov %[_data], #0\n\t"
+
+                        // Increment the buffer address
+                        "add %[_bufAdr], #1"
+
+                        :// Outputs
+                        [_bufAdr] "+r" (bufferAddr),
+                        [_data] "+r" (data)
+                        : [_rxMask] "r" (rxMask));
+            } while (--words);
         }
 
     protected:

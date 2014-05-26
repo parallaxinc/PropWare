@@ -326,9 +326,9 @@ class SD {
          * @brief       Initialize SD card communication over SPI for 3.3V
          *              configuration
          *
-         * @detailed    Starts an SPI cog IFF an SPI cog has not already been
-         *              started; If one has been started, only the cs and freq
-         *              parameter will have effect
+         * Starts an SPI cog IFF an SPI cog has not already been started; If
+         * one has been started, only the cs and freq parameter will have
+         * effect
          *
          * @param[in]   mosi        PinNum mask for MOSI pin
          * @param[in]   miso        PinNum mask for MISO pin
@@ -442,12 +442,11 @@ class SD {
          * @brief       Change the current working directory to *d (similar to
          *              'cd dir')
          *
-         * @detailed    At the moment, the target directory must be an immediate
-         *              child of the current directory ("." and ".." are
-         *              allowed). I hope to implement the ability to change to
-         *              any directory soon (such as "cd ../siblingDirectory")
-         *              but attempting to do this now would currently result in
-         *              an SD_FILENAME_NOT_FOUND error
+         * At the moment, the target directory must be an immediate child of
+         * the current directory ("." and ".." are allowed). I hope to
+         * implement the ability to change to any directory soon (such as "cd
+         * ../siblingDirectory") but attempting to do this now would currently
+         * result in an SD_FILENAME_NOT_FOUND error
          *
          * @param[in]   *d     Short filename of directory to change to
          *
@@ -531,8 +530,8 @@ class SD {
          * @brief       Open a file with a given name and load its information
          *              into the file pointer
          *
-         * @detailed    Load the first sector of a file into the file buffer;
-         *              Initialize global character pointers
+         * Load the first sector of a file into the file buffer; Initialize
+         * global character pointers
          *
          * @note        Currently, only one file mode is supported and is best
          *              described as "r+"
@@ -756,9 +755,10 @@ class SD {
         /**
          * @brief       Insert a character into a given file
          *
-         * @detailed    Insert 'c' at the location pointed to by the file's
-         *              write pointer; Note: the read and write pointers may be
-         *              merged into one at a later date
+         * Insert 'c' at the location pointed to by the file's write pointer;
+         *
+         * Note: the read and write pointers may be merged into one at a
+         * later date
          *
          * @param[in]   c       Character to be inserted
          * @param[in]   *f      Address of the desired file object
@@ -818,9 +818,8 @@ class SD {
         /**
          * @brief       Insert a c-string into a file
          *
-         * @detailed    Insert an array of bytes into the file object pointed to
-         *              by 'f' beginning at address 's' until the value 0 is
-         *              reached
+         * Insert an array of bytes into the file object pointed to by 'f'
+         * beginning at address 's' until the value 0 is reached
          *
          * @param[in]   *s  C-string to be inserted
          * @param[in]   *f  Address of file object
@@ -840,7 +839,7 @@ class SD {
         /**
          * @brief       Read one character from the currently opened file.
          *
-         * @detailed    NOTE: This function does not include error checking
+         * NOTE: This function does not include error checking
          *
          * @pre         *f must point to a currently opened and valid file
          * @pre         The file must have at least one byte left - no error
@@ -2472,11 +2471,11 @@ class SD {
 
         /**
          * @brief       Read the next sector from SD card into memory
-         * @detailed    When the final sector of a cluster is finished,
-         *              SDIncCluster can be called. The appropriate global
-         *              variables will be set according (incremented or set by
-         *              the FAT) and the first sector of the next cluster will
-         *              be read into the desired buffer.
+         *
+         * When the final sector of a cluster is finished,
+         * SDIncCluster can be called. The appropriate global variables will
+         * be set according (incremented or set by the FAT) and the first
+         * sector of the next cluster will be read into the desired buffer.
          *
          * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes used to hold a
          *                      sector from the SD card
@@ -2581,10 +2580,9 @@ class SD {
         /**
          * @brief       Find a file entry (file or sub-directory)
          *
-         * @detailed    Find a file or directory that matches the name in
-         *              *filename in the current directory; its relative
-         *              location is communicated by placing it in the address of
-         *              *fileEntryOffset
+         * Find a file or directory that matches the name in *filename in the
+         * current directory; its relative location is communicated by
+         * placing it in the address of *fileEntryOffset
          *
          * @param[in]   *filename           C-string representing the short
          *                                  (standard) filename
@@ -2716,14 +2714,13 @@ class SD {
         /**
          * @brief       Find the first empty allocation unit in the FAT
          *
-         * @detailed    The value of the first empty allocation unit is returned
-         *              and its location will contain the end-of-chain marker,
-         *              SD_EOC_END.
-         *              NOTE: It is important to realize that, though the new
-         *              entry now contains an EOC marker, this function does not
-         *              know what cluster is being extended and therefore the
-         *              calling function must modify the previous EOC to contain
-         *              the return value
+         * The value of the first empty allocation unit is returned and its
+         * location will contain the end-of-chain marker, SD_EOC_END.
+         *
+         * NOTE: It is important to realize that, though the new entry now
+         * contains an EOC marker, this function does not know what cluster is
+         * being extended and therefore the calling function must modify the
+         * previous EOC to contain the return value
          *
          * @param[in]   restore     If non-zero, the original fat-sector will be
          *                          restored to m_fat before returning; if zero,
