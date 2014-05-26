@@ -20,7 +20,7 @@ class ImportSimple:
     PROPWARE_ROOT = os.path.abspath("..") + os.sep
     CHEATER_DIR = PROPWARE_ROOT + "simple" + os.sep
     LEARN_DOWNLOAD_LINK = "http://learn.parallax.com/sites/default/files/content/propeller-c-tutorials/" \
-                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.02.27.zip"
+                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.05.14.zip"
     LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep
 
     def __init__(self):
