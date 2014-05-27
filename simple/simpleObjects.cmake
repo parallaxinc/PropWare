@@ -7,7 +7,9 @@ set(SIMPLE_OBJECTS
         ../adcDCpropab
         ../addfiledriver
         ../cogend
+        ../cognum
         ../cogrun
+        ../colorpal
         ../compass3d
         ../count
         ../daCalibrate
@@ -16,8 +18,11 @@ set(SIMPLE_OBJECTS
         ../dacctr
         ../doscanf
         ../dosprint
+        ../dosput
         ../dprint
+        ../dprinti
         ../dscan
+        ../dscani
         ../eeprom_getByte
         ../eeprom_getFloat
         ../eeprom_getInt
@@ -27,11 +32,12 @@ set(SIMPLE_OBJECTS
         ../eeprom_putFloat
         ../eeprom_putInt
         ../eeprom_putStr
+        ../endianSwap
         ../fdserial
         ../fdserial_utils
         ../floatToString
-        ../fpucog
         ../freqout
+        ../gRangec
         ../getBin
         ../getChar
         ../getDec
@@ -39,6 +45,7 @@ set(SIMPLE_OBJECTS
         ../getDirections
         ../getFloat
         ../getHex
+        ../getMode
         ../getOutput
         ../getOutputs
         ../getScale
@@ -46,15 +53,20 @@ set(SIMPLE_OBJECTS
         ../getStates
         ../getStr
         ../gets
+        ../getxyz10
+        ../getxyz8
         ../high
+        ../i2c_busy
         ../i2c_in
         ../i2c_init
         ../i2c_out
-        ../i2cinit
+        ../init
         ../input
+        ../intprint
         ../itoa
         ../low
         ../mark
+        ../mma7455
         ../mstimer
         ../mx2125
         ../mx2125_accel
@@ -65,19 +77,27 @@ set(SIMPLE_OBJECTS
         ../ping
         ../print
         ../printNumber
+        ../printi
         ../pulseIn
         ../pulseOut
         ../putBin
+        ../putBinDigits
         ../putChar
         ../putDec
+        ../putDecDigits
         ../putFloat
+        ../putFloatPrecision
         ../putHex
+        ../putHexDigits
         ../putLine
         ../putStr
+        ../putStrDigits
         ../putln
         ../pwm
         ../rcTime
+        ../readByte
         ../reverse
+        ../rfidser
         ../safe_gets
         ../scan
         ../scanf_getf
@@ -92,8 +112,9 @@ set(SIMPLE_OBJECTS
         ../setDacBits
         ../setDirection
         ../setDirections
-        ../setForget
         ../setIoDt
+        ../setMode
+        ../setOffset
         ../setOutput
         ../setOutputs
         ../setPauseDt
@@ -104,10 +125,14 @@ set(SIMPLE_OBJECTS
         ../simplei2c
         ../simpleterm
         ../simpleterm_close
+        ../sirc
+        ../soundimpact
         ../sprint
+        ../sprinti
         ../squareWave
         ../sscan
         ../stringToFloat
+        ../timeTicks
         ../timeout
         ../toggle
         ../vgatext
@@ -115,6 +140,7 @@ set(SIMPLE_OBJECTS
         ../wavplayer
         ../writeBin
         ../writeBinDigits
+        ../writeByte
         ../writeChar
         ../writeDec
         ../writeDecDigits

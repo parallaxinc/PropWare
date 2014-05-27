@@ -43,7 +43,7 @@
 //#define TEST_WRITE
 #define TEST_SHELL
 
-//#define USE_PRINTF
+#define USE_PRINTF
 
 #ifdef USE_PRINTF
 #include <tinyio.h>
