@@ -109,7 +109,9 @@ class ImportSimple:
         for fileName in rmList:
             os.remove(fileName)
 
-        shutil.rmtree(ImportSimple.CHEATER_DIR + os.sep + "CMakeFiles")
+        destroyMe = ImportSimple.CHEATER_DIR + os.sep + "CMakeFiles"
+        if os.path.exists(destroyMe):
+            shutil.rmtree(destroyMe)
 
     @staticmethod
     def getDemoFileNames(library):

@@ -25,11 +25,11 @@ import propwareUtils
 
 class CreateBinaryDistr:
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
-    WHITELISTED_FILES = ["Makefile", "Doxyfile", "README", "run_all_tests", "run_unit"]
-    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "mk", "dox", "md", "py", "pl", "elf", "txt", "rb",
+    WHITELISTED_FILES = ["CMakeLists.txt", "Doxyfile", "README", "run_all_tests", "run_unit"]
+    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "rb",
                             "jpg", "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
-    BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly", "cmake"]
+    BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2"]
     CURRENT_SUGGESTION = "release-2.0"
 
@@ -108,9 +108,12 @@ class CreateBinaryDistr:
 
     @staticmethod
     def clean():
+        if CreateBinaryDistr.isCMakeBranch():
+            subprocess.call("cmake .")
+
         subprocess.call("make clean --silent", shell=True)
 
-        # If we can't "make simple_clean", that probably just means we're on an old branch that didn't have Simple
+        # Not all branches have the simple_clean target, so it's no big deal if it fails
         try:
             subprocess.check_output("make simple_clean --silent", shell=True)
         except subprocess.CalledProcessError as e:
@@ -138,10 +141,14 @@ class CreateBinaryDistr:
 
     @staticmethod
     def compile():
-        if 0 != subprocess.call("make -j4 --silent", shell=True):
+        command = "make -j4 --silent"
+
+        # Determine if Makefile or CMake branch
+        if CreateBinaryDistr.isCMakeBranch():
+            command = "cmake . && " + command
+
+        if 0 != subprocess.call(command, shell=True):
             raise MakeErrorException()
-
-
 
     @staticmethod
     def isWhitelisted(filename):
@@ -163,6 +170,10 @@ class CreateBinaryDistr:
             print("Failed to return git repository to 'current' branch", file=sys.stderr)
             print("Caused by: " + str(e), file=sys.stderr)
             print(e.output.decode(), file=sys.stderr)
+
+    @staticmethod
+    def isCMakeBranch():
+        return os.path.exists("CMakeLists.txt")
 
     def printSummary(self, branches):
         # Let the stdout and stderr buffers catch up

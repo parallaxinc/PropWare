@@ -112,8 +112,9 @@ class ImportLibpropeller:
                         for fileName in files:
                             if fileName not in ImportLibpropeller.CLEAN_EXCLUDES:
                                 os.remove(root + os.sep + fileName)
-                    shutil.rmtree(ImportLibpropeller.DESTINATION + entry + os\
-                        .sep + "CMakeFiles")
+                    destroyMe = ImportLibpropeller.DESTINATION + entry + os.sep + "CMakeFiles"
+                    if os.path.exists(destroyMe):
+                        shutil.rmtree(destroyMe)
                 elif entry not in ImportLibpropeller.CLEAN_EXCLUDES:
                     removable = ImportLibpropeller.DESTINATION + entry
                     if os.path.isdir(removable):
