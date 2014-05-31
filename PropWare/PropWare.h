@@ -1,8 +1,6 @@
 /**
  * @file    PropWare.h
  *
- * @project PropWare
- *
  * @author  David Zemon
  *
  * @copyright

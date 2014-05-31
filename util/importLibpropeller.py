@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # @file    importLibpropeller.py
 # @author  David Zemon
-# @project PropWare
 #
 # Created with: PyCharm Community Edition
 

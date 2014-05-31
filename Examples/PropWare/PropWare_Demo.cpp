@@ -1,8 +1,6 @@
 /**
  * @file    PropWare_Demo.cpp
  *
- * @project PropWare_Demo
- *
  * @author  Modified by David Zemon
  */
 

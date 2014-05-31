@@ -1,8 +1,6 @@
 /**
  * @file    MCP3000_Demo.cpp
  *
- * @project MCP3000_Demo
- *
  * @author  David Zemon
  *
  * @copyright

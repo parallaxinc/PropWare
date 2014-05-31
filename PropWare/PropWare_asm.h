@@ -4,8 +4,6 @@
 /**
  * @brief   Generic definitions for assembly files for the Parallax Propeller
  *
- * @project PropWare
- *
  * @author  David Zemon
  *
  * @copyright

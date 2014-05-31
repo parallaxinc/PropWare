@@ -1,8 +1,6 @@
 /**
  * @file    SimplexUART_Demo.cpp
  *
- * @project SimplexUART_Demo
- *
  * @author  David Zemon
  *
  * @copyright

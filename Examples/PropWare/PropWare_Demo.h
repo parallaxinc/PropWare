@@ -14,8 +14,6 @@
  *
  * This program should be compiled with the LMM memory model.
  *
- * @project     PropWare_Demo
- *
  * @author      Modified by David Zemon
  *
  * @copyright

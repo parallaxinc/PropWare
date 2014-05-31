@@ -1,8 +1,6 @@
 /**
  * @file        uart.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  *
  * @copyright

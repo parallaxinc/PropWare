@@ -1,9 +1,6 @@
 /**
  * @file    sd.cpp
  *
- *
- * @project PropWare
- *
  * @author  David Zemon
  *
  * @copyright

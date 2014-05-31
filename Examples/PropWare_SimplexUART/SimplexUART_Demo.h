@@ -4,8 +4,6 @@
 /**
  * @brief   Write "Hello world!\n" out via UART protocol
  *
- * @project SimplexUART_Demo
- *
  * @author  David Zemon
  *
  * @copyright

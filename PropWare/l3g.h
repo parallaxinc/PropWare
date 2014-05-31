@@ -1,8 +1,6 @@
 /**
  * @file    l3g.h
  *
- * @project PropWare
- *
  * @author  David Zemon
  * @author  Collin Winans
  *

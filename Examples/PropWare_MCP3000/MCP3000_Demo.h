@@ -5,8 +5,6 @@
  * @brief   Display the value of an analog channel on stdout and as a bar graph
  *          over the 8 LEDs of the QUICKSTART board
  *
- * @project MCP3000_Demo
- *
  * @author  David Zemon
  *
  * @copyright

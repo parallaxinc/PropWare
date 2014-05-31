@@ -1,8 +1,6 @@
 /**
  * @file    DuplexUART_Demo.cpp
  *
- * @project DuplexUART_Demo
- *
  * @author  David Zemon
  *
  * @copyright

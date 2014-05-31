@@ -1,8 +1,6 @@
 /**
  * @file        pin.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  *
  * @copyright

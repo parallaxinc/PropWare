@@ -5,8 +5,6 @@
  * @brief   Demonstrate various functions including writing to files and the
  *          Shell
  *
- * @project SD_Demo
- *
  * @author  David Zemon
  *
  * @copyright

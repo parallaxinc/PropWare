@@ -4,8 +4,6 @@
 /**
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  *
- * @project SPI_Demo
- *
  * @author  David Zemon
  *
  * @copyright

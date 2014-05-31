@@ -1,8 +1,6 @@
 /**
  * @file        port.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  *
  * @copyright

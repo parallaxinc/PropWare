@@ -1,8 +1,6 @@
 /**
  * @file    HD44780_Demo.cpp
  *
- * @project HD44780_Demo
- *
  * @author  David Zemon
  *
  * @copyright
