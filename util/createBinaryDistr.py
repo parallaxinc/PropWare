@@ -23,6 +23,7 @@ import propwareUtils
 
 
 class CreateBinaryDistr:
+    PROPWARE_ROOT = ""
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     WHITELISTED_FILES = ["CMakeLists.txt", "Doxyfile", "README", "run_all_tests", "run_unit"]
     WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "rb",
@@ -36,6 +37,9 @@ class CreateBinaryDistr:
         self.successes = []
 
         propwareUtils.checkProperWorkingDirectory()
+
+        # Get the current path and truncate "/util" from the end (therefore resulting in PropWare's root)
+        CreateBinaryDistr.PROPWARE_ROOT = os.getcwd()[:-5]
 
         # Import all extra libraries
         importAll()
@@ -54,8 +58,6 @@ class CreateBinaryDistr:
         try:
             for branch in branches:
                 self.runInBranch(branch, areTags)
-        except Exception as e:
-            print(e, file=sys.stderr)
         finally:
             CreateBinaryDistr.attemptCleanExit()
 
@@ -75,7 +77,7 @@ class CreateBinaryDistr:
             with ZipFile(archiveName, 'w') as archive:
                 # Add all whitelisted files (see CreateBinaryDistr.isWhitelisted() ) so long as they are not within a
                 # blacklisted directory
-                for root, dirs, files in os.walk('.'):
+                for root, dirs, files in os.walk(CreateBinaryDistr.PROPWARE_ROOT):
                     # First, determine whether or not the directory we are iterating over is blacklisted...
                     rootList = root.split('/')
                     try:
@@ -98,6 +100,7 @@ class CreateBinaryDistr:
 
         # Clean again. Cleaning is good. You should clean your house more often too!
         CreateBinaryDistr.clean()
+        CreateBinaryDistr.cleanUntracked()
 
     @staticmethod
     def cleanOldArchives():
@@ -108,22 +111,29 @@ class CreateBinaryDistr:
     @staticmethod
     def clean():
         if CreateBinaryDistr.isCMakeBranch():
-            subprocess.call("cmake .")
+            subprocess.call(["cmake", '.'], cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
-        subprocess.call("make clean --silent", shell=True)
+        subprocess.call(["make", "clean", "--silent"], shell=True, cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
         # Not all branches have the simple_clean target, so it's no big deal if it fails
         try:
-            subprocess.check_output("make simple_clean --silent", shell=True)
+            subprocess.check_output(["make", "simple_clean", "--silent"], shell=True,
+                                    cwd=CreateBinaryDistr.PROPWARE_ROOT)
         except subprocess.CalledProcessError as e:
             if 2 != e.returncode:
                 raise e
+
+    @staticmethod
+    def cleanUntracked():
+        # If we've made it this far without failure, then clean all untracked files (leftovers from the previous branch)
+        subprocess.call(["git", "clean", "-fd"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
     @staticmethod
     def checkout(branch, isTag=False):
         assert (isinstance(isTag, bool))
 
         try:
+            CreateBinaryDistr.cleanUntracked()
             subprocess.check_output(["git", "checkout", branch])
         except subprocess.CalledProcessError:
             print("Failed to checkout " + branch, file=sys.stderr)
@@ -140,13 +150,13 @@ class CreateBinaryDistr:
 
     @staticmethod
     def compile():
-        command = "make -j4 --silent"
+        command = ["make", "-j4", "--silent"]
 
         # Determine if Makefile or CMake branch
         if CreateBinaryDistr.isCMakeBranch():
-            command = "cmake . && " + command
+            command = ["cmake", '.', "&&"] + command
 
-        if 0 != subprocess.call(command, shell=True):
+        if 0 != subprocess.call(command, shell=True, cwd=CreateBinaryDistr.PROPWARE_ROOT):
             raise MakeErrorException()
 
     @staticmethod
@@ -164,6 +174,7 @@ class CreateBinaryDistr:
     @staticmethod
     def attemptCleanExit():
         try:
+            CreateBinaryDistr.cleanUntracked()
             subprocess.check_output("git checkout " + CreateBinaryDistr.CURRENT_SUGGESTION, shell=True)
         except subprocess.CalledProcessError as e:
             print("Failed to return git repository to 'current' branch", file=sys.stderr)
@@ -203,7 +214,4 @@ if "__main__" == __name__:
     args = parser.parse_args()
 
     runMe = CreateBinaryDistr()
-    runMe.run(CreateBinaryDistr.BRANCHES)
-
-    if args.tags:
-        runMe.run(CreateBinaryDistr.TAGS, True)
+    runMe.run(CreateBinaryDistr.BRANCHES, args.tags)
