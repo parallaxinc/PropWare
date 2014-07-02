@@ -203,7 +203,7 @@ class CreateBinaryDistr:
 
     @staticmethod
     def isBranchWithImporter():
-        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "propwareImporter.py")
+        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "util" + os.sep + "propwareImporter.py")
 
     def printSummary(self, branches):
         # Let the stdout and stderr buffers catch up
