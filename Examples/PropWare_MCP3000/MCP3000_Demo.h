@@ -5,8 +5,6 @@
  * @brief   Display the value of an analog channel on stdout and as a bar graph
  *          over the 8 LEDs of the QUICKSTART board
  *
- * @project MCP3000_Demo
- *
  * @author  David Zemon
  *
  * @copyright
@@ -39,7 +37,7 @@
  */
 
 #include <propeller.h>
-#include <tinyio.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include <PropWare/PropWare.h>
@@ -64,8 +62,6 @@
 // We're going to read from just channel 1 in this demo, but feel free to read
 // from any that you like
 #define CHANNEL         PropWare::MCP3000::CHANNEL_1
-
-#define DEBUG_LEDS      PropWare::BYTE_2
 
 /**
  * @brief       Report errors to the Debug LEDs for user interpretation

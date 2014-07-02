@@ -1,8 +1,6 @@
 /**
  * @file    MCP3000_Demo.cpp
  *
- * @project MCP3000_Demo
- *
  * @author  David Zemon
  *
  * @copyright
@@ -57,7 +55,7 @@ int main () {
     puts("Welcome to the MCP3000 demo!\n");
 
     while (1) {
-        loopCounter = SECOND / 2 + CNT;
+        loopCounter = (uint32_t) (SECOND / 2 + CNT);
 
         // Loop over the LED output very quickly, until we are within 1
         // millisecond of total period
@@ -66,7 +64,7 @@ int main () {
                 error(err);
 
             // Turn on LEDs proportional to the analog value
-            scaledValue = (data + divisor / 2 - 1) / divisor;
+            scaledValue = (uint8_t) ((data + divisor / 2 - 1) / divisor);
             ledOutput = 0;
             for (i = 0; i < scaledValue; ++i)
                 ledOutput = (ledOutput << 1) | 1;
@@ -75,15 +73,13 @@ int main () {
 
         printf("Channel %u is reading: %u\n", CHANNEL, data);
     }
-
-    return 0;
 }
 
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
-        debugLEDs.write(err);
+        debugLEDs.write((uint32_t) err);
         waitcnt(150*MILLISECOND + CNT);
         debugLEDs.write(0);
         waitcnt(150*MILLISECOND + CNT);

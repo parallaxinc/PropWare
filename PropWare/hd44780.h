@@ -1,8 +1,6 @@
 /**
  * @file        hd44780.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  * @author      Collin Winans
  *
@@ -325,8 +323,8 @@ class HD44780 {
         /**
          * @brief       Print a string to the LCD
          *
-         * @detailed    Via a series of calls to HD44780_putchar, prints each
-         *              character individually
+         * Via a series of calls to HD44780_putchar, prints each character
+         * individually
          *
          * @param[in]   *s  Address where c-string can be found (must be
          *                  null-terminated)
@@ -362,7 +360,7 @@ class HD44780 {
             else {
                 //set RS to data and RW to write
                 this->m_rs.set();
-                this->write(c);
+                this->write((const uint8_t) c);
 
                 // Insert a line wrap if necessary
                 ++this->m_curCol;

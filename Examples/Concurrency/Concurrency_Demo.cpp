@@ -1,8 +1,6 @@
 /**
  * @file    Concurrency_Demo.cpp
  *
- * @project PropWare_Demo
- *
  * @author  David Zemon
  */
 

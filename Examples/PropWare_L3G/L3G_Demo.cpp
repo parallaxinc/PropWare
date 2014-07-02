@@ -1,8 +1,6 @@
 /**
  * @file    L3G_Demo.cpp
  *
- * @project L3G_Demo
- *
  * @author  David Zemon
  *
  * @copyright

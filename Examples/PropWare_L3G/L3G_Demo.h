@@ -4,8 +4,6 @@
 /**
  * @brief   Demonstration using various functions of the L3G gyroscope
  *
- * @project L3G_Demo
- *
  * @author  David Zemon
  *
  * @copyright

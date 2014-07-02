@@ -1,8 +1,6 @@
 /**
  * @file    spi_as.S
- */
-
-/**
+ *
  * @brief   SPI routine for Parallax Propeller. Runs in master mode only.
  *
  * @project PropWare
@@ -40,7 +38,7 @@
 #define SPI_FUNC_READ_FAST      3
 #define SPI_FUNC_READ_SECTOR    4
 #define SPI_FUNC_SET_MODE       5
-#define SPI_FUNC_SET_BITMODE    6
+#define SPI_FUNC_SET_bitMode    6
 #define SPI_FUNC_SET_FREQ       7
 #define SPI_FUNC_GET_FREQ       8
 
@@ -48,7 +46,7 @@
 
 #define SPI_PHASE_BIT           BIT_0
 #define SPI_POLARITY_BIT        BIT_1                   '' When set, clock idles high, When reset, clock idles low
-#define SPI_BITMODE_BIT         BIT_2                   '' MSB_FIRST == HIGH, LSB_FIRST == LOW
+#define SPI_bitMode_BIT         BIT_2                   '' MSB_FIRST == HIGH, LSB_FIRST == LOW
 
 #define SPI_FUNC_BITS           BYTE_0                  '' Interpret bits 7-0 as a function descriptor
 #define SPI_BIT_COUNT_BITS      BYTE_1                  '' Interpret bits 15-8 as bit-count descriptor
@@ -63,7 +61,7 @@
                         or dira, testLEDs               '' DEBUG: LEDs used for debugging purposes, can be removed later
                         wrlong negOne, par              '' Inform parent cog that initialization has begun
 
-                        // Begin by retreiving all parameters...
+                        // Begin by retrieving all parameters...
                         call #READ_CMD                  '' Read in the pin mask MOSI
                         mov mosi, mailbox
                         call #READ_CMD                  '' Read in the pin number for MOSI
@@ -114,9 +112,9 @@ LOOP                    // Retrieve a command
                         cmp temp, #SPI_FUNC_SET_MODE wz
         if_z            jmp #SET_MODE
 
-                        // If command is "Set bitmode
-                        cmp temp, #SPI_FUNC_SET_BITMODE wz
-        if_z            jmp #SET_BITMODE
+                        // If command is "Set bitMode
+                        cmp temp, #SPI_FUNC_SET_bitMode wz
+        if_z            jmp #SET_bitMode
 
                         // If command is "Set clock"
                         cmp temp, #SPI_FUNC_SET_FREQ wz
@@ -129,38 +127,38 @@ LOOP                    // Retrieve a command
                         // Default: Return to loop
                         jmp #LOOP
 
-/* FUNCTION: spi_set_mode() */
+/* FUNCTION: PropWare::SPI::set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA_CONFIRM                 '' Read in the mode
 
                         mov clkPhase, mailbox           '' Store the phase
                         and clkPhase, #SPI_PHASE_BIT    '' Clear the clock polarity bit
 
-                        test mailbox, #BIT_1 wz         '' TODO: WHY IS "SPI_POLARITY_BIT" NOT WORKING!?!?!?!?!?!?
+                        test mailbox, #BIT_1 wz
                         muxnz outa, sclk
 
                         jmp #LOOP
 
-/* FUNCTION: spi_set_bit_mode() */
-SET_BITMODE             // Set shifting bitmode (LSB or MSB first) of communication
-                        call #READ_CMD                  '' Read in bitmode
-                        mov bitmode, mailbox
+/* FUNCTION: PropWare::SPI::set_bit_mode() */
+SET_bitMode             // Set shifting bitMode (LSB or MSB first) of communication
+                        call #READ_CMD                  '' Read in bitMode
+                        mov bitMode, mailbox
                         jmp #LOOP
 
-/* FUNCTION: spi_set_clock() */
+/* FUNCTION: PropWare::SPI::set_clock() */
 SET_FREQ                call #READ_CMD                  '' Using READ_CMD instead of READ_DATA_CONFIRM because -1 is not a valid clock signal
                         mov clkDelay, mailbox
                         jmp #LOOP
 
-/* FUNCTION: spi_get_clock() */
+/* FUNCTION: PropWare::SPI::get_clock() */
 GET_FREQ                mov data, clkDelay
                         call #WRITE_DATA
                         jmp #LOOP
 
-/* FUNCTION: spi_shift_out() */
+/* FUNCTION: PropWare::SPI::send() */
 SEND                    // Interpret the bit count and mode of output for this send command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
 
 SEND_rd_data            call #READ_DATA
@@ -169,7 +167,7 @@ SEND_rd_data            call #READ_DATA
 
                         mov data, mailbox               '' Initialize 'data' register
 
-                        cmp bitmode, #SPI_BITMODE_BIT wz        '' Is bitmode MSB first or LSB first?
+                        cmp bitMode, #SPI_bitMode_BIT wz        '' Is bitMode MSB first or LSB first?
                         mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
                         add clock, clkDelay             '' /
         if_z            jmp #msb_first
@@ -214,10 +212,10 @@ SEND_complete           wrlong negOne, par              '' Indicate that send is
                         or outa, mosi                   '' Leave MOSI in the high state
                         jmp #LOOP
 
-/* FUNCTION: spi_shift_in() */
+/* FUNCTION: PropWare::SPI::shift_in() */
 READ                    // Interpret the bit count and mode of output for this read command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
                         mov loopIdx, bitCount           '' Create a second storage register for the bit count - used in LSB modes
                         mov data, #0                    '' Clear out the data register, ready for input
@@ -226,7 +224,7 @@ READ                    // Interpret the bit count and mode of output for this r
                         add clock, clkDelay
 
                         // Determine clock phase and bit mode...
-                        cmp bitmode, #SPI_BITMODE_BIT wz    '' First up is determining bitmode
+                        cmp bitMode, #SPI_bitMode_BIT wz    '' First up is determining bitMode
         if_z            jmp #read_msb_first
 
                         cmp clkPhase, #SPI_PHASE_BIT wz     '' So it's LSB first, now determine CPHA
@@ -299,10 +297,10 @@ lsb_cpha1               // Read in a value LSB-first with data valid after the c
                         shr data, temp
 lsb_cpha1_ret           ret
 
-/* FUNCTION: spi_shift_out_fast() */
+/* FUNCTION: PropWare::SPI::shift_out_fast() */
 SEND_fast               // Interpret the bit count and mode of output for this send command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
 
 SEND_rd_data_fast       call #READ_DATA
@@ -313,7 +311,7 @@ SEND_rd_data_fast       call #READ_DATA
 
                         mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
                         add clock, clkDelay             '' /
-                        cmp bitmode, #SPI_BITMODE_BIT wz        '' Is bitmode MSB first or LSB first?
+                        cmp bitMode, #SPI_bitMode_BIT wz        '' Is bitMode MSB first or LSB first?
         if_z            jmp #msb_first
 
                         // LSB_FIRST Initialization
@@ -350,10 +348,10 @@ SEND_complete_fast      wrlong negOne, par              '' Indicate that send is
                         or outa, mosi                   '' Leave MOSI in the high state
                         jmp #LOOP
 
-/* FUNCTION: spi_shift_in_fast() */
+/* FUNCTION: PropWare::SPI::shift_in_fast() */
 READ_fast               // Interpret the bit count and mode of output for this read command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
                         mov loopIdx, bitCount           '' Create a second storage register for the bit count - used in LSB modes
                         mov data, #0                    '' Clear out the data register, ready for input
@@ -362,7 +360,7 @@ READ_fast               // Interpret the bit count and mode of output for this r
                         add clock, clkDelay
 
                         // Determine clock phase and bit mode...
-                        cmp bitmode, #SPI_BITMODE_BIT wz    '' First up is determining bitmode
+                        cmp bitMode, #SPI_bitMode_BIT wz    '' First up is determining bitMode
         if_z            jmp #read_msb_first_fast
 
                         cmp clkPhase, #SPI_PHASE_BIT wz     '' So it's LSB first, now determine CPHA
@@ -427,7 +425,7 @@ lsb_post_fast           // Read in a value LSB-first with data valid after the c
                         shr data, temp
 lsb_post_fast_ret       ret
 
-/* FUNCTION: SPIReadSDSector() */
+/* FUNCTION: PropWare::SPI::read_sd_sector() */
 read_sector             // Read an entire sector from the SD card as quickly as possible, write values to the mailbox
 read_sector_addr        call #READ_DATA                 '' Read in hub address to store the data
                         cmp mailbox, negOne wz          '' Are we reading a valid parameter?
@@ -502,14 +500,14 @@ read_byte               test miso, ina wc
                         wrlong negOne, par
                         jmp #LOOP
 
-/* FUNCTION: SPIPostClock() */
+/* FUNCTION:  */
 POST_CLOCK              waitcnt clock, clkDelay
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         xor outa, sclk
 POST_CLOCK_ret          ret
 
-/* FUNCTION: SPIPreClock() */
+/* FUNCTION:  */
 PRE_CLOCK               xor outa, sclk
                         waitcnt clock, clkDelay
                         xor outa, sclk
@@ -552,7 +550,7 @@ SEND_TO_LED_ret         ret
 /* Pre-Initialized Values */
 negOne                  long    -1                      '' Used for comparison purposes
 spiFuncBits             long    SPI_FUNC_BITS
-spiBitCountBits         long    SPI_BIT_COUNT_BITS
+spibitCountBits         long    SPI_BIT_COUNT_BITS
 dataMask                long    BIT_31
 sdSectorSize            long    SD_SECTOR_SIZE
 
@@ -574,7 +572,7 @@ temp                    res     1                       '' Working register
 temp2                   res     1
 loopIdx                 res     1                       '' Used when bitCount cannot be modified during a loop (LSB first modes)
 clock                   res     1                       '' Used for clocking in and out with SCLK
-bitmode                 res     1                       '' Store the current bitmode (LSB or MSB first)
+bitMode                 res     1                       '' Store the current bitMode (LSB or MSB first)
 clkPhase                res     1                       '' Store the current clock phase (CPHA)
 bitCount                res     1                       '' Keep track of how many bits need to be sent/received - used for DJNZ loop
 data                    res     1                       '' Working register, Data is written to and read from this register

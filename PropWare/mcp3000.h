@@ -163,7 +163,7 @@ class MCP3000 {
             this->m_cs.clear();
             check_errors(
                     this->m_spi->shift_out(PropWare::MCP3000::OPTN_WIDTH,
-                            options));
+                            (uint32_t) options));
             check_errors(
                     this->m_spi->shift_in(this->m_dataWidth, dat,
                             sizeof(*dat)));
@@ -205,7 +205,7 @@ class MCP3000 {
             this->m_cs.clear();
             check_errors(
                     this->m_spi->shift_out(PropWare::MCP3000::OPTN_WIDTH,
-                            options));
+                            (uint32_t) options));
             check_errors(
                     this->m_spi->shift_in(this->m_dataWidth, dat,
                             sizeof(*dat)));

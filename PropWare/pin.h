@@ -1,8 +1,6 @@
 /**
  * @file        pin.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  *
  * @copyright
@@ -67,7 +65,8 @@ class Pin: public PropWare::Port {
          * @param[in]   direction   Direction to initialize pin; One of
          *                          PropWare::Pin::Dir
          */
-        Pin (const PropWare::Port::Mask mask, const PropWare::Port::Dir direction) :
+        Pin (const PropWare::Port::Mask mask,
+                const PropWare::Port::Dir direction) :
                 PropWare::Port(mask, direction) {
         }
 
@@ -100,6 +99,10 @@ class Pin: public PropWare::Port {
             this->PropWare::Port::set_mask(mask);
         }
 
+        PropWare::Port::Mask get_mask () const {
+            return (PropWare::Port::Mask) this->m_mask;
+        }
+
         /**
          * @brief   Read the value from a single pin and return its state
          *
@@ -107,6 +110,39 @@ class Pin: public PropWare::Port {
          */
         bool read () const {
             return (bool) this->read_fast();
+        }
+
+        /**
+         * @brief   Hold cog execution until an input pin goes high
+         *
+         * @pre     Pin must be configured as input; You will have very sad and
+         *          undesirable results if your pin is an output at the time
+         *          of calling this function
+         */
+        void wait_until_high () const {
+            waitpeq(this->m_mask, this->m_mask);
+        }
+
+        /**
+         * @brief   Hold cog execution until an input pin goes low
+         *
+         * @pre     Pin must be configured as input; You will have very sad and
+         *          undesirable results if your pin is an output at the time
+         *          of calling this function
+         */
+        void wait_until_low () const {
+            waitpeq(0, this->m_mask);
+        }
+
+        /**
+         * @brief   Hold cog execution until an input pin toggles
+         *
+         * @pre     Pin must be configured as input; You will have very sad and
+         *          undesirable results if your pin is an output at the time
+         *          of calling this function
+         */
+        void wait_until_toggle () const {
+            waitpne(this->read_fast(), this->m_mask);
         }
 
         /**

@@ -1,8 +1,6 @@
 /**
  * @file        spi.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  *
  * @copyright
@@ -31,6 +29,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/thread.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 
@@ -82,32 +81,24 @@ extern uint32_t _SPIStartCog (void *arg);
  * @brief       SPI serial communications library; Core functionality comes from
  *              a dedicated assembly cog
  *
- * @detailed    Generally, multiple instances of the SPI class are not desired.
- *              To avoid the programmer from accidentally creating multiple
- *              instances, this class is set up as a singleton. A static
- *              instance can be retrieved with PropWare::SPI::getInstance(). If
- *              multiple instances of PropWare::SPI are desired, the PropWare
- *              library (and your project) should be built from source with
- *              PROPWARE_NO_SAFE_SPI defined
+ * Generally, multiple instances of the SPI class are not desired. To avoid
+ * the programmer from accidentally creating multiple instances, this class is
+ * set up as a singleton. A static instance can be retrieved with
+ * PropWare::SPI::getInstance(). If multiple instances of PropWare::SPI are
+ * desired, the PropWare library (and your project) should be built from
+ * source with PROPWARE_NO_SAFE_SPI defined
  */
 class SPI {
 #define check_errors_w_str(x, y) \
-    if ((err = x)) { \
-         \
-        strcpy(this->m_errorInMethod, y);  \
-        return err;}
-
-    public:
-        /** Used as index for an array of PropWare objects */
-        static const uint8_t PROPWARE_OBJECT_NUMBER = 0;
+        if ((err = x)) {strcpy(this->m_errorInMethod, y);return err;}
 
     public:
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
-         * @detailed    CPOL 0 refers to a low polarity (where the clock idles
-         *              in the low state) and CPOL 1 is for high polarity.
-         *              TODO: Describe phase
+         * CPOL 0 refers to a low polarity (where the clock idles in the low
+         * state) and CPOL 1 is for high polarity.
+         * TODO: Describe phase
          * <table><tr><td>SPI Mode</td><td>CPOL</td><td>CPHA</td></tr><tr>
          * <td>0</td><td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td>
          * </tr><tr><td>2</td><td>1</td><td>0</td></tr><tr><td>3</td><td>1</td>
@@ -126,7 +117,6 @@ class SPI {
             /** Mode 1 */MODE_1,
             /** Mode 2 */MODE_2,
             /** Mode 3 */MODE_3,
-            /** Number of SPI modes */MODES
         } Mode;
 
         /**
@@ -141,9 +131,8 @@ class SPI {
              * Start the enumeration where SPI::Mode left off; this ensures no
              * overlap
              */
-            LSB_FIRST = SPI::MODES,
-            MSB_FIRST,
-            BIT_MODES
+            LSB_FIRST = SPI::MODE_3 + 1,
+            MSB_FIRST
         } BitMode;
 
         /**
@@ -180,7 +169,7 @@ class SPI {
 #ifndef PROPWARE_NO_SAFE_SPI
     private:
 #else
-        public:
+    public:
 #endif
         /**
          * @brief   Create a new instance of SPI which will, upon calling
@@ -231,11 +220,6 @@ class SPI {
             // Check clock frequency
             if (SPI::MAX_CLOCK <= frequency)
                 return SPI::INVALID_FREQ;
-
-            if (SPI::MODES <= mode)
-                return SPI::INVALID_MODE;
-            if (SPI::LSB_FIRST != bitmode && SPI::MSB_FIRST != bitmode)
-                return SPI::INVALID_BITMODE;
 #endif
 
             // If cog already started, do not start another
@@ -245,7 +229,7 @@ class SPI {
                 // Set the mailbox to 0 (anything other than -1) so that we know
                 // when the SPI cog has started
                 this->m_mailbox = 0;
-                this->m_cog = PropWare::_SPIStartCog((void *) &this->m_mailbox);
+                this->m_cog = (int8_t) PropWare::_SPIStartCog((void *) &this->m_mailbox);
                 if (!this->is_running())
                     return SPI::COG_NOT_STARTED;
 
@@ -275,7 +259,7 @@ class SPI {
          * @return  Returns 0 upon success, otherwise error code (will return
          *          SPI::COG_NOT_STARTED if no cog has previously been started)
          */
-        PropWare::ErrorCode stop (void) {
+        PropWare::ErrorCode stop () {
             if (!this->is_running())
                 return SPI::NO_ERROR;
 
@@ -289,9 +273,9 @@ class SPI {
         /**
          * @brief    Determine if the SPI cog has already been initialized
          *
-         * @return       Returns 1 if the SPI cog is up and running, 0 otherwise
+         * @return   Returns 1 if the SPI cog is up and running, 0 otherwise
          */
-        bool is_running (void) {
+        bool is_running () {
             return -1 != this->m_cog;
         }
 
@@ -300,11 +284,11 @@ class SPI {
          *
          * @return  May return non-zero error code when a timeout occurs
          */
-        PropWare::ErrorCode wait (void) {
+        PropWare::ErrorCode wait () {
             const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
-            while ((uint32_t) -1 != this->m_mailbox)
+            while (-1 != this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < SPI::TIMEOUT_WIGGLE_ROOM)
                     return SPI::TIMEOUT;
 
@@ -322,7 +306,7 @@ class SPI {
             const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
-            while (value == this->m_mailbox)
+            while (value == (uint32_t) this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < SPI::TIMEOUT_WIGGLE_ROOM)
                     // Always use return instead of spi_error() for private
                     // f0unctions
@@ -345,10 +329,6 @@ class SPI {
 
             if (!this->is_running())
                 return SPI::MODULE_NOT_RUNNING;
-#ifdef SPI_OPTION_DEBUG_PARAMS
-            if (SPI::MODES <= mode)
-                return SPI::INVALID_MODE;
-#endif
 
             // Wait for SPI cog to go idle
             check_errors_w_str(this->wait(), str);
@@ -599,7 +579,7 @@ class SPI {
                     | (bits << PropWare::SPI::BITS_OFFSET);
 
             // Wait for a value to be written
-            while ((uint32_t) -1 == this->m_mailbox)
+            while (-1 == this->m_mailbox)
                 waitcnt(PropWare::SPI::TIMEOUT_WIGGLE_ROOM + CNT);
 
             // Determine if output variable is char, short or long and write
@@ -607,15 +587,15 @@ class SPI {
             switch (bytes) {
                 case sizeof(uint8_t):
                     par8 = (uint8_t *) data;
-                    *par8 = this->m_mailbox;
+                    *par8 = (uint8_t) this->m_mailbox;
                     break;
                 case sizeof(uint16_t):
                     par16 = (uint16_t *) data;
-                    *par16 = this->m_mailbox;
+                    *par16 = (uint16_t) this->m_mailbox;
                     break;
                 case sizeof(uint32_t):
                     par32 = (uint32_t *) data;
-                    *par32 = this->m_mailbox;
+                    *par32 = (uint32_t) this->m_mailbox;
                     break;
                 default:
                     return PropWare::SPI::INVALID_BYTE_SIZE;
@@ -648,10 +628,10 @@ class SPI {
         }
 #endif
         /**
-         * @brief   Print through UART an error string followed by entering an
-         *          infinite loop
+         * @brief      Print through UART an error string followed by entering
+         *             an infinite loop
          *
-         * @param   err     Error number used to determine error string
+         * @param[in]  err     Error number used to determine error string
          */
         void print_error_str (const SPI::ErrorCode err) const {
             char str[] = "SPI Error %u: %s\n";
@@ -714,7 +694,7 @@ class SPI {
             }
         }
 
-    private:
+    protected:
         /************************************
          *** Private Constant Definitions ***
          ************************************/
@@ -737,7 +717,7 @@ class SPI {
         // MSB_FIRST == HIGH; LSB_FIRST == LOW
         static const uint8_t BITMODE_BIT = BIT_2;
 
-    private:
+    protected:
         /***********************************
          *** Private Method Declarations ***
          ***********************************/
@@ -761,7 +741,7 @@ class SPI {
             const uint32_t timeoutCnt = PropWare::SPI::WR_TIMEOUT_VAL + CNT;
 
             // Wait for a value to be written
-            while ((uint32_t) -1 == this->m_mailbox)
+            while (-1 == this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < PropWare::SPI::TIMEOUT_WIGGLE_ROOM)
                     return PropWare::SPI::TIMEOUT_RD;
 
@@ -770,15 +750,15 @@ class SPI {
             switch (size) {
                 case sizeof(uint8_t):
                     par8 = (uint8_t *) par;
-                    *par8 = this->m_mailbox;
+                    *par8 = (uint8_t) this->m_mailbox;
                     break;
                 case sizeof(uint16_t):
                     par16 = (uint16_t *) par;
-                    *par16 = this->m_mailbox;
+                    *par16 = (uint16_t) this->m_mailbox;
                     break;
                 case sizeof(uint32_t):
                     par32 = (uint32_t *) par;
-                    *par32 = this->m_mailbox;
+                    *par32 = (uint32_t) this->m_mailbox;
                     break;
                 default:
                     return PropWare::SPI::INVALID_BYTE_SIZE;
@@ -791,14 +771,14 @@ class SPI {
             return SPI::NO_ERROR;
         }
 
-    private:
+    protected:
         /********************************
          *** Private Member Variables ***
          ********************************/
-        volatile uint32_t m_mailbox;
+        volatile atomic_t m_mailbox;
         int8_t m_cog;
         char m_errorInMethod[16];
-};
+    };
 
 }
 

@@ -4,8 +4,6 @@
 /**
  * @brief   Display "Hello world" on LCD screen and demonstrate line-wrapping
  *
- * @project HD44780_Demo
- *
  * @author  David Zemon
  *
  * @copyright

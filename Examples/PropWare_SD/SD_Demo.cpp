@@ -1,8 +1,6 @@
 /**
  * @file    SD_Demo.cpp
  *
- * @project SD_Demo
- *
  * @author  David Zemon
  *
  * @copyright

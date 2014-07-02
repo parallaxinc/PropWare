@@ -45,11 +45,14 @@ endif
 # where we installed the propeller binaries and libraries
 PROPGCC_PREFIX ?= /opt/parallax
 
-# libgcc directory
-LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
-
 # Define a default memory model
 MODEL ?= lmm
+
+# XMM is deprecated and now means "xmm-split"; To ensure that the proper library
+# is linked, 'xmm' will be re-mapped to xmm-split
+ifeq ($(MODEL), xmm)
+	MODEL=xmm-split
+endif
 
 # Define a default board
 BOARD ?= $(PROPELLER_LOAD_BOARD)
@@ -61,7 +64,7 @@ endif
 CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
 CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
 CSTANDARD = -std=c99
-CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
+CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics -fno-rtti
 CXXSTANDARD = -std=gnu++0x
 LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp

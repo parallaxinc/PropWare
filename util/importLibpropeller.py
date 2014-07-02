@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # @file    importLibpropeller.py
 # @author  David Zemon
-# @project PropWare
 #
 # Created with: PyCharm Community Edition
 
@@ -24,8 +23,8 @@ class ImportLibpropeller:
     DESTINATION = PROPWARE_ROOT + "libpropeller" + os.sep
     SOURCE_DROPBOX = "source"
     DESTINATION_SOURCES = DESTINATION + SOURCE_DROPBOX + os.sep
-    SOURCE_OBJECT_LIST = "libpropellerObjects.mk"
-    CLEAN_EXCLUDES = ["cmm", "lmm", "xmm", "xmmc", "Makefile", "libpropeller.mk"]
+    SOURCE_OBJECT_LIST = "libpropellerObjects.cmake"
+    CLEAN_EXCLUDES = ["cog", "cmm", "lmm", "xmm-split", "xmm-single", "xmmc", "CMakeLists.txt", "libpropeller.cmake"]
     WHITELISTED_SOURCE_FILES = ["numbers.cpp"]
 
     def __init__(self):
@@ -70,10 +69,10 @@ class ImportLibpropeller:
         # in any guaranteed order)
         self.sourceFiles.sort()
         with open(ImportLibpropeller.DESTINATION_SOURCES + ImportLibpropeller.SOURCE_OBJECT_LIST, 'w') as f:
-            f.write("OBJS = ")
+            f.write("set(LIBPROPELLER_OBJECTS")
             for sourceFile in self.sourceFiles:
-                sourceFile = sourceFile.split('.')[0]  # Remove the extension
-                f.write(sourceFile + ".o ")
+                f.write('\n' + ' '*8 + '../' + sourceFile)
+            f.write(')')
 
     def createAndUpdateGit(self):
         """
@@ -122,7 +121,10 @@ class ImportLibpropeller:
                     for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION + entry):
                         for fileName in files:
                             if fileName not in ImportLibpropeller.CLEAN_EXCLUDES:
-                                os.remove(root + '/' + fileName)
+                                os.remove(root + os.sep + fileName)
+                    destroyMe = ImportLibpropeller.DESTINATION + entry + os.sep + "CMakeFiles"
+                    if os.path.exists(destroyMe):
+                        shutil.rmtree(destroyMe)
                 elif entry not in ImportLibpropeller.CLEAN_EXCLUDES:
                     removable = ImportLibpropeller.DESTINATION + entry
                     if os.path.isdir(removable):

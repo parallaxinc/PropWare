@@ -1,8 +1,6 @@
 /**
  * @file    PropWare.h
  *
- * @project PropWare
- *
  * @author  David Zemon
  *
  * @copyright
@@ -25,7 +23,6 @@
  * SOFTWARE.
  */
 
-
 #ifdef ASM_OBJ_FILE
 #include <PropWare/PropWare_asm.h>
 #endif
@@ -35,7 +32,7 @@
 
 #include <propeller.h>
 #include <sys/null.h>
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller
@@ -48,9 +45,9 @@ namespace PropWare {
 #define check_errors(x)      if ((err = x)) return err
 #endif
 
-#define SECOND              ((unsigned long long) CLKFREQ)
-#define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
-#define MICROSECOND         ((unsigned long long) (MILLISECOND / 1000))
+#define SECOND              ((uint64_t) CLKFREQ)
+#define MILLISECOND         ((uint64_t) (CLKFREQ / 1000))
+#define MICROSECOND         ((uint64_t) (MILLISECOND / 1000))
 
 typedef int8_t ErrorCode;
 
@@ -120,6 +117,16 @@ typedef enum {
  * @return      Number of bits that are non-zero in par
  */
 uint8_t count_bits (uint32_t par);
+
+/**
+ * @brief       Determine the number of microseconds passed since a starting
+ *              point
+ *
+ * @param[in]   start   A value from the system counter (CNT)
+ *
+ * @return      Microseconds since start
+ */
+uint32_t measure_time_interval (const register uint32_t start);
 
 }
 

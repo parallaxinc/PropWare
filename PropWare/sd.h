@@ -1,8 +1,6 @@
 /**
  * @file        sd.h
  *
- * @project     PropWare
- *
  * @author      David Zemon
  *
  * @copyright
@@ -102,8 +100,6 @@ namespace PropWare {
  *          which would ignore any error less than 6
  */
 class SD {
-    public:
-        static const uint8_t PROPWARE_OBJECT_NUMBER = 1;
     public:
         /** Number of characters printed to the terminal before a line break */
         static const uint8_t LINE_SIZE = 16;
@@ -241,7 +237,7 @@ class SD {
                 /**  Buffer for SD card contents */
                 uint8_t buf[SD_SECTOR_SIZE];
                 /** Buffer ID - determine who owns the current information */
-                uint8_t id;
+                int8_t id;
                 /** Store the current cluster's starting sector number */
                 uint32_t curClusterStartAddr;
                 /**
@@ -258,7 +254,7 @@ class SD {
                  * When set, the currently loaded sector has been modified since
                  * it was read from the SD card
                  */
-                uint8_t mod;
+                bool mod;
 #endif
         };
 
@@ -284,7 +280,7 @@ class SD {
                  * When the length of a file is changed, this variable will be
                  * set, otherwise cleared
                  */
-                uint8_t mod;
+                bool mod;
                 /** File's starting allocation unit */
                 uint32_t firstAllocUnit;
                 /**
@@ -328,9 +324,9 @@ class SD {
          * @brief       Initialize SD card communication over SPI for 3.3V
          *              configuration
          *
-         * @detailed    Starts an SPI cog IFF an SPI cog has not already been
-         *              started; If one has been started, only the cs and freq
-         *              parameter will have effect
+         * Starts an SPI cog IFF an SPI cog has not already been started; If
+         * one has been started, only the cs and freq parameter will have
+         * effect
          *
          * @param[in]   mosi        PinNum mask for MOSI pin
          * @param[in]   miso        PinNum mask for MISO pin
@@ -444,12 +440,11 @@ class SD {
          * @brief       Change the current working directory to *d (similar to
          *              'cd dir')
          *
-         * @detailed    At the moment, the target directory must be an immediate
-         *              child of the current directory ("." and ".." are
-         *              allowed). I hope to implement the ability to change to
-         *              any directory soon (such as "cd ../siblingDirectory")
-         *              but attempting to do this now would currently result in
-         *              an SD_FILENAME_NOT_FOUND error
+         * At the moment, the target directory must be an immediate child of
+         * the current directory ("." and ".." are allowed). I hope to
+         * implement the ability to change to any directory soon (such as "cd
+         * ../siblingDirectory") but attempting to do this now would currently
+         * result in an SD_FILENAME_NOT_FOUND error
          *
          * @param[in]   *d     Short filename of directory to change to
          *
@@ -506,7 +501,7 @@ class SD {
             this->get_fat_value(this->m_buf.curAllocUnit,
                     &(this->m_buf.nextAllocUnit));
             if (0 == this->m_buf.curAllocUnit) {
-                this->m_buf.curAllocUnit = -1;
+                this->m_buf.curAllocUnit = (uint32_t) -1;
                 this->m_dir_firstAllocUnit = this->m_rootAllocUnit;
             } else
                 this->m_dir_firstAllocUnit = this->m_buf.curAllocUnit;
@@ -533,8 +528,8 @@ class SD {
          * @brief       Open a file with a given name and load its information
          *              into the file pointer
          *
-         * @detailed    Load the first sector of a file into the file buffer;
-         *              Initialize global character pointers
+         * Load the first sector of a file into the file buffer; Initialize
+         * global character pointers
          *
          * @note        Currently, only one file mode is supported and is best
          *              described as "r+"
@@ -609,7 +604,7 @@ class SD {
                     check_errors(this->create_file(name, &fileEntryOffset));
                 } else
 #endif
-                    // SDFind returned unknown error - throw it
+                    // SD::find returned unknown error - throw it
                     return err;
             }
 
@@ -657,7 +652,7 @@ class SD {
             // useful in the case that the file needs to be extended
             f->maxSectors = f->length >> SD::SECTOR_SIZE_SHIFT;
             if (!(f->maxSectors))
-                f->maxSectors = 1 << this->m_sectorsPerCluster_shift;
+                f->maxSectors = (uint32_t) (1 << this->m_sectorsPerCluster_shift);
             while (f->maxSectors % (1 << this->m_sectorsPerCluster_shift))
                 ++(f->maxSectors);
             f->buf->mod = false;
@@ -758,9 +753,10 @@ class SD {
         /**
          * @brief       Insert a character into a given file
          *
-         * @detailed    Insert 'c' at the location pointed to by the file's
-         *              write pointer; Note: the read and write pointers may be
-         *              merged into one at a later date
+         * Insert 'c' at the location pointed to by the file's write pointer;
+         *
+         * Note: the read and write pointers may be merged into one at a
+         * later date
          *
          * @param[in]   c       Character to be inserted
          * @param[in]   *f      Address of the desired file object
@@ -770,7 +766,7 @@ class SD {
         PropWare::ErrorCode fputc (const char c, SD::File *f) {
             PropWare::ErrorCode err;
             // Determines byte-offset within a sector
-            uint16_t sectorPtr = f->wPtr % SD::SECTOR_SIZE;
+            uint16_t sectorPtr = (uint16_t) (f->wPtr % SD::SECTOR_SIZE);
             // Determine the needed file sector
             uint32_t sectorOffset = (f->wPtr >> SD::SECTOR_SIZE_SHIFT);
 
@@ -811,7 +807,7 @@ class SD {
                 ++(f->length);
                 f->mod = true;
             }
-            f->buf->buf[sectorPtr] = c;
+            f->buf->buf[sectorPtr] = (uint8_t) c;
             f->buf->mod = true;
 
             return 0;
@@ -820,9 +816,8 @@ class SD {
         /**
          * @brief       Insert a c-string into a file
          *
-         * @detailed    Insert an array of bytes into the file object pointed to
-         *              by 'f' beginning at address 's' until the value 0 is
-         *              reached
+         * Insert an array of bytes into the file object pointed to by 'f'
+         * beginning at address 's' until the value 0 is reached
          *
          * @param[in]   *s  C-string to be inserted
          * @param[in]   *f  Address of file object
@@ -842,7 +837,7 @@ class SD {
         /**
          * @brief       Read one character from the currently opened file.
          *
-         * @detailed    NOTE: This function does not include error checking
+         * NOTE: This function does not include error checking
          *
          * @pre         *f must point to a currently opened and valid file
          * @pre         The file must have at least one byte left - no error
@@ -856,7 +851,7 @@ class SD {
          */
         char fgetc (SD::File *f) {
             char c;
-            uint16_t ptr = f->rPtr % SD::SECTOR_SIZE;
+            uint16_t ptr = (uint16_t) (f->rPtr % SD::SECTOR_SIZE);
 
             // Determine if the currently loaded sector is what we need
             uint32_t sectorOffset = (f->rPtr >> SD::SECTOR_SIZE_SHIFT);
@@ -902,10 +897,10 @@ class SD {
 
             --size;
             while (count < size) {
-                c = this->fgetc(f);
+                c = (uint32_t) this->fgetc(f);
                 if ((uint32_t) EOF == c)
                     break;
-                s[count++] = c;
+                s[count++] = (char) c;
                 if ('\n' == c)
                     break;
             }
@@ -945,7 +940,7 @@ class SD {
                 const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
-                    f->rPtr = offset;
+                    f->rPtr = (uint32_t) offset;
                     break;
                 case SEEK_CUR:
                     f->rPtr = f->rPtr + offset;
@@ -978,7 +973,7 @@ class SD {
                 const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
-                    f->wPtr = offset;
+                    f->wPtr = (uint32_t) offset;
                     break;
                 case SEEK_CUR:
                     f->wPtr += offset;
@@ -1039,7 +1034,7 @@ class SD {
             char arg[SD_SHELL_ARG_LEN] = "";
             char uppercaseName[SD_SHELL_ARG_LEN] = "";
             uint8_t i, j;
-            PropWare::ErrorCode err;
+            PropWare::ErrorCode err = 0;
 
             printf("Welcome to David's quick shell! "
                     "There is no help, nor much to do.\n");
@@ -1214,10 +1209,7 @@ class SD {
 
             // Attempt to find the file
             if ((err = this->fopen(name, f, SD::FILE_MODE_R))) {
-                if ((uint8_t) SD::EOC_END == err)
-                    return err;
-                else
-                    return err;
+                return err;
             } else {
                 // Loop over each character and print them to the screen
                 // one-by-one
@@ -1492,7 +1484,7 @@ class SD {
             // Send at least 72 clock cycles to enable the SD card
             this->m_cs.set();
             for (i = 0; i < 128; ++i)
-                check_errors(this->m_spi->shift_out(16, -1));
+                check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
 
             // Be very super 100% sure that all clocks have finished ticking
             // before setting chip select low
@@ -1554,7 +1546,7 @@ class SD {
         inline PropWare::ErrorCode send_active (uint8_t response[]) {
             PropWare::ErrorCode err;
             uint32_t timeout;
-            uint32_t longWiggleRoom = 3 * MILLISECOND;
+            uint32_t longWiggleRoom = (uint32_t) (3 * MILLISECOND);
             bool stageCleared = false;
 
             // Attempt to send active
@@ -1790,8 +1782,8 @@ class SD {
                     this->read_data_block(this->m_rootAddr, this->m_buf.buf));
             this->m_buf.curClusterStartAddr = this->m_rootAddr;
             if (SD::FAT_16 == this->m_filesystem) {
-                this->m_dir_firstAllocUnit = -1;
-                this->m_buf.curAllocUnit = -1;
+                this->m_dir_firstAllocUnit = (uint32_t) -1;
+                this->m_buf.curAllocUnit = (uint32_t) -1;
             } else {
                 this->m_buf.curAllocUnit = this->m_dir_firstAllocUnit =
                         this->m_rootAllocUnit;
@@ -1913,10 +1905,10 @@ class SD {
 
             // Responses should always be followed up by outputting 8 clocks
             // with MOSI high
-            check_errors(this->m_spi->shift_out(16, -1));
-            check_errors(this->m_spi->shift_out(16, -1));
-            check_errors(this->m_spi->shift_out(16, -1));
-            check_errors(this->m_spi->shift_out(16, -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
 
             return 0;
         }
@@ -2462,8 +2454,8 @@ class SD {
             }
 
             // Followed by finding the correct sector
-            f->buf->curSectorOffset = offset
-                    % (1 << this->m_sectorsPerCluster_shift);
+            f->buf->curSectorOffset = (uint8_t) (offset
+                    % (1 << this->m_sectorsPerCluster_shift));
             f->curSector = offset;
             this->read_data_block(
                     f->buf->curClusterStartAddr + f->buf->curSectorOffset,
@@ -2474,11 +2466,11 @@ class SD {
 
         /**
          * @brief       Read the next sector from SD card into memory
-         * @detailed    When the final sector of a cluster is finished,
-         *              SDIncCluster can be called. The appropriate global
-         *              variables will be set according (incremented or set by
-         *              the FAT) and the first sector of the next cluster will
-         *              be read into the desired buffer.
+         *
+         * When the final sector of a cluster is finished,
+         * SDIncCluster can be called. The appropriate global variables will
+         * be set according (incremented or set by the FAT) and the first
+         * sector of the next cluster will be read into the desired buffer.
          *
          * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes used to hold a
          *                      sector from the SD card
@@ -2560,7 +2552,7 @@ class SD {
             // 8 characters have been read, whichever comes first
             for (i = 0; i < SD::FILE_NAME_LEN; ++i) {
                 if (0x05 == buf[i])
-                    filename[j++] = 0xe5;
+                    filename[j++] = (char) 0xe5;
                 else if (' ' != buf[i])
                     filename[j++] = buf[i];
             }
@@ -2583,10 +2575,9 @@ class SD {
         /**
          * @brief       Find a file entry (file or sub-directory)
          *
-         * @detailed    Find a file or directory that matches the name in
-         *              *filename in the current directory; its relative
-         *              location is communicated by placing it in the address of
-         *              *fileEntryOffset
+         * Find a file or directory that matches the name in *filename in the
+         * current directory; its relative location is communicated by
+         * placing it in the address of *fileEntryOffset
          *
          * @param[in]   *filename           C-string representing the short
          *                                  (standard) filename
@@ -2645,7 +2636,7 @@ class SD {
             // file is not found
             while (this->m_buf.buf[*fileEntryOffset]) {
                 // Check if file is valid, retrieve the name if it is
-                if (!(SD::DELETED_FILE_MARK == this->m_buf.buf[*fileEntryOffset])) {
+                if (SD::DELETED_FILE_MARK != this->m_buf.buf[*fileEntryOffset]) {
                     this->get_filename(&(this->m_buf.buf[*fileEntryOffset]),
                             readEntryName);
                     if (!strcmp(filename, readEntryName))
@@ -2718,14 +2709,13 @@ class SD {
         /**
          * @brief       Find the first empty allocation unit in the FAT
          *
-         * @detailed    The value of the first empty allocation unit is returned
-         *              and its location will contain the end-of-chain marker,
-         *              SD_EOC_END.
-         *              NOTE: It is important to realize that, though the new
-         *              entry now contains an EOC marker, this function does not
-         *              know what cluster is being extended and therefore the
-         *              calling function must modify the previous EOC to contain
-         *              the return value
+         * The value of the first empty allocation unit is returned and its
+         * location will contain the end-of-chain marker, SD_EOC_END.
+         *
+         * NOTE: It is important to realize that, though the new entry now
+         * contains an EOC marker, this function does not know what cluster is
+         * being extended and therefore the calling function must modify the
+         * previous EOC to contain the return value
          *
          * @param[in]   restore     If non-zero, the original fat-sector will be
          *                          restored to m_fat before returning; if zero,
@@ -2796,7 +2786,7 @@ class SD {
                 // In FAT32, the first 7 usable clusters seem to be
                 // un-officially reserved for the root directory
                 if (0 == this->m_curFatSector)
-                    allocOffset = 9 * this->m_filesystem;
+                    allocOffset = (uint16_t) (9 * this->m_filesystem);
 
                 // Loop until we find an empty cluster
                 while (this->read_rev_dat32(&(this->m_fat[allocOffset]))
@@ -2925,9 +2915,10 @@ class SD {
 
             // This function should only be called when a file or directory has
             // reached the end of its cluster chain
-            uint16_t entriesPerFatSector = 1
-                    << this->m_entriesPerFatSector_Shift;
-            uint16_t allocUnitOffset = buf->curAllocUnit % entriesPerFatSector;
+            uint16_t entriesPerFatSector = (uint16_t) (1
+                    << this->m_entriesPerFatSector_Shift);
+            uint16_t allocUnitOffset = (uint16_t)
+                    (buf->curAllocUnit % entriesPerFatSector);
             uint16_t fatPointerAddress = allocUnitOffset * this->m_filesystem;
             uint32_t nxtSctr = this->read_rev_dat32(
                     &(this->m_fat[fatPointerAddress]));
@@ -3005,21 +2996,23 @@ class SD {
 
             /* 1) Short file name */
             // Write first section
-            for (i = 0; '.' != name[i] && 0 != name[i]; ++i)
-                this->m_buf.buf[*fileEntryOffset + i] = name[i];
+            for (i = 0; '.' != uppercaseName[i] && 0 != uppercaseName[i]; ++i)
+                this->m_buf.buf[*fileEntryOffset + i] =
+                        (uint8_t) uppercaseName[i];
             // Check if there is an extension
-            if (name[i]) {
+            if (uppercaseName[i]) {
                 // There might be an extension - pad first name with spaces
                 for (j = i; j < SD::FILE_NAME_LEN; ++j)
                     this->m_buf.buf[*fileEntryOffset + j] = ' ';
                 // Check if there is a period, as one would expect for a file
                 // name with an extension
-                if ('.' == name[i]) {
+                if ('.' == uppercaseName[i]) {
                     // Extension exists, write it
                     ++i;        // Skip the period
                     // Insert extension, character-by-character
-                    for (j = SD::FILE_NAME_LEN; name[i]; ++j)
-                        this->m_buf.buf[*fileEntryOffset + j] = name[i++];
+                    for (j = SD::FILE_NAME_LEN; uppercaseName[i]; ++j)
+                        this->m_buf.buf[*fileEntryOffset + j] =
+                                (uint8_t) uppercaseName[i++];
                     // Pad extension with spaces
                     for (; j < SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN; ++j)
                         this->m_buf.buf[*fileEntryOffset + j] = ' ';
@@ -3075,7 +3068,7 @@ class SD {
             SD::print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
 #endif
 
-            this->m_buf.mod = 1;
+            this->m_buf.mod = true;
 
             return 0;
         }
@@ -3290,7 +3283,7 @@ class SD {
         SD::Buffer m_buf;
         uint8_t m_fat[SD_SECTOR_SIZE];        // Buffer for FAT entries only
 #ifdef SD_OPTION_FILE_WRITE
-        uint8_t m_fatMod;  // Has the currently loaded FAT sector been modified
+        bool m_fatMod;  // Has the currently loaded FAT sector been modified
         uint32_t m_fatSize;
 #endif
         uint16_t m_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT

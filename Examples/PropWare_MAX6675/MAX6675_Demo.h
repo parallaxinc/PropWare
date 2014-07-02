@@ -4,8 +4,6 @@
 /**
  * @brief   Display the temperature on stdout and a character LCD
  *
- * @project MAX6675_Demo
- *
  * @author  David Zemon
  *
  * @copyright

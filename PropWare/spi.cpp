@@ -1,8 +1,6 @@
 /**
  * @file    spi.cpp
  *
- * @project PropWare
- *
  * @author  David Zemon
  *
  * @copyright
@@ -30,5 +28,4 @@
 
 // Constants that use CLKFREQ cannot be initialized in the header
 const uint32_t PropWare::SPI::WR_TIMEOUT_VAL = CLKFREQ / 10;
-const uint32_t PropWare::SPI::RD_TIMEOUT_VAL = CLKFREQ / 10;
 const int32_t PropWare::SPI::MAX_CLOCK = CLKFREQ >> 3;

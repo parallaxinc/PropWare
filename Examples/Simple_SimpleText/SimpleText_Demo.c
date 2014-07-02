@@ -1,5 +1,5 @@
-/**
- * @file libsimpletext.c
+/*
+ * @file libsimpletext.h
  * Project and Test harness for library simpletext
  *
  * Copyright (c) 2013, Parallax Inc. MIT license.
@@ -12,26 +12,55 @@
 
 int main(void)
 {
-  int   n;
-  char  buffer[80];
-  char  sval[80];
-  int   buflen = 80;
-  int   xval = 0;
-  int   ival = 0x55;
-  float fval = 355/113.0;
-  float fval2 = 1.4;
-  float e = 2.71828184590;
+    int   n;
+    char  buffer[80];
+    char  sval[80];
+    int   buflen = 80;
+    int   xval = 0;
+    int   ival = 0x55;
+    float fval = 355/113.0;
+    float fval2 = 1.4;
+    float e = 2.71828184590;
+    char bigtext[] = "abcdefghijklmnopqrstuvwxyz";
 
-  /*
-   * global serial module pointer - can be local.
-   */
-  serial *text;
+    /*
+     * global serial module pointer - can be local.
+     */
+    serial *text;
 
-  /* no need to wait for terminal startup.
-   * delay is done in the default serial open function. */
+    /* no need to wait for terminal startup.
+     * delay is done in the default serial open function. */
 
-  /* traditional hello message. */
-  putln("Hello, world!");
+    /* traditional hello message. */
+    putln("Hello, world!");
+
+    putStrLen(&bigtext[20],5);
+    putln("");
+    writeStrLen(simpleterm_pointer(),&bigtext[4],5);
+    putln("");
+
+#ifdef DIV0_NAN_TEST
+  float fproblem;
+  float f;
+
+  for(f = 5.0; f > -5.0; f -= 1.0) {
+    fproblem = 1.0 / f;
+    print("f = %02.2f, fproblem = %02.2f\n", f, fproblem);
+  }
+  for(f = 5.0; f > -5.0; f -= 1.0) {
+    fproblem = 1.0 / -f;
+    putStr("f = "); putFloat(f); putStr(" fproblem = "); putFloat(fproblem); putLine("");
+  }
+
+   for(f = 5.0; f > -5.0; f -= 1.0) {
+      fproblem = atan(0.0/f);
+      print("f = %02.2f, fproblem = %02.2f\n", f, fproblem);
+   }
+   for(f = 5.0; f > -5.0; f -= 1.0) {
+      fproblem = atan(0.0/-f);
+      putStr("f = "); putFloat(f); putStr(" fproblem = "); putFloat(fproblem); putLine("");
+   }
+#endif
 
 #ifdef MORETESTING
 
@@ -146,11 +175,11 @@ int main(void)
   writeChar(text, readChar(text));
 
   writeStr(text, "\nEnter a decimal number: ");
-  writeDecDigits(text, readDec(text),8);
+  writeDecLen(text, readDec(text),8);
   writeStr(text, "\nEnter a hexadecimal number: ");
-  writeHexDigits(text, readHex(text),8);
+  writeHexLen(text, readHex(text),8);
   writeStr(text, "\nEnter a binary number: ");
-  writeBinDigits(text, readBin(text),8);
+  writeBinLen(text, readBin(text),8);
   writeStr(text, "\nEnter a floating point number: ");
   writeFloatPrecision(text, readFloat(text),8,8);
 
@@ -161,13 +190,13 @@ int main(void)
   sprint(buffer, "%s %d %x %f %f\n", sval, ival, xval, fval, fval2);
   writeLine(text, "");
   writeLine(text, buffer);
-
+  
   writeLine(text, "All done.");
   serial_close(text);
 
 #endif
 
-  return 0;
+    return 0;
 }
 
 

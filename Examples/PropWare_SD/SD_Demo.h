@@ -5,8 +5,6 @@
  * @brief   Demonstrate various functions including writing to files and the
  *          Shell
  *
- * @project SD_Demo
- *
  * @author  David Zemon
  *
  * @copyright
@@ -43,7 +41,7 @@
 //#define TEST_WRITE
 #define TEST_SHELL
 
-//#define USE_PRINTF
+#define USE_PRINTF
 
 #ifdef USE_PRINTF
 #include <tinyio.h>

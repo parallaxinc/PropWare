@@ -1,7 +1,6 @@
 #/usr/bin/python
 # @file    importSimple.py
 # @author  David Zemon
-# @project PropWare
 #
 # Created with: PyCharm Community Edition
 
@@ -12,6 +11,7 @@
 import os
 from shutil import copy2
 import zipfile
+import shutil
 
 import propwareUtils
 
@@ -20,7 +20,7 @@ class ImportSimple:
     PROPWARE_ROOT = os.path.abspath("..") + os.sep
     CHEATER_DIR = PROPWARE_ROOT + "simple" + os.sep
     LEARN_DOWNLOAD_LINK = "http://learn.parallax.com/sites/default/files/content/propeller-c-tutorials/" \
-                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.02.27.zip"
+                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.05.14.zip"
     LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep
 
     def __init__(self):
@@ -76,10 +76,11 @@ class ImportSimple:
         # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run
         # in any guaranteed order)
         self.sourceFiles.sort()
-        with open(ImportSimple.CHEATER_DIR + "simpleObjects.mk", 'w') as f:
-            f.write("OBJS = ")
+        with open(ImportSimple.CHEATER_DIR + "simpleObjects.cmake", 'w') as f:
+            f.write("set(SIMPLE_OBJECTS")
             for sourceFile in self.sourceFiles:
-                f.write(sourceFile[:-1] + "o ")
+                f.write('\n' + ' '*8 + '../' + sourceFile[:-2])
+            f.write(')')
 
     @staticmethod
     def downloadLearn():
@@ -101,11 +102,15 @@ class ImportSimple:
                 rmList.append(ImportSimple.PROPWARE_ROOT + fileName)
 
         for fileName in os.listdir(ImportSimple.CHEATER_DIR):
-            if ".c" == fileName[-2:]:
+            if fileName[-2:] in [".c", "cpp"]:
                 rmList.append(ImportSimple.CHEATER_DIR + fileName)
 
         for fileName in rmList:
             os.remove(fileName)
+
+        destroyMe = ImportSimple.CHEATER_DIR + os.sep + "CMakeFiles"
+        if os.path.exists(destroyMe):
+            shutil.rmtree(destroyMe)
 
     @staticmethod
     def getDemoFileNames(library):
