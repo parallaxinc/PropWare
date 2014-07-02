@@ -72,7 +72,9 @@ class CreateBinaryDistr:
         # Attempt to checkout the next branch
         if 0 == CreateBinaryDistr.checkout(branch, isTag):
             if CreateBinaryDistr.isBranchWithImporter():
+                os.chdir("util")
                 importAll()
+                os.chdir("..")
 
             # Compile the static libraries and example projects
             CreateBinaryDistr.compile()
@@ -199,7 +201,7 @@ class CreateBinaryDistr:
 
     @staticmethod
     def isCMakeBranch():
-        return os.path.exists("CMakeLists.txt")
+        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "CMakeLists.txt")
 
     @staticmethod
     def isBranchWithImporter():
