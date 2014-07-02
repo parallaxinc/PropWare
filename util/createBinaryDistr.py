@@ -32,6 +32,8 @@ class CreateBinaryDistr:
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2"]
     CURRENT_SUGGESTION = "release-2.0"
+    MAKE_COMPILE = ["make", "-j4", "--silent"]
+    CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
 
     def __init__(self):
         self.successes = []
@@ -70,6 +72,7 @@ class CreateBinaryDistr:
         # Attempt to checkout the next branch
         if 0 == CreateBinaryDistr.checkout(branch, isTag):
             # Compile the static libraries and example projects
+            CreateBinaryDistr.cleanUntracked()
             CreateBinaryDistr.compile()
 
             # Generate the archive file name
@@ -111,14 +114,15 @@ class CreateBinaryDistr:
     @staticmethod
     def clean():
         if CreateBinaryDistr.isCMakeBranch():
-            subprocess.call(["cmake", '.'], cwd=CreateBinaryDistr.PROPWARE_ROOT)
+            subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT)
+            sys.stdout.flush()
 
-        subprocess.call(["make", "clean", "--silent"], shell=True, cwd=CreateBinaryDistr.PROPWARE_ROOT)
+        subprocess.call(["make", "clean", "--silent"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
+        sys.stdout.flush()
 
         # Not all branches have the simple_clean target, so it's no big deal if it fails
         try:
-            subprocess.check_output(["make", "simple_clean", "--silent"], shell=True,
-                                    cwd=CreateBinaryDistr.PROPWARE_ROOT)
+            subprocess.check_output(["make", "simple_clean", "--silent"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
         except subprocess.CalledProcessError as e:
             if 2 != e.returncode:
                 raise e
@@ -150,14 +154,19 @@ class CreateBinaryDistr:
 
     @staticmethod
     def compile():
-        command = ["make", "-j4", "--silent"]
-
         # Determine if Makefile or CMake branch
         if CreateBinaryDistr.isCMakeBranch():
-            command = ["cmake", '.', "&&"] + command
+            if 0 != subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+                sys.stdout.flush()
+                raise MakeErrorException()
 
-        if 0 != subprocess.call(command, shell=True, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+        sys.stdout.flush()
+
+        if 0 != subprocess.call(CreateBinaryDistr.MAKE_COMPILE, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+            sys.stdout.flush()
             raise MakeErrorException()
+
+        sys.stdout.flush()
 
     @staticmethod
     def isWhitelisted(filename):
@@ -175,7 +184,7 @@ class CreateBinaryDistr:
     def attemptCleanExit():
         try:
             CreateBinaryDistr.cleanUntracked()
-            subprocess.check_output("git checkout " + CreateBinaryDistr.CURRENT_SUGGESTION, shell=True)
+            subprocess.check_output(["git", "checkout", CreateBinaryDistr.CURRENT_SUGGESTION])
         except subprocess.CalledProcessError as e:
             print("Failed to return git repository to 'current' branch", file=sys.stderr)
             print("Caused by: " + str(e), file=sys.stderr)
