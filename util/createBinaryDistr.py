@@ -43,9 +43,6 @@ class CreateBinaryDistr:
         # Get the current path and truncate "/util" from the end (therefore resulting in PropWare's root)
         CreateBinaryDistr.PROPWARE_ROOT = os.getcwd()[:-5]
 
-        # Import all extra libraries
-        importAll()
-
         # The remainder of this script needs to be run from the PropWare root directory
         os.chdir("..")
         CreateBinaryDistr.cleanOldArchives()
@@ -58,6 +55,10 @@ class CreateBinaryDistr:
         self.successes = []
 
         try:
+            # Let's start by cleaning some stuff up if possible
+            CreateBinaryDistr.clean()
+            CreateBinaryDistr.cleanUntracked()
+
             for branch in branches:
                 self.runInBranch(branch, areTags)
         finally:
@@ -66,13 +67,12 @@ class CreateBinaryDistr:
         self.printSummary(branches)
 
     def runInBranch(self, branch, isTag):
-        # Clean any leftover crud
-        CreateBinaryDistr.clean()
-
         # Attempt to checkout the next branch
         if 0 == CreateBinaryDistr.checkout(branch, isTag):
+            if CreateBinaryDistr.isBranchWithImporter():
+                importAll()
+
             # Compile the static libraries and example projects
-            CreateBinaryDistr.cleanUntracked()
             CreateBinaryDistr.compile()
 
             # Generate the archive file name
@@ -114,7 +114,10 @@ class CreateBinaryDistr:
     @staticmethod
     def clean():
         if CreateBinaryDistr.isCMakeBranch():
-            subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT)
+            # Try to generate the Make files so that we can clean stuff up...
+            if 0 != subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+                # But if it fails, no biggy. Just move on
+                return
             sys.stdout.flush()
 
         subprocess.call(["make", "clean", "--silent"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
@@ -193,6 +196,10 @@ class CreateBinaryDistr:
     @staticmethod
     def isCMakeBranch():
         return os.path.exists("CMakeLists.txt")
+
+    @staticmethod
+    def isBranchWithImporter():
+        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "propwareImporter.py")
 
     def printSummary(self, branches):
         # Let the stdout and stderr buffers catch up
