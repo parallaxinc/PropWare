@@ -34,6 +34,8 @@ class CreateBinaryDistr:
     CURRENT_SUGGESTION = "release-2.0"
     MAKE_COMPILE = ["make", "-j4", "--silent"]
     CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
+    MAKE_FAILED_CLEAN_CODE = 2
+    CMAKE_FAILED_GENERATE_CODE = 1
 
     def __init__(self):
         self.successes = []
@@ -103,7 +105,6 @@ class CreateBinaryDistr:
 
         # Clean again. Cleaning is good. You should clean your house more often too!
         CreateBinaryDistr.clean()
-        CreateBinaryDistr.cleanUntracked()
 
     @staticmethod
     def cleanOldArchives():
@@ -113,22 +114,22 @@ class CreateBinaryDistr:
 
     @staticmethod
     def clean():
-        if CreateBinaryDistr.isCMakeBranch():
-            # Try to generate the Make files so that we can clean stuff up...
-            if 0 != subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT):
-                # But if it fails, no biggy. Just move on
-                return
+        with open(os.devnull, 'w') as devnull:
+            if CreateBinaryDistr.isCMakeBranch():
+                # Try to generate the Make files so that we can clean stuff up...
+                subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, stdout=devnull, stderr=devnull,
+                                cwd=CreateBinaryDistr.PROPWARE_ROOT)
+
+            subprocess.call(["make", "clean", "--silent"], stderr=devnull, cwd=CreateBinaryDistr.PROPWARE_ROOT)
             sys.stdout.flush()
 
-        subprocess.call(["make", "clean", "--silent"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
-        sys.stdout.flush()
-
-        # Not all branches have the simple_clean target, so it's no big deal if it fails
-        try:
-            subprocess.check_output(["make", "simple_clean", "--silent"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
-        except subprocess.CalledProcessError as e:
-            if 2 != e.returncode:
-                raise e
+            # Not all branches have the simple_clean target, so it's no big deal if it fails
+            try:
+                subprocess.check_output(["make", "simple_clean", "--silent"], stderr=devnull,
+                                        cwd=CreateBinaryDistr.PROPWARE_ROOT)
+            except subprocess.CalledProcessError as e:
+                if CreateBinaryDistr.MAKE_FAILED_CLEAN_CODE != e.returncode:
+                    raise e
 
     @staticmethod
     def cleanUntracked():
@@ -152,6 +153,9 @@ class CreateBinaryDistr:
             except subprocess.CalledProcessError:
                 print("Failed to pull latest sources", file=sys.stderr)
                 return 1
+
+        print("Now in branch: " + branch)
+        sys.stdout.flush()
 
         return 0
 
