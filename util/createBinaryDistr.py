@@ -30,7 +30,7 @@ class CreateBinaryDistr:
                             "jpg", "lang", "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
-    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2"]
+    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3"]
     CURRENT_SUGGESTION = "release-2.0"
     MAKE_COMPILE = ["make", "-j4", "--silent"]
     CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
@@ -49,9 +49,9 @@ class CreateBinaryDistr:
         os.chdir("..")
         CreateBinaryDistr.cleanOldArchives()
 
-    def run(self, branches, areTags=False):
+    def run(self, branches, tagsIncluded=False):
         assert (isinstance(branches, list))
-        assert (isinstance(areTags, bool))
+        assert (isinstance(tagsIncluded, bool))
 
         branches.sort()
         self.successes = []
@@ -62,15 +62,15 @@ class CreateBinaryDistr:
             CreateBinaryDistr.cleanUntracked()
 
             for branch in branches:
-                self.runInBranch(branch, areTags)
+                self.runInBranch(branch)
         finally:
             CreateBinaryDistr.attemptCleanExit()
 
-        self.printSummary(branches)
+        self.printSummary(branches, tagsIncluded)
 
-    def runInBranch(self, branch, isTag):
+    def runInBranch(self, branch):
         # Attempt to checkout the next branch
-        if 0 == CreateBinaryDistr.checkout(branch, isTag):
+        if 0 == CreateBinaryDistr.checkout(branch):
             if CreateBinaryDistr.isBranchWithImporter():
                 os.chdir("util")
                 importAll()
@@ -139,9 +139,7 @@ class CreateBinaryDistr:
         subprocess.call(["git", "clean", "-fd"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
     @staticmethod
-    def checkout(branch, isTag=False):
-        assert (isinstance(isTag, bool))
-
+    def checkout(branch):
         try:
             CreateBinaryDistr.cleanUntracked()
             subprocess.check_output(["git", "checkout", branch])
@@ -149,7 +147,7 @@ class CreateBinaryDistr:
             print("Failed to checkout " + branch, file=sys.stderr)
             return 1
 
-        if not isTag:
+        if branch not in CreateBinaryDistr.TAGS:
             try:
                 subprocess.check_output(["git", "pull"])
             except subprocess.CalledProcessError:
@@ -207,7 +205,9 @@ class CreateBinaryDistr:
     def isBranchWithImporter():
         return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "util" + os.sep + "propwareImporter.py")
 
-    def printSummary(self, branches):
+    def printSummary(self, branches, tagsIncluded):
+        assert isinstance(tagsIncluded, bool)
+
         # Let the stdout and stderr buffers catch up
         sleep(1)
 
@@ -218,6 +218,10 @@ class CreateBinaryDistr:
         for branch in branches:
             if branch not in self.successes:
                 print("\tFAIL: " + branch)
+        if tagsIncluded:
+            for tag in CreateBinaryDistr.TAGS:
+                if tag not in self.successes:
+                    print("\tFAIL: " + tag)
 
 
 class MakeErrorException(Exception):
@@ -236,4 +240,9 @@ if "__main__" == __name__:
     args = parser.parse_args()
 
     runMe = CreateBinaryDistr()
-    runMe.run(CreateBinaryDistr.BRANCHES, args.tags)
+
+    branches = CreateBinaryDistr.BRANCHES
+    if args.tags:
+        branches += CreateBinaryDistr.TAGS
+
+    runMe.run(branches, args.tags)
