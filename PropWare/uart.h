@@ -635,30 +635,19 @@ class FullDuplexUART: public PropWare::SimplexUART {
          *          returned
          */
         HUBTEXT virtual uint32_t receive () const {
+            PropWare::ErrorCode err;
             uint32_t rxVal;
-            uint32_t evenParityResult;
             uint32_t wideParityMask = this->m_parityMask;
             uint32_t wideDataMask = this->m_dataMask;
+
+
+            uint32_t evenParityResult;
 
             rxVal = this->shift_in_data(this->m_receivableBits,
                     this->m_bitCycles, this->m_rx.get_mask(), this->m_msbMask);
 
-            // Check parity bit
-            if (this->m_parity) {
-                evenParityResult = 0;
-                __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
-                        "muxc %[_parityResult], %[_parityMask]"
-                        : [_parityResult] "+r" (evenParityResult)
-                        : [_data] "r" (rxVal),
-                        [_dataMask] "r" (wideDataMask),
-                        [_parityMask] "r" (wideParityMask));
-
-                if (PropWare::UART::ODD_PARITY == this->m_parity) {
-                    if (evenParityResult != (rxVal & this->m_parityMask))
-                        return (uint32_t) -1;
-                } else if (evenParityResult == (rxVal & this->m_parityMask))
-                    return (uint32_t) -1;
-            }
+            if (this->m_parity && 0 != this->checkParity(rxVal))
+                return (uint32_t) -1;
 
             return rxVal & wideDataMask;
         }
@@ -682,22 +671,28 @@ class FullDuplexUART: public PropWare::SimplexUART {
          */
         HUBTEXT virtual PropWare::ErrorCode receive_array (char *buffer,
                 uint32_t words) const {
+            uint32_t wideData;
+
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
                 this->shift_in_array((uint32_t) buffer, words,
                         this->m_receivableBits, this->m_bitCycles,
                         this->m_rx.get_mask(), this->m_msbMask);
 
-                // TODO: Check parity bits
+                for (uint32_t i = words; i; --i) {
+                    wideData = (uint32_t) buffer[i];
+                    if (0 != this->checkParity(wideData))
+                        return PropWare::UART::PARITY_ERROR;
+                }
             }
             // If total receivable bits does not fit within a byte, shift in
             // one word at a time (this offers no speed improvement - it is
             // only here for user convenience)
             else {
                 do {
-                    *buffer = this->shift_in_data(this->m_receivableBits,
-                            this->m_bitCycles, this->m_rx.get_mask(),
-                            this->m_msbMask);
+                    *buffer = (char) this->shift_in_data(this->m_receivableBits,
+                                                this->m_bitCycles, this->m_rx.get_mask(),
+                                                this->m_msbMask);
                     if (-1 == *buffer)
                         return PropWare::UART::PARITY_ERROR;
                     ++buffer;
@@ -863,6 +858,35 @@ class FullDuplexUART: public PropWare::SimplexUART {
                         [_data] "+r" (data)
                         : [_rxMask] "r" (rxMask));
             } while (--words);
+        }
+
+        /**
+         * @brief       Check parity for a received value
+         *
+         * @param[in]   Received value with parity bit exactly as received
+         *
+         * @return      0 for proper parity; -1 for parity error
+         */
+        HUBTEXT PropWare::ErrorCode checkParity (uint32_t rxVal) const {
+            uint32_t evenParityResult;
+            uint32_t wideParityMask = this->m_parityMask;
+            uint32_t wideDataMask = this->m_dataMask;
+
+            evenParityResult = 0;
+            __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
+                    "muxc %[_parityResult], %[_parityMask]"
+            : [_parityResult] "+r" (evenParityResult)
+            : [_data] "r" (rxVal),
+            [_dataMask] "r" (wideDataMask),
+            [_parityMask] "r" (wideParityMask));
+
+            if (PropWare::UART::ODD_PARITY == this->m_parity) {
+                if (evenParityResult != (rxVal & this->m_parityMask))
+                    return PropWare::UART::PARITY_ERROR;
+            } else if (evenParityResult == (rxVal & this->m_parityMask))
+                return PropWare::UART::PARITY_ERROR;
+            else
+                return PropWare::UART::NO_ERROR;
         }
 
     protected:
