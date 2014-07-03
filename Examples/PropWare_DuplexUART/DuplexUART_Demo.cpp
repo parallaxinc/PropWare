@@ -41,8 +41,9 @@ char g_numberPattern[] = {
 // Create the test string - useful when testing with a terminal
 static char g_string[] = "Hello world! This is David Zemon. I'm here to rescue "
         "you! But I don't know if this will actually work :(";
-static const uint32_t BAUD_RATE = 559000;
+static const uint32_t BAUD_RATE = 740750;
 static const PropWare::Port::Mask TX_PIN = PropWare::Port::P16;
+static const PropWare::UART::Parity PARITY = PropWare::UART::ODD_PARITY;
 volatile uint8_t g_stringLength;
 
 /**
@@ -53,26 +54,16 @@ int main () {
     static _thread_state_t threadData;
     PropWare::SimplexUART uart(TX_PIN);
     uart.set_baud_rate(BAUD_RATE);
+    uart.set_parity(PARITY);
 
-    g_stringLength = (uint8_t) strlen(g_string);
+    g_stringLength = (uint8_t) (strlen(g_string) + 1);
 
     uint8_t cog = (uint8_t) _start_cog_thread(threadStack + STACK_SIZE, receiveSilently,
                 (void *) NULL, &threadData);
 
     while (1) {
-        waitcnt(500*MILLISECOND + CNT);
-        sendBytes(uart, g_string);
-    }
-
-    return 0;
-}
-
-void sendBytes (const PropWare::UART &uart, const char buffer[]) {
-    const char *ptr = buffer;
-
-    while(*ptr) {
-        uart.send((uint16_t) *ptr);
-        ++ptr;
+        waitcnt(500 * MILLISECOND + CNT);
+        uart.send_array(g_string, g_stringLength);
     }
 }
 
@@ -81,12 +72,12 @@ void receiveSilently (void *arg) {
 
     PropWare::HalfDuplexUART uart(PropWare::Port::P17);
     uart.set_baud_rate(BAUD_RATE);
+    uart.set_parity(PARITY);
 
     printf("Ready to receive!!!\n");
 
     while (1) {
         uart.receive_array(buffer, g_stringLength);
-        buffer[g_stringLength] = 0;
 
         printf("Data: '%s'\n", buffer);
     }

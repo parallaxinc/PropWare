@@ -69,31 +69,21 @@ namespace PropWare {
             real limit is likely much lower for configurations using few stop
             bits due to the necessary processing delay between each character.
                 <ul>
-                    <li>CMM: 559,000</li>
-                    <li>LMM: 559,000</li>
+                    <li>CMM: 740,720</li>
+                    <li>LMM: 740,720</li>
                 </ul>
             </li>
         </ul>
     </li>
-    <li>Max speed [average bitrate of PropWare::UART::puts() w/ 8N1 config]:
+    <li>Max transmit speed [average bitrate of PropWare::UART::puts() w/ 8N1
+    config]:
         <ul>
-            <li>Send
-                <ul>
-                    <li>CMM: 339,227</li>
-                    <li>LMM: 673,230</li>
-                </ul>
-            </li>
-            <li>Receive
-                <br/>Note: This has not been tested with an external device. The
-                real limit is likely much lower due to the necessary delay
-                between each character.
-                <ul>
-                    <li>CMM: </li>
-                    <li>LMM: </li>
-                </ul>
-            </li>
+            <li>CMM: 339,227</li>
+            <li>LMM: 673,230</li>
         </ul>
     </li>
+    <li>TODO: Determine maximum baudrate that receive_array() and receive() can
+    read data in 8N1 configuration with minimum stop-bits between each word</li>
     <li>PropWare::UART::send() vs PropWare::UART::puts() minimum delay between
     each character
          <ul>
