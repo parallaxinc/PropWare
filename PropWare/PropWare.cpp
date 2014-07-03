@@ -41,5 +41,5 @@ uint8_t PropWare::count_bits (uint32_t par) {
 uint32_t PropWare::measure_time_interval (const register uint32_t start) {
     uint32_t interval = CNT - start;
 
-    return interval/MICROSECOND;
+    return (uint32_t) (interval/MICROSECOND);
 }

@@ -60,19 +60,42 @@ namespace PropWare {
         <ul>
             <li>Send
                 <ul>
-                    <li>LMM: </li>
+                    <li>CMM: 1,428,550</li>
+                    <li>LMM: 1,428,550</li>
                 </ul>
             </li>
             <li>Receive
+            <br/>Note: This has not been tested with an external device. The
+            real limit is likely much lower for configurations using few stop
+            bits due to the necessary processing delay between each character.
                 <ul>
-                	<li>CMM: 559,000</li>
+                    <li>CMM: 559,000</li>
                     <li>LMM: 559,000</li>
                 </ul>
             </li>
         </ul>
     </li>
-    <li>PropWare::UART::send() vs PropWare::UART::puts() delay between each
-    character
+    <li>Max speed [average bitrate of PropWare::UART::puts() w/ 8N1 config]:
+        <ul>
+            <li>Send
+                <ul>
+                    <li>CMM: 339,227</li>
+                    <li>LMM: 673,230</li>
+                </ul>
+            </li>
+            <li>Receive
+                <br/>Note: This has not been tested with an external device. The
+                real limit is likely much lower due to the necessary delay
+                between each character.
+                <ul>
+                    <li>CMM: </li>
+                    <li>LMM: </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <li>PropWare::UART::send() vs PropWare::UART::puts() minimum delay between
+    each character
          <ul>
              <li>CMM:
                  <ul>
@@ -356,7 +379,7 @@ class UART {
                         ++array;
                     } while (--words);
                     break;
-                case PropWare::UART::EVEN_PARITY:
+                case PropWare::UART::ODD_PARITY:
                     do {
                         wideData = (uint32_t) *array;
 
@@ -381,7 +404,7 @@ class UART {
                         ++array;
                     } while (--words);
                     break;
-                case PropWare::UART::ODD_PARITY:
+                case PropWare::UART::EVEN_PARITY:
                     do {
                         wideData = (uint32_t) *array;
 
@@ -640,7 +663,7 @@ class FullDuplexUART: public PropWare::SimplexUART {
                         [_dataMask] "r" (wideDataMask),
                         [_parityMask] "r" (wideParityMask));
 
-                if (PropWare::UART::EVEN_PARITY == this->m_parity) {
+                if (PropWare::UART::ODD_PARITY == this->m_parity) {
                     if (evenParityResult != (rxVal & this->m_parityMask))
                         return (uint32_t) -1;
                 } else if (evenParityResult == (rxVal & this->m_parityMask))

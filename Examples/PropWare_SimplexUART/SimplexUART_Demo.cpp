@@ -25,6 +25,9 @@
 
 #include "SimplexUART_Demo.h"
 
+static const PropWare::Port::Mask TX_PIN = PropWare::Port::P16;
+static const uint32_t BAUD_RATE = 115200;
+
 /**
  * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
  */
@@ -45,15 +48,16 @@ int main () {
             0x00 };
 
     // Create the test string - useful when testing with a terminal
-    char string[] = "Hello world!\n\r";
+    char string[] = "Hello world! This is my most favoritest sentence "
+            "ever!!!\n\r";
 
     // Create pointer variables that can be incremented in a loop
     char *s;
 
-    PropWare::SimplexUART uart(PropWare::Port::P16);
+    PropWare::SimplexUART uart(TX_PIN);
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
-    uart.set_baud_rate(115200);
+    uart.set_baud_rate(BAUD_RATE);
     if ((err = uart.set_data_width(8)))
         error(err);
     if ((err = uart.set_stop_bit_width(1)))
@@ -63,7 +67,7 @@ int main () {
     while (1) {
         s = numberPattern;         // Set the pointer to the beginning of the string
         while (*s) {        // Loop until we read the null-terminator
-            uart.send(*s);  // Output the next character of the string
+            uart.send((uint16_t) *s);  // Output the next character of the string
 
             // Increment the character pointer
             ++s;
@@ -71,12 +75,15 @@ int main () {
 
         waitcnt(MILLISECOND + CNT);
 
+        for (s = numberPattern; *s; ++s)
+            uart.send((uint16_t) *s);
+
+        waitcnt(MILLISECOND + CNT);
+
         uart.puts(string);
 
         waitcnt(MILLISECOND + CNT);
     }
-
-    return 0;
 }
 
 void error (const PropWare::ErrorCode err) {
@@ -85,7 +92,7 @@ void error (const PropWare::ErrorCode err) {
     printf("Unknown error %u\n", err);
 
     while (1) {
-        debugLEDs.write(err);
+        debugLEDs.write((uint32_t) err);
         waitcnt(100*MILLISECOND);
         debugLEDs.write(0);
         waitcnt(100*MILLISECOND);

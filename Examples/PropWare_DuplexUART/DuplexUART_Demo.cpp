@@ -39,8 +39,10 @@ char g_numberPattern[] = {
         0x00 };
 
 // Create the test string - useful when testing with a terminal
-char g_string[] = "Hello world! This is David Zemon. I'm here to rescue you! But I don't know if this will actually work :(";
-const uint32_t BAUD_RATE = 559000;
+static char g_string[] = "Hello world! This is David Zemon. I'm here to rescue "
+        "you! But I don't know if this will actually work :(";
+static const uint32_t BAUD_RATE = 559000;
+static const PropWare::Port::Mask TX_PIN = PropWare::Port::P16;
 volatile uint8_t g_stringLength;
 
 /**
@@ -49,13 +51,13 @@ volatile uint8_t g_stringLength;
 int main () {
     static uint32_t threadStack[STACK_SIZE];
     static _thread_state_t threadData;
-    PropWare::SimplexUART uart(PropWare::Port::P16);
+    PropWare::SimplexUART uart(TX_PIN);
     uart.set_baud_rate(BAUD_RATE);
 
-    g_stringLength = strlen(g_string);
+    g_stringLength = (uint8_t) strlen(g_string);
 
-    uint8_t cog = _start_cog_thread(threadStack + STACK_SIZE, receiveSilently,
-            (void *) NULL, &threadData);
+    uint8_t cog = (uint8_t) _start_cog_thread(threadStack + STACK_SIZE, receiveSilently,
+                (void *) NULL, &threadData);
 
     while (1) {
         waitcnt(500*MILLISECOND + CNT);
@@ -69,14 +71,13 @@ void sendBytes (const PropWare::UART &uart, const char buffer[]) {
     const char *ptr = buffer;
 
     while(*ptr) {
-        uart.send(*ptr);
+        uart.send((uint16_t) *ptr);
         ++ptr;
     }
 }
 
 void receiveSilently (void *arg) {
     char buffer[256];
-    char *s;
 
     PropWare::HalfDuplexUART uart(PropWare::Port::P17);
     uart.set_baud_rate(BAUD_RATE);
@@ -97,7 +98,7 @@ void error (const PropWare::ErrorCode err) {
     printf("Unknown error %u\n", err);
 
     while (1) {
-        debugLEDs.write(err);
+        debugLEDs.write((uint32_t) err);
         waitcnt(100*MILLISECOND);
         debugLEDs.write(0);
         waitcnt(100*MILLISECOND);

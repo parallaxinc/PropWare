@@ -48,7 +48,7 @@ void error (const PropWare::ErrorCode err) {
     PropWare::HD44780::print_error_str((PropWare::HD44780::ErrorCode) err);
 
     while (1) {
-        debugLEDs.write(err);
+        debugLEDs.write((uint32_t) err);
         waitcnt(150*MILLISECOND + CNT);
         debugLEDs.write(0);
         waitcnt(150*MILLISECOND + CNT);
