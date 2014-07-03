@@ -136,7 +136,7 @@ class CreateBinaryDistr:
     @staticmethod
     def cleanUntracked():
         # If we've made it this far without failure, then clean all untracked files (leftovers from the previous branch)
-        subprocess.call(["git", "clean", "-fd"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
+        subprocess.call(["git", "clean", "-fxd"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
     @staticmethod
     def checkout(branch):
