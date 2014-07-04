@@ -45,11 +45,11 @@
 
 #define STACK_SIZE      256
 
-void sendBytes (const PropWare::UART &uart, const char *buffer);
+void sendBytes (const PropWare::UART &uart, const char buffer[]);
 
 void receiveSilently (void *arg);
 
-void error (const PropWare::ErrorCode err, const PropWare::UART *uart);
+void error (const PropWare::ErrorCode err);
 
 /**@}*/
 

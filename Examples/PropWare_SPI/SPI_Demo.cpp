@@ -51,7 +51,7 @@ int main () {
             waitcnt(CLKFREQ/100 + CNT);
 
             cs.clear();  // Enable the SPI slave attached to CS
-            spi->shift_out(8, *s);  // Output the next character of the string
+            spi->shift_out(8, (uint32_t) *s);  // Output the next character of the string
 
             // Be sure to wait until the SPI communication has FINISHED before
             // proceeding to set chip select high
@@ -59,7 +59,7 @@ int main () {
             cs.set();
 
             waitcnt(CLKFREQ/100 + CNT);
-            in = 0xff;              // Reset input variable
+            in = (char) 0xff;              // Reset input variable
             while (in != *s) {
                 cs.clear();
                 spi->shift_in(8, &in, 1);  // Read in a value from the SPI device

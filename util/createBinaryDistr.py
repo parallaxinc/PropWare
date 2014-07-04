@@ -26,19 +26,20 @@ class CreateBinaryDistr:
     PROPWARE_ROOT = ""
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     WHITELISTED_FILES = ["CMakeLists.txt", "Doxyfile", "README", "run_all_tests", "run_unit"]
-    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "rb",
-                            "jpg", "lang", "pdf", "png"]
+    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "rb", "jpg", "lang",
+                            "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
-    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2"]
+    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3"]
     CURRENT_SUGGESTION = "release-2.0"
     MAKE_COMPILE = ["make", "-j4", "--silent"]
     CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
-    MAKE_FAILED_CLEAN_CODE = 2
-    CMAKE_FAILED_GENERATE_CODE = 1
+    MAKE_CLEAN_FAILED_CODE = 2
+    CMAKE_GENERATE_FAILED_CODE = 1
 
     def __init__(self):
         self.successes = []
+        self.currentBranch = ""
 
         propwareUtils.checkProperWorkingDirectory()
 
@@ -49,9 +50,9 @@ class CreateBinaryDistr:
         os.chdir("..")
         CreateBinaryDistr.cleanOldArchives()
 
-    def run(self, branches, areTags=False):
+    # noinspection PyShadowingNames
+    def run(self, branches):
         assert (isinstance(branches, list))
-        assert (isinstance(areTags, bool))
 
         branches.sort()
         self.successes = []
@@ -62,15 +63,18 @@ class CreateBinaryDistr:
             CreateBinaryDistr.cleanUntracked()
 
             for branch in branches:
-                self.runInBranch(branch, areTags)
+                self.runInBranch(branch)
         finally:
             CreateBinaryDistr.attemptCleanExit()
 
         self.printSummary(branches)
 
-    def runInBranch(self, branch, isTag):
+    def runInBranch(self, branch):
+        # Here for debugging purposes only
+        self.currentBranch = branch
+
         # Attempt to checkout the next branch
-        if 0 == CreateBinaryDistr.checkout(branch, isTag):
+        if 0 == CreateBinaryDistr.checkout(branch):
             if CreateBinaryDistr.isBranchWithImporter():
                 os.chdir("util")
                 importAll()
@@ -130,32 +134,32 @@ class CreateBinaryDistr:
                 subprocess.check_output(["make", "simple_clean", "--silent"], stderr=devnull,
                                         cwd=CreateBinaryDistr.PROPWARE_ROOT)
             except subprocess.CalledProcessError as e:
-                if CreateBinaryDistr.MAKE_FAILED_CLEAN_CODE != e.returncode:
+                if CreateBinaryDistr.MAKE_CLEAN_FAILED_CODE != e.returncode:
                     raise e
 
     @staticmethod
     def cleanUntracked():
         # If we've made it this far without failure, then clean all untracked files (leftovers from the previous branch)
-        subprocess.call(["git", "clean", "-fd"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
+        subprocess.call(["git", "clean", "-fxd", "-ePropWare*.zip", "-e*.pyc"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
     @staticmethod
-    def checkout(branch, isTag=False):
-        assert (isinstance(isTag, bool))
-
+    def checkout(branch):
         try:
             CreateBinaryDistr.cleanUntracked()
+            sys.stdout.flush()
             subprocess.check_output(["git", "checkout", branch])
         except subprocess.CalledProcessError:
             print("Failed to checkout " + branch, file=sys.stderr)
             return 1
 
-        if not isTag:
+        if branch not in CreateBinaryDistr.TAGS:
             try:
                 subprocess.check_output(["git", "pull"])
             except subprocess.CalledProcessError:
                 print("Failed to pull latest sources", file=sys.stderr)
                 return 1
 
+        sys.stdout.flush()
         print("Now in branch: " + branch)
         sys.stdout.flush()
 
@@ -191,6 +195,9 @@ class CreateBinaryDistr:
 
     @staticmethod
     def attemptCleanExit():
+        print("[INFO] !!!Attempting clean exit!!!")
+        sys.stdout.flush()
+
         try:
             CreateBinaryDistr.cleanUntracked()
             subprocess.check_output(["git", "checkout", CreateBinaryDistr.CURRENT_SUGGESTION])
@@ -207,6 +214,7 @@ class CreateBinaryDistr:
     def isBranchWithImporter():
         return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "util" + os.sep + "propwareImporter.py")
 
+    # noinspection PyShadowingNames
     def printSummary(self, branches):
         # Let the stdout and stderr buffers catch up
         sleep(1)
@@ -228,12 +236,20 @@ class MakeErrorException(Exception):
         return "Make failed to finish executing"
 
 
-if "__main__" == __name__:
+def parseArgs():
     parser = argparse.ArgumentParser(description="Create binary distributions of all branches (and optionally tags too)"
                                                  " of PropWare")
     parser.add_argument("--tags", action="store_true",
                         help="Create binary distributions for all tagged commits as well")
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if "__main__" == __name__:
+    args = parseArgs()
+
+    branches = CreateBinaryDistr.BRANCHES
+    if args.tags:
+        branches += CreateBinaryDistr.TAGS
 
     runMe = CreateBinaryDistr()
-    runMe.run(CreateBinaryDistr.BRANCHES, args.tags)
+    runMe.run(branches)
