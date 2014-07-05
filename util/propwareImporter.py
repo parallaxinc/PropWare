@@ -10,12 +10,13 @@
 """
 __author__ = 'david'
 
-from importLibpropeller import ImportLibpropeller
-from importSimple import ImportSimple
 import propwareUtils
 
 
 def importAll():
+    from importLibpropeller import ImportLibpropeller
+    from importSimple import ImportSimple
+
     propwareUtils.checkProperWorkingDirectory()
 
     # Import libpropeller

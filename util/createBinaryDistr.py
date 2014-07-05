@@ -18,7 +18,6 @@ from time import sleep
 from shutil import copy2
 import argparse
 
-from propwareImporter import importAll
 import propwareUtils
 
 
@@ -37,17 +36,20 @@ class CreateBinaryDistr:
     MAKE_CLEAN_FAILED_CODE = 2
     CMAKE_GENERATE_FAILED_CODE = 1
 
-    def __init__(self):
+    def __init__(self, propWareRoot=None):
         self.successes = []
         self.currentBranch = ""
 
-        propwareUtils.checkProperWorkingDirectory()
-
         # Get the current path and truncate "/util" from the end (therefore resulting in PropWare's root)
-        CreateBinaryDistr.PROPWARE_ROOT = os.getcwd()[:-5]
+        if None == propWareRoot:
+            propwareUtils.checkProperWorkingDirectory()
+            CreateBinaryDistr.PROPWARE_ROOT = os.getcwd()[:-5]
 
-        # The remainder of this script needs to be run from the PropWare root directory
-        os.chdir("..")
+            # The remainder of this script needs to be run from the PropWare root directory
+            os.chdir("..")
+        else:
+            CreateBinaryDistr.PROPWARE_ROOT = propWareRoot
+
         CreateBinaryDistr.cleanOldArchives()
 
     # noinspection PyShadowingNames
@@ -77,6 +79,7 @@ class CreateBinaryDistr:
         if 0 == CreateBinaryDistr.checkout(branch):
             if CreateBinaryDistr.isBranchWithImporter():
                 os.chdir("util")
+                from propwareImporter import importAll
                 importAll()
                 os.chdir("..")
 
