@@ -44,9 +44,12 @@ def completePackager():
     os.environ['PROPWARE_PATH'] = newPropWarePath
     sys.path = [newPropWarePath + os.sep + "util"] + sys.path
 
-    branches = newestBinaryCreator.BRANCHES
-    if args.tags:
-        branches += newestBinaryCreator.TAGS
+    if None == args.branches:
+        branches = newestBinaryCreator.BRANCHES
+        if args.tags:
+            branches += newestBinaryCreator.TAGS
+    else:
+        branches = args.branches
 
     failList = []
     for branch in branches:
@@ -67,6 +70,7 @@ def parseArgs():
                                                  " of PropWare")
     parser.add_argument("--tags", action="store_true",
                         help="Create binary distributions for all tagged commits as well")
+    parser.add_argument("-b", "--branch", dest="branches", action='append')
     return parser.parse_args()
 
 
