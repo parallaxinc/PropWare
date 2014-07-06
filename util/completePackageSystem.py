@@ -158,6 +158,8 @@ def copyZipAndCleanDir(binaryCreator, newPropWarePath, branch, failList):
     newZipFile = binaryCreator.ARCHIVE_FILE_NAME % branch
     if os.path.exists(newZipFile):
         shutil.copy(newZipFile, PROPWARE_PATH)
+        if binaryCreator.CURRENT_SUGGESTION == branch:
+            shutil.copy(binaryCreator.ARCHIVE_FILE_NAME % "current", PROPWARE_PATH)
     else:
         failList.append(branch)
     shutil.rmtree(newPropWarePath)
