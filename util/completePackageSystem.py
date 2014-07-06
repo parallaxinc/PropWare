@@ -1,4 +1,4 @@
-# /usr/bin/python
+#!/usr/bin/python
 # File:    createBinaryDistr_v2
 # Author:  David Zemon
 # Project: PropWare
@@ -16,7 +16,14 @@ import shutil
 import tempfile
 import sys
 import subprocess
+import types
 
+# noinspection PyUnresolvedReferences
+import importLibpropeller
+# noinspection PyUnresolvedReferences
+import importSimple
+# noinspection PyUnresolvedReferences
+import propwareImporter
 import createBinaryDistr
 
 PROPWARE_PATH = os.environ['PROPWARE_PATH']
@@ -113,12 +120,27 @@ def hasCreationScript(propwarePath):
     return os.path.exists(utilPackage) and os.path.exists(utilPackage + os.sep + BINARY_CREATOR_FILENAME)
 
 
+def loadImportScripts():
+    # noinspection PyGlobalUndefined
+    global importAll
+
+    sys.modules['importLibpropeller'] = reloadModule(sys.modules['importLibpropeller'])
+    sys.modules['importSimple'] = reloadModule(sys.modules['importSimple'])
+    sys.modules['propwareImporter'] = reloadModule(sys.modules['propwareImporter'])
+    # noinspection PyUnresolvedReferences
+    from propwareImporter import importAll
+
+
 def reloadModule(module):
+    if not module or not isinstance(module, types.ModuleType):
+        raise TypeError("reload() argument must be module")
+
     try:
         # noinspection PyUnboundLocalVariable,PyUnresolvedReferences
         return reload(module)
     except NameError:
-        return reloadModule_py3(module)
+        import importlib
+        return importlib.reload(module)
 
 
 def run(binaryCreator, branch):
@@ -141,13 +163,6 @@ def copyZipAndCleanDir(binaryCreator, newPropWarePath, branch, failList):
     shutil.rmtree(newPropWarePath)
 
 
-def reloadModule_py3(module):
-    # noinspection PyUnresolvedReferences
-    from importlib import reload
-
-    return reload(module)
-
-
 def printSummary(branches, failList):
     print("\n\nSummary:")
     for branch in branches:
@@ -155,21 +170,6 @@ def printSummary(branches, failList):
             print("\tPASS: " + branch)
     for branch in failList:
         print("\tFAIL: " + branch)
-
-
-def loadImportScripts():
-    global importLibpropeller
-    global importSimple
-    global importAll
-
-    import importLibpropeller
-    import importSimple
-    import propwareImporter
-
-    importLibpropeller = reloadModule(importLibpropeller)
-    importSimple = reloadModule(importSimple)
-    propwareImporter = reloadModule(propwareImporter)
-    importAll = propwareImporter.importAll
 
 
 def bandageBrokenTag():
