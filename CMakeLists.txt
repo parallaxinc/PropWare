@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.6.4)
 
+set(CMAKE_TOOLCHAIN_FILE ./PropellerToolchain.cmake)
+set (CMAKE_BUILD_TYPE None)
+project(PropWare C CXX ASM)
+
 set(PROPWARE_MAIN_PACKAGE 1)
 
 add_subdirectory(simple)

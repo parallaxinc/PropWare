@@ -14,5 +14,3 @@ set(CFLAGS "-Os")
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
-
-include(${PROPWARE_PATH}/PropellerToolchain.cmake)

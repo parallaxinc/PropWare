@@ -8,6 +8,7 @@
 """
 @description:
 """
+import re
 import shutil
 
 __author__ = 'david'
@@ -132,12 +133,12 @@ def isAsmFile(f):
 
 def isSourceFile(f):
     assert (isinstance(f, str))
-    return f[-2:] == ".c"
+    return re.match('.*(\.c|\.cpp|\.dat|\.cogc|\.s|\.ecogc|\.spin)$', f, re.I)
 
 
 def isHeaderFile(f):
     assert (isinstance(f, str))
-    return f[-2:] == ".h"
+    return re.match('.*(\.h|\.hpp)$', f, re.I)
 
 
 def isSourceOrHeaderFile(f):

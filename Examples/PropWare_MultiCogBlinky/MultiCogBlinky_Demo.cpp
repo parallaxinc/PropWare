@@ -1,10 +1,10 @@
 /**
- * @file    PropWare_Demo.cpp
+ * @file    MultiCogBlinky_Demo.cpp
  *
  * @author  Modified by David Zemon
  */
 
-#include "PropWare_Demo.h"
+#include "MultiCogBlinky_Demo.h"
 
 static uint32_t cog_stack[STACK_SIZE][8];
 static _thread_state_t thread_data;

@@ -1,5 +1,10 @@
 cmake_minimum_required (VERSION 2.6.4)
 
+if (NOT DEFINED PROPWARE_PATH)
+    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
+endif (NOT DEFINED PROPWARE_PATH)
+set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
+
 set(MODEL xmm-split)
 project(Simple_${MODEL})
 set(CMAKE_PROJECT_NAME Simple_${MODEL})
@@ -14,5 +19,3 @@ set(CFLAGS "-Os")
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
-
-include(${PROPWARE_PATH}/PropellerToolchain.cmake)

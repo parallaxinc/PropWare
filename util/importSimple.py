@@ -79,7 +79,7 @@ class ImportSimple:
         with open(ImportSimple.CHEATER_DIR + "simpleObjects.cmake", 'w') as f:
             f.write("set(SIMPLE_OBJECTS")
             for sourceFile in self.sourceFiles:
-                f.write('\n' + ' '*8 + '../' + sourceFile[:-2])
+                f.write('\n' + ' '*8 + '../' + sourceFile)  # TODO: Can't add non-standard files like .dat, .ecogc, etc
             f.write(')')
 
     @staticmethod

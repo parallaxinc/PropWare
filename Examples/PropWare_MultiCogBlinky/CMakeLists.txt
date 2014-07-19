@@ -9,7 +9,7 @@ set(MODEL lmm)
 set(CFLAGS "-Os")
 set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
 
-project(MAX6675_Demo)
+project(MultiCogBlinky_Demo)
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
 include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)
