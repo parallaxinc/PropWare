@@ -20,7 +20,7 @@ class ImportSimple:
     PROPWARE_ROOT = os.path.abspath("..") + os.sep
     CHEATER_DIR = PROPWARE_ROOT + "simple" + os.sep
     LEARN_DOWNLOAD_LINK = "http://learn.parallax.com/sites/default/files/content/propeller-c-tutorials/" \
-                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.02.27.zip"
+                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.05.14.zip"
     LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep
 
     def __init__(self):
@@ -79,7 +79,8 @@ class ImportSimple:
         with open(ImportSimple.CHEATER_DIR + "simpleObjects.mk", 'w') as f:
             f.write("OBJS = ")
             for sourceFile in self.sourceFiles:
-                f.write(sourceFile[:-1] + "o ")
+                splitFIle = sourceFile.split('.')
+                f.write('.'.join(splitFIle[:-1]) + propwareUtils.getSrcOutExt(splitFIle[-1]) + " ")
 
     @staticmethod
     def downloadLearn():

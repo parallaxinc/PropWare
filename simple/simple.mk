@@ -11,8 +11,6 @@
 #
 #  Then set up a default "all" target (normally this will be
 #    all: $(NAME).elf
-#  and finally
-#    include $(PROPLIB)/demo.mk
 #
 # Copyright (c) 2011 Parallax Inc.
 # All rights MIT licensed
@@ -22,7 +20,7 @@
 # Modification by David Zemon...
 #
 # !!! NOTE !!!
-# All C source files must have an accompanying header file
+# All C/C++ source files must have an accompanying header file
 # in the same directory as the source.
 # Without this mod, changes in header files would be ignored
 # until the source file was modified (and therefore rebuilt)
@@ -32,8 +30,6 @@
 # #########################################################
 # Variable Definitions
 # #########################################################
-# where we installed the propeller binaries and libraries
-
 # Depending on OS type, set the file deletion commands appropriately
 ifeq ($(OS), Windows_NT)
 	CLEAN=del /f
@@ -46,15 +42,28 @@ else
 	CLEAN=rm -f
 endif
 
-# Find PropGCC
+# where we installed the propeller binaries and libraries
 PROPGCC_PREFIX ?= /opt/parallax
 
 # libgcc directory
 LIBGCC = $(PROPGCC_PREFIX)/lib/gcc/propeller-elf/4.6.1
 
-CFLAGS_NO_MODEL := -Wextra $(CFLAGS)
-CFLAGS += -m$(MODEL) -Wall -m32bit-doubles -std=c99
-CXXFLAGS += $(CFLAGS) -Wall
+# Define a default memory model
+MODEL ?= lmm
+
+# Define a default board
+BOARD ?= $(PROPELLER_LOAD_BOARD)
+
+ifneq ($(BOARD),)
+	BOARDFLAG=-b$(BOARD)
+endif
+
+CFLAGS_NO_MODEL := -g -Wall -m32bit-doubles
+CFLAGS += -m$(MODEL) $(CFLAGS_NO_MODEL)
+CSTANDARD = -std=c99
+CXXFLAGS += $(CFLAGS) -fno-threadsafe-statics
+CXXSTANDARD = -std=gnu++0x
+LDFLAGS += -m$(MODEL) -Xlinker -Map=main.rawmap
 ASFLAGS += -m$(MODEL) -xassembler-with-cpp
 INC += -I'$(PROPWARE_PATH)' -I'$(PROPGCC_PREFIX)/propeller-elf/include'
 
@@ -68,7 +77,7 @@ endif
 # basic gnu tools
 GCC_PATH = $(PROPGCC_PREFIX)/bin
 CC = $(GCC_PATH)/propeller-elf-gcc
-CXX = $(GCC_PATH)/propeller-elf-g++
+CXX = $(GCC_PATH)/propeller-elf-gcc
 LD = $(GCC_PATH)/propeller-elf-ld
 AS = $(GCC_PATH)/propeller-elf-as
 AR = $(GCC_PATH)/propeller-elf-ar
@@ -90,14 +99,14 @@ endif
 %.o: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
-	$(CC) $(INC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(INC) $(CFLAGS) $(CSTANDARD) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropG++ Compiler'
-	$(CC) $(INC) $(CXXFLAGS) -o $@ -c $<
+	$(CC) $(INC) $(CXXFLAGS) $(CXXSTANDARD) -o $@ -c $<
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -121,19 +130,19 @@ endif
 # driver that the linker will place in the .text section.
 #
 %.cog: ../%.c
-	@echo "Building file: $<'
-	@echo "Invoking: PropGCC Compiler"
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
+	@echo 'Building file: $<'
+	@echo 'Invoking: PropGCC Compiler'
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
-	@echo "Finished building: $<'
+	@echo 'Finished building: $<'
 	@echo ' '
 
 %.cog: ../%.cogc
-	@echo "Building file: $<'
-	@echo "Invoking: PropGCC Compiler"
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
+	@echo 'Building file: $<'
+	@echo 'Invoking: PropGCC Compiler'
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
-	@echo "Finished building: $<'
+	@echo 'Finished building: $<'
 	@echo ' '
 
 #
@@ -145,7 +154,7 @@ endif
 %.ecog: ../%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -r -o $@ $<
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
 	@echo 'Renaming: ".text" section'
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
 	@echo 'Finished building: $<'
@@ -154,7 +163,7 @@ endif
 %.ecog: ../%.ecogc
 	@echo 'Building file: $<'
 	@echo 'Invoking: PropGCC Compiler'
-	$(CC) $(INC) $(CFLAGS_NO_MODEL) -mcog -xc -r -o $@ $<
+	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
 	@echo 'Renaming: ".text" section'
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
 	@echo 'Finished building: $<'
@@ -167,7 +176,7 @@ endif
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.dat: $(SPINDIR)/%.spin
+%.dat: ../%.spin
 	@echo 'Building file: $<'
 	@echo 'Invoking: bstc'
 	$(BSTC) -Ox -c -o $(basename $@) $<
@@ -182,4 +191,5 @@ endif
 	@echo ' '
 
 clean:
-	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary $(NULL)
+	$(CLEAN) *.o *.elf *.a *.cog *.ecog *.binary *.map *.rawmap $(NULL)
+

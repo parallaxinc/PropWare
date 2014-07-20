@@ -8,6 +8,7 @@
 """
 @description:
 """
+import re
 import shutil
 
 __author__ = 'david'
@@ -137,12 +138,29 @@ def isAsmFile(f):
 
 def isSourceFile(f):
     assert (isinstance(f, str))
-    return f[-2:] == ".c"
+    return re.match('.*(\.c|\.cpp|\.cxx|\.cc|\.dat|\.cogc|\.s|\.ecogc)$', f, re.I)
 
+
+def getSrcOutExt(ext):
+    assert (isinstance(ext, str))
+
+    gcc_extensions = ['c', 'cpp', 'cxx', 'cc', 's']
+    cog_extensions = ["cogc"]
+    ecog_extensions = ["ecogc"]
+    dat_extensions = ["dat"]
+
+    if ext.lower() in gcc_extensions or ext.upper() in gcc_extensions:
+        return ".o"
+    elif ext.lower() in cog_extensions or ext.upper() in cog_extensions:
+        return ".cog"
+    elif ext.lower() in ecog_extensions or ext.upper() in ecog_extensions:
+        return ".ecog"
+    elif ext.lower() in dat_extensions or ext.upper() in dat_extensions:
+        return "_firmware.o"
 
 def isHeaderFile(f):
     assert (isinstance(f, str))
-    return f[-2:] == ".h"
+    return re.match('.*(\.h|\.hpp)$', f, re.I)
 
 
 def isSourceOrHeaderFile(f):

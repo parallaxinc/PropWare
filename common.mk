@@ -77,7 +77,7 @@ endif
 
 ifndef NO_LIB_LIBPROPELLER
 	LIBS += -lLibpropeller_$(MODEL)
-endif 
+endif
 
 ifndef NO_LIB_TINY
 	LIBS += -ltiny
@@ -164,19 +164,19 @@ endif
 # driver that the linker will place in the .text section.
 #
 %.cog: ../%.c ../%.h
-	@echo "Building file: $<'
-	@echo "Invoking: PropGCC Compiler"
+	@echo 'Building file: $<'
+	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
-	@echo "Finished building: $<'
+	@echo 'Finished building: $<'
 	@echo ' '
 
 %.cog: ../%.cogc ../%.h
-	@echo "Building file: $<'
-	@echo "Invoking: PropGCC Compiler"
+	@echo 'Building file: $<'
+	@echo 'Invoking: PropGCC Compiler'
 	$(CC) $(INC) $(CFLAGS_NO_MODEL) $(CSTANDARD) -mcog -xc -r -o $@ $<
 	$(OBJCOPY) --localize-text --rename-section .text=$@ $@
-	@echo "Finished building: $<'
+	@echo 'Finished building: $<'
 	@echo ' '
 
 #
@@ -210,7 +210,7 @@ endif
 	@echo 'Finished building: $<'
 	@echo ' '
 
-%.dat: $(SPINDIR)/%.spin
+%.dat: ../%.spin
 	@echo 'Building file: $<'
 	@echo 'Invoking: bstc'
 	$(BSTC) -Ox -c -o $(basename $@) $<
