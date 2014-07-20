@@ -3,19 +3,13 @@ cmake_minimum_required (VERSION 2.6.4)
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
-set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
 
+set(CFLAGS "-Os")
+set(CXXFLAGS )
 set(MODEL xmmc)
+include(${PROPWARE_PATH}/Generic-gcc-Propeller.cmake)
+
 project(Simple_${MODEL})
-set(CMAKE_PROJECT_NAME Simple_${MODEL})
 
 include(../simpleObjects.cmake)
-
-add_library(${CMAKE_PROJECT_NAME} STATIC ${SIMPLE_OBJECTS})
-
-set(BOARD QUICKSTART)
-set(CFLAGS "-Os")
-
-if (NOT DEFINED PROPWARE_PATH)
-    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
-endif (NOT DEFINED PROPWARE_PATH)
+add_library(${PROJECT_NAME} STATIC ${SIMPLE_OBJECTS})
