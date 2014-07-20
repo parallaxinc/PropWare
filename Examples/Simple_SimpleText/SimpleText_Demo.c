@@ -1,5 +1,5 @@
-/**
- * @file libsimpletext.c
+/*
+ * @file libsimpletext.h
  * Project and Test harness for library simpletext
  *
  * Copyright (c) 2013, Parallax Inc. MIT license.
@@ -21,6 +21,7 @@ int main(void)
   float fval = 355/113.0;
   float fval2 = 1.4;
   float e = 2.71828184590;
+  char bigtext[] = "abcdefghijklmnopqrstuvwxyz";
 
   /*
    * global serial module pointer - can be local.
@@ -32,6 +33,34 @@ int main(void)
 
   /* traditional hello message. */
   putln("Hello, world!");
+
+  putStrLen(&bigtext[20],5);
+  putln("");
+  writeStrLen(simpleterm_pointer(),&bigtext[4],5);
+  putln("");
+
+#ifdef DIV0_NAN_TEST
+  float fproblem;
+  float f;
+
+  for(f = 5.0; f > -5.0; f -= 1.0) {
+    fproblem = 1.0 / f;
+    print("f = %02.2f, fproblem = %02.2f\n", f, fproblem);
+  }
+  for(f = 5.0; f > -5.0; f -= 1.0) {
+    fproblem = 1.0 / -f;
+    putStr("f = "); putFloat(f); putStr(" fproblem = "); putFloat(fproblem); putLine("");
+  }
+
+   for(f = 5.0; f > -5.0; f -= 1.0) {
+      fproblem = atan(0.0/f);
+      print("f = %02.2f, fproblem = %02.2f\n", f, fproblem);
+   }
+   for(f = 5.0; f > -5.0; f -= 1.0) {
+      fproblem = atan(0.0/-f);
+      putStr("f = "); putFloat(f); putStr(" fproblem = "); putFloat(fproblem); putLine("");
+   }
+#endif
 
 #ifdef MORETESTING
 
@@ -146,11 +175,11 @@ int main(void)
   writeChar(text, readChar(text));
 
   writeStr(text, "\nEnter a decimal number: ");
-  writeDecDigits(text, readDec(text),8);
+  writeDecLen(text, readDec(text),8);
   writeStr(text, "\nEnter a hexadecimal number: ");
-  writeHexDigits(text, readHex(text),8);
+  writeHexLen(text, readHex(text),8);
   writeStr(text, "\nEnter a binary number: ");
-  writeBinDigits(text, readBin(text),8);
+  writeBinLen(text, readBin(text),8);
   writeStr(text, "\nEnter a floating point number: ");
   writeFloatPrecision(text, readFloat(text),8,8);
 

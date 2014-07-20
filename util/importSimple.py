@@ -10,7 +10,7 @@
 """
 
 import os
-from shutil import copy2
+from shutil import copy2, rmtree
 import zipfile
 
 import propwareUtils
@@ -91,8 +91,7 @@ class ImportSimple:
         zipFile = zipfile.ZipFile(zipFileName, mode='r')
         zipFile.extractall(ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
 
-        return ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep + "Simple Libraries"\
-               + os.sep
+        return ImportSimple.LEARN_PATH + "Simple Libraries" + os.sep
 
     @staticmethod
     def clean():
@@ -107,6 +106,8 @@ class ImportSimple:
 
         for fileName in rmList:
             os.remove(fileName)
+
+        rmtree(ImportSimple.LEARN_PATH)
 
     @staticmethod
     def getDemoFileNames(library):

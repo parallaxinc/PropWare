@@ -138,7 +138,7 @@ def isAsmFile(f):
 
 def isSourceFile(f):
     assert (isinstance(f, str))
-    return re.match('.*(\.c|\.cpp|\.cxx|\.cc|\.dat|\.cogc|\.s|\.ecogc)$', f, re.I)
+    return re.match('.*(\.s|\.c|\.cpp|\.cxx|\.cc|\.dat|\.spin)$', f, re.I)
 
 
 def getSrcOutExt(ext):
@@ -148,15 +148,19 @@ def getSrcOutExt(ext):
     cog_extensions = ["cogc"]
     ecog_extensions = ["ecogc"]
     dat_extensions = ["dat"]
+    spin_extensions = ["spin"]
 
     if ext.lower() in gcc_extensions or ext.upper() in gcc_extensions:
         return ".o"
-    elif ext.lower() in cog_extensions or ext.upper() in cog_extensions:
-        return ".cog"
-    elif ext.lower() in ecog_extensions or ext.upper() in ecog_extensions:
-        return ".ecog"
+    # elif ext.lower() in cog_extensions or ext.upper() in cog_extensions:
+    #     return ".cog"
+    # elif ext.lower() in ecog_extensions or ext.upper() in ecog_extensions:
+    #     return ".ecog"
     elif ext.lower() in dat_extensions or ext.upper() in dat_extensions:
         return "_firmware.o"
+    elif ext.lower() in spin_extensions or ext.upper() in spin_extensions:
+        return ".o"
+
 
 def isHeaderFile(f):
     assert (isinstance(f, str))
