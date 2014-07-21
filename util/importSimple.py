@@ -117,7 +117,8 @@ class ImportSimple:
         if os.path.exists(destroyMe):
             rmtree(destroyMe)
 
-        rmtree(ImportSimple.LEARN_PATH)
+        if os.path.exists(ImportSimple.LEARN_PATH):
+            rmtree(ImportSimple.LEARN_PATH)
 
     @staticmethod
     def getDemoFileNames(library):
