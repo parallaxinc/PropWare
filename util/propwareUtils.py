@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# File:    ${file}
-# Author:  David Zemon
-# Project: PropWare
+# @file    propwareUtils.py
+# @author  David Zemon
 #
 # Created with: PyCharm Community Edition
 
@@ -17,6 +16,7 @@ import os
 from sys import version
 
 DOWNLOADS_DIRECTORY = ".external_downloads" + os.sep
+MEMORY_MODELS = ["cog", "cmm", "lmm", "xmmc", "xmm-single", "xmm-split"]
 
 
 def which(program):
@@ -72,6 +72,7 @@ def initDownloadsFolder(propwareRoot):
     if "nt" == os.name:
         winDirName = os.path.normpath(fullPath)
         import ctypes
+
         FILE_ATTRIBUTE_HIDDEN = 0x02
 
         ret = ctypes.windll.kernel32.SetFileAttributesW(winDirName, FILE_ATTRIBUTE_HIDDEN)
@@ -89,9 +90,11 @@ def downloadFile(src, dstDir):
 
     if isPython3():
         import urllib.request
+
         return urllib.request.urlretrieve(src, dst)
     else:
         import urllib2
+
         u = urllib2.urlopen(src)
         with open(dst, 'wb') as f:
             meta = u.info()
@@ -138,7 +141,7 @@ def isAsmFile(f):
 
 def isSourceFile(f):
     assert (isinstance(f, str))
-    return re.match('.*(\.c|\.cpp|\.dat|\.cogc|\.s|\.ecogc|\.spin)$', f, re.I)
+    return re.match('.*(\.c|\.cpp|\.cxx|\.cc|\.s|\.dat|\.cogc|\.ecogc|\.spin)$', f, re.I)
 
 
 def isHeaderFile(f):

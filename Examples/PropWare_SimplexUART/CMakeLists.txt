@@ -10,7 +10,7 @@ set(CFLAGS "-Os")
 set(CXXFLAGS )
 set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
 if (DEFINED PROPWARE_MAIN_PACKAGE)
-    include(${PROPWARE_PATH}/Generic-gcc-Propeller.cmake)
+    include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
 endif (DEFINED PROPWARE_MAIN_PACKAGE)
 
 project(SimplexUART_Demo)

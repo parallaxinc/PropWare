@@ -7,7 +7,7 @@ endif (NOT DEFINED PROPWARE_PATH)
 set(CFLAGS "-Os")
 set(CXXFLAGS )
 set(MODEL xmm-single)
-include(${PROPWARE_PATH}/Generic-gcc-Propeller.cmake)
+include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
 
 project(PropWare_${MODEL})
 

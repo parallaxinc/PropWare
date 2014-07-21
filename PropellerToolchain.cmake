@@ -31,9 +31,13 @@ set(GCC_PATH ${PROPGCC_PREFIX}/bin)
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc)
-#set(CMAKE_AR ${GCC_PATH}/propeller-elf-ar)  # For some reason, defining this breaks it all
 set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib)
+set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy)
+set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump)
 set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load)
+
+set(CMAKE_COGC_COMPILER ${CMAKE_C_COMPILER})
+set(CMAKE_COGCXX_COMPILER ${CMAKE_CXX_COMPILER})
 
 set(CMAKE_FIND_ROOT_PATH ${PROPGCC_PREFIX} ${PROPWARE_PATH})
 

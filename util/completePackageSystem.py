@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# File:    createBinaryDistr_v2
-# Author:  David Zemon
-# Project: PropWare
+# @file    completePackageSystem.py
+# @author  David Zemon
 #
 # Created with: PyCharm Community Edition
 

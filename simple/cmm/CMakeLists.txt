@@ -7,9 +7,10 @@ endif (NOT DEFINED PROPWARE_PATH)
 set(CFLAGS "-Os")
 set(CXXFLAGS )
 set(MODEL cmm)
-include(${PROPWARE_PATH}/Generic-gcc-Propeller.cmake)
+include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
 
 project(Simple_${MODEL})
 
 include(../simpleObjects.cmake)
 add_library(${PROJECT_NAME} STATIC ${SIMPLE_OBJECTS})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
