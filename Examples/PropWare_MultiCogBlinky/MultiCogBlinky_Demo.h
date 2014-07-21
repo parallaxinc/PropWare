@@ -1,5 +1,5 @@
 /**
- * @file        PropWare_Demo.h
+ * @file        MultiCogBlinky_Demo.h
  */
 /**
  * @brief       Blink an LED on each of the 8 Propeller cogs

@@ -13,7 +13,7 @@ if (DEFINED PROPWARE_MAIN_PACKAGE)
     include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
 endif (DEFINED PROPWARE_MAIN_PACKAGE)
 
-project(SD_Demo)
+project(MultiCogBlinky_Demo)
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
 include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)

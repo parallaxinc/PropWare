@@ -1,10 +1,17 @@
 cmake_minimum_required (VERSION 2.6.4)
 
-set(MODEL xmmc)
-project(PropWare_${MODEL})
-set(CMAKE_PROJECT_NAME PropWare_${MODEL})
+if (NOT DEFINED PROPWARE_PATH)
+    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
+endif (NOT DEFINED PROPWARE_PATH)
 
-add_library(${CMAKE_PROJECT_NAME} STATIC
+set(CFLAGS "-Os")
+set(CXXFLAGS )
+set(MODEL xmmc)
+include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
+
+project(PropWare_${MODEL})
+
+add_library(${PROJECT_NAME} STATIC
         ../hd44780
         ../l3g
         ../max6675
@@ -16,12 +23,3 @@ add_library(${CMAKE_PROJECT_NAME} STATIC
         ../spi
         ../spi_as.S
         ../uart)
-
-set(BOARD QUICKSTART)
-set(CFLAGS "-Os")
-
-if (NOT DEFINED PROPWARE_PATH)
-    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
-endif (NOT DEFINED PROPWARE_PATH)
-
-include(${PROPWARE_PATH}/PropellerToolchain.cmake)

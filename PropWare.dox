@@ -59,12 +59,12 @@
     <li><a href="http://obex.parallax.com/" target="_blank">OBEX</a>: Parallax Object Exchange
     </li>
 
-    <li><a target="_blank" href="https://code.google.com/p/lib-propelleruino/">libpropelleruino</a>: Arduino-compatible
-        source for the Propeller
-    </li>
-
     <li><a target="_blank" href="https://github.com/libpropeller/libpropeller">libpropeller</a>: C++ Propeller GCC
         objects
+    </li>
+
+    <li><a target="_blank" href="https://code.google.com/p/lib-propelleruino/">libpropelleruino</a>: Arduino-compatible
+        source for the Propeller
     </li>
 </ul>
 

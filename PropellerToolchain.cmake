@@ -1,3 +1,6 @@
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR Propeller)
+
 if (NOT DEFINED PROPGCC_PREFIX)
     set(PROPGCC_PREFIX $ENV{PROPGCC_PREFIX})
     if (NOT PROPGCC_PREFIX)
@@ -18,22 +21,23 @@ if (NOT DEFINED MODEL)
     set(MODEL lmm)
 endif (NOT DEFINED MODEL)
 
+# XMM model is retroactively renamed xmm-split
 if (${MODEL} STREQUAL xmm)
     set(MODEL xmm-split)
 endif (${MODEL} STREQUAL xmm)
 
-enable_language(ASM)
-
-SET(CMAKE_SYSTEM_NAME Propeller)
-
 # specify the cross compiler
 set(GCC_PATH ${PROPGCC_PREFIX}/bin)
-set(CMAKE_ASM_COMPILER   ${GCC_PATH}/propeller-elf-gcc )
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
-set(CMAKE_AR ${GCC_PATH}/propeller-elf-ar)
+set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib)
+set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy)
+set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump)
 set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load)
+
+set(CMAKE_COGC_COMPILER ${CMAKE_C_COMPILER})
+set(CMAKE_COGCXX_COMPILER ${CMAKE_CXX_COMPILER})
 
 set(CMAKE_FIND_ROOT_PATH ${PROPGCC_PREFIX} ${PROPWARE_PATH})
 
@@ -42,30 +46,3 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM never)
 # for libraries and headers in the target directories
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY only)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE only)
-
-# Add standard flags
-set(ASFLAGS "-m${MODEL} -xassembler-with-cpp")
-set(CFLAGS_NO_MODEL "-Wall -m32bit-doubles")
-set(CFLAGS "${CFLAGS} -m${MODEL} ${CFLAGS_NO_MODEL}")
-set(CSTANDARD "-std=c99")
-set(CXXFLAGS "${CXXFLAGS} ${CFLAGS} -fno-threadsafe-statics -fno-rtti")
-set(CXXSTANDARD "-std=gnu++0x")
-
-# Set flags
-set(CMAKE_ASM_FLAGS ${ASFLAGS})
-set(CMAKE_C_FLAGS "${CFLAGS} ${CSTANDARD}")
-set(CMAKE_CXX_FLAGS "${CXXFLAGS} ${CXXSTANDARD}")
-set(LDFLAGS "-Xlinker -Map=main.rawmap")
-
-include_directories(${PROPWARE_PATH})
-
-################################################################################
-# Custom commands for non-standard files
-################################################################################
-#ADD_CUSTOM_COMMAND(
-#    OUTPUT ${temp}.cog
-#    COMMAND ${CMAKE_C_COMPILER}
-#    ARGS -r -mcog ${COGC_SOURCE_FLAGS} -o ${CMAKE_CURRENT_BINARY_DIR}/${temp}
-#    .cog ${CMAKE_CURRENT_SOURCE_DIR}/${file}
-#    COMMAND ${CMAKE_OBJECT_COPIER}
-#    ARGS --localize-text --rename-section .text=${temp}.cogc ${temp}.cog)

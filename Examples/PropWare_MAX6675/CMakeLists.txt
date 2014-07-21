@@ -1,16 +1,19 @@
 cmake_minimum_required (VERSION 2.6.4)
 
-project(MAX6675_Demo)
-set(CMAKE_PROJECT_NAME MAX6675_Demo)
-
-add_executable(${CMAKE_PROJECT_NAME}.elf ${CMAKE_PROJECT_NAME}.cpp)
-
-set(BOARD QUICKSTART)
-set(MODEL lmm)
-set(CFLAGS "-Os")
-
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
 
-include(${PROPWARE_PATH}/CMake_header.cmake)
+set(BOARD QUICKSTART)
+set(MODEL lmm)
+set(CFLAGS "-Os")
+set(CXXFLAGS )
+set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
+if (DEFINED PROPWARE_MAIN_PACKAGE)
+    include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
+endif (DEFINED PROPWARE_MAIN_PACKAGE)
+
+project(MAX6675_Demo)
+
+add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
+include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)
