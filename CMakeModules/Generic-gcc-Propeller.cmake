@@ -14,6 +14,12 @@ set(CMAKE_EXECUTABLE_SUFFIX .elf)
 ################################################################################
 ### Flags
 ################################################################################
+
+#set(CMAKE_C_FLAGS_INIT "$ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT} -Wall -m32bit-doubles")
+## avoid just having a space as the initial value for the cache
+#set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
+#     "Flags used by the compiler during all build types.")
+
 # Create standard flags
 set(ASMFLAGS "-xassembler-with-cpp")
 set(CFLAGS "${CFLAGS} -Wall -m32bit-doubles")
@@ -65,14 +71,6 @@ include_directories(${PROPWARE_PATH})
 ###
 ### NOTE: Set src file ext in CMake<LANG>Compiler.cmake.in
 ################################################################################
-#set(CMAKE_ECOGC_SOURCE_FILE_EXTENSIONS)
-#set(CMAKE_ECOGCXX_SOURCE_FILE_EXTENSIONS)
-#set(CMAKE_SPIN_SOURCE_FILE_EXTENSIONS)
-#set(CMAKE_DAT_SOURCE_FILE_EXTENSIONS)
-
-
-#set(CMAKE_COGCXX_OUTPUT_EXTENSION .cog)
-#set(CMAKE_ECOGCXX_OUTPUT_EXTENSION .ecog)
 #set(CMAKE_SPIN_OUTPUT_EXTENSION .o)
 #set(CMAKE_DAT_SOURCE_FILE_EXTENSIONS _firmware.o)
 
@@ -95,11 +93,39 @@ set(CMAKE_COGC_COMPILE_OBJECT
 set(CMAKE_COGCXX_OUTPUT_EXTENSION .cogcxx)
 
 set(CMAKE_COGCXX_FLAGS "${CFLAGS} ${CXXFLAGS} ${CXXSTANDARD} -mcog -xc++ -r")
-set(CMAKE_INCLUDE_FLAG_COGC ${CMAKE_INCLUDE_FLAG_C})
+set(CMAKE_INCLUDE_FLAG_COGCXX ${CMAKE_INCLUDE_FLAG_C})
 
 set(CMAKE_COGC_ARCHIVE_CREATE ${CMAKE_C_ARCHIVE_CREATE})
 set(CMAKE_COGC_ARCHIVE_APPEND ${CMAKE_C_ARCHIVE_APPEND})
 set(CMAKE_COGC_ARCHIVE_FINISH ${CMAKE_C_ARCHIVE_FINISH})
 set(CMAKE_COGC_COMPILE_OBJECT
+"<CMAKE_C_COMPILER> <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>"
+"${CMAKE_OBJCOPY} --localize-text --rename-section .text=<OBJECT> <OBJECT>")
+
+#############
+# ECOGC
+set(CMAKE_ECOGC_OUTPUT_EXTENSION .ecog)
+
+set(CMAKE_ECOGC_FLAGS "${CFLAGS} ${CSTANDARD} -mcog -xc -r")
+set(CMAKE_INCLUDE_FLAG_ECOGC ${CMAKE_INCLUDE_FLAG_C})
+
+set(CMAKE_ECOGC_ARCHIVE_CREATE ${CMAKE_C_ARCHIVE_CREATE})
+set(CMAKE_ECOGC_ARCHIVE_APPEND ${CMAKE_C_ARCHIVE_APPEND})
+set(CMAKE_ECOGC_ARCHIVE_FINISH ${CMAKE_C_ARCHIVE_FINISH})
+set(CMAKE_ECOGC_COMPILE_OBJECT
+"<CMAKE_C_COMPILER> <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>"
+"${CMAKE_OBJCOPY} --localize-text --rename-section .text=<OBJECT> <OBJECT>")
+
+############
+# ECOGCXX
+set(CMAKE_ECOGCXX_OUTPUT_EXTENSION .ecogcxx)
+
+set(CMAKE_ECOGCXX_FLAGS "${CFLAGS} ${CXXFLAGS} ${CXXSTANDARD} -mcog -xc++ -r")
+set(CMAKE_INCLUDE_FLAG_ECOGCXX ${CMAKE_INCLUDE_FLAG_C})
+
+set(CMAKE_ECOGC_ARCHIVE_CREATE ${CMAKE_C_ARCHIVE_CREATE})
+set(CMAKE_ECOGC_ARCHIVE_APPEND ${CMAKE_C_ARCHIVE_APPEND})
+set(CMAKE_ECOGC_ARCHIVE_FINISH ${CMAKE_C_ARCHIVE_FINISH})
+set(CMAKE_ECOGC_COMPILE_OBJECT
 "<CMAKE_C_COMPILER> <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>"
 "${CMAKE_OBJCOPY} --localize-text --rename-section .text=<OBJECT> <OBJECT>")

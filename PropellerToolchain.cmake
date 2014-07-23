@@ -27,7 +27,7 @@ if (${MODEL} STREQUAL xmm)
 endif (${MODEL} STREQUAL xmm)
 
 # specify the cross compiler
-set(GCC_PATH ${PROPGCC_PREFIX}/bin)
+file(TO_CMAKE_PATH "${PROPGCC_PREFIX}/bin" GCC_PATH)
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc)

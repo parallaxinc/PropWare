@@ -95,7 +95,7 @@ if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
   endif ()
 endif ()
 
-include(CMakeFindBinUtils)
+#include(CMakeFindBinUtils)
 
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeCOGCCompiler.cmake.in

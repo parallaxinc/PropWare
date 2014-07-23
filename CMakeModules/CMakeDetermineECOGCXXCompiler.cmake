@@ -94,8 +94,6 @@ if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
   endif ()
 endif ()
 
-include(CMakeFindBinUtils)
-
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeECOGCXXCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeECOGCXXCompiler.cmake
