@@ -6,6 +6,8 @@ add_library(SIMPLE_LIB
 add_library(PROPWARE_LIB
         STATIC IMPORTED)
 
+include_directories("${PROPWARE_PATH}")
+
 # Set locations for library dependencies
 set_target_properties(LIBPROPELLER_LIB
         PROPERTIES
