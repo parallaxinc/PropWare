@@ -1,8 +1,9 @@
-cmake_minimum_required (VERSION 2.6.4)
+cmake_minimum_required (VERSION 3.0.0)
 
 set(CMAKE_TOOLCHAIN_FILE ./PropellerToolchain.cmake)
-set (CMAKE_BUILD_TYPE None)
-project(PropWare C CXX ASM COGC COGCXX ECOGC ECOGCXX)
+set(CMAKE_BUILD_TYPE None)
+
+project(PropWare C CXX COGC COGCXX ECOGC ECOGCXX ASM)
 
 set(PROPWARE_MAIN_PACKAGE 1)
 

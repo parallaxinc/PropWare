@@ -1,17 +1,15 @@
-cmake_minimum_required (VERSION 2.6.4)
+cmake_minimum_required (VERSION 3.0.0)
 
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
+set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
 
 set(BOARD QUICKSTART)
 set(MODEL lmm)
-set(CFLAGS "-Os")
-set(CXXFLAGS )
-set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
-if (DEFINED PROPWARE_MAIN_PACKAGE)
-    include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
-endif (DEFINED PROPWARE_MAIN_PACKAGE)
+set(COMMON_FLAGS "-Os")
+set(C_FLAGS )
+set(CXX_FLAGS )
 
 project(SimplexUART_Demo)
 

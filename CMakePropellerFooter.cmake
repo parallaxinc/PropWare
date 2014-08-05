@@ -1,3 +1,5 @@
+include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+
 # Create library dependencies
 add_library(LIBPROPELLER_LIB
         STATIC IMPORTED)

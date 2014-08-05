@@ -7,13 +7,14 @@
 """
 @description:
 """
+import os
 import re
 import shutil
+from sys import version
+import subprocess
 
 __author__ = 'david'
 
-import os
-from sys import version
 
 DOWNLOADS_DIRECTORY = ".external_downloads" + os.sep
 MEMORY_MODELS = ["cog", "cmm", "lmm", "xmmc", "xmm-single", "xmm-split"]
@@ -151,6 +152,13 @@ def isHeaderFile(f):
 
 def isSourceOrHeaderFile(f):
     return isSourceFile(f) or isHeaderFile(f)
+
+
+def testPropGCC():
+    """
+    Determine if PropGCC is installed and in the users PATH
+    """
+    subprocess.check_output(["propeller-elf-gcc", "--version"])
 
 
 class IncorrectStartingDirectoryException(Exception):

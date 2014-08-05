@@ -1,13 +1,14 @@
-cmake_minimum_required (VERSION 2.6.4)
+cmake_minimum_required (VERSION 3.0.0)
 
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
 
-set(CFLAGS "-Os")
-set(CXXFLAGS )
+set(COMMON_FLAGS "-Os")
+set(C_FLAGS )
+set(CXX_FLAGS )
 set(MODEL lmm)
-include(${PROPWARE_PATH}/CMakeModules/Generic-gcc-Propeller.cmake)
+include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
 
 project(PropWare_${MODEL})
 

@@ -17,24 +17,15 @@ if (NOT DEFINED PROPWARE_PATH)
     endif (NOT PROPWARE_PATH)
 endif (NOT DEFINED PROPWARE_PATH)
 
-if (NOT DEFINED MODEL)
-    set(MODEL lmm)
-endif (NOT DEFINED MODEL)
-
-# XMM model is retroactively renamed xmm-split
-if (${MODEL} STREQUAL xmm)
-    set(MODEL xmm-split)
-endif (${MODEL} STREQUAL xmm)
-
 # specify the cross compiler
 file(TO_CMAKE_PATH "${PROPGCC_PREFIX}/bin" GCC_PATH)
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc)
-set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib)
-set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy)
-set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump)
-set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load)
+#set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib)
+#set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy)
+#set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump)
+#set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load)
 
 set(CMAKE_COGC_COMPILER ${CMAKE_C_COMPILER})
 set(CMAKE_COGCXX_COMPILER ${CMAKE_CXX_COMPILER})
