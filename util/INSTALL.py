@@ -13,6 +13,7 @@ import os
 from os.path import expanduser
 import sys
 import tempfile
+import shutil
 
 import propwareUtils
 
@@ -26,6 +27,8 @@ def my_input(prompt):
 
 
 class Installer:
+    _PROPWARE_ROOT = ""
+
     __DEFAULT_PROPGCC_PATH = expanduser("~")
     __DEFAULT_CMAKE_PATH = expanduser("~")
 
@@ -35,6 +38,9 @@ class Installer:
         self._propgcc_download_url = ""
         self._cmake_zip_name = None
         self._propgcc_zip_name = None
+
+        propwareUtils.checkProperWorkingDirectory()
+        Installer._PROPWARE_ROOT = os.path.abspath("..")
 
         # Parse arguments
         args = Installer._parse_args()
@@ -61,7 +67,9 @@ class Installer:
     def install(self):
         self._download_dependencies()  # CMake and PropGCC
 
-        self._copy_cmake_files()
+        self._copy_cmake_files()  # Copy necessary language files (*COG* and eventually Spin)
+
+        self._import_propware()  # Download Simple and libpropeller
 
         # Last but not least, check to ensure Make is installed
         self._check_for_make()
@@ -88,6 +96,12 @@ class Installer:
         else:
             return default
 
+    @staticmethod
+    def _import_propware():
+        if not os.path.exists(Installer._PROPWARE_ROOT + str(os.sep) + propwareUtils.DOWNLOADS_DIRECTORY):
+            from propwareImporter import importAll
+            importAll()
+
     def _download_cmake(self):
         assert (self._cmake_download_url != "")
         return propwareUtils.downloadFile(self._cmake_download_url, tempfile.gettempdir())[0]
@@ -111,7 +125,8 @@ class Installer:
         propwareUtils.extractZip(self._propgcc_zip_name, self._propgcc_path)
 
     def _copy_cmake_files(self):
-        pass
+        for root, dir, files in os.walk(self._cmake_path + str(os.sep) + "CMakeModules"):
+            pass
 
 
 class NixInstaller(Installer):
