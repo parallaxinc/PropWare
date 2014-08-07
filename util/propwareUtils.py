@@ -12,6 +12,7 @@ import re
 import shutil
 from sys import version
 import subprocess
+import zipfile
 
 __author__ = 'david'
 
@@ -63,7 +64,7 @@ def isPython3():
 def initDownloadsFolder(propwareRoot):
     assert (isPropWareRoot(propwareRoot))
 
-    fullPath = os.path.abspath(propwareRoot) + os.sep + DOWNLOADS_DIRECTORY
+    fullPath = os.path.abspath(propwareRoot) + str(os.sep) + DOWNLOADS_DIRECTORY
 
     # Create the folder if it doesn't exist
     if not os.path.exists(fullPath):
@@ -83,7 +84,7 @@ def initDownloadsFolder(propwareRoot):
 
 def downloadFile(src, dstDir):
     fileName = src.split('/')[-1]
-    dst = os.path.abspath(dstDir) + os.sep + fileName
+    dst = os.path.abspath(dstDir) + str(os.sep) + fileName
 
     # If the file already exists, don't re-download it
     if os.path.exists(dst):
@@ -94,6 +95,7 @@ def downloadFile(src, dstDir):
 
         return urllib.request.urlretrieve(src, dst)
     else:
+        # noinspection PyUnresolvedReferences
         import urllib2
 
         u = urllib2.urlopen(src)
@@ -159,6 +161,11 @@ def testPropGCC():
     Determine if PropGCC is installed and in the users PATH
     """
     subprocess.check_output(["propeller-elf-gcc", "--version"])
+
+
+def extractZip(zipFileName, destination):
+    zipFile = zipfile.ZipFile(zipFileName, mode='r')
+    zipFile.extractall(destination)
 
 
 class IncorrectStartingDirectoryException(Exception):

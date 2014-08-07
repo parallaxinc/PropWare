@@ -10,7 +10,6 @@
 
 import os
 from shutil import copy2, rmtree
-import zipfile
 
 import propwareUtils
 
@@ -94,8 +93,7 @@ class ImportSimple:
 
         zipFileName = propwareUtils.downloadFile(ImportSimple.getDownloadLink(),
                                                  ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)[0]
-        zipFile = zipfile.ZipFile(zipFileName, mode='r')
-        zipFile.extractall(ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
+        propwareUtils.extractZip(zipFileName, ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
 
         return ImportSimple.LEARN_PATH + "Simple Libraries" + os.sep
 
