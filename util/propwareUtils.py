@@ -7,12 +7,13 @@
 """
 @description:
 """
+from __future__ import print_function
 import os
 import re
 import shutil
-from sys import version
 import subprocess
 import zipfile
+import sys
 
 __author__ = 'david'
 
@@ -58,7 +59,7 @@ def isPropWareRoot(directory):
 
 
 def isPython3():
-    return '3' == version[0]
+    return '3' == sys.version[0]
 
 
 def initDownloadsFolder(propwareRoot):
@@ -91,33 +92,34 @@ def downloadFile(src, dstDir):
         return dst, None
 
     if isPython3():
-        import urllib.request
-
-        return urllib.request.urlretrieve(src, dst)
+        # noinspection PyUnresolvedReferences
+        from urllib.request import urlopen
     else:
         # noinspection PyUnresolvedReferences
-        import urllib2
+        from urllib2 import urlopen
 
-        u = urllib2.urlopen(src)
-        with open(dst, 'wb') as f:
-            meta = u.info()
-            file_size = int(meta.getheaders("Content-Length")[0])
-            print("Downloading: %s Bytes: %s" % (fileName, file_size))
+    u = urlopen(src)
+    with open(dst, 'wb') as f:
+        meta = u.info()
+        file_size = int(meta.get("Content-Length"))
+        print("Downloading: %s - Bytes: %s" % (fileName, file_size))
 
-            fileSizeDl = 0
-            blockSize = 8192
-            while True:
-                buffer = u.read(blockSize)
-                if not buffer:
-                    break
+        fileSizeDl = 0
+        blockSize = 8192
+        while True:
+            buf = u.read(blockSize)
+            if not buf:
+                break
 
-                fileSizeDl += len(buffer)
-                f.write(buffer)
-                status = r"%10d  [%3.2f%%]" % (fileSizeDl, fileSizeDl * 100. / file_size)
-                status += chr(8) * (len(status) + 1)
-                print(status)
+            fileSizeDl += len(buf)
+            f.write(buf)
+            status = r"%10d  [%3.2f%%]" % (fileSizeDl, fileSizeDl * 100. / file_size)
+            status += chr(8) * (len(status))
+            sys.stdout.write(status)
 
-            return dst, meta
+        sys.stdout.write(os.linesep)
+
+        return dst, meta
 
 
 def copytree(src, dst):
@@ -166,6 +168,36 @@ def testPropGCC():
 def extractZip(zipFileName, destination):
     zipFile = zipfile.ZipFile(zipFileName, mode='r')
     zipFile.extractall(destination)
+
+
+def get_user_input(prompt, errorPrompt, default):
+    def my_input(inner_prompt):
+        try:
+            # noinspection PyUnresolvedReferences
+            return raw_input(inner_prompt)
+        except NameError:
+            return input(inner_prompt)
+
+    usrInput = my_input(prompt % default)
+    if "" != usrInput:
+        if os.path.isdir(usrInput):
+            return usrInput
+        else:
+            if None != errorPrompt:
+                print(errorPrompt % usrInput, file=sys.stderr)
+            return get_user_input(prompt, errorPrompt, default)
+    else:
+        return default
+
+
+def get_cmake_modules_path(cmake_root):
+    modules_dir_from_src_dstr = cmake_root + str(os.sep) + "Modules"
+    modules_dir_from_bin_dstr = cmake_root + str(os.sep) + "share" + str(os.sep) + "cmake-3.0" + str(os.sep) + "Modules"
+
+    if os.path.exists(modules_dir_from_src_dstr):
+        return modules_dir_from_src_dstr
+    elif os.path.exists(modules_dir_from_bin_dstr):
+        return modules_dir_from_bin_dstr
 
 
 class IncorrectStartingDirectoryException(Exception):
