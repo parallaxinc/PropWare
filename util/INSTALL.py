@@ -16,61 +16,64 @@ import tempfile
 import shutil
 import subprocess
 
+from pip.backwardcompat import PermissionError
+
 import propwareUtils
 
 
-class Installer:
+class Installer(object):
     _PROPGCC_DIR_NAME = "propgcc"
-    _CMAKE_DIR_NAME = "cmake-3.0"
     _PROPWARE_ROOT = ""
 
     __DEFAULT_PROPGCC_PATH = expanduser("~")
     __DEFAULT_CMAKE_PATH = expanduser("~")
 
     def __init__(self):
+        super(Installer, self).__init__()
         self._cmake_download_url = ""
         self._propgcc_download_url = ""
+        self._cmake_parent = ""
+        self._propgcc_path = ""
         self._cmake_zip_name = None
         self._propgcc_zip_name = None
         self._make_installed = False
         self._cmake_installed = False
+        self._cmake_root_dir_name = ""  # Differs between each OS - must be set in children
 
         propwareUtils.checkProperWorkingDirectory()
         Installer._PROPWARE_ROOT = os.path.abspath("..")
 
         # Parse arguments
         args = Installer._parse_args()
-        if None != args.propgcc_path:
+        if args.propgcc_path:
             self._propgcc_path = args.propgcc_path
         else:
             self._propgcc_path = Installer.__DEFAULT_PROPGCC_PATH
-        if None != args.cmake_path:
-            self._cmake_path = args.cmake_path
+        if args.cmake_path:
+            self._cmake_parent = args.cmake_path
         else:
-            self._cmake_path = Installer.__DEFAULT_CMAKE_PATH
+            self._cmake_parent = Installer.__DEFAULT_CMAKE_PATH
 
         # Confirm configuration settings
-        self._cmake_path = propwareUtils.get_user_input("CMake will be installed to %s. Press enter to continue or "
-                                                        "type "
-                                                        "another existing path to download to a new directory.\n>>> ",
-                                                        "'%s' does not exist or is not a directory.",
-                                                        Installer.__DEFAULT_CMAKE_PATH + os.sep +
-                                                        Installer._CMAKE_DIR_NAME)
+        self._cmake_parent = propwareUtils.get_user_input("CMake will be installed to %s. Press enter to continue or "
+                                                          "type "
+                                                          "another existing path to download to a new directory.\n>>> ",
+                                                          "'%s' does not exist or is not a directory.",
+                                                          self._cmake_parent)
         self._propgcc_path = propwareUtils.get_user_input("PropGCC will be installed to %s. Press enter to continue or "
                                                           "type another existing path to download to a new "
                                                           "directory.\n>>> ",
                                                           "'%s' does not exists or is not a directory.",
-                                                          Installer.__DEFAULT_PROPGCC_PATH + os.sep +
-                                                          Installer._PROPGCC_DIR_NAME)
+                                                          self._propgcc_path)
 
     def install(self):
         self._download_dependencies()  # CMake and PropGCC
 
         self._copy_cmake_files()  # Copy necessary language files (*COG* and eventually Spin)
 
-        self._import_propware()  # Download Simple and libpropeller
-
         self._set_env_variables()
+
+        self._import_propware()  # Download Simple and libpropeller
 
         # Last but not least, check to ensure Make is installed
         self._check_for_make()
@@ -116,19 +119,19 @@ class Installer:
         self._cmake_zip_name = self._download_cmake()
         self._propgcc_zip_name = self._download_propgcc()
 
-        # TODO: THEY'RE NOT ZIPS YOU IDIOT!
-        propwareUtils.extractZip(self._cmake_zip_name, self._cmake_path)
-        propwareUtils.extractZip(self._propgcc_zip_name, self._propgcc_path)
+        propwareUtils.extract(self._cmake_zip_name, self._cmake_parent)
+        propwareUtils.extract(self._propgcc_zip_name, self._propgcc_path)
 
     def _copy_cmake_files(self):
         cmake_modules_src_path = Installer._PROPWARE_ROOT + str(os.sep) + "CMakeModules"
-        cmake_modules_dst_path = propwareUtils.get_cmake_modules_path(self._cmake_path)
+        cmake_modules_dst_path = propwareUtils.get_cmake_modules_path(
+            self._cmake_parent + str(os.sep) + self._cmake_root_dir_name)
 
-        # noinspection PyUnresolvedReferences
         try:
             for entry in os.listdir(cmake_modules_src_path):
                 src_file_path = cmake_modules_src_path + str(os.sep) + entry
                 if os.path.isfile(src_file_path):
+                    print(src_file_path, cmake_modules_dst_path)
                     shutil.copy(src_file_path, cmake_modules_dst_path)
 
             cmake_platform_src_path = cmake_modules_src_path + str(os.sep) + "Platform"
@@ -176,7 +179,10 @@ class NixInstaller(Installer):
     def _build_binaries(self):
         Installer._build_binaries(self)
 
-        cmd = [self._cmake_path + str(os.sep) + 'bin' + str(os.sep) + 'cmake', '-G', '"Unix Makefiles"', '.']
+        cmd = [
+            self._cmake_parent + str(os.sep) + self._cmake_root_dir_name + str(os.sep) + 'bin' + str(os.sep) + 'cmake',
+            '-G', "Unix Makefiles", '.']
+        print(' '.join(cmd))
         if 0 != subprocess.call(cmd, cwd=Installer._PROPWARE_ROOT):
             return
 
@@ -188,6 +194,7 @@ class DebInstaller(NixInstaller):
     def __init__(self):
         NixInstaller.__init__(self)
         self._cmake_download_url = "http://www.cmake.org/files/v3.0/cmake-3.0.1-Linux-i386.tar.gz"
+        self._cmake_root_dir_name = "cmake-3.0.1-Linux-i386"
         self._propgcc_download_url = "http://david.zemon.name/downloads/PropGCC-linux_v1_0_0.tar.gz"
 
     def _warn_make_instructions(self):
@@ -202,6 +209,7 @@ class MacInstaller(NixInstaller):
     def __init__(self):
         NixInstaller.__init__(self)
         self._cmake_download_url = "http://www.cmake.org/files/v3.0/cmake-3.0.1-Darwin-universal.tar.gz"
+        # TODO: self._cmake_root_dir_name =
         self._propgcc_download_url = "http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz"
 
     def _warn_make_instructions(self):
@@ -213,6 +221,7 @@ class WinInstaller(Installer):
     def __init__(self):
         Installer.__init__(self)
         self._cmake_download_url = "http://www.cmake.org/files/v3.0/cmake-3.0.1-win32-x86.zip"
+        # TODO: self._cmake_root_dir_name =
         self._propgcc_download_url = "http://david.zemon.name/downloads/PropGCC-win_v1_0_0.zip"
 
     def _warn_make_instructions(self):

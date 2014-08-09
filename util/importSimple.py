@@ -93,7 +93,7 @@ class ImportSimple:
 
         zipFileName = propwareUtils.downloadFile(ImportSimple.getDownloadLink(),
                                                  ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)[0]
-        propwareUtils.extractZip(zipFileName, ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
+        propwareUtils.extract(zipFileName, ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
 
         return ImportSimple.LEARN_PATH + "Simple Libraries" + os.sep
 

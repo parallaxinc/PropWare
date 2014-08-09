@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import subprocess
+import tarfile
 import zipfile
 import sys
 
@@ -165,9 +166,23 @@ def testPropGCC():
     subprocess.check_output(["propeller-elf-gcc", "--version"])
 
 
-def extractZip(zipFileName, destination):
-    zipFile = zipfile.ZipFile(zipFileName, mode='r')
-    zipFile.extractall(destination)
+def extract(f, dest):
+    """
+    Supports any tar file as well as zips
+    :param f: Path to compressed file or compressed file object
+    :param dest: Path where contents should be extracted
+    :return:
+    """
+
+    if tarfile.is_tarfile(f):
+        open_method = tarfile.open
+    elif zipfile.is_zipfile(f):
+        open_method = zipfile.ZipFile
+    else:
+        raise NotRecognizedCompressedFile(f)
+
+    with open_method(f, mode='r') as f:
+        f.extractall(dest)
 
 
 def get_user_input(prompt, errorPrompt, default):
@@ -179,7 +194,7 @@ def get_user_input(prompt, errorPrompt, default):
             return input(inner_prompt)
 
     usrInput = my_input(prompt % default)
-    if "" != usrInput:
+    if usrInput:
         if os.path.isdir(usrInput):
             return usrInput
         else:
@@ -194,15 +209,40 @@ def get_cmake_modules_path(cmake_root):
     modules_dir_from_src_dstr = cmake_root + str(os.sep) + "Modules"
     modules_dir_from_bin_dstr = cmake_root + str(os.sep) + "share" + str(os.sep) + "cmake-3.0" + str(os.sep) + "Modules"
 
+    print(modules_dir_from_bin_dstr)
+    print(modules_dir_from_src_dstr)
+
     if os.path.exists(modules_dir_from_src_dstr):
         return modules_dir_from_src_dstr
     elif os.path.exists(modules_dir_from_bin_dstr):
         return modules_dir_from_bin_dstr
+    else:
+        raise CannotFindCMakeModulesPath()
 
 
 class IncorrectStartingDirectoryException(Exception):
-    def __init__(self):
-        pass
+    def __init__(self, *args, **kwargs):
+        super(IncorrectStartingDirectoryException, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return "Must be executed from within <propware root>/util"
+
+
+class CannotFindCMakeModulesPath(Exception):
+    def __init__(self, *args, **kwargs):
+        super(CannotFindCMakeModulesPath, self).__init__(*args, **kwargs)
+
+
+class NotRecognizedCompressedFile(Exception):
+    def __init__(self, f, *args, **kwargs):
+        super(NotRecognizedCompressedFile, self).__init__(*args, **kwargs)
+        if isinstance(f, str):
+            self._filename = f
+        else:
+            self._filename = None
+
+    def __str_(self):
+        if None == self._filename:
+            return super(NotRecognizedCompressedFile, self).__str__()
+        else:
+            return "'%s' is not a recognized compressed file type." % self._filename
