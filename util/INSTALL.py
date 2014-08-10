@@ -19,6 +19,7 @@ import subprocess
 from pip.backwardcompat import PermissionError
 
 import propwareUtils
+from propwareUtils import OperatingSystem, Windows, Linux, Mac
 
 
 class Installer(object):
@@ -28,17 +29,32 @@ class Installer(object):
     __DEFAULT_PROPGCC_PATH = expanduser("~")
     __DEFAULT_CMAKE_PATH = expanduser("~")
 
+    @staticmethod
+    def create(operating_system):
+        assert (isinstance(operating_system, OperatingSystem))
+        operating_system = propwareUtils.get_os()
+        if isinstance(operating_system, Linux):
+            return DebInstaller()
+        elif isinstance(operating_system, Mac):
+            return MacInstaller()
+        elif isinstance(operating_system, Windows):
+            return WinInstaller()
+        else:
+            raise Exception("Your operating system " % str(operating_system))
+
     def __init__(self):
         super(Installer, self).__init__()
         self._cmake_download_url = ""
         self._propgcc_download_url = ""
         self._cmake_parent = ""
-        self._propgcc_path = ""
+        self._propgcc_parent = ""
         self._cmake_zip_name = None
         self._propgcc_zip_name = None
         self._make_installed = False
         self._cmake_installed = False
         self._cmake_root_dir_name = ""  # Differs between each OS - must be set in children
+        self._cmake_path = ""
+        self._propgcc_path = ""
 
         propwareUtils.checkProperWorkingDirectory()
         Installer._PROPWARE_ROOT = os.path.abspath("..")
@@ -46,37 +62,22 @@ class Installer(object):
         # Parse arguments
         args = Installer._parse_args()
         if args.propgcc_path:
-            self._propgcc_path = args.propgcc_path
+            self._propgcc_parent = args.propgcc_path
         else:
-            self._propgcc_path = Installer.__DEFAULT_PROPGCC_PATH
+            self._propgcc_parent = Installer.__DEFAULT_PROPGCC_PATH
         if args.cmake_path:
             self._cmake_parent = args.cmake_path
         else:
             self._cmake_parent = Installer.__DEFAULT_CMAKE_PATH
 
-        # Confirm configuration settings
-        self._cmake_parent = propwareUtils.get_user_input("CMake will be installed to %s. Press enter to continue or "
-                                                          "type "
-                                                          "another existing path to download to a new directory.\n>>> ",
-                                                          "'%s' does not exist or is not a directory.",
-                                                          self._cmake_parent)
-        self._propgcc_path = propwareUtils.get_user_input("PropGCC will be installed to %s. Press enter to continue or "
-                                                          "type another existing path to download to a new "
-                                                          "directory.\n>>> ",
-                                                          "'%s' does not exists or is not a directory.",
-                                                          self._propgcc_path)
-
     def install(self):
-        self._download_dependencies()  # CMake and PropGCC
+        self._confirm_dependencies()
 
         self._copy_cmake_files()  # Copy necessary language files (*COG* and eventually Spin)
 
         self._set_env_variables()
 
         self._import_propware()  # Download Simple and libpropeller
-
-        # Last but not least, check to ensure Make is installed
-        self._check_for_make()
 
         if self._make_installed and self._cmake_installed:
             self._build_binaries()
@@ -115,23 +116,14 @@ class Installer(object):
     def _warn_make_instructions(self):
         pass
 
-    def _download_dependencies(self):
-        self._cmake_zip_name = self._download_cmake()
-        self._propgcc_zip_name = self._download_propgcc()
-
-        propwareUtils.extract(self._cmake_zip_name, self._cmake_parent)
-        propwareUtils.extract(self._propgcc_zip_name, self._propgcc_path)
-
     def _copy_cmake_files(self):
         cmake_modules_src_path = Installer._PROPWARE_ROOT + str(os.sep) + "CMakeModules"
-        cmake_modules_dst_path = propwareUtils.get_cmake_modules_path(
-            self._cmake_parent + str(os.sep) + self._cmake_root_dir_name)
+        cmake_modules_dst_path = propwareUtils.get_cmake_modules_path(self._cmake_path)
 
         try:
             for entry in os.listdir(cmake_modules_src_path):
                 src_file_path = cmake_modules_src_path + str(os.sep) + entry
                 if os.path.isfile(src_file_path):
-                    print(src_file_path, cmake_modules_dst_path)
                     shutil.copy(src_file_path, cmake_modules_dst_path)
 
             cmake_platform_src_path = cmake_modules_src_path + str(os.sep) + "Platform"
@@ -153,11 +145,52 @@ class Installer(object):
         return False
 
     def _set_env_variables(self):
-        # TODO
         pass
 
     def _build_binaries(self):
         pass
+
+    def _confirm_dependencies(self):
+        self._check_for_make()
+
+        existing_cmake_path = propwareUtils.which("cmake")
+        if existing_cmake_path:
+            cmake_bin_dir = os.path.split(existing_cmake_path)[0]
+            self._cmake_path = os.path.abspath(cmake_bin_dir + str(os.sep) + '..')
+
+        existing_propgcc_path = propwareUtils.which("propeller-elf-gcc")
+        if existing_propgcc_path:
+            self._propgcc_path = os.path.abspath(existing_propgcc_path + str(os.sep) + '..')
+
+        # If downloads are required, perform them after inquiring about both CMake and PropGCC
+
+        if None == existing_cmake_path:
+            try:
+                self._cmake_parent = propwareUtils.get_user_input(
+                    "CMake will be installed to %s. Press enter to continue or type another existing path to download "
+                    "to a new directory.\n>>> ", os.path.isdir, "'%s' does not exist or is not a directory.",
+                    self._cmake_parent)
+                os.makedirs(self._cmake_parent, 0644)
+            except OSError:
+                pass
+            finally:
+                self._cmake_zip_name = self._download_cmake()
+                propwareUtils.extract(self._cmake_zip_name, self._cmake_parent)
+                self._cmake_path = self._cmake_parent + str(os.sep) + self._cmake_root_dir_name
+
+        if None == existing_propgcc_path:
+            try:
+                self._propgcc_parent = propwareUtils.get_user_input(
+                    "PropGCC will be installed to %s. Press enter to continue or type another existing path to "
+                    "download to a new directory.\n>>> ",
+                    os.path.isdir, "'%s' does not exists or is not a directory.", self._propgcc_parent)
+                os.makedirs(self._propgcc_parent, 0644)
+            except OSError:
+                pass
+            finally:
+                self._propgcc_zip_name = self._download_propgcc()
+                propwareUtils.extract(self._propgcc_zip_name, self._propgcc_parent)
+                self._propgcc_path = self._propgcc_parent + str(os.sep) + self._PROPGCC_DIR_NAME
 
 
 class NixInstaller(Installer):
@@ -182,12 +215,23 @@ class NixInstaller(Installer):
         cmd = [
             self._cmake_parent + str(os.sep) + self._cmake_root_dir_name + str(os.sep) + 'bin' + str(os.sep) + 'cmake',
             '-G', "Unix Makefiles", '.']
-        print(' '.join(cmd))
+        print('%s %s "%s" %s' % (cmd[0], cmd[1], cmd[2], cmd[3]))  # WARNING: This is not flexible!
         if 0 != subprocess.call(cmd, cwd=Installer._PROPWARE_ROOT):
             return
 
         cmd = ["make"]
+        print(' '.join(cmd))
         subprocess.call(cmd, cwd=Installer._PROPWARE_ROOT)
+
+    def _set_env_variables(self):
+        super(NixInstaller, self)._set_env_variables()
+
+        cmake_bin = self._cmake_path + str(os.sep) + "bin"
+        propgcc_bin = self._propgcc_path + str(os.sep) + "bin"
+
+        cmd = ["echo", "export PATH=%s:%s:$PATH > $HOME/.bashrc" % (cmake_bin, propgcc_bin)]
+        print(cmd)
+        subprocess.call(cmd)
 
 
 class DebInstaller(NixInstaller):
@@ -202,7 +246,32 @@ class DebInstaller(NixInstaller):
               "make\".", file=sys.stderr)
 
     def _set_env_variables(self):
-        Installer._set_env_variables(self)
+        super(DebInstaller, self)._set_env_variables()
+
+        print("Environment variables will now be configured for the root environment.")
+        prompt = "Press 'enter' to continue or 'no' to configure them yourself.\n>>>"
+        usr_input = propwareUtils.get_user_input(prompt, "no".__eq__, prompt, None)
+        if None == usr_input:
+            # noinspection PyListCreation
+            propgcc_env = 'echo "PROPGCC_PREFIX=' + self._propgcc_parent + str(
+                os.sep) + Installer._PROPGCC_DIR_NAME + '" > /etc/environment'
+            propware_env = 'echo "PROPWARE_PATH=' + Installer._PROPWARE_ROOT + '" > /etc/environment'
+
+            cmd = ["sudo", "sh", "-c", "'%s ; %s'" % (propgcc_env, propware_env)]
+            print(' '.join(cmd))
+            subprocess.call(cmd)
+        else:
+            # TODO: Tell the user what environment variables should be installed
+            pass
+
+    def _check_for_make(self):
+        if None == propwareUtils.which("make"):
+            cmd = ["sudo", "apt-get", "install", "make"]
+            print(' '.join(cmd))
+            subprocess.call(cmd)
+
+        # Run the parent AFTER we attempt to install Make
+        super(DebInstaller, self)._check_for_make()
 
 
 class MacInstaller(NixInstaller):
@@ -215,6 +284,10 @@ class MacInstaller(NixInstaller):
     def _warn_make_instructions(self):
         print("WARNING: Make was not detected on your system. You can install it by following these instructions:\n\t"
               "http://stackoverflow.com/a/6767528", file=sys.stderr)
+
+    def _set_env_variables(self):
+        super(MacInstaller, self)._set_env_variables()
+        # TODO: Finish this
 
 
 class WinInstaller(Installer):
@@ -237,19 +310,5 @@ class WinInstaller(Installer):
 
 
 if "__main__" == __name__:
-    verStr = str(sys.version_info[0]) + '.' + str(sys.version_info[1])
-
-    installer = None
-    platform = sys.platform
-    if "linux2" == platform:
-        installer = DebInstaller()
-    elif "darwin" == platform:
-        installer = MacInstaller()
-    elif "win32" == platform:
-        installer = WinInstaller()
-    else:
-        print("Your system (" + platform + ") could not be recognized. Please report this message to david@zemon.name",
-              file=sys.stderr)
-        exit(1)
-
+    installer = Installer.create(propwareUtils.get_os())
     installer.install()

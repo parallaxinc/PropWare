@@ -18,12 +18,74 @@ import sys
 
 __author__ = 'david'
 
-
 DOWNLOADS_DIRECTORY = ".external_downloads" + os.sep
 MEMORY_MODELS = ["cog", "cmm", "lmm", "xmmc", "xmm-single", "xmm-split"]
 
 
+class OperatingSystem(object):
+    def __init__(self, platform):
+        self._platform = platform
+
+    def __str__(self):
+        return self._platform
+
+
+class Windows(OperatingSystem):
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "Windows"
+
+
+class Nix(OperatingSystem):
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "*Nix"
+
+
+class Linux(Nix):
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "Linux"
+
+
+class Mac(Nix):
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "Mac"
+
+
+def get_os():
+    platform = sys.platform
+    if "linux2" == platform:
+        return Linux()
+    elif "darwin" == platform:
+        return Mac()
+    elif "win32" == platform:
+        return Windows()
+    else:
+        return OperatingSystem(platform)
+
+
 def which(program):
+    """
+    Search the system PATH environment variable in an attempt to find the requested program
+    :param program: Name of executable or path (can be relative) to executable
+    :return: Absolute path of requested program
+    """
+    assert (isinstance(program, str))
+
     def is_exe(filePath):
         if os.path.isfile(filePath) and os.access(filePath, os.X_OK):
             return True
@@ -35,16 +97,19 @@ def which(program):
     directory, fileName = os.path.split(program)
     if directory:
         if is_exe(program):
-            return program
+            return os.path.abspath(program)
     else:
         for path in os.environ["PATH"].split(os.pathsep):
             path = path.strip('"')
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):
-                return exe_file
+                return os.path.abspath(exe_file)
 
-    # If we haven't returned anything yet, that means the program doesn't exist
-    return None
+    if Windows == get_os() and not program.endswith(".exe"):
+        return which(program + ".exe")
+    else:
+        # If we haven't returned anything yet, that means the program doesn't exist
+        return None
 
 
 def checkProperWorkingDirectory():
@@ -185,7 +250,12 @@ def extract(f, dest):
         f.extractall(dest)
 
 
-def get_user_input(prompt, errorPrompt, default):
+def get_user_input(prompt, condition, error_prompt, default):
+    assert isinstance(prompt, str)
+    # assert isinstance(condition, )
+    assert (None == error_prompt or isinstance(error_prompt, str))
+    assert (None == default or isinstance(default, str))
+
     def my_input(inner_prompt):
         try:
             # noinspection PyUnresolvedReferences
@@ -193,14 +263,18 @@ def get_user_input(prompt, errorPrompt, default):
         except NameError:
             return input(inner_prompt)
 
-    usrInput = my_input(prompt % default)
-    if usrInput:
-        if os.path.isdir(usrInput):
-            return usrInput
+    if None != default:
+        short_prompt = prompt % default
+    else:
+        short_prompt = prompt
+    usr_input = my_input(short_prompt)
+    if usr_input:
+        if condition(usr_input):
+            return usr_input
         else:
-            if None != errorPrompt:
-                print(errorPrompt % usrInput, file=sys.stderr)
-            return get_user_input(prompt, errorPrompt, default)
+            if None != error_prompt:
+                print(error_prompt % usr_input, file=sys.stderr)
+            return get_user_input(prompt, condition, error_prompt, default)
     else:
         return default
 
@@ -208,9 +282,6 @@ def get_user_input(prompt, errorPrompt, default):
 def get_cmake_modules_path(cmake_root):
     modules_dir_from_src_dstr = cmake_root + str(os.sep) + "Modules"
     modules_dir_from_bin_dstr = cmake_root + str(os.sep) + "share" + str(os.sep) + "cmake-3.0" + str(os.sep) + "Modules"
-
-    print(modules_dir_from_bin_dstr)
-    print(modules_dir_from_src_dstr)
 
     if os.path.exists(modules_dir_from_src_dstr):
         return modules_dir_from_src_dstr
