@@ -68,7 +68,7 @@ class Mac(Nix):
 
 def get_os():
     platform = sys.platform
-    if "linux2" == platform:
+    if platform in ["linux", "linux2"]:
         return Linux()
     elif "darwin" == platform:
         return Mac()
