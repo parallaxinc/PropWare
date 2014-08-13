@@ -165,22 +165,26 @@ class Installer(object):
             cmake_bin_dir = os.path.split(existing_cmake_path)[0]
             self._cmake_path = os.path.abspath(cmake_bin_dir + str(os.sep) + '..')
         else:
+            self._cmake_parent = propwareUtils.get_user_input(
+                "CMake will be installed to %s. Press enter to continue or type another existing path to download to "
+                "a new directory.\n>>> ", os.path.isdir, "'%s' does not exist or is not a directory.",
+                self._cmake_parent)
             self._add_cmake_to_path = True
 
         existing_propgcc_path = propwareUtils.which("propeller-elf-gcc")
         if existing_propgcc_path:
             self._propgcc_path = os.path.abspath(existing_propgcc_path + str(os.sep) + '..')
         else:
+            self._propgcc_parent = propwareUtils.get_user_input(
+                "PropGCC will be installed to %s. Press enter to continue or type another existing path to download "
+                "to a new directory.\n>>> ", os.path.isdir, "'%s' does not exists or is not a directory.",
+                self._propgcc_parent)
             self._add_propgcc_to_path = True
 
         # If downloads are required, perform them after inquiring about both CMake and PropGCC
 
         if None == existing_cmake_path:
             try:
-                self._cmake_parent = propwareUtils.get_user_input(
-                    "CMake will be installed to %s. Press enter to continue or type another existing path to download "
-                    "to a new directory.\n>>> ", os.path.isdir, "'%s' does not exist or is not a directory.",
-                    self._cmake_parent)
                 os.makedirs(self._cmake_parent, 0o644)
             except OSError:
                 pass
@@ -191,10 +195,6 @@ class Installer(object):
 
         if None == existing_propgcc_path:
             try:
-                self._propgcc_parent = propwareUtils.get_user_input(
-                    "PropGCC will be installed to %s. Press enter to continue or type another existing path to "
-                    "download to a new directory.\n>>> ", os.path.isdir, "'%s' does not exists or is not a directory.",
-                    self._propgcc_parent)
                 os.makedirs(self._propgcc_parent, 0o644)
             except OSError:
                 pass
