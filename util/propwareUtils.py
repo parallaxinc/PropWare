@@ -105,7 +105,7 @@ def which(program):
             if is_exe(exe_file):
                 return os.path.abspath(exe_file)
 
-    if Windows == get_os() and not program.endswith(".exe"):
+    if Windows() == get_os() and not program.endswith(".exe"):
         return which(program + ".exe")
     else:
         # If we haven't returned anything yet, that means the program doesn't exist
