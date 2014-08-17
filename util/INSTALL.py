@@ -15,6 +15,7 @@ import sys
 import tempfile
 import shutil
 import subprocess
+import grp
 
 try:
     # noinspection PyUnresolvedReferences
@@ -274,6 +275,23 @@ class DebInstaller(NixInstaller):
     def _warn_make_instructions(self):
         print("WARNING: Make was not detected on your system. You can install it by executing \"sudo apt-get install "
               "make\".", file=sys.stderr)
+
+    def _confirm_dependencies(self):
+        super(DebInstaller, self)._confirm_dependencies()
+
+        # 64-bit versions of Debian also need the 32-bit C libraries. Install them.
+        if propwareUtils.is_64_bit():
+            cmd = ['sudo', 'dpkg', '--add-architecture', 'i386']
+            print(' '.join(cmd))
+            subprocess.call(cmd)
+
+            cmd = ['sudo', 'apt-get', 'install', 'libc6:i386']
+            print(' '.join(cmd))
+            subprocess.call(cmd)
+
+        # Also, add user to "dialout" group if necessary
+        if os.environ['USER'] not in grp.getgrnam('dialout'):
+            subprocess.call(['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']])
 
     def _set_env_variables(self):
         super(DebInstaller, self)._set_env_variables()

@@ -15,6 +15,7 @@ import subprocess
 import tarfile
 import zipfile
 import sys
+import struct
 
 __author__ = 'david'
 
@@ -224,7 +225,7 @@ def isSourceOrHeaderFile(f):
     return isSourceFile(f) or isHeaderFile(f)
 
 
-def testPropGCC():
+def test_propgcc():
     """
     Determine if PropGCC is installed and in the users PATH
     """
@@ -289,6 +290,10 @@ def get_cmake_modules_path(cmake_root):
         return modules_dir_from_bin_dstr
     else:
         raise CannotFindCMakeModulesPath()
+
+
+def is_64_bit():
+    return 64 == struct.calcsize("P") * 8
 
 
 class IncorrectStartingDirectoryException(Exception):
