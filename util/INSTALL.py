@@ -262,17 +262,18 @@ class NixInstaller(Installer):
                 print(' '.join(cmd))
                 subprocess.check_output(cmd)
         else:
-            print(
-                'Unknown shell is used. It is recommended that you add "%s" and "%s" to the PATH variable for your '
-                'user\'s environment.' % (cmake_bin, propgcc_bin))
+            print('Unknown shell is used. It is recommended that you add "%s" and "%s" to the PATH variable for your '
+                  'user\'s environment.' % (cmake_bin, propgcc_bin))
 
 
 class DebInstaller(NixInstaller):
     def __init__(self):
-        NixInstaller.__init__(self)
+        super(DebInstaller, self).__init__()
+
         self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-Linux-i386.tar.gz'
         self._cmake_root_dir_name = 'cmake-3.0.1-Linux-i386'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-linux_v1_0_0.tar.gz'
+        self._user_in_dialout = os.environ['USER'] in grp.getgrnam('dialout')[3]
 
     def _warn_make_instructions(self):
         print('WARNING: Make was not detected on your system. You can install it by executing "sudo apt-get install '
@@ -293,8 +294,15 @@ class DebInstaller(NixInstaller):
                 subprocess.call(cmd)
 
         # Also, add user to "dialout" group if necessary
-        if os.environ['USER'] not in grp.getgrnam('dialout')[3]:
-            subprocess.call(['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']])
+        if not self._user_in_dialout:
+            user_input = propwareUtils.get_user_input(
+                'Your user must be added to the "dialout" group in order to program a Propeller chip. Root privileges '
+                'are required. Should your user be added? [default: %s] (y/n)\n>>> ',
+                re.compile('(y|n)', re.I).match, '"%s" is not valid. Please enter "y" or "n".\n>>> ', 'y')
+            if user_input.lower() == 'y':
+                cmd = ['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']]
+                print(' '.join(cmd))
+                subprocess.call(cmd)
 
     def _set_env_variables(self):
         super(DebInstaller, self)._set_env_variables()
@@ -356,7 +364,7 @@ class MacInstaller(NixInstaller):
 
     def _set_env_variables(self):
         super(MacInstaller, self)._set_env_variables()
-        # TODO: Finish this
+        # TODO: Set Mac environment variables
 
 
 class WinInstaller(Installer):
