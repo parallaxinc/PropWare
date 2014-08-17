@@ -11,6 +11,7 @@ from __future__ import print_function
 import argparse
 import os
 from os.path import expanduser
+import re
 import sys
 import tempfile
 import shutil
@@ -281,16 +282,17 @@ class DebInstaller(NixInstaller):
 
         # 64-bit versions of Debian also need the 32-bit C libraries. Install them.
         if propwareUtils.is_64_bit():
-            cmd = ['sudo', 'dpkg', '--add-architecture', 'i386']
-            print(' '.join(cmd))
-            subprocess.call(cmd)
+            if DebInstaller._needs_libc6():
+                cmd = ['sudo', 'dpkg', '--add-architecture', 'i386']
+                print(' '.join(cmd))
+                subprocess.call(cmd)
 
-            cmd = ['sudo', 'apt-get', 'install', 'libc6:i386']
-            print(' '.join(cmd))
-            subprocess.call(cmd)
+                cmd = ['sudo', 'apt-get', 'install', 'libc6:i386']
+                print(' '.join(cmd))
+                subprocess.call(cmd)
 
         # Also, add user to "dialout" group if necessary
-        if os.environ['USER'] not in grp.getgrnam('dialout'):
+        if os.environ['USER'] not in grp.getgrnam('dialout')[3]:
             subprocess.call(['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']])
 
     def _set_env_variables(self):
@@ -327,6 +329,17 @@ class DebInstaller(NixInstaller):
 
         # Run the parent AFTER we attempt to install Make
         super(DebInstaller, self)._check_for_make()
+
+    @staticmethod
+    def _needs_libc6():
+        cmd = ['dpkg-query', '-l', 'libc6*']
+        package_list = subprocess.check_output(cmd).split('\n')
+        matcher = re.compile('.*libc6(:|-)i386.*')
+        for package in package_list:
+            if matcher.match(package):
+                return False
+
+        return True
 
 
 class MacInstaller(NixInstaller):
