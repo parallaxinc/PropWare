@@ -295,21 +295,29 @@ class DebInstaller(NixInstaller):
 
     def _set_env_variables(self):
         super(DebInstaller, self)._set_env_variables()
-        print('Environment variables will now be configured for the root environment.')
-        prompt = 'Press "enter" to continue or "no" to configure them yourself.\n>>> '
-        usr_input = propwareUtils.get_user_input(prompt, "no".__eq__, prompt, None)
-        if None == usr_input:
-            # noinspection PyListCreation
-            propgcc_env = 'echo "\nPROPGCC_PREFIX=%s" >> /etc/environment' % self._propgcc_path
-            propware_env = 'echo "PROPWARE_PATH=%s" >> /etc/environment' % Installer._PROPWARE_ROOT
 
-            cmd = ['sudo', 'sh', '-c', '%s ; %s' % (propgcc_env, propware_env)]
-            print(' '.join(cmd))
-            subprocess.call(cmd)
-        else:
-            print('You have selected to configure environment variables for yourself.')
-            print('Please set PROPGCC_PREFIX to "%s"' % self._propgcc_path)
-            print('Please set PROPWARE_PATH to "%s"' % Installer._PROPWARE_ROOT)
+        if 'PROPGCC_PREFIX' not in os.environ or 'PROPWARE_PATH' not in os.environ:
+            print('Environment variables will now be configured for the root environment.')
+            prompt = 'Press "enter" to continue or "no" to configure them yourself.\n>>> '
+            usr_input = propwareUtils.get_user_input(prompt, "no".__eq__, prompt, None)
+            if None == usr_input:
+                if 'PROPGCC_PREFIX' not in os.environ:
+                    propgcc_env = 'echo "PROPGCC_PREFIX=%s" >> /etc/environment' % self._propgcc_path
+                    cmd = ['sudo', 'sh', '-c', propgcc_env]
+                    print(' '.join(cmd))
+                    subprocess.call(cmd)
+
+                if 'PROPWARE_PATH' not in os.environ:
+                    propware_env = 'echo "PROPWARE_PATH=%s" >> /etc/environment' % Installer._PROPWARE_ROOT
+                    cmd = ['sudo', 'sh', '-c', propware_env]
+                    print(' '.join(cmd))
+                    subprocess.call(cmd)
+            else:
+                print('You have selected to configure the following environment variables for yourself:')
+                if 'PROPGCC_PREFIX' not in os.environ:
+                    print('\tPlease set PROPGCC_PREFIX to "%s"' % self._propgcc_path)
+                if 'PROPWARE_PATH' not in os.environ:
+                    print('\tPlease set PROPWARE_PATH to "%s"' % Installer._PROPWARE_ROOT)
 
     def _check_for_make(self):
         if None == propwareUtils.which("make"):
