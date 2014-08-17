@@ -229,7 +229,7 @@ def test_propgcc():
     """
     Determine if PropGCC is installed and in the users PATH
     """
-    subprocess.check_output(["propeller-elf-gcc", "--version"])
+    subprocess.check_output(['propeller-elf-gcc', '--version'])
 
 
 def extract(f, dest):
@@ -252,6 +252,9 @@ def extract(f, dest):
 
 
 def get_user_input(prompt, condition, error_prompt, default):
+    """
+    :rtype : str
+    """
     assert isinstance(prompt, str)
     # assert isinstance(condition, )
     assert (None == error_prompt or isinstance(error_prompt, str))
@@ -293,7 +296,7 @@ def get_cmake_modules_path(cmake_root):
 
 
 def is_64_bit():
-    return 64 == struct.calcsize("P") * 8
+    return 64 == struct.calcsize('P') * 8
 
 
 class IncorrectStartingDirectoryException(Exception):
