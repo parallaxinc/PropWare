@@ -15,11 +15,11 @@ import propwareUtils
 
 
 class ImportSimple:
-    PROPWARE_ROOT = os.path.abspath("..") + os.sep
-    CHEATER_DIR = PROPWARE_ROOT + "simple" + os.sep
-    LEARN_DOWNLOAD_LINK = "http://learn.parallax.com/sites/default/files/content/propeller-c-tutorials/" \
-                          "set-up-simpleide/Learn-folder/Learn-Folder-Updated-2014.05.14.zip"
-    LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "Learn" + os.sep
+    PROPWARE_ROOT = os.path.abspath('..') + os.sep
+    CHEATER_DIR = PROPWARE_ROOT + 'simple' + os.sep
+    LEARN_DOWNLOAD_LINK = 'https://googledrive.com/host/0B0Hlguyerv4QQ0E2UVZSTTQxMEU/Learn-Folder-Updated-2014-07-30' \
+                          '.zip'
+    LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'Learn' + os.sep + 'Learn' + os.sep
 
     def __init__(self):
         self.libraries = {}
@@ -84,7 +84,7 @@ class ImportSimple:
         with open(ImportSimple.CHEATER_DIR + "simpleObjects.cmake", 'w') as f:
             f.write("set(SIMPLE_OBJECTS")
             for sourceFile in self.sourceFiles:
-                f.write('\n' + ' '*8 + '../' + sourceFile)
+                f.write('\n' + ' ' * 8 + '../' + sourceFile)
             f.write(')')
 
     @staticmethod
