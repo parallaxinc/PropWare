@@ -8,6 +8,7 @@
 @description:
 """
 from __future__ import print_function
+import glob
 import os
 import re
 import shutil
@@ -16,6 +17,7 @@ import tarfile
 import zipfile
 import sys
 import struct
+import readline
 
 __author__ = 'david'
 
@@ -253,6 +255,13 @@ def extract(f, dest):
 
 def get_user_input(prompt, condition, error_prompt, default):
     """
+
+    :param prompt: String prompting user for input - if `default` != None, then `default` will be inserted into
+    `prompt` via the % formatter and `prompt` should contain '%s' somewhere within it
+    :param condition: Condition to accept response and return value
+    :param error_prompt: String to print upon invalid response
+    :param default: Default value to return if user enters nothing
+    :return: User's response
     :rtype : str
     """
     assert isinstance(prompt, str)
@@ -261,6 +270,13 @@ def get_user_input(prompt, condition, error_prompt, default):
     assert (None == default or isinstance(default, str))
 
     def my_input(inner_prompt):
+        def complete(text, state):
+            return (glob.glob(text+'*')+[None])[state]
+
+        readline.set_completer_delims(' \t\n;')
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(complete)
+
         try:
             # noinspection PyUnresolvedReferences
             return raw_input(inner_prompt)

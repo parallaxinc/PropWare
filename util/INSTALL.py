@@ -162,13 +162,30 @@ class Installer(object):
     def _confirm_dependencies(self):
         self._check_for_make()
 
+        ###
+        # Query user about downloads
+        ###
+
         existing_cmake_bin = propwareUtils.which('cmake')
+        download_new_cmake = True
         if existing_cmake_bin:
             cmake_bin_dir = os.path.split(existing_cmake_bin)[0]
             self._cmake_path = os.path.abspath(cmake_bin_dir + str(os.sep) + '..')
-        else:
+            if os.access(self._cmake_path, os.W_OK):
+                download_new_cmake = False
+            else:
+                user_input = propwareUtils.get_user_input(
+                    'CMake is installed to a write-protected directory. Administrative privileges will be required to '
+                    'install PropWare. Would you like to download a new version of CMake or install to the existing '
+                    'directory? (download/install) [default: %s]\n>>> ', re.compile('(download|install)', re.I).match,
+                    '"%s" is invalid. Choose "download" to download a new version of CMake or "install" to install in '
+                    'the existing directory (requires administrative privileges)\n>>> ', 'download')
+                if 'install' == user_input.lower():
+                    download_new_cmake = False
+
+        if download_new_cmake:
             self._cmake_parent = propwareUtils.get_user_input(
-                'CMake will be installed to %s. Press enter to continue or type another existing path to download to '
+                'CMake will be installed to %s. Press enter to continue or type another path to download to '
                 'a new directory.\n>>> ', os.path.isdir, '"%s" does not exist or is not a directory.',
                 self._cmake_parent)
             self._add_cmake_to_path = True
@@ -184,12 +201,15 @@ class Installer(object):
                 self._propgcc_parent)
             self._add_propgcc_to_path = True
 
-        # If downloads are required, perform them after inquiring about both CMake and PropGCC
+        ###
+        # Download any required dependencies
+        ###
 
-        if None == existing_cmake_bin:
+        if download_new_cmake:
             try:
                 os.makedirs(self._cmake_parent, 0o644)
             except OSError:
+                # OSError most likely results from the directory already existing. If that is the case, just ignore it.
                 pass
             finally:
                 self._cmake_zip_name = self._download_cmake()
@@ -297,8 +317,8 @@ class DebInstaller(NixInstaller):
         if not self._user_in_dialout:
             user_input = propwareUtils.get_user_input(
                 'Your user must be added to the "dialout" group in order to program a Propeller chip. Root privileges '
-                'are required. Should your user be added? [default: %s] (y/n)\n>>> ',
-                re.compile('(y|n)', re.I).match, '"%s" is not valid. Please enter "y" or "n".\n>>> ', 'y')
+                'are required. Should your user be added? [default: %s] (y/n)\n>>> ', re.compile('(y|n)', re.I).match,
+                '"%s" is not valid. Please enter "y" or "n".\n>>> ', 'y')
             if user_input.lower() == 'y':
                 cmd = ['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']]
                 print(' '.join(cmd))
