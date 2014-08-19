@@ -38,12 +38,12 @@ if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     endif(DEFINED BOARD)
 
     # Add target for run (load to RAM and start terminal)
-    add_custom_target(run
+    add_custom_target(debug
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t
             DEPENDS ${CMAKE_PROJECT_NAME}.elf)
 
     # Add target for install (load to EEPROM and start terminal)
-#    add_custom_target(install
-#            ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t -e
-#            DEPENDS ${CMAKE_PROJECT_NAME}.elf)
+    add_custom_target(run
+            ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t -e
+            DEPENDS ${CMAKE_PROJECT_NAME}.elf)
 ENDIF(NOT DEFINED PROPWARE_MAIN_PACKAGE)
