@@ -22,14 +22,14 @@ file(TO_CMAKE_PATH "${PROPGCC_PREFIX}/bin" GCC_PATH)
 set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
 set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc)
-set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib
-    CACHE STRING "" FORCE "")
-set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy
-    CACHE STRING "" FORCE "")
-set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump
-    CACHE STRING "" FORCE "")
-set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load
-    CACHE STRING "" FORCE "")
+#set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib
+#    CACHE STRING "" FORCE "")
+#set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy
+#    CACHE STRING "" FORCE "")
+#set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump
+#    CACHE STRING "" FORCE "")
+#set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load
+#    CACHE STRING "" FORCE "")
 
 set(CMAKE_COGC_COMPILER ${CMAKE_C_COMPILER})
 set(CMAKE_COGCXX_COMPILER ${CMAKE_CXX_COMPILER})
