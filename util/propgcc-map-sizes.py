@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# File:    ${file}
-# Author:  David Zemon
-# Project: PropWare
+# @file    propgcc-map-sizes.py
+# @author  David Zemon
 #
 # Created with: PyCharm Community Edition
 

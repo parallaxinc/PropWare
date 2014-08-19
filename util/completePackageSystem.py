@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# File:    createBinaryDistr_v2
-# Author:  David Zemon
-# Project: PropWare
+# @file    completePackageSystem.py
+# @author  David Zemon
 #
 # Created with: PyCharm Community Edition
 
@@ -44,9 +43,12 @@ def completePackager():
     os.environ['PROPWARE_PATH'] = newPropWarePath
     sys.path = [newPropWarePath + os.sep + "util"] + sys.path
 
-    branches = newestBinaryCreator.BRANCHES
-    if args.tags:
-        branches += newestBinaryCreator.TAGS
+    if None == args.branches:
+        branches = newestBinaryCreator.BRANCHES
+        if args.tags:
+            branches += newestBinaryCreator.TAGS
+    else:
+        branches = args.branches
 
     failList = []
     for branch in branches:
@@ -67,6 +69,7 @@ def parseArgs():
                                                  " of PropWare")
     parser.add_argument("--tags", action="store_true",
                         help="Create binary distributions for all tagged commits as well")
+    parser.add_argument("-b", "--branch", dest="branches", action='append')
     return parser.parse_args()
 
 
@@ -158,6 +161,8 @@ def copyZipAndCleanDir(binaryCreator, newPropWarePath, branch, failList):
     newZipFile = binaryCreator.ARCHIVE_FILE_NAME % branch
     if os.path.exists(newZipFile):
         shutil.copy(newZipFile, PROPWARE_PATH)
+        if binaryCreator.CURRENT_SUGGESTION == branch:
+            shutil.copy(binaryCreator.ARCHIVE_FILE_NAME % "current", PROPWARE_PATH)
     else:
         failList.append(branch)
     shutil.rmtree(newPropWarePath)

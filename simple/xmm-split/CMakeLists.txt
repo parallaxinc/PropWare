@@ -1,18 +1,17 @@
-cmake_minimum_required (VERSION 2.6.4)
-
-set(MODEL xmm-split)
-project(Simple_${MODEL})
-set(CMAKE_PROJECT_NAME Simple_${MODEL})
-
-include(../simpleObjects.cmake)
-
-add_library(${CMAKE_PROJECT_NAME} STATIC ${SIMPLE_OBJECTS})
-
-set(BOARD QUICKSTART)
-set(CFLAGS "-Os")
+cmake_minimum_required (VERSION 3.0.0)
 
 if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
 endif (NOT DEFINED PROPWARE_PATH)
 
-include(${PROPWARE_PATH}/PropellerToolchain.cmake)
+set(COMMON_FLAGS "-Os")
+set(C_FLAGS )
+set(CXX_FLAGS )
+set(MODEL xmm-split)
+include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+
+project(Simple_${MODEL})
+
+include(../simpleObjects.cmake)
+add_library(${PROJECT_NAME} STATIC ${SIMPLE_OBJECTS})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
