@@ -162,11 +162,13 @@ class Installer(object):
     def _confirm_dependencies(self):
         self._check_for_make()
 
-        ###
+        # ##
         # Query user about downloads
         ###
 
         existing_cmake_bin = propwareUtils.which('cmake')
+        if None != existing_cmake_bin:
+            existing_cmake_bin = os.path.realpath(existing_cmake_bin)
         download_new_cmake = True
         if existing_cmake_bin:
             cmake_bin_dir = os.path.split(existing_cmake_bin)[0]
@@ -192,14 +194,20 @@ class Installer(object):
 
         existing_propgcc_bin = propwareUtils.which('propeller-elf-gcc')
         if existing_propgcc_bin:
+            existing_propgcc_bin = os.path.realpath(existing_propgcc_bin)
             propgcc_bin_dir = os.path.split(existing_propgcc_bin)[0]
             self._propgcc_path = os.path.abspath(propgcc_bin_dir + str(os.sep) + '..')
         else:
-            self._propgcc_parent = propwareUtils.get_user_input(
-                'PropGCC will be installed to %s. Press enter to continue or type another existing path to download '
-                'to a new directory.\n>>> ', os.path.isdir, '"%s" does not exists or is not a directory.',
-                self._propgcc_parent)
-            self._add_propgcc_to_path = True
+            default_propgcc = self._check_for_default_propgcc()
+            if default_propgcc:
+                self._propgcc_path = default_propgcc
+            else:
+                self._propgcc_parent = propwareUtils.get_user_input(
+                    'PropGCC will be installed to %s. Press enter to continue or type another existing path to '
+                    'download '
+                    'to a new directory.\n>>> ', os.path.isdir, '"%s" does not exists or is not a directory.',
+                    self._propgcc_parent)
+                self._add_propgcc_to_path = True
 
         ###
         # Download any required dependencies
@@ -216,7 +224,7 @@ class Installer(object):
                 propwareUtils.extract(self._cmake_zip_name, self._cmake_parent)
                 self._cmake_path = self._cmake_parent + str(os.sep) + self._cmake_root_dir_name
 
-        if None == existing_propgcc_bin:
+        if not self._propgcc_path:
             try:
                 os.makedirs(self._propgcc_parent, 0o644)
             except OSError:
@@ -225,6 +233,9 @@ class Installer(object):
                 self._propgcc_zip_name = self._download_propgcc()
                 propwareUtils.extract(self._propgcc_zip_name, self._propgcc_parent)
                 self._propgcc_path = self._propgcc_parent + str(os.sep) + self._PROPGCC_DIR_NAME
+
+    def _check_for_default_propgcc(self):
+        pass
 
 
 class NixInstaller(Installer):
@@ -284,6 +295,14 @@ class NixInstaller(Installer):
         else:
             print('Unknown shell is used. It is recommended that you add "%s" and "%s" to the PATH variable for your '
                   'user\'s environment.' % (cmake_bin, propgcc_bin))
+
+    def _check_for_default_propgcc(self):
+        super(NixInstaller, self)._check_for_default_propgcc()
+
+        if os.path.exists("/opt/parallax/bin/propeller-elf-gcc"):
+            return "/opt/parallax"
+        else:
+            return None
 
 
 class DebInstaller(NixInstaller):
@@ -410,7 +429,22 @@ class WinInstaller(Installer):
 
         # TODO: Set windows environment variables
 
+    def _check_for_default_propgcc(self):
+        super(WinInstaller, self)._check_for_default_propgcc()
+
+        if os.path.exists(r"C:\Program Files (x86)\SimpleIDE\propeller-gcc\bin\propeller-elf-gcc"):
+            return os.path.abspath("C:\Program Files (x86)\SimpleIDE\propeller-gcc")
+        elif os.path.exists(r"C:\Program Files\SimpleIDE\propeller-gcc\bin\propeller-elf-gcc"):
+            return os.path.abspath("C:\Program Files\SimpleIDE\propeller-gcc")
+        elif os.path.exists(r"C:\propgcc\bin\propeller-elf-gcc"):
+            return os.path.abspath(r"C:\propgcc")
+        else:
+            return None
+
 
 if '__main__' == __name__:
     installer = Installer.create(propwareUtils.get_os())
     installer.install()
+
+    print("\nCongratulations! PropWare has been installed successfully! If root environment variables were "
+          "configured, you will need to reboot your computer. Otherwise, open a new terminal and have fun!")
