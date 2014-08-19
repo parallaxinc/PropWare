@@ -31,7 +31,7 @@ class CreateBinaryDistr:
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3"]
     CURRENT_SUGGESTION = "release-2.0"
-    MAKE_COMPILE = ["make", "VERBOSE=1"]
+    MAKE_COMPILE = ["make", "-j4", "--silent"]
     CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
     MAKE_CLEAN_FAILED_CODE = 2
     CMAKE_GENERATE_FAILED_CODE = 1
