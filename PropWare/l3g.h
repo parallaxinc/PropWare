@@ -49,20 +49,6 @@ class L3G {
         } Axis;
 
         /**
-         * Extra functions available on the L3G device; Callable by passing one
-         * as the first parameter to @ref L3G::ioctl
-         */
-        typedef enum {
-            /**
-             * Set the sensitivity of input values; must be one of
-             * PropWare::L3G::DPSMode
-             */
-            FUNC_MOD_DPS,
-            /** Read the value on any internal register */
-            FUNC_RD_REG,
-        } IoctlFunction;
-
-        /**
          * Sensitivity measured in degrees per second
          */
         typedef enum {
@@ -124,8 +110,6 @@ class L3G {
          * @param[in]   miso        PinNum mask for MISO
          * @param[in]   sclk        PinNum mask for SCLK
          * @param[in]   cs          PinNum mask for CS
-         * @param[in]   dpsMode     Determines the resolution of the L3G device
-         *                          in units of degrees per second
          *
          * @return       Returns 0 upon success, error code otherwise
          */
@@ -345,9 +329,8 @@ class L3G {
         /**
          * @brief       Write one byte to the L3G module
          *
-         * @param[in]   address     Destination register address
-         * @param[in]   dat         Data to be written to the destination
-         *                          register
+         * @param[in]   addr    Destination register address
+         * @param[in]   dat     Data to be written to the destination register
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -373,9 +356,8 @@ class L3G {
         /**
          * @brief       Write one byte to the L3G module
          *
-         * @param[in]   address     Destination register address
-         * @param[in]   dat         Data to be written to the destination
-         *                          register
+         * @param[in]   addr    Destination register address
+         * @param[in]   dat     Data to be written to the destination register
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -403,8 +385,8 @@ class L3G {
         /**
          * @brief       Read one byte from the L3G module
          *
-         * @param[in]   address     Origin register address
-         * @param[out]  *dat        Address where incoming data should be stored
+         * @param[in]   addr    Origin register address
+         * @param[out]  *dat    Address where incoming data should be stored
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -427,8 +409,8 @@ class L3G {
         /**
          * @brief       Read two bytes from the L3G module
          *
-         * @param[in]   address     Origin register address
-         * @param[out]  *dat        Address where incoming data should be stored
+         * @param[in]   addr    Origin register address
+         * @param[out]  *dat    Address where incoming data should be stored
          *
          * @return      Returns 0 upon success, error code otherwise
          */

@@ -155,10 +155,8 @@ class Installer(object):
 
         self._cmake_installed = True
 
+    # noinspection PyMethodMayBeStatic
     def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
-        assert (isinstance(cmake_modules_src_path, str))
-        assert (isinstance(cmake_modules_dst_path, str))
-
         return False
 
     def _set_env_variables(self):
@@ -268,6 +266,8 @@ class NixInstaller(Installer):
 
     def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
         super(NixInstaller, self)._sudo_copy_cmake_files(cmake_modules_src_path, cmake_modules_dst_path)
+        assert (isinstance(cmake_modules_src_path, str))
+        assert (isinstance(cmake_modules_dst_path, str))
 
         cmd = 'sudo cp -r ' + cmake_modules_src_path + ' ' + cmake_modules_dst_path
         print('Your CMake installation directory is write-protected. Please provide root level permissions (normally, '
@@ -426,6 +426,8 @@ class WinInstaller(Installer):
 
     def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
         super(WinInstaller, self)._sudo_copy_cmake_files(cmake_modules_src_path, cmake_modules_dst_path)
+        assert (isinstance(cmake_modules_src_path, str))
+        assert (isinstance(cmake_modules_dst_path, str))
 
         # TODO: Don't just print a warning, attempt to copy the CMake files
 

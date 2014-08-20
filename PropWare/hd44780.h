@@ -326,8 +326,8 @@ class HD44780 {
          * Via a series of calls to HD44780_putchar, prints each character
          * individually
          *
-         * @param[in]   *s  Address where c-string can be found (must be
-         *                  null-terminated)
+         * @param[in]   *str    Address where c-string can be found (must be
+         *                      null-terminated)
          */
         void putStr (const char str[]) {
             const char *s = str;

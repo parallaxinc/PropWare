@@ -148,7 +148,7 @@ class UART {
         /**
          * @brief       Set the pin mask for TX pin
          *
-         * @param[in]   Pin mask for the transmit (TX) pin
+         * @param[in]   tx  Pin mask for the transmit (TX) pin
          */
         void set_tx_mask (const PropWare::Port::Mask tx) {
             this->m_tx.set_mask(tx);
@@ -202,7 +202,7 @@ class UART {
         /**
          * @brief       Set the parity configuration
          *
-         * @param[in]   No parity, even or odd parity can be selected
+         * @param[in]   parity  No parity, even or odd parity can be selected
          */
         virtual void set_parity (const PropWare::UART::Parity parity) {
             this->m_parity = parity;
@@ -223,8 +223,8 @@ class UART {
         /**
          * @brief       Set the number of stop bits used
          *
-         * @param[in]   Typically either 1 or 2, but can be any number between 1
-         *              and 14
+         * @param[in]   stopBitWidth    Typically either 1 or 2, but can be any 
+         *                              number between 1 and 14
          *
          * @return      Returns 0 upon success; Failure can occur when an
          *              invalid value is passed into stopBitWidth
@@ -877,7 +877,8 @@ class FullDuplexUART: public PropWare::SimplexUART {
         /**
          * @brief       Check parity for a received value
          *
-         * @param[in]   Received value with parity bit exactly as received
+         * @param[in]   rxVal   Received value with parity bit exactly as 
+         *                      received
          *
          * @return      0 for proper parity; -1 for parity error
          */
