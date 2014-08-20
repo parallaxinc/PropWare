@@ -17,7 +17,6 @@ import tarfile
 import zipfile
 import sys
 import struct
-import readline
 
 __author__ = 'david'
 
@@ -270,12 +269,21 @@ def get_user_input(prompt, condition, error_prompt, default):
     assert (None == default or isinstance(default, str))
 
     def my_input(inner_prompt):
-        def complete(text, state):
-            return (glob.glob(text+'*')+[None])[state]
+        try:
+            # The readline module isn't always installed. So, if you don't have readline, you don't get autocompletion.
+            # Sorry!
 
-        readline.set_completer_delims(' \t\n;')
-        readline.parse_and_bind("tab: complete")
-        readline.set_completer(complete)
+            # noinspection PyUnresolvedReferences
+            import readline
+
+            def complete(text, state):
+                return (glob.glob(text+'*')+[None])[state]
+
+            readline.set_completer_delims(' \t\n;')
+            readline.parse_and_bind("tab: complete")
+            readline.set_completer(complete)
+        except ImportError:
+            pass
 
         try:
             # noinspection PyUnresolvedReferences
