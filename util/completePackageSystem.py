@@ -31,17 +31,17 @@ BINARY_CREATOR_FILENAME = "createBinaryDistr.py"
 BROKEN_TAGS = ["v2.0-beta1"]
 
 
-def completePackager():
+def complete_packager():
     global newestBinaryCreator
-    args = parseArgs()
+    args = parse_args()
 
     tempdir = tempfile.gettempdir()
-    newPropWarePath = tempdir + os.sep + "PropWare"
-    newestBinaryCreator = createBinaryDistr.CreateBinaryDistr(newPropWarePath)
-    fixSystemPath()
+    new_propware_path = tempdir + os.sep + "PropWare"
+    newestBinaryCreator = createBinaryDistr.CreateBinaryDistr(new_propware_path)
+    fix_system_path()
 
-    os.environ['PROPWARE_PATH'] = newPropWarePath
-    sys.path = [newPropWarePath + os.sep + "util"] + sys.path
+    os.environ['PROPWARE_PATH'] = new_propware_path
+    sys.path = [new_propware_path + os.sep + "util"] + sys.path
 
     if None == args.branches:
         branches = newestBinaryCreator.BRANCHES
@@ -50,21 +50,21 @@ def completePackager():
     else:
         branches = args.branches
 
-    failList = []
+    fail_list = []
     for branch in branches:
-        checkoutNewRepo(tempdir, branch)
-        os.chdir(newPropWarePath)
+        checkout_new_repo(tempdir, branch)
+        os.chdir(new_propware_path)
 
-        binaryCreator = getBinaryCreator(branch, newPropWarePath)
+        binary_creator = get_binary_creator(branch, new_propware_path)
 
-        run(binaryCreator, branch)
+        run(binary_creator, branch)
 
-        copyZipAndCleanDir(binaryCreator, newPropWarePath, branch, failList)
+        copy_zip_and_clean_dir(binary_creator, new_propware_path, branch, fail_list)
 
-    printSummary(branches, failList)
+    print_summary(branches, fail_list)
 
 
-def parseArgs():
+def parse_args():
     parser = argparse.ArgumentParser(description="Create binary distributions of all branches (and optionally tags too)"
                                                  " of PropWare")
     parser.add_argument("--tags", action="store_true",
@@ -73,20 +73,20 @@ def parseArgs():
     return parser.parse_args()
 
 
-def fixSystemPath():
-    originPath = sys.path[0]
-    originPath = originPath[:-5]  # Truncate the "/util" from the end
+def fix_system_path():
+    origin_path = sys.path[0]
+    origin_path = origin_path[:-5]  # Truncate the "/util" from the end
 
-    removeMe = []
+    remove_me = []
     for path in sys.path:
-        if originPath in path:
-            removeMe.append(path)
+        if origin_path in path:
+            remove_me.append(path)
 
-    sys.path = [path for path in sys.path if path not in removeMe]
+    sys.path = [path for path in sys.path if path not in remove_me]
 
 
-def checkoutNewRepo(parentDir, branch):
-    os.chdir(parentDir)
+def checkout_new_repo(parent_dir, branch):
+    os.chdir(parent_dir)
 
     if os.path.exists("PropWare"):
         shutil.rmtree("PropWare")
@@ -94,7 +94,7 @@ def checkoutNewRepo(parentDir, branch):
     try:
         subprocess.check_output(["git", "clone", REPO_URL])
         os.chdir("PropWare")
-        subprocess.check_output(["git", "checkout", branch])
+        subprocess.check_output(["git", "_checkout", branch])
     except subprocess.CalledProcessError:
         print("Failed to clone from GitHub", file=sys.stderr)
         return 1
@@ -102,39 +102,39 @@ def checkoutNewRepo(parentDir, branch):
     return 0
 
 
-def getBinaryCreator(branch, newPropWarePath):
+def get_binary_creator(branch, new_propware_path):
     import createBinaryDistr
 
-    if hasCreationScript(newPropWarePath):
+    if has_creation_script(new_propware_path):
         os.chdir("util")
-        loadImportScripts()
-        binaryCreator = reloadModule(createBinaryDistr)
-        binaryCreator = binaryCreator.CreateBinaryDistr()
+        load_import_scripts()
+        binary_creator = reload_module(createBinaryDistr)
+        binary_creator = binary_creator.CreateBinaryDistr()
         if branch in BROKEN_TAGS:
-            bandageBrokenTag()
+            bandage_broken_tag()
     else:
-        binaryCreator = newestBinaryCreator
+        binary_creator = newestBinaryCreator
 
-    return binaryCreator
-
-
-def hasCreationScript(propwarePath):
-    utilPackage = propwarePath + os.sep + "util"
-    return os.path.exists(utilPackage) and os.path.exists(utilPackage + os.sep + BINARY_CREATOR_FILENAME)
+    return binary_creator
 
 
-def loadImportScripts():
+def has_creation_script(propware_path):
+    util_package = propware_path + os.sep + "util"
+    return os.path.exists(util_package) and os.path.exists(util_package + os.sep + BINARY_CREATOR_FILENAME)
+
+
+def load_import_scripts():
     # noinspection PyGlobalUndefined
     global importAll
 
-    sys.modules['importLibpropeller'] = reloadModule(sys.modules['importLibpropeller'])
-    sys.modules['importSimple'] = reloadModule(sys.modules['importSimple'])
-    sys.modules['propwareImporter'] = reloadModule(sys.modules['propwareImporter'])
+    sys.modules['importLibpropeller'] = reload_module(sys.modules['importLibpropeller'])
+    sys.modules['importSimple'] = reload_module(sys.modules['importSimple'])
+    sys.modules['propwareImporter'] = reload_module(sys.modules['propwareImporter'])
     # noinspection PyUnresolvedReferences
     from propwareImporter import importAll
 
 
-def reloadModule(module):
+def reload_module(module):
     if not module or not isinstance(module, types.ModuleType):
         raise TypeError("reload() argument must be module")
 
@@ -143,45 +143,46 @@ def reloadModule(module):
         return reload(module)
     except NameError:
         import importlib
+        # noinspection PyUnresolvedReferences
         return importlib.reload(module)
 
 
-def run(binaryCreator, branch):
-    requiresSecondArg = False
+def run(binary_creator, branch):
+    requires_second_arg = False
     try:
-        binaryCreator.runInBranch(branch)
+        binary_creator.runInBranch(branch)
     except TypeError:
-        requiresSecondArg = True
-    if requiresSecondArg:
+        requires_second_arg = True
+    if requires_second_arg:
         # noinspection PyArgumentList
-        binaryCreator.runInBranch(branch, branch in newestBinaryCreator.TAGS)
+        binary_creator.runInBranch(branch, branch in newestBinaryCreator.TAGS)
 
 
-def copyZipAndCleanDir(binaryCreator, newPropWarePath, branch, failList):
-    newZipFile = binaryCreator.ARCHIVE_FILE_NAME % branch
-    if os.path.exists(newZipFile):
-        shutil.copy(newZipFile, PROPWARE_PATH)
-        if binaryCreator.CURRENT_SUGGESTION == branch:
-            shutil.copy(binaryCreator.ARCHIVE_FILE_NAME % "current", PROPWARE_PATH)
+def copy_zip_and_clean_dir(binary_creator, new_propware_path, branch, fail_list):
+    new_zip_file = binary_creator.ARCHIVE_FILE_NAME % branch
+    if os.path.exists(new_zip_file):
+        shutil.copy(new_zip_file, PROPWARE_PATH)
+        if binary_creator.CURRENT_SUGGESTION == branch:
+            shutil.copy(binary_creator.ARCHIVE_FILE_NAME % "current", PROPWARE_PATH)
     else:
-        failList.append(branch)
-    shutil.rmtree(newPropWarePath)
+        fail_list.append(branch)
+    shutil.rmtree(new_propware_path)
 
 
-def printSummary(branches, failList):
+def print_summary(branches, fail_list):
     print("\n\nSummary:")
     for branch in branches:
-        if branch not in failList:
+        if branch not in fail_list:
             print("\tPASS: " + branch)
-    for branch in failList:
+    for branch in fail_list:
         print("\tFAIL: " + branch)
 
 
-def bandageBrokenTag():
+def bandage_broken_tag():
     os.chdir("util")
     importAll()
     os.chdir("..")
 
 
 if "__main__" == __name__:
-    completePackager()
+    complete_packager()

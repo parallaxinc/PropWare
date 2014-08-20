@@ -74,7 +74,7 @@ class Installer(object):
         self._add_propgcc_to_path = False
         self._export_env_var = ''
 
-        propwareUtils.checkProperWorkingDirectory()
+        propwareUtils.check_proper_working_dir()
         Installer._PROPWARE_ROOT = os.path.abspath('..')
 
         # Parse arguments
@@ -117,11 +117,11 @@ class Installer(object):
 
     def _download_cmake(self):
         assert (self._cmake_download_url != '')
-        return propwareUtils.downloadFile(self._cmake_download_url, tempfile.gettempdir())[0]
+        return propwareUtils.download_file(self._cmake_download_url, tempfile.gettempdir())[0]
 
     def _download_propgcc(self):
         assert (self._cmake_download_url != '')
-        return propwareUtils.downloadFile(self._propgcc_download_url, tempfile.gettempdir())[0]
+        return propwareUtils.download_file(self._propgcc_download_url, tempfile.gettempdir())[0]
 
     def _check_for_make(self):
         if None == propwareUtils.which('make'):
