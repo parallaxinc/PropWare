@@ -30,17 +30,12 @@ When JetBrain's releases their new C++ IDE
 it will support CMake out-of-the-box and PropWare will be ready for it (I am currently 
 using the EAP version).
 
-All source code has been MIT licensed and hosted on GitHub with documentation and 
-binaries available from my website.
-
-I have to give a huge thank you out to everyone here on the forums that have helped me 
-get this far - jazzed, srlm, ericpine, pmrobert, David Betz, and many others.
-
 ### Key Features
 * More C++ for the Propeller!
 * CMake for the Propeller!
 * Support for Eclipse, CLion and other full-featured IDEs!
 * Active development - I'm open to requests for new objects/peripherals!
+* MIT license on all source code files
 
 Installation
 ------------
