@@ -17,6 +17,15 @@ def query_value(key, name):
     return value
 
 
+def show(key):
+    for i in range(1024):
+        try:
+            n, v, t = EnumValue(key, i)
+            print('%s=%s' % (n, v))
+        except EnvironmentError:
+            break
+
+
 def set_environ_var(name, value):
     assert (isinstance(name, str))
     assert (isinstance(value, str))
@@ -25,8 +34,7 @@ def set_environ_var(name, value):
     reg = None
     try:
         path = r'Environment'
-        reg = ConnectRegistry(None, HKEY_CURRENT_USER)
-        key = OpenKey(reg, path, 0, KEY_ALL_ACCESS)
+        key = OpenKey(HKEY_CURRENT_USER, path, access=KEY_ALL_ACCESS)
 
         if name.upper() == 'PATH':
             try:
@@ -46,4 +54,4 @@ def set_environ_var(name, value):
 
 
 if '__main__' == __name__:
-    pass
+    print('Nothing to execute here! Program exiting...')

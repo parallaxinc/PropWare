@@ -32,6 +32,9 @@ class OperatingSystem(object):
     def __str__(self):
         return self._platform
 
+    def __eq__(self, y):
+        return str(self) == str(y)
+
 
 class Windows(OperatingSystem):
     # noinspection PyMissingConstructor
@@ -89,30 +92,13 @@ def which(program):
     """
     assert (isinstance(program, str))
 
-    def is_exe(file_path):
-        if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
-            return True
-        elif Windows() == get_os() and '.exe' != file_path[-4:]:
-            return is_exe(file_path + '.exe')
-        else:
-            return False
-
-    directory, file_name = os.path.split(program)
-    if directory:
-        if is_exe(program):
-            return os.path.abspath(program)
-    else:
-        for path in os.environ['PATH'].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return os.path.abspath(exe_file)
-
-    if Windows() == get_os() and not program.endswith('.exe'):
-        return which(program + '.exe')
-    else:
-        # If we haven't returned anything yet, that means the program doesn't exist
-        return None
+    system_path = os.environ['PATH'].split(os.pathsep)
+    for path in system_path:
+        candidate = os.path.join(path, program)
+        if os.path.isfile(candidate):
+            return candidate
+        elif Windows() == get_os() and os.path.isfile(candidate + '.exe'):
+            return candidate + '.exe'
 
 
 def check_proper_working_dir():
@@ -124,7 +110,7 @@ def is_propware_root(directory):
     assert (isinstance(directory, str))
     assert (os.path.isdir(directory))
 
-    return 'PropWare.dox' in os.listdir(directory)
+    return {'PropWare', 'util', 'libpropeller', 'simple'}.issubset(os.listdir(directory))
 
 
 def is_python3():
