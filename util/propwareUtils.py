@@ -124,7 +124,7 @@ def is_propware_root(directory):
     assert (isinstance(directory, str))
     assert (os.path.isdir(directory))
 
-    return 'PropWare.dox' in os.listdir(directory)
+    return {'PropWare', 'util', 'libpropeller', 'simple'}.issubset(os.listdir(directory))
 
 
 def is_python3():
