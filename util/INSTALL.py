@@ -387,7 +387,7 @@ class DebInstaller(NixInstaller):
     @staticmethod
     def _needs_libc6():
         cmd = ['dpkg-query', '-l', 'libc6*']
-        package_list = subprocess.check_output(cmd).split('\n')
+        package_list = subprocess.check_output(cmd).split(bytes('\n'))
         matcher = re.compile('.*libc6(:|-)i386.*')
         for package in package_list:
             if matcher.match(package):
@@ -475,6 +475,3 @@ class WinInstaller(Installer):
 if '__main__' == __name__:
     installer = Installer.create(propwareUtils.get_os())
     installer.install()
-
-    print("\nCongratulations! PropWare has been installed successfully! If root environment variables were "
-          "configured, you will need to reboot your computer. Otherwise, open a new terminal and have fun!")
