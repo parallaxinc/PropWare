@@ -1,5 +1,7 @@
-PropWare v2.0 Documentation - Nightly
+PropWare v2.0 Documentation - Nightly   {#mainpage}
 =====================================
+
+[TOC]
 
 Overview
 --------
