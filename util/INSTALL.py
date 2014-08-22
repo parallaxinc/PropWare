@@ -8,6 +8,7 @@
 @description:
 """
 from __future__ import print_function
+from abc import abstractmethod
 import argparse
 import os
 from os.path import expanduser
@@ -16,6 +17,7 @@ import sys
 import tempfile
 import shutil
 import subprocess
+
 try:
     # noinspection PyUnresolvedReferences
     import grp
@@ -34,6 +36,12 @@ from propwareUtils import OperatingSystem, Windows, Linux, Mac
 
 class CMakeFailedException(Exception):
     pass
+
+
+class MissingBashrcException(Exception):
+    def __init__(self):
+        super(MissingBashrcException, self).__init__('Cannot find ~/.bashrc. ~/.bashrc is expected to exist so that I '
+                                                     'can add environment variables for you.')
 
 
 class Installer(object):
@@ -65,7 +73,6 @@ class Installer(object):
         self._propgcc_parent = ''
         self._cmake_zip_name = None
         self._propgcc_zip_name = None
-        self._make_installed = False
         self._cmake_installed = False
         self._cmake_root_dir_name = ''  # Differs between each OS - must be set in children
         self._cmake_path = ''
@@ -73,6 +80,7 @@ class Installer(object):
         self._add_cmake_to_path = False
         self._add_propgcc_to_path = False
         self._export_env_var = ''
+        self.cmd_sep = ''
 
         propwareUtils.check_proper_working_dir()
         Installer._PROPWARE_ROOT = os.path.abspath('..')
@@ -93,12 +101,14 @@ class Installer(object):
 
         self._copy_cmake_files()  # Copy necessary language files (*COG* and eventually Spin)
 
-        self._set_env_variables()
+        self._add_to_path()
 
         self._import_propware()  # Download Simple and libpropeller
 
-        if self._make_installed and self._cmake_installed:
+        if self._check_for_make() and self._cmake_installed:
             self._build_binaries()
+        else:
+            print('Could not build PropWare :\'. Sorry.', file=sys.stderr)
 
     @staticmethod
     def _parse_args():
@@ -126,10 +136,11 @@ class Installer(object):
     def _check_for_make(self):
         if None == propwareUtils.which('make'):
             self._warn_make_instructions()
-            self._make_installed = False
+            return False
         else:
-            self._make_installed = True
+            return True
 
+    @abstractmethod
     def _warn_make_instructions(self):
         pass
 
@@ -159,33 +170,31 @@ class Installer(object):
     def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
         return False
 
-    def _set_env_variables(self):
-        pass
+    def _add_to_path(self):
+        cmake_bin = self._cmake_path + str(os.sep) + 'bin'
+        propgcc_bin = self._propgcc_path + str(os.sep) + 'bin'
 
-    def _build_binaries(self):
-        set_propgcc_prefix = '%s PROPGCC_PREFIX=%s' % (self._export_env_var, os.path.abspath(self._propgcc_path))
-        set_propware_path = '%s PROPWARE_PATH=%s' % (self._export_env_var, os.path.abspath(self._PROPWARE_ROOT))
-        run_cmake = self._cmake_path + str(os.sep) + 'bin' + str(os.sep) + 'cmake -G "Unix Makefiles" .'
+        if self._add_cmake_to_path:
+            self.add_env_var('PATH', cmake_bin)
 
-        run_cmake_cmd = '%s ; %s ; %s' % (set_propgcc_prefix, set_propware_path, run_cmake)
-        cmd = ['sh', '-c', run_cmake_cmd]
+        if self._add_propgcc_to_path:
+            self.add_env_var('PATH', propgcc_bin)
 
-        print(run_cmake_cmd)
-        if 0 != subprocess.call(cmd, cwd=Installer._PROPWARE_ROOT):
+    @staticmethod
+    def _build_binaries():
+        run_cmake = ['cmake', '-G', 'Unix Makefiles', '.']
+        print(' '.join(run_cmake))
+        if 0 != subprocess.call(run_cmake, cwd=Installer._PROPWARE_ROOT):
             raise CMakeFailedException()
 
-        run_make = 'make'
-        run_make_cmd = '%s ; %s ; %s' % (set_propgcc_prefix, set_propware_path, run_make)
-        cmd = ['sh', '-c', run_make_cmd]
-        print(run_make_cmd)
-        subprocess.call(cmd, cwd=Installer._PROPWARE_ROOT)
+        run_make = ['make']
+        print(' '.join(run_make))
+        subprocess.call(run_make, cwd=Installer._PROPWARE_ROOT)
 
     def _confirm_dependencies(self):
-        self._check_for_make()
-
         # ##
         # Query user about downloads
-        ###
+        # ##
 
         existing_cmake_bin = propwareUtils.which('cmake')
         if existing_cmake_bin:
@@ -230,7 +239,7 @@ class Installer(object):
                     self._propgcc_parent)
                 self._add_propgcc_to_path = True
 
-        ###
+        # ##
         # Download any required dependencies
         ###
 
@@ -255,7 +264,19 @@ class Installer(object):
                 propwareUtils.extract(self._propgcc_zip_name, self._propgcc_parent)
                 self._propgcc_path = self._propgcc_parent + str(os.sep) + self._PROPGCC_DIR_NAME
 
+    @abstractmethod
     def _check_for_default_propgcc(self):
+        pass
+
+    @staticmethod
+    def add_env_var(key, value):
+        assert (isinstance(key, str))
+        assert (isinstance(value, str))
+        os.environ[key] = value
+
+    @staticmethod
+    @abstractmethod
+    def _add_root_env_var(key, value):
         pass
 
 
@@ -263,6 +284,7 @@ class NixInstaller(Installer):
     def __init__(self):
         super(NixInstaller, self).__init__()
         self._export_env_var = 'export'
+        self.cmd_sep = ';'
 
     def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
         super(NixInstaller, self)._sudo_copy_cmake_files(cmake_modules_src_path, cmake_modules_dst_path)
@@ -278,28 +300,6 @@ class NixInstaller(Installer):
         else:
             return False
 
-    def _set_env_variables(self):
-        super(NixInstaller, self)._set_env_variables()
-
-        cmake_bin = self._cmake_path + str(os.sep) + 'bin'
-        propgcc_bin = self._propgcc_path + str(os.sep) + 'bin'
-
-        if os.environ['SHELL'].endswith('/bash'):
-            if self._add_cmake_to_path:
-                cmd = ['sh', '-c',
-                       'echo "\nexport PATH=%s:\\$PATH" >> %s/.bashrc' % (cmake_bin, os.path.expanduser('~'))]
-                print(' '.join(cmd))
-                subprocess.check_output(cmd)
-
-            if self._add_propgcc_to_path:
-                cmd = ['sh', '-c',
-                       'echo "\nexport PATH=%s:\\$PATH" >> %s/.bashrc' % (propgcc_bin, os.path.expanduser('~'))]
-                print(' '.join(cmd))
-                subprocess.check_output(cmd)
-        else:
-            print('Unknown shell is used. It is recommended that you add "%s" and "%s" to the PATH variable for your '
-                  'user\'s environment.' % (cmake_bin, propgcc_bin))
-
     def _check_for_default_propgcc(self):
         super(NixInstaller, self)._check_for_default_propgcc()
 
@@ -307,6 +307,38 @@ class NixInstaller(Installer):
             return "/opt/parallax"
         else:
             return None
+
+    @abstractmethod
+    def _warn_make_instructions(self):
+        pass
+
+    @staticmethod
+    def add_env_var(key, value):
+        if os.environ['SHELL'].endswith('/bash'):
+            NixInstaller().add_env_var(key, value)
+
+            if not os.path.exists(os.path.expanduser('~') + str(os.sep) + '.bashrc'):
+                raise MissingBashrcException()
+
+            if 'PATH' == key:
+                cmd = ['sh', '-c', 'echo "\nexport PATH=%s:\\$PATH" >> %s/.bashrc' % (value, os.path.expanduser('~'))]
+            else:
+                cmd = ['sh', '-c', 'echo "\nexport %s=%s" >> %s/.bashrc' % (key, value, os.path.expanduser('~'))]
+
+            print(' '.join(cmd))
+            subprocess.check_output(cmd)
+        else:
+            if 'PATH' == key:
+                error_str = 'Unknown shell is used. It is recommended that you add %s to your PATH.' % value
+            else:
+                error_str = 'Unknown shell is used. It is recommended that you add %s=%s to your environment.' \
+                            % (key, value)
+            print(error_str, file=sys.stderr)
+
+    @staticmethod
+    @abstractmethod
+    def _add_root_env_var(key, value):
+        pass
 
 
 class DebInstaller(NixInstaller):
@@ -347,25 +379,16 @@ class DebInstaller(NixInstaller):
                 print(' '.join(cmd))
                 subprocess.call(cmd)
 
-    def _set_env_variables(self):
-        super(DebInstaller, self)._set_env_variables()
+    def _add_to_path(self):
+        super(DebInstaller, self)._add_to_path()
 
         if 'PROPGCC_PREFIX' not in os.environ or 'PROPWARE_PATH' not in os.environ:
             print('Environment variables will now be configured for the root environment.')
             prompt = 'Press "enter" to continue or "no" to configure them yourself.\n>>> '
             usr_input = propwareUtils.get_user_input(prompt, 'no'.__eq__, prompt, None)
             if None == usr_input:
-                if 'PROPGCC_PREFIX' not in os.environ:
-                    propgcc_env = 'echo "PROPGCC_PREFIX=%s" >> /etc/environment' % self._propgcc_path
-                    cmd = ['sudo', 'sh', '-c', propgcc_env]
-                    print(' '.join(cmd))
-                    subprocess.call(cmd)
-
-                if 'PROPWARE_PATH' not in os.environ:
-                    propware_env = 'echo "PROPWARE_PATH=%s" >> /etc/environment' % Installer._PROPWARE_ROOT
-                    cmd = ['sudo', 'sh', '-c', propware_env]
-                    print(' '.join(cmd))
-                    subprocess.call(cmd)
+                DebInstaller._add_root_env_var('PROPGCC_PREFIX', self._propgcc_path)
+                DebInstaller._add_root_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
             else:
                 print('You have selected to configure the following environment variables for yourself:')
                 if 'PROPGCC_PREFIX' not in os.environ:
@@ -395,6 +418,16 @@ class DebInstaller(NixInstaller):
 
         return True
 
+    @staticmethod
+    def _add_root_env_var(key, value):
+        super(DebInstaller)._add_root_env_var(key, value)
+
+        if key not in os.environ:
+            env_cmd = 'echo "%s=%s" >> /etc/environment' % (key, value)
+            cmd = ['sudo', 'sh', '-c', env_cmd]
+            print(' '.join(cmd))
+            subprocess.call(cmd)
+
 
 class MacInstaller(NixInstaller):
     def __init__(self):
@@ -407,9 +440,15 @@ class MacInstaller(NixInstaller):
         print('WARNING: Make was not detected on your system. You can install it by following these instructions:\n\t'
               'http://stackoverflow.com/a/6767528', file=sys.stderr)
 
-    def _set_env_variables(self):
-        super(MacInstaller, self)._set_env_variables()
+    def _add_to_path(self):
+        super(MacInstaller, self)._add_to_path()
         # TODO: Set Mac environment variables
+
+    @staticmethod
+    def _add_root_env_var(key, value):
+        # TODO: Don't be a jerk. Figure out how to add root environment variables to Macs
+        print("Uh oh! You need to add a root environment variable and I haven't figured out how yet! You should "
+              "Google that.... Sorry. You need: %s=%s" % (key, value))
 
 
 class WinInstaller(Installer):
@@ -419,6 +458,7 @@ class WinInstaller(Installer):
         self._cmake_root_dir_name = 'cmake-3.0.1-win32-x86'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-win_v1_0_0.zip'
         self._export_env_var = 'set'
+        self.cmd_sep = '&'
 
     def _warn_make_instructions(self):
         print('WARNING: Make was not detected on your system. Make is packaged with PropGCC so be sure to add '
@@ -436,22 +476,18 @@ class WinInstaller(Installer):
               'directory.' % (cmake_modules_src_path, cmake_modules_dst_path), file=sys.stderr)
         return False
 
-    def _set_env_variables(self):
-        super(WinInstaller, self)._set_env_variables()
+    @staticmethod
+    def add_env_var(key, value):
+        super(WinInstaller, key).add_env_var(value)
 
         from winutils import set_environ_var
 
-        cmake_bin = self._cmake_path + str(os.sep) + 'bin'
-        propgcc_bin = self._propgcc_path + str(os.sep) + 'bin'
+        set_environ_var(key, value)
 
-        if self._add_cmake_to_path:
-            set_environ_var('PATH', cmake_bin)
-        if self._add_propgcc_to_path:
-            set_environ_var('PATH', propgcc_bin)
-        if 'PROPWARE_PATH' not in os.environ.keys():
-            set_environ_var('PROPWARE_PATH', self._PROPWARE_ROOT)
-        if 'PROPGCC_PREFIX' not in os.environ.keys():
-            set_environ_var('PROPGCC_PREFIX', self._propgcc_path)
+    @staticmethod
+    def _add_root_env_var(key, value):
+        # No need for root environment variables here. User vars will do just fine in Windoze
+        WinInstaller.add_env_var(key, value)
 
     def _check_for_default_propgcc(self):
         super(WinInstaller, self)._check_for_default_propgcc()
@@ -468,8 +504,8 @@ class WinInstaller(Installer):
     def _check_for_make(self):
         # Make will be installed along with PropGCC, so no need to worry about this
         # NOTE: DO NOT call the super() method. We DO NOT want to do anything on a Windows machine when this method is
-        #       called
-        pass
+        # called
+        return True
 
 
 if '__main__' == __name__:

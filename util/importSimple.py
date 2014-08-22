@@ -38,7 +38,7 @@ class ImportSimple:
         for library in self.libraries.keys():
             self._process_library(library)
 
-        # Create a one-line makefile that lists all objects to be compiled into the Simple library
+        # Create a one-line CMake file that lists all objects to be compiled into the Simple library
         self._make_obj_list()
 
     def _get_libraries(self, learn_root):

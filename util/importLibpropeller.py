@@ -57,10 +57,11 @@ class ImportLibpropeller:
 
         for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION):
             # Skip the root git directory and move into its subdirectories
+            # noinspection PyBroadException
             try:
                 # noinspection PyUnresolvedReferences
                 libpropeller_dst_root = os.path.samefile(root, ImportLibpropeller.DESTINATION_SOURCES)
-            except NameError:
+            except Exception:  # This should be NameError... but that wasn't properly catching the exception... :'(
                 libpropeller_dst_root = os.path.normcase(root) == os.path.normcase(
                     ImportLibpropeller.DESTINATION_SOURCES)
 

@@ -131,6 +131,7 @@ def init_downloads_folder(propware_root):
         win_dir_name = os.path.normpath(full_path)
         import ctypes
 
+        ctypes.windll.kernel32.SetFileAttributesW.argtypes = (ctypes.c_wchar_p, ctypes.c_uint32)
         ret = ctypes.windll.kernel32.SetFileAttributesW(win_dir_name, FILE_ATTRIBUTE_HIDDEN)
         if 0 == ret:  # return code of zero indicates failure, raise Windows error
             raise ctypes.WinError()
