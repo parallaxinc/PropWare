@@ -42,8 +42,8 @@ if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t
             DEPENDS ${CMAKE_PROJECT_NAME}.elf)
 
-    # Add target for install (load to EEPROM and start terminal)
+    # Add target for run (load to EEPROM, do not start terminal)
     add_custom_target(run
-            ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t -e
+            ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -e
             DEPENDS ${CMAKE_PROJECT_NAME}.elf)
 ENDIF(NOT DEFINED PROPWARE_MAIN_PACKAGE)
