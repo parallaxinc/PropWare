@@ -13,5 +13,5 @@ set(CXX_FLAGS )
 
 project(SimpleText_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME}.c)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME})
 include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)

@@ -13,5 +13,5 @@ set(CXX_FLAGS )
 
 project(DuplexUART_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME})
 include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)
