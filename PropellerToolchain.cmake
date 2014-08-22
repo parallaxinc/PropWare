@@ -1,13 +1,6 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR Propeller)
 
-if (NOT DEFINED PROPGCC_PREFIX)
-    set(PROPGCC_PREFIX $ENV{PROPGCC_PREFIX})
-    if (NOT PROPGCC_PREFIX)
-        message(FATAL_ERROR "Please define 'PROPGCC_PREFIX' either as an environment variable or CMake variable. The value should be the installation directory for PropGCC")
-    endif (NOT PROPGCC_PREFIX)
-endif (NOT DEFINED PROPGCC_PREFIX)
-
 # PROPWARE_PATH must be defined here so that the header files are included in
 # the search path
 if (NOT DEFINED PROPWARE_PATH)
@@ -18,10 +11,9 @@ if (NOT DEFINED PROPWARE_PATH)
 endif (NOT DEFINED PROPWARE_PATH)
 
 # specify the cross compiler
-file(TO_CMAKE_PATH "${PROPGCC_PREFIX}/bin" GCC_PATH)
-set(CMAKE_C_COMPILER   ${GCC_PATH}/propeller-elf-gcc)
-set(CMAKE_CXX_COMPILER ${GCC_PATH}/propeller-elf-gcc)
-set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc)
+set(CMAKE_C_COMPILER   propeller-elf-gcc)
+set(CMAKE_CXX_COMPILER propeller-elf-gcc)
+set(CMAKE_ASM_COMPILER propeller-elf-gcc)
 #set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib)
 #set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy)
 #set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump)
