@@ -20,7 +20,7 @@ set(CMAKE_ECOGCXX_FLAGS "${COMMON_FLAGS} ${CXX_FLAGS}")
 
 # If no model is specified, we must choose a default so that the proper libraries can be linked
 if (NOT DEFINED MODEL)
-    set(MODEL
+    set(MODEL lmm)
 endif ()
 
 # XMM model is retroactively renamed xmm-split

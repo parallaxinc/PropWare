@@ -7,8 +7,10 @@ if (NOT DEFINED PROPWARE_PATH)
     set(PROPWARE_PATH $ENV{PROPWARE_PATH})
     if (NOT PROPWARE_PATH)
         message(FATAL_ERROR "Please define 'PROPWARE_PATH' either as an environment variable or CMake variable. The value should be the location of the PropWare root directory.")
-    endif (NOT PROPWARE_PATH)
-endif (NOT DEFINED PROPWARE_PATH)
+    else ()
+        file(TO_NATIVE_PATH ${PROPWARE_PATH} ${PROPWARE_PATH})
+    endif ()
+endif ()
 
 # specify the cross compiler
 set(CMAKE_C_COMPILER   propeller-elf-gcc)

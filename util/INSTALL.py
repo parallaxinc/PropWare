@@ -241,7 +241,7 @@ class Installer(object):
 
         # ##
         # Download any required dependencies
-        ###
+        # ##
 
         if download_new_cmake:
             try:
