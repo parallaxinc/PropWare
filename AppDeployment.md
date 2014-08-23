@@ -12,8 +12,7 @@ Starting a New Project
    cmake_minimum_required (VERSION 3.0.0)
    # Aside from cmake_minimum_required, this must be the first line of the file
    if (NOT DEFINED PROPWARE_PATH)
-       set(PROPWARE_PATH $ENV{PROPWARE_PATH})
-       file(TO_NATIVE_PATH PROPWARE_PATH ${PROPWARE_PATH})
+       file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)
    endif (NOT DEFINED PROPWARE_PATH)
    set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
    

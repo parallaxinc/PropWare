@@ -4,12 +4,12 @@ set(CMAKE_SYSTEM_PROCESSOR Propeller)
 # PROPWARE_PATH must be defined here so that the header files are included in
 # the search path
 if (NOT DEFINED PROPWARE_PATH)
-    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
+    file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)
     if (NOT PROPWARE_PATH)
         message(FATAL_ERROR "Please define 'PROPWARE_PATH' either as an environment variable or CMake variable. The value should be the location of the PropWare root directory.")
     endif ()
 endif ()
-file(TO_NATIVE_PATH PROPWARE_PATH ${PROPWARE_PATH})
+file(TO_CMAKE_PATH ${PROPWARE_PATH} PROPWARE_PATH)
 
 list(APPEND CMAKE_MODULE_PATH ${PROPWARE_PATH}/CMakeModules)
 
