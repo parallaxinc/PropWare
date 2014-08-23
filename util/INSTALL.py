@@ -159,7 +159,9 @@ class Installer(object):
             if 0 != subprocess.call(run_cmake, cwd=Installer._PROPWARE_ROOT):
                 raise CMakeFailedException()
 
-            run_make = ['make', '-j%d' % multiprocessing.cpu_count()]
+            # Dependency scanning isn't perfect. Seems to fail with 8 threads, so let's limit it to 4
+            cpu_count = 4 if multiprocessing.cpu_count() > 4 else multiprocessing.cpu_count()
+            run_make = ['make', '-j%d' % cpu_count]
             print(' '.join(run_make))
             subprocess.call(run_make, cwd=Installer._PROPWARE_ROOT)
         else:
@@ -402,9 +404,8 @@ class DebInstaller(NixInstaller):
 
         if key not in os.environ:
             env_cmd = 'echo "%s=%s" >> /etc/environment' % (key, value)
-            cmd = ['sudo', 'sh', '-c', env_cmd]
-            print(' '.join(cmd))
-            subprocess.call(cmd)
+            print(env_cmd)
+            subprocess.call(env_cmd, shell=True)
 
 
 class MacInstaller(NixInstaller):
