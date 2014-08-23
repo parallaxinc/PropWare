@@ -10,12 +10,12 @@
 from __future__ import print_function
 from abc import abstractmethod
 import argparse
+import multiprocessing
 import os
 from os.path import expanduser
 import re
 import sys
 import tempfile
-import shutil
 import subprocess
 
 try:
@@ -32,6 +32,8 @@ except ImportError:
 
 import propwareUtils
 from propwareUtils import OperatingSystem, Windows, Linux, Mac
+
+os.environ['PATH'] = '/home/david/reusable/cmake-3.0.1-Linux-i386/bin:' + os.environ['PATH']
 
 
 class CMakeFailedException(Exception):
@@ -99,16 +101,11 @@ class Installer(object):
     def install(self):
         self._confirm_dependencies()
 
-        self._copy_cmake_files()  # Copy necessary language files (*COG* and eventually Spin)
-
         self._add_to_path()
 
         self._import_propware()  # Download Simple and libpropeller
 
-        if self._check_for_make() and self._cmake_installed:
-            self._build_binaries()
-        else:
-            print('Could not build PropWare :\'. Sorry.', file=sys.stderr)
+        self._build_binaries()
 
     @staticmethod
     def _parse_args():
@@ -144,32 +141,6 @@ class Installer(object):
     def _warn_make_instructions(self):
         pass
 
-    def _copy_cmake_files(self):
-        cmake_modules_src_path = Installer._PROPWARE_ROOT + str(os.sep) + 'CMakeModules'
-        cmake_modules_dst_path = propwareUtils.get_cmake_modules_path(self._cmake_path)
-
-        try:
-            for entry in os.listdir(cmake_modules_src_path):
-                src_file_path = cmake_modules_src_path + str(os.sep) + entry
-                if os.path.isfile(src_file_path):
-                    shutil.copy(src_file_path, cmake_modules_dst_path)
-
-            cmake_platform_src_path = cmake_modules_src_path + str(os.sep) + 'Platform'
-            cmake_platform_dst_path = cmake_modules_dst_path + str(os.sep) + 'Platform'
-            for entry in os.listdir(cmake_platform_src_path):
-                src_file_path = cmake_platform_src_path + str(os.sep) + entry
-                if os.path.isfile(src_file_path):
-                    shutil.copy(src_file_path, cmake_platform_dst_path)
-        except (PermissionError, IOError):
-            self._cmake_installed = self._sudo_copy_cmake_files(os.path.abspath(cmake_modules_src_path),
-                                                                os.path.abspath(cmake_modules_dst_path))
-
-        self._cmake_installed = True
-
-    # noinspection PyMethodMayBeStatic
-    def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
-        return False
-
     def _add_to_path(self):
         cmake_bin = self._cmake_path + str(os.sep) + 'bin'
         propgcc_bin = self._propgcc_path + str(os.sep) + 'bin'
@@ -180,16 +151,26 @@ class Installer(object):
         if self._add_propgcc_to_path:
             self.add_env_var('PATH', propgcc_bin)
 
-    @staticmethod
-    def _build_binaries():
-        run_cmake = ['cmake', '-G', 'Unix Makefiles', '.']
-        print(' '.join(run_cmake))
-        if 0 != subprocess.call(run_cmake, cwd=Installer._PROPWARE_ROOT):
-            raise CMakeFailedException()
+    def _build_binaries(self):
+        has_make = self._check_for_make()
+        if has_make and self._cmake_installed:
+            run_cmake = ['cmake', '-G', 'Unix Makefiles', '.']
+            print(' '.join(run_cmake))
+            if 0 != subprocess.call(run_cmake, cwd=Installer._PROPWARE_ROOT):
+                raise CMakeFailedException()
 
-        run_make = ['make']
-        print(' '.join(run_make))
-        subprocess.call(run_make, cwd=Installer._PROPWARE_ROOT)
+            run_make = ['make', '-j%d' % multiprocessing.cpu_count()]
+            print(' '.join(run_make))
+            subprocess.call(run_make, cwd=Installer._PROPWARE_ROOT)
+        else:
+            if not has_make:
+                missing_dependency = 'Make'
+            elif not self._cmake_installed:
+                missing_dependency = 'CMake'
+            else:
+                raise Exception('Oh that\'s no good. Please contact david@zemon.name and inform him that you are '
+                                'reading this right now.')
+            print('Could not build PropWare due to missing %s. Sorry. :\'(' % missing_dependency, file=sys.stderr)
 
     def _confirm_dependencies(self):
         # ##
@@ -201,19 +182,8 @@ class Installer(object):
             existing_cmake_bin = os.path.realpath(existing_cmake_bin)
             cmake_bin_dir = os.path.split(existing_cmake_bin)[0]
             self._cmake_path = os.path.abspath(cmake_bin_dir + str(os.sep) + '..')
-            if os.access(self._cmake_path, os.W_OK):
-                download_new_cmake = False
-            else:
-                user_input = propwareUtils.get_user_input(
-                    'CMake is installed to a write-protected directory. Administrative privileges will be required to '
-                    'install PropWare. Would you like to download a new version of CMake or install to the existing '
-                    'directory? (download/install) [default: %s]\n>>> ', re.compile('(download|install)', re.I).match,
-                    '"%s" is invalid. Choose "download" to download a new version of CMake or "install" to install in '
-                    'the existing directory (requires administrative privileges)\n>>> ', 'download')
-                if 'install' == user_input.lower():
-                    download_new_cmake = False
-                else:
-                    download_new_cmake = True
+            download_new_cmake = False
+            self._cmake_installed = True
         else:
             download_new_cmake = True
             self._cmake_parent = propwareUtils.get_user_input(
@@ -253,6 +223,7 @@ class Installer(object):
                 self._cmake_zip_name = self._download_cmake()
                 propwareUtils.extract(self._cmake_zip_name, self._cmake_parent)
                 self._cmake_path = self._cmake_parent + str(os.sep) + self._cmake_root_dir_name
+                self._cmake_installed = True
 
         if not self._propgcc_path:
             try:
@@ -285,20 +256,6 @@ class NixInstaller(Installer):
         super(NixInstaller, self).__init__()
         self._export_env_var = 'export'
         self.cmd_sep = ';'
-
-    def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
-        super(NixInstaller, self)._sudo_copy_cmake_files(cmake_modules_src_path, cmake_modules_dst_path)
-        assert (isinstance(cmake_modules_src_path, str))
-        assert (isinstance(cmake_modules_dst_path, str))
-
-        cmd = 'sudo cp -r ' + cmake_modules_src_path + ' ' + cmake_modules_dst_path
-        print('Your CMake installation directory is write-protected. Please provide root level permissions (normally, '
-              'your standard system password) to copy necessary files into CMake.')
-        print(' '.join(cmd))
-        if 0 == subprocess.call(cmd.split()):
-            return True
-        else:
-            return False
 
     def _check_for_default_propgcc(self):
         super(NixInstaller, self)._check_for_default_propgcc()
@@ -397,15 +354,13 @@ class DebInstaller(NixInstaller):
                     print('\tPlease set PROPWARE_PATH to "%s"' % Installer._PROPWARE_ROOT)
 
     def _check_for_make(self):
-        super(DebInstaller, self)._check_for_make()
-
         if None == propwareUtils.which('make'):
             cmd = ['sudo', 'apt-get', 'install', 'make']
             print(' '.join(cmd))
             subprocess.call(cmd)
 
         # Run the parent AFTER we attempt to install Make
-        super(DebInstaller, self)._check_for_make()
+        return super(DebInstaller, self)._check_for_make()
 
     @staticmethod
     def _needs_libc6():
@@ -463,18 +418,6 @@ class WinInstaller(Installer):
     def _warn_make_instructions(self):
         print('WARNING: Make was not detected on your system. Make is packaged with PropGCC so be sure to add '
               'PropGCC\'s bin folder to your system\'s PATH environment variable.', file=sys.stderr)
-
-    def _sudo_copy_cmake_files(self, cmake_modules_src_path, cmake_modules_dst_path):
-        super(WinInstaller, self)._sudo_copy_cmake_files(cmake_modules_src_path, cmake_modules_dst_path)
-        assert (isinstance(cmake_modules_src_path, str))
-        assert (isinstance(cmake_modules_dst_path, str))
-
-        # TODO: Don't just print a warning, attempt to copy the CMake files
-
-        print('Your CMake installation directory is in a write-protected directory. Please copy the contents of %s '
-              'into %s before attempting to use CMake for the Propeller or use a version of CMake in a different '
-              'directory.' % (cmake_modules_src_path, cmake_modules_dst_path), file=sys.stderr)
-        return False
 
     @staticmethod
     def add_env_var(key, value):

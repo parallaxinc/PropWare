@@ -74,7 +74,7 @@ endif ()
 #include(CMakeFindBinUtils)
 
 # configure variables set in this file for fast reload later on
-configure_file(${CMAKE_ROOT}/Modules/CMakeCOGCCompiler.cmake.in
+configure_file(${PROPWARE_PATH}/CMakeModules/CMakeCOGCCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCOGCCompiler.cmake
   @ONLY
   )

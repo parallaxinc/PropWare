@@ -97,8 +97,14 @@ def which(program):
         candidate = os.path.join(path, program)
         if os.path.isfile(candidate):
             return candidate
-        elif Windows() == get_os() and os.path.isfile(candidate + '.exe'):
-            return candidate + '.exe'
+
+    if Windows() == get_os():
+        for path in system_path:
+            candidate = os.path.join(path, program) + '.exe'
+            if os.path.isfile(candidate):
+                return candidate
+
+    return None
 
 
 def check_proper_working_dir():
