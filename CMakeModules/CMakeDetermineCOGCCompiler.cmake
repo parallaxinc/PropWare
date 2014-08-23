@@ -39,13 +39,36 @@ if(NOT CMAKE_COGC_COMPILER_NAMES)
   set(CMAKE_COGC_COMPILER_NAMES cc)
 endif()
 
-
 if(NOT CMAKE_COGC_COMPILER)
   message(FATAL_ERROR "CMAKE_COGC_COMPILER must be defined")
 endif()
 mark_as_advanced(CMAKE_COGC_COMPILER)
 
-set(CMAKE_COMPILER_IS_GNUCC 1)
+# Each entry in this list is a set of extra flags to try
+# adding to the compile line to see if it helps produce
+# a valid identification file.
+set(CMAKE_COGC_COMPILER_ID_TEST_FLAGS
+  # Try compiling to an object file only.
+  "-c -xc"
+)
+
+# Build a small source file to identify the compiler.
+if(NOT CMAKE_COGC_COMPILER_ID_RUN)
+  set(CMAKE_COGC_COMPILER_ID_RUN 1)
+
+  # Try to identify the compiler.
+  set(CMAKE_COGC_COMPILER_ID)
+  file(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
+    CMAKE_COGC_COMPILER_ID_PLATFORM_CONTENT)
+
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
+  CMAKE_DETERMINE_COMPILER_ID(COGC COGCFLAGS CMakeCCompilerId.c)
+
+  # Set old compiler and platform id variables.
+  if("${CMAKE_COGC_COMPILER_ID}" MATCHES "GNU")
+    set(CMAKE_COMPILER_IS_GNUCC 1)
+  endif()
+endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
   get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_COGC_COMPILER}" PATH)
