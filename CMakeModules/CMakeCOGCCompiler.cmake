@@ -1,4 +1,4 @@
-set(CMAKE_COGC_COMPILER "/opt/parallax/bin/propeller-elf-gcc")
+set(CMAKE_COGC_COMPILER "propeller-elf-gcc")
 set(CMAKE_COGC_COMPILER_ARG1 "")
 set(CMAKE_COGC_COMPILER_ID "")
 set(CMAKE_COGC_COMPILER_VERSION "")
@@ -7,7 +7,7 @@ set(CMAKE_COGC_SIMULATE_ID "")
 set(CMAKE_COGC_SIMULATE_VERSION "")
 
 set(CMAKE_AR "")
-set(CMAKE_RANLIB "/opt/parallax/bin/propeller-elf-ranlib")
+set(CMAKE_RANLIB "propeller-elf-ranlib")
 set(CMAKE_LINKER "")
 set(CMAKE_COMPILER_IS_GNUCC )
 set(CMAKE_COGC_COMPILER_LOADED 1)
@@ -23,6 +23,7 @@ set(CMAKE_COGC_SOURCE_FILE_EXTENSIONS cogc)
 set(CMAKE_COGC_IGNORE_EXTENSIONS h;H;o;O;obj;OBJ;def;DEF;rc;RC)
 set(CMAKE_COGC_LINKER_PREFERENCE 50)
 
+set(LINKER_LANGUAGE C)
 # Save compiler ABI information.
 set(CMAKE_COGC_SIZEOF_DATA_PTR "")
 set(CMAKE_COGC_COMPILER_ABI "")

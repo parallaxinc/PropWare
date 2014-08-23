@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.0.0)
 
 if (NOT DEFINED PROPWARE_PATH)
     file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)
-endif (NOT DEFINED PROPWARE_PATH)
+endif ()
 set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
 
 set(BOARD QUICKSTART)
