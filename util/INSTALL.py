@@ -146,10 +146,10 @@ class Installer(object):
         propgcc_bin = self._propgcc_path + str(os.sep) + 'bin'
 
         if self._add_cmake_to_path:
-            self.add_env_var('PATH', cmake_bin)
+            self._add_env_var('PATH', cmake_bin)
 
         if self._add_propgcc_to_path:
-            self.add_env_var('PATH', propgcc_bin)
+            self._add_env_var('PATH', propgcc_bin)
 
     def _build_binaries(self):
         has_make = self._check_for_make()
@@ -179,13 +179,20 @@ class Installer(object):
 
         existing_cmake_bin = propwareUtils.which('cmake')
         if existing_cmake_bin:
-            existing_cmake_bin = os.path.realpath(existing_cmake_bin)
-            cmake_bin_dir = os.path.split(existing_cmake_bin)[0]
-            self._cmake_path = os.path.abspath(cmake_bin_dir + str(os.sep) + '..')
-            download_new_cmake = False
-            self._cmake_installed = True
+            if 2 >= self._check_cmake_version(existing_cmake_bin)[0]:
+                print('An existing version of CMake (version 2.x or older) has been detected. PropWare requires CMake'
+                      '3.x or higher - a new version will be installed.')
+                download_new_cmake = True
+            else:
+                existing_cmake_bin = os.path.realpath(existing_cmake_bin)
+                cmake_bin_dir = os.path.split(existing_cmake_bin)[0]
+                self._cmake_path = os.path.abspath(cmake_bin_dir + str(os.sep) + '..')
+                download_new_cmake = False
+                self._cmake_installed = True
         else:
             download_new_cmake = True
+
+        if download_new_cmake:
             self._cmake_parent = propwareUtils.get_user_input(
                 'CMake will be installed to %s. Press enter to continue or type another path to download to '
                 'a new directory.\n>>> ', os.path.isdir, '"%s" does not exist or is not a directory.',
@@ -240,7 +247,7 @@ class Installer(object):
         pass
 
     @staticmethod
-    def add_env_var(key, value):
+    def _add_env_var(key, value):
         assert (isinstance(key, str))
         assert (isinstance(value, str))
         os.environ[key] = value
@@ -249,6 +256,17 @@ class Installer(object):
     @abstractmethod
     def _add_root_env_var(key, value):
         pass
+
+    @staticmethod
+    def _check_cmake_version(cmake_exe):
+        assert (isinstance(cmake_exe, str))
+
+        version_output = subprocess.check_output([cmake_exe, '--version'])
+        version_line = version_output.split('\n')[0]
+        version_number = version_line.split()[2]
+        digits = version_number.split('.')
+        version_tuple = (int(digits[0]), int(digits[1]), int(digits[2]))
+        return version_tuple
 
 
 class NixInstaller(Installer):
@@ -270,9 +288,9 @@ class NixInstaller(Installer):
         pass
 
     @staticmethod
-    def add_env_var(key, value):
+    def _add_env_var(key, value):
         if os.environ['SHELL'].endswith('/bash'):
-            NixInstaller().add_env_var(key, value)
+            super(NixInstaller)._add_env_var(key, value)
 
             if not os.path.exists(os.path.expanduser('~') + str(os.sep) + '.bashrc'):
                 raise MissingBashrcException()
@@ -288,8 +306,8 @@ class NixInstaller(Installer):
             if 'PATH' == key:
                 error_str = 'Unknown shell is used. It is recommended that you add %s to your PATH.' % value
             else:
-                error_str = 'Unknown shell is used. It is recommended that you add %s=%s to your environment.' \
-                            % (key, value)
+                error_str = \
+                    'Unknown shell is used. It is recommended that you add %s=%s to your environment.' % (key, value)
             print(error_str, file=sys.stderr)
 
     @staticmethod
@@ -420,8 +438,8 @@ class WinInstaller(Installer):
               'PropGCC\'s bin folder to your system\'s PATH environment variable.', file=sys.stderr)
 
     @staticmethod
-    def add_env_var(key, value):
-        super(WinInstaller, key).add_env_var(value)
+    def _add_env_var(key, value):
+        super(WinInstaller, key)._add_env_var(value)
 
         from winutils import set_environ_var
 
@@ -430,7 +448,7 @@ class WinInstaller(Installer):
     @staticmethod
     def _add_root_env_var(key, value):
         # No need for root environment variables here. User vars will do just fine in Windoze
-        WinInstaller.add_env_var(key, value)
+        WinInstaller._add_env_var(key, value)
 
     def _check_for_default_propgcc(self):
         super(WinInstaller, self)._check_for_default_propgcc()

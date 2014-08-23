@@ -12,6 +12,7 @@ endif ()
 file(TO_CMAKE_PATH ${PROPWARE_PATH} PROPWARE_PATH)
 
 list(APPEND CMAKE_MODULE_PATH ${PROPWARE_PATH}/CMakeModules)
+message(STATUS ${CMAKE_MODULE_PATH})
 
 # specify the cross compiler
 if (WIN32)
