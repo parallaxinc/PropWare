@@ -94,7 +94,7 @@ def checkout_new_repo(parent_dir, branch):
     try:
         subprocess.check_output(["git", "clone", REPO_URL])
         os.chdir("PropWare")
-        subprocess.check_output(["git", "_checkout", branch])
+        subprocess.check_output(["git", "checkout", branch])
     except subprocess.CalledProcessError:
         print("Failed to clone from GitHub", file=sys.stderr)
         return 1
@@ -148,12 +148,12 @@ def reload_module(module):
 
 
 def run(binary_creator, branch):
-    requires_second_arg = False
+    assert (isinstance(binary_creator, createBinaryDistr.CreateBinaryDistr))
+    assert (isinstance(branch, str))
+
     try:
         binary_creator.runInBranch(branch)
     except TypeError:
-        requires_second_arg = True
-    if requires_second_arg:
         # noinspection PyArgumentList
         binary_creator.runInBranch(branch, branch in newestBinaryCreator.TAGS)
 

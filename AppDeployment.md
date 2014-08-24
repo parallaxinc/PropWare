@@ -6,7 +6,7 @@ deploying a PropGCC application using PropWare.
 
 Starting a New Project
 ----------------------
--# The defining piece of a PropWare project is the CMakeLists.txt file. It must be named "CMakeLists.txt". Examples of
+1. The defining piece of a PropWare project is the CMakeLists.txt file. It must be named "CMakeLists.txt". Examples of
    this file can be found in each of the Example projects, but here's the simplest form:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
    cmake_minimum_required (VERSION 3.0.0)
@@ -38,10 +38,10 @@ Starting a New Project
      the same as your project. The second parameter says that "HelloWorld.elf" should contain the source file 
      "main.cpp". If you have multiple source files in your project, simply append them after main.cpp - each 
      separated by any amount of whitespace.
--# 
+2. 
 
 Importing PropWare Projects into Eclipse (and other IDEs)
 ---------------------------------------------------------
--# For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
+1. For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
    `Eclipse IDE for C/C++ Developers` [here](http://www.eclipse.org/downloads/) and download the appropriate package
--# Coming soon...
+2. Coming soon...

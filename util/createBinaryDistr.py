@@ -9,6 +9,7 @@
 """
 
 from __future__ import print_function
+import multiprocessing
 import sys
 import os
 from glob import glob
@@ -31,8 +32,8 @@ class CreateBinaryDistr(object):
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3", "v2.0-beta4"]
     CURRENT_SUGGESTION = "release-2.0"
-    MAKE_COMPILE = ["make", "-j4", "--silent"]
-    CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
+    MAKE_COMPILE = ["make", "-j%d" % (multiprocessing.cpu_count() if 4 >= multiprocessing.cpu_count() else 4),
+                    "--silent"]
     MAKE_CLEAN_FAILED_CODE = 2
     CMAKE_GENERATE_FAILED_CODE = 1
 
@@ -65,17 +66,17 @@ class CreateBinaryDistr(object):
             CreateBinaryDistr._clean_untracked()
 
             for branch in branches:
-                self.run_in_branch(branch)
+                self.runInBranch(branch)
         finally:
             CreateBinaryDistr._attempt_clean_exit()
 
         self._print_summary(branches)
 
-    def run_in_branch(self, branch):
+    def runInBranch(self, branch):
         # Here for debugging purposes only
         self.currentBranch = branch
 
-        # Attempt to _checkout the next branch
+        # Attempt to checkout the next branch
         if 0 == CreateBinaryDistr._checkout(branch):
             if CreateBinaryDistr._is_branch_with_importer():
                 os.chdir("util")
@@ -125,20 +126,24 @@ class CreateBinaryDistr(object):
     def _clean():
         with open(os.devnull, 'w') as devnull:
             if CreateBinaryDistr._is_cmake_branch():
-                # Try to generate the Make files so that we can clean stuff up...
-                subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, stdout=devnull, stderr=devnull,
-                                cwd=CreateBinaryDistr.PROPWARE_ROOT)
+                build_dir = CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + 'bin'
+                if os.path.exists(build_dir):
+                    # Try to generate the Make files so that we can clean stuff up...
+                    subprocess.call(['cmake', CreateBinaryDistr.PROPWARE_ROOT], stdout=devnull, stderr=devnull,
+                                    cwd=build_dir)
+            else:
+                build_dir = CreateBinaryDistr.PROPWARE_ROOT
 
-            subprocess.call(["make", "clean", "--silent"], stderr=devnull, cwd=CreateBinaryDistr.PROPWARE_ROOT)
-            sys.stdout.flush()
+            if os.path.exists(build_dir):
+                subprocess.call(["make", "clean", "--silent"], stderr=devnull, cwd=build_dir)
+                sys.stdout.flush()
 
-            # Not all branches have the simple_clean target, so it's no big deal if it fails
-            try:
-                subprocess.check_output(["make", "simple_clean", "--silent"], stderr=devnull,
-                                        cwd=CreateBinaryDistr.PROPWARE_ROOT)
-            except subprocess.CalledProcessError as e:
-                if CreateBinaryDistr.MAKE_CLEAN_FAILED_CODE != e.returncode:
-                    raise e
+                # Not all branches have the simple_clean target, so it's no big deal if it fails
+                try:
+                    subprocess.check_output(["make", "simple_clean", "--silent"], stderr=devnull, cwd=build_dir)
+                except subprocess.CalledProcessError as e:
+                    if CreateBinaryDistr.MAKE_CLEAN_FAILED_CODE != e.returncode:
+                        raise e
 
     @staticmethod
     def _clean_untracked():
@@ -147,12 +152,14 @@ class CreateBinaryDistr(object):
 
     @staticmethod
     def _checkout(branch):
+        assert (isinstance(branch, str))
+
         try:
             CreateBinaryDistr._clean_untracked()
             sys.stdout.flush()
-            subprocess.check_output(["git", "_checkout", branch])
+            subprocess.check_output(["git", "checkout", branch])
         except subprocess.CalledProcessError:
-            print("Failed to _checkout " + branch, file=sys.stderr)
+            print("Failed to checkout " + branch, file=sys.stderr)
             return 1
 
         if branch not in CreateBinaryDistr.TAGS:
@@ -172,13 +179,18 @@ class CreateBinaryDistr(object):
     def _compile():
         # Determine if Makefile or CMake branch
         if CreateBinaryDistr._is_cmake_branch():
-            if 0 != subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+            build_dir = CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + 'bin'
+            if not os.path.exists(build_dir):
+                os.makedirs(build_dir)
+            if 0 != subprocess.call(['cmake', CreateBinaryDistr.PROPWARE_ROOT], cwd=build_dir):
                 sys.stdout.flush()
                 raise MakeErrorException()
+        else:
+            build_dir = CreateBinaryDistr.PROPWARE_ROOT
 
         sys.stdout.flush()
 
-        if 0 != subprocess.call(CreateBinaryDistr.MAKE_COMPILE, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+        if 0 != subprocess.call(CreateBinaryDistr.MAKE_COMPILE, cwd=build_dir):
             sys.stdout.flush()
             raise MakeErrorException()
 
@@ -203,7 +215,7 @@ class CreateBinaryDistr(object):
 
         try:
             CreateBinaryDistr._clean_untracked()
-            subprocess.check_output(["git", "_checkout", CreateBinaryDistr.CURRENT_SUGGESTION])
+            subprocess.check_output(["git", "checkout", CreateBinaryDistr.CURRENT_SUGGESTION])
         except subprocess.CalledProcessError as e:
             print("Failed to return git repository to 'current' branch", file=sys.stderr)
             print("Caused by: " + str(e), file=sys.stderr)
@@ -211,11 +223,12 @@ class CreateBinaryDistr(object):
 
     @staticmethod
     def _is_cmake_branch():
-        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "CMakeLists.txt")
+        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + "CMakeLists.txt")
 
     @staticmethod
     def _is_branch_with_importer():
-        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "util" + os.sep + "propwareImporter.py")
+        return os.path.exists(
+            CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + "util" + str(os.sep) + "propwareImporter.py")
 
     # noinspection PyShadowingNames
     def _print_summary(self, branches):
