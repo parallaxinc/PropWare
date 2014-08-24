@@ -17,6 +17,7 @@ import tarfile
 import zipfile
 import sys
 import struct
+import time
 
 __author__ = 'david'
 
@@ -255,7 +256,7 @@ def get_user_input(prompt, condition, error_prompt, default):
     :return: User's response
     :rtype : str
     """
-    assert isinstance(prompt, str)
+    assert (None == prompt or isinstance(prompt, str))
     # assert isinstance(condition, )
     assert (None == error_prompt or isinstance(error_prompt, str))
     assert (None == default or isinstance(default, str))
@@ -283,20 +284,27 @@ def get_user_input(prompt, condition, error_prompt, default):
         except NameError:
             return input(inner_prompt)
 
-    if None != default:
-        short_prompt = prompt % default
+    if prompt:
+        if None != default and '%s' in prompt:
+            short_prompt = prompt % default
+        else:
+            short_prompt = prompt
     else:
-        short_prompt = prompt
+        short_prompt = ''
     usr_input = my_input(short_prompt)
     if usr_input:
         if condition(usr_input):
             return usr_input
         else:
-            if None != error_prompt:
+            if error_prompt:
                 print(error_prompt % usr_input, file=sys.stderr)
+                sys.stderr.flush()
+                time.sleep(0.01)
             return get_user_input(prompt, condition, error_prompt, default)
-    else:
+    elif default:
         return default
+    else:
+        return get_user_input(prompt, condition, error_prompt, default)
 
 
 def get_cmake_modules_path(cmake_root):
@@ -313,6 +321,58 @@ def get_cmake_modules_path(cmake_root):
 
 def is_64_bit():
     return 64 == struct.calcsize('P') * 8
+
+
+class Menu(object):
+    def __init__(self, prompt):
+        self._prompt = prompt
+        self._options = []
+        self._default = None
+
+    def add_option(self, name, default=False):
+        assert (isinstance(default, bool))
+
+        self._options.append(name)
+
+        if default:
+            self._default = name
+
+        return self._options.index(name)
+
+    def prompt(self):
+        """
+        :return: Selected value from menu
+        :rtype str
+        """
+        options_len = len(self._options)
+
+        assert (options_len > 1)
+
+        prompt = '%s\n%s\n>>> ' % (self._prompt, self._get_menu_str())
+        condition = re.compile('[1-%d]' % options_len).match
+        error_prompt = '%s is not valid. Please select a menu number 1-' + str(options_len) + '.'
+        default = self._get_default_value()
+        selection = get_user_input(prompt, condition, error_prompt, default)
+        selection = int(selection) - 1
+        return self._options[selection]
+
+    def _get_default_value(self):
+        if self._default:
+            return str(self._options.index(self._default) + 1)
+        else:
+            return None
+
+    def _get_menu_str(self):
+        menu_str = ''
+        for i in range(len(self._options)):
+            option = self._options[i]
+            menu_str += '\t%d. %s' % (i + 1, option)
+            if option == self._default:
+                menu_str += ' [default]'
+            if i != len(self._options) - 1:
+                menu_str += os.linesep
+
+        return menu_str
 
 
 class IncorrectStartingDirectoryException(Exception):

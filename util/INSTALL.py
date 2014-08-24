@@ -370,12 +370,21 @@ class DebInstaller(NixInstaller):
         super(DebInstaller, self)._set_all_environment_variables()
 
         if 'PROPGCC_PREFIX' not in os.environ or 'PROPWARE_PATH' not in os.environ:
-            print('Environment variables will now be configured for the root environment.')
-            prompt = 'Press "enter" to continue or "no" to configure them yourself.\n>>> '
-            usr_input = propwareUtils.get_user_input(prompt, 'no'.__eq__, prompt, None)
-            if None == usr_input:
+            menu = propwareUtils.Menu('The PROPWARE_PATH and PROPGCC_PREFIX environment variables must now be set. For '
+                                      'use in graphical applications, they must be added to the root environment. For '
+                                      'command-line only use, they can be set as user variables. You may also choose '
+                                      'to configure them yourself and to leave these variables for the moment.')
+            menu.add_option('root', default=True)
+            menu.add_option('user')
+            menu.add_option("I'll configure them myself.")
+            usr_input = menu.prompt()
+
+            if 'root' == usr_input:
                 self._add_root_env_var('PROPGCC_PREFIX', self._propgcc_path)
                 self._add_root_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
+            elif 'user' == usr_input:
+                self._set_env_var('PROPGCC_PREFIX', self._propgcc_path)
+                self._set_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
             else:
                 print('You have selected to configure the following environment variables for yourself:')
                 if 'PROPGCC_PREFIX' not in os.environ:
@@ -408,7 +417,7 @@ class DebInstaller(NixInstaller):
         super(DebInstaller, cls)._add_root_env_var(key, value)
 
         if key not in os.environ:
-            env_cmd = 'echo "%s=%s" >> /etc/environment' % (key, value)
+            env_cmd = 'sudo echo "%s=%s" >> /etc/environment' % (key, value)
             print(env_cmd)
             subprocess.call(env_cmd, shell=True)
 
