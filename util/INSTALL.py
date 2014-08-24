@@ -318,8 +318,8 @@ class NixInstaller(Installer):
             if 'PATH' == key:
                 error_str = 'Unknown shell is used. It is recommended that you add %s to your PATH.' % value
             else:
-                error_str = \
-                    'Unknown shell is used. It is recommended that you add %s=%s to your environment.' % (key, value)
+                error_str = 'Unknown shell is used. It is recommended that you add %s=%s to your environment.' % (
+                    key, value)
             print(error_str, file=sys.stderr)
 
     @classmethod
@@ -357,14 +357,22 @@ class DebInstaller(NixInstaller):
 
         # Also, add user to "dialout" group if necessary
         if not self._user_in_dialout:
-            user_input = propwareUtils.get_user_input(
-                'Your user must be added to the "dialout" group in order to program a Propeller chip. Root privileges '
-                'are required. Should your user be added? [default: %s] (y/n)\n>>> ', re.compile('(y|n)', re.I).match,
-                '"%s" is not valid. Please enter "y" or "n".\n>>> ', 'y')
-            if user_input.lower() == 'y':
-                cmd = ['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']]
-                print(' '.join(cmd))
+            cmd = ['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']]
+            cmd_str = ' '.join(cmd)
+
+            menu = propwareUtils.Menu('In order to write programs to the Propeller\'s hardware, your user needs to be '
+                                      'added to the "dialout" Unix group (root privileges are required). Should I do '
+                                      'this for you or would you like to do it on your own time?')
+            do_it = 'Do it for me now'
+            menu.add_option(do_it, default=True)
+            menu.add_option("I'll do it myself")
+            user_input = menu.prompt()
+            if do_it == user_input:
+                print(cmd_str)
                 subprocess.call(cmd)
+            else:
+                print('You can add yourself to the dialout group at any time by executing the following '
+                      'command:\n\t"%s"' + cmd_str)
 
     def _set_all_environment_variables(self):
         super(DebInstaller, self)._set_all_environment_variables()
@@ -373,7 +381,7 @@ class DebInstaller(NixInstaller):
             menu = propwareUtils.Menu('The PROPWARE_PATH and PROPGCC_PREFIX environment variables must now be set. For '
                                       'use in graphical applications, they must be added to the root environment. For '
                                       'command-line only use, they can be set as user variables. You may also choose '
-                                      'to configure them yourself and to leave these variables for the moment.')
+                                      'to configure them yourself at a later time.')
             menu.add_option('root', default=True)
             menu.add_option('user')
             menu.add_option("I'll configure them myself.")
