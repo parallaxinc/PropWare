@@ -10,16 +10,20 @@ Starting a New Project
    this file can be found in each of the Example projects, but here's the simplest form:
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
    cmake_minimum_required (VERSION 3.0.0)
-   # Aside from cmake_minimum_required, this must be the first line of the file
-   if (NOT DEFINED PROPWARE_PATH)
-       file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)
-   endif ()
+   # Aside from cmake_minimum_required, this must be the first two lines of the file
+   file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)
    set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
-   
+
+   ##############################################
+   # Your code starts here
+
    project(HelloWorld)
-   
+
    add_executable(${PROJECT_NAME} main.cpp)
-   
+
+   # Your code ends here
+   ##############################################
+
    # This must be the last line of the file
    include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
