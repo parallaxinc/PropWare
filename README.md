@@ -7,7 +7,7 @@ Overview
 ### What PropWare IS
 PropWare is a combination of three key pieces:
 * Easy, configurable and fast C++ objects for the Propeller (includes the C Simple 
-  Library from Parallax, libpropeller, and my own PropWare namespace)
+  Library from Parallax, libpropeller by SRLM, and my own PropWare namespace)
 * An easy-to-use and robust build system using CMake (lots of examples for anyone 
   not yet familiar)
 * Thorough documentation regarding both source code and setup

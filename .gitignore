@@ -36,5 +36,3 @@ atlassian-ide-plugin.xml
 
 # Ignore the Simple header files in the root directory
 /*.h
-
-/util/cmakeScrubber.py

@@ -155,16 +155,20 @@ class Installer(object):
     def _build_binaries(self):
         has_make = self._check_for_make()
         if has_make and self._cmake_installed:
-            run_cmake = ['cmake', '-G', 'Unix Makefiles', '.']
+            build_dir = Installer._PROPWARE_ROOT + str(os.sep) + 'bin'
+            if not os.path.exists(build_dir):
+                os.makedirs(build_dir)
+
+            run_cmake = ['cmake', '-G', 'Unix Makefiles', Installer._PROPWARE_ROOT]
             print(' '.join(run_cmake))
-            if 0 != subprocess.call(run_cmake, cwd=Installer._PROPWARE_ROOT):
+            if 0 != subprocess.call(run_cmake, cwd=build_dir):
                 raise CMakeFailedException()
 
             # Dependency scanning isn't perfect. Seems to fail with 8 threads, so let's limit it to 4
             cpu_count = 4 if multiprocessing.cpu_count() > 4 else multiprocessing.cpu_count()
             run_make = ['make', '-j%d' % cpu_count]
             print(' '.join(run_make))
-            subprocess.call(run_make, cwd=Installer._PROPWARE_ROOT)
+            subprocess.call(run_make, cwd=build_dir)
         else:
             if not has_make:
                 missing_dependency = 'Make'
@@ -183,7 +187,7 @@ class Installer(object):
         existing_cmake_bin = propwareUtils.which('cmake')
         if existing_cmake_bin:
             if 2 >= self._check_cmake_version(existing_cmake_bin)[0]:
-                print('An existing version of CMake (version 2.x or older) has been detected. PropWare requires CMake'
+                print('An existing version of CMake (version 2.x or older) has been detected. PropWare requires CMake '
                       '3.x or higher - a new version will be installed.')
                 download_new_cmake = True
             else:
@@ -372,7 +376,7 @@ class DebInstaller(NixInstaller):
                 subprocess.call(cmd)
             else:
                 print('You can add yourself to the dialout group at any time by executing the following '
-                      'command:\n\t"%s"' + cmd_str)
+                      'command:\n\t' + cmd_str)
 
     def _set_all_environment_variables(self):
         super(DebInstaller, self)._set_all_environment_variables()
