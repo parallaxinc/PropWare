@@ -101,7 +101,7 @@ class Installer(object):
     def install(self):
         self._confirm_dependencies()
 
-        self._add_to_path()
+        self._set_all_environment_variables()
 
         self._import_propware()  # Download Simple and libpropeller
 
@@ -141,7 +141,8 @@ class Installer(object):
     def _warn_make_instructions(self):
         pass
 
-    def _add_to_path(self):
+    @abstractmethod
+    def _set_all_environment_variables(self):
         cmake_bin = self._cmake_path + str(os.sep) + 'bin'
         propgcc_bin = self._propgcc_path + str(os.sep) + 'bin'
 
@@ -291,6 +292,10 @@ class NixInstaller(Installer):
             return None
 
     @abstractmethod
+    def _set_all_environment_variables(self):
+        super(NixInstaller, self)._set_all_environment_variables()
+
+    @abstractmethod
     def _warn_make_instructions(self):
         super(NixInstaller, self)._warn_make_instructions()
 
@@ -361,8 +366,8 @@ class DebInstaller(NixInstaller):
                 print(' '.join(cmd))
                 subprocess.call(cmd)
 
-    def _add_to_path(self):
-        super(DebInstaller, self)._add_to_path()
+    def _set_all_environment_variables(self):
+        super(DebInstaller, self)._set_all_environment_variables()
 
         if 'PROPGCC_PREFIX' not in os.environ or 'PROPWARE_PATH' not in os.environ:
             print('Environment variables will now be configured for the root environment.')
@@ -419,9 +424,9 @@ class MacInstaller(NixInstaller):
         print('WARNING: Make was not detected on your system. You can install it by following these instructions:\n\t'
               'http://stackoverflow.com/a/6767528', file=sys.stderr)
 
-    def _add_to_path(self):
-        super(MacInstaller, self)._add_to_path()
-        # TODO: Set Mac environment variables
+    def _set_all_environment_variables(self):
+        super(MacInstaller, self)._set_all_environment_variables()
+        # TODO: set PROPWARE_PATH and PROPGCC_PREFIX on Mac
 
     @classmethod
     def _add_root_env_var(cls, key, value):
@@ -476,6 +481,12 @@ class WinInstaller(Installer):
         # NOTE: DO NOT call the super() method. We DO NOT want to do anything on a Windows machine when this method is
         # called
         return True
+
+    def _set_all_environment_variables(self):
+        super(WinInstaller, self)._set_all_environment_variables()
+
+        self._set_env_var('PROPGCC_PREFIX', self._propgcc_path)
+        self._set_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
 
 
 if '__main__' == __name__:
