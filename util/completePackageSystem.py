@@ -10,6 +10,7 @@
 
 from __future__ import print_function
 import argparse
+import inspect
 import os
 import shutil
 import tempfile
@@ -151,9 +152,9 @@ def run(binary_creator, branch):
     assert (isinstance(binary_creator, createBinaryDistr.CreateBinaryDistr))
     assert (isinstance(branch, str))
 
-    try:
+    if 2 == len(inspect.getargspec(binary_creator.runInBranch).args):
         binary_creator.runInBranch(branch)
-    except TypeError:
+    else:
         # noinspection PyArgumentList
         binary_creator.runInBranch(branch, branch in newestBinaryCreator.TAGS)
 

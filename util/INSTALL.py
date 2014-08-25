@@ -267,7 +267,14 @@ class Installer(object):
     @classmethod
     @abstractmethod
     def _add_root_env_var(cls, key, value):
-        pass
+        assert (isinstance(key, str))
+        assert (isinstance(value, str))
+
+        # Don't overwrite the PATH variable!!!
+        if 'PATH' == key.upper():
+            os.environ[key] = value + os.pathsep + os.environ[key]
+        else:
+            os.environ[key] = value
 
     @classmethod
     def _check_cmake_version(cls, cmake_exe):
@@ -429,9 +436,11 @@ class DebInstaller(NixInstaller):
         super(DebInstaller, cls)._add_root_env_var(key, value)
 
         if key not in os.environ:
-            env_cmd = 'sudo echo "%s=%s" >> /etc/environment' % (key, value)
-            print(env_cmd)
-            subprocess.call(env_cmd, shell=True)
+            # Don't know why we can't use shell=True option here, but it was failing for some reason
+            env_cmd = 'echo "%s=%s" >> /etc/environment' % (key, value)
+            cmd = ['sudo', 'sh', '-c', env_cmd]
+            print(' '.join(cmd))
+            subprocess.call(cmd)
 
 
 class MacInstaller(NixInstaller):
