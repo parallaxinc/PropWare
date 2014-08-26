@@ -302,9 +302,31 @@ class NixInstaller(Installer):
         else:
             return None
 
-    @abstractmethod
     def _set_all_environment_variables(self):
         super(NixInstaller, self)._set_all_environment_variables()
+
+        if 'PROPGCC_PREFIX' not in os.environ or 'PROPWARE_PATH' not in os.environ:
+            menu = propwareUtils.Menu('The PROPWARE_PATH and PROPGCC_PREFIX environment variables must now be set. For '
+                                      'use in graphical applications, they must be added to the root environment. For '
+                                      'command-line only use, they can be set as user variables. You may also choose '
+                                      'to configure them yourself at a later time.')
+            menu.add_option('root', default=True)
+            menu.add_option('user')
+            menu.add_option("I'll configure them myself.")
+            usr_input = menu.prompt()
+
+            if 'root' == usr_input:
+                self._add_root_env_var('PROPGCC_PREFIX', self._propgcc_path)
+                self._add_root_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
+            elif 'user' == usr_input:
+                self._set_env_var('PROPGCC_PREFIX', self._propgcc_path)
+                self._set_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
+            else:
+                print('You have selected to configure the following environment variables for yourself:')
+                if 'PROPGCC_PREFIX' not in os.environ:
+                    print('\tPlease set PROPGCC_PREFIX to "%s"' % self._propgcc_path)
+                if 'PROPWARE_PATH' not in os.environ:
+                    print('\tPlease set PROPWARE_PATH to "%s"' % Installer._PROPWARE_ROOT)
 
     @abstractmethod
     def _warn_make_instructions(self):
@@ -385,32 +407,6 @@ class DebInstaller(NixInstaller):
                 print('You can add yourself to the dialout group at any time by executing the following '
                       'command:\n\t' + cmd_str)
 
-    def _set_all_environment_variables(self):
-        super(DebInstaller, self)._set_all_environment_variables()
-
-        if 'PROPGCC_PREFIX' not in os.environ or 'PROPWARE_PATH' not in os.environ:
-            menu = propwareUtils.Menu('The PROPWARE_PATH and PROPGCC_PREFIX environment variables must now be set. For '
-                                      'use in graphical applications, they must be added to the root environment. For '
-                                      'command-line only use, they can be set as user variables. You may also choose '
-                                      'to configure them yourself at a later time.')
-            menu.add_option('root', default=True)
-            menu.add_option('user')
-            menu.add_option("I'll configure them myself.")
-            usr_input = menu.prompt()
-
-            if 'root' == usr_input:
-                self._add_root_env_var('PROPGCC_PREFIX', self._propgcc_path)
-                self._add_root_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
-            elif 'user' == usr_input:
-                self._set_env_var('PROPGCC_PREFIX', self._propgcc_path)
-                self._set_env_var('PROPWARE_PATH', Installer._PROPWARE_ROOT)
-            else:
-                print('You have selected to configure the following environment variables for yourself:')
-                if 'PROPGCC_PREFIX' not in os.environ:
-                    print('\tPlease set PROPGCC_PREFIX to "%s"' % self._propgcc_path)
-                if 'PROPWARE_PATH' not in os.environ:
-                    print('\tPlease set PROPWARE_PATH to "%s"' % Installer._PROPWARE_ROOT)
-
     def _check_for_make(self):
         if None == propwareUtils.which('make'):
             cmd = ['sudo', 'apt-get', 'install', 'make']
@@ -454,17 +450,13 @@ class MacInstaller(NixInstaller):
         print('WARNING: Make was not detected on your system. You can install it by following these instructions:\n\t'
               'http://stackoverflow.com/a/6767528', file=sys.stderr)
 
-    def _set_all_environment_variables(self):
-        super(MacInstaller, self)._set_all_environment_variables()
-        # TODO: set PROPWARE_PATH and PROPGCC_PREFIX on Mac
-
     @classmethod
     def _add_root_env_var(cls, key, value):
         super(MacInstaller, cls)._add_root_env_var(key, value)
 
         # TODO: Don't be a jerk. Figure out how to add root environment variables to Macs
         print("Uh oh! You need to add a root environment variable and I haven't figured out how yet! You should "
-              "Google that.... Sorry. You need: %s=%s" % (key, value))
+              "Google that.... Sorry. You need: %s=%s" % (key, value), file=sys.stderr)
 
 
 class WinInstaller(Installer):

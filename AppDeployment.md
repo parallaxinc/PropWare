@@ -7,7 +7,8 @@ deploying a PropGCC application using PropWare.
 Starting a New Project
 ----------------------
 1. The defining piece of a PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
-   standards. Examples of this file can be found in each of the Example projects, but here's the simplest form:
+   standards. Full details on CMake files in relation to PropWare can be found on the 
+   [CMake For PropWare](./md_CMakeForPropware.html) page, but a typical use case is provided below.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
    #############################################################################
    ### Template code. Do not modify                                            #
@@ -19,9 +20,18 @@ Starting a New Project
    set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)         #
    #############################################################################
 
-   project(HelloWorld)
+   set(BOARD QUICKSTART)
+   set(MODEL cmm)
+   set(COMMON_FLAGS "-Os")
+   set(ECOGC_FLAGS "--bogus")
+   
+   project(Quadcopter C CXX ASM ECOGC)
 
-   add_executable(${PROJECT_NAME} main.cpp)
+   add_executable(${PROJECT_NAME} 
+       ${PROJECT_NAME}
+       motor_drivers
+       avionics.S
+       rf_transceiver.ecogc)
 
    #############################################################################
    ### Template code. Do not modify                                            #
@@ -30,15 +40,6 @@ Starting a New Project
    include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                        #
    #############################################################################
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * Note the two sections marked as "Template code." Make sure these two pieces begin and end each of your
-     CMakeLists.txt files. They load the standard Propeller settings for your project.
-   * Next we name our project: `project(HelloWorld)`. This name can be anything you'd like so long as there is no 
-     whitespace.
-   * Finally, we need to tell CMake what files should be compiled: `add_executable(${PROJECT_NAME} main.cpp)`.
-     The first parameter _must_ be exactly as you see it - PropWare's build system relies on your executable being named
-     the same as your project. Next, simply list off each of your source files (separated by whitespace).
-   * There is LOTS more information about creating CMakeLists.txt files for PropWare projects on the [CMakeLists.txt 
-     Files for PropWare](./md_CMakeListsForPropware.html) page.
 2. Write your source code.
 3. At the terminal, enter your project's directory. Type `cmake -G "Unix Makefiles" .`. This will generate a Makefile
    for you.

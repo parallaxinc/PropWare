@@ -37,7 +37,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
 if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     if (DEFINED BOARD)
         set(BOARDFLAG -b${BOARD})
-    endif(DEFINED BOARD)
+    endif()
 
     # Add target for run (load to RAM and start terminal)
     add_custom_target(debug
@@ -48,4 +48,4 @@ if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     add_custom_target(run
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -e
             DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
-ENDIF(NOT DEFINED PROPWARE_MAIN_PACKAGE)
+endif()

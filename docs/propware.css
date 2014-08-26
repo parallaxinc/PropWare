@@ -4,3 +4,7 @@ code {
     border-radius: 3px;
     padding: 0.2em 0.5em 0.2em 0.5em;
 }
+
+h3 {
+    font-size: 1.05em;
+}
