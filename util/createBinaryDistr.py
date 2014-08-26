@@ -9,6 +9,7 @@
 """
 
 from __future__ import print_function
+import multiprocessing
 import sys
 import os
 from glob import glob
@@ -21,7 +22,7 @@ import argparse
 import propwareUtils
 
 
-class CreateBinaryDistr:
+class CreateBinaryDistr(object):
     PROPWARE_ROOT = ""
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     WHITELISTED_FILES = ["CMakeLists.txt", "Doxyfile", "README", "run_all_tests", "run_unit"]
@@ -29,28 +30,28 @@ class CreateBinaryDistr:
                             "pdf", "png"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
-    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3"]
+    TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3", "v2.0-beta4"]
     CURRENT_SUGGESTION = "release-2.0"
-    MAKE_COMPILE = ["make", "-j4", "--silent"]
-    CMAKE_GENERATE_MAKEFILES = ["cmake", "."]
+    MAKE_COMPILE = ["make", "-j%d" % (multiprocessing.cpu_count() if 4 >= multiprocessing.cpu_count() else 4),
+                    "--silent"]
     MAKE_CLEAN_FAILED_CODE = 2
     CMAKE_GENERATE_FAILED_CODE = 1
 
-    def __init__(self, propWareRoot=None):
+    def __init__(self, propware_root=None):
         self.successes = []
         self.currentBranch = ""
 
         # Get the current path and truncate "/util" from the end (therefore resulting in PropWare's root)
-        if None == propWareRoot:
-            propwareUtils.checkProperWorkingDirectory()
+        if None == propware_root:
+            propwareUtils.check_proper_working_dir()
             CreateBinaryDistr.PROPWARE_ROOT = os.getcwd()[:-5]
 
             # The remainder of this script needs to be run from the PropWare root directory
             os.chdir("..")
         else:
-            CreateBinaryDistr.PROPWARE_ROOT = propWareRoot
+            CreateBinaryDistr.PROPWARE_ROOT = propware_root
 
-        CreateBinaryDistr.cleanOldArchives()
+        CreateBinaryDistr._clean_old_archives()
 
     # noinspection PyShadowingNames
     def run(self, branches):
@@ -61,94 +62,100 @@ class CreateBinaryDistr:
 
         try:
             # Let's start by cleaning some stuff up if possible
-            CreateBinaryDistr.clean()
-            CreateBinaryDistr.cleanUntracked()
+            CreateBinaryDistr._clean()
+            CreateBinaryDistr._clean_untracked()
 
             for branch in branches:
                 self.runInBranch(branch)
         finally:
-            CreateBinaryDistr.attemptCleanExit()
+            CreateBinaryDistr._attempt_clean_exit()
 
-        self.printSummary(branches)
+        self._print_summary(branches)
 
     def runInBranch(self, branch):
         # Here for debugging purposes only
         self.currentBranch = branch
 
         # Attempt to checkout the next branch
-        if 0 == CreateBinaryDistr.checkout(branch):
-            if CreateBinaryDistr.isBranchWithImporter():
+        if 0 == CreateBinaryDistr._checkout(branch):
+            if CreateBinaryDistr._is_branch_with_importer():
                 os.chdir("util")
                 from propwareImporter import importAll
                 importAll()
                 os.chdir("..")
 
             # Compile the static libraries and example projects
-            CreateBinaryDistr.compile()
+            CreateBinaryDistr._compile()
 
             # Generate the archive file name
-            archiveName = CreateBinaryDistr.ARCHIVE_FILE_NAME % branch
-            with ZipFile(archiveName, 'w') as archive:
-                # Add all whitelisted files (see CreateBinaryDistr.isWhitelisted() ) so long as they are not within a
+            archive_name = CreateBinaryDistr.ARCHIVE_FILE_NAME % branch
+            with ZipFile(archive_name, 'w') as archive:
+                # Add all whitelisted files (see CreateBinaryDistr._is_whitelisted() ) so long as they are not within a
                 # blacklisted directory
                 for root, dirs, files in os.walk(CreateBinaryDistr.PROPWARE_ROOT):
                     # First, determine whether or not the directory we are iterating over is blacklisted...
-                    rootList = root.split('/')
+                    root_list = root.split('/')
                     try:
                         # Currently, the only blacklisted directories are direct children of the PropWare root
-                        isBlacklisted = rootList[1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
+                        is_blacklisted = root_list[1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
                     except IndexError:
-                        # Obviously, if rootList[1] throws an error, we aren't looking at a blacklisted directory
-                        isBlacklisted = False
+                        # Obviously, if root_list[1] throws an error, we aren't looking at a blacklisted directory
+                        is_blacklisted = False
 
                     # Finally, check each file within the directory and see if it is whitelisted
-                    if not isBlacklisted:
-                        for file in files:
-                            if self.isWhitelisted(file):
-                                archive.write(root + '/' + file)
+                    if not is_blacklisted:
+                        for f in files:
+                            if self._is_whitelisted(f):
+                                archive.write(root + '/' + f)
 
             self.successes.append(branch)
             if CreateBinaryDistr.CURRENT_SUGGESTION == branch:
                 self.successes.append("current")
-                copy2(archiveName, CreateBinaryDistr.ARCHIVE_FILE_NAME % "current")
+                copy2(archive_name, CreateBinaryDistr.ARCHIVE_FILE_NAME % "current")
 
         # Clean again. Cleaning is good. You should clean your house more often too!
-        CreateBinaryDistr.clean()
+        CreateBinaryDistr._clean()
 
     @staticmethod
-    def cleanOldArchives():
+    def _clean_old_archives():
         files = glob("./PropWare_*.zip")
         for f in files:
             os.remove(f)
 
     @staticmethod
-    def clean():
+    def _clean():
         with open(os.devnull, 'w') as devnull:
-            if CreateBinaryDistr.isCMakeBranch():
-                # Try to generate the Make files so that we can clean stuff up...
-                subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, stdout=devnull, stderr=devnull,
-                                cwd=CreateBinaryDistr.PROPWARE_ROOT)
+            if CreateBinaryDistr._is_cmake_branch():
+                build_dir = CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + 'bin'
+                if os.path.exists(build_dir):
+                    # Try to generate the Make files so that we can clean stuff up...
+                    subprocess.call(['cmake', CreateBinaryDistr.PROPWARE_ROOT], stdout=devnull, stderr=devnull,
+                                    cwd=build_dir)
+            else:
+                build_dir = CreateBinaryDistr.PROPWARE_ROOT
 
-            subprocess.call(["make", "clean", "--silent"], stderr=devnull, cwd=CreateBinaryDistr.PROPWARE_ROOT)
-            sys.stdout.flush()
+            if os.path.exists(build_dir):
+                subprocess.call(["make", "clean", "--silent"], stderr=devnull, cwd=build_dir)
+                sys.stdout.flush()
 
-            # Not all branches have the simple_clean target, so it's no big deal if it fails
-            try:
-                subprocess.check_output(["make", "simple_clean", "--silent"], stderr=devnull,
-                                        cwd=CreateBinaryDistr.PROPWARE_ROOT)
-            except subprocess.CalledProcessError as e:
-                if CreateBinaryDistr.MAKE_CLEAN_FAILED_CODE != e.returncode:
-                    raise e
+                # Not all branches have the simple_clean target, so it's no big deal if it fails
+                try:
+                    subprocess.check_output(["make", "simple_clean", "--silent"], stderr=devnull, cwd=build_dir)
+                except subprocess.CalledProcessError as e:
+                    if CreateBinaryDistr.MAKE_CLEAN_FAILED_CODE != e.returncode:
+                        raise e
 
     @staticmethod
-    def cleanUntracked():
+    def _clean_untracked():
         # If we've made it this far without failure, then clean all untracked files (leftovers from the previous branch)
         subprocess.call(["git", "clean", "-fxd", "-ePropWare*.zip", "-e*.pyc"], cwd=CreateBinaryDistr.PROPWARE_ROOT)
 
     @staticmethod
-    def checkout(branch):
+    def _checkout(branch):
+        assert (isinstance(branch, str))
+
         try:
-            CreateBinaryDistr.cleanUntracked()
+            CreateBinaryDistr._clean_untracked()
             sys.stdout.flush()
             subprocess.check_output(["git", "checkout", branch])
         except subprocess.CalledProcessError:
@@ -169,23 +176,28 @@ class CreateBinaryDistr:
         return 0
 
     @staticmethod
-    def compile():
+    def _compile():
         # Determine if Makefile or CMake branch
-        if CreateBinaryDistr.isCMakeBranch():
-            if 0 != subprocess.call(CreateBinaryDistr.CMAKE_GENERATE_MAKEFILES, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+        if CreateBinaryDistr._is_cmake_branch():
+            build_dir = CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + 'bin'
+            if not os.path.exists(build_dir):
+                os.makedirs(build_dir)
+            if 0 != subprocess.call(['cmake', CreateBinaryDistr.PROPWARE_ROOT], cwd=build_dir):
                 sys.stdout.flush()
                 raise MakeErrorException()
+        else:
+            build_dir = CreateBinaryDistr.PROPWARE_ROOT
 
         sys.stdout.flush()
 
-        if 0 != subprocess.call(CreateBinaryDistr.MAKE_COMPILE, cwd=CreateBinaryDistr.PROPWARE_ROOT):
+        if 0 != subprocess.call(CreateBinaryDistr.MAKE_COMPILE, cwd=build_dir):
             sys.stdout.flush()
             raise MakeErrorException()
 
         sys.stdout.flush()
 
     @staticmethod
-    def isWhitelisted(filename):
+    def _is_whitelisted(filename):
         if filename in CreateBinaryDistr.WHITELISTED_FILES:
             return True
         else:
@@ -197,12 +209,12 @@ class CreateBinaryDistr:
         return False
 
     @staticmethod
-    def attemptCleanExit():
+    def _attempt_clean_exit():
         print("[INFO] !!!Attempting clean exit!!!")
         sys.stdout.flush()
 
         try:
-            CreateBinaryDistr.cleanUntracked()
+            CreateBinaryDistr._clean_untracked()
             subprocess.check_output(["git", "checkout", CreateBinaryDistr.CURRENT_SUGGESTION])
         except subprocess.CalledProcessError as e:
             print("Failed to return git repository to 'current' branch", file=sys.stderr)
@@ -210,15 +222,16 @@ class CreateBinaryDistr:
             print(e.output.decode(), file=sys.stderr)
 
     @staticmethod
-    def isCMakeBranch():
-        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "CMakeLists.txt")
+    def _is_cmake_branch():
+        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + "CMakeLists.txt")
 
     @staticmethod
-    def isBranchWithImporter():
-        return os.path.exists(CreateBinaryDistr.PROPWARE_ROOT + os.sep + "util" + os.sep + "propwareImporter.py")
+    def _is_branch_with_importer():
+        return os.path.exists(
+            CreateBinaryDistr.PROPWARE_ROOT + str(os.sep) + "util" + str(os.sep) + "propwareImporter.py")
 
     # noinspection PyShadowingNames
-    def printSummary(self, branches):
+    def _print_summary(self, branches):
         # Let the stdout and stderr buffers catch up
         sleep(1)
 
@@ -239,7 +252,7 @@ class MakeErrorException(Exception):
         return "Make failed to finish executing"
 
 
-def parseArgs():
+def parse_args():
     parser = argparse.ArgumentParser(description="Create binary distributions of all branches (and optionally tags too)"
                                                  " of PropWare")
     parser.add_argument("--tags", action="store_true",
@@ -248,7 +261,7 @@ def parseArgs():
 
 
 if "__main__" == __name__:
-    args = parseArgs()
+    args = parse_args()
 
     branches = CreateBinaryDistr.BRANCHES
     if args.tags:

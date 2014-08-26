@@ -26,58 +26,58 @@ class ImportSimple:
         self.sourceFiles = []
 
     def run(self):
-        propwareUtils.checkProperWorkingDirectory()
+        propwareUtils.check_proper_working_dir()
 
-        ImportSimple.clean()
+        ImportSimple._clean()
 
-        libraryPath = self.downloadLearn()
+        library_path = self._download_learn()
 
-        self.getLibraries(libraryPath)
+        self._get_libraries(library_path)
 
         # Process every library that was found
         for library in self.libraries.keys():
-            self.processLibrary(library)
+            self._process_library(library)
 
-        # Create a one-line makefile that lists all objects to be compiled into the Simple library
-        self.makeObjectList()
+        # Create a one-line CMake file that lists all objects to be compiled into the Simple library
+        self._make_obj_list()
 
-    def getLibraries(self, learnRoot):
+    def _get_libraries(self, learn_root):
         # Get a map of all the libraries
-        for category in os.listdir(learnRoot):
-            if os.path.isdir(learnRoot + category):
-                for subDir in os.listdir(learnRoot + category):
-                    if os.path.isdir(learnRoot + category + os.sep + subDir):
-                        self.libraries[subDir[3:]] = learnRoot + category + os.sep + subDir
+        for category in os.listdir(learn_root):
+            if os.path.isdir(learn_root + category):
+                for subDir in os.listdir(learn_root + category):
+                    if os.path.isdir(learn_root + category + os.sep + subDir):
+                        self.libraries[subDir[3:]] = learn_root + category + os.sep + subDir
 
         # Manually add the libsimpletools source folder
-        self.libraries['__simpletools'] = learnRoot + "Utility" + os.sep + "libsimpletools" + os.sep + "source"
+        self.libraries['__simpletools'] = learn_root + "Utility" + os.sep + "libsimpletools" + os.sep + "source"
 
-    def processLibrary(self, library):
-        libraryDirectory = self.libraries[library] + os.sep
+    def _process_library(self, library):
+        library_directory = self.libraries[library] + os.sep
 
-        demoFiles = ImportSimple.getDemoFileNames(library)
+        demo_files = ImportSimple._get_demo_file_names(library)
 
         # Copy all source and header files into PropWare's cheater directory
-        for dirEntry in os.listdir(libraryDirectory):
+        for dir_entry in os.listdir(library_directory):
             # Don't copy the demo files
-            if dirEntry not in demoFiles:
-                if propwareUtils.isSourceFile(dirEntry):
-                    copy2(libraryDirectory + dirEntry, ImportSimple.CHEATER_DIR)
+            if dir_entry not in demo_files:
+                if propwareUtils.is_src_file(dir_entry):
+                    copy2(library_directory + dir_entry, ImportSimple.CHEATER_DIR)
 
                     # Keep track of all the source files so we can make an object list later
-                    self.sourceFiles.append(dirEntry)
+                    self.sourceFiles.append(dir_entry)
 
-                elif propwareUtils.isHeaderFile(dirEntry):
-                    copy2(libraryDirectory + dirEntry, ImportSimple.PROPWARE_ROOT)
+                elif propwareUtils.is_header_file(dir_entry):
+                    copy2(library_directory + dir_entry, ImportSimple.PROPWARE_ROOT)
 
             # Copy over the crazy stuff like pre-compiled spin/pasm files
-            if dirEntry in propwareUtils.MEMORY_MODELS:
-                absDirEntry = libraryDirectory + dirEntry
-                for wtf in os.listdir(absDirEntry):
+            if dir_entry in propwareUtils.MEMORY_MODELS:
+                abs_dir_entry = library_directory + dir_entry
+                for wtf in os.listdir(abs_dir_entry):
                     if wtf.endswith(".dat") and wtf not in os.listdir(ImportSimple.CHEATER_DIR):
-                        copy2(absDirEntry + os.sep + wtf, ImportSimple.CHEATER_DIR)
+                        copy2(abs_dir_entry + os.sep + wtf, ImportSimple.CHEATER_DIR)
 
-    def makeObjectList(self):
+    def _make_obj_list(self):
         # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run
         # in any guaranteed order)
         self.sourceFiles.sort()
@@ -88,45 +88,45 @@ class ImportSimple:
             f.write(')')
 
     @staticmethod
-    def downloadLearn():
-        propwareUtils.initDownloadsFolder(ImportSimple.PROPWARE_ROOT)
+    def _download_learn():
+        propwareUtils.init_downloads_folder(ImportSimple.PROPWARE_ROOT)
 
-        zipFileName = propwareUtils.downloadFile(ImportSimple.getDownloadLink(),
-                                                 ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)[0]
-        propwareUtils.extract(zipFileName, ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
+        zip_file_name = propwareUtils.download_file(ImportSimple._get_download_link(),
+                                                    ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)[0]
+        propwareUtils.extract(zip_file_name, ImportSimple.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY)
 
         return ImportSimple.LEARN_PATH + "Simple Libraries" + os.sep
 
     @staticmethod
-    def clean():
-        rmList = []
+    def _clean():
+        rm_list = []
         for fileName in os.listdir(ImportSimple.PROPWARE_ROOT):
             if ".h" == fileName[-2:]:
-                rmList.append(ImportSimple.PROPWARE_ROOT + fileName)
+                rm_list.append(ImportSimple.PROPWARE_ROOT + fileName)
 
         for fileName in os.listdir(ImportSimple.CHEATER_DIR):
-            if propwareUtils.isSourceFile(fileName):
-                rmList.append(ImportSimple.CHEATER_DIR + fileName)
+            if propwareUtils.is_src_file(fileName):
+                rm_list.append(ImportSimple.CHEATER_DIR + fileName)
 
-        for fileName in rmList:
+        for fileName in rm_list:
             os.remove(fileName)
 
-        destroyMe = ImportSimple.CHEATER_DIR + os.sep + "CMakeFiles"
-        if os.path.exists(destroyMe):
-            rmtree(destroyMe)
+        destroy_me = ImportSimple.CHEATER_DIR + os.sep + "CMakeFiles"
+        if os.path.exists(destroy_me):
+            rmtree(destroy_me)
 
         if os.path.exists(ImportSimple.LEARN_PATH):
             rmtree(ImportSimple.LEARN_PATH)
 
     @staticmethod
-    def getDemoFileNames(library):
+    def _get_demo_file_names(library):
         names = []
         for ext in [".c", ".h"]:
             names.append("lib" + library + ext)
         return names
 
     @staticmethod
-    def getDownloadLink():
+    def _get_download_link():
         return ImportSimple.LEARN_DOWNLOAD_LINK
 
 

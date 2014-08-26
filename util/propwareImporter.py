@@ -12,19 +12,20 @@ __author__ = 'david'
 import propwareUtils
 
 
+# noinspection PyPep8Naming
 def importAll():
     from importLibpropeller import ImportLibpropeller
     from importSimple import ImportSimple
 
-    propwareUtils.checkProperWorkingDirectory()
+    propwareUtils.check_proper_working_dir()
 
     # Import libpropeller
-    libpropellerImporter = ImportLibpropeller()
-    libpropellerImporter.run()
+    libpropeller_importer = ImportLibpropeller()
+    libpropeller_importer.run()
 
     #import simple libraries
-    simpleImporter = ImportSimple()
-    simpleImporter.run()
+    simple_importer = ImportSimple()
+    simple_importer.run()
 
 if "__main__" == __name__:
     importAll()

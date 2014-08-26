@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 3.0.0)
 
-if (NOT DEFINED PROPWARE_PATH)
-    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
-endif (NOT DEFINED PROPWARE_PATH)
+file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)
 set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
 
 set(BOARD QUICKSTART)
@@ -13,5 +11,5 @@ set(CXX_FLAGS )
 
 project(SimpleText_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME}.c)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME})
 include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)

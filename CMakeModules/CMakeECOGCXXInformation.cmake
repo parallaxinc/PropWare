@@ -4,7 +4,7 @@
 # It also loads a system - compiler - processor (or target hardware)
 # specific file, which is mainly useful for crosscompiling and embedded systems.
 
-set(CMAKE_ECOGCXX_OUTPUT_EXTENSION .ecogxx)
+set(CMAKE_ECOGCXX_OUTPUT_EXTENSION .ecog)
 
 set(_INCLUDED_FILE 0)
 
@@ -40,10 +40,10 @@ if(NOT CMAKE_MODULE_EXISTS)
 endif()
 
 # avoid just having a space as the initial value for the cache
-if(CMAKE_C_FLAGS_INIT STREQUAL " ")
-  set(CMAKE_C_FLAGS_INIT)
+if(CMAKE_CXX_FLAGS_INIT STREQUAL " ")
+  set(CMAKE_CXX_FLAGS_INIT)
 endif()
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
+set (CMAKE_ECOGCXX_FLAGS "${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
 
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
@@ -52,20 +52,20 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
     set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
       "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
   endif()
-  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
+  set (CMAKE_ECOGCXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
     "Flags used by the compiler during debug builds.")
-  set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
+  set (CMAKE_ECOGCXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING
     "Flags used by the compiler during release builds for minimum size.")
-  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING
+  set (CMAKE_ECOGCXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
     "Flags used by the compiler during release builds.")
-  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
+  set (CMAKE_ECOGCXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
     "Flags used by the compiler during release builds with debug info.")
 endif()
 
-if(CMAKE_C_STANDARD_LIBRARIES_INIT)
-  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES_INIT}"
-    CACHE STRING "Libraries linked by default with all C applications.")
-  mark_as_advanced(CMAKE_C_STANDARD_LIBRARIES)
+if(CMAKE_CXX_STANDARD_LIBRARIES_INIT)
+  set(CMAKE_ECOGCXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES_INIT}"
+    CACHE STRING "Libraries linked by default with all C++ applications.")
+  mark_as_advanced(CMAKE_ECOGCXX_STANDARD_LIBRARIES)
 endif()
 
 include(CMakeCommonLanguageInclude)
@@ -103,7 +103,14 @@ set(CMAKE_ECOGCXX_ARCHIVE_APPEND ${CMAKE_C_ARCHIVE_APPEND})
 set(CMAKE_ECOGCXX_ARCHIVE_FINISH ${CMAKE_C_ARCHIVE_FINISH})
 set(CMAKE_ECOGCXX_COMPILE_OBJECT
 "<CMAKE_C_COMPILER> <DEFINES> ${CMAKE_ECOGCXX_FLAGS_INIT} <FLAGS> -o <OBJECT> -c <SOURCE>"
-"<CMAKE_OBJCOPY> --localize-text --rename-section .text=<OBJECT> <OBJECT>")
+"${CMAKE_OBJCOPY} --localize-text --rename-section .text=<OBJECT> <OBJECT>")
 
+mark_as_advanced(
+CMAKE_ECOGCXX_FLAGS
+CMAKE_ECOGCXX_FLAGS_DEBUG
+CMAKE_ECOGCXX_FLAGS_MINSIZEREL
+CMAKE_ECOGCXX_FLAGS_RELEASE
+CMAKE_ECOGCXX_FLAGS_RELWITHDEBINFO
+)
 set(CMAKE_ECOGCXX_INFORMATION_LOADED 1)
 

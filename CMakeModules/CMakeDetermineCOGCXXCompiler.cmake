@@ -97,7 +97,7 @@ endif ()
 #include(CMakeFindBinUtils)
 
 # configure all variables set in this file
-configure_file(${CMAKE_ROOT}/Modules/CMakeCOGCXXCompiler.cmake.in
+configure_file(${PROPWARE_PATH}/CMakeModules/CMakeCOGCXXCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCOGCXXCompiler.cmake
   @ONLY
   )

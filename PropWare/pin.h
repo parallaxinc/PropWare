@@ -189,7 +189,7 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @Brief   Compare the pin mask of two pin objects. Does not compare
+         * @brief   Compare the pin mask of two pin objects. Does not compare
          *          I/O direction
          */
         bool operator== (const PropWare::Pin &rhs) {

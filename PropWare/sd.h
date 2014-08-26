@@ -550,6 +550,7 @@ class SD {
          * @param[in]   *f      Address where file information (such as the
          *                      first allocation unit) can be stored. Opening
          *                      multiple files simultaneously is allowed.
+         * @param[in]   *mode   Determine file mode (such as read or write)
          *
          * @return      Returns 0 upon success, error code otherwise; Look for
          *              PropWare::SD::
@@ -1127,8 +1128,6 @@ class SD {
          * @note        TODO: Implement *abspath when SDGetSectorFromPath() is
          *              functional
          *
-         * @param[in]   *absPath    Absolute path of the directory to be printed
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode shell_ls () {
@@ -1199,7 +1198,8 @@ class SD {
          *
          * @note        Does not currently follow paths
          *
-         * @param[in]   *f  Short filename of file to print
+         * @param[in]   *name   Name of the file to open
+         * @param[in]   *f      File object that can be used to open *name
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -1297,9 +1297,7 @@ class SD {
         /**
          * @brief   Create a human-readable error string
          *
-         * @param[in]   err         Error number used to determine error string
-         * @param[out]  errorStr    Allocated space where a string of no more
-         *                          than 128 characters can be printed
+         * @param[in]   err     Error number used to determine error string
          */
         void print_error_str (const SD::ErrorCode err) const {
             const char str[] = "SD Error %u: %s\n";
@@ -1839,10 +1837,10 @@ class SD {
         /**
          * @brief       Send a command and argument over SPI to the SD card
          *
-         * @param[in]   command     6-bit value representing the command sent to
-         *                          the SD card
-         * @param[in]   arg         Any argument applicable to the command
-         * @param[in]   crc         CRC for the command and argument
+         * @param[in]   cmd     6-bit value representing the command sent to the
+         *                      SD card
+         * @param[in]   arg     Any argument applicable to the command
+         * @param[in]   crc     CRC for the command and argument
          *
          * @return      Returns 0 for success, else error code
          */
@@ -1866,9 +1864,9 @@ class SD {
         /**
          * @brief       receive response and data from SD card over SPI
          *
-         * @param[in]   bytes   Number of bytes to receive
-         * @param[out]  *data   Location in memory with enough space to store
-         *                      `bytes` bytes of data
+         * @param[in]   numBytes    Number of bytes to receive
+         * @param[out]  *dat        Location in memory with enough space to 
+         *                          store `bytes` bytes of data
          *
          * @return      Returns 0 for success, else error code
          */
@@ -1917,7 +1915,7 @@ class SD {
          * @brief       Receive data from SD card via SPI
          *
          * @param[in]   bytes   Number of bytes to receive
-         * @param[out]  *data   Location in memory with enough space to store
+         * @param[out]  *dat    Location in memory with enough space to store
          *                      `bytes` bytes of data
          *
          * @return      Returns 0 for success, else error code
@@ -3094,7 +3092,8 @@ class SD {
         /**
          * @brief       Print attributes of a file entry
          *
-         * @param[in]
+         * @param[in]   flags   Flags that are set - each bit in this parameter
+         *                      corresponds to a line that will be printed
          */
         void print_file_attributes (const uint8_t flags) {
             // Print file attributes

@@ -1,9 +1,12 @@
-cmake_minimum_required (VERSION 3.0.0)
-
-if (NOT DEFINED PROPWARE_PATH)
-    set(PROPWARE_PATH $ENV{PROPWARE_PATH})
-endif (NOT DEFINED PROPWARE_PATH)
-set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
+#############################################################################
+### Template code. Do not modify                                            #
+                                                                            #
+cmake_minimum_required (VERSION 3.0.0)                                      #
+# Aside from cmake_minimum_required, this must be the first two lines       #
+# of the file                                                               #
+file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                       #
+set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)         #
+#############################################################################
 
 set(BOARD QUICKSTART)
 set(MODEL lmm)
@@ -13,5 +16,10 @@ set(CXX_FLAGS )
 
 project(SPI_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME}.cpp)
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)
+add_executable(${PROJECT_NAME} ${PROJECT_NAME})
+
+#############################################################################
+### Template code. Do not modify                                            #
+                                                                            #
+include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                        #
+#############################################################################

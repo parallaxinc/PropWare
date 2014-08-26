@@ -17,12 +17,13 @@ import tarfile
 import zipfile
 import sys
 import struct
-import readline
+import time
 
 __author__ = 'david'
 
-DOWNLOADS_DIRECTORY = ".external_downloads" + os.sep
-MEMORY_MODELS = ["cog", "cmm", "lmm", "xmmc", "xmm-single", "xmm-split"]
+DOWNLOADS_DIRECTORY = '.external_downloads' + os.sep
+MEMORY_MODELS = ['cog', 'cmm', 'lmm', 'xmmc', 'xmm-single', 'xmm-split']
+FILE_ATTRIBUTE_HIDDEN = 0x02
 
 
 class OperatingSystem(object):
@@ -32,6 +33,9 @@ class OperatingSystem(object):
     def __str__(self):
         return self._platform
 
+    def __eq__(self, y):
+        return str(self) == str(y)
+
 
 class Windows(OperatingSystem):
     # noinspection PyMissingConstructor
@@ -39,7 +43,7 @@ class Windows(OperatingSystem):
         pass
 
     def __str__(self):
-        return "Windows"
+        return 'Windows'
 
 
 class Nix(OperatingSystem):
@@ -48,7 +52,7 @@ class Nix(OperatingSystem):
         pass
 
     def __str__(self):
-        return "*Nix"
+        return '*Nix'
 
 
 class Linux(Nix):
@@ -57,7 +61,7 @@ class Linux(Nix):
         pass
 
     def __str__(self):
-        return "Linux"
+        return 'Linux'
 
 
 class Mac(Nix):
@@ -66,16 +70,16 @@ class Mac(Nix):
         pass
 
     def __str__(self):
-        return "Mac"
+        return 'Mac'
 
 
 def get_os():
     platform = sys.platform
-    if platform in ["linux", "linux2"]:
+    if platform in ['linux', 'linux2']:
         return Linux()
-    elif "darwin" == platform:
+    elif 'darwin' == platform:
         return Mac()
-    elif "win32" == platform:
+    elif 'win32' == platform:
         return Windows()
     else:
         return OperatingSystem(platform)
@@ -89,78 +93,66 @@ def which(program):
     """
     assert (isinstance(program, str))
 
-    def is_exe(filePath):
-        if os.path.isfile(filePath) and os.access(filePath, os.X_OK):
-            return True
-        elif "nt" == os.name and ".exe" != filePath[-4:]:
-            return is_exe(filePath + ".exe")
-        else:
-            return False
+    system_path = os.environ['PATH'].split(os.pathsep)
+    for path in system_path:
+        candidate = os.path.join(path, program)
+        if os.path.isfile(candidate):
+            return candidate
 
-    directory, fileName = os.path.split(program)
-    if directory:
-        if is_exe(program):
-            return os.path.abspath(program)
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return os.path.abspath(exe_file)
+    if Windows() == get_os():
+        for path in system_path:
+            candidate = os.path.join(path, program) + '.exe'
+            if os.path.isfile(candidate):
+                return candidate
 
-    if Windows() == get_os() and not program.endswith(".exe"):
-        return which(program + ".exe")
-    else:
-        # If we haven't returned anything yet, that means the program doesn't exist
-        return None
+    return None
 
 
-def checkProperWorkingDirectory():
-    if "createBinaryDistr.py" not in os.listdir('.'):
+def check_proper_working_dir():
+    if 'createBinaryDistr.py' not in os.listdir('.'):
         raise IncorrectStartingDirectoryException()
 
 
-def isPropWareRoot(directory):
+def is_propware_root(directory):
     assert (isinstance(directory, str))
     assert (os.path.isdir(directory))
 
-    return "PropWare.dox" in os.listdir(directory)
+    return {'PropWare', 'util', 'libpropeller', 'simple'}.issubset(os.listdir(directory))
 
 
-def isPython3():
+def is_python3():
     return '3' == sys.version[0]
 
 
-def initDownloadsFolder(propwareRoot):
-    assert (isPropWareRoot(propwareRoot))
+def init_downloads_folder(propware_root):
+    assert (is_propware_root(propware_root))
 
-    fullPath = os.path.abspath(propwareRoot) + str(os.sep) + DOWNLOADS_DIRECTORY
+    full_path = os.path.abspath(propware_root) + str(os.sep) + DOWNLOADS_DIRECTORY
 
     # Create the folder if it doesn't exist
-    if not os.path.exists(fullPath):
-        os.mkdir(fullPath)
+    if not os.path.exists(full_path):
+        os.mkdir(full_path)
 
     # If on Windows, set the hidden attribute
-    if "nt" == os.name:
-        winDirName = os.path.normpath(fullPath)
+    if Windows() == get_os():
+        win_dir_name = os.path.normpath(full_path)
         import ctypes
 
-        FILE_ATTRIBUTE_HIDDEN = 0x02
-
-        ret = ctypes.windll.kernel32.SetFileAttributesW(winDirName, FILE_ATTRIBUTE_HIDDEN)
+        ctypes.windll.kernel32.SetFileAttributesW.argtypes = (ctypes.c_wchar_p, ctypes.c_uint32)
+        ret = ctypes.windll.kernel32.SetFileAttributesW(win_dir_name, FILE_ATTRIBUTE_HIDDEN)
         if 0 == ret:  # return code of zero indicates failure, raise Windows error
             raise ctypes.WinError()
 
 
-def downloadFile(src, dstDir):
-    fileName = src.split('/')[-1]
-    dst = os.path.abspath(dstDir) + str(os.sep) + fileName
+def download_file(src, dst_dir):
+    file_name = src.split('/')[-1]
+    dst = os.path.abspath(dst_dir) + str(os.sep) + file_name
 
     # If the file already exists, don't re-download it
     if os.path.exists(dst):
         return dst, None
 
-    if isPython3():
+    if is_python3():
         # noinspection PyUnresolvedReferences
         from urllib.request import urlopen
     else:
@@ -170,19 +162,19 @@ def downloadFile(src, dstDir):
     u = urlopen(src)
     with open(dst, 'wb') as f:
         meta = u.info()
-        file_size = int(meta.get("Content-Length"))
-        print("Downloading: %s - Bytes: %s" % (fileName, file_size))
+        file_size = int(meta.get('Content-Length'))
+        print('Downloading: %s - Bytes: %s' % (file_name, file_size))
 
-        fileSizeDl = 0
-        blockSize = 8192
+        file_size_dl = 0
+        block_size = 8192
         while True:
-            buf = u.read(blockSize)
+            buf = u.read(block_size)
             if not buf:
                 break
 
-            fileSizeDl += len(buf)
+            file_size_dl += len(buf)
             f.write(buf)
-            status = r"%10d  [%3.2f%%]" % (fileSizeDl, fileSizeDl * 100. / file_size)
+            status = r'%10d  [%3.2f%%]' % (file_size_dl, file_size_dl * 100. / file_size)
             status += chr(8) * (len(status))
             sys.stdout.write(status)
 
@@ -204,27 +196,27 @@ def copytree(src, dst):
             shutil.copy2(s, d)
 
 
-def isAsmFile(f):
+def is_asm_file(f):
     try:
-        extension = f.split(".")[1]
+        extension = f.split('.')[1]
     except IndexError:
         return False
 
-    return extension in ["S", "s"]
+    return extension in ['S', 's']
 
 
-def isSourceFile(f):
+def is_src_file(f):
     assert (isinstance(f, str))
     return re.match('.*(\.c|\.cpp|\.cxx|\.cc|\.s|\.dat|\.cogc|\.ecogc|\.spin)$', f, re.I)
 
 
-def isHeaderFile(f):
+def is_header_file(f):
     assert (isinstance(f, str))
     return re.match('.*(\.h|\.hpp)$', f, re.I)
 
 
-def isSourceOrHeaderFile(f):
-    return isSourceFile(f) or isHeaderFile(f)
+def is_src_or_hdr_file(f):
+    return is_src_file(f) or is_header_file(f)
 
 
 def test_propgcc():
@@ -234,11 +226,11 @@ def test_propgcc():
     subprocess.check_output(['propeller-elf-gcc', '--version'])
 
 
-def extract(f, dest):
+def extract(f, dst):
     """
     Supports any tar file as well as zips
     :param f: Path to compressed file or compressed file object
-    :param dest: Path where contents should be extracted
+    :param dst: Path where contents should be extracted
     :return:
     """
 
@@ -250,7 +242,7 @@ def extract(f, dest):
         raise NotRecognizedCompressedFile(f)
 
     with open_method(f, mode='r') as f:
-        f.extractall(dest)
+        f.extractall(dst)
 
 
 def get_user_input(prompt, condition, error_prompt, default):
@@ -264,18 +256,27 @@ def get_user_input(prompt, condition, error_prompt, default):
     :return: User's response
     :rtype : str
     """
-    assert isinstance(prompt, str)
+    assert (None == prompt or isinstance(prompt, str))
     # assert isinstance(condition, )
     assert (None == error_prompt or isinstance(error_prompt, str))
     assert (None == default or isinstance(default, str))
 
     def my_input(inner_prompt):
-        def complete(text, state):
-            return (glob.glob(text+'*')+[None])[state]
+        try:
+            # The readline module isn't always installed. So, if you don't have readline, you don't get autocompletion.
+            # Sorry!
 
-        readline.set_completer_delims(' \t\n;')
-        readline.parse_and_bind("tab: complete")
-        readline.set_completer(complete)
+            # noinspection PyUnresolvedReferences
+            import readline
+
+            def complete(text, state):
+                return (glob.glob(text+'*')+[None])[state]
+
+            readline.set_completer_delims(' \t\n;')
+            readline.parse_and_bind('tab: complete')
+            readline.set_completer(complete)
+        except ImportError:
+            pass
 
         try:
             # noinspection PyUnresolvedReferences
@@ -283,25 +284,32 @@ def get_user_input(prompt, condition, error_prompt, default):
         except NameError:
             return input(inner_prompt)
 
-    if None != default:
-        short_prompt = prompt % default
+    if prompt:
+        if None != default and '%s' in prompt:
+            short_prompt = prompt % default
+        else:
+            short_prompt = prompt
     else:
-        short_prompt = prompt
+        short_prompt = ''
     usr_input = my_input(short_prompt)
     if usr_input:
         if condition(usr_input):
             return usr_input
         else:
-            if None != error_prompt:
+            if error_prompt:
                 print(error_prompt % usr_input, file=sys.stderr)
+                sys.stderr.flush()
+                time.sleep(0.01)
             return get_user_input(prompt, condition, error_prompt, default)
-    else:
+    elif default:
         return default
+    else:
+        return get_user_input(prompt, condition, error_prompt, default)
 
 
 def get_cmake_modules_path(cmake_root):
-    modules_dir_from_src_dstr = cmake_root + str(os.sep) + "Modules"
-    modules_dir_from_bin_dstr = cmake_root + str(os.sep) + "share" + str(os.sep) + "cmake-3.0" + str(os.sep) + "Modules"
+    modules_dir_from_src_dstr = cmake_root + str(os.sep) + 'Modules'
+    modules_dir_from_bin_dstr = cmake_root + str(os.sep) + 'share' + str(os.sep) + 'cmake-3.0' + str(os.sep) + 'Modules'
 
     if os.path.exists(modules_dir_from_src_dstr):
         return modules_dir_from_src_dstr
@@ -315,12 +323,64 @@ def is_64_bit():
     return 64 == struct.calcsize('P') * 8
 
 
+class Menu(object):
+    def __init__(self, prompt):
+        self._prompt = prompt
+        self._options = []
+        self._default = None
+
+    def add_option(self, name, default=False):
+        assert (isinstance(default, bool))
+
+        self._options.append(name)
+
+        if default:
+            self._default = name
+
+        return self._options.index(name)
+
+    def prompt(self):
+        """
+        :return: Selected value from menu
+        :rtype str
+        """
+        options_len = len(self._options)
+
+        assert (options_len > 1)
+
+        prompt = '%s\n%s\n>>> ' % (self._prompt, self._get_menu_str())
+        condition = re.compile('[1-%d]' % options_len).match
+        error_prompt = '%s is not valid. Please select a menu number 1-' + str(options_len) + '.'
+        default = self._get_default_value()
+        selection = get_user_input(prompt, condition, error_prompt, default)
+        selection = int(selection) - 1
+        return self._options[selection]
+
+    def _get_default_value(self):
+        if self._default:
+            return str(self._options.index(self._default) + 1)
+        else:
+            return None
+
+    def _get_menu_str(self):
+        menu_str = ''
+        for i in range(len(self._options)):
+            option = self._options[i]
+            menu_str += '\t%d. %s' % (i + 1, option)
+            if option == self._default:
+                menu_str += ' [default]'
+            if i != len(self._options) - 1:
+                menu_str += os.linesep
+
+        return menu_str
+
+
 class IncorrectStartingDirectoryException(Exception):
     def __init__(self, *args, **kwargs):
         super(IncorrectStartingDirectoryException, self).__init__(*args, **kwargs)
 
     def __str__(self):
-        return "Must be executed from within <propware root>/util"
+        return 'Must be executed from within <propware root>/util'
 
 
 class CannotFindCMakeModulesPath(Exception):
@@ -340,4 +400,4 @@ class NotRecognizedCompressedFile(Exception):
         if None == self._filename:
             return super(NotRecognizedCompressedFile, self).__str__()
         else:
-            return "'%s' is not a recognized compressed file type." % self._filename
+            return '"%s" is not a recognized compressed file type.' % self._filename

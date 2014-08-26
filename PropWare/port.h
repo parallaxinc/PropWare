@@ -89,9 +89,9 @@ class Port {
          *
          * @note        Return value is 0-indexed
          *
-         * @param[in]   pinMask     Value with only a single bit set high
-         *                          representing Propeller pin (i.e.: 0x80 would
-         *                          be pin 7)
+         * @param[in]   mask    Value with only a single bit set high 
+         *                      representing Propeller pin (i.e.: 0x80 would
+         *                      be pin 7)
          *
          * @return      Return the pin number of pin
          */
@@ -186,8 +186,9 @@ class Port {
         /**
          * @brief       Set port as either input or output
          *
-         * @param[in]   dir     I/O direction to set selected pins; must be one
-         *                      of PropWare::Port::IN or PropWare::Port::OUT
+         * @param[in]   direction   I/O direction to set selected pins; must be
+         *                          one of PropWare::Port::IN or 
+         *                          PropWare::Port::OUT
          */
         void set_dir (const PropWare::Port::Dir direction) const {
             DIRA = (DIRA & ~(this->m_mask)) | (this->m_mask & direction);

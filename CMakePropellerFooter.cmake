@@ -14,15 +14,15 @@ include_directories("${PROPWARE_PATH}")
 set_target_properties(LIBPROPELLER_LIB
         PROPERTIES
         IMPORTED_LOCATION
-        ${PROPWARE_PATH}/libpropeller/source/${MODEL}/libLibpropeller_${MODEL}.a)
+        ${PROPWARE_PATH}/bin/libpropeller/source/${MODEL}/libLibpropeller_${MODEL}.a)
 set_target_properties(SIMPLE_LIB
         PROPERTIES
         IMPORTED_LOCATION
-        ${PROPWARE_PATH}/simple/${MODEL}/libSimple_${MODEL}.a)
+        ${PROPWARE_PATH}/bin/simple/${MODEL}/libSimple_${MODEL}.a)
 set_target_properties(PROPWARE_LIB
         PROPERTIES
         IMPORTED_LOCATION
-        ${PROPWARE_PATH}/PropWare/${MODEL}/libPropWare_${MODEL}.a)
+        ${PROPWARE_PATH}/bin/PropWare/${MODEL}/libPropWare_${MODEL}.a)
 
 # Add links to all four major components
 target_link_libraries(${PROJECT_NAME}
@@ -31,19 +31,21 @@ target_link_libraries(${PROJECT_NAME}
         PROPWARE_LIB
         tiny)
 
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
+
 # Only add these custom targets if we're not compiling the PropWare library
 if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     if (DEFINED BOARD)
         set(BOARDFLAG -b${BOARD})
-    endif(DEFINED BOARD)
+    endif()
 
     # Add target for run (load to RAM and start terminal)
-    add_custom_target(run
+    add_custom_target(debug
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t
-            DEPENDS ${CMAKE_PROJECT_NAME}.elf)
+            DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
 
-    # Add target for install (load to EEPROM and start terminal)
-#    add_custom_target(install
-#            ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t -e
-#            DEPENDS ${CMAKE_PROJECT_NAME}.elf)
-ENDIF(NOT DEFINED PROPWARE_MAIN_PACKAGE)
+    # Add target for run (load to EEPROM, do not start terminal)
+    add_custom_target(run
+            ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -e
+            DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
+endif()

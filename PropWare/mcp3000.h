@@ -137,10 +137,10 @@ class MCP3000 {
         /**
          * @brief       Read a specific channel's data in single-ended mode
          *
-         * @param[in]   axis    One of MCP_CHANNEL_<x>, where <x> is a number 0
-         *                      through 3 (or 0 through 7 for the MCP3008);
-         *                      Selects the channel to be read
-         * @param[out]  *val    Address that data should be placed into
+         * @param[in]   channel     One of MCP_CHANNEL_<x>, where <x> is a number 0
+         *                          through 3 (or 0 through 7 for the MCP3008);
+         *                          Selects the channel to be read
+         * @param[out]  *dat        Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -175,11 +175,11 @@ class MCP3000 {
         /**
          * @brief       Read a specific axis's data in differential mode
          *
-         * @param[in]   axis    One of DIFF_<x>_<y>, where <x> is a number 0
-         *                      through 3 (or 0 through 7 for the MCP3008) and
-         *                      <y> is <x> + (<x> + 1)%2 (See above defined enum
-         *                      or datasheet for details)
-         * @param[out]  *val    Address that data should be placed into
+         * @param[in]   channels    One of DIFF_<x>_<y>, where <x> is a number 0
+         *                          through 3 (or 0 through 7 for the MCP3008) 
+         *                          and <y> is <x> + (<x> + 1)%2 (See above 
+         *                          defined enum or datasheet for details)
+         * @param[out]  *dat        Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
          */

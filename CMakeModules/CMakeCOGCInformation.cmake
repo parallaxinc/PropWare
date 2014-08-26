@@ -12,7 +12,7 @@ set(_INCLUDED_FILE 0)
 
 set(CMAKE_BASE_NAME gcc)
 
-include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}-${CMAKE_SYSTEM_PROCESSOR} OPTIONAL)
+#include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}-${CMAKE_SYSTEM_PROCESSOR} OPTIONAL)
 
 # This should be included before the _INIT variables are
 # used to initialize the cache.  Since the rule variables
@@ -45,7 +45,7 @@ endif()
 if(CMAKE_C_FLAGS_INIT STREQUAL " ")
   set(CMAKE_C_FLAGS_INIT)
 endif()
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
+set (CMAKE_COGC_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
      "Flags used by the compiler during all build types.")
 
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
@@ -54,20 +54,20 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
     set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
       "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
   endif()
-  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
+  set (CMAKE_COGC_FLAGS_DEBUG "${CMAKE_COGC_FLAGS_DEBUG_INIT}" CACHE STRING
     "Flags used by the compiler during debug builds.")
-  set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL_INIT}" CACHE STRING
+  set (CMAKE_COGC_FLAGS_MINSIZEREL "${CMAKE_COGC_FLAGS_MINSIZEREL_INIT}" CACHE STRING
     "Flags used by the compiler during release builds for minimum size.")
-  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE_INIT}" CACHE STRING
+  set (CMAKE_COGC_FLAGS_RELEASE "${CMAKE_COGC_FLAGS_RELEASE_INIT}" CACHE STRING
     "Flags used by the compiler during release builds.")
-  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
+  set (CMAKE_COGC_FLAGS_RELWITHDEBINFO "${CMAKE_COGC_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
     "Flags used by the compiler during release builds with debug info.")
 endif()
 
 if(CMAKE_C_STANDARD_LIBRARIES_INIT)
-  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES_INIT}"
+  set(CMAKE_COGC_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES_INIT}"
     CACHE STRING "Libraries linked by default with all C applications.")
-  mark_as_advanced(CMAKE_C_STANDARD_LIBRARIES)
+  mark_as_advanced(CMAKE_COGC_STANDARD_LIBRARIES)
 endif()
 
 include(CMakeCommonLanguageInclude)
@@ -109,5 +109,9 @@ set(CMAKE_COGC_COMPILE_OBJECT
 
 mark_as_advanced(
 CMAKE_COGC_FLAGS
+CMAKE_COGC_FLAGS_DEBUG
+CMAKE_COGC_FLAGS_MINSIZEREL
+CMAKE_COGC_FLAGS_RELEASE
+CMAKE_COGC_FLAGS_RELWITHDEBINFO
 )
 set(CMAKE_COGC_INFORMATION_LOADED 1)

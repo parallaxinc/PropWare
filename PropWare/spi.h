@@ -203,9 +203,10 @@ class SPI {
          * @param[in]   sclk        PinNum mask for SCLK
          * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must
          *                          be less than CLKFREQ/4
-         * @param[in]   polarity    Polarity of the clock - idle low or high;
-         *                          must be one of SPI_POLARITY_LOW or
-         *                          SPI_POLARITY_HIGH
+         * @param[in]   mode        Select one of the 4 Motorola SPI modes to
+         *                          choose your polarity and clock phase
+         * @param[in]   bitmode     One of MSB-first or LSB-first to determine
+         *                          the order that data is sent and received
          *
          * @return      Returns 0 upon success, otherwise error code
          */
@@ -343,8 +344,9 @@ class SPI {
         /**
          * @brief       Set the bitmode of SPI communication
          *
-         * @param[in]   mode    Select one of SPI::LSB_FIRST or SPI::MSB_FIRST
-         *                      to choose which bit will be shifted out first
+         * @param[in]   bitmode     Select one of SPI::LSB_FIRST or 
+         *                          SPI::MSB_FIRST to choose which bit will be 
+         *                          shifted out first
          *
          * @return      Can return non-zero in the case of a timeout
          */
@@ -475,14 +477,14 @@ class SPI {
         /**
          * @brief       Receive a value in from a peripheral device
          *
-         * @param[in]   bits        Number of bits to be shifted in
-         * @param[out]  *data       Received data will be stored at this address
-         * @param[in]   bytes       Number of bytes allocated to *data; Example:
-         *                            int newVal;
-         *                            spi.shift_in(8, &newVal, sizeof(newVal));
-         *                          Or if using a pointer:
-         *                            int *newVal;
-         *                            spi.shift_in(8, newVal, sizeof(*newVal));
+         * @param[in]   bits    Number of bits to be shifted in
+         * @param[out]  *data   Received data will be stored at this address
+         * @param[in]   size    Number of bytes allocated to *data; Example:
+         *                        int newVal;
+         *                        spi.shift_in(8, &newVal, sizeof(newVal));
+         *                      Or if using a pointer:
+         *                        int *newVal;
+         *                        spi.shift_in(8, newVal, sizeof(*newVal));
          *
          * @return      Returns 0 upon success, otherwise error code
          */
@@ -518,14 +520,13 @@ class SPI {
         /**
          * @brief       Send a value out to a peripheral device
          *
-         * @detailed    Pass a value and mode into the assembly cog to be sent
-         *              to the peripheral; NOTE: this function is non-blocking
-         *              and chip-select should not be set inactive immediately
-         *              after the return (you should call spi_wait() before
-         *              setting chip-select inactive); Optimized for fastest
-         *              possible clock speed; No error checking is performed;
-         *              'Timeout' event will never be thrown and possible
-         *              infinite loop can happen
+         * Pass a value and mode into the assembly cog to be sent to the 
+         * peripheral; NOTE: this function is non-blocking and chip-select 
+         * should not be set inactive immediately after the return (you should 
+         * call spi_wait() before setting chip-select inactive); Optimized for 
+         * fastest possible clock speed; No error checking is performed; 
+         * 'Timeout' event will never be thrown and possible infinite loop can 
+         * happen
          *
          * @param[in]   bits        Number of bits to be shifted out
          * @param[in]   value       The value to be shifted out
@@ -725,7 +726,7 @@ class SPI {
          * @brief       Read the value that the SPI cog just shifted in
          *
          * @param[out]  *par    Address to store the parameter
-         * @param[in]   bytes   Number of bytes allocated to *data; Example:
+         * @param[in]   size    Number of bytes allocated to *data; Example:
          *                        int newVal;
          *                        spi.read_par(&newVal, sizeof(newVal));
          *                      Or if using a pointer:
