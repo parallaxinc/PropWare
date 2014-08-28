@@ -73,7 +73,7 @@ the repository and creating a pull request.
 Useful links
 ------------
 
-* [PropWare source code](https://github.com/SwimDude0614/PropWare)
+* [PropWare source code](https://github.com/DavidZemon/PropWare)
 * [PropWare binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/)
 * [Parallax forums](http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller)
 * [Simple IDE](http://learn.parallax.com/node/640): Light-weight IDE for Parallax Propeller 
