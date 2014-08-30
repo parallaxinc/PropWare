@@ -403,12 +403,10 @@ lsb_pre_fast_ret        ret
 msb_post_fast           // Read in a value MSB-first with data valid after the clock
                         xor outa, sclk
                         test miso, ina wc
-                        muxc data, #BIT_0
+                        rcl data, #1
                         xor outa, sclk
-                        shl data, #1
                         djnz bitCount, #msb_post_fast
 
-                        shr data, #1
 msb_post_fast_ret       ret
 
 lsb_post_fast           // Read in a value LSB-first with data valid after the clock
