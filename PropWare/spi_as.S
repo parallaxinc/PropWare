@@ -377,13 +377,11 @@ finish_lsb_first_fast   call #WRITE_DATA
 
 msb_pre_fast            // Read in a value MSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, #BIT_0
                         xor outa, sclk
-                        shl data, #1
+                        rcl data, #1
                         xor outa, sclk
                         djnz bitCount, #msb_pre_fast
 
-                        shr data, #1
 msb_pre_fast_ret        ret
 
 lsb_pre_fast            // Read in a value LSB-first with data valid before the clock
