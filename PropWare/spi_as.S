@@ -241,15 +241,13 @@ finish_lsb_first        call #WRITE_DATA
 
 msb_cpha0               // Read in a value MSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, #BIT_0
-                        shl data, #1
                         waitcnt clock, clkDelay
                         xor outa, sclk
+                        rcl data, #1
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         djnz bitCount, #msb_cpha0
 
-                        shr data, #1
 msb_cpha0_ret           ret
 
 lsb_cpha0               // Read in a value LSB-first with data valid before the clock
