@@ -485,14 +485,11 @@ beginSectorRead         mov bitCount, #8
                         xor outa, sclk
 */
 read_byte               test miso, ina wc
-                        muxc data, #BIT_0
-                        shl data, #1
+                        rcl data, #1
                         call #POST_CLOCK
                         djnz bitCount, #read_byte
 
-                        shr data, #1
-
-                        // Shift the data one more time and write it to HUB
+                        // Write data to HUB
                         wrbyte data, mailbox
                         add mailbox, #1                 '' Increase the address to the next byte in HUB RAM
 
