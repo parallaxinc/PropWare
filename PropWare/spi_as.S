@@ -170,14 +170,7 @@ SEND_rd_data            call #READ_DATA
                         cmp bitMode, #SPI_bitMode_BIT wz        '' Is bitMode MSB first or LSB first?
                         mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
                         add clock, clkDelay             '' /
-        if_z            jmp #msb_first
-
-                        // LSB_FIRST Initialization
-                        mov loopIdx, negOne
-                        sub bitCount, #1
-                        mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
-                        add clock, clkDelay             '' /
-                        jmp #lsb_first
+        if_nz           jmp #lsb_first
 
 msb_first               // MSB_FIRST Routine
                         ror data, bitCount              '' move MSB into bit 31
@@ -193,17 +186,13 @@ msb_first_loop          rol data, #1 wc                 '' gradually restore dat
                         jmp #SEND_complete
 
 lsb_first               // LSB_FIRST Routine
-                        add loopIdx, #1
-                        mov temp, data
-                        shr temp, loopIdx
-                        test temp, #BIT_0 wc
+                        ror data, #1 wc                 '' move LSB into carry
                         muxc outa, mosi
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         xor outa, sclk
-                        cmp bitCount, loopIdx wz
-        if_nz           jmp #lsb_first
+                        djnz bitCount, #lsb_first
 
                         // SEND complete, return to loop
 SEND_complete           wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
