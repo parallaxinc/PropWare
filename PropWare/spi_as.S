@@ -180,16 +180,14 @@ SEND_rd_data            call #READ_DATA
                         jmp #lsb_first
 
 msb_first               // MSB_FIRST Routine
-                        sub bitCount, #1 wz
-                        mov temp, data
-                        shr temp, bitCount
-                        test temp, #BIT_0 wc
+                        ror data, bitCount              '' move MSB into bit 31
+msb_first_loop          rol data, #1 wc                 '' gradually restore data
                         muxc outa, mosi
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         xor outa, sclk
-        if_nz           jmp #msb_first
+                        djnz bitCount, #msb_first_loop
 
                         // SEND complete, return to loop
                         jmp #SEND_complete
