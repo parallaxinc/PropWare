@@ -76,6 +76,7 @@ class ImportSimple:
                 for wtf in os.listdir(abs_dir_entry):
                     if wtf.endswith(".dat") and wtf not in os.listdir(ImportSimple.CHEATER_DIR):
                         copy2(abs_dir_entry + os.sep + wtf, ImportSimple.CHEATER_DIR)
+                        self.sourceFiles.append(wtf)
 
     def _make_obj_list(self):
         # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run

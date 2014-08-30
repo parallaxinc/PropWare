@@ -429,9 +429,12 @@ class DebInstaller(NixInstaller):
 
     @classmethod
     def _add_root_env_var(cls, key, value):
+        # Must be done before parent method - the parent method will add it to os.environ
+        needs_adding = key not in os.environ
+
         super(DebInstaller, cls)._add_root_env_var(key, value)
 
-        if key not in os.environ:
+        if needs_adding:
             # Don't know why we can't use shell=True option here, but it was failing for some reason
             env_cmd = 'echo "%s=%s" >> /etc/environment' % (key, value)
             cmd = ['sudo', 'sh', '-c', env_cmd]

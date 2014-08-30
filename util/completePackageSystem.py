@@ -27,7 +27,7 @@ import propwareImporter
 import createBinaryDistr
 
 PROPWARE_PATH = os.environ['PROPWARE_PATH']
-REPO_URL = "https://github.com/SwimDude0614/PropWare.git"
+REPO_URL = "https://github.com/DavidZemon/PropWare.git"
 BINARY_CREATOR_FILENAME = "createBinaryDistr.py"
 BROKEN_TAGS = ["v2.0-beta1"]
 
