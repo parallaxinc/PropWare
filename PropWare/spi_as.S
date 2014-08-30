@@ -105,7 +105,7 @@ LOOP                    // Retrieve a command
         if_z            jmp #READ_fast
 
                         // If command is "Read sector"
-                        cmp temp, #SPI_FUNC_READ_SECTOR
+                        cmp temp, #SPI_FUNC_READ_SECTOR wz
         if_z            jmp #read_sector
 
                         // If command is "Set mode"
