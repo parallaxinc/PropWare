@@ -272,13 +272,11 @@ msb_cpha1               // Read in a value MSB-first with data valid after the c
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         test miso, ina wc
-                        muxc data, #BIT_0
                         xor outa, sclk
                         waitcnt clock, clkDelay
-                        shl data, #1
+                        rcl data, #1
                         djnz bitCount, #msb_cpha1
 
-                        shr data, #1
 msb_cpha1_ret           ret
 
 lsb_cpha1               // Read in a value LSB-first with data valid after the clock
