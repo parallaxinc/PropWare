@@ -112,7 +112,7 @@ LOOP                    // Retrieve a command
                         cmp temp, #SPI_FUNC_SET_MODE wz
         if_z            jmp #SET_MODE
 
-                        // If command is "Set bitMode
+                        // If command is "Set bitMode"
                         cmp temp, #SPI_FUNC_SET_bitMode wz
         if_z            jmp #SET_bitMode
 
