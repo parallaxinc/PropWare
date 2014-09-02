@@ -255,15 +255,13 @@ msb_cpha0_ret           ret
 
 lsb_cpha0               // Read in a value LSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large to fit in an operand. `dataMask` already contains BIT_31
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
                         waitcnt clock, clkDelay
                         xor outa, sclk
+                        rcr data, #1
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         djnz loopIdx, #lsb_cpha0
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
@@ -284,13 +282,11 @@ lsb_cpha1               // Read in a value LSB-first with data valid after the c
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
                         xor outa, sclk
                         waitcnt clock, clkDelay
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+                        rcr data, #1
                         djnz loopIdx, #lsb_cpha1
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
