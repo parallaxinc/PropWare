@@ -385,13 +385,11 @@ msb_pre_fast_ret        ret
 
 lsb_pre_fast            // Read in a value LSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
                         xor outa, sclk
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+                        rcr data, #1
                         xor outa, sclk
                         djnz loopIdx, #lsb_pre_fast
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
@@ -409,12 +407,10 @@ msb_post_fast_ret       ret
 lsb_post_fast           // Read in a value LSB-first with data valid after the clock
                         xor outa, sclk
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+                        rcr data, #1
                         xor outa, sclk
                         djnz loopIdx, #lsb_post_fast
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
