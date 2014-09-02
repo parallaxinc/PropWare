@@ -84,6 +84,22 @@
 /*** MAIN LOOP ***/
 LOOP                    // Retrieve a command
                         call #READ_CMD
+
+                        and cmsk, mailbox
+                        max cmsk, #9                    '' avoid overflow (optional if frontend handles it)
+                        add jump, cmsk
+
+                        mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
+
+jump                    jmpret $, $+1
+
+                        long    SEND, READ, SEND_fast, READ_fast, read_sector
+                        long    SET_MODE, SET_bitMode, SET_FREQ, GET_FREQ
+
+                        long    LOOP                    '' catch all      (optional if frontend handles it)
+
+cmsk                    long    SPI_FUNC_BITS
+/*
                         mov temp, mailbox
                         and temp, spiFuncBits           '' Mask away all bits but the function descriptor
 
@@ -105,14 +121,14 @@ LOOP                    // Retrieve a command
         if_z            jmp #READ_fast
 
                         // If command is "Read sector"
-                        cmp temp, #SPI_FUNC_READ_SECTOR
+                        cmp temp, #SPI_FUNC_READ_SECTOR wz
         if_z            jmp #read_sector
 
                         // If command is "Set mode"
                         cmp temp, #SPI_FUNC_SET_MODE wz
         if_z            jmp #SET_MODE
 
-                        // If command is "Set bitMode
+                        // If command is "Set bitMode"
                         cmp temp, #SPI_FUNC_SET_bitMode wz
         if_z            jmp #SET_bitMode
 
@@ -126,7 +142,7 @@ LOOP                    // Retrieve a command
 
                         // Default: Return to loop
                         jmp #LOOP
-
+*/
 /* FUNCTION: PropWare::SPI::set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA_CONFIRM                 '' Read in the mode
@@ -170,42 +186,29 @@ SEND_rd_data            call #READ_DATA
                         cmp bitMode, #SPI_bitMode_BIT wz        '' Is bitMode MSB first or LSB first?
                         mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
                         add clock, clkDelay             '' /
-        if_z            jmp #msb_first
-
-                        // LSB_FIRST Initialization
-                        mov loopIdx, negOne
-                        sub bitCount, #1
-                        mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
-                        add clock, clkDelay             '' /
-                        jmp #lsb_first
+        if_nz           jmp #lsb_first
 
 msb_first               // MSB_FIRST Routine
-                        sub bitCount, #1 wz
-                        mov temp, data
-                        shr temp, bitCount
-                        test temp, #BIT_0 wc
+                        ror data, bitCount              '' move MSB into bit 31
+msb_first_loop          rol data, #1 wc                 '' gradually restore data
                         muxc outa, mosi
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         xor outa, sclk
-        if_nz           jmp #msb_first
+                        djnz bitCount, #msb_first_loop
 
                         // SEND complete, return to loop
                         jmp #SEND_complete
 
 lsb_first               // LSB_FIRST Routine
-                        add loopIdx, #1
-                        mov temp, data
-                        shr temp, loopIdx
-                        test temp, #BIT_0 wc
+                        ror data, #1 wc                 '' move LSB into carry
                         muxc outa, mosi
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         xor outa, sclk
-                        cmp bitCount, loopIdx wz
-        if_nz           jmp #lsb_first
+                        djnz bitCount, #lsb_first
 
                         // SEND complete, return to loop
 SEND_complete           wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
@@ -241,28 +244,24 @@ finish_lsb_first        call #WRITE_DATA
 
 msb_cpha0               // Read in a value MSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, #BIT_0
-                        shl data, #1
                         waitcnt clock, clkDelay
                         xor outa, sclk
+                        rcl data, #1
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         djnz bitCount, #msb_cpha0
 
-                        shr data, #1
 msb_cpha0_ret           ret
 
 lsb_cpha0               // Read in a value LSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large to fit in an operand. `dataMask` already contains BIT_31
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
                         waitcnt clock, clkDelay
                         xor outa, sclk
+                        rcr data, #1
                         waitcnt clock, clkDelay
                         xor outa, sclk
                         djnz loopIdx, #lsb_cpha0
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
@@ -272,26 +271,22 @@ msb_cpha1               // Read in a value MSB-first with data valid after the c
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         test miso, ina wc
-                        muxc data, #BIT_0
                         xor outa, sclk
                         waitcnt clock, clkDelay
-                        shl data, #1
+                        rcl data, #1
                         djnz bitCount, #msb_cpha1
 
-                        shr data, #1
 msb_cpha1_ret           ret
 
 lsb_cpha1               // Read in a value LSB-first with data valid after the clock
                         xor outa, sclk
                         waitcnt clock, clkDelay
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
                         xor outa, sclk
                         waitcnt clock, clkDelay
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+                        rcr data, #1
                         djnz loopIdx, #lsb_cpha1
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
@@ -377,24 +372,20 @@ finish_lsb_first_fast   call #WRITE_DATA
 
 msb_pre_fast            // Read in a value MSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, #BIT_0
                         xor outa, sclk
-                        shl data, #1
+                        rcl data, #1
                         xor outa, sclk
                         djnz bitCount, #msb_pre_fast
 
-                        shr data, #1
 msb_pre_fast_ret        ret
 
 lsb_pre_fast            // Read in a value LSB-first with data valid before the clock
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
                         xor outa, sclk
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+                        rcr data, #1
                         xor outa, sclk
                         djnz loopIdx, #lsb_pre_fast
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
@@ -403,23 +394,19 @@ lsb_pre_fast_ret        ret
 msb_post_fast           // Read in a value MSB-first with data valid after the clock
                         xor outa, sclk
                         test miso, ina wc
-                        muxc data, #BIT_0
+                        rcl data, #1
                         xor outa, sclk
-                        shl data, #1
                         djnz bitCount, #msb_post_fast
 
-                        shr data, #1
 msb_post_fast_ret       ret
 
 lsb_post_fast           // Read in a value LSB-first with data valid after the clock
                         xor outa, sclk
                         test miso, ina wc
-                        muxc data, dataMask             '' Would use BIT_31 here, but it's too large for a second operand. 'dataMask' already contains BIT_31
-                        shr data, #1 wc                 '' wc flag is specified for the case of a 32-bit shift in - upon receiving the 32nd bit, the lsb will be shifted out of the register and must be saved.
+                        rcr data, #1
                         xor outa, sclk
                         djnz loopIdx, #lsb_post_fast
 
-                        rcl data, #1                    '' In the case of a 32-bit shift in, retreive the LSB *NOTE: 32-bit shift in is not currently supported for the same reason that a 32-bit shift out cannot happen
                         mov temp, #32
                         sub temp, bitCount
                         shr data, temp
@@ -485,14 +472,11 @@ beginSectorRead         mov bitCount, #8
                         xor outa, sclk
 */
 read_byte               test miso, ina wc
-                        muxc data, #BIT_0
-                        shl data, #1
+                        rcl data, #1
                         call #POST_CLOCK
                         djnz bitCount, #read_byte
 
-                        shr data, #1
-
-                        // Shift the data one more time and write it to HUB
+                        // Write data to HUB
                         wrbyte data, mailbox
                         add mailbox, #1                 '' Increase the address to the next byte in HUB RAM
 
