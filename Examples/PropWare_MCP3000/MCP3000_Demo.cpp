@@ -40,7 +40,7 @@ int main () {
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
-        error(err);
+        error(spi, err);
 
     // Retrieve the SPI module and manually set the clock frequency
     spi->set_clock(FREQ);
@@ -61,7 +61,7 @@ int main () {
         // millisecond of total period
         while (abs(loopCounter - CNT) > MILLISECOND) {
             if ((err = adc.read(CHANNEL, &data)))
-                error(err);
+                error(spi, err);
 
             // Turn on LEDs proportional to the analog value
             scaledValue = (uint8_t) ((data + divisor / 2 - 1) / divisor);
@@ -75,8 +75,13 @@ int main () {
     }
 }
 
-void error (const PropWare::ErrorCode err) {
+void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+
+    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
+        spi->print_error_str((PropWare::SPI::ErrorCode const) err);
+    else
+        printf("Unknown error: %u", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

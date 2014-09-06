@@ -68,7 +68,7 @@
  *
  * @param[in]   err     Error value
  */
-void error (const PropWare::ErrorCode err);
+void error (const PropWare::SPI *spi, const PropWare::ErrorCode err);
 
 /**@}*/
 
