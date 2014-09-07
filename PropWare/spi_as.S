@@ -41,6 +41,7 @@
 #define SPI_FUNC_SET_bitMode    6
 #define SPI_FUNC_SET_FREQ       7
 #define SPI_FUNC_GET_FREQ       8
+#define SPI_FUNC_CATCH_ALL      9
 
 #define SPI_BITS_OFFSET         8
 
@@ -73,7 +74,9 @@
                         call #READ_CMD                  '' Read in the pin mask SCLK
                         mov sclk, mailbox
 
-                        // Followed by setting MOSI & SCLK as outputs and MISO as input, Also set MOSI and MISO high
+                        // Followed by setting MOSI & SCLK as outputs and MISO as input (with MOSI and MISO initialized high)
+                        or outa, mosi
+                        or outa, miso
                         or dira, mosi
                         or dira, sclk
                         andn dira, miso
@@ -84,24 +87,52 @@
 /*** MAIN LOOP ***/
 LOOP                    // Retrieve a command
                         call #READ_CMD
+                        mov temp, mailbox
+                        and temp, spiFuncBits           '' Mask away all bits but the function descriptor
 
-                        and cmsk, mailbox
-                        max cmsk, #9                    '' avoid overflow (optional if frontend handles it)
-                        add jump, cmsk
+/*
+                        max temp, #SPI_FUNC_CATCH_ALL   '' avoid overflow
 
-                        mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
+                        mov temp2, launch_pad_addr
+                        shr temp2, #2                   '' Divide address by four to yield long address instead of byte address
 
-jump                    jmpret jump, jump + 1
+''                      nop
 
-                        long    SEND, READ, SEND_fast, READ_fast, read_sector
-                        long    SET_MODE, SET_bitMode, SET_FREQ, GET_FREQ
+''                      add temp2, #1
+
+                        nop
+
+                        mov outa, #0
+                        shl outa, #16
+endless_loop            jmp #endless_loop
+
+                        add temp, #1                    '' Our commands are 0-indexed but a jump value of 0 would be an endless loop, jumping back to #jump every time
+                        movs func_launch_pad, temp
+
+func_launch_pad         jmp #0                          '' 0 is a placeholder - the value will be overwritten
+                                                        '' 108
+addr_send               long    SEND                    '' 112
+addr_read               long    READ                    '' 116
+addr_send_fast          long    SEND_fast               '' 120
+addr_read_fast          long    READ_fast               '' 124
+addr_read_sector        long    read_sector             '' 128
+addr_set_mode           long    SET_MODE                '' 132
+addr_set_bitmode        long    SET_bitMode             '' 136
+addr_set_freq           long    SET_FREQ                '' 140
+addr_get_freq           long    GET_FREQ                '' 144
+addr_my_blinky          long    MY_BLINKY               '' 148
 
                         long    LOOP                    '' catch all      (optional if frontend handles it)
 
-cmsk                    long    SPI_FUNC_BITS
-/*
-                        mov temp, mailbox
-                        and temp, spiFuncBits           '' Mask away all bits but the function descriptor
+launch_pad_addr         long    func_launch_pad
+
+MY_BLINKY               // Blink a dumb LED
+                        mov temp, cnt
+                        add temp, quarterSecond
+blinky_loop             waitcnt temp, quarterSecond
+                        xor outa, led23
+                        jmp #blinky_loop
+*/
 
                         // Using "jmp" instead of "call" because all functions return by "jmp #LOOP" instead of "ret"
                         // If command is "Send"
@@ -142,7 +173,7 @@ cmsk                    long    SPI_FUNC_BITS
 
                         // Default: Return to loop
                         jmp #LOOP
-*/
+
 /* FUNCTION: PropWare::SPI::set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA_CONFIRM                 '' Read in the mode
@@ -174,7 +205,7 @@ GET_FREQ                mov data, clkDelay
 /* FUNCTION: PropWare::SPI::send() */
 SEND                    // Interpret the bit count and mode of output for this send command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
 
 SEND_rd_data            call #READ_DATA
@@ -218,7 +249,7 @@ SEND_complete           wrlong negOne, par              '' Indicate that send is
 /* FUNCTION: PropWare::SPI::shift_in() */
 READ                    // Interpret the bit count and mode of output for this read command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
                         mov loopIdx, bitCount           '' Create a second storage register for the bit count - used in LSB modes
                         mov data, #0                    '' Clear out the data register, ready for input
@@ -295,7 +326,7 @@ lsb_cpha1_ret           ret
 /* FUNCTION: PropWare::SPI::shift_out_fast() */
 SEND_fast               // Interpret the bit count and mode of output for this send command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
 
 SEND_rd_data_fast       call #READ_DATA
@@ -346,7 +377,7 @@ SEND_complete_fast      wrlong negOne, par              '' Indicate that send is
 /* FUNCTION: PropWare::SPI::shift_in_fast() */
 READ_fast               // Interpret the bit count and mode of output for this read command
                         mov bitCount, mailbox           '' Initialize 'bitCount' register
-                        and bitCount, spibitCountBits   '' Mask off all bits except the bit count
+                        and bitCount, spiBitCountBits   '' Mask off all bits except the bit count
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
                         mov loopIdx, bitCount           '' Create a second storage register for the bit count - used in LSB modes
                         mov data, #0                    '' Clear out the data register, ready for input
@@ -534,7 +565,7 @@ SEND_TO_LED_ret         ret
 /* Pre-Initialized Values */
 negOne                  long    -1                      '' Used for comparison purposes
 spiFuncBits             long    SPI_FUNC_BITS
-spibitCountBits         long    SPI_BIT_COUNT_BITS
+spiBitCountBits         long    SPI_BIT_COUNT_BITS
 dataMask                long    BIT_31
 sdSectorSize            long    SD_SECTOR_SIZE
 

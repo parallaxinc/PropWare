@@ -161,8 +161,7 @@ class SPI {
     public:
         // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout
         // error
-        static const uint32_t WR_TIMEOUT_VAL;
-        static const uint32_t RD_TIMEOUT_VAL;
+        static const uint32_t TIMEOUT_VAL;
         static const uint8_t MAX_PAR_BITS = 31;
         static const int32_t MAX_CLOCK;
 
@@ -173,10 +172,9 @@ class SPI {
 #endif
         /**
          * @brief   Create a new instance of SPI which will, upon calling
-         *          SPI::start(), will start a new assembly cog. Creating
-         *          multiple instances of PropWare::SPI allows the user to have
-         *          multiple, independent SPI modules for simultaneous
-         *          communication
+         *          SPI::start(), start a new assembly cog. Creating multiple
+         *          instances of PropWare::SPI allows the user to have multiple,
+         *          independent SPI modules for simultaneous communication
          */
         SPI () {
             this->m_mailbox = -1;
@@ -230,7 +228,7 @@ class SPI {
                 // Set the mailbox to 0 (anything other than -1) so that we know
                 // when the SPI cog has started
                 this->m_mailbox = 0;
-                this->m_cog = (int8_t) PropWare::_SPIStartCog((void *) &this->m_mailbox);
+                this->m_cog = PropWare::_SPIStartCog((void *) &this->m_mailbox);
                 if (!this->is_running())
                     return SPI::COG_NOT_STARTED;
 
@@ -286,7 +284,7 @@ class SPI {
          * @return  May return non-zero error code when a timeout occurs
          */
         PropWare::ErrorCode wait () {
-            const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
+            const uint32_t timeoutCnt = SPI::TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
             while (-1 != this->m_mailbox)
@@ -304,7 +302,7 @@ class SPI {
          * @return  May return non-zero error code when a timeout occurs
          */
         PropWare::ErrorCode wait_specific (const uint32_t value) {
-            const uint32_t timeoutCnt = SPI::WR_TIMEOUT_VAL + CNT;
+            const uint32_t timeoutCnt = SPI::TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
             while (value == (uint32_t) this->m_mailbox)
@@ -334,7 +332,7 @@ class SPI {
             // Wait for SPI cog to go idle
             check_errors_w_str(this->wait(), str);
 
-            this->m_mailbox = SPI::FUNC_SET_MODE;
+            this->m_mailbox = SPI::SET_MODE;
             check_errors_w_str(this->wait(), str);
             this->m_mailbox = mode;
 
@@ -362,7 +360,7 @@ class SPI {
 #endif
 
             check_errors_w_str(this->wait(), str);
-            this->m_mailbox = SPI::FUNC_SET_BITMODE;
+            this->m_mailbox = SPI::SET_BITMODE;
             check_errors_w_str(this->wait(), str);
             this->m_mailbox = bitmode;
 
@@ -392,9 +390,9 @@ class SPI {
             // Wait for SPI cog to go idle
             check_errors_w_str(this->wait(), str);
             // Prepare cog for clock frequency change
-            this->m_mailbox = SPI::FUNC_SET_FREQ;
+            this->m_mailbox = SPI::SET_FREQ;
             // Wait for the ready command
-            check_errors_w_str(this->wait_specific(SPI::FUNC_SET_FREQ), str);
+            check_errors_w_str(this->wait_specific(SPI::SET_FREQ), str);
             // Send new frequency
             this->m_mailbox = (CLKFREQ / frequency) >> 1;
 
@@ -423,11 +421,11 @@ class SPI {
             check_errors_w_str(this->wait(), str);
 
             // Call GAS function
-            this->m_mailbox = SPI::FUNC_GET_FREQ;
-            check_errors_w_str(this->wait_specific(SPI::FUNC_GET_FREQ), str);
+            this->m_mailbox = SPI::GET_FREQ;
+            check_errors_w_str(this->wait_specific(SPI::GET_FREQ), str);
 
             this->read_par(frequency, sizeof(*frequency));
-            *frequency = CLKFREQ / (*frequency << 1);
+            *frequency = (int32_t) (CLKFREQ / (*frequency << 1));
 
             return SPI::NO_ERROR;
         }
@@ -461,15 +459,15 @@ class SPI {
             check_errors_w_str(this->wait(), str);
 
             // Call GAS function
-            this->m_mailbox = SPI::FUNC_SEND | (bits << SPI::BITS_OFFSET);
+            this->m_mailbox = SPI::SEND | (bits << SPI::BITS_OFFSET);
             check_errors_w_str(
                     this->wait_specific(
-                            SPI::FUNC_SEND | (bits << SPI::BITS_OFFSET)), str);
+                            SPI::SEND | (bits << SPI::BITS_OFFSET)), str);
 
             // Pass parameter in; Bit 31 is cleared to indicate data is being
             // sent. Without this limitation, who's to say the value being
             // passed is not -1?
-            this->m_mailbox = value & (~BIT_31);
+            this->m_mailbox = (atomic_t) (value & (~BIT_31));
 
             return SPI::NO_ERROR;
         }
@@ -508,7 +506,7 @@ class SPI {
             check_errors_w_str(this->wait(), str);
 
             // Call GAS function
-            this->m_mailbox = SPI::FUNC_READ | (bits << SPI::BITS_OFFSET);
+            this->m_mailbox = SPI::READ | (bits << SPI::BITS_OFFSET);
 
             // Read in parameter
             check_errors_w_str(this->read_par(data, size), str);
@@ -520,7 +518,7 @@ class SPI {
         /**
          * @brief       Send a value out to a peripheral device
          *
-         * Pass a value and mode into the assembly cog to be sent to the 
+         * Pass a value and mode into the assembly cog to be sent to the
          * peripheral; NOTE: this function is non-blocking and chip-select 
          * should not be set inactive immediately after the return (you should 
          * call spi_wait() before setting chip-select inactive); Optimized for 
@@ -540,14 +538,14 @@ class SPI {
             this->wait();
 
             // Call GAS function
-            this->m_mailbox = PropWare::SPI::FUNC_SEND_FAST
+            this->m_mailbox = PropWare::SPI::SEND_FAST
                     | (bits << PropWare::SPI::BITS_OFFSET);
             this->wait();
 
             // Pass parameter in; Bit 31 is cleared to indicate data is being
             // sent. Without this limitation, who's to say the value being
             // passed is not -1?
-            this->m_mailbox = value & (~BIT_31);
+            this->m_mailbox = (atomic_t) (value & (~BIT_31));
 
             return PropWare::SPI::NO_ERROR;
         }
@@ -576,7 +574,7 @@ class SPI {
 
             // Wait until idle state, then send function and mode bits
             this->wait();
-            this->m_mailbox = PropWare::SPI::FUNC_READ_FAST
+            this->m_mailbox = PropWare::SPI::READ_FAST
                     | (bits << PropWare::SPI::BITS_OFFSET);
 
             // Wait for a value to be written
@@ -619,9 +617,9 @@ class SPI {
         PropWare::ErrorCode shift_in_sector (const uint8_t addr[],
                 const uint8_t blocking) {
             this->wait();
-            this->m_mailbox = PropWare::SPI::FUNC_READ_SECTOR;
+            this->m_mailbox = PropWare::SPI::READ_SECTOR;
             this->wait();
-            this->m_mailbox = (uint32_t) addr;
+            this->m_mailbox = (atomic_t) addr;
             if (blocking)
                 return this->wait();
             else
@@ -696,32 +694,29 @@ class SPI {
         }
 
     protected:
-        /************************************
-         *** Private Constant Definitions ***
-         ************************************/
-        static const uint16_t TIMEOUT_WIGGLE_ROOM = 400;
-        static const uint8_t FUNC_SEND = 0;
-        static const uint8_t FUNC_READ = 1;
-        static const uint8_t FUNC_SEND_FAST = 2;
-        static const uint8_t FUNC_READ_FAST = 3;
-        static const uint8_t FUNC_READ_SECTOR = 4;
-        static const uint8_t FUNC_SET_MODE = 5;
-        static const uint8_t FUNC_SET_BITMODE = 6;
-        static const uint8_t FUNC_SET_FREQ = 7;
-        static const uint8_t FUNC_GET_FREQ = 8;
+        /*************************************
+         *** Protected Method Declarations ***
+         *************************************/
+        static const uint16_t TIMEOUT_WIGGLE_ROOM = 600;
+
+        typedef enum {
+            SEND,
+            READ,
+            SEND_FAST,
+            READ_FAST,
+            READ_SECTOR,
+            SET_MODE,
+            SET_BITMODE,
+            SET_FREQ,
+            GET_FREQ
+        } FunctionConstant;
 
         static const uint8_t BITS_OFFSET = 8;
 
-        static const uint8_t PHASE_BIT = BIT_0;
-        // Idle high == HIGH; Idle low == LOW
-        static const uint8_t POLARITY_BIT = BIT_1;
-        // MSB_FIRST == HIGH; LSB_FIRST == LOW
-        static const uint8_t BITMODE_BIT = BIT_2;
-
     protected:
-        /***********************************
-         *** Private Method Declarations ***
-         ***********************************/
+        /*************************************
+         *** Protected Method Declarations ***
+         *************************************/
         /**
          * @brief       Read the value that the SPI cog just shifted in
          *
@@ -739,7 +734,7 @@ class SPI {
             uint8_t *par8;
             uint16_t *par16;
             uint32_t *par32;
-            const uint32_t timeoutCnt = PropWare::SPI::WR_TIMEOUT_VAL + CNT;
+            const uint32_t timeoutCnt = PropWare::SPI::TIMEOUT_VAL + CNT;
 
             // Wait for a value to be written
             while (-1 == this->m_mailbox)
@@ -773,9 +768,9 @@ class SPI {
         }
 
     protected:
-        /********************************
-         *** Private Member Variables ***
-         ********************************/
+        /*************************************
+         *** Protected Method Declarations ***
+         *************************************/
         volatile atomic_t m_mailbox;
         int8_t m_cog;
         char m_errorInMethod[16];
