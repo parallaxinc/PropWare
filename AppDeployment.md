@@ -9,16 +9,16 @@ Starting a New Project
 1. The defining piece of a PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
    standards. Full details on CMake files in relation to PropWare can be found on the 
    [CMake For PropWare](./md_CMakeForPropware.html) page, but a typical use case is provided below.
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-   #############################################################################
-   ### Template code. Do not modify                                            #
-                                                                               #
-   cmake_minimum_required (VERSION 3.0.0)                                      #
-   # Aside from cmake_minimum_required, this must be the first two lines       #
-   # of the file                                                               #
-   file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                       #
-   include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)         #
-   #############################################################################
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
+   ################################################################################
+   ### Template code. Do not modify                                               #
+                                                                                  #
+   cmake_minimum_required (VERSION 3.0.0)                                         #
+   # Aside from cmake_minimum_required, this must be the first two lines          #
+   # of the file                                                                  #
+   file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
+   include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
+   ################################################################################
 
    set(BOARD QUICKSTART)
    set(MODEL cmm)
@@ -33,13 +33,13 @@ Starting a New Project
        avionics.S
        rf_transceiver.ecogc)
 
-   #############################################################################
-   ### Template code. Do not modify                                            #
-                                                                               #
-   # This must be the last line of the file                                    #
-   include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                        #
-   #############################################################################
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   ################################################################################
+   ### Template code. Do not modify                                               #
+                                                                                  #
+   # This must be the last line of the file                                       #
+   include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
+   ################################################################################
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2. Write your source code.
 3. At the terminal, enter your project's directory. Type `cmake -G "Unix Makefiles" .`. This will generate a Makefile
    for you.
