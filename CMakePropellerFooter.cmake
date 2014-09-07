@@ -42,10 +42,10 @@ if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     # Add target for run (load to RAM and start terminal)
     add_custom_target(debug
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t
-            DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME})
 
     # Add target for run (load to EEPROM, do not start terminal)
     add_custom_target(run
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -e
-            DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME})
 endif()
