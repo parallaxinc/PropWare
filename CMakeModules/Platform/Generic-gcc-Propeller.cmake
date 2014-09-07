@@ -6,14 +6,13 @@ message(STATUS "LOADED: Generic-gcc-Propeller.cmake")
 
 # Create standard flags
 set(ASMFLAGS_INIT "")
-set(CFLAGS_INIT "-Wall -m32bit-doubles")
-set(CSTANDARD "-std=c99")
+set(CFLAGS_INIT "")
+set(CSTANDARD "")
 set(CXXFLAGS_INIT "-fno-threadsafe-statics -fno-rtti")
-set(CXXSTANDARD "-std=gnu++0x")
 
 set(CMAKE_ASM_FLAGS_INIT "${ASMFLAGS_INIT}")
-set(CMAKE_C_FLAGS_INIT "${CFLAGS_INIT} ${CSTANDARD}")
-set(CMAKE_CXX_FLAGS_INIT "${CFLAGS_INIT} ${CXXFLAGS_INIT} ${CXXSTANDARD}")
+set(CMAKE_C_FLAGS_INIT "${CFLAGS_INIT}")
+set(CMAKE_CXX_FLAGS_INIT "${CFLAGS_INIT} ${CXXFLAGS_INIT}")
 set(CMAKE_COGC_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -mcog -xc -r")
 set(CMAKE_ECOGC_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -mcog -xc -r")
 set(CMAKE_COGCXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -mcog -xc++ -r")

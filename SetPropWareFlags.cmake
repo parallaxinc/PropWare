@@ -2,9 +2,28 @@
 ### Finalize Compile Flags
 ################################################################################
 
+# Handle user options
+if (32_BIT_DOUBLES)
+    set(C_FLAGS "${C_FLAGS} -m32bit-doubles")
+    set(CXX_FLAGS "${CXX_FLAGS} -m32bit-doubles")
+endif ()
+
+if (WARN_ALL)
+    set(C_FLAGS "${C_FLAGS} -Wall")
+    set(CXX_FLAGS "${CXX_FLAGS} -Wall")
+endif ()
+
+if (AUTO_C_STD)
+    set(C_FLAGS "${C_FLAGS} -std=c99")
+endif ()
+
+if (AUTO_CXX_STD)
+    set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
+endif ()
+
 # Check if the deprecated variable name is set
 if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
-    message(WARN ": CFLAGS and CXXFLAGS variable names have been replaced by C_FLAGS and CXX_FLAGS.")
+    message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")
     set(C_FLAGS ${CFLAGS})
     set(CXX_FLAGS ${CXXFLAGS})
     set(CFLAGS )

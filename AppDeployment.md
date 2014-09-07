@@ -17,7 +17,7 @@ Starting a New Project
    # Aside from cmake_minimum_required, this must be the first two lines       #
    # of the file                                                               #
    file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                       #
-   set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)         #
+   include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)         #
    #############################################################################
 
    set(BOARD QUICKSTART)
