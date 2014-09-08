@@ -93,45 +93,30 @@ LOOP                    // Retrieve a command
 /*
                         max temp, #SPI_FUNC_CATCH_ALL   '' avoid overflow
 
-                        mov temp2, launch_pad_addr
+                        mov temp2, #func_launch_pad
                         shr temp2, #2                   '' Divide address by four to yield long address instead of byte address
+                        add temp2, #1
+                        add temp2, temp
+                        movs func_launch_pad, temp2
 
-''                      nop
-
-''                      add temp2, #1
-
-                        nop
-
-                        mov outa, #0
-                        shl outa, #16
 endless_loop            jmp #endless_loop
 
                         add temp, #1                    '' Our commands are 0-indexed but a jump value of 0 would be an endless loop, jumping back to #jump every time
                         movs func_launch_pad, temp
 
-func_launch_pad         jmp #0                          '' 0 is a placeholder - the value will be overwritten
-                                                        '' 108
-addr_send               long    SEND                    '' 112
-addr_read               long    READ                    '' 116
-addr_send_fast          long    SEND_fast               '' 120
-addr_read_fast          long    READ_fast               '' 124
-addr_read_sector        long    read_sector             '' 128
-addr_set_mode           long    SET_MODE                '' 132
-addr_set_bitmode        long    SET_bitMode             '' 136
-addr_set_freq           long    SET_FREQ                '' 140
-addr_get_freq           long    GET_FREQ                '' 144
-addr_my_blinky          long    MY_BLINKY               '' 148
+func_launch_pad         jmp #0-0                        '' 0 is a placeholder - the value will be overwritten
+
+                        long    SEND
+                        long    READ
+                        long    SEND_fast
+                        long    READ_fast
+                        long    read_sector
+                        long    SET_MODE
+                        long    SET_bitMode
+                        long    SET_FREQ
+                        long    GET_FREQ
 
                         long    LOOP                    '' catch all      (optional if frontend handles it)
-
-launch_pad_addr         long    func_launch_pad
-
-MY_BLINKY               // Blink a dumb LED
-                        mov temp, cnt
-                        add temp, quarterSecond
-blinky_loop             waitcnt temp, quarterSecond
-                        xor outa, led23
-                        jmp #blinky_loop
 */
 
                         // Using "jmp" instead of "call" because all functions return by "jmp #LOOP" instead of "ret"
