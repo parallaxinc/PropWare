@@ -94,12 +94,19 @@ LOOP                    // Retrieve a command
 
                         mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
 
-jump                    jmpret $, $+1
+jump                    jmpret jump, table
 
-                        long    SEND, READ, SEND_fast, READ_fast, read_sector
-                        long    SET_MODE, SET_bitMode, SET_FREQ, GET_FREQ
+table                   mov SEND, SEND
+                        mov READ, READ
+                        mov SEND_fast, SEND_fast
+                        mov READ_fast, READ_fast
+                        mov read_sector, read_sector
+                        mov SET_MODE, SET_MODE
+                        mov SET_bitMode, SET_bitMode
+                        mov SET_FREQ, SET_FREQ
+                        mov GET_FREQ, GET_FREQ
 
-                        long    LOOP                    '' catch all      (optional if frontend handles it)
+                        mov LOOP, LOOP                 '' catch all      (optional if frontend handles it)
 
 cmsk                    long    SPI_FUNC_BITS
 /*
