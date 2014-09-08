@@ -1,8 +1,8 @@
 PropWare v2.0 Documentation - Nightly
 =====================================
 
-[PropWare Home](http://david.zemon.name/PropWare/)
---------------------------------------------------
+Pages
+-----
   * [About](./md_About.html)
   * [Installation](./md_Install.html)
   * [Creating a PropWare Application](./md_AppDeployment.html)
