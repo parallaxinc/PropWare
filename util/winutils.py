@@ -34,7 +34,7 @@ def set_environ_var(name, value):
     reg = None
     try:
         path = r'Environment'
-        key = OpenKey(HKEY_CURRENT_USER, path, access=KEY_ALL_ACCESS)
+        key = OpenKey(HKEY_CURRENT_USER, path, KEY_ALL_ACCESS)
 
         if name.upper() == 'PATH':
             try:

@@ -49,6 +49,7 @@ Planned Enhancements/Known Issues
 ---------------------------------
 * CMake not working on Windows
 * Add Spin language compatibility
+* Add support for ActivityBot's [ADC](http://www.ti.com/lit/ds/symlink/adc124s021.pdf) and DAC
 * SD Demo does not fit in LMM mode
 * PropWare::SD class contains shell methods - these should be brought out to their class
 * SD & FAT16/32 driver
