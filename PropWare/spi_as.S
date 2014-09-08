@@ -87,6 +87,22 @@
 /*** MAIN LOOP ***/
 LOOP                    // Retrieve a command
                         call #READ_CMD
+
+                        and cmsk, mailbox
+                        max cmsk, #9                    '' avoid overflow (optional if frontend handles it)
+                        add jump, cmsk
+
+                        mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
+
+jump                    jmpret $, $+1
+
+                        long    SEND, READ, SEND_fast, READ_fast, read_sector
+                        long    SET_MODE, SET_bitMode, SET_FREQ, GET_FREQ
+
+                        long    LOOP                    '' catch all      (optional if frontend handles it)
+
+cmsk                    long    SPI_FUNC_BITS
+/*
                         mov temp, mailbox
                         and temp, spiFuncBits           '' Mask away all bits but the function descriptor
 
@@ -158,7 +174,7 @@ func_launch_pad         jmp #0-0                        '' 0 is a placeholder - 
 
                         // Default: Return to loop
                         jmp #LOOP
-
+*/
 /* FUNCTION: PropWare::SPI::set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA_CONFIRM                 '' Read in the mode
