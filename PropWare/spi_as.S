@@ -106,7 +106,7 @@ table                   mov SEND, SEND
                         mov SET_FREQ, SET_FREQ
                         mov GET_FREQ, GET_FREQ
 
-                        mov LOOP, LOOP                 '' catch all      (optional if frontend handles it)
+                        mov LOOP, LOOP                  '' catch all      (optional if frontend handles it)
 
 cmsk                    long    SPI_FUNC_BITS
 /*
