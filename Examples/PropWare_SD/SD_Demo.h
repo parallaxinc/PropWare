@@ -41,20 +41,13 @@
 //#define TEST_WRITE
 #define TEST_SHELL
 
-#define USE_PRINTF
-
-#ifdef USE_PRINTF
-#include <tinyio.h>
-#else
-#include <simpletext.h>
-#endif
-
 // Includes
 #include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/sd.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
+#include <simpletext.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI        PropWare::Port::P0

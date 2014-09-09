@@ -33,7 +33,7 @@ set(CMAKE_ASM_COMPILER ${GCC_PATH}/propeller-elf-gcc${GCC_SUFFIX})
 #set(CMAKE_RANLIB ${GCC_PATH}/propeller-elf-ranlib${GCC_SUFFIX})
 #set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy${GCC_SUFFIX})
 #set(CMAKE_OBJDUMP ${GCC_PATH}/propeller-elf-objdump${GCC_SUFFIX})
-#set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load${GCC_SUFFIX})
+set(CMAKE_ELF_LOADER ${GCC_PATH}/propeller-load${GCC_SUFFIX})
 
 set(CMAKE_COGC_COMPILER    ${CMAKE_C_COMPILER})
 set(CMAKE_COGCXX_COMPILER  ${CMAKE_CXX_COMPILER})

@@ -1,4 +1,4 @@
-CMake For PropWare
+CMake for PropWare
 ===========================
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
@@ -6,28 +6,28 @@ Remember that PropWare uses CMake 3.0.
 
 Bare Minimum
 ------------
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-#############################################################################
-### Template code. Do not modify                                            #
-                                                                            #
-cmake_minimum_required (VERSION 3.0.0)                                      #
-# Aside from cmake_minimum_required, this must be the first two lines       #
-# of the file                                                               #
-file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                       #
-set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)         #
-#############################################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
+################################################################################
+### Template code. Do not modify                                               #
+                                                                               #
+cmake_minimum_required (VERSION 3.0.0)                                         #
+# Aside from cmake_minimum_required, this must be the first two lines          #
+# of the file                                                                  #
+file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
+include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
+################################################################################
 
 project(HelloWorld)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-#############################################################################
-### Template code. Do not modify                                            #
-                                                                            #
-# This must be the last line of the file                                    #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                        #
-#############################################################################
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+################################################################################
+### Template code. Do not modify                                               #
+                                                                               #
+# This must be the last line of the file                                       #
+include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
+################################################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Note the two sections marked as "Template code." Make sure these two pieces begin and end each of your
   CMakeLists.txt files. They load the standard Propeller settings for your project.
 * Next we name our project: `project(HelloWorld)`. This name can be anything you'd like so long as there is no 
@@ -52,16 +52,16 @@ following files:
 We're also going to compile all ECOGC files with the `--bogus` flag because... we can.
 
 Our CMakeLists.txt file might look something like this:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-#############################################################################
-### Template code. Do not modify                                            #
-                                                                            #
-cmake_minimum_required (VERSION 3.0.0)                                      #
-# Aside from cmake_minimum_required, this must be the first two lines       #
-# of the file                                                               #
-file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                       #
-set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)         #
-#############################################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
+################################################################################
+### Template code. Do not modify                                               #
+                                                                               #
+cmake_minimum_required (VERSION 3.0.0)                                         #
+# Aside from cmake_minimum_required, this must be the first two lines          #
+# of the file                                                                  #
+file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
+include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
+################################################################################
 
 set(BOARD QUICKSTART)
 set(MODEL cmm)
@@ -76,13 +76,13 @@ add_executable(${PROJECT_NAME}
     avionics.S
     rf_transceiver.ecogc)
 
-#############################################################################
-### Template code. Do not modify                                            #
-                                                                            #
-# This must be the last line of the file                                    #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                        #
-#############################################################################
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+################################################################################
+### Template code. Do not modify                                               #
+                                                                               #
+# This must be the last line of the file                                       #
+include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
+################################################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Common CMake variables in PropWare 
 * BOARD: The `BOARD` variable can be used to identify your physical hardware. PropGCC uses this to determine
@@ -132,11 +132,55 @@ Used to identify your physical hardware. PropGCC uses this to determine how many
 RS232, and other functions. Any board available in SimpleIDE is available here as well - they are reading from the same 
 configuration pool (`<PropGCC root>/propeller-load`).
 
+Options
+-------
+
+CMake options allow you to have fine-grain control over what compilation flags are used by default. Most users will 
+want to leave all options set to their default values, but those doing special projects or using conflict libraries 
+can change the options to suit their needs.
+
+### 32_BIT_DOUBLES
+\[default: ON\]
+
+Sets all variables of type `double` to use IEEE 32-bit floating point instead of 64. Equivalent to adding 
+"-m32bit-doubles" to `COMMON_FLAGS`. Required for compatibility with numerous functions in the Simple library.
+
+### AUTO_C_STD
+\[default: ON\]
+
+Sets the C standard to C99. Equivalent to adding "-std=c99" to `C_FLAGS`
+
+### AUTO_CXX_STD
+\[default: ON\]
+
+Sets the C++ standard to gnu++0x. Equivalent to adding "-std=gnu++0x" to `CXX_FLAGS`.
+
+### LINK_LIBPROPELLER
+\[default: ON\]
+
+Link the target executable with the libpropeller library. 
+
+### LINK_PROPWARE
+\[default: ON\]
+
+Link the target executable with the PropWare library.
+
+### LINK_SIMPLE
+\[default: ON\]
+
+Link the target executable with the Simple library.
+
+### LINK_TINY
+\[default: OFF\]
+
+Link the target executable with the tiny library. Note: tiny has been deprecated by Parallax in favor of `print` and 
+`printi`.
+
 Default Compile Flags
 ---------------------
-Default compile flags are set in `<PropWare root>/CMakeModules/Platform/Generic-gcc-Propeller.cmake` and cannot be 
-modified by a project directory. To change default flags, the `Generic-gcc-Propeller.cmake` file must be modified 
-directly.
+With all options left at their defaults, the following flags will be used. There is currently no option to disable 
+`-fno-threadsafe-statics -fno-rtti`. If such an option is required, let the [author](mailto:david@zemon.name) know 
+and an option will be added. It is believed that these flags will always be desired by Propeller users.
 
 * ASM: None
 * C: `-Wall -m32bit-doubles -std=c99`

@@ -17,9 +17,8 @@ import propwareUtils
 class ImportSimple:
     PROPWARE_ROOT = os.path.abspath('..') + os.sep
     CHEATER_DIR = PROPWARE_ROOT + 'simple' + os.sep
-    LEARN_DOWNLOAD_LINK = 'https://googledrive.com/host/0B0Hlguyerv4QQ0E2UVZSTTQxMEU/Learn-Folder-Updated-2014-07-30' \
-                          '.zip'
-    LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'Learn' + os.sep + 'Learn' + os.sep
+    LEARN_DOWNLOAD_LINK = 'http://david.zemon.name/downloads/Learn-current.zip'
+    LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'Learn' + str(os.sep)
 
     def __init__(self):
         self.libraries = {}

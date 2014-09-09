@@ -33,9 +33,13 @@
 #ifndef PROPWARE_H
 #define PROPWARE_H
 
+
+
+
 #define SECOND              ((unsigned long long) CLKFREQ)
 #define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
 #define MICROSECOND         ((unsigned long long) (MILLISECOND / 1000))
+
 
 #define BIT_0               0x1
 #define BIT_1               0x2

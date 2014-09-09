@@ -27,10 +27,10 @@
 
 // Main function
 int main () {
+    const uint16_t DIVISOR = 1024 / 8;
     PropWare::ErrorCode err;
     uint16_t data;
     uint32_t loopCounter;
-    uint16_t divisor = 1024 / 8;
     uint8_t scaledValue, i;
     uint32_t ledOutput;
     PropWare::SPI *spi = PropWare::SPI::getInstance();
@@ -40,7 +40,7 @@ int main () {
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if ((err = adc.start(MOSI, MISO, SCLK, CS)))
-        error(err);
+        error(spi, err);
 
     // Retrieve the SPI module and manually set the clock frequency
     spi->set_clock(FREQ);
@@ -52,7 +52,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    puts("Welcome to the MCP3000 demo!\n");
+    printf("Welcome to the MCP3000 demo!\n");
 
     while (1) {
         loopCounter = (uint32_t) (SECOND / 2 + CNT);
@@ -61,10 +61,10 @@ int main () {
         // millisecond of total period
         while (abs(loopCounter - CNT) > MILLISECOND) {
             if ((err = adc.read(CHANNEL, &data)))
-                error(err);
+                error(spi, err);
 
             // Turn on LEDs proportional to the analog value
-            scaledValue = (uint8_t) ((data + divisor / 2 - 1) / divisor);
+            scaledValue = (uint8_t) ((data + DIVISOR / 2 - 1) / DIVISOR);
             ledOutput = 0;
             for (i = 0; i < scaledValue; ++i)
                 ledOutput = (ledOutput << 1) | 1;
@@ -75,8 +75,13 @@ int main () {
     }
 }
 
-void error (const PropWare::ErrorCode err) {
+void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+
+    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
+        spi->print_error_str((PropWare::SPI::ErrorCode const) err);
+    else
+        printf("Unknown error: %u", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

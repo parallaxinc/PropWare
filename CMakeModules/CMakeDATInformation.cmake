@@ -24,6 +24,7 @@ set(CMAKE_DAT_COMPILE_OBJECT
 "${PROPWARE_PATH}/util/datSymbolConverter.py -i <SOURCE> -o <OBJECT> --objcopy=\"${CMAKE_OBJCOPY}\"")
 
 mark_as_advanced(
+    CMAKE_DAT_COMPILER
     CMAKE_DAT_FLAGS
 )
 

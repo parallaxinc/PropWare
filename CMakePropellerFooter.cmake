@@ -1,35 +1,44 @@
 include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
 
-# Create library dependencies
-add_library(LIBPROPELLER_LIB
-        STATIC IMPORTED)
-add_library(SIMPLE_LIB
-        STATIC IMPORTED)
-add_library(PROPWARE_LIB
-        STATIC IMPORTED)
-
 include_directories("${PROPWARE_PATH}")
 
-# Set locations for library dependencies
-set_target_properties(LIBPROPELLER_LIB
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${PROPWARE_PATH}/bin/libpropeller/source/${MODEL}/libLibpropeller_${MODEL}.a)
-set_target_properties(SIMPLE_LIB
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${PROPWARE_PATH}/bin/simple/${MODEL}/libSimple_${MODEL}.a)
-set_target_properties(PROPWARE_LIB
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${PROPWARE_PATH}/bin/PropWare/${MODEL}/libPropWare_${MODEL}.a)
+################################################################################
+# Create library dependencies
 
-# Add links to all four major components
-target_link_libraries(${PROJECT_NAME}
-        LIBPROPELLER_LIB
-        SIMPLE_LIB
-        PROPWARE_LIB
-        tiny)
+if (LINK_LIBPROPELLER)
+    add_library(LIBPROPELLER_LIB STATIC IMPORTED)
+    set_target_properties(LIBPROPELLER_LIB
+            PROPERTIES
+            IMPORTED_LOCATION
+            ${PROPWARE_PATH}/bin/libpropeller/source/${MODEL}/libLibpropeller_${MODEL}.a)
+    target_link_libraries(${PROJECT_NAME} LIBPROPELLER_LIB)
+endif ()
+
+if (LINK_SIMPLE)
+    add_library(SIMPLE_LIB STATIC IMPORTED)
+    set_target_properties(SIMPLE_LIB
+            PROPERTIES
+            IMPORTED_LOCATION
+            ${PROPWARE_PATH}/bin/simple/${MODEL}/libSimple_${MODEL}.a)
+    target_link_libraries(${PROJECT_NAME}
+            SIMPLE_LIB)
+endif ()
+
+if (LINK_PROPWARE)
+    add_library(PROPWARE_LIB STATIC IMPORTED)
+    set_target_properties(PROPWARE_LIB
+            PROPERTIES
+            IMPORTED_LOCATION
+            ${PROPWARE_PATH}/bin/PropWare/${MODEL}/libPropWare_${MODEL}.a)
+    target_link_libraries(${PROJECT_NAME} PROPWARE_LIB)
+endif ()
+
+if (LINK_TINY)
+    target_link_libraries(${PROJECT_NAME} tiny)
+endif ()
+
+# End library dependencies
+################################################################################
 
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
 
@@ -42,10 +51,10 @@ if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     # Add target for run (load to RAM and start terminal)
     add_custom_target(debug
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -t
-            DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME})
 
     # Add target for run (load to EEPROM, do not start terminal)
     add_custom_target(run
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -e
-            DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.elf)
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME})
 endif()
