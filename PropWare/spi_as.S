@@ -90,7 +90,7 @@ LOOP                    // Retrieve a command
                         call #READ_CMD
 
                         and cmsk, mailbox
-                        max cmsk, #9                    '' avoid overflow
+                        max cmsk, #SPI_FUNC_CATCH_ALL   '' avoid overflow
                         add jump, cmsk
 
                         mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
