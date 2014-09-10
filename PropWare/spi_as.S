@@ -90,92 +90,27 @@ LOOP                    // Retrieve a command
                         call #READ_CMD
 
                         and cmsk, mailbox
-                        max cmsk, #9                    '' avoid overflow (optional if frontend handles it)
+                        max cmsk, #9                    '' avoid overflow
                         add jump, cmsk
 
                         mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
 
 jump                    jmpret jump, table
 
-table                   long SEND, READ, SEND_fast, READ_fast, read_sector
-                        long SET_MODE, SET_bitMode, SET_FREQ, GET_FREQ
+table                   long SEND
+                        long READ
+                        long SEND_fast
+                        long READ_fast
+                        long read_sector
+                        long SET_MODE
+                        long SET_bitMode
+                        long SET_FREQ
+                        long GET_FREQ
 
-                        long LOOP                       '' catch all      (optional if frontend handles it)
+                        long LOOP                       '' catch all
 
 cmsk                    long    SPI_FUNC_BITS
-/*
-                        mov temp, mailbox
-                        and temp, spiFuncBits           '' Mask away all bits but the function descriptor
 
-/*
-                        max temp, #SPI_FUNC_CATCH_ALL   '' avoid overflow
-
-                        mov temp2, #func_launch_pad
-                        shr temp2, #2                   '' Divide address by four to yield long address instead of byte address
-                        add temp2, #1
-                        add temp2, temp
-                        movs func_launch_pad, temp2
-
-endless_loop            jmp #endless_loop
-
-                        add temp, #1                    '' Our commands are 0-indexed but a jump value of 0 would be an endless loop, jumping back to #jump every time
-                        movs func_launch_pad, temp
-
-func_launch_pad         jmp #0-0                        '' 0 is a placeholder - the value will be overwritten
-
-                        long    SEND
-                        long    READ
-                        long    SEND_fast
-                        long    READ_fast
-                        long    read_sector
-                        long    SET_MODE
-                        long    SET_bitMode
-                        long    SET_FREQ
-                        long    GET_FREQ
-
-                        long    LOOP                    '' catch all      (optional if frontend handles it)
-*/
-
-                        // Using "jmp" instead of "call" because all functions return by "jmp #LOOP" instead of "ret"
-                        // If command is "Send"
-                        cmp temp, #SPI_FUNC_SEND wz
-        if_z            jmp #SEND
-
-                        // If command is "Read"
-                        cmp temp, #SPI_FUNC_READ wz
-        if_z            jmp #READ
-
-                        // If command is "Send fast"
-                        cmp temp, #SPI_FUNC_SEND_FAST wz
-        if_z            jmp #SEND_fast
-
-                        // If command is "Read fast"
-                        cmp temp, #SPI_FUNC_READ_FAST wz
-        if_z            jmp #READ_fast
-
-                        // If command is "Read sector"
-                        cmp temp, #SPI_FUNC_READ_SECTOR wz
-        if_z            jmp #read_sector
-
-                        // If command is "Set mode"
-                        cmp temp, #SPI_FUNC_SET_MODE wz
-        if_z            jmp #SET_MODE
-
-                        // If command is "Set bitMode"
-                        cmp temp, #SPI_FUNC_SET_bitMode wz
-        if_z            jmp #SET_bitMode
-
-                        // If command is "Set clock"
-                        cmp temp, #SPI_FUNC_SET_FREQ wz
-        if_z            jmp #SET_FREQ
-
-                        // If command is "Get clock"
-                        cmp temp, #SPI_FUNC_GET_FREQ wz
-        if_z            jmp #GET_FREQ
-
-                        // Default: Return to loop
-                        jmp #LOOP
-*/
 /* FUNCTION: PropWare::SPI::set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit
                         call #READ_DATA_CONFIRM                 '' Read in the mode
