@@ -108,6 +108,16 @@ def which(program):
     return None
 
 
+def find(name, path):
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            return os.path.join(root, name)
+
+    # Try adding '.exe' to the end and run again
+    if Windows == get_os():
+        return find(name + '.exe', path)
+
+
 def check_proper_working_dir():
     if 'createBinaryDistr.py' not in os.listdir('.'):
         raise IncorrectStartingDirectoryException()
