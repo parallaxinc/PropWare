@@ -54,6 +54,7 @@
 
 #define SD_SECTOR_SIZE          512
 
+                        .pasm
                         .section spi_as.cog, "ax"
                         .compress off
 
@@ -96,17 +97,10 @@ LOOP                    // Retrieve a command
 
 jump                    jmpret jump, table
 
-table                   mov SEND, SEND
-                        mov READ, READ
-                        mov SEND_fast, SEND_fast
-                        mov READ_fast, READ_fast
-                        mov read_sector, read_sector
-                        mov SET_MODE, SET_MODE
-                        mov SET_bitMode, SET_bitMode
-                        mov SET_FREQ, SET_FREQ
-                        mov GET_FREQ, GET_FREQ
+table                   long SEND, READ, SEND_fast, READ_fast, read_sector
+                        long SET_MODE, SET_bitMode, SET_FREQ, GET_FREQ
 
-                        mov LOOP, LOOP                  '' catch all      (optional if frontend handles it)
+                        long LOOP                       '' catch all      (optional if frontend handles it)
 
 cmsk                    long    SPI_FUNC_BITS
 /*
