@@ -21,6 +21,7 @@ add_library(${PROJECT_NAME} STATIC
         ../port
         ../PropWare
         ../sd
+        ../seeedtft
         ../spi
         ../spi_as.S
         ../uart)

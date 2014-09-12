@@ -350,7 +350,7 @@ class SimplePort: public Port {
          * @param[in]   value   value to be bit-masked and then written to the
          *                      port
          */
-        void write (uint32_t value) {
+        void write (uint32_t value) const {
             this->Port::write_fast(value << this->m_firstPinNum);
         }
 

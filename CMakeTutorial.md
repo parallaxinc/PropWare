@@ -46,13 +46,16 @@ Breakdown:
   to your Propeller. PropWare provides some extra "targets" to make your life even easier though. Try typing `make 
   debug` to write your program to RAM and open a terminal (like Parallax's PST) or `make run` to write your program to
   EEPROM.
+  
+CMakeLists.txt
+--------------
 
-Curses CMake
-------------
+As described in `Creating a PropWare Application`, the CMakeLists.txt file is required for all CMake (and therefore 
+PropWare) applications. The file must be named "CMakeLists.txt" - character for character.
 
-Curses is a library that provides a psuedo-graphical user interface at the command line. Curses CMake (or ccmake) allows
-you to easily configure some options for your project before compiling it. Try running `ccmake -G "Unix Makefiles 
-<source directory>` next time and take a look.
+The contents of the file are simple - many useful tips can be gleaned from both `Creating a PropWare Application` and
+`CMake for PropWare`. Here, I'll go over some generic pieces of information about CMake that are not specific to 
+PropWare.
 
 CMakeCache.txt
 --------------
@@ -62,6 +65,13 @@ a lot of times, you might change a setting without CMake taking notice. When thi
 `CMakeCache.txt` file and rerun your CMake command (as given above). As a bonus to using the out-of-source build
 technique you can also just delete your entire build directory and start over - then you know with 100% confidence that
 no leftover settings will linger around to haunt you.
+
+Curses CMake
+------------
+
+Curses is a library that provides a psuedo-graphical user interface at the command line. Curses CMake (or ccmake) allows
+you to easily configure some options for your project before compiling it. Try running `ccmake -G "Unix Makefiles 
+<source directory>` next time and take a look.
 
 Make Targets
 ------------
