@@ -92,109 +92,39 @@ namespace PropWare {
 
             waitcnt(100 * MILLISECOND + CNT);
 
-            this->sendCommand(0x0001);
-            this->sendData(0x0100);
-            this->sendCommand(0x0002);
-            this->sendData(0x0700);
-            this->sendCommand(0x0003);
-            this->sendData(0x1030);
-            this->sendCommand(0x0004);
-            this->sendData(0x0000);
-            this->sendCommand(0x0008);
-            this->sendData(0x0302);
-            this->sendCommand(0x000A);
-            this->sendData(0x0000);
-            this->sendCommand(0x000C);
-            this->sendData(0x0000);
-            this->sendCommand(0x000D);
-            this->sendData(0x0000);
-            this->sendCommand(0x000F);
-            this->sendData(0x0000);
+            this->sendCommandSeq((uint8_t *) this->init_seq_cmd1,
+                    (uint16_t *) this->init_seq_dat1);
 
             waitcnt(100 * MILLISECOND + CNT);
 
-            this->sendCommand(0x0030);
-            this->sendData(0x0000);
-            this->sendCommand(0x0031);
-            this->sendData(0x0405);
-            this->sendCommand(0x0032);
-            this->sendData(0x0203);
-            this->sendCommand(0x0035);
-            this->sendData(0x0004);
-            this->sendCommand(0x0036);
-            this->sendData(0x0B07);
-            this->sendCommand(0x0037);
-            this->sendData(0x0000);
-            this->sendCommand(0x0038);
-            this->sendData(0x0405);
-            this->sendCommand(0x0039);
-            this->sendData(0x0203);
-            this->sendCommand(0x003c);
-            this->sendData(0x0004);
-            this->sendCommand(0x003d);
-            this->sendData(0x0B07);
-            this->sendCommand(0x0020);
-            this->sendData(0x0000);
-            this->sendCommand(0x0021);
-            this->sendData(0x0000);
-            this->sendCommand(0x0050);
-            this->sendData(0x0000);
-            this->sendCommand(0x0051);
-            this->sendData(0x00ef);
-            this->sendCommand(0x0052);
-            this->sendData(0x0000);
-            this->sendCommand(0x0053);
-            this->sendData(0x013f);
+            this->sendCommandSeq((uint8_t *) this->init_seq_cmd2,
+                    (uint16_t *) this->init_seq_dat2);
 
             waitcnt(100 * MILLISECOND + CNT);
 
-            this->sendCommand(0x0060);
-            this->sendData(0xa700);
-            this->sendCommand(0x0061);
-            this->sendData(0x0001);
-            this->sendCommand(0x0090);
-            this->sendData(0x003A);
-            this->sendCommand(0x0095);
-            this->sendData(0x021E);
-            this->sendCommand(0x0080);
-            this->sendData(0x0000);
-            this->sendCommand(0x0081);
-            this->sendData(0x0000);
-            this->sendCommand(0x0082);
-            this->sendData(0x0000);
-            this->sendCommand(0x0083);
-            this->sendData(0x0000);
-            this->sendCommand(0x0084);
-            this->sendData(0x0000);
-            this->sendCommand(0x0085);
-            this->sendData(0x0000);
-            this->sendCommand(0x00FF);
-            this->sendData(0x0001);
-            this->sendCommand(0x00B0);
-            this->sendData(0x140D);
-            this->sendCommand(0x00FF);
-            this->sendData(0x0000);
+            this->sendCommandSeq((uint8_t *) this->init_seq_cmd3,
+                    (uint16_t *) this->init_seq_dat3);
 
             waitcnt(100 * MILLISECOND + CNT);
 
-            this->sendCommand(0x0007);
+            this->sendCommand(0x07);
             this->sendData(0x0133);
 
             waitcnt(50 * MILLISECOND + CNT);
 
             this->exitStandBy();
-            this->sendCommand(0x0022);
+            this->sendCommand(0x22);
 
             //paint screen black
             this->paintScreenBlack();
         }
 
-        void paintScreenBlack () {
+        virtual void paintScreenBlack () const {
             for (unsigned int f = 0; f < 76800; f++)
                 this->sendData(PropWare::SeeedTFT::BLACK);
         }
 
-        void exitStandBy () {
+        void exitStandBy () const {
             this->sendCommand(0x0010);
             this->sendData(0x14E0);
             waitcnt(100 * MILLISECOND + CNT);
@@ -377,6 +307,13 @@ namespace PropWare {
             this->m_cs.toggle();
         }
 
+        virtual void sendCommandSeq (uint8_t *commands, uint16_t *data) const {
+            for (uint16_t i = 0; 0xff != commands[i]; ++i) {
+                this->sendCommand(commands[i]);
+                this->sendData(data[i]);
+            }
+        }
+
     protected:
         PropWare::SimplePort m_dataPort;
 
@@ -386,6 +323,13 @@ namespace PropWare {
         PropWare::Pin m_wr;
 
         uint8_t m_displayDirection;
+
+        static const uint8_t init_seq_cmd1[];
+        static const uint16_t init_seq_dat1[];
+        static const uint8_t init_seq_cmd2[];
+        static const uint16_t init_seq_dat2[];
+        static const uint8_t init_seq_cmd3[];
+        static const uint16_t init_seq_dat3[];
 
         static const uint8_t SIMPLE_FONT[][8];
     };

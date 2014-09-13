@@ -32,10 +32,9 @@
 #define ASM_OBJ_FILE
 #include <PropWare/PropWare.h>
 
-#define pmb_idle      0
-#define pmb_sendCMD   1
-#define pmb_sendDATA  2
-#define pmb_repeat    3
+#define FUNC_SEND_CMD   1
+#define FUNC_SEND_DATA  2
+#define FUNC_REPEAT     3
 
 ' PAR passes the address of the Long mailbox.
 '
@@ -66,12 +65,12 @@ tpi_loop      mov       tmp,par
               mov       tmp,pmb_data
               and       tmp,#$FF
 
-              cmp       tmp,#pmb_repeat wz
+              cmp       tmp,#FUNC_REPEAT wz
         if_z  shr       pmb_data,#8
         if_z  mov       rcount, pmb_data
         if_z  jmp       #tpi_clear
 
-              cmp       tmp,#pmb_sendCMD wz
+              cmp       tmp,#FUNC_SEND_CMD wz
         if_nz jmp       #tpi_notCMD
               '
 dloop         andn      outa,cs_bit_mask
@@ -95,7 +94,7 @@ dloop         andn      outa,cs_bit_mask
               or        outa,cs_bit_mask
               jmp       #tpi_clear
 
-tpi_notCMD    cmp       tmp,#pmb_sendDATA wz
+tpi_notCMD    cmp       tmp,#FUNC_SEND_DATA wz
         if_nz jmp       #tpi_clear
 
 :loop         andn      outa,cs_bit_mask

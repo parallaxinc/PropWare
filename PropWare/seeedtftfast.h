@@ -47,21 +47,31 @@ namespace PropWare {
             SeeedTFT::start(lsbDataPin, csMask, rdMask, wrMask, rsMask);
         }
 
+        virtual void paintScreenBlack () const {
+            this->sendMultiData(PropWare::SeeedTFT::BLACK, 38400 * 2);
+        }
+
     protected:
         virtual void sendCommand (const uint_fast8_t index) const {
-            mailbox = index << 8 + pmb_sendCMD;
+            PropWare::SeeedTFTFast::mailbox = index << 8 + SEND_CMD;
         }
 
         virtual void sendData (const uint_fast16_t data) const {
-            mailbox = data << 8 + pmb_sendDATA;
+            PropWare::SeeedTFTFast::mailbox = data << 8 + SEND_DATA;
+        }
+
+        virtual void sendMultiData(const uint16_t data,
+                const size_t len) const {
+            PropWare::SeeedTFTFast::mailbox = (len - 1) << 8 + REPEAT;
+            this->sendData(data);
+            while (0 != PropWare::SeeedTFTFast::mailbox);
         }
 
     protected:
         typedef enum {
-            pmb_idle,
-            pmb_sendCMD,
-            pmb_sendDATA,
-            pmb_repeat
+            SEND_CMD = 1,
+            SEND_DATA,
+            REPEAT
         } SeeedTftAsmFunc;
 
         int8_t m_cog;
