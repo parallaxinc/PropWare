@@ -36,6 +36,9 @@ namespace PropWare {
 
     class SeeedTFTFast : public PropWare::SeeedTFT {
     public:
+        SeeedTFTFast() : PropWare::SeeedTFT() {
+        };
+
         virtual void start (const PropWare::Pin::Mask lsbDataPin,
                 const PropWare::Port::Mask csMask,
                 const PropWare::Port::Mask rdMask,
@@ -51,18 +54,42 @@ namespace PropWare {
             this->sendMultiData(PropWare::SeeedTFT::BLACK, 38400 * 2);
         }
 
+        virtual void drawVerticalLine (const uint16_t posX, const uint16_t posY,
+                uint16_t length, const uint16_t color) const {
+            this->setXY(posX, posY);
+            this->setOrientation(PropWare::SeeedTFT::VERTICAL);
+
+            if (length + posY > PropWare::SeeedTFT::MAX_Y)
+                length = MAX_Y - posY;
+
+            this->sendMultiData(color, length);
+        }
+
+        virtual void drawHorizontalLine (const uint16_t posX,
+                const uint16_t posY, uint16_t length,
+                const uint16_t color) const {
+            this->setXY(posX, posY);
+            this->setOrientation(PropWare::SeeedTFT::HORIZONTAL);
+
+            if (length + posY > PropWare::SeeedTFT::MAX_X)
+                length = MAX_X - posX;
+
+            this->sendMultiData(color, length);
+        }
+
     protected:
-        virtual void sendCommand (const uint_fast8_t index) const {
+        virtual void sendCommand (const uint8_t index) const {
             PropWare::SeeedTFTFast::mailbox = index << 8 + SEND_CMD;
         }
 
-        virtual void sendData (const uint_fast16_t data) const {
+        virtual void sendData (const uint16_t data) const {
             PropWare::SeeedTFTFast::mailbox = data << 8 + SEND_DATA;
         }
 
         virtual void sendMultiData(const uint16_t data,
                 const size_t len) const {
-            PropWare::SeeedTFTFast::mailbox = (len - 1) << 8 + REPEAT;
+            if (1 < len)
+                PropWare::SeeedTFTFast::mailbox = (len - 1) << 8 + REPEAT;
             this->sendData(data);
             while (0 != PropWare::SeeedTFTFast::mailbox);
         }

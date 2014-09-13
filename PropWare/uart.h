@@ -900,8 +900,8 @@ class FullDuplexUART: public PropWare::SimplexUART {
                     return PropWare::UART::PARITY_ERROR;
             } else if (evenParityResult == (rxVal & this->m_parityMask))
                 return PropWare::UART::PARITY_ERROR;
-            else
-                return PropWare::UART::NO_ERROR;
+
+            return PropWare::UART::NO_ERROR;
         }
 
     protected:

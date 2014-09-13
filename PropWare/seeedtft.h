@@ -120,7 +120,9 @@ namespace PropWare {
         }
 
         virtual void paintScreenBlack () const {
-            for (unsigned int f = 0; f < 76800; f++)
+            const uint32_t totalPixels = PropWare::SeeedTFT::MAX_X *
+                    PropWare::SeeedTFT::MAX_Y;
+            for (unsigned int pixel = 0; pixel < totalPixels; ++pixel)
                 this->sendData(PropWare::SeeedTFT::BLACK);
         }
 
@@ -150,12 +152,12 @@ namespace PropWare {
             this->sendCommand(0x0022);//Start to write to display RAM
         }
 
-        void drawVerticalLine (const uint16_t poX, const uint16_t poY,
+        virtual void drawVerticalLine (const uint16_t posX, const uint16_t posY,
                 uint16_t length, const uint16_t color) const {
-            this->setXY(poX, poY);
+            this->setXY(posX, posY);
             this->setOrientation(PropWare::SeeedTFT::VERTICAL);
-            if (length + poY > MAX_Y) {
-                length = MAX_Y - poY;
+            if (length + posY > MAX_Y) {
+                length = MAX_Y - posY;
             }
 
             for (unsigned int i = 0; i < length; i++) {
@@ -163,17 +165,18 @@ namespace PropWare {
             }
         }
 
-        void drawHorizontalLine (const uint16_t poX, const uint16_t poY,
-                uint16_t length, const uint16_t color) const {
-            this->setXY(poX, poY);
+        virtual void drawHorizontalLine (const uint16_t posX,
+                const uint16_t posY, uint16_t length,
+                const uint16_t color) const {
+            this->setXY(posX, posY);
             this->setOrientation(PropWare::SeeedTFT::HORIZONTAL);
-            if (length + poX > MAX_X)
-                length = MAX_X - poX;
+            if (length + posX > MAX_X)
+                length = MAX_X - posX;
             for (uint16_t i = 0; i < length; i++)
                 sendData(color);
         }
 
-        void drawRectangle (const uint16_t poX, const uint16_t poY,
+        virtual void drawRectangle (const uint16_t poX, const uint16_t poY,
                 const uint16_t length, const uint16_t width,
                 const uint16_t color) const {
             this->drawHorizontalLine(poX, poY, length, color);
@@ -275,7 +278,7 @@ namespace PropWare {
         }
 
     protected:
-        virtual void sendCommand (const uint_fast8_t index) const {
+        virtual void sendCommand (const uint8_t index) const {
             this->m_cs.low();
             this->m_rs.low();
             this->m_rd.high();
@@ -291,7 +294,7 @@ namespace PropWare {
             this->m_cs.toggle();
         }
 
-        virtual void sendData (const uint_fast16_t data) const {
+        virtual void sendData (const uint16_t data) const {
             this->m_cs.low();
             this->m_rs.high();
             this->m_rd.high();
@@ -324,6 +327,7 @@ namespace PropWare {
 
         uint8_t m_displayDirection;
 
+    protected:
         static const uint8_t init_seq_cmd1[];
         static const uint16_t init_seq_dat1[];
         static const uint8_t init_seq_cmd2[];
