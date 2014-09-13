@@ -9,5 +9,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/seeedtft.h>
+#include <PropWare/seeedtftfast.h>
+#include <simpletext.h>
 
 #endif /* SEEEDTFT_DEMO_H_ */

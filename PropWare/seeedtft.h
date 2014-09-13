@@ -50,7 +50,7 @@ namespace PropWare {
         typedef enum {
             LEFT_TO_RIGHT,
             DOWN_TO_UP,
-            RIGHT_TO_LFET,
+            RIGHT_TO_LEFT,
             UP_TO_DOWN
         } DisplayDirection;
 
@@ -71,7 +71,7 @@ namespace PropWare {
             this->m_displayDirection = PropWare::SeeedTFT::LEFT_TO_RIGHT;
         };
 
-        void start (const PropWare::Pin::Mask lsbDataPin,
+        virtual void start (const PropWare::Pin::Mask lsbDataPin,
                 const PropWare::Port::Mask csMask,
                 const PropWare::Port::Mask rdMask,
                 const PropWare::Port::Mask wrMask,
@@ -189,16 +189,12 @@ namespace PropWare {
             this->paintScreenBlack();
         }
 
-#ifndef DOXYGEN_IGNORE
-
-        __attribute__ ((fcache))
-#endif
-        void paintScreenBlack (void) {
+        void paintScreenBlack () {
             for (unsigned int f = 0; f < 76800; f++)
                 this->sendData(PropWare::SeeedTFT::BLACK);
         }
 
-        void exitStandBy (void) {
+        void exitStandBy () {
             this->sendCommand(0x0010);
             this->sendData(0x14E0);
             waitcnt(100 * MILLISECOND + CNT);
@@ -206,10 +202,10 @@ namespace PropWare {
             this->sendData(0x0133);
         }
 
-        void setOrientation(const PropWare::SeeedTFT::Orientation
-        orientation) const {
+        void setOrientation (
+                const PropWare::SeeedTFT::Orientation orientation) const {
             this->sendCommand(0x03);
-            if(PropWare::SeeedTFT::HORIZONTAL == orientation)
+            if (PropWare::SeeedTFT::HORIZONTAL == orientation)
                 this->sendData(0x5030);
             else
                 this->sendData(0x5038);
@@ -247,7 +243,6 @@ namespace PropWare {
                 sendData(color);
         }
 
-
         void drawRectangle (const uint16_t poX, const uint16_t poY,
                 const uint16_t length, const uint16_t width,
                 const uint16_t color) const {
@@ -268,7 +263,7 @@ namespace PropWare {
                     case DOWN_TO_UP:
                         drawHorizontalLine(posX, posY - i, length, color);
                         break;
-                    case RIGHT_TO_LFET:
+                    case RIGHT_TO_LEFT:
                         drawHorizontalLine(posX, posY - i, length, color);
                         break;
                     case UP_TO_DOWN:
@@ -289,7 +284,8 @@ namespace PropWare {
                 ascii = '?';
 
             for (uint8_t i = 0; i < 8; i++) {
-                uint8_t temp = PropWare::SeeedTFT::SIMPLE_FONT[ascii - 0x20][i];
+                uint8_t temp =
+                        PropWare::SeeedTFT::SIMPLE_FONT[ascii - 0x20][i];
                 for (uint8_t j = 0; j < 8; j++) {
                     if ((temp >> j) & PropWare::BIT_0)
                         switch (this->m_displayDirection) {
@@ -303,7 +299,7 @@ namespace PropWare {
                                 this->fillRectangle(poX + j * size,
                                         poY - i * size, size, size, fgColor);
                                 break;
-                            case RIGHT_TO_LFET:
+                            case RIGHT_TO_LEFT:
                                 this->fillRectangle(poX - i * size,
                                         poY - j * size, size, size, fgColor);
                                 break;
@@ -334,7 +330,7 @@ namespace PropWare {
                         if (posY > 0)
                             posY -= size << 3; // Move cursor right
                         break;
-                    case RIGHT_TO_LFET:
+                    case RIGHT_TO_LEFT:
                         if (posX > 0)
                             posX -= size << 3; // Move cursor right
                         break;
@@ -349,11 +345,7 @@ namespace PropWare {
         }
 
     protected:
-#ifndef DOXYGEN_IGNORE
-
-        __attribute__ ((fcache))
-#endif
-        void sendCommand (const uint_fast8_t index) const {
+        virtual void sendCommand (const uint_fast8_t index) const {
             this->m_cs.low();
             this->m_rs.low();
             this->m_rd.high();
@@ -369,12 +361,7 @@ namespace PropWare {
             this->m_cs.toggle();
         }
 
-
-#ifndef DOXYGEN_IGNORE
-
-        __attribute__ ((fcache))
-#endif
-        void sendData (const uint_fast16_t data) const {
+        virtual void sendData (const uint_fast16_t data) const {
             this->m_cs.low();
             this->m_rs.high();
             this->m_rd.high();
