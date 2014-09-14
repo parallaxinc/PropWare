@@ -114,7 +114,7 @@ def find(name, path):
             return os.path.join(root, name)
 
     # Try adding '.exe' to the end and run again
-    if Windows == get_os():
+    if Windows() == get_os():
         return find(name + '.exe', path)
 
 
