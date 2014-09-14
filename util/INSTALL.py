@@ -396,7 +396,7 @@ class DebInstaller(NixInstaller):
     def __init__(self):
         super(DebInstaller, self).__init__()
 
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-Linux-i386.tar.gz'
+        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Linux-i386.tar.gz'
         self._cmake_root_dir_name = 'cmake-3.0.1-Linux-i386'
         self._propgcc_download_url = \
             'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0_2408-i686-linux.tar.gz'
@@ -477,7 +477,7 @@ class DebInstaller(NixInstaller):
 class MacInstaller(NixInstaller):
     def __init__(self):
         super(MacInstaller, self).__init__()
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-Darwin-universal.tar.gz'
+        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Darwin-universal.tar.gz'
         self._cmake_root_dir_name = 'cmake-3.0.1-Darwin64-universal'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz'
 
@@ -497,7 +497,7 @@ class MacInstaller(NixInstaller):
 class WinInstaller(Installer):
     def __init__(self):
         super(WinInstaller, self).__init__()
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-win32-x86.zip'
+        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-win32-x86.zip'
         self._cmake_root_dir_name = 'cmake-3.0.1-win32-x86'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0-i686-windows.zip'
         self._export_env_var = 'set'
