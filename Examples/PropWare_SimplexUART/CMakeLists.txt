@@ -14,7 +14,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-project(SimplexUART_Demo C CXX ASM COGC COGCXX ECOGC ECOGCXX)
+project(SimplexUART_Demo C CXX ASM)
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME})
 
