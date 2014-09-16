@@ -176,14 +176,14 @@ namespace PropWare {
                 sendData(color);
         }
 
-        virtual void drawRectangle (const uint16_t poX, const uint16_t poY,
+        virtual void drawRectangle (const uint16_t posX, const uint16_t posY,
                 const uint16_t length, const uint16_t width,
                 const uint16_t color) const {
-            this->drawHorizontalLine(poX, poY, length, color);
-            this->drawHorizontalLine(poX, poY + width, length, color);
+            this->drawHorizontalLine(posX, posY, length, color);
+            this->drawHorizontalLine(posX, posY + width, length, color);
 
-            this->drawVerticalLine(poX, poY, width, color);
-            this->drawVerticalLine(poX + length, poY, width, color);
+            this->drawVerticalLine(posX, posY, width, color);
+            this->drawVerticalLine(posX + length, posY, width, color);
         }
 
         void fillRectangle (uint16_t posX, uint16_t posY, uint16_t length,
@@ -215,15 +215,15 @@ namespace PropWare {
             // Check for unsupported character
             if ((0x20 > ascii) || (0x7e < ascii))
                 ascii = '?';
+            else
+                ascii -= 0x20;
 
             for (uint8_t i = 0; i < 8; i++) {
                 uint8_t temp =
-                        PropWare::SeeedTFT::SIMPLE_FONT[ascii - 0x20][i];
+                        PropWare::SeeedTFT::SIMPLE_FONT[ascii][i];
                 for (uint8_t j = 0; j < 8; j++) {
                     if ((temp >> j) & PropWare::BIT_0)
                         switch (this->m_displayDirection) {
-                            // TODO: Optimization can be performed by using
-                            // addition for `i * size` and `j * size`
                             case LEFT_TO_RIGHT:
                                 this->fillRectangle(poX + i * size,
                                         poY + j * size, size, size, fgColor);
@@ -252,7 +252,7 @@ namespace PropWare {
             while (*string) {
                 for (uint8_t i = 0; i < 8; i++)
                     this->drawChar(*string, posX, posY, size, fgColor);
-                *string++;
+                ++string;
 
                 switch (this->m_displayDirection) {
                     case LEFT_TO_RIGHT:
