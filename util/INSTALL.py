@@ -397,7 +397,7 @@ class DebInstaller(NixInstaller):
         super(DebInstaller, self).__init__()
 
         self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Linux-i386.tar.gz'
-        self._cmake_root_dir_name = 'cmake-3.0.1-Linux-i386'
+        self._cmake_root_dir_name = 'cmake-3.0.2-Linux-i386'
         self._propgcc_download_url = \
             'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0_2408-i686-linux.tar.gz'
         self._user_in_dialout = os.environ['USER'] in grp.getgrnam('dialout')[3]
@@ -478,7 +478,7 @@ class MacInstaller(NixInstaller):
     def __init__(self):
         super(MacInstaller, self).__init__()
         self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Darwin-universal.tar.gz'
-        self._cmake_root_dir_name = 'cmake-3.0.1-Darwin64-universal'
+        self._cmake_root_dir_name = 'cmake-3.0.2-Darwin64-universal'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz'
 
     def _warn_make_instructions(self):
@@ -498,7 +498,7 @@ class WinInstaller(Installer):
     def __init__(self):
         super(WinInstaller, self).__init__()
         self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-win32-x86.zip'
-        self._cmake_root_dir_name = 'cmake-3.0.1-win32-x86'
+        self._cmake_root_dir_name = 'cmake-3.0.2-win32-x86'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0-i686-windows.zip'
         self._export_env_var = 'set'
         self.cmd_sep = '&'
@@ -509,11 +509,12 @@ class WinInstaller(Installer):
 
     @classmethod
     def _set_env_var(cls, key, value):
-        super(WinInstaller, cls)._set_env_var(key, value)
-
         from winutils import set_environ_var
 
-        set_environ_var(key, value)
+        if key not in os.environ or 'PATH' == key:
+            set_environ_var(key, value)
+
+        super(WinInstaller, cls)._set_env_var(key, value)
 
     @classmethod
     def _add_root_env_var(cls, key, value):

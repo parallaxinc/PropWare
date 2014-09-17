@@ -18,11 +18,6 @@ set(CMAKE_ECOGC_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -mcog -xc -r")
 set(CMAKE_COGCXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -mcog -xc++ -r")
 set(CMAKE_ECOGCXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -mcog -xc++ -r")
 
-################################################################################
-### !!! IMPORTANT !!!
-### This file must exist in the cmake installation direction under
-### Modules/Platform/
-################################################################################
 # File names
 set(CMAKE_STATIC_LIBRARY_PREFIX lib)
 set(CMAKE_STATIC_LIBRARY_SUFFIX .a)
