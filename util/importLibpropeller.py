@@ -105,7 +105,8 @@ class ImportLibpropeller:
         is_whitelisted = file_name in ImportLibpropeller.WHITELISTED_SOURCE_FILES
         is_asm = propwareUtils.is_asm_file(file_name)
         is_new = file_name not in self.sourceFiles
-        return (is_whitelisted or is_asm) and is_new
+        is_not_symlink = not propwareUtils.is_symbolic_link_on_windows(file_name)
+        return (is_whitelisted or is_asm) and is_new and is_not_symlink
 
     @staticmethod
     def _clean():
