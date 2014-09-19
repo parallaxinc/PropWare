@@ -78,7 +78,8 @@ class ImportLibpropeller:
         with open(ImportLibpropeller.DESTINATION_SOURCES + ImportLibpropeller.SOURCE_OBJECT_LIST, 'w') as f:
             f.write("set(LIBPROPELLER_OBJECTS")
             for sourceFile in self.sourceFiles:
-                f.write('\n' + ' ' * 8 + '..' + str(os.sep) + sourceFile)
+                # DO NOT use os.sep here - CMake requires Unix-like file separators
+                f.write('\n' + ' ' * 8 + '../' + sourceFile)
             f.write(')')
 
     def _create_and_update_git(self):

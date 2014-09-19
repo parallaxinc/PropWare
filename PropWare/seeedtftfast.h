@@ -27,6 +27,7 @@
 #define SEEEDTFTFAST_H_
 
 #include <PropWare/seeedtft.h>
+#include <sys/thread.h>
 
 namespace PropWare {
     // Symbol for assembly instructions to start a new SPI cog

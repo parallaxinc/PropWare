@@ -339,10 +339,13 @@ def is_symbolic_link_on_windows(file_name):
 
     if Windows() == get_os():
         with open(file_name, 'r') as test_file:
-            for i, l in enumerate(test_file):
-                pass
-            # noinspection PyUnboundLocalVariable
-            return 1 == i + 1
+            lines = 0
+            try:
+                for i, l in enumerate(test_file):
+                    lines = i + 1
+            except UnicodeDecodeError:
+                return False
+            return 1 == lines
 
 
 class Menu(object):
