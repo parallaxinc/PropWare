@@ -68,7 +68,7 @@ class ImportLibpropeller:
             if not libpropeller_dst_root:
                 for f in files:
                     if self._is_worthy_file(f):
-                        shutil.copy2(root + '/' + f, ImportLibpropeller.DESTINATION_SOURCES + f)
+                        shutil.copy2(root + str(os.sep) + f, ImportLibpropeller.DESTINATION_SOURCES + f)
                         self.sourceFiles.append(f)
 
     def _make_obj_list(self):
@@ -78,7 +78,7 @@ class ImportLibpropeller:
         with open(ImportLibpropeller.DESTINATION_SOURCES + ImportLibpropeller.SOURCE_OBJECT_LIST, 'w') as f:
             f.write("set(LIBPROPELLER_OBJECTS")
             for sourceFile in self.sourceFiles:
-                f.write('\n' + ' ' * 8 + '../' + sourceFile)
+                f.write('\n' + ' ' * 8 + '..' + str(os.sep) + sourceFile)
             f.write(')')
 
     def _create_and_update_git(self):
