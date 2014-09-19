@@ -334,6 +334,9 @@ def is_64_bit():
 
 
 def is_symbolic_link_on_windows(file_name):
+    assert (isinstance(file_name, str))
+    assert (os.path.exists(file_name))
+
     if Windows() == get_os():
         with open(file_name, 'r') as test_file:
             for i, l in enumerate(test_file):
