@@ -122,6 +122,9 @@ def check_proper_working_dir():
     if 'createBinaryDistr.py' not in os.listdir('.'):
         raise IncorrectStartingDirectoryException()
 
+    if ' ' in os.path.abspath('..'):
+        raise SpaceInPropWarePathException()
+
 
 def is_propware_root(directory):
     assert (isinstance(directory, str))
@@ -406,6 +409,14 @@ class IncorrectStartingDirectoryException(Exception):
 
     def __str__(self):
         return 'Must be executed from within <propware root>/util'
+
+
+class SpaceInPropWarePathException(Exception):
+    def __str__(self):
+        return 'PropWare must exist in a directory without spaces'
+
+    def __init__(self, *args, **kwargs):
+        super(SpaceInPropWarePathException, self).__init__(*args, **kwargs)
 
 
 class CannotFindCMakeModulesPath(Exception):

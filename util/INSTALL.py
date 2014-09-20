@@ -204,8 +204,8 @@ class Installer(object):
         if download_new_cmake:
             self._cmake_parent = propwareUtils.get_user_input(
                 'CMake will be installed to %s. Press enter to continue or type another path to download to '
-                'a new directory.\n>>> ', os.path.isdir, '"%s" does not exist or is not a directory. Please '
-                                                         'provide an existing directory',
+                'a new directory.\n>>> ', Installer._is_acceptable_path, '"%s" is not a directory or contains a space. '
+                                                                         'Please provide an existing directory',
                 self._cmake_parent)
             self._add_cmake_to_path = True
 
@@ -236,8 +236,9 @@ class Installer(object):
         if download_new_propgcc:
             self._propgcc_parent = propwareUtils.get_user_input(
                 'PropGCC will be installed to %s. Press enter to continue or type another existing path to download '
-                'to a new directory.\n>>> ', os.path.isdir, '"%s" does not exists or is not a directory. Please '
-                                                            'provide an existing directory',
+                'to a new directory.\n>>> ', Installer._is_acceptable_path, '"%s" is not a directory or contains a '
+                                                                            'space. Please provide an existing '
+                                                                            'directory',
                 self._propgcc_parent)
             self._add_propgcc_to_path = True
 
@@ -321,6 +322,11 @@ class Installer(object):
             digits.append('0')
         version_tuple = (int(digits[0]), int(digits[1]), int(digits[2]))
         return version_tuple
+
+    @staticmethod
+    def _is_acceptable_path(path):
+        assert (isinstance(path, str))
+        return os.path.exists(path) and ' ' not in path
 
 
 class NixInstaller(Installer):
