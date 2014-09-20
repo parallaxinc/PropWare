@@ -194,7 +194,7 @@ class HD44780 {
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode start (const PropWare::Pin::Mask lsbDataPin,
+        void start (const PropWare::Pin::Mask lsbDataPin,
                 const Pin rs, const Pin rw, const Pin en,
                 const HD44780::Bitmode bitmode,
                 const HD44780::Dimensions dimensions) {
@@ -270,8 +270,6 @@ class HD44780 {
             this->cmd(arg);
 
             this->clear();
-
-            return 0;
         }
 
         /**

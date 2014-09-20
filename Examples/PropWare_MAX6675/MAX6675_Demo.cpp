@@ -38,8 +38,7 @@ int main () {
     if ((err = thermo.start(MOSI, MISO, SCLK, CS)))
         error(err);
 
-    if ((err = lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS)))
-        error(err);
+    lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the

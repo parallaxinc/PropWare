@@ -54,6 +54,7 @@
 
 #define SD_SECTOR_SIZE          512
 
+                        .pasm
                         .section spi_as.cog, "ax"
                         .compress off
 
@@ -87,77 +88,28 @@
 /*** MAIN LOOP ***/
 LOOP                    // Retrieve a command
                         call #READ_CMD
-                        mov temp, mailbox
-                        and temp, spiFuncBits           '' Mask away all bits but the function descriptor
 
-/*
-                        max temp, #SPI_FUNC_CATCH_ALL   '' avoid overflow
+                        and cmsk, mailbox
+                        max cmsk, #SPI_FUNC_CATCH_ALL   '' avoid overflow
+                        add jump, cmsk
 
-                        mov temp2, #func_launch_pad
-                        shr temp2, #2                   '' Divide address by four to yield long address instead of byte address
-                        add temp2, #1
-                        add temp2, temp
-                        movs func_launch_pad, temp2
+                        mov cmsk, spiFuncBits           '' restore mask (spiFuncBits == SPI_FUNC_BITS)
 
-endless_loop            jmp #endless_loop
+jump                    jmpret jump, table
 
-                        add temp, #1                    '' Our commands are 0-indexed but a jump value of 0 would be an endless loop, jumping back to #jump every time
-                        movs func_launch_pad, temp
+table                   long SEND
+                        long READ
+                        long SEND_fast
+                        long READ_fast
+                        long read_sector
+                        long SET_MODE
+                        long SET_bitMode
+                        long SET_FREQ
+                        long GET_FREQ
 
-func_launch_pad         jmp #0-0                        '' 0 is a placeholder - the value will be overwritten
+                        long LOOP                       '' catch all
 
-                        long    SEND
-                        long    READ
-                        long    SEND_fast
-                        long    READ_fast
-                        long    read_sector
-                        long    SET_MODE
-                        long    SET_bitMode
-                        long    SET_FREQ
-                        long    GET_FREQ
-
-                        long    LOOP                    '' catch all      (optional if frontend handles it)
-*/
-
-                        // Using "jmp" instead of "call" because all functions return by "jmp #LOOP" instead of "ret"
-                        // If command is "Send"
-                        cmp temp, #SPI_FUNC_SEND wz
-        if_z            jmp #SEND
-
-                        // If command is "Read"
-                        cmp temp, #SPI_FUNC_READ wz
-        if_z            jmp #READ
-
-                        // If command is "Send fast"
-                        cmp temp, #SPI_FUNC_SEND_FAST wz
-        if_z            jmp #SEND_fast
-
-                        // If command is "Read fast"
-                        cmp temp, #SPI_FUNC_READ_FAST wz
-        if_z            jmp #READ_fast
-
-                        // If command is "Read sector"
-                        cmp temp, #SPI_FUNC_READ_SECTOR wz
-        if_z            jmp #read_sector
-
-                        // If command is "Set mode"
-                        cmp temp, #SPI_FUNC_SET_MODE wz
-        if_z            jmp #SET_MODE
-
-                        // If command is "Set bitMode"
-                        cmp temp, #SPI_FUNC_SET_bitMode wz
-        if_z            jmp #SET_bitMode
-
-                        // If command is "Set clock"
-                        cmp temp, #SPI_FUNC_SET_FREQ wz
-        if_z            jmp #SET_FREQ
-
-                        // If command is "Get clock"
-                        cmp temp, #SPI_FUNC_GET_FREQ wz
-        if_z            jmp #GET_FREQ
-
-                        // Default: Return to loop
-                        jmp #LOOP
+cmsk                    long    SPI_FUNC_BITS
 
 /* FUNCTION: PropWare::SPI::set_mode() */
 SET_MODE                // Set the current SPI polarity, If polarity high, initialize sclk high, else clear the bit

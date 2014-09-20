@@ -27,14 +27,11 @@
 
 // Main function
 int main () {
-    PropWare::ErrorCode err;
-
     char buffer[128];
 
     PropWare::HD44780 lcd;
 
-    if ((err = lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS)))
-        error(err);
+    lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
 
     sprintf(buffer, "%u %s%07d 0x%x", 123456789, "Hello!", -12345, 0xabcdef);
     lcd.putStr(buffer);

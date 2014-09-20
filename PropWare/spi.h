@@ -768,9 +768,9 @@ class SPI {
         }
 
     protected:
-        /*************************************
-         *** Protected Method Declarations ***
-         *************************************/
+        /***************************************
+         *** Protected Variable Declarations ***
+         ***************************************/
         volatile atomic_t m_mailbox;
         int8_t m_cog;
         char m_errorInMethod[16];

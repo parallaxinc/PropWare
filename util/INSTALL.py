@@ -17,6 +17,7 @@ import re
 import sys
 import tempfile
 import subprocess
+import shutil
 
 try:
     # noinspection PyUnresolvedReferences
@@ -156,8 +157,9 @@ class Installer(object):
         has_make = self._check_for_make()
         if has_make and self._cmake_installed:
             build_dir = Installer._PROPWARE_ROOT + str(os.sep) + 'bin'
-            if not os.path.exists(build_dir):
-                os.makedirs(build_dir)
+            if os.path.exists(build_dir):
+                shutil.rmtree(build_dir)
+            os.makedirs(build_dir)
 
             run_cmake = ['cmake', '-G', 'Unix Makefiles', Installer._PROPWARE_ROOT]
             print(' '.join(run_cmake))
@@ -202,26 +204,43 @@ class Installer(object):
         if download_new_cmake:
             self._cmake_parent = propwareUtils.get_user_input(
                 'CMake will be installed to %s. Press enter to continue or type another path to download to '
-                'a new directory.\n>>> ', os.path.isdir, '"%s" does not exist or is not a directory.',
+                'a new directory.\n>>> ', Installer._is_acceptable_path, '"%s" is not a directory or contains a space. '
+                                                                         'Please provide an existing directory',
                 self._cmake_parent)
             self._add_cmake_to_path = True
 
         existing_propgcc_bin = propwareUtils.which('propeller-elf-gcc')
-        if existing_propgcc_bin:
-            existing_propgcc_bin = os.path.realpath(existing_propgcc_bin)
-            propgcc_bin_dir = os.path.split(existing_propgcc_bin)[0]
-            self._propgcc_path = os.path.abspath(propgcc_bin_dir + str(os.sep) + '..')
-        else:
+        # Attempt to find the default installation of PropGCC
+        if not existing_propgcc_bin:
             default_propgcc = self._check_for_default_propgcc()
             if default_propgcc:
-                self._propgcc_path = default_propgcc
+                existing_propgcc_bin = propwareUtils.find('propeller-elf-gcc', default_propgcc)
+
+        if existing_propgcc_bin:
+            existing_propgcc_as = propwareUtils.find('propeller-elf-as', os.path.split(existing_propgcc_bin)[0])
+            version_tuple = self._check_propgcc_version(existing_propgcc_as)
+            if 2 >= version_tuple[0] and 31 >= version_tuple[1] and 1 > version_tuple[2]:
+                print('An existing version of PropGCC (containing propeller-elf-as older than 2.31.1) has been '
+                      'detected. PropWare requires propeller-elf-as 2.31.1 or higher - a new version will be '
+                      'installed.')
+                download_new_propgcc = True
             else:
-                self._propgcc_parent = propwareUtils.get_user_input(
-                    'PropGCC will be installed to %s. Press enter to continue or type another existing path to '
-                    'download '
-                    'to a new directory.\n>>> ', os.path.isdir, '"%s" does not exists or is not a directory.',
-                    self._propgcc_parent)
-                self._add_propgcc_to_path = True
+                existing_propgcc_bin = os.path.realpath(existing_propgcc_bin)
+                propgcc_bin_dir = os.path.split(existing_propgcc_bin)[0]
+                self._propgcc_path = os.path.abspath(propgcc_bin_dir + str(os.sep) + '..')
+
+                download_new_propgcc = False
+        else:
+            download_new_propgcc = True
+
+        if download_new_propgcc:
+            self._propgcc_parent = propwareUtils.get_user_input(
+                'PropGCC will be installed to %s. Press enter to continue or type another existing path to download '
+                'to a new directory.\n>>> ', Installer._is_acceptable_path, '"%s" is not a directory or contains a '
+                                                                            'space. Please provide an existing '
+                                                                            'directory',
+                self._propgcc_parent)
+            self._add_propgcc_to_path = True
 
         # ##
         # Download any required dependencies
@@ -281,11 +300,33 @@ class Installer(object):
         assert (isinstance(cmake_exe, str))
 
         version_output = subprocess.check_output([cmake_exe, '--version'])
-        version_line = version_output.split('\n')[0]
+        if isinstance(version_output, bytes):
+            version_output = version_output.decode()
+        version_line = version_output.split(os.linesep)[0]
         version_number = version_line.split()[2]
         digits = version_number.split('.')
         version_tuple = (int(digits[0]), int(digits[1]), int(digits[2]))
         return version_tuple
+
+    @classmethod
+    def _check_propgcc_version(cls, gcc_exe):
+        assert (isinstance(gcc_exe, str))
+
+        version_output = subprocess.check_output([gcc_exe, '--version'])
+        if isinstance(version_output, bytes):
+            version_output = version_output.decode()
+        version_line = version_output.split(os.linesep)[0]
+        version_number = version_line.split()[-1]
+        digits = version_number.split('.')
+        while 3 > len(digits):
+            digits.append('0')
+        version_tuple = (int(digits[0]), int(digits[1]), int(digits[2]))
+        return version_tuple
+
+    @staticmethod
+    def _is_acceptable_path(path):
+        assert (isinstance(path, str))
+        return os.path.exists(path) and ' ' not in path
 
 
 class NixInstaller(Installer):
@@ -365,9 +406,10 @@ class DebInstaller(NixInstaller):
     def __init__(self):
         super(DebInstaller, self).__init__()
 
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-Linux-i386.tar.gz'
-        self._cmake_root_dir_name = 'cmake-3.0.1-Linux-i386'
-        self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-linux_v1_0_0.tar.gz'
+        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Linux-i386.tar.gz'
+        self._cmake_root_dir_name = 'cmake-3.0.2-Linux-i386'
+        self._propgcc_download_url = \
+            'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0_2408-i686-linux.tar.gz'
         self._user_in_dialout = os.environ['USER'] in grp.getgrnam('dialout')[3]
 
     def _warn_make_instructions(self):
@@ -445,8 +487,8 @@ class DebInstaller(NixInstaller):
 class MacInstaller(NixInstaller):
     def __init__(self):
         super(MacInstaller, self).__init__()
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-Darwin-universal.tar.gz'
-        self._cmake_root_dir_name = 'cmake-3.0.1-Darwin64-universal'
+        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Darwin-universal.tar.gz'
+        self._cmake_root_dir_name = 'cmake-3.0.2-Darwin64-universal'
         self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz'
 
     def _warn_make_instructions(self):
@@ -465,9 +507,9 @@ class MacInstaller(NixInstaller):
 class WinInstaller(Installer):
     def __init__(self):
         super(WinInstaller, self).__init__()
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.1-win32-x86.zip'
-        self._cmake_root_dir_name = 'cmake-3.0.1-win32-x86'
-        self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-win_v1_0_0.zip'
+        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-win32-x86.zip'
+        self._cmake_root_dir_name = 'cmake-3.0.2-win32-x86'
+        self._propgcc_download_url = 'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0-i686-windows.zip'
         self._export_env_var = 'set'
         self.cmd_sep = '&'
 
@@ -477,11 +519,12 @@ class WinInstaller(Installer):
 
     @classmethod
     def _set_env_var(cls, key, value):
-        super(WinInstaller, cls)._set_env_var(key, value)
-
         from winutils import set_environ_var
 
-        set_environ_var(key, value)
+        if key not in os.environ or 'PATH' == key:
+            set_environ_var(key, value)
+
+        super(WinInstaller, cls)._set_env_var(key, value)
 
     @classmethod
     def _add_root_env_var(cls, key, value):

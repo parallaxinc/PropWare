@@ -108,9 +108,22 @@ def which(program):
     return None
 
 
+def find(name, path):
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            return os.path.join(root, name)
+
+    # Try adding '.exe' to the end and run again
+    if Windows() == get_os():
+        return find(name + '.exe', path)
+
+
 def check_proper_working_dir():
     if 'createBinaryDistr.py' not in os.listdir('.'):
         raise IncorrectStartingDirectoryException()
+
+    if ' ' in os.path.abspath('..'):
+        raise SpaceInPropWarePathException()
 
 
 def is_propware_root(directory):
@@ -323,6 +336,21 @@ def is_64_bit():
     return 64 == struct.calcsize('P') * 8
 
 
+def is_symbolic_link_on_windows(file_name):
+    assert (isinstance(file_name, str))
+    assert (os.path.exists(file_name))
+
+    if Windows() == get_os():
+        with open(file_name, 'r') as test_file:
+            lines = 0
+            try:
+                for i, l in enumerate(test_file):
+                    lines = i + 1
+            except UnicodeDecodeError:
+                return False
+            return 1 == lines
+
+
 class Menu(object):
     def __init__(self, prompt):
         self._prompt = prompt
@@ -381,6 +409,14 @@ class IncorrectStartingDirectoryException(Exception):
 
     def __str__(self):
         return 'Must be executed from within <propware root>/util'
+
+
+class SpaceInPropWarePathException(Exception):
+    def __str__(self):
+        return 'PropWare must exist in a directory without spaces'
+
+    def __init__(self, *args, **kwargs):
+        super(SpaceInPropWarePathException, self).__init__(*args, **kwargs)
 
 
 class CannotFindCMakeModulesPath(Exception):

@@ -67,8 +67,8 @@ class ImportLibpropeller:
 
             if not libpropeller_dst_root:
                 for f in files:
-                    if self._is_worthy_file(f):
-                        shutil.copy2(root + '/' + f, ImportLibpropeller.DESTINATION_SOURCES + f)
+                    if self._is_worthy_file(f, root):
+                        shutil.copy2(root + str(os.sep) + f, ImportLibpropeller.DESTINATION_SOURCES + f)
                         self.sourceFiles.append(f)
 
     def _make_obj_list(self):
@@ -78,6 +78,7 @@ class ImportLibpropeller:
         with open(ImportLibpropeller.DESTINATION_SOURCES + ImportLibpropeller.SOURCE_OBJECT_LIST, 'w') as f:
             f.write("set(LIBPROPELLER_OBJECTS")
             for sourceFile in self.sourceFiles:
+                # DO NOT use os.sep here - CMake requires Unix-like file separators
                 f.write('\n' + ' ' * 8 + '../' + sourceFile)
             f.write(')')
 
@@ -101,11 +102,12 @@ class ImportLibpropeller:
                 print("Caused by: " + str(e), file=sys.stderr)
                 print(e.output.decode(), file=sys.stderr)
 
-    def _is_worthy_file(self, file_name):
+    def _is_worthy_file(self, file_name, path):
         is_whitelisted = file_name in ImportLibpropeller.WHITELISTED_SOURCE_FILES
         is_asm = propwareUtils.is_asm_file(file_name)
         is_new = file_name not in self.sourceFiles
-        return (is_whitelisted or is_asm) and is_new
+        is_not_symlink = not propwareUtils.is_symbolic_link_on_windows(path + str(os.sep) + file_name)
+        return (is_whitelisted or is_asm) and is_new and is_not_symlink
 
     @staticmethod
     def _clean():
