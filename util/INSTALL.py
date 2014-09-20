@@ -299,6 +299,8 @@ class Installer(object):
         assert (isinstance(cmake_exe, str))
 
         version_output = subprocess.check_output([cmake_exe, '--version'])
+        if isinstance(version_output, bytes):
+            version_output = version_output.decode()
         version_line = version_output.split(os.linesep)[0]
         version_number = version_line.split()[2]
         digits = version_number.split('.')
@@ -310,6 +312,8 @@ class Installer(object):
         assert (isinstance(gcc_exe, str))
 
         version_output = subprocess.check_output([gcc_exe, '--version'])
+        if isinstance(version_output, bytes):
+            version_output = version_output.decode()
         version_line = version_output.split(os.linesep)[0]
         version_number = version_line.split()[-1]
         digits = version_number.split('.')
