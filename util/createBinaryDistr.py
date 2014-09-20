@@ -38,6 +38,10 @@ class CreateBinaryDistr(object):
     CMAKE_GENERATE_FAILED_CODE = 1
 
     def __init__(self, propware_root=None):
+        # OS safety check!
+        if propwareUtils.Windows() == propwareUtils.get_os():
+            raise NotWindowsCompatibleException()
+
         self.successes = []
         self.currentBranch = ""
 
@@ -87,26 +91,7 @@ class CreateBinaryDistr(object):
             # Compile the static libraries and example projects
             CreateBinaryDistr._compile()
 
-            # Generate the archive
-            archive_name = CreateBinaryDistr.ARCHIVE_FILE_NAME % branch
-            with ZipFile(archive_name, 'w') as archive:
-                # Add all whitelisted files (see CreateBinaryDistr._is_whitelisted() ) so long as they are not within a
-                # blacklisted directory
-                for root, dirs, files in os.walk(CreateBinaryDistr.PROPWARE_ROOT):
-                    # First, determine whether or not the directory we are iterating over is blacklisted...
-                    root_list = root.split('/')
-                    try:
-                        # Currently, the only blacklisted directories are direct children of the PropWare root
-                        is_blacklisted = root_list[1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
-                    except IndexError:
-                        # Obviously, if root_list[1] throws an error, we aren't looking at a blacklisted directory
-                        is_blacklisted = False
-
-                    # Finally, check each file within the directory and see if it is whitelisted
-                    if not is_blacklisted:
-                        for f in files:
-                            if self._is_whitelisted(f):
-                                archive.write(root + '/' + f)
+            archive_name = self._create_archive(branch)
 
             self.successes.append(branch)
             if CreateBinaryDistr.CURRENT_SUGGESTION == branch:
@@ -115,6 +100,32 @@ class CreateBinaryDistr(object):
 
         # Clean again. Cleaning is good. You should clean your house more often too!
         CreateBinaryDistr._clean()
+
+    @classmethod
+    def _create_archive(cls, branch):
+        # Generate the archive
+        archive_name = CreateBinaryDistr.ARCHIVE_FILE_NAME % branch
+        with ZipFile(archive_name, 'w') as archive:
+            # Add all whitelisted files (see CreateBinaryDistr._is_whitelisted() ) so long as they are not within a
+            # blacklisted directory
+            for root, dirs, files in os.walk(CreateBinaryDistr.PROPWARE_ROOT):
+                # First, determine whether or not the directory we are iterating over is blacklisted...
+                path_list = root.split('/')
+                propware_root_index = path_list.index('PropWare')
+                try:
+                    # Currently, the only blacklisted directories are direct children of the PropWare root
+                    is_blacklisted = path_list[propware_root_index + 1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
+                except IndexError:
+                    # Obviously, if root_list[1] throws an error, we aren't looking at a blacklisted directory
+                    is_blacklisted = False
+
+                # Finally, check each file within the directory and see if it is whitelisted
+                if not is_blacklisted:
+                    for f in files:
+                        archive_dst = '/' + '/'.join(path_list[propware_root_index:]) + '/' + f
+                        if CreateBinaryDistr._is_whitelisted(f):
+                            archive.write(root + '/' + f, archive_dst)
+        return archive_name
 
     @staticmethod
     def _clean_old_archives():
@@ -245,11 +256,21 @@ class CreateBinaryDistr(object):
 
 
 class MakeErrorException(Exception):
-    def __init__(self):
-        pass
+    def __init__(self, *args, **kwargs):
+        super(MakeErrorException, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return "Make failed to finish executing"
+
+
+class NotWindowsCompatibleException(Exception):
+    def __init__(self, *args, **kwargs):
+        super(NotWindowsCompatibleException, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return "CreateBinaryDistr is not compatible with Windows operating systems. This application was never " \
+               "intended to be run by the end user. If you would like to run this on a Windows machine, please let " \
+               "the author know by emailing david@zemon.name."
 
 
 def parse_args():
@@ -261,10 +282,10 @@ def parse_args():
 
 
 if "__main__" == __name__:
-    args = parse_args()
+    cli_args = parse_args()
 
     branches = CreateBinaryDistr.BRANCHES
-    if args.tags:
+    if cli_args.tags:
         branches += CreateBinaryDistr.TAGS
 
     runMe = CreateBinaryDistr()
