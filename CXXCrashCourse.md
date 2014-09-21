@@ -11,7 +11,7 @@ C-Family Syntax
 ---------------
 * [Complete syntax reference](http://www.cprogramming.com/reference/)
 * Capitalization matters
-* Whitespace does not
+* Whitespace is not necessary except as a delimiter between words (you may format your code however you please)
 * Every line of code must be terminated with `;`
 * Assign variables with `=`
 * Compare variables with `==`, `!=`, `>=`, `<=` and `!`
@@ -40,35 +40,106 @@ C-Family Syntax
   ~~~~~~~~~~~~~~~~~
 * A function must declare what type of variable will be returned (use `void` if no return)
   ~~~~~~~~~~~~~~~~~{.c}
+  // A function that takes no parameters and does not return a value
   void main () {
       // Some code here
   }
   
+  // C will prefer the above function slightly different - they both mean the same thing
+  void main (void) {
+      // Some code here
+  }
+  
+  // This function returns an integer of basic type `int`
   int get_x () {
-      // Some code to calculate an integer x
+      int x = 5;
       return x;
   }
+  
+  // A function that takes two parameters, `x` and `y` and returns the sum
+  int add (int x, int y) {
+      return x + y;
+  }
   ~~~~~~~~~~~~~~~~~
-* For-loop: `for (<init>; <condition>; <end-of-iteration code>) {<Code executed each iteration>}`
+* Loops by example
   ~~~~~~~~~~~~~~~~~{.c}
-  // C++ allows you to declare `i` within the for-loop
+  // Basic while-loop
+  while (x == y) {
+      // Do stuff
+  }
+  
+  // C++ allows you to declare your index (`i`) within the for-loop
   for (int i = 0; i < 10; i++) {
       printf("The current value of `i`: %d", i);
   }
   
-  // C must have `i` declared prior to the loop
+  // C must have the index declared prior to the loop
   int i;
   for (i = 0; i < 10; i++) {
       printf("The current value of `i`: %d", i);
   }
+  
+  // A simple do-while
+  do {
+      // Some stuff
+  } while (x == y);
   ~~~~~~~~~~~~~~~~~
 
 Object-Oriented Programming
 ------------------
-Classes. It's all about classes: organizing code into logical blocks. If you have 10 functions that all deal with a
-serial terminal, you might want to categorize them as `Serial`. Congratulations! You just made a class called `Serial`. 
+Classes. It's all about classes: organizing code into logical blocks. If you have 3 functions that all deal with a
+serial terminal, you might want to categorize them as `Serial`. That's all a `class` is - a group of functions that
+belong together. This code might look something like
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+class Serial {
+    public:
+        void start (int baudrate) {
+            // Initialize the serial terminal
+        }
+        
+        void send_character (char c) {
+            // Some code to send a character over the serial bus
+        }
+        
+        char receive_character () {
+           char c;
+           // Some code to receive a character from the serial bus and store it in `c`
+           return c;
+        }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Notice that, just like Parallax's Spin, we have visibility keywords: `public` in this case. This keyword marks 
+everything beneath it as accessible to the outside world, just like Spin's `PUB` keyword before a function.
+ 
+Where Spin might have some code such as
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.spin}
+Obj
+  pst : "Parallax Serial Terminal"
+  
+PUB Main | receivedChar
+  pst.start(9600)
+  pst.Char('A')
+  receivedChar := pst.CharIn
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+C++ would write this as
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+void main () {
+    Serial pst;                                // Instantiation of the `Serial` object
+    char receivedChar;                         // Instantiation of the receivedChar variable
+    
+    pst.start(9600);                           // Starting our Serial terminal at 9,600 baud
+    pst.send_character('A');                   // Send the single character, 'A', out the serial bus
+    receivedChar = pst.receive_character();    // Store a character from the serial bus into `receivedChar`
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Namespaces
 ----------
 Coming soon!
 
+Including Separate Files
+------------------------
+Coming soon!
