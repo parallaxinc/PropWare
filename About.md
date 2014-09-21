@@ -25,10 +25,9 @@ An installation script is provided in Python that will set up your environment f
 you (including downloading dependencies) and CMake gives you a wonderfully easy way to 
 build your binaries. If you are an Eclipse user, CMake provides a simple command that 
 will generate an Eclipse project for you (no need for a special Propeller plugin!). 
-When JetBrain's releases their new C++ IDE 
+JetBrains' new C++ IDE, 
 ([CLion](http://blog.jetbrains.com/objc/2014/02/jetbrains-c-ide-status-update-and-video-report/)),
-it will support CMake out-of-the-box and PropWare will be ready for it (I am currently 
-using the EAP version).
+supports CMake out-of-the-box and is the recommended tool for use PropWare applications.
 
 ### Key Features
 * More C++ for the Propeller!
@@ -41,13 +40,12 @@ Developing and Contributing to PropWare
 ---------------------------------------
 PropWare is developed by David Zemon.
 
-Contributions can be made by either 
+Code contributions can be made by either 
 [contacting David Zemon](http://david.zemon.name/professional/contact.shtml) or forking 
 the repository and creating a pull request.
 
 Planned Enhancements/Known Issues
 ---------------------------------
-* CMake not working on Windows
 * Add Spin language compatibility
 * Add support for ActivityBot's [ADC](http://www.ti.com/lit/ds/symlink/adc124s021.pdf) and DAC
 * SD Demo does not fit in LMM mode

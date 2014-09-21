@@ -15,13 +15,13 @@ Useful links
 * PropWare Links
     * [Home](http://david.zemon.name/PropWare)
     * [Source code](https://github.com/DavidZemon/PropWare)
-    * [Binary distributions](http://david.zemon.name/downloads/PropWare_Binaries/)
+    * [PropWare binaries](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip)
     * [Forum thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
 * [Parallax forums](http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller)
 * [JetBrains CLion](http://www.jetbrains.com/clion/): Full-featured, cross-platform C/C++ IDE
 * [PropGCC](https://code.google.com/p/propgcc/): GCC compiler for Parallax Propeller
-    * Binary distributions for [Windows](http://david.zemon.name/downloads/PropGCC-win_v1_0_0.zip),
-      [Linux](http://david.zemon.name/downloads/PropGCC-linux_v1_0_0.tar.gz), and 
+    * Binary distributions for [Windows](http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0-i686-windows.zip),
+      [Linux](http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0_2408-i686-linux.tar.gz), and 
       [Mac](http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz)
 * [CMake](http://www.cmake.org/): Cross-platform C/C++ build tool used by PropWare
 * [OBEX](http://obex.parallax.com/): Parallax Object Exchange

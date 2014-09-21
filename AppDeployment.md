@@ -75,5 +75,5 @@ Importing PropWare Projects into Eclipse (and other IDEs)
 6. Compiling your program and loading to EEPROM can be done easily from within Eclipse. Compiling is as simple as 
    clicking the hammer icon or using `Control-B`. Writing to EEPROM requires creating a new Run Configuration.
   - I do not recommend attempting to create a Run Configuration for PropWare's `debug` configuration. PropGCC's 
-    terminal does not play well with either Eclipse or JetBrain's CLion. Use the terminal for debugging, exactly as
+    terminal does not play well with either Eclipse or JetBrains CLion. Use the terminal for debugging, exactly as
     described in "Starting a New Project" step 4.
