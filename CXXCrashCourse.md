@@ -138,7 +138,33 @@ void main () {
 
 Namespaces
 ----------
-Coming soon!
+The term "Serial" can be pretty generic. Maybe David's Serial object has a max baud of 115,000 but Bob's Serial object 
+has configurable pins (so you don't have to use the default RX and TX hardware pins). You want to use BOTH Serial 
+objects. In order to differentiate between David's `Serial` class and Bob's `Serial` class, we prefix the class names 
+with a `namespace`. This looks like
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+namespace PropWare {
+    class Serial {
+        // David's code here
+    }
+}
+
+namespace BobWare {
+    class Serial {
+        // Bob's code here
+    }
+}
+
+void main () {
+    PropWare::Serial davidSerial;
+    BobWare::Serial bobSerial;
+    
+    davidSerial.call_function();
+    bobSerial.call_function()
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now that both classes are surrounded by a namespace, our code can use both classes without conflict! 
 
 Including Separate Files
 ------------------------
