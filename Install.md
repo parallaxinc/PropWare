@@ -4,9 +4,7 @@ Installation
 Microsoft Windows
 -----------------
 1. Download PropWare to your computer. You may use [git](http://msysgit.github.io/) to download the source code or 
-   you may download a binary distribution from the 
-   [downloads section](http://david.zemon.name/downloads/PropWare_Binaries/). Please see the "Last Modified" column to 
-   help you pick the most recent version.
+   you may download a [binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip).
 2. Extract the contents to a directory without any spaces. For instance, `C:\Users\David\PropWare` would be an excellent
    choice. However, `C:\Documents and Settings\David` would be an awful choice. For Windows XP users, I am sorry. You
    may need to use a path such as `C:\PropWare`.
