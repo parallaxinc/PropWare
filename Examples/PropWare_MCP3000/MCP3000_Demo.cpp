@@ -33,7 +33,7 @@ int main () {
     uint32_t loopCounter;
     uint8_t scaledValue, i;
     uint32_t ledOutput;
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::MCP3000 adc(spi, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)

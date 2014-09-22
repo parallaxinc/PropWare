@@ -32,7 +32,7 @@ int main () {
 
     PropWare::Pin statusLED(PropWare::Port::P16, PropWare::Pin::OUT);
 
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::SD sd(spi);
     PropWare::SD::File f, f2;
 
@@ -144,7 +144,7 @@ void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        PropWare::SPI::getInstance()->print_error_str(
+        PropWare::SPI::get_instance()->print_error_str(
                 (PropWare::SPI::ErrorCode) err);
     else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
 //        sd->print_error_str((PropWare::SD::ErrorCode) err);

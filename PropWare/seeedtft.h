@@ -31,20 +31,24 @@
 #include <PropWare/pin.h>
 
 namespace PropWare {
-    class SeeedTFT {
+/**
+ * This class is pre-alpha stage and has not been successfully tested. Use at
+ * your own risk.
+ */
+class SeeedTFT {
     public:
         typedef enum {
-            RED = 0xf800,
-            GREEN = 0x07e0,
-            BLUE = 0x001f,
-            BLACK = 0x0000,
+            RED    = 0xf800,
+            GREEN  = 0x07e0,
+            BLUE   = 0x001f,
+            BLACK  = 0x0000,
             YELLOW = 0xffe0,
-            WHITE = 0xffff,
+            WHITE  = 0xffff,
 
-            CYAN = 0x07ff,
+            CYAN       = 0x07ff,
             BRIGHT_RED = 0xf810,
-            GRAY1 = 0x8410,
-            GRAY2 = 0x4208
+            GRAY1      = 0x8410,
+            GRAY2      = 0x4208
         } Color;
 
         typedef enum {
@@ -226,19 +230,23 @@ namespace PropWare {
                         switch (this->m_displayDirection) {
                             case LEFT_TO_RIGHT:
                                 this->fillRectangle(poX + i * size,
-                                        poY + j * size, size, size, fgColor);
+                                        poY + j * size, size, size,
+                                        fgColor);
                                 break;
                             case DOWN_TO_UP:
                                 this->fillRectangle(poX + j * size,
-                                        poY - i * size, size, size, fgColor);
+                                        poY - i * size, size, size,
+                                        fgColor);
                                 break;
                             case RIGHT_TO_LEFT:
                                 this->fillRectangle(poX - i * size,
-                                        poY - j * size, size, size, fgColor);
+                                        poY - j * size, size, size,
+                                        fgColor);
                                 break;
                             case UP_TO_DOWN:
                                 this->fillRectangle(poX - j * size,
-                                        poY + i * size, size, size, fgColor);
+                                        poY + i * size, size, size,
+                                        fgColor);
                                 break;
                             default:
                                 break;
@@ -328,15 +336,15 @@ namespace PropWare {
         uint8_t m_displayDirection;
 
     protected:
-        static const uint8_t init_seq_cmd1[];
+        static const uint8_t  init_seq_cmd1[];
         static const uint16_t init_seq_dat1[];
-        static const uint8_t init_seq_cmd2[];
+        static const uint8_t  init_seq_cmd2[];
         static const uint16_t init_seq_dat2[];
-        static const uint8_t init_seq_cmd3[];
+        static const uint8_t  init_seq_cmd3[];
         static const uint16_t init_seq_dat3[];
 
         static const uint8_t SIMPLE_FONT[][8];
-    };
+};
 }
 
 #endif /* SEEEDTFT_H_ */

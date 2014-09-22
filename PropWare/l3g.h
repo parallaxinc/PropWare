@@ -53,9 +53,9 @@ class L3G {
          */
         typedef enum {
             /** 250 degrees per second */
-            DPS_250 = 0x00,
+            DPS_250  = 0x00,
             /** 500 degrees per second */
-            DPS_500 = 0x10,
+            DPS_500  = 0x10,
             /** 2000 degrees per second */
             DPS_2000 = 0x20
         } DPSMode;
@@ -63,32 +63,32 @@ class L3G {
     public:
         static const uint8_t WHO_AM_I = 0x0F;
 
-        static const uint8_t CTRL_REG1 = 0x20;
-        static const uint8_t CTRL_REG2 = 0x21;
-        static const uint8_t CTRL_REG3 = 0x22;
-        static const uint8_t CTRL_REG4 = 0x23;
-        static const uint8_t CTRL_REG5 = 0x24;
-        static const uint8_t REFERENCE = 0x25;
-        static const uint8_t OUT_TEMP = 0x26;
+        static const uint8_t CTRL_REG1  = 0x20;
+        static const uint8_t CTRL_REG2  = 0x21;
+        static const uint8_t CTRL_REG3  = 0x22;
+        static const uint8_t CTRL_REG4  = 0x23;
+        static const uint8_t CTRL_REG5  = 0x24;
+        static const uint8_t REFERENCE  = 0x25;
+        static const uint8_t OUT_TEMP   = 0x26;
         static const uint8_t STATUS_REG = 0x27;
-        static const uint8_t OUT_X_L = 0x28;
-        static const uint8_t OUT_X_H = 0x29;
-        static const uint8_t OUT_Y_L = 0x2A;
-        static const uint8_t OUT_Y_H = 0x2B;
-        static const uint8_t OUT_Z_L = 0x2C;
-        static const uint8_t OUT_Z_H = 0x2D;
+        static const uint8_t OUT_X_L    = 0x28;
+        static const uint8_t OUT_X_H    = 0x29;
+        static const uint8_t OUT_Y_L    = 0x2A;
+        static const uint8_t OUT_Y_H    = 0x2B;
+        static const uint8_t OUT_Z_L    = 0x2C;
+        static const uint8_t OUT_Z_H    = 0x2D;
 
         static const uint8_t FIFO_CTRL_REG = 0x2E;
-        static const uint8_t FIFO_SRC_REG = 0x2F;
+        static const uint8_t FIFO_SRC_REG  = 0x2F;
 
-        static const uint8_t INT1_CFG = 0x30;
-        static const uint8_t INT1_SRC = 0x31;
-        static const uint8_t INT1_THS_XH = 0x32;
-        static const uint8_t INT1_THS_XL = 0x33;
-        static const uint8_t INT1_THS_YH = 0x34;
-        static const uint8_t INT1_THS_YL = 0x35;
-        static const uint8_t INT1_THS_ZH = 0x36;
-        static const uint8_t INT1_THS_ZL = 0x37;
+        static const uint8_t INT1_CFG      = 0x30;
+        static const uint8_t INT1_SRC      = 0x31;
+        static const uint8_t INT1_THS_XH   = 0x32;
+        static const uint8_t INT1_THS_XL   = 0x33;
+        static const uint8_t INT1_THS_YH   = 0x34;
+        static const uint8_t INT1_THS_YL   = 0x35;
+        static const uint8_t INT1_THS_ZH   = 0x36;
+        static const uint8_t INT1_THS_ZL   = 0x37;
         static const uint8_t INT1_DURATION = 0x38;
 
     public:
@@ -318,9 +318,9 @@ class L3G {
         }
 
     private:
-        static const uint32_t SPI_DEFAULT_FREQ = 900000;
-        static const SPI::Mode SPI_MODE = SPI::MODE_3;
-        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
+        static const uint32_t     SPI_DEFAULT_FREQ = 900000;
+        static const SPI::Mode    SPI_MODE         = SPI::MODE_3;
+        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
 
     private:
         /***********************************
@@ -453,10 +453,10 @@ class L3G {
         }
 
     private:
-        SPI *m_spi;
+        SPI           *m_spi;
         PropWare::Pin m_cs;
-        DPSMode m_dpsMode;
-        bool m_alwaysSetMode;
+        DPSMode       m_dpsMode;
+        bool          m_alwaysSetMode;
 };
 
 }

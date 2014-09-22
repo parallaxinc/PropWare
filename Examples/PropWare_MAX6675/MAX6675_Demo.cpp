@@ -32,7 +32,7 @@ int main () {
     char buffer[128];
 
     PropWare::HD44780 lcd;
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::MAX6675 thermo(spi);
 
     if ((err = thermo.start(MOSI, MISO, SCLK, CS)))

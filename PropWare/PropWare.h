@@ -52,16 +52,16 @@ namespace PropWare {
 typedef int8_t ErrorCode;
 
 typedef enum {
-    BIT_0 = 0x1,
-    BIT_1 = 0x2,
-    BIT_2 = 0x4,
-    BIT_3 = 0x8,
-    BIT_4 = 0x10,
-    BIT_5 = 0x20,
-    BIT_6 = 0x40,
-    BIT_7 = 0x80,
-    BIT_8 = 0x100,
-    BIT_9 = 0x200,
+    BIT_0  = 0x1,
+    BIT_1  = 0x2,
+    BIT_2  = 0x4,
+    BIT_3  = 0x8,
+    BIT_4  = 0x10,
+    BIT_5  = 0x20,
+    BIT_6  = 0x40,
+    BIT_7  = 0x80,
+    BIT_8  = 0x100,
+    BIT_9  = 0x200,
     BIT_10 = 0x400,
     BIT_11 = 0x800,
     BIT_12 = 0x1000,
@@ -109,25 +109,42 @@ typedef enum {
     WORD_1 = 0xffff0000
 } Word;
 
-/**
- * @brief       Count the number of set bits in a parameter
- *
- * @param[in]   par     Parameter whose bits should be counted
- *
- * @return      Number of bits that are non-zero in par
- */
-uint8_t count_bits (uint32_t par);
+class Utility {
+    public:
+        /**
+         * @brief       Count the number of set bits in a parameter
+         *
+         * @param[in]   par     Parameter whose bits should be counted
+         *
+         * @return      Number of bits that are non-zero in par
+         */
+        static uint8_t count_bits (uint32_t par) {
+            // Brian Kernighan's method for counting set bits in a variable
+            uint8_t totalBits = 0;
 
-/**
- * @brief       Determine the number of microseconds passed since a starting
- *              point
- *
- * @param[in]   start   A value from the system counter (CNT)
- *
- * @return      Microseconds since start
- */
-uint32_t measure_time_interval (const register uint32_t start);
+            while (par) {
+                par &= par - 1; // clear the least significant bit set
+                ++totalBits;
+            }
 
+            return totalBits;
+        }
+
+        /**
+         * @brief       Determine the number of microseconds passed since a
+         *              starting point
+         *
+         * @param[in]   start   A value from the system counter (CNT)
+         *
+         * @return      Microseconds since start
+         */
+        static uint32_t measure_time_interval (
+                const register uint32_t start) {
+            uint32_t interval = CNT - start;
+
+            return (uint32_t) (interval/MICROSECOND);
+        }
+};
 }
 
 #endif /* PROPWARE_H */

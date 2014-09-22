@@ -32,7 +32,7 @@ int main () {
     char string[] = "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     char in;    // Create an input variable to store received values from SPI
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
 
     // Initialize SPI module, giving it pin masks for the physical pins,
     // frequency for the clock, mode of SPI, and bitmode

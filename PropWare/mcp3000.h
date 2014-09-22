@@ -43,10 +43,10 @@ class MCP3000 {
     public:
         /** Single-ended channels */
         typedef enum {
-            /** Channel 0 */CHANNEL_0,
-            /** Channel 1 */CHANNEL_1,
-            /** Channel 2 */CHANNEL_2,
-            /** Channel 3 */CHANNEL_3,
+            /** Channel 0 */               CHANNEL_0,
+            /** Channel 1 */               CHANNEL_1,
+            /** Channel 2 */               CHANNEL_2,
+            /** Channel 3 */               CHANNEL_3,
             /** Channel 4 (MCP3008 only) */CHANNEL_4,
             /** Channel 5 (MCP3008 only) */CHANNEL_5,
             /** Channel 6 (MCP3008 only) */CHANNEL_6,
@@ -55,10 +55,10 @@ class MCP3000 {
 
         /** Pseudo-differential pair channels */
         typedef enum {
-            /** CH0+, CH1- */DIFF_0_1,
-            /** CH1+, CH0- */DIFF_1_0,
-            /** CH2+, CH3- */DIFF_2_3,
-            /** CH3+, CH2- */DIFF_3_2,
+            /** CH0+, CH1- */               DIFF_0_1,
+            /** CH1+, CH0- */               DIFF_1_0,
+            /** CH2+, CH3- */               DIFF_2_3,
+            /** CH3+, CH2- */               DIFF_3_2,
             /** CH4+, CH5- (MCP3008 only) */DIFF_4_5,
             /** CH5+, CH4- (MCP3008 only) */DIFF_5_4,
             /** CH6+, CH7- (MCP3008 only) */DIFF_6_7,
@@ -215,20 +215,20 @@ class MCP3000 {
         }
 
     private:
-        static const uint32_t SPI_DEFAULT_FREQ = 100000;
-        static const SPI::Mode SPI_MODE = SPI::MODE_2;
-        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
+        static const uint32_t     SPI_DEFAULT_FREQ = 100000;
+        static const SPI::Mode    SPI_MODE         = SPI::MODE_2;
+        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
 
-        static const uint8_t START = BIT_4;
+        static const uint8_t START        = BIT_4;
         static const uint8_t SINGLE_ENDED = BIT_3;
         static const uint8_t DIFFERENTIAL = 0;
-        static const uint8_t OPTN_WIDTH = 7;
+        static const uint8_t OPTN_WIDTH   = 7;
 
     private:
-        SPI *m_spi;
+        SPI           *m_spi;
         PropWare::Pin m_cs;
-        bool m_alwaysSetMode;
-        uint8_t m_dataWidth;
+        bool          m_alwaysSetMode;
+        uint8_t       m_dataWidth;
 };
 
 }
