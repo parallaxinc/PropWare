@@ -33,15 +33,16 @@ include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
 * Next we name our project: `project(HelloWorld)`. This name can be anything you'd like so long as there is no 
   whitespace.
 * Finally, we need to tell CMake what files should be compiled: `add_executable(${PROJECT_NAME} main.cpp)`.
-  The first parameter _must_ be exactly as you see it - PropWare's build system relies on your executable being named
-  the same as your project. Next, simply list off each of your source files (separated by whitespace).
+  The first parameter (`${PROJECT_NAME}`) _must_ be exactly as you see it - PropWare's build system relies on your 
+  executable being named the same as your project. Next, simply list off each of your source files (separated by 
+  whitespace).
 * There is LOTS more information about creating CMakeLists.txt files for PropWare projects on the [CMakeLists.txt 
   Files for PropWare](./md_CMakeListsForPropware.html) page.
 
 Typical Use Case
 ----------------
 Let's take the example of a phony project for a Quadcopter. We're using Parallax's Quickstart development board, 
-the compressed-memory-model, and our code must be compiled with size optimizations. Our projects consists of the 
+the compressed-memory-model, and our code must be compiled with size optimizations. Our project consists of the 
 following files:
 
 * Quadcopter.cpp

@@ -40,22 +40,20 @@ Breakdown:
   generate the Makefiles would be `cmake -G "Unix Makefiles" ..`. The `..` is a cross-platform way of saying "the
   directory above me". For reference: `.` refers to the current directory.
   
-* `make`: Make is old, flexible, and great. CMake has done all the work for us though and we don't need to add any extra
-  arguments to this command. After successfully running CMake, all you need to type is `make` - character for character.
-  When it completes successfully, your project will have been compiled into its binary format, ready to be programmed
-  to your Propeller. PropWare provides some extra "targets" to make your life even easier though. Try typing `make 
-  debug` to write your program to RAM and open a terminal (like Parallax's PST) or `make run` to write your program to
-  EEPROM.
+* `make`: Make is old, flexible, and great. CMake has done all the work though and no extra arguments are needed for
+  this command. After successfully running CMake, simply type `make` - character for character. When it
+  completes successfully, your project will have been compiled into its binary format, ready to be programmed to your
+  Propeller. PropWare provides some extra "targets" to make your life even easier though. Try typing `make debug` to 
+  write your program to RAM and open a terminal (like Parallax's PST) or `make run` to write your program to EEPROM.
   
 CMakeLists.txt
 --------------
 
-As described in `Creating a PropWare Application`, the CMakeLists.txt file is required for all CMake (and therefore 
-PropWare) applications. The file must be named "CMakeLists.txt" - character for character.
+As described in [Creating a PropWare Application](./md_AppDeployment.html), the CMakeLists.txt file is required for all
+CMake (and therefore PropWare) applications. The file must be named "CMakeLists.txt" - character for character.
 
-The contents of the file are simple - many useful tips can be gleaned from both `Creating a PropWare Application` and
-`CMake for PropWare`. Here, I'll go over some generic pieces of information about CMake that are not specific to 
-PropWare.
+The contents of the file are simple - many useful tips can be gleaned from both 
+[Creating a PropWare Application](./md_AppDeployment.html) and [CMake for PropWare](./md_CMakeForPropware.html).
 
 CMakeCache.txt
 --------------
