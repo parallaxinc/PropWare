@@ -220,7 +220,8 @@ def is_asm_file(f):
 
 def is_src_file(f):
     assert (isinstance(f, str))
-    return re.match('.*(\.c|\.cpp|\.cxx|\.cc|\.s|\.dat|\.cogc|\.ecogc|\.spin)$', f, re.I)
+    return re.match('.*(\.c|\.cpp|\.cxx|\.cc|\.s|\.dat|\.cogc|\.cogcxx|\.cogcpp|\.ecogc|\.ecogcxx|\.ecogcpp|\.spin)$',
+                    f, re.I)
 
 
 def is_header_file(f):
