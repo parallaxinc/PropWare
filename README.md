@@ -9,13 +9,14 @@ Pages
   * [CMake for PropWare](./md_CMakeForPropware.html)
   * [CMake Tutorial](./md_CMakeTutorial.html)
   * [C++ Crash Course](./md_CXXCrashCourse.html)
+  * [Limitations](./md_Limitations.html)
 
 Useful links
 ------------
 * PropWare Links
     * [Home](http://david.zemon.name/PropWare)
     * [Source code](https://github.com/DavidZemon/PropWare)
-    * [PropWare binaries](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip)
+    * [PropWare binary](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip)
     * [Forum thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
 * [Parallax forums](http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller)
 * [JetBrains CLion](http://www.jetbrains.com/clion/): Full-featured, cross-platform C/C++ IDE
