@@ -3,7 +3,8 @@ Installation
 
 Microsoft Windows
 -----------------
-1. Download PropWare to your computer. You may use [git](http://msysgit.github.io/) to download the source code or 
+1. Download [PropWare](https://github.com/DavidZemon/PropWare) to your computer. You may use
+   [git](http://msysgit.github.io/) to download the [source code](https://github.com/DavidZemon/PropWare) or
    you may download a [binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip).
 2. Extract the contents to a directory without any spaces. For instance, `C:\Users\David\PropWare` would be an excellent
    choice. However, `C:\Documents and Settings\David` would be an awful choice. For Windows XP users, I am sorry. You
@@ -29,8 +30,9 @@ Microsoft Windows
 
 Linux
 -----
-Most, if not all, Linux distributions ship with a version of Python, so don't worry about that. Simply download PropWare
-in any way that you like (Git is recommended, but a 
+Most, if not all, Linux distributions ship with a version of Python, so don't worry about that. Simply download
+[PropWare](https://github.com/DavidZemon/PropWare) in any way that you like
+([source code](https://github.com/DavidZemon/PropWare) is recommended, but a
 [binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/) will work just fine) and execute the
 INSTALL.py script. If you downloaded PropWare to `/home/david/PropWare`, you would open a terminal and type:
 
