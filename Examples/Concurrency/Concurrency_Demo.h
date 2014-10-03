@@ -9,8 +9,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
-#include <simpletools.h>
 
-void blinkAnLEDSome (void);
+void blinkAnLEDSome (void *arg);
 
 #endif /* CONCURRENCY_DEMO_H_ */
