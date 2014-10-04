@@ -125,7 +125,7 @@ class Port {
                 const uint32_t iterations = 10) {
             const Port port(pinMask, Port::OUT);
 
-            for (int i = 0; i < iterations; ++i) {
+            for (uint32_t i = 0; i < iterations; ++i) {
                 port.write_fast(value);
                 waitcnt(75 * MILLISECOND + CNT);
                 port.clear();

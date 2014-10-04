@@ -16,4 +16,7 @@ option(WARN_ALL "Turn on all compiler warnings (-Wall)" ON)
 option(AUTO_C_STD "Set C standard to c99 (-std=c99)" ON)
 option(AUTO_CXX_STD "Set C++ standard to gnu++0x (-std=gnu++0x)" ON)
 
+# Optimize size option
+option(AUTO_CUT_SECTIONS "Cut out unused code (Compile: -ffunction-sections -fdata-sections; Link: --gc-sections)" ON)
+
 mark_as_advanced(CMAKE_TOOLCHAIN_FILE)

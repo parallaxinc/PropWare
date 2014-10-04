@@ -90,6 +90,8 @@ void listen_silently (void *arg) {
     while (1) {
         listener.receive_array(buffer, (uint32_t) (g_stringLength - 1));
 
+//        g_printer.printf("Data: \"%s\"" CRLF, buffer);
+
         g_printer.puts("Data: \"");
         g_printer.puts(buffer);
         g_printer.puts("\"" CRLF);

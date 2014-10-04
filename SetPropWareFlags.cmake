@@ -21,7 +21,12 @@ if (AUTO_CXX_STD)
     set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
 endif ()
 
-# Check if the deprecated variable name is set
+if (AUTO_CUT_SECTIONS)
+    set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --gc-sections")
+endif ()
+
+# Check if a deprecated variable name is set
 if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")
     set(C_FLAGS ${CFLAGS})
