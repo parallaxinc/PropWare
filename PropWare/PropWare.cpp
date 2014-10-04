@@ -1,5 +1,5 @@
 /**
- * @file    PropWare.cpp
+ * @file    PropWare.h
  *
  * @author  David Zemon
  *
@@ -23,23 +23,7 @@
  * SOFTWARE.
  */
 
-
-#include <PropWare/PropWare.h>
-
-uint8_t PropWare::count_bits (uint32_t par) {
-    /* Brian Kernighan's method for counting set bits in a variable */
-    uint8_t totalBits = 0;
-
-    while (par) {
-        par &= par - 1; // clear the least significant bit set
-        ++totalBits;
-    }
-
-    return totalBits;
-}
-
-uint32_t PropWare::measure_time_interval (const register uint32_t start) {
-    uint32_t interval = CNT - start;
-
-    return (uint32_t) (interval/MICROSECOND);
+extern "C" void __cxa_pure_virtual () {
+    // TODO: Provide some cool way for the user to enter their own error code
+    while (1);
 }

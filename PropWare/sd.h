@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_SD_H_
-#define PROPWARE_SD_H_
+#pragma once
 
 #include <stdlib.h>
 #include <string.h>
@@ -1544,7 +1543,7 @@ class SD {
         inline PropWare::ErrorCode send_active (uint8_t response[]) {
             PropWare::ErrorCode err;
             uint32_t timeout;
-            uint32_t longWiggleRoom = (uint32_t) (3 * MILLISECOND);
+            uint32_t longWiggleRoom = 3 * MILLISECOND;
             bool stageCleared = false;
 
             // Attempt to send active
@@ -3300,5 +3299,3 @@ class SD {
 };
 
 }
-
-#endif /* PROPWARE_SD_H_ */

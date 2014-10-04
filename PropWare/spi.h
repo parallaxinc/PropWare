@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_SPI_H_
-#define PROPWARE_SPI_H_
+#pragma once
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -84,7 +83,7 @@ extern uint32_t _SPIStartCog (void *arg);
  * Generally, multiple instances of the SPI class are not desired. To avoid
  * the programmer from accidentally creating multiple instances, this class is
  * set up as a singleton. A static instance can be retrieved with
- * PropWare::SPI::getInstance(). If multiple instances of PropWare::SPI are
+ * PropWare::SPI::get_instance(). If multiple instances of PropWare::SPI are
  * desired, the PropWare library (and your project) should be built from
  * source with PROPWARE_NO_SAFE_SPI defined
  */
@@ -139,9 +138,9 @@ class SPI {
          * Error codes - Proceeded by nothing
          */
         typedef enum {
-            /** No error */NO_ERROR = 0,
+            /** No error */NO_ERROR             = 0,
             /** First SPI error */BEG_ERROR,
-            /** SPI Error  0 */INVALID_PIN = BEG_ERROR,
+            /** SPI Error  0 */INVALID_PIN      = BEG_ERROR,
             /** SPI Error  1 */INVALID_CLOCK_INIT,
             /** SPI Error  2 */INVALID_MODE,
             /** SPI Error  3 */INVALID_PIN_MASK,
@@ -162,8 +161,8 @@ class SPI {
         // (Default: CLKFREQ/10) Wait 0.1 seconds before throwing a timeout
         // error
         static const uint32_t TIMEOUT_VAL;
-        static const uint8_t MAX_PAR_BITS = 31;
-        static const int32_t MAX_CLOCK;
+        static const uint8_t  MAX_PAR_BITS = 31;
+        static const int32_t  MAX_CLOCK;
 
 #ifndef PROPWARE_NO_SAFE_SPI
     private:
@@ -187,7 +186,7 @@ class SPI {
          *
          * @return  Address of an SPI module
          */
-        static SPI* getInstance () {
+        static SPI* get_instance () {
             // TODO: Add a lock to make this thread-safe
             static SPI instance;
             return &instance;
@@ -633,7 +632,7 @@ class SPI {
          * @param[in]  err     Error number used to determine error string
          */
         void print_error_str (const SPI::ErrorCode err) const {
-            char str[] = "SPI Error %u: %s\n";
+            char str[] = "SPI Error %u: %s" CRLF;
 
             switch (err) {
                 case PropWare::SPI::INVALID_PIN:
@@ -655,7 +654,7 @@ class SPI {
                     break;
                 case PropWare::SPI::TIMEOUT:
                     printf("SPI Error %u: %s\n\tCalling function was "
-                            "SPI::%s()\n", (err - PropWare::SPI::BEG_ERROR),
+                            "SPI::%s()" CRLF, (err - PropWare::SPI::BEG_ERROR),
                             "Timed out during parameter passing",
                             this->m_errorInMethod);
                     break;
@@ -772,10 +771,8 @@ class SPI {
          *** Protected Variable Declarations ***
          ***************************************/
         volatile atomic_t m_mailbox;
-        int8_t m_cog;
-        char m_errorInMethod[16];
+        int8_t            m_cog;
+        char              m_errorInMethod[16];
     };
 
 }
-
-#endif /* PROPWARE_SPI_H_ */

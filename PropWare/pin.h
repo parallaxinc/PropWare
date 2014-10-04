@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_PIN_H_
-#define PROPWARE_PIN_H_
+#pragma once
 
 #include <PropWare/PropWare.h>
 #include <PropWare/port.h>
@@ -38,6 +37,12 @@ class Pin: public PropWare::Port {
     public:
         /** Number of milliseconds to delay during debounce */
         static const uint8_t DEBOUNCE_DELAY = 3;
+
+    public:
+        static void flash_pin (const Pin::Mask pinMask,
+                const uint32_t iterations = 10) {
+            Port::flash_port(pinMask, pinMask, iterations);
+        }
 
     public:
         /**
@@ -221,5 +226,3 @@ class Pin: public PropWare::Port {
 };
 
 }
-
-#endif /* PROPWARE_PIN_H_ */

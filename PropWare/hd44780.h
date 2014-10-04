@@ -24,8 +24,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_HD44780_H_
-#define PROPWARE_HD44780_H_
+#pragma once
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -63,20 +62,20 @@ class HD44780 {
          *          are a single line of DDRAM.
          */
         typedef enum {
-            /** 8x1 */DIM_8x1,
-            /** 8x2 */DIM_8x2,
-            /** 8x4 */DIM_8x4,
+            /** 8x1 */        DIM_8x1,
+            /** 8x2 */        DIM_8x2,
+            /** 8x4 */        DIM_8x4,
             /** 16x1 mode 1 */DIM_16x1_1,
             /** 16x1 mode 2 */DIM_16x1_2,
-            /** 16x2 */DIM_16x2,
-            /** 16x4 */DIM_16x4,
-            /** 20x1 */DIM_20x1,
-            /** 20x2 */DIM_20x2,
-            /** 20x4 */DIM_20x4,
-            /** 24x1 */DIM_24x1,
-            /** 24x2 */DIM_24x2,
-            /** 40x1 */DIM_40x1,
-            /** 40x2 */DIM_40x2,
+            /** 16x2 */       DIM_16x2,
+            /** 16x4 */       DIM_16x4,
+            /** 20x1 */       DIM_20x1,
+            /** 20x2 */       DIM_20x2,
+            /** 20x4 */       DIM_20x4,
+            /** 24x1 */       DIM_24x1,
+            /** 24x2 */       DIM_24x2,
+            /** 40x1 */       DIM_40x1,
+            /** 40x2 */       DIM_40x2,
         } Dimensions;
 
         /** Number of allocated error codes for HD44780 */
@@ -88,30 +87,30 @@ class HD44780 {
          * Error codes - Proceeded by SD, SPI
          */
         typedef enum {
-            /** No error */NO_ERROR = 0,
+            /** No error */          NO_ERROR          = 0,
             /** First HD44780 error */BEG_ERROR = HD44780_ERRORS_BASE,
-            /** HD44780 Error 0 */INVALID_CTRL_SGNL = HD44780::BEG_ERROR,
-            /** HD44780 Error 1 */INVALID_DIMENSIONS,
-            /** Last HD44780 error */END_ERROR = HD44780::INVALID_DIMENSIONS
+            /** HD44780 Error 0 */   INVALID_CTRL_SGNL = HD44780::BEG_ERROR,
+            /** HD44780 Error 1 */   INVALID_DIMENSIONS,
+            /** Last HD44780 error */END_ERROR         = HD44780::INVALID_DIMENSIONS
         } ErrorCode;
 
     protected:
+        /**
+         * Store metadata on the LCD device to determine when line-wraps should
+         * and shouldn't occur
+         */
+        typedef struct {
+            /** How many characters can be displayed on a single row */
+            uint8_t charRows;
+            /** How many characters can be displayed in a single column */
+            uint8_t charColumns;
             /**
-             * Store metadata on the LCD device to determine when line-wraps should
-             * and shouldn't occur
+             * How many contiguous bytes of memory per visible character row
              */
-            typedef struct {
-                    /** How many characters can be displayed on a single row */
-                    uint8_t charRows;
-                    /** How many characters can be displayed in a single column */
-                    uint8_t charColumns;
-                    /**
-                     * How many contiguous bytes of memory per visible character row
-                     */
-                    uint8_t ddramCharRowBreak;
-                    /** Last byte of memory used in each DDRAM line */
-                    uint8_t ddramLineEnd;
-            } MemMap;
+            uint8_t ddramCharRowBreak;
+            /** Last byte of memory used in each DDRAM line */
+            uint8_t ddramLineEnd;
+        } MemMap;
 
     public:
         /** Number of spaces inserted for '\\t' */
@@ -122,12 +121,12 @@ class HD44780 {
          * @note    Must be combined with arguments below to create a parameter
          *          for the HD44780
          */
-        static const uint8_t CLEAR = BIT_0;
-        static const uint8_t RET_HOME = BIT_1;
+        static const uint8_t CLEAR          = BIT_0;
+        static const uint8_t RET_HOME       = BIT_1;
         static const uint8_t ENTRY_MODE_SET = BIT_2;
-        static const uint8_t DISPLAY_CTRL = BIT_3;
-        static const uint8_t SHIFT = BIT_4;
-        static const uint8_t FUNCTION_SET = BIT_5;
+        static const uint8_t DISPLAY_CTRL   = BIT_3;
+        static const uint8_t SHIFT          = BIT_4;
+        static const uint8_t FUNCTION_SET   = BIT_5;
         static const uint8_t SET_CGRAM_ADDR = BIT_6;
         static const uint8_t SET_DDRAM_ADDR = BIT_7;
         /**@}*/
@@ -137,7 +136,7 @@ class HD44780 {
          * @{
          */
         static const uint8_t SHIFT_INC = BIT_1;
-        static const uint8_t SHIFT_EN = BIT_0;
+        static const uint8_t SHIFT_EN  = BIT_0;
         /**@}*/
 
         /**
@@ -145,8 +144,8 @@ class HD44780 {
          * @{
          */
         static const uint8_t DISPLAY_PWR = BIT_2;
-        static const uint8_t CURSOR = BIT_1;
-        static const uint8_t BLINK = BIT_0;
+        static const uint8_t CURSOR      = BIT_1;
+        static const uint8_t BLINK       = BIT_0;
         /**@}*/
 
         /**
@@ -154,16 +153,16 @@ class HD44780 {
          * @{
          */
         static const uint8_t SHIFT_DISPLAY = BIT_3;  // 0 = shift cursor
-        static const uint8_t SHIFT_RIGHT = BIT_2;  // 0 = shift left
+        static const uint8_t SHIFT_RIGHT   = BIT_2;  // 0 = shift left
         /**@}*/
 
         /**
          * @name Function set arguments
          * @{
          */
-        static const uint8_t FUNC_8BIT_MODE = BIT_4;  // 0 = 4-bit mode
+        static const uint8_t FUNC_8BIT_MODE  = BIT_4;  // 0 = 4-bit mode
         static const uint8_t FUNC_2LINE_MODE = BIT_3;  // 0 = 1-line mode
-        static const uint8_t FUNC_5x10_CHAR = BIT_2;  // 0 = 5x8 dot mode
+        static const uint8_t FUNC_5x10_CHAR  = BIT_2;  // 0 = 5x8 dot mode
         /**@}*/
 
     public:
@@ -220,7 +219,6 @@ class HD44780 {
             this->m_dataPort.set_dir(PropWare::Pin::OUT);
 
             // Save the modes
-            this->m_dim = dimensions;
             this->generate_mem_map(dimensions);
             this->m_bitmode = bitmode;
 
@@ -534,16 +532,14 @@ class HD44780 {
         }
 
     protected:
-        HD44780::Dimensions m_dim;
-        uint8_t m_curRow;
-        uint8_t m_curCol;
-        HD44780::MemMap m_memMap;
+        uint8_t             m_curRow;
+        uint8_t             m_curCol;
+        HD44780::MemMap     m_memMap;
+
     private:
-        PropWare::Pin m_rs, m_rw, m_en;
+        PropWare::Pin        m_rs, m_rw, m_en;
         PropWare::SimplePort m_dataPort;
-        HD44780::Bitmode m_bitmode;
+        HD44780::Bitmode     m_bitmode;
 };
 
 }
-
-#endif /* PROPWARE_HD44780_H_ */

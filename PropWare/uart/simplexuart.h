@@ -1,10 +1,7 @@
 /**
- * @file    SPI_Demo.h
- */
-/**
- * @brief   Write "Hello world!" out via SPI protocol and receive an echo
+ * @file        simplexuart.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -26,41 +23,35 @@
  * SOFTWARE.
  */
 
-#ifndef SPI_DEMO_H_
-#define SPI_DEMO_H_
+#pragma once
+
+#include <PropWare/uart/abstractsimplexuart.h>
+
+namespace PropWare {
 
 /**
- * @defgroup    _propware_example_spi   SPI Demo
- * @ingroup     _propware_examples
- * @{
+ * @brief   An easy-to-use class for simplex (transmit only) UART communication
  */
+class SimplexUART: public AbstractSimplexUART {
+    public:
+        /**
+         * @brief   No-arg constructors are helpful when avoiding dynamic
+         *          allocation
+         */
+        SimplexUART () :
+                AbstractSimplexUART() {
+        }
 
-// Includes
-#include <propeller.h>
-#include <tinyio.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/spi.h>
-#include <PropWare/pin.h>
-#include <PropWare/port.h>
+        /**
+         * @brief       Construct a UART instance capable of simplex serial
+         *              communications
+         *
+         * @param[in]   tx  Bit mask used for the TX (transmit) pin
+         */
+        SimplexUART (const Port::Mask tx) :
+                AbstractSimplexUART() {
+            this->set_tx_mask(tx);
+        }
+};
 
-/** Pin number for MOSI (master out - slave in) */
-#define MOSI                PropWare::Port::P0
-/** Pin number for MISO (master in - slave out) */
-#define MISO                PropWare::Port::P1
-/** Pin number for the clock signal */
-#define SCLK                PropWare::Port::P2
-/** Pin number for chip select */
-#define CS                  PropWare::Port::P6
-
-/** Frequency (in hertz) to run the SPI module */
-#define FREQ                100000
-/** The SPI mode to run */
-#define MODE                PropWare::SPI::MODE_0
-/** Determine if the LSB or MSB should be sent first for each byte */
-#define BITMODE             PropWare::SPI::MSB_FIRST
-
-void error (const PropWare::ErrorCode err, const PropWare::SPI *spi);
-
-/**@}*/
-
-#endif /* SPI_DEMO_H_ */
+}

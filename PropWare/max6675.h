@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_MAX6675_H_
-#define PROPWARE_MAX6675_H_
+#pragma once
 
 #include <PropWare/PropWare.h>
 #include <PropWare/spi.h>
@@ -166,16 +165,14 @@ class MAX6675 {
 
     private:
         static const uint32_t SPI_DEFAULT_FREQ = 1000000;
-        static const SPI::Mode SPI_MODE = SPI::MODE_1;
-        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
-        static const uint8_t BIT_WIDTH = 12;
+        static const SPI::Mode    SPI_MODE     = SPI::MODE_1;
+        static const SPI::BitMode SPI_BITMODE  = SPI::MSB_FIRST;
+        static const uint8_t      BIT_WIDTH    = 12;
 
     private:
-        SPI *m_spi;
+        SPI           *m_spi;
         PropWare::Pin m_cs;
-        bool m_alwaysSetMode;
+        bool          m_alwaysSetMode;
 };
 
 }
-
-#endif /* PROPWARE_MAX6675_H_ */

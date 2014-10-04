@@ -32,7 +32,7 @@ int main () {
 
     PropWare::Pin statusLED(PropWare::Port::P16, PropWare::Pin::OUT);
 
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::SD sd(spi);
     PropWare::SD::File f, f2;
 
@@ -61,7 +61,7 @@ int main () {
 #endif
 
 #ifdef DEBUG
-    printf("Beginning SD card initialization...\n");
+    printf("Beginning SD card initialization..." CRLF);
 #endif
 
     // Start your engines!!!
@@ -69,12 +69,12 @@ int main () {
         error(err, &sd);
 
 #ifdef DEBUG
-    printf("SD routine started. Mounting now...\n");
+    printf("SD routine started. Mounting now..." CRLF);
 #endif
     if ((err = sd.mount()))
         error(err, &sd);
 #ifdef DEBUG
-    printf("FAT partition mounted!\n");
+    printf("FAT partition mounted!" CRLF);
 #endif
 
 #ifdef TEST_SHELL
@@ -85,7 +85,7 @@ int main () {
     sd.fopen(NEW_FILE, &f2, PropWare::SD::FILE_MODE_R_PLUS);
 
 #ifdef DEBUG
-    printf("Both files opened...\n");
+    printf("Both files opened..." CRLF);
 #endif
 
     while (!sd.feof(&f)) {
@@ -97,21 +97,21 @@ int main () {
     }
 
 #ifdef DEBUG
-    printf("\nFile printed...\n");
+    printf(CRLF "File printed..." CRLF);
 
-    printf("Now closing read-only file!\n");
+    printf("Now closing read-only file!" CRLF);
 #endif
     sd.fclose(&f);
 #ifdef DEBUG
-    printf("***Now closing the modified file!***\n");
+    printf("***Now closing the modified file!***" CRLF);
 #endif
     sd.fclose(&f2);
 
 #ifdef DEBUG
-    printf("Files closed...\n");
+    printf("Files closed..." CRLF);
 
     sd.fopen(NEW_FILE, &f2, PropWare::SD::FILE_MODE_R);
-    printf("File opened for a second time, now printing new contents...\n");
+    printf("File opened for a second time, now printing new contents..." CRLF);
     while (!sd.feof(&f2))
     putchar(sd.fgetc(&f2));
     sd.fclose(&f2);
@@ -129,7 +129,7 @@ int main () {
 #endif
 
 #ifdef DEBUG
-    printf("Execution complete!\n");
+    printf("Execution complete!" CRLF);
 #endif
 
     while (1) {
@@ -144,14 +144,13 @@ void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        PropWare::SPI::getInstance()->print_error_str(
+        PropWare::SPI::get_instance()->print_error_str(
                 (PropWare::SPI::ErrorCode) err);
     else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
-//        sd->print_error_str((PropWare::SD::ErrorCode) err);
-        ;
+        sd->print_error_str((PropWare::SD::ErrorCode) err);
 
     while (1) {
-        debugLEDs.write(err);
+        debugLEDs.write((uint32_t) err);
         waitcnt(100*MILLISECOND);
         debugLEDs.write(0);
         waitcnt(100*MILLISECOND);

@@ -2,7 +2,7 @@
  * @file    SimplexUART_Demo.h
  */
 /**
- * @brief   Write "Hello world!\n" out via UART protocol
+ * @brief   Write "Hello world!" out via UART protocol
  *
  * @author  David Zemon
  *
@@ -37,9 +37,8 @@
 
 // Includes
 #include <propeller.h>
-#include <tinyio.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/uart.h>
+#include <PropWare/uart/simplexuart.h>
 #include <PropWare/port.h>
 
 void error (const PropWare::ErrorCode err);

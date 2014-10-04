@@ -26,8 +26,7 @@ class CreateBinaryDistr(object):
     PROPWARE_ROOT = ""
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     WHITELISTED_FILES = ["CMakeLists.txt", "Doxyfile", "README", "run_all_tests", "run_unit"]
-    WHITELIST_EXTENSIONS = ["c", "s", "cpp", "cxx", "cc", "h", "a", "dox", "md", "py", "pl", "elf", "rb", "jpg", "lang",
-                            "pdf", "png", "cmake", "in"]
+    WHITELIST_EXTENSIONS = ["dox", "md", "py", "pl", "elf", "rb", "jpg", "lang", "pdf", "png", "cmake", "in"]
     BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3", "v2.0-beta4"]
@@ -210,6 +209,8 @@ class CreateBinaryDistr(object):
     @staticmethod
     def _is_whitelisted(filename):
         if filename in CreateBinaryDistr.WHITELISTED_FILES:
+            return True
+        elif propwareUtils.is_src_file(filename):
             return True
         else:
             filename = filename.split('.')

@@ -1,4 +1,3 @@
-add_subdirectory(cog)
 add_subdirectory(cmm)
 add_subdirectory(lmm)
 add_subdirectory(xmmc)

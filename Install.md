@@ -3,16 +3,38 @@ Installation
 
 Microsoft Windows
 -----------------
-I'm sorry to say, there is a bug in the CMake files and PropWare is not currently usable on any Microsoft Windows 
-operating system. If you'd like to get ready for PropWare though, go ahead and download/install any version of Python
-2.7+ from [Python's website](https://www.python.org/downloads/). You'll need it for the installation script.
+1. Download [PropWare](https://github.com/DavidZemon/PropWare) to your computer. You may use
+   [git](http://msysgit.github.io/) to download the [source code](https://github.com/DavidZemon/PropWare) or
+   you may download a [binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip).
+2. Extract the contents to a directory without any spaces. For instance, `C:\Users\David\PropWare` would be an excellent
+   choice. However, `C:\Documents and Settings\David` would be an awful choice. For Windows XP users, I am sorry. You
+   may need to use a path such as `C:\PropWare`.
+3. Download Python 2.7 or later. At the time of this writing,
+   [Python 3.4.1](https://www.python.org/ftp/python/3.4.1/python-3.4.1.msi) is the latest Windows revision. Refer to the
+   python.org [downloads page](https://www.python.org/downloads/windows/) for the complete list of downloads.
+4. Run the Python installation file or extract its contents to your desired directory. When selecting which components
+   to install, ensure you have `Add python.exe to Path` set to install to disk.
+   ![Python installation window](python_install.png)
+5. Run `INSTALL.py`:
+   * Open the PropWare root directory in your file browser
+   * Open the `util` directory within PropWare
+   * While holding `shift`, right-click on in the file browser window (not on a file) and choose `Open command window
+    here`
+    ![Right-click menu to open command window](open_cmd_window.png)
+   * Type `INSTALL.py` and press enter. You might see some questions pop up - just answer them as your heart desires. 
+     Since I'm still very new to this, _please_ [let me know](mailto:david@zemon.name) if there is anything confusing
+     about my wording.
+6. You're all done! If any errors were reported, please [let me know](mailto:david@zemon.name) or 
+   [post in the forums](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
+   so that I may help you through it or fix a bug in the installation.
 
 Linux
 -----
-Most, if not all, Linux distributions ship with a version of Python, so don't worry about that. Simply download PropWare
-in any way that you like (Git is recommended, but a 
-[binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/) from here will work just fine) and execute
-the INSTALL.py script. If you downloaded PropWare to `/home/david/PropWare`, you would open a terminal and type:
+Most, if not all, Linux distributions ship with a version of Python, so don't worry about that. Simply download
+[PropWare](https://github.com/DavidZemon/PropWare) in any way that you like
+([source code](https://github.com/DavidZemon/PropWare) is recommended, but a
+[binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/) will work just fine) and execute the
+INSTALL.py script. If you downloaded PropWare to `/home/david/PropWare`, you would open a terminal and type:
 
     cd /home/david/PropWare/util
     python INSTALL.py

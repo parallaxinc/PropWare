@@ -37,7 +37,6 @@
  */
 
 #include <propeller.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include <PropWare/PropWare.h>
@@ -45,6 +44,7 @@
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
+#include <simpletext.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
 #define PART_NUMBER     PropWare::MCP3000::MCP300x

@@ -33,7 +33,7 @@ int main () {
     uint32_t loopCounter;
     uint8_t scaledValue, i;
     uint32_t ledOutput;
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::MCP3000 adc(spi, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
@@ -52,10 +52,10 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    printf("Welcome to the MCP3000 demo!\n");
+    print("Welcome to the MCP3000 demo!" CRLF);
 
     while (1) {
-        loopCounter = (uint32_t) (SECOND / 2 + CNT);
+        loopCounter = SECOND / 2 + CNT;
 
         // Loop over the LED output very quickly, until we are within 1
         // millisecond of total period
@@ -71,7 +71,7 @@ int main () {
             scale.write(ledOutput);
         }
 
-        printf("Channel %u is reading: %u\n", CHANNEL, data);
+        print("Channel %d is reading: %d" CRLF, CHANNEL, data);
     }
 }
 
@@ -81,7 +81,7 @@ void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
         spi->print_error_str((PropWare::SPI::ErrorCode const) err);
     else
-        printf("Unknown error: %u", err);
+        print("Unknown error: %u", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

@@ -24,8 +24,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_MCP300X_H_
-#define PROPWARE_MCP300X_H_
+#pragma once
 
 #include <propeller.h>
 #include <PropWare/PropWare.h>
@@ -43,10 +42,10 @@ class MCP3000 {
     public:
         /** Single-ended channels */
         typedef enum {
-            /** Channel 0 */CHANNEL_0,
-            /** Channel 1 */CHANNEL_1,
-            /** Channel 2 */CHANNEL_2,
-            /** Channel 3 */CHANNEL_3,
+            /** Channel 0 */               CHANNEL_0,
+            /** Channel 1 */               CHANNEL_1,
+            /** Channel 2 */               CHANNEL_2,
+            /** Channel 3 */               CHANNEL_3,
             /** Channel 4 (MCP3008 only) */CHANNEL_4,
             /** Channel 5 (MCP3008 only) */CHANNEL_5,
             /** Channel 6 (MCP3008 only) */CHANNEL_6,
@@ -55,10 +54,10 @@ class MCP3000 {
 
         /** Pseudo-differential pair channels */
         typedef enum {
-            /** CH0+, CH1- */DIFF_0_1,
-            /** CH1+, CH0- */DIFF_1_0,
-            /** CH2+, CH3- */DIFF_2_3,
-            /** CH3+, CH2- */DIFF_3_2,
+            /** CH0+, CH1- */               DIFF_0_1,
+            /** CH1+, CH0- */               DIFF_1_0,
+            /** CH2+, CH3- */               DIFF_2_3,
+            /** CH3+, CH2- */               DIFF_3_2,
             /** CH4+, CH5- (MCP3008 only) */DIFF_4_5,
             /** CH5+, CH4- (MCP3008 only) */DIFF_5_4,
             /** CH6+, CH7- (MCP3008 only) */DIFF_6_7,
@@ -137,9 +136,9 @@ class MCP3000 {
         /**
          * @brief       Read a specific channel's data in single-ended mode
          *
-         * @param[in]   channel     One of MCP_CHANNEL_<x>, where <x> is a number 0
-         *                          through 3 (or 0 through 7 for the MCP3008);
-         *                          Selects the channel to be read
+         * @param[in]   channel     One of MCP_CHANNEL_`x`, where `x` is a
+         *                          number 0 through 3 (or 0 through 7 for the
+         *                          MCP3008); Selects the channel to be read
          * @param[out]  *dat        Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
@@ -175,9 +174,9 @@ class MCP3000 {
         /**
          * @brief       Read a specific axis's data in differential mode
          *
-         * @param[in]   channels    One of DIFF_<x>_<y>, where <x> is a number 0
+         * @param[in]   channels    One of DIFF_`x`_`y`, where `x` is a number 0
          *                          through 3 (or 0 through 7 for the MCP3008) 
-         *                          and <y> is <x> + (<x> + 1)%2 (See above 
+         *                          and `y` is `x` + (`x` + 1)%2 (See above
          *                          defined enum or datasheet for details)
          * @param[out]  *dat        Address that data should be placed into
          *
@@ -215,22 +214,20 @@ class MCP3000 {
         }
 
     private:
-        static const uint32_t SPI_DEFAULT_FREQ = 100000;
-        static const SPI::Mode SPI_MODE = SPI::MODE_2;
-        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
+        static const uint32_t     SPI_DEFAULT_FREQ = 100000;
+        static const SPI::Mode    SPI_MODE         = SPI::MODE_2;
+        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
 
-        static const uint8_t START = BIT_4;
+        static const uint8_t START        = BIT_4;
         static const uint8_t SINGLE_ENDED = BIT_3;
         static const uint8_t DIFFERENTIAL = 0;
-        static const uint8_t OPTN_WIDTH = 7;
+        static const uint8_t OPTN_WIDTH   = 7;
 
     private:
-        SPI *m_spi;
+        SPI           *m_spi;
         PropWare::Pin m_cs;
-        bool m_alwaysSetMode;
-        uint8_t m_dataWidth;
+        bool          m_alwaysSetMode;
+        uint8_t       m_dataWidth;
 };
 
 }
-
-#endif /* PROPWARE_MCP300X_H_ */

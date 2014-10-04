@@ -13,6 +13,11 @@ include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
 project(PropWare_${MODEL})
 
 add_library(${PROJECT_NAME} STATIC
+        ../uart/abstractduplexuart
+        ../uart/abstractsimplexuart
+        ../uart/duplexuart
+        ../uart/fullduplexuart
+        ../uart/halfduplexuart
         ../hd44780
         ../l3g
         ../max6675
@@ -24,6 +29,7 @@ add_library(${PROJECT_NAME} STATIC
         ../seeedtft
         ../seeedtftfast
         ../seeedtftfast_as.S
+        ../uart/simplexuart
         ../spi
         ../spi_as.S
-        ../uart)
+        ../uart/uart)

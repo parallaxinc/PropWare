@@ -24,15 +24,14 @@
  */
 
 // Includes
-#include <simpletools.h>
 #include "L3G_Demo.h"
 
 // Main function
 int main () {
     PropWare::ErrorCode err;
-    int16_t gyroVals[3];
-    PropWare::SPI *spi = PropWare::SPI::getInstance();
-    PropWare::L3G gyro(spi);
+    int16_t             gyroVals[3];
+    PropWare::SPI       *spi = PropWare::SPI::get_instance();
+    PropWare::L3G       gyro(spi);
 
     if ((err = gyro.start(MOSI, MISO, SCLK, CS)))
         error(err);
@@ -49,10 +48,15 @@ int main () {
     while (1) {
         if ((err = gyro.read_all(gyroVals)))
             error(err);
-        print("Gyro vals DPS... X: %2.3f\tY: %2.3f\tZ: %2.3f\n",
-                gyro.convert_to_dps(gyroVals[0]),
-                gyro.convert_to_dps(gyroVals[1]),
-                gyro.convert_to_dps(gyroVals[2]));
+//        print("Gyro vals DPS... X: %2.3f\tY: %2.3f\tZ: %2.3f" CRLF,
+//              gyro.convert_to_dps(gyroVals[PropWare::L3G::X]),
+//              gyro.convert_to_dps(gyroVals[PropWare::L3G::Y]),
+//              gyro.convert_to_dps(gyroVals[PropWare::L3G::Z]));
+
+        print("Gyro vals... X: %d\tY: %d\tZ: %d" CRLF,
+              gyroVals[PropWare::L3G::X],
+              gyroVals[PropWare::L3G::Y],
+              gyroVals[PropWare::L3G::Z]);
 
 //        waitcnt(50*MILLISECOND + CNT);
     }
@@ -65,9 +69,9 @@ void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     while (1) {
-        debugLEDs.write(err);
-        waitcnt(CLKFREQ/5 + CNT);
+        debugLEDs.write((uint32_t) err);
+        waitcnt(CLKFREQ / 5 + CNT);
         debugLEDs.write(0);
-        waitcnt(CLKFREQ/5 + CNT);
+        waitcnt(CLKFREQ / 5 + CNT);
     }
 }

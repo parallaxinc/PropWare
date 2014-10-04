@@ -23,19 +23,22 @@
 * SOFTWARE.
 */
 
-#ifndef SEEEDTFTFAST_H_
-#define SEEEDTFTFAST_H_
+#pragma once
 
 #include <PropWare/seeedtft.h>
 #include <sys/thread.h>
 
 namespace PropWare {
-    // Symbol for assembly instructions to start a new SPI cog
-    extern "C" {
-    extern uint32_t _SeeedTftStartCog (void *arg);
-    }
+// Symbol for assembly instructions to start a new SPI cog
+extern "C" {
+extern uint32_t _SeeedTftStartCog (void *arg);
+}
 
-    class SeeedTFTFast : public PropWare::SeeedTFT {
+/**
+ * This class is pre-alpha stage and has not been successfully tested. Use at
+ * your own risk.
+ */
+class SeeedTFTFast : public PropWare::SeeedTFT {
     public:
         SeeedTFTFast() : PropWare::SeeedTFT() {
         };
@@ -107,5 +110,3 @@ namespace PropWare {
         static atomic_t mailbox;
     };
 }
-
-#endif /* SEEEDTFTFAST_H_ */
