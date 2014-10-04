@@ -6,17 +6,20 @@
 
 #include "MultiCogBlinky_Demo.h"
 
-static uint32_t cog_stack[STACK_SIZE][8];
+const uint16_t         COGS       = 8;
+const uint16_t         STACK_SIZE = 16;
+static uint32_t        cog_stack[STACK_SIZE][COGS];
 static _thread_state_t thread_data;
 
 volatile uint32_t wait_time;
 volatile uint32_t startCnt;
-volatile int8_t syncStart;
+volatile int8_t   syncStart;
 
 int main (int argc, char* argv[]) {
-    int8_t n;
-    int8_t cog;
-    PropWare::Pin pin;
+    int8_t                              n;
+    int8_t                              cog;
+    PropWare::Pin                       pin;
+    uint32_t                            nextCnt;
     static volatile PropWare::Pin::Mask pins[] = {
             PropWare::Port::P16,
             PropWare::Port::P17,
@@ -25,17 +28,16 @@ int main (int argc, char* argv[]) {
             PropWare::Port::P20,
             PropWare::Port::P21,
             PropWare::Port::P22,
-            PropWare::Port::P23 };
-    uint32_t nextCnt;
+            PropWare::Port::P23};
 
-    wait_time = (uint32_t) (50 * MILLISECOND);
+    wait_time = 50 * MILLISECOND;
 
     syncStart = 0;
 
     for (n = 1; n < COGS; n++) {
         cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, do_toggle,
                         (void *) &pins[n], &thread_data);
-        printf("Toggle COG %d Started\n", cog);
+        print("Toggle COG %d Started" CRLF, cog);
     }
 
     pin.set_mask(pins[0]);
@@ -55,7 +57,7 @@ int main (int argc, char* argv[]) {
 
 void do_toggle (void *arg) {
     PropWare::Pin pin;
-    uint32_t nextcnt;
+    uint32_t      nextCnt;
 
     pin.set_mask(*(PropWare::Pin::Mask *) arg);
     pin.set_dir(PropWare::Pin::OUT);
@@ -64,10 +66,10 @@ void do_toggle (void *arg) {
     while (syncStart == 0)
         ;
 
-    nextcnt = wait_time + startCnt;
+    nextCnt = wait_time + startCnt;
     while (1) {
         pin.toggle();
-        nextcnt = waitcnt2(nextcnt, wait_time);
+        nextCnt = waitcnt2(nextCnt, wait_time);
     }
 }
 

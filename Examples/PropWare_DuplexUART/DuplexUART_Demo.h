@@ -2,7 +2,7 @@
  * @file    DuplexUART_Demo.h
  */
 /**
- * @brief   Write "Hello world!\n" out via UART protocol
+ * @brief   Write "Hello world!" out via UART protocol
  *
  * @author  David Zemon
  *
@@ -26,8 +26,7 @@
  * SOFTWARE.
  */
 
-#ifndef DuplexUART_DEMO_H_
-#define DuplexUART_DEMO_H_
+#pragma once
 
 /**
  * @defgroup    _propware_example_DuplexUart    DuplexUART Demo
@@ -37,20 +36,19 @@
 
 // Includes
 #include <propeller.h>
-#include <tinyio.h>
 #include <sys/thread.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/uart.h>
+#include <PropWare/uart/halfduplexuart.h>
+#include <PropWare/uart/simplexuart.h>
 #include <PropWare/port.h>
 
-#define STACK_SIZE      256
+uint8_t init_main_cog (_thread_state_t *threadData,
+        PropWare::SimplexUART *speaker);
 
-void sendBytes (const PropWare::UART &uart, const char buffer[]);
+void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener);
 
-void receiveSilently (void *arg);
+void listen_silently (void *arg);
 
 void error (const PropWare::ErrorCode err);
 
 /**@}*/
-
-#endif /* DuplexUART_DEMO_H_ */

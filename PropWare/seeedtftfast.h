@@ -23,8 +23,7 @@
 * SOFTWARE.
 */
 
-#ifndef SEEEDTFTFAST_H_
-#define SEEEDTFTFAST_H_
+#pragma once
 
 #include <PropWare/seeedtft.h>
 #include <sys/thread.h>
@@ -111,5 +110,3 @@ class SeeedTFTFast : public PropWare::SeeedTFT {
         static atomic_t mailbox;
     };
 }
-
-#endif /* SEEEDTFTFAST_H_ */

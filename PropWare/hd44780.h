@@ -24,8 +24,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_HD44780_H_
-#define PROPWARE_HD44780_H_
+#pragma once
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -544,5 +543,3 @@ class HD44780 {
 };
 
 }
-
-#endif /* PROPWARE_HD44780_H_ */

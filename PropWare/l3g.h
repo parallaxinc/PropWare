@@ -24,8 +24,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_L3G_H_
-#define PROPWARE_L3G_H_
+#pragma once
 
 #include <propeller.h>
 #include <PropWare/PropWare.h>
@@ -114,20 +113,22 @@ class L3G {
          * @return       Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
-                const PropWare::Port::Mask miso,
-                const PropWare::Port::Mask sclk,
-                const PropWare::Port::Mask cs) {
+                                   const PropWare::Port::Mask miso,
+                                   const PropWare::Port::Mask sclk,
+                                   const PropWare::Port::Mask cs) {
             PropWare::ErrorCode err;
 
             // Ensure SPI module started
             if (this->m_spi->is_running()) {
-                check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
+                check_errors(this->m_spi->set_mode(PropWare::L3G::SPI_MODE));
+                check_errors(
+                        this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE));
             } else {
                 check_errors(
                         this->m_spi->start(mosi, miso, sclk,
-                                L3G::SPI_DEFAULT_FREQ, L3G::SPI_MODE,
-                                L3G::SPI_BITMODE));
+                                           PropWare::L3G::SPI_DEFAULT_FREQ,
+                                           PropWare::L3G::SPI_MODE,
+                                           PropWare::L3G::SPI_BITMODE));
             }
 
             this->m_cs.set_mask(cs);
@@ -136,8 +137,8 @@ class L3G {
 
             // NOTE L3G has high- and low-pass filters. Should they be enabled?
             // (Page 31)
-            check_errors(this->write8(L3G::CTRL_REG1, NIBBLE_0));
-            check_errors(this->write8(L3G::CTRL_REG4, BIT_7));
+            check_errors(this->write8(PropWare::L3G::CTRL_REG1, NIBBLE_0));
+            check_errors(this->write8(PropWare::L3G::CTRL_REG4, BIT_7));
 
             return 0;
         }
@@ -163,8 +164,9 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const L3G::Axis axis, int16_t *val) const {
-            return this->read16(L3G::OUT_X_L + (axis << 1), val);
+        PropWare::ErrorCode read (const PropWare::L3G::Axis axis,
+                                  int16_t *val) const {
+            return this->read16(PropWare::L3G::OUT_X_L + (axis << 1), val);
         }
 
         /**
@@ -175,7 +177,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode read_x (int16_t *val) const {
-            return this->read16(L3G::OUT_X_L, val);
+            return this->read16(PropWare::L3G::OUT_X_L, val);
         }
 
         /**
@@ -186,7 +188,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode read_y (int16_t *val) const {
-            return this->read16(L3G::OUT_Y_L, val);
+            return this->read16(PropWare::L3G::OUT_Y_L, val);
         }
 
         /**
@@ -197,7 +199,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode read_z (int16_t *val) const {
-            return this->read16(L3G::OUT_Z_L, val);
+            return this->read16(PropWare::L3G::OUT_Z_L, val);
         }
 
         /**
@@ -211,9 +213,9 @@ class L3G {
          */
         PropWare::ErrorCode read_all (int16_t *val) const {
             PropWare::ErrorCode err;
-            uint8_t i;
+            uint8_t             i;
 
-            uint8_t addr = L3G::OUT_X_L;
+            uint8_t addr = PropWare::L3G::OUT_X_L;
             addr |= BIT_7;  // Set RW bit (
             addr |= BIT_6;  // Enable address auto-increment
 
@@ -221,15 +223,12 @@ class L3G {
 
             this->m_cs.clear();
             check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(
-                    this->m_spi->shift_in(16, &(val[L3G::X]),
-                            sizeof(val[L3G::X])));
-            check_errors(
-                    this->m_spi->shift_in(16, &(val[L3G::Y]),
-                            sizeof(val[L3G::Y])));
-            check_errors(
-                    this->m_spi->shift_in(16, &(val[L3G::Z]),
-                            sizeof(val[L3G::Z])));
+            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::X]),
+                                               sizeof(val[PropWare::L3G::X])));
+            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Y]),
+                                               sizeof(val[PropWare::L3G::Y])));
+            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Z]),
+                                               sizeof(val[PropWare::L3G::Z])));
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary
@@ -252,15 +251,16 @@ class L3G {
          */
         PropWare::ErrorCode set_dps (const PropWare::L3G::DPSMode dpsMode) {
             PropWare::ErrorCode err;
-            uint8_t oldValue;
+            uint8_t             oldValue;
 
             this->m_dpsMode = dpsMode;
             check_errors(this->maybe_set_spi_mode());
 
-            check_errors(this->read8(L3G::CTRL_REG4, (int8_t * ) &oldValue));
+            check_errors(this->read8(PropWare::L3G::CTRL_REG4,
+                                     (int8_t *) &oldValue));
             oldValue &= ~(BIT_5 | BIT_4);
             oldValue |= dpsMode;
-            check_errors(this->write8(L3G::CTRL_REG4, oldValue));
+            check_errors(this->write8(PropWare::L3G::CTRL_REG4, oldValue));
 
             return 0;
         }
@@ -305,7 +305,7 @@ class L3G {
          * @return      Returns the rotational value in degrees-per-second
          */
         static float convert_to_dps (const int16_t rawValue,
-                const PropWare::L3G::DPSMode dpsMode) {
+                                     const PropWare::L3G::DPSMode dpsMode) {
             switch (dpsMode) {
                 case PropWare::L3G::DPS_250:
                     return (float) (rawValue * 0.00875);
@@ -318,11 +318,11 @@ class L3G {
         }
 
     private:
-        static const uint32_t     SPI_DEFAULT_FREQ = 900000;
+        static const uint32_t     SPI_DEFAULT_FREQ = 9000;
         static const SPI::Mode    SPI_MODE         = SPI::MODE_3;
         static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
 
-    private:
+    protected:
         /***********************************
          *** Private Method Declarations ***
          ***********************************/
@@ -336,7 +336,7 @@ class L3G {
          */
         PropWare::ErrorCode write8 (uint8_t addr, const uint8_t dat) const {
             PropWare::ErrorCode err;
-            uint16_t outputValue;
+            uint16_t            outputValue;
 
             addr &= ~BIT_7;  // Clear the RW bit (write mode)
 
@@ -363,7 +363,7 @@ class L3G {
          */
         PropWare::ErrorCode write16 (uint8_t addr, const uint16_t dat) const {
             PropWare::ErrorCode err;
-            uint16_t outputValue;
+            uint16_t            outputValue;
 
             addr &= ~BIT_7;  // Clear the RW bit (write mode)
             addr |= BIT_6;  // Enable address auto-increment
@@ -453,12 +453,10 @@ class L3G {
         }
 
     private:
-        SPI           *m_spi;
-        PropWare::Pin m_cs;
-        DPSMode       m_dpsMode;
-        bool          m_alwaysSetMode;
+        SPI                    *m_spi;
+        PropWare::Pin          m_cs;
+        PropWare::L3G::DPSMode m_dpsMode;
+        bool                   m_alwaysSetMode;
 };
 
 }
-
-#endif /* PROPWARE_L3G_H_ */

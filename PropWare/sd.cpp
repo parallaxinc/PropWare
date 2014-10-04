@@ -35,6 +35,6 @@ const char PropWare::SD::SHELL_CD[]    = "cd";
 const char PropWare::SD::SHELL_TOUCH[] = "touch";
 #endif
 
-const uint32_t PropWare::SD::RESPONSE_TIMEOUT        = (uint32_t const) (100 * MILLISECOND);
-const uint32_t PropWare::SD::SEND_ACTIVE_TIMEOUT     = (uint32_t const) (500 * MILLISECOND);
-const uint32_t PropWare::SD::SINGLE_BYTE_WIGGLE_ROOM = (uint32_t const) (150 * MICROSECOND);
+const uint32_t PropWare::SD::RESPONSE_TIMEOUT        = 100 * MILLISECOND;
+const uint32_t PropWare::SD::SEND_ACTIVE_TIMEOUT     = 500 * MILLISECOND;
+const uint32_t PropWare::SD::SINGLE_BYTE_WIGGLE_ROOM = 150 * MICROSECOND;

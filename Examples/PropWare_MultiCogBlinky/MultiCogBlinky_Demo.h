@@ -36,8 +36,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_DEMO_H_
-#define PROPWARE_DEMO_H_
+#pragma once
 
 /**
  * @defgroup    _propware_example_propware  PropWare Basics
@@ -45,16 +44,12 @@
  * @{
  */
 
-#include <tinyio.h>
-#include <sys/thread.h>
-
 // Note the lack of an include for propeller.h; This is because PropWare.h will
 // include propeller.h for you
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
-
-#define COGS            8
-#define STACK_SIZE      16
+#include <sys/thread.h>
+#include <simpletext.h>
 
 /**
  * @brief       Toggle thread function gets started in an LMM COG.
@@ -64,5 +59,3 @@
 void do_toggle (void *arg);
 
 /*@}*/
-
-#endif /* PROPWARE_DEMO_H_ */

@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_MAX6675_H_
-#define PROPWARE_MAX6675_H_
+#pragma once
 
 #include <PropWare/PropWare.h>
 #include <PropWare/spi.h>
@@ -177,5 +176,3 @@ class MAX6675 {
 };
 
 }
-
-#endif /* PROPWARE_MAX6675_H_ */

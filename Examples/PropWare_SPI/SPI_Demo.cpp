@@ -26,10 +26,10 @@
 #include "SPI_Demo.h"
 
 /**
- * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
+ * @brief   Write "Hello world!" out via SPI protocol and receive an echo
  */
 int main () {
-    char string[] = "Hello world!\n";  // Create the test string
+    char string[] = "Hello world!" CRLF;  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     char in;    // Create an input variable to store received values from SPI
     PropWare::SPI *spi = PropWare::SPI::get_instance();
@@ -86,7 +86,7 @@ void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
         spi->print_error_str((PropWare::SPI::ErrorCode) err);
     } else
-        printf("Unknown error %u\n", err);
+        printf("Unknown error %u" CRLF, err);
 
     while (1) {
         debugLEDs.write(err);

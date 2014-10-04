@@ -30,11 +30,7 @@
 #error "This file is for assembly files only; Please use PropWare.h instead"
 #endif
 
-#ifndef PROPWARE_H
-#define PROPWARE_H
-
-
-
+#pragma once
 
 #define SECOND              ((unsigned long long) CLKFREQ)
 #define MILLISECOND         ((unsigned long long) (CLKFREQ / 1000))
@@ -93,5 +89,3 @@
 
 #define GPIO_DIR_IN         0
 #define GPIO_DIR_OUT        -1
-
-#endif /* PROPWARE_H */

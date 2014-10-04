@@ -23,8 +23,7 @@
 * SOFTWARE.
 */
 
-#ifndef SEEEDTFT_H_
-#define SEEEDTFT_H_
+#pragma once
 
 #include <PropWare/PropWare.h>
 #include <PropWare/port.h>
@@ -346,5 +345,3 @@ class SeeedTFT {
         static const uint8_t SIMPLE_FONT[][8];
 };
 }
-
-#endif /* SEEEDTFT_H_ */

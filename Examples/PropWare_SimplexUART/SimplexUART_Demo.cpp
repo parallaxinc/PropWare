@@ -25,11 +25,10 @@
 
 #include "SimplexUART_Demo.h"
 
-static const PropWare::Port::Mask TX_PIN = PropWare::Port::P16;
 static const uint32_t BAUD_RATE = 115200;
 
 /**
- * @brief   Write "Hello world!\n" out via SPI protocol and receive an echo
+ * @brief   Write "Hello world!" out via UART protocol
  */
 int main () {
     PropWare::ErrorCode err;
@@ -49,12 +48,12 @@ int main () {
 
     // Create the test string - useful when testing with a terminal
     char string[] = "Hello world! This is my most favoritest sentence "
-            "ever!!!\n\r";
+            "ever!!!" CRLF;
 
     // Create pointer variables that can be incremented in a loop
     char *s;
 
-    PropWare::SimplexUART uart(TX_PIN);
+    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
     uart.set_baud_rate(BAUD_RATE);
@@ -88,8 +87,6 @@ int main () {
 
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
-
-    printf("Unknown error %u\n", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

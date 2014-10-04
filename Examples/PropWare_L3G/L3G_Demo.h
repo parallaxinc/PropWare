@@ -41,6 +41,7 @@
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
+#include <simpletools.h>
 
 /** Pin number for MOSI (master out - slave in) */
 #define MOSI                PropWare::Port::P0
@@ -50,10 +51,6 @@
 #define SCLK                PropWare::Port::P2
 /** Pin number for chip select */
 #define CS                  PropWare::Port::P6
-/** Frequency (in Hertz) to run the SPI protocol */
-#define FREQ                10000
-
-#define DEBUG_LEDS          PropWare::BYTE_2
 
 void error (const PropWare::ErrorCode err);
 

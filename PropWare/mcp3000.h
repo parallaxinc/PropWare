@@ -24,8 +24,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_MCP300X_H_
-#define PROPWARE_MCP300X_H_
+#pragma once
 
 #include <propeller.h>
 #include <PropWare/PropWare.h>
@@ -137,9 +136,9 @@ class MCP3000 {
         /**
          * @brief       Read a specific channel's data in single-ended mode
          *
-         * @param[in]   channel     One of MCP_CHANNEL_<x>, where <x> is a number 0
-         *                          through 3 (or 0 through 7 for the MCP3008);
-         *                          Selects the channel to be read
+         * @param[in]   channel     One of MCP_CHANNEL_`x`, where `x` is a
+         *                          number 0 through 3 (or 0 through 7 for the
+         *                          MCP3008); Selects the channel to be read
          * @param[out]  *dat        Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
@@ -175,9 +174,9 @@ class MCP3000 {
         /**
          * @brief       Read a specific axis's data in differential mode
          *
-         * @param[in]   channels    One of DIFF_<x>_<y>, where <x> is a number 0
+         * @param[in]   channels    One of DIFF_`x`_`y`, where `x` is a number 0
          *                          through 3 (or 0 through 7 for the MCP3008) 
-         *                          and <y> is <x> + (<x> + 1)%2 (See above 
+         *                          and `y` is `x` + (`x` + 1)%2 (See above
          *                          defined enum or datasheet for details)
          * @param[out]  *dat        Address that data should be placed into
          *
@@ -232,5 +231,3 @@ class MCP3000 {
 };
 
 }
-
-#endif /* PROPWARE_MCP300X_H_ */

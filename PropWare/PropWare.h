@@ -23,12 +23,11 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #ifdef ASM_OBJ_FILE
 #include <PropWare/PropWare_asm.h>
-#endif
-
-#ifndef PROPWARE_H
-#define PROPWARE_H
+#else
 
 #include <propeller.h>
 #include <sys/null.h>
@@ -42,12 +41,14 @@ namespace PropWare {
 #ifdef DAREDEVIL
 #define check_errors(x)      x
 #else
-#define check_errors(x)      if ((err = x)) return err
+#define check_errors(x)     if ((err = x)) return err
 #endif
 
-#define SECOND              ((uint64_t) CLKFREQ)
-#define MILLISECOND         ((uint64_t) (CLKFREQ / 1000))
-#define MICROSECOND         ((uint64_t) (MILLISECOND / 1000))
+#define CRLF                "\n\r"
+
+#define SECOND              ((uint32_t) CLKFREQ)
+#define MILLISECOND         ((uint32_t) (CLKFREQ / 1000))
+#define MICROSECOND         ((uint32_t) (MILLISECOND / 1000))
 
 typedef int8_t ErrorCode;
 
@@ -142,9 +143,10 @@ class Utility {
                 const register uint32_t start) {
             uint32_t interval = CNT - start;
 
-            return (uint32_t) (interval/MICROSECOND);
+            return interval/MICROSECOND;
         }
 };
+
 }
 
-#endif /* PROPWARE_H */
+#endif

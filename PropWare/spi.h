@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_SPI_H_
-#define PROPWARE_SPI_H_
+#pragma once
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -633,7 +632,7 @@ class SPI {
          * @param[in]  err     Error number used to determine error string
          */
         void print_error_str (const SPI::ErrorCode err) const {
-            char str[] = "SPI Error %u: %s\n";
+            char str[] = "SPI Error %u: %s" CRLF;
 
             switch (err) {
                 case PropWare::SPI::INVALID_PIN:
@@ -655,7 +654,7 @@ class SPI {
                     break;
                 case PropWare::SPI::TIMEOUT:
                     printf("SPI Error %u: %s\n\tCalling function was "
-                            "SPI::%s()\n", (err - PropWare::SPI::BEG_ERROR),
+                            "SPI::%s()" CRLF, (err - PropWare::SPI::BEG_ERROR),
                             "Timed out during parameter passing",
                             this->m_errorInMethod);
                     break;
@@ -777,5 +776,3 @@ class SPI {
     };
 
 }
-
-#endif /* PROPWARE_SPI_H_ */

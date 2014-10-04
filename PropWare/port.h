@@ -23,8 +23,7 @@
  * SOFTWARE.
  */
 
-#ifndef PROPWARE_PORT_H
-#define PROPWARE_PORT_H
+#pragma once
 
 #include <PropWare/PropWare.h>
 
@@ -120,6 +119,18 @@ class Port {
                 return PropWare::Port::NULL_PIN;
             else
                 return (PropWare::Port::Mask) (mask << pinNum);
+        }
+
+        static void flash_port (const uint32_t pinMask, uint32_t value,
+                const uint32_t iterations = 10) {
+            const Port port(pinMask, Port::OUT);
+
+            for (int i = 0; i < iterations; ++i) {
+                port.write_fast(value);
+                waitcnt(75 * MILLISECOND + CNT);
+                port.clear();
+                waitcnt(75 * MILLISECOND + CNT);
+            }
         }
 
     public:
@@ -293,6 +304,21 @@ class Port {
  */
 class SimplePort: public Port {
     public:
+        static void flash_port (const Port::Mask firstPin,
+                const uint8_t portWidth, const uint32_t value,
+                const uint16_t iterations = 10) {
+            const SimplePort port(firstPin, portWidth, Port::OUT);
+
+            const uint32_t shiftVal = value << port.m_firstPinNum;
+
+            for (int i = 0; i < iterations; ++i) {
+                port.write_fast(shiftVal);
+                waitcnt(75 * MILLISECOND + CNT);
+                port.clear();
+                waitcnt(75 * MILLISECOND + CNT);
+            }
+        }
+    public:
         /**
          * @brief   @see PropWare::Port::Port()
          */
@@ -371,5 +397,3 @@ class SimplePort: public Port {
 };
 
 }
-
-#endif /* PROPWARE_PORT_H */
