@@ -25,9 +25,7 @@
 
 #pragma once
 
-#include <stdarg.h>
 #include <PropWare/uart/uart.h>
-#include <stdlib.h>
 
 namespace PropWare {
 
@@ -320,120 +318,6 @@ class AbstractSimplexUART : public virtual UART {
         const uint32_t length = strlen(string);
         this->send_array(string, length);
     }
-
-        virtual void put_int (int32_t x) const {
-            char    buf[32];
-            uint8_t j, i = 0;
-            uint8_t sign = 0;
-
-            if (x < 0) {
-                sign = 1;
-                x    = abs(x);
-            } else if (0 == x) {
-                this->send('0');
-                return;
-            }
-
-            // Create a character array in reverse order, starting with the tens
-            // digit and working toward the largest digit
-            while (x) {
-                buf[i] = x % 10 + '0';
-                x /= 10;
-                ++i;
-            }
-
-            // If negative, add the sign
-            if (sign) {
-                buf[i] = '-';
-                ++i;
-            }
-
-            // Reverse the character array
-            for (j = 0; j < i; ++j)
-                this->send((uint16_t) buf[i - j - 1]);
-        }
-
-        virtual void put_uint (uint32_t x) const {
-            const uint8_t divisor = 10;
-            char          buf[32];
-            uint8_t       j, i    = 0;
-
-            if (0 == x)
-                this->send('0');
-            else {
-                // Create a character array in reverse order, starting with the tens
-                // digit and working toward the largest digit
-                while (x) {
-                    buf[i] = x % divisor + '0';
-                    x /= divisor;
-                    ++i;
-                }
-
-                // Reverse the character array
-                for (j = 0; j < i; ++j)
-                    this->send((uint16_t) buf[i - j - 1]);
-            }
-        }
-
-        virtual void put_hex (uint32_t x) const {
-            char    buf[32];
-            uint8_t temp, j, i = 0;
-
-            while (x) {
-                temp = x & NIBBLE_0;
-                if (temp < 10)
-                    buf[i] = temp + '0';
-                else {
-                    temp -= 10;
-                    buf[i] = temp + 'A';
-                }
-                ++i;
-                x >>= 4;
-            }
-
-            // Reverse the character array
-            for (j = 0; j < i; ++j)
-                this->send((uint16_t) buf[i - j - 1]);
-        }
-
-        virtual void printf (const char fmt[], ...)const {
-            const char *s = fmt;
-            va_list    list;
-            va_start(list, fmt);
-            while (*s) {
-                if ('%' == *s) {
-                    ++s;
-                    switch (*s) {
-                        case 'i':
-                        case 'd':
-                            this->put_int(va_arg(list, int32_t));
-                            break;
-                        case 'u':
-                            this->put_uint(va_arg(list, uint32_t));
-                            break;
-                        case 's':
-                            this->puts(va_arg(list, char *));
-                            break;
-                        case 'c':
-                            this->send(va_arg(list, int));
-                            break;
-                        case 'X':
-                            this->put_hex(va_arg(list, uint32_t));
-                            break;
-                        case '%':
-                            this->send('%');
-                            break;
-                        default:
-                            va_arg(list, int);  // Increment va_arg pointer
-                            this->send(' ');
-                            break;
-                    }
-                } else
-                    this->send((uint16_t) *s);
-                ++s;
-            }
-            va_end(list);
-        }
 
     protected:
         /**

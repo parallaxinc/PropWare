@@ -97,12 +97,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @see PropWare::UART::receive
          */
         HUBTEXT virtual uint32_t receive () const {
-            ErrorCode err;
             uint32_t rxVal;
-            uint32_t wideParityMask = this->m_parityMask;
             uint32_t wideDataMask = this->m_dataMask;
-
-            uint32_t evenParityResult;
 
             rxVal = this->shift_in_data(this->m_receivableBits,
                     this->m_bitCycles, this->m_rx.get_mask(), this->m_msbMask);

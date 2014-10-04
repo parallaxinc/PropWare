@@ -90,11 +90,7 @@ void listen_silently (void *arg) {
     while (1) {
         listener.receive_array(buffer, (uint32_t) (g_stringLength - 1));
 
-//        g_printer.printf("Data: \"%s\"" CRLF, buffer);
-
-        g_printer.puts("Data: \"");
-        g_printer.puts(buffer);
-        g_printer.puts("\"" CRLF);
+        g_printer.printf("Data: \"%s\"" CRLF, buffer);
     }
 }
 
@@ -111,9 +107,7 @@ void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    g_printer.puts("Unknown error ");
-    g_printer.send('0' + err);
-    g_printer.puts(CRLF);
+    g_printer.printf("Unknown error: %u" CRLF, err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);
