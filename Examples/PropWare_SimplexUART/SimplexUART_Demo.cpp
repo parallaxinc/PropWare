@@ -25,7 +25,8 @@
 
 #include "SimplexUART_Demo.h"
 
-static const uint32_t BAUD_RATE = 115200;
+const uint32_t BAUD_RATE = 115200;
+const uint32_t DELAY     = 200;
 
 /**
  * @brief   Write "Hello world!" out via UART protocol
@@ -44,14 +45,11 @@ int main () {
             0xaa,
             0xff,
             0x80,
-            0x00 };
+            0x00 }; // Make sure we have a null-terminator for UART::puts
 
     // Create the test string - useful when testing with a terminal
     char string[] = "Hello world! This is my most favoritest sentence "
             "ever!!!" CRLF;
-
-    // Create pointer variables that can be incremented in a loop
-    char *s;
 
     PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
 
@@ -64,24 +62,17 @@ int main () {
     uart.set_parity(PropWare::UART::NO_PARITY);
 
     while (1) {
-        s = numberPattern;         // Set the pointer to the beginning of the string
-        while (*s) {        // Loop until we read the null-terminator
-            uart.send((uint16_t) *s);  // Output the next character of the string
+        // Test the number pattern
+        uart.puts(numberPattern);
+        waitcnt(DELAY * MILLISECOND + CNT);
 
-            // Increment the character pointer
-            ++s;
-        }
-
-        waitcnt(MILLISECOND + CNT);
-
-        for (s = numberPattern; *s; ++s)
-            uart.send((uint16_t) *s);
-
-        waitcnt(MILLISECOND + CNT);
-
+        // Test a basic string
         uart.puts(string);
+        waitcnt(DELAY * MILLISECOND + CNT);
 
-        waitcnt(MILLISECOND + CNT);
+        // Test a formatted string
+        uart.printf("Math: %u + 0x%X = %d" CRLF, 3, 0xF, 3 + 0xF);
+        waitcnt(DELAY * MILLISECOND + CNT);
     }
 }
 
