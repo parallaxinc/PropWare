@@ -1,5 +1,5 @@
 /**
- * @file    Concurrency_Demo.cpp
+ * @file    Hello_Demo.cpp
  *
  * @author  David Zemon
  */
@@ -9,31 +9,23 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-
-#ifdef TEST_PROPWARE
-#include <PropWare/uart/simplexuart.h>
 #include <PropWare/printer.h>
-#endif
-
-#ifdef TEST_SIMPLE
-#include <simpletext.h>
-#endif
 
 // Main function
 int main () {
     uint32_t i = 0;
+    const float f = 4.2;
 
 #ifdef TEST_PROPWARE
-    const PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
-    const PropWare::Printer printer(&uart);
-
     while (1) {
-        printer.printf("Hello, world! %d" CRLF, i++);
+        pstw.printf("Hello, world! %03d 0x%02X %06.3f" CRLF, i, i, f);
+        ++i;
         waitcnt(500 * MILLISECOND + CNT);
     }
 #elif defined TEST_SIMPLE
     while (1) {
-        print("Hello, world! %d" CRLF, i++);
+        print("Hello, world! %03d 0x%02x %06.3f" CRLF, i, i, f);
+        i++;
         waitcnt(500 * MILLISECOND + CNT);
     }
 #endif

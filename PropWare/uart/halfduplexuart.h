@@ -54,11 +54,7 @@ class HalfDuplexUART: public AbstractDuplexUART {
         /**
          * @see PropWare::UART::send()
          */
-        HUBTEXT virtual void send (uint16_t originalData) const {
-            // Set pin as output
-            __asm__ volatile ("or outa, %0" : : "r" (this->m_tx.get_mask()));
-            __asm__ volatile ("or dira, %0" : : "r" (this->m_tx.get_mask()));
-
+        HUBTEXT void send (uint16_t originalData) const {
             this->AbstractSimplexUART::send(originalData);
 
             // Set pin as input
@@ -68,39 +64,12 @@ class HalfDuplexUART: public AbstractDuplexUART {
         /**
          * @see PropWare::UART::send_array()
          */
-        HUBTEXT virtual void send_array (const char array[],
+        HUBTEXT void send_array (const char array[],
                 uint32_t words) const {
-            // Set pin as output
-            __asm__ volatile ("or outa, %0" : : "r" (this->m_tx.get_mask()));
-            __asm__ volatile ("or dira, %0" : : "r" (this->m_tx.get_mask()));
-
             this->AbstractSimplexUART::send_array(array, words);
 
             // Set pin as input
             __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
-        }
-
-        /**
-         * @see PropWare::FullDuplexUART::receive()
-         */
-        HUBTEXT virtual uint32_t receive () const {
-            // Set RX as input
-            __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
-
-            // Receive data
-            return this->AbstractDuplexUART::receive();
-        }
-
-        /**
-         * @see PropWare::FullDuplexUART::receive_array()
-         */
-        HUBTEXT virtual ErrorCode receive_array (char *buffer,
-                uint32_t words) const {
-            // Set RX as input
-            __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
-
-            // Receive data
-            return this->AbstractDuplexUART::receive_array(buffer, words);
         }
 };
 

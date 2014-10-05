@@ -26,6 +26,10 @@ if (AUTO_CUT_SECTIONS)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --gc-sections")
 endif ()
 
+if (PROPWARE_PRINT_FLOAT)
+    add_definitions(-DENABLE_PROPWARE_PRINT_FLOAT)
+endif ()
+
 # Check if a deprecated variable name is set
 if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")

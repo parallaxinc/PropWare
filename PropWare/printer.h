@@ -28,8 +28,16 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
+
+#ifndef S_ISNAN
+#define S_ISNAN(x) (x != x)
+#endif  /* !defined(S_ISNAN) */
+#ifndef S_ISINF
+#define S_ISINF(x) (x != 0.0 && x + x == x)
+#endif  /* !defined(S_ISINF) */
 
 namespace PropWare {
 
@@ -61,11 +69,12 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        void put_int (int32_t x) const {
+        void put_int (int32_t x, uint16_t width,
+                const char fillChar) const {
             if (0 > x)
                 this->printCapable->put_char('-');
 
-            this->put_uint((uint32_t) abs(x));
+            this->put_uint((uint32_t) abs(x), width, fillChar);
         }
 
         /**
@@ -73,26 +82,29 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        void put_uint (uint32_t x) const {
+        void put_uint (uint32_t x, uint16_t width,
+                const char fillChar) const {
             const uint8_t radix = 10;
-            char          buf[sizeof(x)*8];
-            uint8_t       j, i    = 0;
+            char          buf[sizeof(x) * 8];
+            uint8_t       j, i  = 0;
 
-            if (0 == x)
-                this->printCapable->put_char('0');
-            else {
-                // Create a character array in reverse order, starting with the
-                // tens digit and working toward the largest digit
-                while (x) {
-                    buf[i] = x % radix + '0';
-                    x /= radix;
-                    ++i;
-                }
-
-                // Reverse the character array
-                for (j = 0; j < i; ++j)
-                    this->printCapable->put_char((uint16_t) buf[i - j - 1]);
+            // Create a character array in reverse order, starting with the
+            // tens digit and working toward the largest digit
+            while (x) {
+                buf[i] = x % radix + '0';
+                x /= radix;
+                ++i;
             }
+
+            if (width) {
+                width -= i;
+                while (width--)
+                    this->put_char(fillChar);
+            }
+
+            // Reverse the character array
+            for (j = 0; j < i; ++j)
+                this->printCapable->put_char((uint16_t) buf[i - j - 1]);
         }
 
         /**
@@ -101,7 +113,8 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        void put_hex (uint32_t x) const {
+        void put_hex (uint32_t x, uint16_t width,
+                const char fillChar) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
 
@@ -117,10 +130,168 @@ class Printer {
                 x >>= 4;
             }
 
+            if (width) {
+                width -= i;
+                while (width--)
+                    this->put_char(fillChar);
+            }
+
             // Reverse the character array
             for (j = 0; j < i; ++j)
                 this->printCapable->put_char((uint16_t) buf[i - j - 1]);
         }
+
+#ifdef ENABLE_PROPWARE_PRINT_FLOAT
+        /**
+         * @brief       Print a floating point number with a given width and
+         *              precision
+         *
+         * @param[in]   f           Number to print
+         * @param[in]   width       Number of integer digits to print
+         * @param[in]   precision   Number of digits to the right of the decimal
+         *                          point to print
+         */
+        void put_float (double f, uint16_t width, uint16_t precision,
+                const char fillChar) const {
+            ////////////////////////////////////////////////////////////////////
+            // Code taken straight from Parallax's floatToString! Thank you!!!
+            ////////////////////////////////////////////////////////////////////
+
+            char buffer[32];
+            char *s = buffer;
+            union convert {
+                float v;
+                int   w;
+            } fval;
+
+            int m = 0;
+            int k = 0;
+
+            int j    = 0;
+            int sign = 0;
+            int g    = 0;
+
+            int   reps  = 0;
+            float scale;
+            int   ctr   = 0;
+
+            int offset;
+            int p;
+            int q;
+            int n;
+
+            if (S_ISNAN(f)) {
+                this->puts("nan");
+            }
+            if (S_ISINF(f)) {
+                if (((int) f) & 0x80000000)
+                    this->puts("-inf");
+                else
+                    this->puts("inf");
+            }
+
+            /* clamp the digits. */
+            int clamp = 6; /* a buffer must be at least clamp + 4 digits */
+            precision = (precision > clamp) ? clamp : precision;
+
+            if (f < 0.0) {
+                sign = 1;
+                f    = -f;
+            }
+
+            if (sign) {
+                s[j++] = '-';
+            }
+
+            /* Find reasonable starting value for scale.
+            // Using 2^10x has similar values to 10^3x. */
+            fval.v = f;
+            g = fval.w;
+
+            g >>= 23;
+            g &= 0xFF;
+            g -= 127;
+
+            reps     = (g / 10);
+            scale    = 1.0;
+            for (ctr = 0; ctr <= reps; ctr++) {
+                scale *= 1000.0;
+            }
+
+            /* If integer is zero, 0 */
+            if (f < 1.0) {
+                s[j++] = '0';
+            }
+            else {
+                char c;
+                for (; scale >= 1.0; scale /= 10.0) {
+                    if (f >= scale) {
+                        break;
+                    }
+                }
+                for (; scale >= 1.0; scale /= 10.0) {
+                    c = (char) (f / scale);
+                    f -= ((float) c * scale);
+                    c += 48;
+                    s[j++] = c;
+                }
+            }
+
+            /* If width > current size, move right, then pad with spaces */
+            offset = width - j - precision - 1;
+            if (precision == 0)
+                offset++;
+
+            p = j + offset;
+            q = j;
+            n = p;
+
+            if (offset > 0) {
+                for (; j >= 0;) {
+                    s[n--] = s[j--];
+                }
+                for (; n >= 0;) {
+                    s[n--] = fillChar;
+                }
+                j = p;
+            }
+            else {
+                j = q;
+            }
+
+            /* Append with fractional */
+            if (precision > 0)
+                s[j++] = '.';
+
+            k = j;
+            k += precision;
+            for (; j <= k;) {
+                f *= 10.0;
+                s[j++] = (char) f + '0';
+                f -= ((int) f);
+            }
+
+            m = j - 1;
+            j--;
+            if (s[j] >= '5') {
+                j--;
+                for (; (j >= 0); j--) {
+                    if ((s[j] < '0') || (s[j] > '9')) continue;
+                    if (s[j] < '9') {
+                        s[j]++;
+                        break;
+                    }
+                    else {
+                        s[j] = '0';
+                    }
+                }
+            }
+
+            s[m] = 0;
+
+            this->puts(s);
+        }
+#endif
 
         /**
          * @brief       Similar in functionality to the C-standard, this method
@@ -132,6 +303,8 @@ class Printer {
          *                - \%s - String
          *                - \%c - Single character
          *                - \%X - Hexadecimal with capital letters
+         *                - \%f - Floating point number (must have CMake option
+         *                  `PROPWARE_PRINT_FLOAT` enabled)
          *                - \%\% - Literal percent sign ('\%')
          *
          *              A single space will be printed in place of unsupported
@@ -142,29 +315,55 @@ class Printer {
          * @param[in]   ...     Variable number of arguments passed here.
          *                      Continuing with the `Hello, %%s!` example, a
          *                      single argument could be passed such as:<br>
-         *                        `UART::printf("Hello, %s!", "David");`<br>
+         *                        `Printer::printf("Hello, %s!", "David");`<br>
          *                      and "Hello, David!" would be sent out the serial
          *                      port. Multiple arguments can be used as well,
          *                      such as:<br>
-         *                        `UART::printf("%i + %i = %i", 2, 3, 2 +
+         *                        `Printer::printf("%i + %i = %i", 2, 3, 2 +
          *                        3);`<br>
          *                      Which would print:<br>
          *                        `2 + 3 = 5`
          */
         void printf (const char fmt[], ...) const {
             const char *s = fmt;
+            char       c, fillChar;
+            uint16_t    width;
             va_list    list;
             va_start(list, fmt);
+
             while (*s) {
-                if ('%' == *s) {
-                    ++s;
-                    switch (*s) {
+                c = *s;
+
+                if ('%' == c) {
+                    c = *(++s);
+
+                    (c == '0') ? fillChar = '0' : fillChar = ' ';
+
+                    width = 0;
+                    while (c && isdigit(c)) {
+                        width = 10 * width + (c - '0');
+                        c     = *(++s);
+                    }
+
+                    uint8_t precision = 6;
+                    if (c == '.') {
+                        precision = 0;
+                        c         = *(++s);
+                        while (c && isdigit(c)) {
+                            precision = 10 * precision + (c - '0');
+                            c         = *(++s);
+                        }
+                    }
+
+                    switch (c) {
                         case 'i':
                         case 'd':
-                            this->put_int(va_arg(list, int32_t));
+                            this->put_int(va_arg(list, int32_t), width,
+                                    fillChar);
                             break;
                         case 'u':
-                            this->put_uint(va_arg(list, uint32_t));
+                            this->put_uint(va_arg(list, uint32_t), width,
+                                    fillChar);
                             break;
                         case 's':
                             this->printCapable->puts(va_arg(list, char *));
@@ -173,8 +372,15 @@ class Printer {
                             this->printCapable->put_char(va_arg(list, int));
                             break;
                         case 'X':
-                            this->put_hex(va_arg(list, uint32_t));
+                            this->put_hex(va_arg(list, uint32_t), width,
+                                    fillChar);
                             break;
+#ifdef ENABLE_PROPWARE_PRINT_FLOAT
+                        case 'f':
+                            this->put_float(va_arg(list, double), width,
+                                    precision, fillChar);
+                            break;
+#endif
                         case '%':
                             this->printCapable->put_char('%');
                             break;
@@ -185,6 +391,7 @@ class Printer {
                     }
                 } else
                     this->printCapable->put_char(*s);
+
                 ++s;
             }
             va_end(list);
@@ -195,3 +402,6 @@ class Printer {
 };
 
 }
+
+extern const PropWare::Printer pstw;
+extern const PropWare::Printer pstr;

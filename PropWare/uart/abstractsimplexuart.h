@@ -202,6 +202,13 @@ class AbstractSimplexUART : public virtual UART {
         HUBTEXT virtual void send (uint16_t originalData) const {
             uint32_t wideData = originalData;
 
+            // Set pin as output
+            __asm__ volatile (
+                    "or outa, %0 \n\t"
+                    "or dira, %0 \n\t"
+                    :
+                    : "r" (this->m_tx.get_mask()));
+
             // Add parity bit
             if (UART::EVEN_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
@@ -241,6 +248,13 @@ class AbstractSimplexUART : public virtual UART {
                 register uint32_t bitCycles   = this->m_bitCycles;
                 register uint32_t txMask      = this->m_tx.get_mask();
 
+                // Set pin as output
+                __asm__ volatile (
+                        "or outa, %0 \n\t"
+                        "or dira, %0 \n\t"
+                        :
+                        : "r" (txMask));
+
                 switch (this->m_parity) {
                     case UART::NO_PARITY:
                         do {
@@ -264,7 +278,7 @@ class AbstractSimplexUART : public virtual UART {
                             // Add parity
                             __asm__ volatile(
                                     "test %[_data], %[_dataMask] wc \n\t"
-                                    "muxnc %[_data], %[_parityMask]"
+                                    "muxnc %[_data], %[_parityMask] \n\t"
                                     : [_data] "+r" (wideData)
                                     : [_dataMask] "r" (dataMask),
                                     [_parityMask] "r" (parityMask));

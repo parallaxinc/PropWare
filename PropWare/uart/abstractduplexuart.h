@@ -34,28 +34,6 @@ class AbstractDuplexUART: public virtual DuplexUART,
                           public AbstractSimplexUART {
     public:
         /**
-         * @see PropWare::SimplexUART::AbstractSimplexUART()
-         */
-        AbstractDuplexUART () :
-                AbstractSimplexUART() {
-        }
-
-        /**
-         * @brief       Initialize a UART module with both pin masks
-         *
-         * @param[in]   tx  Pin mask for TX (transmit) pin
-         * @param[in]   rx  Pin mask for RX (receive) pin
-         */
-        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) {
-            this->AbstractSimplexUART::set_data_width(this->m_dataWidth);
-
-            // Set rx direction second so that, in the case of half-duplex, the
-            // pin floats high
-            this->set_tx_mask(tx);
-            this->set_rx_mask(rx);
-        }
-
-        /**
          * @see PropWare::UART::set_rx_mask
          */
         void set_rx_mask (const Port::Mask rx) {
@@ -96,9 +74,12 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive
          */
-        HUBTEXT virtual uint32_t receive () const {
+        HUBTEXT uint32_t receive () const {
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
+
+            // Set RX as input
+            __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
             rxVal = this->shift_in_data(this->m_receivableBits,
                     this->m_bitCycles, this->m_rx.get_mask(), this->m_msbMask);
@@ -112,9 +93,12 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive_array
          */
-        HUBTEXT virtual ErrorCode receive_array (char *buffer,
+        HUBTEXT ErrorCode receive_array (char *buffer,
                 uint32_t words) const {
             uint32_t wideData;
+
+            // Set RX as input
+            __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
@@ -145,6 +129,29 @@ class AbstractDuplexUART: public virtual DuplexUART,
         }
 
     protected:
+        /**
+         * @see PropWare::SimplexUART::AbstractSimplexUART()
+         */
+        AbstractDuplexUART () :
+                AbstractSimplexUART() {
+        }
+
+        /**
+         * @brief       Initialize a UART module with both pin masks
+         *
+         * @param[in]   tx  Pin mask for TX (transmit) pin
+         * @param[in]   rx  Pin mask for RX (receive) pin
+         */
+        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) :
+                AbstractSimplexUART() {
+            this->AbstractSimplexUART::set_data_width(this->m_dataWidth);
+
+            // Set rx direction second so that, in the case of half-duplex, the
+            // pin floats high
+            this->set_tx_mask(tx);
+            this->set_rx_mask(rx);
+        }
+
         /**
          * @brief   Set a bit-mask for the data word's MSB (assuming LSB is bit
          *          0 - the start bit is not taken into account)
