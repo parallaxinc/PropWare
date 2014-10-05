@@ -1,4 +1,5 @@
 add_subdirectory(Concurrency)
+add_subdirectory(Hello)
 add_subdirectory(PropWare_DuplexUART)
 add_subdirectory(PropWare_HD44780)
 add_subdirectory(PropWare_L3G)
