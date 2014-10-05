@@ -24,6 +24,8 @@ add_library(${PROJECT_NAME} STATIC
         ../mcp3000
         ../pin
         ../port
+        ../printcapable
+        ../printer
         ../PropWare
         ../sd
         ../seeedtft

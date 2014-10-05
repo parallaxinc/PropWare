@@ -47,7 +47,7 @@ int main () {
     // configuration
     thermo.always_set_spi_mode(1);
 
-    lcd.putStr("Welcome to the MAX6675 demo!\n");
+    lcd.puts("Welcome to the MAX6675 demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
@@ -57,7 +57,7 @@ int main () {
 
         lcd.clear();
         sprintf(buffer, "Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
-        lcd.putStr(buffer);
+        lcd.puts(buffer);
 
         waitcnt(loopCounter);
     }

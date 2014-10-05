@@ -7,7 +7,7 @@ project(PropWare C CXX ASM COGC COGCXX ECOGC ECOGCXX DAT)
 
 set(PROPWARE_MAIN_PACKAGE 1)
 
-add_subdirectory(simple)
-add_subdirectory(libpropeller)
+#add_subdirectory(simple)
+#add_subdirectory(libpropeller)
 add_subdirectory(PropWare)
 add_subdirectory(Examples)

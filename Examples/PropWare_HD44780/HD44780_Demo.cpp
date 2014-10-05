@@ -23,18 +23,42 @@
  * SOFTWARE.
  */
 
-#include "HD44780_Demo.h"
+#include <PropWare/PropWare.h>
+#include <PropWare/hd44780.h>
+#include <PropWare/uart/simplexuart.h>
+#include <simpletext.h>
+
+/**
+* @brief       Enter an infinite loop that blinks the error code on the
+*              QUICKSTART's 8 onboard LEDs
+*
+* @param[in]   err     Error code
+*/
+void error (const PropWare::ErrorCode err);
+
+const PropWare::Port::Mask RS = PropWare::Port::P16;
+const PropWare::Port::Mask RW = PropWare::Port::P17;
+const PropWare::Port::Mask EN = PropWare::Port::P18;
+
+const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
+const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
+const PropWare::HD44780::Dimensions DIMENSIONS     =
+                                            PropWare::HD44780::DIM_16x2;
+
+const PropWare::SimplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
+const PropWare::Printer     g_printer(&g_uart);
 
 // Main function
 int main () {
-    char buffer[128];
-
+    // Create and initialize our LCD object
     PropWare::HD44780 lcd;
-
     lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
 
-    sprintf(buffer, "%u %s%07d 0x%x", 123456789, "Hello!", -12345, 0xabcdef);
-    lcd.putStr(buffer);
+    // Create a printer for easy, formatted writing to the LCD
+    PropWare::Printer lcdPrinter(&lcd);
+
+    // Print to the LCD (exactly 32 characters so that we fill up both lines)
+    lcdPrinter.printf("%u %s%d  0x%X", 123456789, "Hello!", -12345, 0xabcdef);
 
     return 0;
 }
@@ -42,7 +66,8 @@ int main () {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    PropWare::HD44780::print_error_str((PropWare::HD44780::ErrorCode) err);
+    PropWare::HD44780::print_error_str(&g_printer,
+            (PropWare::HD44780::ErrorCode) err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

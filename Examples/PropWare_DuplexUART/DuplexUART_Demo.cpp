@@ -23,7 +23,19 @@
  * SOFTWARE.
  */
 
-#include "DuplexUART_Demo.h"
+// Includes
+#include <propeller.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/uart/halfduplexuart.h>
+
+uint8_t init_main_cog (_thread_state_t *threadData,
+        PropWare::SimplexUART *speaker);
+
+void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener);
+
+void listen_silently (void *arg);
+
+void error (const PropWare::ErrorCode err);
 
 // Create an easy-to-test number pattern - useful when testing with a logic
 // analyzer
@@ -41,7 +53,7 @@ char g_numberPattern[] = {
 // Need to use HalfDuplex instead of Simplex so that multiple cogs can use the
 // same port. Otherwise, any cog _not_ writing to the pin would hold the pin
 // high
-const PropWare::HalfDuplexUART g_printer(PropWare::UART::PARALLAX_STANDARD_TX);
+const PropWare::HalfDuplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
 // Create the test string - useful when testing with a terminal
 const char                   TEST_STRING[] = "Hello world!";
 const uint32_t               BAUD_RATE = 115200;
@@ -61,7 +73,7 @@ int main () {
 
     // Start our new cog and initialize the speaking UART
     const uint8_t cog = init_main_cog(&threadData, &speaker);
-    g_printer.puts("Ready to send!!!" CRLF);
+    g_uart.puts("Ready to send!!!" CRLF);
 
     while (1) {
         waitcnt(500 * MILLISECOND + CNT);
@@ -85,12 +97,12 @@ void listen_silently (void *arg) {
 
     // Initialize the listener UART and clear the buffer
     init_listener_cog(buffer, &listener);
-    g_printer.puts("Ready to receive!" CRLF);
+    g_uart.puts("Ready to receive!" CRLF);
 
     while (1) {
         listener.receive_array(buffer, (uint32_t) (g_stringLength - 1));
 
-        g_printer.printf("Data: \"%s\"" CRLF, buffer);
+        g_uart.printf("Data: \"%s\"" CRLF, buffer);
     }
 }
 
@@ -107,7 +119,7 @@ void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    g_printer.printf("Unknown error: %u" CRLF, err);
+    g_uart.printf("Unknown error: %u" CRLF, err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

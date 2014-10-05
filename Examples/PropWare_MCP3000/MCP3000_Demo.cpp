@@ -23,18 +23,45 @@
  * SOFTWARE.
  */
 
-#include "MCP3000_Demo.h"
+#include <stdlib.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/mcp3000.h>
+#include <PropWare/uart/simplexuart.h>
+
+/**
+* @brief       Report errors to the Debug LEDs for user interpretation
+*
+* @param[in]   err     Error value
+*/
+void error (const PropWare::SPI *spi, const PropWare::ErrorCode err);
+
+/** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
+const PropWare::MCP3000::PartNumber PART_NUMBER = PropWare::MCP3000::MCP300x;
+const PropWare::MCP3000::Channel    CHANNEL     = PropWare::MCP3000::CHANNEL_1;
+
+/** Pin number for MOSI (master out - slave in) */
+const PropWare::Port::Mask          MOSI        = PropWare::Port::P0;
+/** Pin number for MISO (master in - slave out) */
+const PropWare::Port::Mask          MISO        = PropWare::Port::P1;
+/** Pin number for the clock signal */
+const PropWare::Port::Mask          SCLK        = PropWare::Port::P2;
+/** Pin number for chip select */
+const PropWare::Port::Mask          CS          = PropWare::Port::P3;
+const uint32_t                      FREQ        = 100000;
+
+// Used for console printing
+const PropWare::SimplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
 
 // Main function
 int main () {
-    const uint16_t DIVISOR = 1024 / 8;
+    const uint16_t      DIVISOR = 1024 / 8;
     PropWare::ErrorCode err;
-    uint16_t data;
-    uint32_t loopCounter;
-    uint8_t scaledValue, i;
-    uint32_t ledOutput;
-    PropWare::SPI *spi = PropWare::SPI::get_instance();
-    PropWare::MCP3000 adc(spi, PART_NUMBER);
+    uint16_t            data;
+    uint32_t            loopCounter;
+    uint8_t             scaledValue, i;
+    uint32_t            ledOutput;
+    PropWare::SPI       *spi    = PropWare::SPI::get_instance();
+    PropWare::MCP3000   adc(spi, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
@@ -52,7 +79,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    print("Welcome to the MCP3000 demo!" CRLF);
+    g_uart.printf("Welcome to the MCP3000 demo!" CRLF);
 
     while (1) {
         loopCounter = SECOND / 2 + CNT;
@@ -71,7 +98,7 @@ int main () {
             scale.write(ledOutput);
         }
 
-        print("Channel %d is reading: %d" CRLF, CHANNEL, data);
+        g_uart.printf("Channel %d is reading: %d" CRLF, CHANNEL, data);
     }
 }
 
@@ -79,9 +106,9 @@ void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        spi->print_error_str((PropWare::SPI::ErrorCode const) err);
+        spi->print_error_str(&g_uart, (PropWare::SPI::ErrorCode const) err);
     else
-        print("Unknown error: %u", err);
+        g_uart.printf("Unknown error: %u", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

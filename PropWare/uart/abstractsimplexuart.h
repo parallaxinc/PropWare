@@ -312,12 +312,19 @@ class AbstractSimplexUART : public virtual UART {
             }
 
         /**
-         * @see PropWare::UART::puts
+         * @see PropWare::PrintCapable::put_char
+         */
+        void put_char (const char c) const {
+            this->send((uint16_t) c);
+        }
+
+        /**
+         * @see PropWare::PrintCapable::puts
          */
         void puts (const char string[]) const {
-        const uint32_t length = strlen(string);
-        this->send_array(string, length);
-    }
+            const uint32_t length = strlen(string);
+            this->send_array(string, length);
+        }
 
     protected:
         /**

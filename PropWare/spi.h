@@ -31,15 +31,7 @@
 #include <sys/thread.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
-
-#if (defined USE_PRINTF)
-#if (!(defined __TINY_IO_H || _STDIO_H))
-extern int printf(const char *fmt, ...);
-#endif
-#else
-#include <simpletext.h>
-#define printf print
-#endif
+#include <PropWare/printer.h>
 
 /** @name   SPI Extra Code Options
  * @{ */
@@ -631,51 +623,52 @@ class SPI {
          *
          * @param[in]  err     Error number used to determine error string
          */
-        void print_error_str (const SPI::ErrorCode err) const {
+        void print_error_str (const Printer *printer,
+                const SPI::ErrorCode err) const {
             char str[] = "SPI Error %u: %s" CRLF;
 
             switch (err) {
                 case PropWare::SPI::INVALID_PIN:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Invalid pin");
                     break;
                 case PropWare::SPI::INVALID_MODE:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Invalid mode");
                     break;
                 case PropWare::SPI::INVALID_PIN_MASK:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Invalid pin mask");
                     break;
                 case PropWare::SPI::TOO_MANY_BITS:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Incapable of handling so many bits in an "
                                     "argument");
                     break;
                 case PropWare::SPI::TIMEOUT:
-                    printf("SPI Error %u: %s\n\tCalling function was "
+                    printer->printf("SPI Error %u: %s\n\tCalling function was "
                             "SPI::%s()" CRLF, (err - PropWare::SPI::BEG_ERROR),
                             "Timed out during parameter passing",
                             this->m_errorInMethod);
                     break;
                 case PropWare::SPI::TIMEOUT_RD:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Timed out during parameter read");
                     break;
                 case PropWare::SPI::COG_NOT_STARTED:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "SPI's GAS cog was not started");
                     break;
                 case PropWare::SPI::MODULE_NOT_RUNNING:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "SPI GAS cog not running");
                     break;
                 case PropWare::SPI::INVALID_FREQ:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Frequency set too high");
                     break;
                 case PropWare::SPI::ADDR_MISALIGN:
-                    printf(str, (err - PropWare::SPI::BEG_ERROR),
+                    printer->printf(str, (err - PropWare::SPI::BEG_ERROR),
                             "Passed in address is miss aligned");
                     break;
                 default:
@@ -684,10 +677,10 @@ class SPI {
                             && err
                                     < (PropWare::SPI::BEG_ERROR
                                             + PropWare::SPI::END_ERROR))
-                        printf("Unknown SPI error %u\n",
+                        printer->printf("Unknown SPI error %u\n",
                                 (err - PropWare::SPI::BEG_ERROR));
                     else
-                        printf("Unknown error %u\n", (err));
+                        printer->printf("Unknown error %u\n", (err));
                     break;
             }
         }

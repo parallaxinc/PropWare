@@ -23,7 +23,13 @@
  * SOFTWARE.
  */
 
-#include "SimplexUART_Demo.h"
+// Includes
+#include <propeller.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/uart/simplexuart.h>
+#include <PropWare/printer.h>
+
+void error (const PropWare::ErrorCode err);
 
 const uint32_t BAUD_RATE = 115200;
 const uint32_t DELAY     = 200;
@@ -33,6 +39,9 @@ const uint32_t DELAY     = 200;
  */
 int main () {
     PropWare::ErrorCode err;
+    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
+    PropWare::Printer printer(&uart);
+
 
     // Create an easy-to-test number pattern - useful when testing with a logic
     // analyzer
@@ -45,13 +54,11 @@ int main () {
             0xaa,
             0xff,
             0x80,
-            0x00 }; // Make sure we have a null-terminator for UART::puts
+            0x00 }; // Make sure we have a null-terminator for puts
 
     // Create the test string - useful when testing with a terminal
     char string[] = "Hello world! This is my most favoritest sentence "
             "ever!!!" CRLF;
-
-    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
     uart.set_baud_rate(BAUD_RATE);
@@ -63,15 +70,15 @@ int main () {
 
     while (1) {
         // Test the number pattern
-        uart.puts(numberPattern);
+        printer.puts(numberPattern);
         waitcnt(DELAY * MILLISECOND + CNT);
 
         // Test a basic string
-        uart.puts(string);
+        printer.puts(string);
         waitcnt(DELAY * MILLISECOND + CNT);
 
         // Test a formatted string
-        uart.printf("Math: %u + 0x%X = %d" CRLF, 3, 0xF, 3 + 0xF);
+        printer.printf("Math: %u + 0x%X = %d" CRLF, 3, 0xF, 3 + 0xF);
         waitcnt(DELAY * MILLISECOND + CNT);
     }
 }

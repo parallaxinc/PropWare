@@ -31,13 +31,14 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
+#include <PropWare/printcapable.h>
 
 namespace PropWare {
 
 /**
  * @brief    Interface for all UART devices
  */
-class UART {
+class UART : public virtual PrintCapable {
     public:
         typedef enum {
             /** No parity */NO_PARITY,
@@ -196,150 +197,6 @@ class UART {
          */
         HUBTEXT virtual void send_array (const char array[],
                 uint32_t words) const = 0;
-
-        /**
-         * @brief       Send a null-terminated character array
-         *
-         * @pre         `string[]` must be terminated with a null terminator
-         *
-         * @param[in]   string[]    Array of data words with the final word
-         *                          being 0 - the null terminator
-         */
-        virtual void puts (const char string[]) const = 0;
-
-        /**
-         * @brief       Print a signed integer in base 10
-         *
-         * @param[in]   x   Integer to be printed
-         */
-        void put_int (int32_t x) const {
-            if (0 > x)
-                this->send('-');
-
-            this->put_uint((uint32_t) abs(x));
-        }
-
-        /**
-         * @brief       Print an unsigned integer in base 10
-         *
-         * @param[in]   x   Integer to be printed
-         */
-        void put_uint (uint32_t x) const {
-            const uint8_t radix = 10;
-            char          buf[sizeof(x)*8];
-            uint8_t       j, i    = 0;
-
-            if (0 == x)
-                this->send('0');
-            else {
-                // Create a character array in reverse order, starting with the
-                // tens digit and working toward the largest digit
-                while (x) {
-                    buf[i] = x % radix + '0';
-                    x /= radix;
-                    ++i;
-                }
-
-                // Reverse the character array
-                for (j = 0; j < i; ++j)
-                    this->send((uint16_t) buf[i - j - 1]);
-            }
-        }
-
-        /**
-         * @brief       Print an integer in base 16 (hexadecimal) with capital
-         *              letters
-         *
-         * @param[in]   x   Integer to be printed
-         */
-        void put_hex (uint32_t x) const {
-            char    buf[sizeof(x)*2];
-            uint8_t temp, j, i = 0;
-
-            while (x) {
-                temp = x & NIBBLE_0;
-                if (temp < 10)
-                    buf[i] = temp + '0';
-                else {
-                    temp -= 10;
-                    buf[i] = temp + 'A';
-                }
-                ++i;
-                x >>= 4;
-            }
-
-            // Reverse the character array
-            for (j = 0; j < i; ++j)
-                this->send((uint16_t) buf[i - j - 1]);
-        }
-
-        /**
-         * @brief       Similar in functionality to the C-standard, this method
-         *              supports formatted printing using the following formats:
-         *
-         *                - \%i - Signed integer (32-bit max)
-         *                - \%d - Signed integer (32-bit max)
-         *                - \%u - Unsigned integer (32-bit max)
-         *                - \%s - String
-         *                - \%c - Single character
-         *                - \%X - Hexadecimal with capital letters
-         *                - \%\% - Literal percent sign ('\%')
-         *
-         *              A single space will be printed in place of unsupported
-         *              formats
-         *
-         * @param[in]   fmt     Format string such as `Hello, %%s!` which can be
-         *                      used to print anyone's name in place of `%%s`
-         * @param[in]   ...     Variable number of arguments passed here.
-         *                      Continuing with the `Hello, %%s!` example, a
-         *                      single argument could be passed such as:<br>
-         *                        `UART::printf("Hello, %s!", "David");`<br>
-         *                      and "Hello, David!" would be sent out the serial
-         *                      port. Multiple arguments can be used as well,
-         *                      such as:<br>
-         *                        `UART::printf("%i + %i = %i", 2, 3, 2 +
-         *                        3);`<br>
-         *                      Which would print:<br>
-         *                        `2 + 3 = 5`
-         */
-        void printf (const char fmt[], ...) const {
-        const char *s = fmt;
-        va_list    list;
-        va_start(list, fmt);
-        while (*s) {
-            if ('%' == *s) {
-                ++s;
-                switch (*s) {
-                    case 'i':
-                    case 'd':
-                        this->put_int(va_arg(list, int32_t));
-                        break;
-                    case 'u':
-                        this->put_uint(va_arg(list, uint32_t));
-                        break;
-                    case 's':
-                        this->puts(va_arg(list, char *));
-                        break;
-                    case 'c':
-                        this->send(va_arg(list, int));
-                        break;
-                    case 'X':
-                        this->put_hex(va_arg(list, uint32_t));
-                        break;
-                    case '%':
-                        this->send('%');
-                        break;
-                    default:
-                        va_arg(list, int);  // Increment va_arg pointer
-                        this->send(' ');
-                        break;
-                }
-            } else
-                this->send((uint16_t) *s);
-            ++s;
-        }
-        va_end(list);
-    }
 };
 
 }
