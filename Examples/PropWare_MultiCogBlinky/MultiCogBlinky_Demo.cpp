@@ -4,7 +4,19 @@
  * @author  Modified by David Zemon
  */
 
-#include "MultiCogBlinky_Demo.h"
+// Note the lack of an include for propeller.h; This is because PropWare.h will
+// include propeller.h for you
+#include <PropWare/PropWare.h>
+#include <PropWare/pin.h>
+#include <PropWare/uart/simplexuart.h>
+#include <PropWare/printer.h>
+
+/**
+* @brief       Toggle thread function gets started in an LMM COG.
+*
+* @param[in]   *arg    pin number to toggle
+*/
+void do_toggle (void *arg);
 
 const uint16_t         COGS       = 8;
 const uint16_t         STACK_SIZE = 16;
@@ -16,6 +28,8 @@ volatile uint32_t startCnt;
 volatile int8_t   syncStart;
 
 int main (int argc, char* argv[]) {
+    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
+    PropWare::Printer printer(&uart);
     int8_t                              n;
     int8_t                              cog;
     PropWare::Pin                       pin;
@@ -37,7 +51,7 @@ int main (int argc, char* argv[]) {
     for (n = 1; n < COGS; n++) {
         cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, do_toggle,
                         (void *) &pins[n], &thread_data);
-        print("Toggle COG %d Started" CRLF, cog);
+        printer.printf("Toggle COG %d Started" CRLF, cog);
     }
 
     pin.set_mask(pins[0]);

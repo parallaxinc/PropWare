@@ -27,6 +27,7 @@
 #include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/uart/halfduplexuart.h>
+#include <PropWare/printer.h>
 
 uint8_t init_main_cog (_thread_state_t *threadData,
         PropWare::SimplexUART *speaker);
@@ -54,13 +55,15 @@ char g_numberPattern[] = {
 // same port. Otherwise, any cog _not_ writing to the pin would hold the pin
 // high
 const PropWare::HalfDuplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
+const PropWare::Printer        g_printer(&g_uart);
+
 // Create the test string - useful when testing with a terminal
 const char                   TEST_STRING[] = "Hello world!";
-const uint32_t               BAUD_RATE = 115200;
-const PropWare::Port::Mask   TX_PIN     = PropWare::Port::P12;
-const PropWare::Port::Mask   RX_PIN     = PropWare::Port::P13;
-const PropWare::UART::Parity PARITY     = PropWare::UART::NO_PARITY;
-const uint16_t               STACK_SIZE = 256;
+const uint32_t               BAUD_RATE     = 115200;
+const PropWare::Port::Mask   TX_PIN        = PropWare::Port::P12;
+const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
+const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
+const uint16_t               STACK_SIZE    = 256;
 volatile uint8_t             g_stringLength;
 uint32_t                     threadStack[STACK_SIZE];
 
@@ -102,7 +105,7 @@ void listen_silently (void *arg) {
     while (1) {
         listener.receive_array(buffer, (uint32_t) (g_stringLength - 1));
 
-        g_uart.printf("Data: \"%s\"" CRLF, buffer);
+        g_printer.printf("Data: \"%s\"" CRLF, buffer);
     }
 }
 
@@ -119,7 +122,7 @@ void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    g_uart.printf("Unknown error: %u" CRLF, err);
+    g_printer.printf("Unknown error: %u" CRLF, err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

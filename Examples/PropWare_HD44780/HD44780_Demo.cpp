@@ -26,7 +26,6 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/hd44780.h>
 #include <PropWare/uart/simplexuart.h>
-#include <simpletext.h>
 
 /**
 * @brief       Enter an infinite loop that blinks the error code on the
@@ -36,10 +35,12 @@
 */
 void error (const PropWare::ErrorCode err);
 
+// Control pins
 const PropWare::Port::Mask RS = PropWare::Port::P16;
 const PropWare::Port::Mask RW = PropWare::Port::P17;
 const PropWare::Port::Mask EN = PropWare::Port::P18;
 
+// Data pins
 const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
 const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
 const PropWare::HD44780::Dimensions DIMENSIONS     =
