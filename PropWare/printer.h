@@ -403,5 +403,5 @@ class Printer {
 
 }
 
-extern const PropWare::Printer pstw;
-extern const PropWare::Printer pstr;
+extern const PropWare::Printer pwOut;
+extern const PropWare::Printer pwIn;

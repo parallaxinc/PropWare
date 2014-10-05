@@ -32,5 +32,5 @@ const PropWare::SimplexUART
 const PropWare::FullDuplexUART
                         _g_consoleUart(PropWare::Port::NULL_PIN,
                                        PropWare::UART::PARALLAX_STANDARD_RX);
-const PropWare::Printer pstw(&_g_simplexUart);
-const PropWare::Printer pstr(&_g_consoleUart);
+const PropWare::Printer pwOut(&_g_simplexUart);
+const PropWare::Printer pwIn(&_g_consoleUart);
