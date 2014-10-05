@@ -60,14 +60,12 @@ class ImportSimple:
         for dir_entry in os.listdir(library_directory):
             # Don't copy the demo files
             if dir_entry not in demo_files:
-                if propwareUtils.is_src_file(dir_entry):
+                if propwareUtils.is_src_or_hdr_file(dir_entry):
                     copy2(library_directory + dir_entry, ImportSimple.CHEATER_DIR)
 
                     # Keep track of all the source files so we can make an object list later
-                    self.sourceFiles.append(dir_entry)
-
-                elif propwareUtils.is_header_file(dir_entry):
-                    copy2(library_directory + dir_entry, ImportSimple.PROPWARE_ROOT)
+                    if propwareUtils.is_src_file(dir_entry):
+                        self.sourceFiles.append(dir_entry)
 
             # Copy over the crazy stuff like pre-compiled spin/pasm files
             if dir_entry in propwareUtils.MEMORY_MODELS:

@@ -10,6 +10,7 @@
 // Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/printer.h>
+#include <simpletext.h>
 
 // Main function
 int main () {
