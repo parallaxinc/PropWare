@@ -4,9 +4,9 @@
  * @author  David Zemon
  */
 
-//#define TEST_PROPWARE
+#define TEST_PROPWARE
 //#define TEST_SIMPLE
-#define TEST_TINYSTREAM
+//#define TEST_TINYSTREAM
 //#define TEST_TINYIO
 
 // Includes

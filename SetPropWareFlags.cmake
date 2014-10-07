@@ -23,7 +23,7 @@ endif ()
 
 if (AUTO_CUT_SECTIONS)
     set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --gc-sections")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
 endif ()
 
 if (PROPWARE_PRINT_FLOAT)

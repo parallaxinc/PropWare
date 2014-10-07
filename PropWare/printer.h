@@ -31,6 +31,7 @@
 #include <ctype.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
+#include <PropWare/pin.h>
 
 #ifndef S_ISNAN
 #define S_ISNAN(x) (x != x)
@@ -45,7 +46,7 @@ namespace PropWare {
 * @brief    Interface for all classes capable of printing
 */
 class Printer {
-        public:
+    public:
         Printer (const PrintCapable *printCapable)
                 : printCapable(printCapable) {
         }
@@ -53,14 +54,14 @@ class Printer {
         /**
          * @see PropWare::PrintCapable::put_char
          */
-        void put_char (const char c) const {
+        virtual void put_char (const char c) const {
             this->printCapable->put_char(c);
         }
 
         /**
          * @see PropWare::PrintCapable::puts
          */
-        void puts (const char string[]) const {
+        virtual void puts (const char string[]) const {
             this->printCapable->puts(string);
         }
 
@@ -69,12 +70,13 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        void put_int (int32_t x, uint16_t width,
-                const char fillChar) const {
+        virtual void put_int (int32_t x, uint16_t width,
+                      const char fillChar,
+                      const bool bypassLock = false) const {
             if (0 > x)
                 this->printCapable->put_char('-');
 
-            this->put_uint((uint32_t) abs(x), width, fillChar);
+            this->put_uint((uint32_t) abs(x), width, fillChar, bypassLock);
         }
 
         /**
@@ -82,19 +84,20 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        void put_uint (uint32_t x, uint16_t width,
-                const char fillChar) const {
+        virtual void put_uint (uint32_t x, uint16_t width,
+                               const char fillChar,
+                               const bool bypassLock = false) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
             uint8_t       j, i  = 0;
 
             // Create a character array in reverse order, starting with the
             // tens digit and working toward the largest digit
-            while (x) {
+            do {
                 buf[i] = x % radix + '0';
                 x /= radix;
                 ++i;
-            }
+            } while (x);
 
             if (width) {
                 width -= i;
@@ -113,8 +116,9 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        void put_hex (uint32_t x, uint16_t width,
-                const char fillChar) const {
+        virtual void put_hex (uint32_t x, uint16_t width,
+                      const char fillChar,
+                      const bool bypassLock = false) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
 
@@ -151,8 +155,9 @@ class Printer {
          * @param[in]   precision   Number of digits to the right of the decimal
          *                          point to print
          */
-        void put_float (double f, uint16_t width, uint16_t precision,
-                const char fillChar) const {
+        virtual void put_float (double f, uint16_t width, uint16_t precision,
+                        const char fillChar,
+                        const bool bypassLock = false) const {
             ////////////////////////////////////////////////////////////////////
             // Code taken straight from Parallax's floatToString! Thank you!!!
             ////////////////////////////////////////////////////////////////////
@@ -325,11 +330,17 @@ class Printer {
          *                        `2 + 3 = 5`
          */
         void printf (const char fmt[], ...) const {
+            va_list    list;
+            va_start(list, fmt);
+            this->_printf(fmt, false, list);
+            va_end(list);
+        }
+
+        virtual void _printf(const char fmt[], const bool bypassLock,
+                             const va_list list) const {
             const char *s = fmt;
             char       c, fillChar;
             uint16_t    width;
-            va_list    list;
-            va_start(list, fmt);
 
             while (*s) {
                 c = *s;
@@ -359,11 +370,11 @@ class Printer {
                         case 'i':
                         case 'd':
                             this->put_int(va_arg(list, int32_t), width,
-                                    fillChar);
+                                          fillChar, bypassLock);
                             break;
                         case 'u':
                             this->put_uint(va_arg(list, uint32_t), width,
-                                    fillChar);
+                                           fillChar, bypassLock);
                             break;
                         case 's':
                             this->printCapable->puts(va_arg(list, char *));
@@ -373,12 +384,12 @@ class Printer {
                             break;
                         case 'X':
                             this->put_hex(va_arg(list, uint32_t), width,
-                                    fillChar);
+                                          fillChar, bypassLock);
                             break;
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
                         case 'f':
                             this->put_float(va_arg(list, double), width,
-                                    precision, fillChar);
+                                            precision, fillChar, bypassLock);
                             break;
 #endif
                         case '%':
@@ -394,14 +405,95 @@ class Printer {
 
                 ++s;
             }
-            va_end(list);
         }
 
     protected:
         const PrintCapable *printCapable;
 };
 
+class SynchronousPrinter : public virtual Printer {
+    public:
+        SynchronousPrinter (PrintCapable const *printCapable)
+                : Printer(printCapable) {
+            this->m_lock = locknew();
+        }
+
+        ~SynchronousPrinter () {
+            lockret(this->m_lock);
+        }
+
+        virtual void put_char (const char c) const {
+            while (lockset(this->m_lock));
+            Printer::put_char(c);
+            lockclr(this->m_lock);
+        }
+
+        virtual void puts (const char string[]) const {
+            while (lockset(this->m_lock));
+            Printer::puts(string);
+            lockclr(this->m_lock);
+        }
+
+        virtual void put_int (int32_t x, uint16_t width, const char fillChar,
+                              const bool bypassLock = false) const {
+            if (bypassLock)
+                Printer::put_int(x, width, fillChar, true);
+            else {
+                while (lockset(this->m_lock));
+                Printer::put_int(x, width, fillChar, true);
+                lockclr(this->m_lock);
+            }
+        }
+
+        virtual void put_uint (uint32_t x, uint16_t width, const char fillChar,
+                               const bool bypassLock = false) const {
+            if (bypassLock)
+                Printer::put_uint(x, width, fillChar, true);
+            else {
+                while (lockset(this->m_lock));
+                Printer::put_uint(x, width, fillChar, true);
+                lockclr(this->m_lock);
+            }
+        }
+
+        virtual void put_hex (uint32_t x, uint16_t width, const char fillChar,
+                              const bool bypassLock = false) const {
+            if (bypassLock)
+                Printer::put_hex(x, width, fillChar, true);
+            else {
+                while (lockset(this->m_lock));
+                Printer::put_hex(x, width, fillChar, true);
+                lockclr(this->m_lock);
+            }
+        }
+
+#ifdef ENABLE_PROPWARE_PRINT_FLOAT
+
+        virtual void put_float (double f, uint16_t width, uint16_t precision,
+                                const char fillChar,
+                                const bool bypassLock = false) const {
+            if (bypassLock)
+                Printer::put_float(f, width, precision, fillChar, true);
+            else {
+                while (lockset(this->m_lock));
+                Printer::put_float(f, width, precision, fillChar, true);
+                lockclr(this->m_lock);
+            }
+        }
+#endif
+
+        void _printf (const char fmt[], const bool bypassLock,
+                      const va_list list) const {
+            while (lockset(this->m_lock));
+            Printer::_printf(fmt, true, list);
+            waitcnt(400 + CNT);
+            lockclr(this->m_lock);
+        }
+
+    protected:
+        volatile int m_lock;
+};
+
 }
 
 extern const PropWare::Printer pwOut;
-extern const PropWare::Printer pwIn;

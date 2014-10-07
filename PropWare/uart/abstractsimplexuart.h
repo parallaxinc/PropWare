@@ -322,7 +322,6 @@ class AbstractSimplexUART : public virtual UART {
                         } while (--words);
                         break;
                 }
-
             }
 
         /**

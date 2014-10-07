@@ -23,7 +23,12 @@
  * SOFTWARE.
  */
 
+#include "port.h"
+#include "pin.h"
+
 extern "C" void __cxa_pure_virtual () {
     // TODO: Provide some cool way for the user to enter their own error code
-    while (1);
+    while (1) {
+        PropWare::Pin::flash_pin(PropWare::Pin::P16);
+    }
 }

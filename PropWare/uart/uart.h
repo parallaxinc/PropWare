@@ -71,8 +71,10 @@ class UART : public virtual PrintCapable {
              * The requested stop bit width is not between 1 and 14 (inclusive)
              */
             INVALID_STOP_BIT_WIDTH,
+            /** Null pointer was passed as an argument */
+            NULL_POINTER,
             /** Last error code used by PropWare::UART */
-            END_ERROR = UART::INVALID_STOP_BIT_WIDTH
+            END_ERROR = UART::NULL_POINTER
         } ErrorCode;
 
     public:

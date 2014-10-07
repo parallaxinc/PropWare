@@ -1,7 +1,7 @@
 /**
-* @file    printer.cpp
+* @file        printer.h
 *
-* @author  David Zemon
+* @author      David Zemon
 *
 * @copyright
 * The MIT License (MIT)<br>
@@ -23,9 +23,51 @@
 * SOFTWARE.
 */
 
-#include <PropWare/printer.h>
-#include <PropWare/uart/simplexuart.h>
+#pragma once
 
-const PropWare::SimplexUART
-                        _g_simplexUart(PropWare::UART::PARALLAX_STANDARD_TX);
-const PropWare::Printer pwOut(&_g_simplexUart);
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <PropWare/PropWare.h>
+#include <PropWare/scancapable.h>
+
+#ifndef S_ISNAN
+#define S_ISNAN(x) (x != x)
+#endif  /* !defined(S_ISNAN) */
+#ifndef S_ISINF
+#define S_ISINF(x) (x != 0.0 && x + x == x)
+#endif  /* !defined(S_ISINF) */
+
+namespace PropWare {
+
+/**
+* @brief    Interface for all classes capable of scanning
+*/
+class Scanner {
+    public:
+        Scanner (const ScanCapable *scanCapable) : scanCapable(scanCapable) {
+        }
+
+        /**
+         * @see PropWare::ScanCapable::get_char
+         */
+        char get_char () const {
+            return this->scanCapable->get_char();
+        }
+
+        /**
+         * @see PropWare::ScanCapable::fgets
+         */
+        virtual ErrorCode gets (char string[],
+                           const uint32_t length = 0) const {
+            return this->scanCapable->fgets(string, length);
+        }
+
+    private:
+        const ScanCapable *scanCapable;
+};
+
+}
+
+extern const PropWare::Scanner pwIn;

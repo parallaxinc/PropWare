@@ -1,5 +1,5 @@
 /**
- * @file        halfduplexuart.h
+ * @file        scancapable.h
  *
  * @author      David Zemon
  *
@@ -25,43 +25,39 @@
 
 #pragma once
 
-#include <PropWare/uart/abstractduplexuart.h>
-
 namespace PropWare {
 
 /**
- * @brief   Simple wrapper for full duplex that provides half duplex capability
- *
- * It is important to note that, just like PropWare::FullDuplexUART, receiving
- * data is an indefinitely blocking call
+ * @brief    Interface for all classes capable of printing
  */
-class HalfDuplexUART: public AbstractDuplexUART {
+class ScanCapable {
+    public:
+        static const char STRING_DELIMITER = '\n';
+
     public:
         /**
-         * @see PropWare::SimplexUART::SimplexUART()
+         * @brief       Read and return a single character (blocking)
          */
-        HalfDuplexUART () :
-                AbstractDuplexUART() {
-        }
+        virtual char get_char () const = 0;
+
+//        virtual char * gets (char string[]) const = 0;
 
         /**
-         * @see PropWare::FullDuplexUART::FullDuplexUART()
+         * @brief        Read a newline-terminated (\n) character array. Though
+         *               this method could be created using put_char, some
+         *               objects (such as PropWare::UART), have optimized
+         *               methods for reading a string and ScanCapable::fgets can
+         *               utilize them. (blocking)
+         *
+         * @pre          `string[]` must have enough space allocated with a null
+         * terminator
+         *
+         * @param[out]   string[]    Buffer to store the string in
+         * @param[out]   *length     Maximum number of characters to read. If
+         *                           null-pointer, characters will be read until
+         *                           newline ('\n').
          */
-        HalfDuplexUART (const Port::Mask pinMask) :
-                AbstractDuplexUART(pinMask, pinMask) {
-        }
-
-        virtual void send (uint16_t originalData) const {
-            AbstractDuplexUART::send(originalData);
-
-            this->m_tx.set_dir(Port::IN);
-        }
-
-        virtual void send_array (char const array[], uint32_t words) const {
-            AbstractDuplexUART::send_array(array, words);
-
-            this->m_tx.set_dir(Port::IN);
-        }
+        virtual ErrorCode fgets (char string[], int32_t *length) const = 0;
 };
 
 }
