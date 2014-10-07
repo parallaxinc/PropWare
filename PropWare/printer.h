@@ -31,7 +31,6 @@
 #include <ctype.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
-#include <PropWare/pin.h>
 
 #ifndef S_ISNAN
 #define S_ISNAN(x) (x != x)
@@ -70,8 +69,7 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        virtual void put_int (int32_t x, uint16_t width,
-                      const char fillChar,
+        virtual void put_int (int32_t x, uint16_t width, const char fillChar,
                       const bool bypassLock = false) const {
             if (0 > x)
                 this->printCapable->put_char('-');
@@ -84,8 +82,7 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        virtual void put_uint (uint32_t x, uint16_t width,
-                               const char fillChar,
+        virtual void put_uint (uint32_t x, uint16_t width, const char fillChar,
                                const bool bypassLock = false) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
@@ -116,8 +113,7 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        virtual void put_hex (uint32_t x, uint16_t width,
-                      const char fillChar,
+        virtual void put_hex (uint32_t x, uint16_t width, const char fillChar,
                       const bool bypassLock = false) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
@@ -332,15 +328,14 @@ class Printer {
         void printf (const char fmt[], ...) const {
             va_list    list;
             va_start(list, fmt);
-            this->_printf(fmt, false, list);
+            this->_printf(fmt, list);
             va_end(list);
         }
 
-        virtual void _printf(const char fmt[], const bool bypassLock,
-                             const va_list list) const {
+        virtual void _printf (const char fmt[], const va_list list) const {
             const char *s = fmt;
             char       c, fillChar;
-            uint16_t    width;
+            uint16_t   width;
 
             while (*s) {
                 c = *s;
@@ -370,11 +365,11 @@ class Printer {
                         case 'i':
                         case 'd':
                             this->put_int(va_arg(list, int32_t), width,
-                                          fillChar, bypassLock);
+                                          fillChar, true);
                             break;
                         case 'u':
                             this->put_uint(va_arg(list, uint32_t), width,
-                                           fillChar, bypassLock);
+                                           fillChar, true);
                             break;
                         case 's':
                             this->printCapable->puts(va_arg(list, char *));
@@ -384,12 +379,12 @@ class Printer {
                             break;
                         case 'X':
                             this->put_hex(va_arg(list, uint32_t), width,
-                                          fillChar, bypassLock);
+                                          fillChar, true);
                             break;
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
                         case 'f':
                             this->put_float(va_arg(list, double), width,
-                                            precision, fillChar, bypassLock);
+                                            precision, fillChar, true);
                             break;
 #endif
                         case '%':
@@ -411,7 +406,7 @@ class Printer {
         const PrintCapable *printCapable;
 };
 
-class SynchronousPrinter : public virtual Printer {
+class SynchronousPrinter : public Printer {
     public:
         SynchronousPrinter (PrintCapable const *printCapable)
                 : Printer(printCapable) {
@@ -482,11 +477,9 @@ class SynchronousPrinter : public virtual Printer {
         }
 #endif
 
-        void _printf (const char fmt[], const bool bypassLock,
-                      const va_list list) const {
+        void _printf (const char fmt[], const va_list list) const {
             while (lockset(this->m_lock));
-            Printer::_printf(fmt, true, list);
-            waitcnt(400 + CNT);
+            Printer::_printf(fmt, list);
             lockclr(this->m_lock);
         }
 
