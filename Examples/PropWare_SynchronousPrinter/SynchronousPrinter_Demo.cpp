@@ -6,13 +6,9 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-#include <PropWare/printer.h>
-#include <PropWare/uart/sharedsimplexuart.h>
+#include <PropWare/synchronousprinter.h>
 
 void run_cog (void *arg);
-
-const PropWare::SharedSimplexUART  g_sharedUart;
-const PropWare::SynchronousPrinter syncOut(&g_sharedUart);
 
 const uint16_t         COGS       = 8;
 const uint16_t         STACK_SIZE = 16;
@@ -34,14 +30,14 @@ int main (int argc, char* argv[]) {
     for (n = 1; n < COGS; n++) {
         cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, run_cog,
                                          (void *) &cogNum[n], &thread_data);
-        syncOut.printf("Toggle COG %d Started" CRLF, cog);
+        pwSyncOut.printf("Toggle COG %d Started" CRLF, cog);
     }
 
     startCnt = CNT;
     syncStart = true;
     nextCnt = wait_time + startCnt;
     while (1) {
-        syncOut.printf("Hello from cog %u" CRLF, cogNum[0]);
+        pwSyncOut.printf("Hello from cog %u" CRLF, cogNum[0]);
         nextCnt = waitcnt2(nextCnt, wait_time);
     }
     return 0;
@@ -56,7 +52,7 @@ void run_cog (void *arg) {
 
     nextCnt = wait_time + startCnt;
     while (1) {
-        syncOut.printf("Hello from cog %u" CRLF, cog);
+        pwSyncOut.printf("Hello from cog %u" CRLF, cog);
         nextCnt = waitcnt2(nextCnt, wait_time);
     }
 }

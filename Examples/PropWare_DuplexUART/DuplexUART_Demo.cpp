@@ -27,8 +27,7 @@
 #include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/uart/halfduplexuart.h>
-#include <PropWare/printer.h>
-#include <PropWare/uart/sharedsimplexuart.h>
+#include <PropWare/synchronousprinter.h>
 
 uint8_t init_main_cog (_thread_state_t *threadData,
                        PropWare::SimplexUART *speaker);
@@ -70,7 +69,7 @@ int main () {
 
     // Start our new cog and initialize the speaking UART
     const uint8_t cog = init_main_cog(&threadData, &speaker);
-    syncOut.printf("New cog %u. Ready to send!!!" CRLF, cog);
+    pwSyncOut.printf("New cog %u. Ready to send!!!" CRLF, cog);
 
     while (1) {
         waitcnt(500 * MILLISECOND + CNT);
@@ -95,14 +94,14 @@ void listen_silently (void *arg) {
 
     // Initialize the listener UART and clear the buffer
     init_listener_cog(buffer, &listener);
-    syncOut.puts("Ready to receive!" CRLF);
+    pwSyncOut.puts("Ready to receive!" CRLF);
 
     while (1) {
         chars = 0;
         if ((err = listener.fgets(buffer, &chars)))
             error(err);
 
-        syncOut.printf("Data (%d chars): \"%s\"" CRLF, chars, buffer);
+        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, chars, buffer);
     }
 }
 
@@ -119,7 +118,7 @@ void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    syncOut.printf("Unknown error: %u" CRLF, err);
+    pwSyncOut.printf("Unknown error: %u" CRLF, err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);
