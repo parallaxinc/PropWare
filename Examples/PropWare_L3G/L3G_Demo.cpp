@@ -44,8 +44,6 @@ void error (const PropWare::ErrorCode err);
 // Main function
 int main () {
     PropWare::ErrorCode err;
-    const PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
-    const PropWare::Printer     printer(&uart);
     int16_t                     gyroVals[3];
     PropWare::SPI               *spi = PropWare::SPI::get_instance();
     PropWare::L3G               gyro(spi);
@@ -70,7 +68,7 @@ int main () {
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::Y]),
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::Z]));
 
-        printer.printf("Gyro vals... X: %d\tY: %d\tZ: %d" CRLF,
+        pwOut.printf("Gyro vals... X: %d\tY: %d\tZ: %d" CRLF,
               gyroVals[PropWare::L3G::X],
               gyroVals[PropWare::L3G::Y],
               gyroVals[PropWare::L3G::Z]);

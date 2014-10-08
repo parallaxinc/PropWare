@@ -49,10 +49,6 @@ const PropWare::Port::Mask          SCLK        = PropWare::Port::P2;
 const PropWare::Port::Mask          CS          = PropWare::Port::P3;
 const uint32_t                      FREQ        = 100000;
 
-// Used for console printing
-const PropWare::SimplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
-const PropWare::Printer     g_printer(&g_uart);
-
 // Main function
 int main () {
     const uint16_t      DIVISOR = 1024 / 8;
@@ -80,7 +76,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    g_printer.printf("Welcome to the MCP3000 demo!" CRLF);
+    pwOut.printf("Welcome to the MCP3000 demo!" CRLF);
 
     while (1) {
         loopCounter = SECOND / 2 + CNT;
@@ -99,7 +95,7 @@ int main () {
             scale.write(ledOutput);
         }
 
-        g_printer.printf("Channel %d is reading: %d" CRLF, CHANNEL, data);
+        pwOut.printf("Channel %d is reading: %d" CRLF, CHANNEL, data);
     }
 }
 
@@ -107,9 +103,9 @@ void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        spi->print_error_str(&g_printer, (PropWare::SPI::ErrorCode const) err);
+        spi->print_error_str(&pwOut, (PropWare::SPI::ErrorCode const) err);
     else
-        g_printer.printf("Unknown error: %u", err);
+        pwOut.printf("Unknown error: %u", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

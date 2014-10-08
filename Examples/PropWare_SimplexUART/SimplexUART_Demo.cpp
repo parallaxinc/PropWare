@@ -31,17 +31,15 @@
 
 void error (const PropWare::ErrorCode err);
 
-const uint32_t BAUD_RATE = 115200;
-const uint32_t DELAY     = 200;
+const int32_t BAUD_RATE = 115200;
+const int32_t DELAY     = 200;
 
 /**
  * @brief   Write "Hello world!" out via UART protocol
  */
 int main () {
     PropWare::ErrorCode err;
-    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
-    PropWare::Printer printer(&uart);
-
+    PropWare::SimplexUART uart;
 
     // Create an easy-to-test number pattern - useful when testing with a logic
     // analyzer
@@ -70,15 +68,11 @@ int main () {
 
     while (1) {
         // Test the number pattern
-        printer.puts(numberPattern);
+        uart.puts(numberPattern);
         waitcnt(DELAY * MILLISECOND + CNT);
 
         // Test a basic string
-        printer.puts(string);
-        waitcnt(DELAY * MILLISECOND + CNT);
-
-        // Test a formatted string
-        printer.printf("Math: %u + 0x%X = %d" CRLF, 3, 0xF, 3 + 0xF);
+        uart.puts(string);
         waitcnt(DELAY * MILLISECOND + CNT);
     }
 }

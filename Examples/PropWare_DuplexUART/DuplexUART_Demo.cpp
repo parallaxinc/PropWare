@@ -31,7 +31,7 @@
 #include <PropWare/uart/sharedsimplexuart.h>
 
 uint8_t init_main_cog (_thread_state_t *threadData,
-        PropWare::SimplexUART *speaker);
+                       PropWare::SimplexUART *speaker);
 
 void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener);
 
@@ -60,10 +60,6 @@ const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
 const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
 const uint16_t               STACK_SIZE    = 256;
 uint32_t                     threadStack[STACK_SIZE];
-
-const PropWare::SharedSimplexUART g_sharedUart
-                                          (PropWare::UART::PARALLAX_STANDARD_TX);
-const PropWare::SynchronousPrinter syncOut(&g_sharedUart);
 
 /**
  * @brief   Write "Hello world!" out via UART protocol and receive an echo

@@ -26,6 +26,5 @@
 #include <PropWare/printer.h>
 #include <PropWare/uart/simplexuart.h>
 
-const PropWare::SimplexUART
-                        _g_simplexUart(PropWare::UART::PARALLAX_STANDARD_TX);
-const PropWare::Printer pwOut(&_g_simplexUart);
+const PropWare::SimplexUART _g_simplexUart;
+const PropWare::Printer     pwOut(&_g_simplexUart);

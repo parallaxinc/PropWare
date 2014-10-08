@@ -1,5 +1,5 @@
 /**
- * @file    PropWare.h
+ * @file    uart.cpp
  *
  * @author  David Zemon
  *
@@ -23,8 +23,12 @@
  * SOFTWARE.
  */
 
-extern "C" void __cxa_pure_virtual () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
-}
+#include <PropWare/uart/uart.h>
+
+int _cfg_rxpin    = -1;
+int _cfg_txpin    = -1;
+int _cfg_baudrate = -1;
+
+const int *PropWare::UART::DEFAULT_BAUD         = &_cfg_baudrate;
+const int *PropWare::UART::PARALLAX_STANDARD_TX = &_cfg_txpin;
+const int *PropWare::UART::PARALLAX_STANDARD_RX = &_cfg_rxpin;

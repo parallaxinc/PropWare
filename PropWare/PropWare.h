@@ -44,7 +44,7 @@ namespace PropWare {
 #define check_errors(x)     if ((err = x)) return err
 #endif
 
-#define CRLF                "\n\r"
+#define CRLF                "\r\n"
 
 #define SECOND              ((uint32_t) CLKFREQ)
 #define MILLISECOND         ((uint32_t) (CLKFREQ / 1000))

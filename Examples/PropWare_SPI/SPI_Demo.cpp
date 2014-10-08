@@ -46,9 +46,6 @@ const PropWare::SPI::Mode    MODE    = PropWare::SPI::MODE_0;
 /** Determine if the LSB or MSB should be sent first for each byte */
 const PropWare::SPI::BitMode BITMODE = PropWare::SPI::MSB_FIRST;
 
-const PropWare::SimplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
-const PropWare::Printer g_printer(&g_uart);
-
 /**
  * @brief   Write "Hello world!" out via SPI protocol and receive an echo
  */
@@ -94,7 +91,7 @@ int main () {
             ++s;
 
             // Print the character to the screen
-            g_printer.put_char(in);
+            pwOut.put_char(in);
         }
 
         // Signal that the entire string has been sent
@@ -108,9 +105,9 @@ void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
-        spi->print_error_str(&g_printer, (PropWare::SPI::ErrorCode) err);
+        spi->print_error_str(&pwOut, (PropWare::SPI::ErrorCode) err);
     } else
-        g_printer.printf("Unknown error %u" CRLF, err);
+        pwOut.printf("Unknown error %u" CRLF, err);
 
     while (1) {
         debugLEDs.write(err);

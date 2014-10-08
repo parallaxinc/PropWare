@@ -48,6 +48,7 @@ class Printer {
     public:
         Printer (const PrintCapable *printCapable)
                 : printCapable(printCapable) {
+            this->m_lock = -1;
         }
 
         /**
@@ -70,7 +71,7 @@ class Printer {
          * @param[in]   x   Integer to be printed
          */
         virtual void put_int (int32_t x, uint16_t width, const char fillChar,
-                      const bool bypassLock = false) const {
+                              const bool bypassLock = false) const {
             if (0 > x)
                 this->printCapable->put_char('-');
 
@@ -114,7 +115,7 @@ class Printer {
          * @param[in]   x   Integer to be printed
          */
         virtual void put_hex (uint32_t x, uint16_t width, const char fillChar,
-                      const bool bypassLock = false) const {
+                              const bool bypassLock = false) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
 
@@ -152,8 +153,8 @@ class Printer {
          *                          point to print
          */
         virtual void put_float (double f, uint16_t width, uint16_t precision,
-                        const char fillChar,
-                        const bool bypassLock = false) const {
+                                const char fillChar,
+                                const bool bypassLock = false) const {
             ////////////////////////////////////////////////////////////////////
             // Code taken straight from Parallax's floatToString! Thank you!!!
             ////////////////////////////////////////////////////////////////////
@@ -328,11 +329,6 @@ class Printer {
         void printf (const char fmt[], ...) const {
             va_list    list;
             va_start(list, fmt);
-            this->_printf(fmt, list);
-            va_end(list);
-        }
-
-        virtual void _printf (const char fmt[], const va_list list) const {
             const char *s = fmt;
             char       c, fillChar;
             uint16_t   width;
@@ -360,6 +356,9 @@ class Printer {
                             c         = *(++s);
                         }
                     }
+
+                    if (-1 != this->m_lock)
+                        while(lockset(this->m_lock));
 
                     switch (c) {
                         case 'i':
@@ -398,12 +397,18 @@ class Printer {
                 } else
                     this->printCapable->put_char(*s);
 
+                if (-1 != this->m_lock)
+                    lockclr(this->m_lock);
+
                 ++s;
             }
+
+            va_end(list);
         }
 
     protected:
         const PrintCapable *printCapable;
+        int8_t m_lock; // Only used in PropWare::SynchronousPrinter
 };
 
 class SynchronousPrinter : public Printer {
@@ -463,7 +468,6 @@ class SynchronousPrinter : public Printer {
         }
 
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
-
         virtual void put_float (double f, uint16_t width, uint16_t precision,
                                 const char fillChar,
                                 const bool bypassLock = false) const {
@@ -476,15 +480,6 @@ class SynchronousPrinter : public Printer {
             }
         }
 #endif
-
-        void _printf (const char fmt[], const va_list list) const {
-            while (lockset(this->m_lock));
-            Printer::_printf(fmt, list);
-            lockclr(this->m_lock);
-        }
-
-    protected:
-        volatile int m_lock;
 };
 
 }

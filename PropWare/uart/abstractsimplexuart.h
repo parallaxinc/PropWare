@@ -185,14 +185,14 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::set_baud_rate
          */
-        virtual void set_baud_rate (const uint32_t baudRate) {
+        virtual void set_baud_rate (const int32_t baudRate) {
             this->m_bitCycles = CLKFREQ / baudRate;
         }
 
         /**
          * @see PropWare::UART::get_baud_rate
          */
-        uint32_t get_baud_rate () const {
+        int32_t get_baud_rate () const {
             return CLKFREQ / this->m_bitCycles;
         }
 
@@ -348,7 +348,9 @@ class AbstractSimplexUART : public virtual UART {
             this->set_data_width(UART::DEFAULT_DATA_WIDTH);
             this->set_parity(UART::DEFAULT_PARITY);
             this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(UART::DEFAULT_BAUD);
+            this->set_tx_mask(
+                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_TX));
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
         }
 
         /**

@@ -78,13 +78,13 @@ class UART : public virtual PrintCapable {
         } ErrorCode;
 
     public:
-        static const uint32_t     DEFAULT_BAUD           = 115200;
-        static const uint8_t      DEFAULT_DATA_WIDTH     = 8;
+        static const uint8_t  DEFAULT_DATA_WIDTH         = 8;
         static const UART::Parity DEFAULT_PARITY         = NO_PARITY;
         static const uint8_t      DEFAULT_STOP_BIT_WIDTH = 1;
 
-        static const Port::Mask PARALLAX_STANDARD_TX = Port::P30;
-        static const Port::Mask PARALLAX_STANDARD_RX = Port::P31;
+        static const int *DEFAULT_BAUD;
+        static const int *PARALLAX_STANDARD_TX;
+        static const int *PARALLAX_STANDARD_RX;
 
     public:
         /**
@@ -165,7 +165,7 @@ class UART : public virtual PrintCapable {
          *              when baudRate is set too high for the Propeller's clock
          *              frequency
          */
-        virtual void set_baud_rate (const uint32_t baudRate) = 0;
+        virtual void set_baud_rate (const int32_t baudRate) = 0;
 
         /**
          * @brief   Retrieve the current baud rate
@@ -173,7 +173,7 @@ class UART : public virtual PrintCapable {
          * @return  Returns an approximation  of the current baud rate; Value is
          *          not exact due to integer math
          */
-        virtual uint32_t get_baud_rate () const = 0;
+        virtual int32_t get_baud_rate () const = 0;
 
         /**
          * @brief       Send a word of data out the serial port

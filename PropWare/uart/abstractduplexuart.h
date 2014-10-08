@@ -173,6 +173,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
          */
         AbstractDuplexUART () :
                 AbstractSimplexUART() {
+            this->set_rx_mask(
+                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_RX));
         }
 
         /**

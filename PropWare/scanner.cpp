@@ -27,7 +27,5 @@
 #include <PropWare/uart/simplexuart.h>
 #include <PropWare/uart/fullduplexuart.h>
 
-const PropWare::FullDuplexUART
-                        _g_consoleUart(PropWare::Port::NULL_PIN,
-                                       PropWare::UART::PARALLAX_STANDARD_RX);
-const PropWare::Printer pwIn(&_g_consoleUart);
+const PropWare::FullDuplexUART _g_consoleUart;
+const PropWare::Printer        pwIn(&_g_consoleUart);

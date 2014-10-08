@@ -46,9 +46,6 @@ const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
 const PropWare::HD44780::Dimensions DIMENSIONS     =
                                             PropWare::HD44780::DIM_16x2;
 
-const PropWare::SimplexUART g_uart(PropWare::UART::PARALLAX_STANDARD_TX);
-const PropWare::Printer     g_printer(&g_uart);
-
 // Main function
 int main () {
     // Create and initialize our LCD object
@@ -67,7 +64,7 @@ int main () {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    PropWare::HD44780::print_error_str(&g_printer,
+    PropWare::HD44780::print_error_str(&pwOut,
             (PropWare::HD44780::ErrorCode) err);
 
     while (1) {

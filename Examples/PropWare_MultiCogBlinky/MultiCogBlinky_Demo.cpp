@@ -16,7 +16,7 @@
 *
 * @param[in]   *arg    pin number to toggle
 */
-void do_toggle (void *arg);
+void run_cog (void *arg);
 
 const uint16_t         COGS       = 8;
 const uint16_t         STACK_SIZE = 16;
@@ -28,8 +28,6 @@ volatile uint32_t startCnt;
 volatile int8_t   syncStart;
 
 int main (int argc, char* argv[]) {
-    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
-    PropWare::Printer printer(&uart);
     int8_t                              n;
     int8_t                              cog;
     PropWare::Pin                       pin;
@@ -49,9 +47,9 @@ int main (int argc, char* argv[]) {
     syncStart = 0;
 
     for (n = 1; n < COGS; n++) {
-        cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, do_toggle,
-                        (void *) &pins[n], &thread_data);
-        printer.printf("Toggle COG %d Started" CRLF, cog);
+        cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, run_cog,
+                                         (void *) &pins[n], &thread_data);
+        pwOut.printf("Toggle COG %d Started" CRLF, cog);
     }
 
     pin.set_mask(pins[0]);
@@ -69,7 +67,7 @@ int main (int argc, char* argv[]) {
     return 0;
 }
 
-void do_toggle (void *arg) {
+void run_cog (void *arg) {
     PropWare::Pin pin;
     uint32_t      nextCnt;
 

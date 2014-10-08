@@ -8,12 +8,10 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/printer.h>
 #include <PropWare/uart/sharedsimplexuart.h>
-#include <PropWare/uart/halfduplexuart.h>
 
-void do_toggle (void *arg);
+void run_cog (void *arg);
 
-const PropWare::HalfDuplexUART  g_sharedUart(
-        PropWare::UART::PARALLAX_STANDARD_TX);
+const PropWare::SharedSimplexUART  g_sharedUart;
 const PropWare::SynchronousPrinter syncOut(&g_sharedUart);
 
 const uint16_t         COGS       = 8;
@@ -27,14 +25,14 @@ volatile bool   syncStart = false;
 volatile uint8_t cogNum[] = {0, 1, 2, 3, 4, 5, 6, 7};
 
 int main (int argc, char* argv[]) {
-    int8_t                  n;
-    int8_t                  cog;
-    uint32_t                nextCnt;
+    int8_t   n;
+    int8_t   cog;
+    uint32_t nextCnt;
 
     wait_time = 500 * MILLISECOND;
 
     for (n = 1; n < COGS; n++) {
-        cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, do_toggle,
+        cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, run_cog,
                                          (void *) &cogNum[n], &thread_data);
         syncOut.printf("Toggle COG %d Started" CRLF, cog);
     }
@@ -49,7 +47,7 @@ int main (int argc, char* argv[]) {
     return 0;
 }
 
-void do_toggle (void *arg) {
+void run_cog (void *arg) {
     const uint8_t cog = *(uint8_t *) arg;
     uint32_t      nextCnt;
 
