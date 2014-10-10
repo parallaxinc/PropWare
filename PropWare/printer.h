@@ -70,12 +70,13 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        virtual void put_int (int32_t x, uint16_t width, const char fillChar,
+        virtual void put_int (int32_t x, uint16_t width = 0,
+                              const char fillChar = ' ',
                               const bool bypassLock = false) const {
             if (0 > x)
                 this->printCapable->put_char('-');
 
-            this->put_uint((uint32_t) abs(x), width, fillChar, bypassLock);
+            this->put_uint((uint32_t) abs(x), width, fillChar, true);
         }
 
         /**
@@ -83,7 +84,8 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        virtual void put_uint (uint32_t x, uint16_t width, const char fillChar,
+        virtual void put_uint (uint32_t x, uint16_t width = 0,
+                               const char fillChar = ' ',
                                const bool bypassLock = false) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
@@ -97,15 +99,15 @@ class Printer {
                 ++i;
             } while (x);
 
-            if (width) {
+            if (width && width > i) {
                 width -= i;
                 while (width--)
-                    this->put_char(fillChar);
+                    this->printCapable->put_char(fillChar);
             }
 
             // Reverse the character array
             for (j = 0; j < i; ++j)
-                this->printCapable->put_char((uint16_t) buf[i - j - 1]);
+                this->printCapable->put_char(buf[i - j - 1]);
         }
 
         /**
@@ -114,7 +116,8 @@ class Printer {
          *
          * @param[in]   x   Integer to be printed
          */
-        virtual void put_hex (uint32_t x, uint16_t width, const char fillChar,
+        virtual void put_hex (uint32_t x, uint16_t width = 0,
+                              const char fillChar = ' ',
                               const bool bypassLock = false) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
@@ -131,15 +134,15 @@ class Printer {
                 x >>= 4;
             }
 
-            if (width) {
+            if (width && width > i) {
                 width -= i;
                 while (width--)
-                    this->put_char(fillChar);
+                    this->printCapable->put_char(fillChar);
             }
 
             // Reverse the character array
             for (j = 0; j < i; ++j)
-                this->printCapable->put_char((uint16_t) buf[i - j - 1]);
+                this->printCapable->put_char(buf[i - j - 1]);
         }
 
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
@@ -183,13 +186,13 @@ class Printer {
             int n;
 
             if (S_ISNAN(f)) {
-                this->puts("nan");
+                this->printCapable->puts("nan");
             }
             if (S_ISINF(f)) {
                 if (((int) f) & 0x80000000)
-                    this->puts("-inf");
+                    this->printCapable->puts("-inf");
                 else
-                    this->puts("inf");
+                    this->printCapable->puts("inf");
             }
 
             /* clamp the digits. */
@@ -291,7 +294,7 @@ class Printer {
 
             s[m] = 0;
 
-            this->puts(s);
+            this->printCapable->puts(s);
         }
 #endif
 
@@ -333,6 +336,9 @@ class Printer {
             char       c, fillChar;
             uint16_t   width;
 
+            if (0 <= this->m_lock)
+                while (lockset(this->m_lock));
+
             while (*s) {
                 c = *s;
 
@@ -356,9 +362,6 @@ class Printer {
                             c         = *(++s);
                         }
                     }
-
-                    if (-1 != this->m_lock)
-                        while(lockset(this->m_lock));
 
                     switch (c) {
                         case 'i':
@@ -397,10 +400,12 @@ class Printer {
                 } else
                     this->printCapable->put_char(*s);
 
-                if (-1 != this->m_lock)
-                    lockclr(this->m_lock);
-
                 ++s;
+            }
+
+            if (0 <= this->m_lock) {
+//                this->printCapable->puts("cleared" CRLF);
+                lockclr(this->m_lock);
             }
 
             va_end(list);
@@ -408,7 +413,7 @@ class Printer {
 
     protected:
         const PrintCapable *printCapable;
-        int8_t m_lock; // Only used in PropWare::SynchronousPrinter
+        int32_t m_lock; // Only used in PropWare::SynchronousPrinter
 };
 
 }

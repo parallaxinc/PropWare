@@ -34,26 +34,28 @@ class SynchronousPrinter : public Printer {
         SynchronousPrinter (PrintCapable const *printCapable)
                 : Printer(printCapable) {
             this->m_lock = locknew();
+            lockclr(this->m_lock);
         }
 
         ~SynchronousPrinter () {
+            lockclr(this->m_lock);
             lockret(this->m_lock);
         }
 
-        virtual void put_char (const char c) const {
+        void put_char (const char c) const {
             while (lockset(this->m_lock));
             Printer::put_char(c);
             lockclr(this->m_lock);
         }
 
-        virtual void puts (const char string[]) const {
+        void puts (const char string[]) const {
             while (lockset(this->m_lock));
-            Printer::puts(string);
+            this->printCapable->puts(string);
             lockclr(this->m_lock);
         }
 
-        virtual void put_int (int32_t x, uint16_t width, const char fillChar,
-                              const bool bypassLock = false) const {
+        void put_int (int32_t x, uint16_t width = 0, const char fillChar = ' ',
+                      const bool bypassLock = false) const {
             if (bypassLock)
                 Printer::put_int(x, width, fillChar, true);
             else {
@@ -63,8 +65,9 @@ class SynchronousPrinter : public Printer {
             }
         }
 
-        virtual void put_uint (uint32_t x, uint16_t width, const char fillChar,
-                               const bool bypassLock = false) const {
+        void put_uint (uint32_t x, uint16_t width = 0,
+                       const char fillChar = ' ',
+                       const bool bypassLock = false) const {
             if (bypassLock)
                 Printer::put_uint(x, width, fillChar, true);
             else {
@@ -74,8 +77,8 @@ class SynchronousPrinter : public Printer {
             }
         }
 
-        virtual void put_hex (uint32_t x, uint16_t width, const char fillChar,
-                              const bool bypassLock = false) const {
+        void put_hex (uint32_t x, uint16_t width = 0, const char fillChar = ' ',
+                      const bool bypassLock = false) const {
             if (bypassLock)
                 Printer::put_hex(x, width, fillChar, true);
             else {
@@ -86,9 +89,9 @@ class SynchronousPrinter : public Printer {
         }
 
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
-        virtual void put_float (double f, uint16_t width, uint16_t precision,
-                                const char fillChar,
-                                const bool bypassLock = false) const {
+        void put_float (double f, uint16_t width, uint16_t precision,
+                        const char fillChar,
+                        const bool bypassLock = false) const {
             if (bypassLock)
                 Printer::put_float(f, width, precision, fillChar, true);
             else {

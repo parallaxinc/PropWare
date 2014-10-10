@@ -40,7 +40,7 @@ int main () {
         printf("Hello, world! %03d 0x%02x" CRLF, i, i);
 #endif
         i++;
-        waitcnt(500 * MILLISECOND + CNT);
+        waitcnt(250 * MILLISECOND + CNT);
     }
 
     return 0;

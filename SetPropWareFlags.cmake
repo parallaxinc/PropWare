@@ -43,6 +43,8 @@ if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     set(CXXFLAGS )
 endif()
 
+set(COMMON_FLAGS "-save-temps ${COMMON_FLAGS}")
+
 # Overwite the old flags
 set(CMAKE_ASM_FLAGS     "${COMMON_FLAGS}    ${ASM_FLAGS}")
 set(CMAKE_C_FLAGS       "${COMMON_FLAGS}    ${C_FLAGS}")
