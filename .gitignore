@@ -8,6 +8,7 @@
 /libpropeller
 /Examples/TestApp
 /.external_downloads
+bin/
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
@@ -21,18 +22,12 @@ sources.mk
 subdir.mk
 makefile
 Makefile
-**.elf
-**.o
-**.a
-**.map
-**.rawmap
 **.pyc
 **~
 **.swp
 **.zip
 **.iml
 atlassian-ide-plugin.xml
-**_Demo
 
 # Ignore the Simple header files in the root directory
 /*.h
