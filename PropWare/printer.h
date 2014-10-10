@@ -32,13 +32,6 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
 
-#ifndef S_ISNAN
-#define S_ISNAN(x) (x != x)
-#endif  /* !defined(S_ISNAN) */
-#ifndef S_ISINF
-#define S_ISINF(x) (x != 0.0 && x + x == x)
-#endif  /* !defined(S_ISINF) */
-
 namespace PropWare {
 
 /**
@@ -146,6 +139,13 @@ class Printer {
         }
 
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
+#ifndef S_ISNAN
+#define S_ISNAN(x) (x != x)
+#endif  /* !defined(S_ISNAN) */
+#ifndef S_ISINF
+#define S_ISINF(x) (x != 0.0 && x + x == x)
+#endif  /* !defined(S_ISINF) */
+
         /**
          * @brief       Print a floating point number with a given width and
          *              precision

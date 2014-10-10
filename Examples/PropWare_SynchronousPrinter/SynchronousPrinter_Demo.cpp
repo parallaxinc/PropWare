@@ -7,6 +7,7 @@
 // Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/synchronousprinter.h>
+#include <PropWare/port.h>
 
 void run_cog (void *arg);
 
@@ -23,6 +24,12 @@ int main (int argc, char* argv[]) {
     int8_t   n;
     int8_t   cog;
     uint32_t nextCnt;
+
+    // If the comm port was not initialized successfully,
+    // just sit here and complain
+    if (!pwSyncOut.hasLock())
+        while (1)
+            PropWare::Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
 
     for (n = 1; n < COGS; n++) {
         cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, run_cog,

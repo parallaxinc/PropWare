@@ -42,6 +42,22 @@ class SynchronousPrinter : public Printer {
             lockret(this->m_lock);
         }
 
+        bool hasLock () const {
+            return -1 != this->m_lock;
+        }
+
+        bool refreshLock () {
+            if (this->hasLock()) {
+                // Wait for any other cogs using the lock to return
+                while(lockset(this->m_lock));
+                lockclr(this->m_lock);
+                lockret(this->m_lock);
+            }
+
+            this->m_lock = locknew();
+            return this->hasLock();
+        }
+
         void put_char (const char c) const {
             while (lockset(this->m_lock));
             Printer::put_char(c);
