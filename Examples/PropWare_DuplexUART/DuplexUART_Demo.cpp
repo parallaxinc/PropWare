@@ -24,7 +24,6 @@
  */
 
 // Includes
-#include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/uart/halfduplexuart.h>
 #include <PropWare/synchronousprinter.h>

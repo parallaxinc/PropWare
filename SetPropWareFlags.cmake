@@ -44,6 +44,7 @@ if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
 endif()
 
 set(COMMON_FLAGS "-save-temps ${COMMON_FLAGS}")
+#set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=main.rawmap ${CMAKE_EXE_LINKER_FLAGS}")
 
 # Overwite the old flags
 set(CMAKE_ASM_FLAGS     "${COMMON_FLAGS}    ${ASM_FLAGS}")

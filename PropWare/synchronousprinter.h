@@ -29,23 +29,55 @@
 
 namespace PropWare {
 
-class SynchronousPrinter : public Printer {
+/**
+ * @brief   IMPORTANT! SynchronousPrinter is not yet working! DO NOT attempt to
+ *          use SynchronousPrinter until this note disappears
+ */
+class SynchronousPrinter: public Printer {
     public:
+        /**
+         * @brief   Creates a synchronous instance of a Printer that can be used
+         *          from multiple cogs simultaneously.
+         *
+         * @param   *printCapable   Address of an instance of a
+         *                          PropWare::PrintCapable device that can be
+         *                          shared across multiple cogs
+         */
         SynchronousPrinter (PrintCapable const *printCapable)
                 : Printer(printCapable) {
             this->m_lock = locknew();
             lockclr(this->m_lock);
         }
 
+        /**
+         * @brief   Ensure that, when a `SynchronousPrinter` is no longer being
+         *          used, the lock is returned
+         */
         ~SynchronousPrinter () {
             lockclr(this->m_lock);
             lockret(this->m_lock);
         }
 
+        /**
+         * @brief   Determine if an instance of a `SynchronousPrinter`
+         *          successfully retrieved a lock
+         * @return  True when a lock has been retrieved successfully, false
+         *          otherwise
+         */
         bool hasLock () const {
             return -1 != this->m_lock;
         }
 
+        /**
+         * @brief   Retrieve a new lock
+         *
+         * If this instance already has a lock, the call will block until the
+         * lock has been cleared. The lock will then be returned and a new lock
+         * will be retrieved.
+         *
+         * @return  True if the instance was able to successfully retrieve a new
+         *          lock
+         */
         bool refreshLock () {
             if (this->hasLock()) {
                 // Wait for any other cogs using the lock to return
@@ -58,18 +90,27 @@ class SynchronousPrinter : public Printer {
             return this->hasLock();
         }
 
+        /**
+         * @see PropWare::Printer::put_char
+         */
         void put_char (const char c) const {
             while (lockset(this->m_lock));
             Printer::put_char(c);
             lockclr(this->m_lock);
         }
 
+        /**
+         * @see PropWare::Printer::puts
+         */
         void puts (const char string[]) const {
             while (lockset(this->m_lock));
             this->printCapable->puts(string);
             lockclr(this->m_lock);
         }
 
+        /**
+         * @see PropWare::Printer::put_int
+         */
         void put_int (int32_t x, uint16_t width = 0, const char fillChar = ' ',
                       const bool bypassLock = false) const {
             if (bypassLock)
@@ -81,6 +122,9 @@ class SynchronousPrinter : public Printer {
             }
         }
 
+        /**
+         * @see PropWare::Printer::put_uint
+         */
         void put_uint (uint32_t x, uint16_t width = 0,
                        const char fillChar = ' ',
                        const bool bypassLock = false) const {
@@ -93,6 +137,9 @@ class SynchronousPrinter : public Printer {
             }
         }
 
+        /**
+         * @see PropWare::Printer::put_hex
+         */
         void put_hex (uint32_t x, uint16_t width = 0, const char fillChar = ' ',
                       const bool bypassLock = false) const {
             if (bypassLock)
@@ -105,6 +152,9 @@ class SynchronousPrinter : public Printer {
         }
 
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
+        /**
+         * @see PropWare::Printer::put_float
+         */
         void put_float (double f, uint16_t width, uint16_t precision,
                         const char fillChar,
                         const bool bypassLock = false) const {

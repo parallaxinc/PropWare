@@ -40,11 +40,9 @@ class ScanCapable {
          */
         virtual char get_char () const = 0;
 
-//        virtual char * gets (char string[]) const = 0;
-
         /**
-         * @brief        Read a newline-terminated (\n) character array. Though
-         *               this method could be created using put_char, some
+         * @brief        Read a newline-terminated (`\n`) character array. Though
+         *               this method could be created using get_char, some
          *               objects (such as PropWare::UART), have optimized
          *               methods for reading a string and ScanCapable::fgets can
          *               utilize them. (blocking)

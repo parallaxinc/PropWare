@@ -28,10 +28,6 @@ set(CMAKE_EXECUTABLE_SUFFIX .elf)
 ################################################################################
 # Set flags
 set(CMAKE_AR_FLAGS "cr")
-set(LDFLAGS "") # -Wl,-Map=main.rawmap")
-
-# Add library search paths
-set(CMAKE_EXE_LINKER_FLAGS "${LDFLAGS}")
 
 ################################################################################
 ### Compilers

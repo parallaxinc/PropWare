@@ -35,10 +35,44 @@
 namespace PropWare {
 
 /**
-* @brief    Interface for all classes capable of printing
-*/
+ * @brief   Container class that has formatting methods for human-readable
+ *          output. This class can be constructed and used for easy and
+ *          efficient output via any communication protocol.
+ *          <p>
+ *          <b>Printing to Terminal</b>
+ *          <p>
+ *          To print to the standard terminal, simply use the existing object,
+ *          `pwOut`:
+ *          <p>
+ *          `pwOut.printf("Hello, world!" CRLF);`
+ *          <p>
+ *          The `CRLF` macro is an easy way to add a line break to your
+ *          print statements.
+ *          <p>
+ *          <b>Creating Custom `Printers`</b>
+ *          <p>
+ *          To create your own `Printer`, you will first need an instance of
+ *          any object that implements the `PrintCapable` interface. Your code
+ *          might look something like this:
+ *          <p>
+ *          `PropWare::HD44780       myLCD;`<br>
+ *          `const PropWare::Printer lcdPrinter(&myLCD);`<br>
+ *          `lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);`<br>
+ *          `lcdPrinter.printf("Hello, LCD!" CRLF);`
+ *          <p>
+ *          Adding `const` in front of the `Printer` declaration allows the
+ *          compiler to make some extra optimizations and is encouraged when
+ *          possible.
+ */
 class Printer {
     public:
+        /**
+         * @brief   Construct a Printer instance that will use the given
+         *          `*printCapable` instance for sending each character
+         *
+         * @param   *printCapable   The address of any initialized communication
+         *                          object such as a PropWare::UART
+         */
         Printer (const PrintCapable *printCapable)
                 : printCapable(printCapable) {
             this->m_lock = -1;
@@ -61,7 +95,12 @@ class Printer {
         /**
          * @brief       Print a signed integer in base 10
          *
-         * @param[in]   x   Integer to be printed
+         * @param[in]   x           Integer to be printed
+         * @param[in]   width       Minimum number of characters to print
+         * @param[in]   fillChar    Character to print to the left of the number
+         *                          if the number's width is less than `width`
+         * @param[in]   bypassLock  For internal use only. Leave as default
+         *                          value.
          */
         virtual void put_int (int32_t x, uint16_t width = 0,
                               const char fillChar = ' ',
@@ -75,14 +114,19 @@ class Printer {
         /**
          * @brief       Print an unsigned integer in base 10
          *
-         * @param[in]   x   Integer to be printed
+         * @param[in]   x           Integer to be printed
+         * @param[in]   width       Minimum number of characters to print
+         * @param[in]   fillChar    Character to print to the left of the number
+         *                          if the number's width is less than `width`
+         * @param[in]   bypassLock  For internal use only. Leave as default
+         *                          value.
          */
         virtual void put_uint (uint32_t x, uint16_t width = 0,
                                const char fillChar = ' ',
                                const bool bypassLock = false) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
-            uint8_t       j, i  = 0;
+            uint8_t       i = 0;
 
             // Create a character array in reverse order, starting with the
             // tens digit and working toward the largest digit
@@ -99,7 +143,7 @@ class Printer {
             }
 
             // Reverse the character array
-            for (j = 0; j < i; ++j)
+            for (uint8_t j = 0; j < i; ++j)
                 this->printCapable->put_char(buf[i - j - 1]);
         }
 
@@ -107,7 +151,12 @@ class Printer {
          * @brief       Print an integer in base 16 (hexadecimal) with capital
          *              letters
          *
-         * @param[in]   x   Integer to be printed
+         * @param[in]   x           Integer to be printed
+         * @param[in]   width       Minimum number of characters to print
+         * @param[in]   fillChar    Character to print to the left of the number
+         *                          if the number's width is less than `width`
+         * @param[in]   bypassLock  For internal use only. Leave as default
+         *                          value.
          */
         virtual void put_hex (uint32_t x, uint16_t width = 0,
                               const char fillChar = ' ',
@@ -150,10 +199,18 @@ class Printer {
          * @brief       Print a floating point number with a given width and
          *              precision
          *
+         * @note        This function is _only_ enabled when the CMake option,
+         *              `PROPWARE_PRINT_FLOAT` is turned on.
+         *
          * @param[in]   f           Number to print
-         * @param[in]   width       Number of integer digits to print
-         * @param[in]   precision   Number of digits to the right of the decimal
-         *                          point to print
+         * @param[in]   width       Number of integer digits to print (includes
+         *                          decimal point)
+         * @param[in]   precision   Number of digits to print to the right of
+         *                          the decimal point
+         * @param[in]   fillChar    Character to print to the left of the number
+         *                          if the number's width is less than `width`
+         * @param[in]   bypassLock  For internal use only. Leave as default
+         *                          value.
          */
         virtual void put_float (double f, uint16_t width, uint16_t precision,
                                 const char fillChar,

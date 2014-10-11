@@ -42,7 +42,6 @@
 #define TEST_SHELL
 
 // Includes
-#include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/sd.h>
 #include <PropWare/pin.h>

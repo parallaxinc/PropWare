@@ -273,7 +273,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @brief       Shift in an array of data (FCache function)
          *
          * @param[in]   bufferAddr
-         * @param[in]   words
+         * @param[in]   maxLength
+         * @param[in]   delim
          * @param[in]   bits
          * @param[in]   bitCycles
          * @param[in]   rxMask

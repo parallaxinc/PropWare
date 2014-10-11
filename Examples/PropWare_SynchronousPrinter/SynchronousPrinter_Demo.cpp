@@ -18,9 +18,9 @@ static _thread_state_t thread_data;
 
 volatile uint32_t wait_time;
 volatile uint32_t startCnt;
-volatile bool   syncStart = false;
+volatile bool     syncStart = false;
 
-int main (int argc, char* argv[]) {
+int main (int argc, char *argv[]) {
     int8_t   n;
     int8_t   cog;
     uint32_t nextCnt;

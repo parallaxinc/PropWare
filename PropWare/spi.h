@@ -333,8 +333,8 @@ class SPI {
         /**
          * @brief       Set the bitmode of SPI communication
          *
-         * @param[in]   bitmode     Select one of SPI::LSB_FIRST or 
-         *                          SPI::MSB_FIRST to choose which bit will be 
+         * @param[in]   bitmode     Select one of SPI::LSB_FIRST or
+         *                          SPI::MSB_FIRST to choose which bit will be
          *                          shifted out first
          *
          * @return      Can return non-zero in the case of a timeout
@@ -510,11 +510,11 @@ class SPI {
          * @brief       Send a value out to a peripheral device
          *
          * Pass a value and mode into the assembly cog to be sent to the
-         * peripheral; NOTE: this function is non-blocking and chip-select 
-         * should not be set inactive immediately after the return (you should 
-         * call spi_wait() before setting chip-select inactive); Optimized for 
-         * fastest possible clock speed; No error checking is performed; 
-         * 'Timeout' event will never be thrown and possible infinite loop can 
+         * peripheral; NOTE: this function is non-blocking and chip-select
+         * should not be set inactive immediately after the return (you should
+         * call spi_wait() before setting chip-select inactive); Optimized for
+         * fastest possible clock speed; No error checking is performed;
+         * 'Timeout' event will never be thrown and possible infinite loop can
          * happen
          *
          * @param[in]   bits        Number of bits to be shifted out
@@ -618,10 +618,11 @@ class SPI {
         }
 #endif
         /**
-         * @brief      Print through UART an error string followed by entering
-         *             an infinite loop
+         * @brief       Print through UART an error string followed by entering
+         *              an infinite loop
          *
-         * @param[in]  err     Error number used to determine error string
+         * @param[in]   *printer    Object used for printing error string
+         * @param[in]   err         Error number used to determine error string
          */
         void print_error_str (const Printer *printer,
                 const SPI::ErrorCode err) const {
