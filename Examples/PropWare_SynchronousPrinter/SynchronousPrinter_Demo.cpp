@@ -17,9 +17,9 @@ const uint16_t         STACK_SIZE = 128;
 static uint32_t        cog_stack[STACK_SIZE][COGS];
 static _thread_state_t thread_data;
 
-volatile uint32_t wait_time;
-volatile uint32_t startCnt;
+volatile uint32_t wait_time = SECOND;
 volatile bool     syncStart = false;
+volatile uint32_t startCnt;
 
 int main (int argc, char *argv[]) {
     int8_t   n;
