@@ -9,6 +9,7 @@ set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL xmm-single)
 include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+include_directories(${PROPWARE_PATH})
 
 project(PropWare_${MODEL})
 
@@ -24,10 +25,11 @@ add_library(${PROJECT_NAME} STATIC
         ../PropWare
         ../scancapable
         ../scanner
-        ../sd
+#        ../sd
         ../seeedtft
         ../seeedtftfast
         ../seeedtftfast_as.S
+#        ../shell
         ../spi
         ../spi_as.S
         ../synchronousprinter

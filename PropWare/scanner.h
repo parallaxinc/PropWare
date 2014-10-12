@@ -31,13 +31,8 @@
 #include <ctype.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/scancapable.h>
-
-#ifndef S_ISNAN
-#define S_ISNAN(x) (x != x)
-#endif  /* !defined(S_ISNAN) */
-#ifndef S_ISINF
-#define S_ISINF(x) (x != 0.0 && x + x == x)
-#endif  /* !defined(S_ISINF) */
+#include <PropWare/printer.h>
+#include <PropWare/uart/halfduplexuart.h>
 
 namespace PropWare {
 
@@ -46,26 +41,55 @@ namespace PropWare {
 */
 class Scanner {
     public:
-        Scanner (const ScanCapable *scanCapable) : scanCapable(scanCapable) {
+        Scanner (const ScanCapable *scanCapable,
+                 const Printer *printer) : m_scanCapable(scanCapable),
+                                           m_printer(printer) {
         }
 
         /**
          * @see PropWare::ScanCapable::get_char
          */
         char get_char () const {
-            return this->scanCapable->get_char();
+            char c = this->m_scanCapable->get_char();
+            this->m_printer->put_char(c);
+            return c;
         }
 
         /**
          * @see PropWare::ScanCapable::fgets
          */
-        virtual ErrorCode gets (char string[],
-                           const uint32_t length = 0) const {
-            return this->scanCapable->fgets(string, length);
+        ErrorCode gets (char string[], int32_t length) const {
+            char *buf = string;
+            while (--length > 0) {
+                char ch = this->m_scanCapable->get_char();
+
+                if (ch == 8 || ch == 127) {
+                    if (buf > string) {
+                        this->m_printer->puts("\010 \010");
+                        ++length;
+                        --buf;
+                    }
+                    length += 1;
+                    continue;
+                }
+
+                this->m_printer->put_char(ch);
+                if (ch == '\r')
+                    this->m_printer->put_char('\n');
+
+                if (ch == '\r' || ch == '\n')
+                    break;
+
+                *(buf++) = ch;
+            }
+            *buf = 0;
+
+            return 0;
         }
 
     private:
-        const ScanCapable *scanCapable;
+        const ScanCapable *m_scanCapable;
+        const Printer     *m_printer;
 };
 
 }

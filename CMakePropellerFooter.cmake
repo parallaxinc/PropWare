@@ -1,7 +1,5 @@
 include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
 
-include_directories("${PROPWARE_PATH}")
-
 ################################################################################
 # Create library dependencies
 
@@ -22,6 +20,7 @@ if (LINK_SIMPLE)
             ${PROPWARE_PATH}/bin/simple/${MODEL}/libSimple_${MODEL}.a)
     target_link_libraries(${PROJECT_NAME}
             SIMPLE_LIB)
+    include_directories(SYSTEM ${PROPWARE_PATH}/simple)
 endif ()
 
 if (LINK_PROPWARE)
@@ -41,6 +40,7 @@ endif ()
 ################################################################################
 
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
+include_directories(SYSTEM ${PROPWARE_PATH})
 
 # Only add these custom targets if we're not compiling the PropWare library
 if (NOT DEFINED PROPWARE_MAIN_PACKAGE)

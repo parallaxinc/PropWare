@@ -31,17 +31,6 @@
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>
 
-// Rather than include all of stdio.h, only these definitions will be declared
-#if (defined USE_PRINTF)
-#if (!(defined __TINY_IO_H || _STDIO_H))
-extern char * gets(char *s);
-#endif
-#else
-#include <simpletext.h>
-#define printf print
-#define putchar putChar
-#endif
-
 #ifndef EOF
 #define EOF (-1)
 #endif
@@ -1017,241 +1006,6 @@ class SD {
             return f->wPtr;
         }
 
-#ifdef SD_OPTION_SHELL
-        /**
-         * @brief       Provide the user with a very basic Unix-like shell. The
-         *              following commands are available to the user: ls, cat,
-         *              cd.
-         *
-         * @param[in]   *f  If a file is opened via a command such as 'cat', its
-         *                  information will be stored at this address
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode shell (SD::File *f) {
-            char usrInput[SD_SHELL_INPUT_LEN] = "";
-            char cmd[SD_SHELL_CMD_LEN] = "";
-            char arg[SD_SHELL_ARG_LEN] = "";
-            char uppercaseName[SD_SHELL_ARG_LEN] = "";
-            uint8_t i, j;
-            PropWare::ErrorCode err = 0;
-
-            printf("Welcome to David's quick shell! "
-                    "There is no help, nor much to do.\n");
-            printf("Have fun...\n");
-
-            // Loop until the user types the SD::SHELL_EXIT string
-            while (strcmp(usrInput, this->SHELL_EXIT)) {
-                printf(">>> ");
-#ifdef USE_PRINTF
-                gets(usrInput);
-#else
-                getStr(usrInput, SD_SHELL_INPUT_LEN - 1);
-#endif
-
-#ifdef SD_OPTION_VERBOSE
-                printf("Received \"%s\" as the complete line\n", usrInput);
-#endif
-
-                // Retrieve command
-                for (i = 0; (0 != usrInput[i] && ' ' != usrInput[i]); ++i)
-                    cmd[i] = usrInput[i];
-
-#ifdef SD_OPTION_VERBOSE
-                printf("Received \"%s\" as command\n", cmd);
-#endif
-
-                // Retrieve argument if it exists (skip over spaces)
-                if (0 != usrInput[i]) {
-                    j = 0;
-                    while (' ' == usrInput[i])
-                        ++i;
-                    for (; (0 != usrInput[i] && ' ' != usrInput[i]); ++i)
-                        arg[j++] = usrInput[i];
-#ifdef SD_OPTION_VERBOSE
-                    printf("And \"%s\" as the argument\n", arg);
-#endif
-                }
-
-                // Convert the arg to uppercase
-                for (i = 0; arg[i]; ++i)
-                    if ('a' <= arg[i] && 'z' >= arg[i])
-                        uppercaseName[i] = arg[i] + 'A' - 'a';
-                    else
-                        uppercaseName[i] = arg[i];
-
-                // Interpret the command
-                if (!strcmp(cmd, this->SHELL_LS))
-                    err = this->shell_ls();
-                else if (!strcmp(cmd, this->SHELL_CAT))
-                    err = this->shell_cat(uppercaseName, f);
-                else if (!strcmp(cmd, this->SHELL_CD))
-                    err = this->chdir(uppercaseName);
-#ifdef SD_OPTION_FILE_WRITE
-                else if (!strcmp(cmd, this->SHELL_CAT))
-                    err = this->shell_touch(uppercaseName);
-#endif
-#ifdef SD_OPTION_VERBOSE_BLOCKS
-                else if (!strcmp(cmd, "d"))
-                this->print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
-#endif
-                else if (!strcmp(cmd, SD::SHELL_EXIT))
-                    break;
-                else if (strcmp(usrInput, ""))
-                    printf("Invalid command: %s\n", cmd);
-
-                // Handle errors; Print user errors and continue; Return system
-                // errors
-                if (err) {
-                    if (SD::BEG_ERROR <= err && err <= SD::END_USER_ERRORS)
-                        SD::print_error_str((SD::ErrorCode) err);
-                    else
-                        return err;
-                }
-
-                // Erase the command and argument strings
-                for (i = 0; i < SD::SHELL_CMD_LEN; ++i)
-                    cmd[i] = 0;
-                for (i = 0; i < SD::SHELL_ARG_LEN; ++i)
-                    uppercaseName[i] = arg[i] = 0;
-                err = 0;
-            }
-
-            return 0;
-        }
-
-        /**
-         * @brief       List the contents of a directory on the screen (similar
-         *              to 'ls .')
-         *
-         * @note        TODO: Implement *abspath when SDGetSectorFromPath() is
-         *              functional
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode shell_ls () {
-            PropWare::ErrorCode err;
-            uint16_t fileEntryOffset = 0;
-
-            // Allocate space for a filename string
-            char string[PropWare::SD::FILENAME_STR_LEN];
-
-            // If we aren't looking at the beginning of a cluster, we must
-            // backtrack to the beginning and then begin listing files
-            if (this->m_buf.curSectorOffset
-                    || (this->find_sector_from_alloc(this->m_dir_firstAllocUnit)
-                            != this->m_buf.curClusterStartAddr)) {
-#ifdef SD_OPTION_VERBOSE
-                printf("'ls' requires a backtrack to beginning of directory's "
-                        "cluster\n");
-#endif
-                this->m_buf.curClusterStartAddr = this->find_sector_from_alloc(
-                        this->m_dir_firstAllocUnit);
-                this->m_buf.curSectorOffset = 0;
-                this->m_buf.curAllocUnit = this->m_dir_firstAllocUnit;
-                check_errors(
-                        this->get_fat_value(this->m_buf.curAllocUnit,
-                                &(this->m_buf.nextAllocUnit)));
-                check_errors(
-                        this->read_data_block(this->m_buf.curClusterStartAddr,
-                                this->m_buf.buf));
-            }
-
-            // Loop through all files in the current directory until we find the
-            // correct one; Function will exit normally without an error code if
-            // the file is not found
-            while (this->m_buf.buf[fileEntryOffset]) {
-                // Check if file is valid, retrieve the name if it is
-                if ((SD::DELETED_FILE_MARK != this->m_buf.buf[fileEntryOffset])
-                        && !(SD::SYSTEM_FILE
-                                & this->m_buf.buf[fileEntryOffset
-                                        + SD::FILE_ATTRIBUTE_OFFSET]))
-                    this->print_file_entry(&(this->m_buf.buf[fileEntryOffset]),
-                            string);
-
-                // Increment to the next file
-                fileEntryOffset += SD::FILE_ENTRY_LENGTH;
-
-                // If it was the last entry in this sector, proceed to the next
-                // one
-                if (SD::SECTOR_SIZE == fileEntryOffset) {
-                    // Last entry in the sector, attempt to load a new sector
-                    // Possible error value includes end-of-chain marker
-                    if ((err = this->load_next_sector(&this->m_buf))) {
-                        if ((uint8_t) SD::EOC_END == err)
-                            break;
-                        else
-                            return err;
-                    }
-
-                    fileEntryOffset = 0;
-                }
-            }
-
-            return 0;
-        }
-
-        /**
-         * @brief       Dump the contents of a file to the screen (similar to
-         *              'cat f');
-         *
-         * @note        Does not currently follow paths
-         *
-         * @param[in]   *name   Name of the file to open
-         * @param[in]   *f      File object that can be used to open *name
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode shell_cat (const char *name,
-                PropWare::SD::File *f) {
-            PropWare::ErrorCode err;
-
-            // Attempt to find the file
-            if ((err = this->fopen(name, f, SD::FILE_MODE_R))) {
-                return err;
-            } else {
-                // Loop over each character and print them to the screen
-                // one-by-one
-                while (!this->feof(f))
-                    // Using SDfgetc() instead of SDfgets to ensure
-                    // compatibility with binary files
-                    // TODO: Should probably create something better to output
-                    //       binary files don't ya think!?
-                    putchar(this->fgetc(f));
-                putchar('\n');
-            }
-
-            return 0;
-        }
-
-#ifdef SD_OPTION_FILE_WRITE
-        /**
-         * @brief       Create a new file, do not open it
-         *
-         * @param[in]   name[]  C-string name for the file to be created
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode shell_touch (const char name[]) {
-            PropWare::ErrorCode err;
-            uint16_t fileEntryOffset;
-
-            // Attempt to find the file if it already exists
-            if ((err = this->find(name, &fileEntryOffset))) {
-                // Error occurred - hopefully it was a "file not found" error
-                if (SD::FILENAME_NOT_FOUND == err)
-                    // File wasn't found, let's create it
-                    err = this->create_file(name, &fileEntryOffset);
-                return err;
-            }
-
-            // If SDFind() returns 0, the file already existed and an error
-            // should be thrown
-            return SD::FILE_ALREADY_EXISTS;
-        }
-#endif
-#endif
-
 #if (defined SD_OPTION_VERBOSE || defined SD_OPTION_VERBOSE_BLOCKS)
         /**
          * @brief       Print a block of data in hex format to the screen in
@@ -1298,20 +1052,21 @@ class SD {
          *
          * @param[in]   err     Error number used to determine error string
          */
-        void print_error_str (const SD::ErrorCode err) const {
+        void print_error_str (const Printer *printer,
+                              const SD::ErrorCode err) const {
             const char str[] = "SD Error %u: %s\n";
             const uint8_t relativeError = err - SD::BEG_ERROR;
 
             switch (err) {
                 case SD::INVALID_CMD:
-                    printf(str, relativeError, "Invalid command");
+                    printer->printf(str, relativeError, "Invalid command");
                     break;
                 case SD::READ_TIMEOUT:
-                    printf(str, relativeError, "Timed out "
+                    printer->printf(str, relativeError, "Timed out "
                             "during read");
                     break;
                 case SD::INVALID_NUM_BYTES:
-                    printf(str, relativeError, "Invalid number of bytes");
+                    printer->printf(str, relativeError, "Invalid number of bytes");
                     break;
                 case SD::INVALID_RESPONSE:
 #ifdef SD_OPTION_VERBOSE
@@ -1320,7 +1075,7 @@ class SD {
                             "Invalid first-byte response\n\tReceived: ",
                             this->m_firstByteResponse);
 #else
-                    printf("SD Error %u: %s%u\n", relativeError,
+                    printer->printf("SD Error %u: %s%u\n", relativeError,
                             "Invalid first-byte response\n\tReceived: ",
                             this->m_firstByteResponse);
 #endif
@@ -1333,13 +1088,13 @@ class SD {
                             "Invalid response during initialization",
                             this->m_firstByteResponse);
 #else
-                    printf("SD Error %u: %s\n\tResponse: %u\n", relativeError,
+                    printer->printf("SD Error %u: %s\n\tResponse: %u\n", relativeError,
                             "Invalid response during initialization",
                             this->m_firstByteResponse);
 #endif
                     break;
                 case SD::INVALID_FILESYSTEM:
-                    printf(str, relativeError, "Invalid file system; Likely not"
+                    printer->printf(str, relativeError, "Invalid file system; Likely not"
                             " a FAT16 or FAT32 system");
                     break;
                 case SD::INVALID_DAT_STRT_ID:
@@ -1348,66 +1103,66 @@ class SD {
                             "Invalid data-start ID\n\tReceived: ",
                             this->m_firstByteResponse);
 #else
-                    printf("SD Error %u: %s%u\n", relativeError,
+                    printer->printf("SD Error %u: %s%u\n", relativeError,
                             "Invalid data-start ID\n\tReceived: ",
                             this->m_firstByteResponse);
 #endif
                     break;
                 case SD::FILENAME_NOT_FOUND:
-                    printf(str, relativeError, "Filename not found");
+                    printer->printf(str, relativeError, "Filename not found");
                     break;
                 case SD::EMPTY_FAT_ENTRY:
-                    printf(str, relativeError, "FAT points to empty entry");
+                    printer->printf(str, relativeError, "FAT points to empty entry");
                     break;
                 case SD::CORRUPT_CLUSTER:
-                    printf(str, relativeError, "SD cluster is corrupt");
+                    printer->printf(str, relativeError, "SD cluster is corrupt");
                     break;
                 case SD::INVALID_PTR_ORIGIN:
-                    printf(str, relativeError, "Invalid pointer origin");
+                    printer->printf(str, relativeError, "Invalid pointer origin");
                     break;
                 case SD::ENTRY_NOT_FILE:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "Requested file entry is not a file");
                     break;
                 case SD::INVALID_FILENAME:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "Invalid filename - please use 8.3 format");
                     break;
                 case SD::INVALID_FAT_APPEND:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "FAT entry append was attempted unnecessarily");
                     break;
                 case SD::FILE_ALREADY_EXISTS:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "Attempting to create an already existing file");
                     break;
                 case SD::INVALID_FILE_MODE:
-                    printf(str, relativeError, "Invalid file mode");
+                    printer->printf(str, relativeError, "Invalid file mode");
                     break;
                 case SD::TOO_MANY_FATS:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "This driver is only capable of writing files on "
                                     "FAT partitions with two (2) copies of the "
                                     "FAT");
                     break;
                 case SD::FILE_WITHOUT_BUFFER:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "SDfopen() was passed a file struct with "
                                     "an uninitialized buffer");
                     break;
                 case SD::CMD8_FAILURE:
-                    printf(str, relativeError,
+                    printer->printf(str, relativeError,
                             "CMD8 never received a proper response; This is "
                                     "most likely to occur when the SD card "
                                     "does not support the 3.3V I/O used by "
                                     "the Propeller");
                     break;
                 case SD::READING_PAST_EOC:
-                    printf(str, relativeError, "Reading past the"
+                    printer->printf(str, relativeError, "Reading past the"
                             " end-of-chain marker");
                     break;
                 case SD::ENTRY_NOT_DIR:
-                    printf(str, relativeError, "Requested name is not a"
+                    printer->printf(str, relativeError, "Requested name is not a"
                             " directory");
                     break;
                 default:

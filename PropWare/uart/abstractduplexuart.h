@@ -185,8 +185,6 @@ class AbstractDuplexUART: public virtual DuplexUART,
          */
         AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) :
                 AbstractSimplexUART() {
-            this->AbstractSimplexUART::set_data_width(this->m_dataWidth);
-
             // Set rx direction second so that, in the case of half-duplex, the
             // pin floats high
             this->set_tx_mask(tx);
@@ -262,10 +260,16 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         [_msbMask] "r" (msbMask));
             } while (--bits);
 
+        Port::flash_port(BYTE_2, data >> 8);
+        Port::flash_port(BYTE_2, data);
+        Port::flash_port(BYTE_2, data << 8);
+        Port::flash_port(BYTE_2, data << 16);
+
             __asm__ volatile ("waitpeq %[_rxMask], %[_rxMask]"
                     :  // No outputs
                     : [_rxMask] "r" (rxMask));
 #endif
+
             return data;
         }
 

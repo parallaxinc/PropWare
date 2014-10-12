@@ -39,23 +39,6 @@ class ScanCapable {
          * @brief       Read and return a single character (blocking)
          */
         virtual char get_char () const = 0;
-
-        /**
-         * @brief        Read a newline-terminated (`\n`) character array. Though
-         *               this method could be created using get_char, some
-         *               objects (such as PropWare::UART), have optimized
-         *               methods for reading a string and ScanCapable::fgets can
-         *               utilize them. (blocking)
-         *
-         * @pre          `string[]` must have enough space allocated with a null
-         * terminator
-         *
-         * @param[out]   string[]    Buffer to store the string in
-         * @param[out]   *length     Maximum number of characters to read. If
-         *                           null-pointer, characters will be read until
-         *                           newline ('\n').
-         */
-        virtual ErrorCode fgets (char string[], int32_t *length) const = 0;
 };
 
 }

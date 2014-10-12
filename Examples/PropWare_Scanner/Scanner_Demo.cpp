@@ -1,5 +1,5 @@
 /**
- * @file    scanner.cpp
+ * @file    SimplexUART_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -23,9 +23,42 @@
  * SOFTWARE.
  */
 
-#include <PropWare/scanner.h>
+// Includes
+#include <PropWare/PropWare.h>
 #include <PropWare/printer.h>
-#include <PropWare/uart/halfduplexuart.h>
+#include <PropWare/scanner.h>
+#include <PropWare/port.h>
+#include <simple/simpletext.h>
 
-const PropWare::HalfDuplexUART _g_halfDuplexUart;
-const PropWare::Scanner        pwIn(&_g_halfDuplexUart, &pwOut);
+void error (const PropWare::ErrorCode err);
+
+int main () {
+    // A nice big buffer that can hold up to 63 characters from the user (the
+    // 64th is used by the null-terminator)
+    char userInput[64];
+
+    pwOut.printf("Hello! I'd like to teach you how to use PropWare to read "
+                         "from the terminal!" CRLF);
+
+    while (1) {
+        pwOut.printf("First, what's your name?" CRLF ">>> ");
+//    getStr(userInput, sizeof(userInput));
+//    pwIn.gets(userInput, sizeof(userInput));
+//    char c = pwIn.get_char();
+        PropWare::HalfDuplexUART poo;
+        char                     c = poo.get_char();
+
+        pwOut.printf("I got: \"0x%02X\". Is that right?" CRLF ">>> ", c);
+    }
+}
+
+void error (const PropWare::ErrorCode err) {
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Port::OUT);
+
+    while (1) {
+        debugLEDs.write((uint32_t) err);
+        waitcnt(100*MILLISECOND);
+        debugLEDs.write(0);
+        waitcnt(100*MILLISECOND);
+    }
+}

@@ -30,10 +30,6 @@ if (PROPWARE_PRINT_FLOAT)
     add_definitions(-DENABLE_PROPWARE_PRINT_FLOAT)
 endif ()
 
-if (LINK_SIMPLE)
-    include_directories(${PROPWARE_PATH}/simple)
-endif ()
-
 # Check if a deprecated variable name is set
 if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")

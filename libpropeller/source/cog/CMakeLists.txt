@@ -8,9 +8,10 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL cog)
-include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
 
 project(Libpropeller_${MODEL})
-
 include(../libpropellerObjects.cmake)
+
+include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+include_directories(${PROPWARE_PATH})
 add_library(${PROJECT_NAME} STATIC ${LIBPROPELLER_OBJECTS})
