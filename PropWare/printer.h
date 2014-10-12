@@ -74,7 +74,7 @@ class Printer {
          *                          object such as a PropWare::UART
          */
         Printer (const PrintCapable *printCapable)
-                : printCapable(printCapable) {
+                : m_printCapable(printCapable) {
             this->m_lock = -1;
         }
 
@@ -82,14 +82,14 @@ class Printer {
          * @see PropWare::PrintCapable::put_char
          */
         virtual void put_char (const char c) const {
-            this->printCapable->put_char(c);
+            this->m_printCapable->put_char(c);
         }
 
         /**
          * @see PropWare::PrintCapable::puts
          */
         virtual void puts (const char string[]) const {
-            this->printCapable->puts(string);
+            this->m_printCapable->puts(string);
         }
 
         /**
@@ -106,7 +106,7 @@ class Printer {
                               const char fillChar = ' ',
                               const bool bypassLock = false) const {
             if (0 > x)
-                this->printCapable->put_char('-');
+                this->m_printCapable->put_char('-');
 
             this->put_uint((uint32_t) abs(x), width, fillChar, true);
         }
@@ -139,12 +139,12 @@ class Printer {
             if (width && width > i) {
                 width -= i;
                 while (width--)
-                    this->printCapable->put_char(fillChar);
+                    this->m_printCapable->put_char(fillChar);
             }
 
             // Reverse the character array
             for (uint8_t j = 0; j < i; ++j)
-                this->printCapable->put_char(buf[i - j - 1]);
+                this->m_printCapable->put_char(buf[i - j - 1]);
         }
 
         /**
@@ -179,12 +179,12 @@ class Printer {
             if (width && width > i) {
                 width -= i;
                 while (width--)
-                    this->printCapable->put_char(fillChar);
+                    this->m_printCapable->put_char(fillChar);
             }
 
             // Reverse the character array
             for (j = 0; j < i; ++j)
-                this->printCapable->put_char(buf[i - j - 1]);
+                this->m_printCapable->put_char(buf[i - j - 1]);
         }
 
 #ifdef ENABLE_PROPWARE_PRINT_FLOAT
@@ -243,13 +243,13 @@ class Printer {
             int n;
 
             if (S_ISNAN(f)) {
-                this->printCapable->puts("nan");
+                this->m_printCapable->puts("nan");
             }
             if (S_ISINF(f)) {
                 if (((int) f) & 0x80000000)
-                    this->printCapable->puts("-inf");
+                    this->m_printCapable->puts("-inf");
                 else
-                    this->printCapable->puts("inf");
+                    this->m_printCapable->puts("inf");
             }
 
             /* clamp the digits. */
@@ -351,7 +351,7 @@ class Printer {
 
             s[m] = 0;
 
-            this->printCapable->puts(s);
+            this->m_printCapable->puts(s);
         }
 #endif
 
@@ -431,10 +431,10 @@ class Printer {
                                            fillChar, true);
                             break;
                         case 's':
-                            this->printCapable->puts(va_arg(list, char *));
+                            this->m_printCapable->puts(va_arg(list, char *));
                             break;
                         case 'c':
-                            this->printCapable->put_char(va_arg(list, int));
+                            this->m_printCapable->put_char(va_arg(list, int));
                             break;
                         case 'X':
                             this->put_hex(va_arg(list, uint32_t), width,
@@ -447,15 +447,15 @@ class Printer {
                             break;
 #endif
                         case '%':
-                            this->printCapable->put_char('%');
+                            this->m_printCapable->put_char('%');
                             break;
                         default:
                             va_arg(list, int);  // Increment va_arg pointer
-                            this->printCapable->put_char(' ');
+                            this->m_printCapable->put_char(' ');
                             break;
                     }
                 } else
-                    this->printCapable->put_char(*s);
+                    this->m_printCapable->put_char(*s);
 
                 ++s;
             }
@@ -469,8 +469,8 @@ class Printer {
         }
 
     protected:
-        const PrintCapable *printCapable;
-        int32_t m_lock; // Only used in PropWare::SynchronousPrinter
+        const PrintCapable *m_printCapable;
+        int32_t            m_lock; // Only used in PropWare::SynchronousPrinter
 };
 
 }

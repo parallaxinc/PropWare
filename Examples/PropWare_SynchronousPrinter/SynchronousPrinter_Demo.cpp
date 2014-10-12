@@ -8,6 +8,7 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/synchronousprinter.h>
 #include <PropWare/port.h>
+#include <PropWare/pin.h>
 
 void run_cog (void *arg);
 
@@ -32,8 +33,8 @@ int main (int argc, char *argv[]) {
             PropWare::Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
 
     for (n = 1; n < COGS; n++) {
-        cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, run_cog,
-                                         nullptr, &thread_data);
+        cog = (int8_t) _start_cog_thread(cog_stack[n] + sizeof(cog_stack[n]),
+                                         run_cog, nullptr, &thread_data);
         pwSyncOut.printf("Toggle COG %d Started" CRLF, cog);
     }
 
@@ -41,6 +42,10 @@ int main (int argc, char *argv[]) {
     syncStart = true;
     nextCnt = wait_time + startCnt;
     while (1) {
+        // Visual recognition that the cog is running
+        PropWare::Pin::flash_pin(
+                (PropWare::Port::Mask) (1 << (cogid() + 16)), 3);
+
         pwSyncOut.printf("Hello from cog %d" CRLF, cogid());
         nextCnt = waitcnt2(nextCnt, wait_time);
     }
@@ -55,6 +60,10 @@ void run_cog (void *arg) {
 
     nextCnt = wait_time + startCnt;
     while (1) {
+        // Visual recognition that the cog is running
+        PropWare::Pin::flash_pin(
+                (PropWare::Port::Mask) (1 << (cogid() + 16)), 3);
+
         pwSyncOut.printf("Hello from cog %d" CRLF, cogid());
         nextCnt = waitcnt2(nextCnt, wait_time);
     }

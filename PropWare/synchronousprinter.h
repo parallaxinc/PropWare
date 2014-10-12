@@ -104,7 +104,7 @@ class SynchronousPrinter: public Printer {
          */
         void puts (const char string[]) const {
             while (lockset(this->m_lock));
-            this->printCapable->puts(string);
+            this->m_printCapable->puts(string);
             lockclr(this->m_lock);
         }
 
