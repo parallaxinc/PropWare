@@ -212,8 +212,9 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        virtual void put_float (double f, uint16_t width, uint16_t precision,
-                                const char fillChar,
+        virtual void put_float (double f, uint16_t width = 0,
+                                uint16_t precision = 6,
+                                const char fillChar = ' ',
                                 const bool bypassLock = false) const {
             ////////////////////////////////////////////////////////////////////
             // Code taken straight from Parallax's floatToString! Thank you!!!
@@ -479,6 +480,13 @@ class Printer {
         inline void print (const char string[]) const {
             this->puts(string);
         }
+
+
+#ifdef ENABLE_PROPWARE_PRINT_FLOAT
+        inline void print (const float x) const {
+            this->put_float(x);
+        }
+#endif
 
     protected:
         const PrintCapable *m_printCapable;
