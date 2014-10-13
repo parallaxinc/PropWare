@@ -14,7 +14,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-project(simple_test)
+project(sample_test)
 
 add_executable(${PROJECT_NAME} ${PROJECT_NAME})
 

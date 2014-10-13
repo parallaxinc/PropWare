@@ -1,5 +1,5 @@
 /**
- * @file    basic_test.cpp
+ * @file    sample_test.cpp
  *
  * @author  David Zemon
  *
@@ -25,9 +25,7 @@
 
 #include "../PropWareTests.h"
 
-TEST(CheckAssert) {
-    ASSERT(true);
-
+TEST(CheckEmpty) {
     return true;
 }
 
@@ -35,8 +33,38 @@ TEST(CheckFail) {
     FAIL("This test was supposed to fail :)");
 }
 
+TEST(CheckAssert) {
+    ASSERT(true);
+
+    return true;
+}
+
+TEST(CheckAssert_ExpectFailure) {
+    ASSERT(false);
+
+    return true;
+}
+
 TEST(CheckAssertTrue) {
     ASSERT_TRUE(true);
+
+    return true;
+}
+
+TEST(CheckAssertTrue_ExpectFailure) {
+    ASSERT_TRUE(false);
+
+    return true;
+}
+
+TEST(CheckAssertFalse) {
+    ASSERT_FALSE(false);
+
+    return true;
+}
+
+TEST(CheckAssertFalse_ExpectFailure) {
+    ASSERT_FALSE(true);
 
     return true;
 }
@@ -81,14 +109,28 @@ TEST(CheckAssertNeq_ExpectFailure) {
     return true;
 }
 
+TEST(PrintUserMessage) {
+    MESSAGE("My name is %s!", "David");
+
+    return true;
+}
+
 int main () {
-    RUN_TEST(CheckAssert);
+    START(SampleTest);
+
+    RUN_TEST(CheckEmpty);
     EXPECT_FAIL(CheckFail);
+    RUN_TEST(CheckAssert);
+    EXPECT_FAIL(CheckAssert_ExpectFailure);
     RUN_TEST(CheckAssertTrue);
+    EXPECT_FAIL(CheckAssertTrue_ExpectFailure);
+    RUN_TEST(CheckAssertFalse);
+    EXPECT_FAIL(CheckAssertFalse_ExpectFailure);
     RUN_TEST(CheckAssertEq);
     EXPECT_FAIL(CheckAssertEq_ExpectFailure);
     RUN_TEST(CheckAssertNeq);
     EXPECT_FAIL(CheckAssertNeq_ExpectFailure);
+    RUN_TEST(PrintUserMessage);
 
-    return 0;
+    COMPLETE();
 }

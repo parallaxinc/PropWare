@@ -29,30 +29,56 @@
 #include <PropWare/printer.h>
 
 void _runPropWareUnitTest (bool (*test) (void), const char testName[],
-                           const bool expectValue) {
+                           const bool expectValue, bool *result) {
     if (expectValue == test())
-        pwOut.printf("SUCCESS: %s" CRLF, testName);
-    else
-        pwOut.printf("FAILURE: %s" CRLF, testName);
+        pwOut.printf("#\tSUCCESS: %s" CRLF, testName);
+    else {
+        pwOut.printf("#\t***FAIL: %s" CRLF, testName);
+        *result = false;
+    }
 }
 
-#define TEST(testName) bool TEST_ ## testName ()
+#define MESSAGE(message, ...) pwOut.printf("#\t- " message CRLF, __VA_ARGS__)
 
-#define RUN_TEST(testName) _runPropWareUnitTest(TEST_ ## testName, #testName, \
-    true)
+#define START(testSuiteName) \
+    bool passed = true; \
+    const char suiteName[] = #testSuiteName; \
+    pwOut.printf( \
+        "####################" \
+        "####################" \
+        "####################" \
+        "####################" CRLF); \
+    pwOut.printf("# Test suite: %s" CRLF, suiteName)
 
-#define EXPECT_FAIL(testName) _runPropWareUnitTest(TEST_ ## testName, \
-    #testName, false)
+#define COMPLETE() \
+    if (!passed) \
+        pwOut.printf("# Test FAILURE"); \
+    return 0
 
-#define FAIL(message) return false;
+#define TEST(testName) \
+    bool TEST_ ## testName ()
 
-#define ASSERT(actual) if (!actual) return false;
+#define RUN_TEST(testName) \
+    _runPropWareUnitTest(TEST_ ## testName, #testName, true, &passed)
 
-#define ASSERT_TRUE(actual) ASSERT(actual)
+#define EXPECT_FAIL(testName) \
+    _runPropWareUnitTest(TEST_ ## testName, #testName, false, &passed)
+
+#define FAIL(message) \
+    return false;
+
+#define ASSERT(actual) \
+    if (!actual) return false;
+
+#define ASSERT_TRUE(actual) \
+    ASSERT(actual)
+
+#define ASSERT_FALSE(actual) \
+    ASSERT(false == actual)
 
 #define ASSERT_EQ(expected, actual) \
     if (expected != actual) { \
-        pwOut.puts("Expected: `"); \
+        pwOut.puts("#\tExpected: `"); \
         pwOut.print(expected); \
         pwOut.puts("`; Acutal: `"); \
         pwOut.print(actual); \
@@ -62,7 +88,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 
 #define ASSERT_NEQ(lhs, rhs) \
     if (lhs == rhs) { \
-        pwOut.puts("Expected mismatch. Got: `"); \
+        pwOut.puts("#\tExpected mismatch. Got: `"); \
         pwOut.print(lhs); \
         pwOut.puts("` == `"); \
         pwOut.print(rhs); \
