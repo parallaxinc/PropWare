@@ -468,6 +468,18 @@ class Printer {
             va_end(list);
         }
 
+        inline void print (const int x) const {
+            this->put_int(x);
+        }
+
+        inline void print (const char c) const {
+            this->put_char(c);
+        }
+
+        inline void print (const char string[]) const {
+            this->puts(string);
+        }
+
     protected:
         const PrintCapable *m_printCapable;
         int32_t            m_lock; // Only used in PropWare::SynchronousPrinter
