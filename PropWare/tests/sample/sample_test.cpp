@@ -89,6 +89,26 @@ TEST(CheckAssertEq_ExpectFailure) {
     return true;
 }
 
+TEST(CheckAssertEqMsg) {
+    int x = 3;
+    int y = 4;
+    int expected = 7;
+    int actual = x + y;
+    ASSERT_EQ_MSG(expected, actual);
+
+    return true;
+}
+
+TEST(CheckAssertEqMsg_ExpectFailure) {
+    int x = 3;
+    int y = 42; // Oops! That'd be a typo wouldn't it? :)
+    int expected = 7;
+    int actual = x + y;
+    ASSERT_EQ_MSG(expected, actual);
+
+    return true;
+}
+
 TEST(CheckAssertNeq) {
     int x = 3;
     int y = 42; // Oops! That'd be a typo wouldn't it? :)
@@ -105,6 +125,26 @@ TEST(CheckAssertNeq_ExpectFailure) {
     int expected = 7;
     int actual = x + y;
     ASSERT_NEQ(expected, actual);
+
+    return true;
+}
+
+TEST(CheckAssertNeqMsg) {
+    int x = 3;
+    int y = 42; // Oops! That'd be a typo wouldn't it? :)
+    int expected = 7;
+    int actual = x + y;
+    ASSERT_NEQ_MSG(expected, actual);
+
+    return true;
+}
+
+TEST(CheckAssertNeqMsg_ExpectFailure) {
+    int x = 3;
+    int y = 4;
+    int expected = 7;
+    int actual = x + y;
+    ASSERT_NEQ_MSG(expected, actual);
 
     return true;
 }
@@ -128,8 +168,12 @@ int main () {
     EXPECT_FAIL(CheckAssertFalse_ExpectFailure);
     RUN_TEST(CheckAssertEq);
     EXPECT_FAIL(CheckAssertEq_ExpectFailure);
+    RUN_TEST(CheckAssertEqMsg);
+    EXPECT_FAIL(CheckAssertEqMsg_ExpectFailure);
     RUN_TEST(CheckAssertNeq);
     EXPECT_FAIL(CheckAssertNeq_ExpectFailure);
+    RUN_TEST(CheckAssertNeqMsg);
+    EXPECT_FAIL(CheckAssertNeqMsg_ExpectFailure);
     RUN_TEST(PrintUserMessage);
 
     COMPLETE();

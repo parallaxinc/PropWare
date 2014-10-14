@@ -76,32 +76,23 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @brief       Create a Pin variable
-         *
-         * @param[in]   pinNum  0-indexed integer value representing pin-number
-         */
-        Pin (const uint8_t pinNum) {
-            this->m_mask = PropWare::Port::convert(pinNum);
-        }
-
-        /**
-         * @brief       Create a Pin variable
-         *
-         * @param[in]   pinNum      0-indexed integer value representing
-         *                          pin-number
-         * @param[in]   direction   Direction to initialize pin; One of
-         *                          PropWare::Pin::Dir
-         */
-        Pin (const uint8_t pinNum, const Pin::Dir direction) {
-            this->m_mask = PropWare::Port::convert(pinNum);
-            this->set_dir(direction);
-        }
-
-        /**
          * @see PropWare::Port::set_mask()
          */
         void set_mask (const PropWare::Port::Mask mask) {
             this->PropWare::Port::set_mask(mask);
+        }
+
+        /**
+         * @brief       Set a Pin's mask based on the pin number (an integer,
+         *              0 through 31
+         *
+         * @param[in]   pinNum  An integer 0-31 representing GPIO pins P0-P31
+         */
+        void set_pin_num (const uint8_t pinNum) {
+            if (31 <= pinNum)
+                this->m_mask = Pin::NULL_PIN;
+            else
+                this->m_mask = 1 << pinNum;
         }
 
         PropWare::Port::Mask get_mask () const {

@@ -27,6 +27,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/printer.h>
+#include "c++allocate.h"
 
 void _runPropWareUnitTest (bool (*test) (void), const char testName[],
                            const bool expectValue, bool *result) {
@@ -53,6 +54,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define COMPLETE() \
     if (!passed) \
         pwOut.printf("# Test FAILURE"); \
+    else \
+        pwOut.print("done..." CRLF); \
     return 0
 
 #define TEST(testName) \
@@ -77,6 +80,14 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     ASSERT(false == actual)
 
 #define ASSERT_EQ(expected, actual) \
+    if (expected != actual) \
+        return false
+
+#define ASSERT_NEQ(expected, actual) \
+    if (expected == actual) \
+        return false
+
+#define ASSERT_EQ_MSG(expected, actual) \
     if (expected != actual) { \
         pwOut.puts("#\tExpected: `"); \
         pwOut.print(expected); \
@@ -86,7 +97,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         return false; \
     }
 
-#define ASSERT_NEQ(lhs, rhs) \
+#define ASSERT_NEQ_MSG(lhs, rhs) \
     if (lhs == rhs) { \
         pwOut.puts("#\tExpected mismatch. Got: `"); \
         pwOut.print(lhs); \
