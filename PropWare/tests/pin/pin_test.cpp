@@ -34,13 +34,20 @@ const uint8_t             TEST_PIN_NUM = 12;
 const PropWare::Pin::Mask TEST_MASK    = PropWare::Pin::P12;
 const PropWare::Pin::Mask CHECK_MASK   = PropWare::Pin::P13;
 
+SETUP {
+    testable = new PropWare::Pin(TEST_MASK, PropWare::Pin::OUT);
+}
+
+TEARDOWN {
+    delete testable;
+}
+
 TEST(Constructor_ShouldSetNullPin) {
     testable = new PropWare::Pin();
 
     ASSERT_EQ(PropWare::Pin::NULL_PIN, testable->get_mask());
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 TEST(Constructor_ShouldSetMask) {
@@ -48,8 +55,7 @@ TEST(Constructor_ShouldSetMask) {
 
     ASSERT_EQ(TEST_MASK, testable->get_mask());
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 TEST(Constructor_ShouldSetMaskAndDir) {
@@ -58,8 +64,7 @@ TEST(Constructor_ShouldSetMaskAndDir) {
     ASSERT_EQ(TEST_MASK, testable->get_mask());
     ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 TEST(SetMask) {
@@ -68,8 +73,7 @@ TEST(SetMask) {
     testable->set_mask(TEST_MASK);
     ASSERT_EQ(TEST_MASK, testable->get_mask());
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 TEST(SetPinNum) {
@@ -78,8 +82,7 @@ TEST(SetPinNum) {
     testable->set_pin_num(TEST_PIN_NUM);
     ASSERT_EQ(TEST_MASK, testable->get_mask());
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 TEST(SetDir) {
@@ -88,18 +91,16 @@ TEST(SetDir) {
     testable->set_dir(PropWare::Pin::OUT);
     ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 TEST(Set) {
-    testable = new PropWare::Pin(TEST_MASK, PropWare::Pin::OUT);
+    setUp();
 
     testable->set();
     ASSERT_TRUE(OUTA & TEST_MASK);
 
-    delete testable;
-    return true;
+    tearDown();
 }
 
 int main () {

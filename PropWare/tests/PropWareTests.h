@@ -106,3 +106,13 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut.puts("`" CRLF); \
         return false; \
     }
+
+#define SETUP \
+    void setUp ()
+
+#define TEARDOWN \
+    void _tearDown ()
+
+#define tearDown() \
+    _tearDown(); \
+    return true
