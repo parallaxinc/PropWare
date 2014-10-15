@@ -30,12 +30,18 @@
 #include "../PropWareTests.h"
 
 PropWare::Pin             *testable;
+PropWare::Pin             *helper;
 const uint8_t             TEST_PIN_NUM = 12;
 const PropWare::Pin::Mask TEST_MASK    = PropWare::Pin::P12;
 const PropWare::Pin::Mask CHECK_MASK   = PropWare::Pin::P13;
 
-SETUP {
-    testable = new PropWare::Pin(TEST_MASK, PropWare::Pin::OUT);
+void setUp(const PropWare::Pin::Dir dir = PropWare::Pin::OUT) {
+    testable = new PropWare::Pin(TEST_MASK, dir);
+
+    if (PropWare::Pin::OUT == dir)
+        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::IN);
+    else
+        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::OUT);
 }
 
 TEARDOWN {
@@ -98,7 +104,89 @@ TEST(Set) {
     setUp();
 
     testable->set();
-    ASSERT_TRUE(OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(High) {
+    setUp();
+
+    testable->high();
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(On) {
+    setUp();
+
+    testable->on();
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(Clear) {
+    setUp();
+
+    testable->clear();
+    ASSERT_EQ(0, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(Low) {
+    setUp();
+
+    testable->low();
+    ASSERT_EQ(0, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(Off) {
+    setUp();
+
+    testable->off();
+    ASSERT_EQ(0, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(Toggle) {
+    setUp();
+
+    testable->low();
+    ASSERT_EQ(0, OUTA & TEST_MASK);
+    testable->toggle();
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    testable->toggle();
+    ASSERT_EQ(0, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(Write) {
+    setUp();
+
+    testable->write(true);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    testable->write(false);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
+    testable->write(42); // Ensure no problems when an arbitrary value is passed
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+
+    tearDown();
+}
+
+TEST(Read) {
+    setUp(PropWare::Pin::IN);
+
+    helper->set();
+    ASSERT_TRUE(testable->read());
+    helper->clear();
+    ASSERT_FALSE(testable->read());
 
     tearDown();
 }
@@ -113,6 +201,16 @@ int main () {
     RUN_TEST(SetPinNum);
     RUN_TEST(SetDir);
     RUN_TEST(Set);
+    RUN_TEST(High);
+    RUN_TEST(On);
+    RUN_TEST(Clear);
+    RUN_TEST(Low);
+    RUN_TEST(Off);
+    RUN_TEST(Toggle);
+    RUN_TEST(Write);
+    RUN_TEST(Read);
+
+    // TODO: Test wait_until_* and is_switch_* methods as well
 
     COMPLETE();
 }

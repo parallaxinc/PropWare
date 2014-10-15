@@ -35,10 +35,6 @@ namespace PropWare {
  */
 class Pin: public PropWare::Port {
     public:
-        /** Number of milliseconds to delay during debounce */
-        static const uint8_t DEBOUNCE_DELAY = 3;
-
-    public:
         static void flash_pin (const Pin::Mask pinMask,
                 const uint32_t iterations = 10) {
             Port::flash_port(pinMask, pinMask, iterations);
@@ -95,8 +91,18 @@ class Pin: public PropWare::Port {
                 this->m_mask = 1 << pinNum;
         }
 
+        /**
+         * @see PropWare::Port::get_mask()
+         */
         PropWare::Port::Mask get_mask () const {
             return (PropWare::Port::Mask) this->m_mask;
+        }
+
+        void write (const bool value) {
+            if (value)
+                this->set();
+            else
+                this->clear();
         }
 
         /**
@@ -142,16 +148,6 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @brief   Allow easy switch-press detection of any pin; Includes
-         *          de-bounce protection
-         *
-         * @return  Returns 1 or 0 depending on whether the switch was pressed
-         */
-        bool is_switch_low () const {
-            return this->is_switch_low(PropWare::Pin::DEBOUNCE_DELAY);
-        }
-
-        /**
          * @brief       Allow easy switch-press detection of any pin; Includes
          *              de-bounce protection
          *
@@ -161,12 +157,11 @@ class Pin: public PropWare::Port {
          * @return      Returns 1 or 0 depending on whether the switch was
          *              pressed
          */
-        bool is_switch_low (const uint16_t debounceDelayInMillis) const {
+        bool is_switch_low (const uint16_t debounceDelayInMillis = 3) const {
             this->set_dir(PropWare::Pin::IN);  // Set the pin as input
 
             if (!(this->read())) {   // If pin is grounded (aka, pressed)
-                // Delay 3 ms
-                waitcnt(debounceDelayInMillis*MILLISECOND + CNT);
+                waitcnt(debounceDelayInMillis * MILLISECOND + CNT);
 
                 return !(this->read());  // Check if it's still pressed
             }

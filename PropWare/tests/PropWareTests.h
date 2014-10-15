@@ -80,15 +80,15 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     ASSERT(false == actual)
 
 #define ASSERT_EQ(expected, actual) \
-    if (expected != actual) \
+    if ((expected) != (actual)) \
         return false
 
-#define ASSERT_NEQ(expected, actual) \
-    if (expected == actual) \
+#define ASSERT_NEQ(lhs, rhs) \
+    if ((lhs) == (rhs)) \
         return false
 
 #define ASSERT_EQ_MSG(expected, actual) \
-    if (expected != actual) { \
+    if ((expected) != (actual)) { \
         pwOut.puts("#\tExpected: `"); \
         pwOut.print(expected); \
         pwOut.puts("`; Acutal: `"); \
@@ -98,7 +98,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     }
 
 #define ASSERT_NEQ_MSG(lhs, rhs) \
-    if (lhs == rhs) { \
+    if ((lhs) == (rhs)) { \
         pwOut.puts("#\tExpected mismatch. Got: `"); \
         pwOut.print(lhs); \
         pwOut.puts("` == `"); \
