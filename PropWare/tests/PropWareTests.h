@@ -39,7 +39,9 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     }
 }
 
-#define MESSAGE(message, ...) pwOut.printf("#\t- " message CRLF, __VA_ARGS__)
+#define MESSAGE(...) \
+    pwOut.printf("#\t- " __VA_ARGS__); \
+    pwOut.puts(CRLF)
 
 #define START(testSuiteName) \
     bool passed = true; \
@@ -53,7 +55,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 
 #define COMPLETE() \
     if (!passed) \
-        pwOut.printf("# Test FAILURE"); \
+        pwOut.printf("# Test FAILURE" CRLF); \
     else \
         pwOut.print("done..." CRLF); \
     return 0
@@ -106,6 +108,22 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut.puts("`" CRLF); \
         return false; \
     }
+
+#define MSG_IF_FAIL(id, assertion, ...)             \
+    class _AssertionCheck ## id {                   \
+        public:                                     \
+            static bool checkAssert () {            \
+                assertion;                          \
+                return true;                        \
+            }                                       \
+    };                                              \
+                                                    \
+    if (!_AssertionCheck ## id::checkAssert()) {    \
+        MESSAGE(__VA_ARGS__);                       \
+        return false;                               \
+    }
+
+
 
 #define SETUP \
     void setUp ()

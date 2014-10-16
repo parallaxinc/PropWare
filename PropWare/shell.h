@@ -32,6 +32,43 @@ namespace PropWare {
 
 class Shell {
 public:
+    /**
+    * @name Shell Definitions
+    * @{
+    */
+    /** Maximum number of characters allowed at the command prompt */
+#define SD_SHELL_INPUT_LEN  128
+    static const uint8_t SHELL_INPUT_LEN = SD_SHELL_INPUT_LEN;
+    /**
+    * Maximum number of characters for an individual command (does not
+    * include parameters
+    */
+#define SD_SHELL_CMD_LEN    8
+    static const uint8_t SHELL_CMD_LEN = SD_SHELL_CMD_LEN;
+    /** Maximum number of characters for each command argument */
+#define SD_SHELL_ARG_LEN    64
+    static const uint8_t SHELL_ARG_LEN = SD_SHELL_ARG_LEN;
+    /** String defining the "exit" command to quit the SD_Shell() function*/
+    static const char SHELL_EXIT[];
+    /**
+    * String defining the "ls" command to call SD_Shell_ls(); List dir
+    * contents
+    */
+    static const char SHELL_LS[];
+    /**
+    * String defining the "cat" command to call SD_Shell_cat(); Prints a
+    * file
+    */
+    static const char SHELL_CAT[];
+    /**
+    * String defining the "cd" command to call SD_Shell_cd(); Change
+    * directory
+    */
+    static const char SHELL_CD[];
+    /** String defining the "touch" command; Creates an empty file */
+    static const char SHELL_TOUCH[];
+    /**@}*/
+
     Shell (SD *sd, const Printer *printer, const Scanner *scanner)
             : m_sd(sd), m_printer(printer), m_scanner(scanner) {
     }

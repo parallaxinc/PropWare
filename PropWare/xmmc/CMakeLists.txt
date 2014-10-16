@@ -25,7 +25,7 @@ add_library(${PROJECT_NAME} STATIC
         ../PropWare
         ../scancapable
         ../scanner
-#        ../sd
+        ../sd
         ../seeedtft
         ../seeedtftfast
         ../seeedtftfast_as.S
