@@ -14,6 +14,8 @@ include_directories(${PROPWARE_PATH})
 project(PropWare_${MODEL})
 
 add_library(${PROJECT_NAME} STATIC
+        ../blockstorage
+        ../fatfs
         ../hd44780
         ../l3g
         ../max6675
@@ -25,11 +27,9 @@ add_library(${PROJECT_NAME} STATIC
         ../PropWare
         ../scancapable
         ../scanner
-        ../sd
         ../seeedtft
         ../seeedtftfast
         ../seeedtftfast_as.S
-#        ../shell
         ../spi
         ../spi_as.S
         ../synchronousprinter

@@ -1,5 +1,5 @@
 /**
- * @file    pin_test.cpp
+ * @file    sd_test.cpp
  *
  * @author  David Zemon
  *
@@ -9,16 +9,6 @@
  *          - MISO = P1
  *          - SCLK = P2
  *          - CS   = P4
- *      SD card with following files:
- *          /test1.txt
- *          /child1/
- *              ./test2.txt
- *              ./grandson/
- *              ./grandson/test3.txt
- *          /child2/
- *              ./test4.txt
- *              ./granddaughter/                     // Inoperable
- *              ./granddaughter/longFilename.txt     // Inoperable
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -41,61 +31,54 @@
  */
 
 #include <PropWare/sd.h>
-#include <PropWare/spi.h>
 #include "../PropWareTests.h"
 
 PropWare::SD *testable;
-bool         didInit;
 
 const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
 const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
 const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
 const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
 
-void setUp (const bool init = true) {
-    PropWare::SPI *spi = PropWare::SPI::get_instance();
-
-    testable = new PropWare::SD(spi);
-
-    if (init) {
-        testable->start(MOSI, MISO, SCLK, CS);
-        testable->mount();
-    }
-
-    didInit = init;
-}
-
 TEARDOWN {
-    if (didInit)
-        testable->unmount();
-
-    PropWare::SPI::get_instance()->stop();
-    delete testable;
 }
 
 TEST(Start) {
-    setUp(false);
-
     MSG_IF_FAIL(1, ASSERT_FALSE(testable->start(MOSI, MISO, SCLK, CS)),
                 "Failed to start %s", ":(");
 
     tearDown();
 }
 
-TEST(Mount) {
-    setUp(false);
-
+TEST(ReadBlock) {
     ASSERT_FALSE(testable->start(MOSI, MISO, SCLK, CS));
-    ASSERT_FALSE(testable->mount());
 
-    tearDown();
+    // Create a buffer and initialize all values to 0. Surely the first sector
+    // of the SD card won't be _all_ zeros!
+    uint8_t buffer[PropWare::SD::SECTOR_SIZE];
+    for (int i = 0; i < sizeof(buffer); ++i)
+        buffer[i] = 0;
+
+    // Read in a block...
+    ASSERT_FALSE(testable->read_data_block(0, buffer));
+
+    // And make sure at least _one_ of the bytes is non-zero
+    for (int j = 0; j < sizeof(buffer); ++j)
+        if (buffer[j])
+            tearDown();
+
+    // If the whole loop finished, that means none of the bytes changed. That
+    // _can't_ be right so go ahead and call it a failure
+    FAIL();
 }
 
 int main () {
     START(SDTest);
 
+    testable = new PropWare::SD(PropWare::SPI::get_instance());
+
     RUN_TEST(Start);
-    RUN_TEST(Mount);
+    RUN_TEST(ReadBlock);
 
     COMPLETE();
 }

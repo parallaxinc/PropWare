@@ -1,3 +1,4 @@
+add_subdirectory(PropWare_Blinky)
 add_subdirectory(Concurrency)
 add_subdirectory(Hello)
 add_subdirectory(Libpropeller_Pwm32)
