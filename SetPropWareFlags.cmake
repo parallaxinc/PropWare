@@ -21,9 +21,14 @@ if (AUTO_CXX_STD)
     set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
 endif ()
 
-if (AUTO_CUT_SECTIONS)
-    set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
+# Linker pruning is broken when used with the cog memory model. See the
+# following thread for a workaround:
+# http://forums.parallax.com/showthread.php/157878-Simple-blinky-program-and-linker-pruning
+if (NOT((MODEL STREQUAL "cog") OR (MODEL STREQUAL "COG")))
+    if (AUTO_CUT_SECTIONS)
+        set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
+    endif ()
 endif ()
 
 if (PROPWARE_PRINT_FLOAT)

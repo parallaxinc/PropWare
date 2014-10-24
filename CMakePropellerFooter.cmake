@@ -23,13 +23,15 @@ if (LINK_SIMPLE)
     include_directories(SYSTEM ${PROPWARE_PATH}/simple)
 endif ()
 
-if (LINK_PROPWARE)
-    add_library(PROPWARE_LIB STATIC IMPORTED)
-    set_target_properties(PROPWARE_LIB
-            PROPERTIES
-            IMPORTED_LOCATION
-            ${PROPWARE_PATH}/bin/PropWare/${MODEL}/libPropWare_${MODEL}.a)
-    target_link_libraries(${PROJECT_NAME} PROPWARE_LIB)
+if (NOT((MODEL STREQUAL "cog") OR (MODEL STREQUAL "COG")))
+    if (LINK_PROPWARE)
+        add_library(PROPWARE_LIB STATIC IMPORTED)
+        set_target_properties(PROPWARE_LIB
+                PROPERTIES
+                IMPORTED_LOCATION
+                ${PROPWARE_PATH}/bin/PropWare/${MODEL}/libPropWare_${MODEL}.a)
+        target_link_libraries(${PROJECT_NAME} PROPWARE_LIB)
+    endif ()
 endif ()
 
 if (LINK_TINY)
@@ -57,4 +59,4 @@ if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
     add_custom_target(run
             ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${PROJECT_NAME}.elf -r -e
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME})
-endif()
+endif ()
