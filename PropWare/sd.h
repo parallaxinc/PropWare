@@ -62,9 +62,19 @@ class SD: public BlockStorage {
 
     public:
         /**
-         * @brief       Construct an SD object; Set two simple member variables
+         * @brief       Construct an SD object with the given SPI parameters
          */
-        SD (SPI *spi) {
+        SD (SPI *spi, const Port::Mask mosi, const Port::Mask miso,
+            const Port::Mask sclk, const Port::Mask cs) {
+            this->m_mosi = mosi;
+            this->m_miso = miso;
+            this->m_sclk = sclk;
+
+            // Set CS for output and initialize high
+            this->m_cs.set_mask(cs);
+            this->m_cs.set_dir(Pin::OUT);
+            this->m_cs.set();
+
             this->m_spi = spi;
         }
 
@@ -75,25 +85,15 @@ class SD: public BlockStorage {
          * Starts an SPI cog IFF an SPI cog has not already been started; If
          * one has been started, only the cs will have effect
          *
-         * @param[in]   mosi        PinNum mask for MOSI pin
-         * @param[in]   miso        PinNum mask for MISO pin
-         * @param[in]   sclk        PinNum mask for SCLK pin
-         * @param[in]   cs          PinNum mask for CS pin
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const Port::Mask mosi, const Port::Mask miso,
-                                   const Port::Mask sclk, const Port::Mask cs) {
+        PropWare::ErrorCode start () {
             PropWare::ErrorCode err;
             uint8_t             response[16];
 
-            // Set CS for output and initialize high
-            this->m_cs.set_mask(cs);
-            this->m_cs.set_dir(Pin::OUT);
-            this->m_cs.set();
-
             // Start SPI module
-            if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ,
+            if ((err = this->m_spi->start(this->m_mosi, this->m_miso,
+                                          this->m_sclk, SD::SPI_INIT_FREQ,
                                           SD::SPI_MODE, SD::SPI_BITMODE)))
                 return err;
 
@@ -799,6 +799,10 @@ class SD: public BlockStorage {
          *******************************/
         SPI *m_spi;
         Pin m_cs;  // Chip select pin mask
+
+        PropWare::Pin::Mask m_mosi;
+        PropWare::Pin::Mask m_miso;
+        PropWare::Pin::Mask m_sclk;
 
         // First byte response receives special treatment to allow for proper debugging
         uint8_t m_firstByteResponse;

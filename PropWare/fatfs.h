@@ -28,14 +28,15 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/blockstorage.h>
 #include <PropWare/printer.h>
+#include <PropWare/filesystem.h>
 
 namespace PropWare {
 
 /**
- * FAT 16/32 filesystem driver - can be used with SD cards, SPI memory, or any
- * class that implements the RAM interface
+ * FAT 16/32 filesystem driver - can be used with SD cards or any other
+ * PropWare::BlockStorage device
  */
-class FatFS {
+class FatFS : public Filesystem {
     public:
 #define HD44780_MAX_ERROR    64
         typedef enum {
@@ -57,12 +58,15 @@ class FatFS {
         }
 
         /**
-         * @brief   Mount either FAT16 or FAT32 file system
+         * @see PropWare::Filesystem::mount
          *
-         * @return  Returns 0 upon success, error code otherwise
+         * @note    Does not yet support multiple partitions
          */
-        PropWare::ErrorCode mount () {
+        PropWare::ErrorCode mount (const uint8_t partition = 0) {
             PropWare::ErrorCode err;
+
+            // Start the driver
+            this->m_driver->start();
 
             // FAT system determination variables:
             FatFS::InitFATInfo fatInfo;
@@ -463,7 +467,7 @@ class FatFS {
          * Buffer object used for storing SD data; Each instance uses 527 bytes
          * (526 if SD_OPTION_FILE_WRITE is disabled)
          */
-        class FatBuffer: BlockStorage::Buffer {
+        class FatBuffer: public BlockStorage::Buffer {
             public:
                 /** Store the current cluster's starting sector number */
                 uint32_t curClusterStartAddr;

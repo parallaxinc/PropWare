@@ -1,5 +1,5 @@
 /**
- * @file    sd_test.cpp
+ * @file    fatfs_test.cpp
  *
  * @author  David Zemon
  *
@@ -9,6 +9,7 @@
  *          - MISO = P1
  *          - SCLK = P2
  *          - CS   = P4
+ *      FAT16 or FAT32 Filesystem on the first partition of the SD card
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -31,55 +32,48 @@
  */
 
 #include <PropWare/sd.h>
+#include <PropWare/fatfs.h>
 #include "../PropWareTests.h"
 
-PropWare::SD *testable;
+PropWare::BlockStorage *driver;
+PropWare::FatFS        *testable;
 
 const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
 const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
 const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
 const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
 
-TEARDOWN {
+SETUP {
+    driver = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
+                              SCLK, CS);
 }
 
-TEST(Start) {
-    MSG_IF_FAIL(1, ASSERT_FALSE(testable->start()),
-                "Failed to start %s", ":(");
+TEARDOWN {
+    delete driver;
+}
+
+TEST(Constructor) {
+    setUp();
+
+    testable = new PropWare::FatFS(driver);
 
     tearDown();
 }
 
-TEST(ReadBlock) {
-    ASSERT_FALSE(testable->start());
+TEST(Mount) {
+    setUp();
 
-    // Create a buffer and initialize all values to 0. Surely the first sector
-    // of the SD card won't be _all_ zeros!
-    uint8_t buffer[PropWare::SD::SECTOR_SIZE];
-    for (int i = 0; i < sizeof(buffer); ++i)
-        buffer[i] = 0;
+    testable = new PropWare::FatFS(driver);
+    testable->mount();
 
-    // Read in a block...
-    ASSERT_FALSE(testable->read_data_block(0, buffer));
-
-    // And make sure at least _one_ of the bytes is non-zero
-    for (int j = 0; j < sizeof(buffer); ++j)
-        if (buffer[j])
-            tearDown();
-
-    // If the whole loop finished, that means none of the bytes changed. That
-    // _can't_ be right so go ahead and call it a failure
-    FAIL();
+    tearDown();
 }
 
 int main () {
-    START(SDTest);
+    START(FatFSTest);
 
-    testable = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
-                                SCLK, CS);
-
-    RUN_TEST(Start);
-    RUN_TEST(ReadBlock);
+    RUN_TEST(Constructor);
+    RUN_TEST(Mount);
 
     COMPLETE();
 }

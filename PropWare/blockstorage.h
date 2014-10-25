@@ -46,6 +46,8 @@ class BlockStorage {
         };
 
     public:
+        virtual ErrorCode start() = 0;
+
         virtual ErrorCode read_data_block (uint32_t address, uint8_t *buf) = 0;
 
         ErrorCode read_data_block (uint32_t address,

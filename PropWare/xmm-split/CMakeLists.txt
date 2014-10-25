@@ -16,6 +16,7 @@ project(PropWare_${MODEL})
 add_library(${PROJECT_NAME} STATIC
         ../blockstorage
         ../fatfs
+        ../filesystem
         ../hd44780
         ../l3g
         ../max6675
