@@ -24,16 +24,8 @@
  */
 
 #include <PropWare/PropWare.h>
+#include <PropWare/printer.h>
 #include <PropWare/hd44780.h>
-#include <PropWare/uart/simplexuart.h>
-
-/**
-* @brief       Enter an infinite loop that blinks the error code on the
-*              QUICKSTART's 8 onboard LEDs
-*
-* @param[in]   err     Error code
-*/
-void error (const PropWare::ErrorCode err);
 
 // Control pins
 const PropWare::Port::Mask RS = PropWare::Port::P16;
@@ -59,18 +51,4 @@ int main () {
     lcdPrinter.printf("%u %s%d 0x%07X", 123456789, "Hello!", -12345, 0xabcdef);
 
     return 0;
-}
-
-void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
-
-    PropWare::HD44780::print_error_str(&pwOut,
-            (PropWare::HD44780::ErrorCode) err);
-
-    while (1) {
-        debugLEDs.write((uint32_t) err);
-        waitcnt(150*MILLISECOND + CNT);
-        debugLEDs.write(0);
-        waitcnt(150*MILLISECOND + CNT);
-    }
 }
