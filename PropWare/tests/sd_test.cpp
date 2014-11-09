@@ -30,8 +30,8 @@
  * SOFTWARE.
  */
 
+#include "../PropWareTests.h"
 #include <PropWare/sd.h>
-#include "PropWareTests.h"
 
 PropWare::SD *testable;
 
