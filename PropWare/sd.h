@@ -1,4 +1,3 @@
-
 /**
  * @file        sd.h
  *
@@ -104,16 +103,12 @@ class SD: public BlockStorage {
 
             check_errors(this->increase_throttle());
 
-#ifdef SD_OPTION_VERBOSE
-            check_errors(this->print_init_debug_blocks(response));
-#endif
-
             // We're finally done initializing everything. Set chip select high
             // again to release the SPI port
             this->m_cs.set();
 
             // Initialization complete
-            return 0;
+            return NO_ERROR;
         }
 
         uint16_t get_sector_size () const {
@@ -147,41 +142,24 @@ class SD: public BlockStorage {
                                     "Invalid number of bytes");
                     break;
                 case SD::INVALID_RESPONSE:
-#ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("SD Error %u: %s0x%02X\nThe following bits are "
-                            "set:" CRLF, relativeError,
-                            "Invalid first-byte response\n\tReceived: ",
-                            this->m_firstByteResponse);
-#else
                     printer->printf("SD Error %u: %s%u" CRLF, relativeError,
-                                    "Invalid first-byte response\n\tReceived: ",
+                                    "Invalid first-byte response" CRLF
+                                            "\tReceived: ",
                                     this->m_firstByteResponse);
-#endif
-                    this->first_byte_expansion();
+                    this->first_byte_expansion(printer);
                     break;
                 case SD::INVALID_INIT:
-#ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("SD Error %u: %s\n\tResponse: 0x%02X" CRLF,
-                            relativeError,
-                            "Invalid response during initialization",
-                            this->m_firstByteResponse);
-#else
-                    printer->printf("SD Error %u: %s\n\tResponse: %u" CRLF,
+                    printer->printf("SD Error %u: %s" CRLF
+                                            "\tResponse: %u" CRLF,
                                     relativeError,
                                     "Invalid response during initialization",
                                     this->m_firstByteResponse);
-#endif
                     break;
                 case SD::INVALID_DAT_STRT_ID:
-#ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("SD Error %u: %s0x%02X" CRLF, relativeError,
-                            "Invalid data-start ID\n\tReceived: ",
-                            this->m_firstByteResponse);
-#else
                     printer->printf("SD Error %u: %s%u" CRLF, relativeError,
-                                    "Invalid data-start ID\n\tReceived: ",
+                                    "Invalid data-start ID" CRLF
+                                            "\tReceived: ",
                                     this->m_firstByteResponse);
-#endif
                     break;
                 default:
                     return;
@@ -205,11 +183,6 @@ class SD: public BlockStorage {
             // Wait until the SD card is no longer busy
             while (!temp)
                 this->m_spi->shift_in(8, &temp, sizeof(temp));
-
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Reading block at sector address: 0x%08X / %u" CRLF,
-                    address, address);
-#endif
 
             /**
              * Special error handling is needed to ensure that, if an error is
@@ -241,10 +214,6 @@ class SD: public BlockStorage {
             while (!temp)
                 this->m_spi->shift_in(8, &temp, 1);
 
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Writing block at address: 0x%08X / %u" CRLF, address, address);
-#endif
-
             this->m_cs.clear();
             check_errors(
                     this->send_command(SD::CMD_WR_BLOCK, address,
@@ -253,7 +222,7 @@ class SD: public BlockStorage {
             check_errors(this->write_block(SD::SECTOR_SIZE, dat));
             this->m_cs.set();
 
-            return 0;
+            return NO_ERROR;
         }
 
         uint16_t get_short (const uint16_t offset, const uint8_t *buf) const {
@@ -305,10 +274,6 @@ class SD: public BlockStorage {
             uint8_t             i, j;
             bool                stageCleared;
 
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Starting SD card..." CRLF);
-#endif
-
             // Attempt initialization no more than 10 times
             stageCleared = false;
             for (i       = 0; i < 10 && !stageCleared; ++i) {
@@ -337,7 +302,7 @@ class SD: public BlockStorage {
                     || (SD::R7_CHECK_PATTERN != response[3]))
                 return SD::CMD8_FAILURE;
 
-            return 0;
+            return NO_ERROR;
         }
 
         inline PropWare::ErrorCode power_up () {
@@ -359,7 +324,7 @@ class SD: public BlockStorage {
             // Chip select goes low for the duration of this function
             this->m_cs.clear();
 
-            return 0;
+            return NO_ERROR;
         }
 
         inline PropWare::ErrorCode reset (uint8_t response[], bool *isIdle) {
@@ -373,22 +338,13 @@ class SD: public BlockStorage {
             // Check if idle
             if (SD::RESPONSE_IDLE == this->m_firstByteResponse)
                 *isIdle = true;
-#ifdef SD_OPTION_VERBOSE
-            else
-            pwOut.printf("Failed attempt at CMD0: 0x%02X" CRLF,
-                    this->m_firstByteResponse);
-#endif
 
-            return 0;
+            return NO_ERROR;
         }
 
         inline PropWare::ErrorCode verify_v2_0 (uint8_t response[],
                 bool *stageCleared) {
             PropWare::ErrorCode err;
-
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("SD card in idle state. Now sending CMD8..." CRLF);
-#endif
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
             check_errors(
@@ -398,14 +354,7 @@ class SD: public BlockStorage {
             if (SD::RESPONSE_IDLE == this->m_firstByteResponse)
                 *stageCleared = true;
 
-            // Print an error message after every failure
-#ifdef SD_OPTION_VERBOSE
-            if (!stageCleared)
-            pwOut.printf("Failed attempt at CMD8: 0x%02X, 0x%02X, 0x%02X;" CRLF,
-                    this->m_firstByteResponse, response[2], response[3]);
-#endif
-
-            return 0;
+            return NO_ERROR;
         }
 
         inline PropWare::ErrorCode activate (uint8_t response[]) {
@@ -437,57 +386,17 @@ class SD: public BlockStorage {
                 // Wait until we have received the active response
             } while (!stageCleared);
 
-#ifdef SD_OPTION_VERBOSE
-            // We did it!
-            pwOut.printf("Activated!" CRLF);
-#endif
-
-            return 0;
+            return NO_ERROR;
         }
 
         inline PropWare::ErrorCode increase_throttle () {
             PropWare::ErrorCode err;
 
             // Initialization nearly complete, increase clock
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Increasing clock to full speed" CRLF);
-#endif
             check_errors(this->m_spi->set_clock(SD::FULL_SPEED_SPI));
 
-            return 0;
+            return NO_ERROR;
         }
-
-#if (defined SD_OPTION_VERBOSE)
-        PropWare::ErrorCode print_init_debug_blocks (uint8_t response[]) {
-            PropWare::ErrorCode err;
-
-            // Request operating conditions register and ensure response begins
-            // with R1
-            check_errors(this->send_command(SD::CMD_READ_OCR, 0,
-                            SD::CRC_OTHER));
-            check_errors(this->get_response(SD::RESPONSE_LEN_R3, response));
-            pwOut.printf("Operating Conditions Register (OCR)..." CRLF);
-            this->print_hex_block(response, SD::RESPONSE_LEN_R3);
-
-            // If debugging requested, print to the screen CSD and CID registers
-            // from SD card
-            pwOut.printf("Requesting CSD..." CRLF);
-            check_errors(this->send_command(SD::CMD_RD_CSD, 0, SD::CRC_OTHER));
-            check_errors(this->read_block(16, response));
-            pwOut.printf("CSD Contents:" CRLF);
-            this->print_hex_block(response, 16);
-            pwOut.put_char('\n');
-
-            pwOut.printf("Requesting CID..." CRLF);
-            check_errors(this->send_command(SD::CMD_RD_CID, 0, SD::CRC_OTHER));
-            check_errors(this->read_block(16, response));
-            pwOut.printf("CID Contents:" CRLF);
-            this->print_hex_block(response, 16);
-            pwOut.put_char('\n');
-
-            return 0;
-        }
-#endif
 
         /**
          * @brief       Send a command and argument over SPI to the SD card
@@ -513,7 +422,7 @@ class SD: public BlockStorage {
             // Send sixth byte - CRC
             check_errors(this->m_spi->shift_out(8, crc));
 
-            return 0;
+            return NO_ERROR;
         }
 
         /**
@@ -563,7 +472,7 @@ class SD: public BlockStorage {
             check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
             check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
 
-            return 0;
+            return NO_ERROR;
         }
 
         /**
@@ -651,7 +560,7 @@ class SD: public BlockStorage {
             } else
                 return SD::INVALID_RESPONSE;
 
-            return 0;
+            return NO_ERROR;
         }
 
         /**
@@ -715,31 +624,27 @@ class SD: public BlockStorage {
                     return SD::INVALID_RESPONSE;
             }
 
-            return 0;
+            return NO_ERROR;
         }
 
-        /**
-         * @brief   Print to screen each status bit individually with
-         *          human-readable descriptions
-         */
-        void first_byte_expansion () const {
+        void first_byte_expansion(const Printer *printer) const {
             if (BIT_0 & this->m_firstByteResponse)
-                pwOut.puts("\t0: Idle" CRLF);
+                printer->puts("\t0: Idle" CRLF);
             if (BIT_1 & this->m_firstByteResponse)
-                pwOut.puts("\t1: Erase reset" CRLF);
+                printer->puts("\t1: Erase reset" CRLF);
             if (BIT_2 & this->m_firstByteResponse)
-                pwOut.puts("\t2: Illegal command" CRLF);
+                printer->puts("\t2: Illegal command" CRLF);
             if (BIT_3 & this->m_firstByteResponse)
-                pwOut.puts("\t3: Communication CRC error" CRLF);
+                printer->puts("\t3: Communication CRC error" CRLF);
             if (BIT_4 & this->m_firstByteResponse)
-                pwOut.puts("\t4: Erase sequence error" CRLF);
+                printer->puts("\t4: Erase sequence error" CRLF);
             if (BIT_5 & this->m_firstByteResponse)
-                pwOut.puts("\t5: Address error" CRLF);
+                printer->puts("\t5: Address error" CRLF);
             if (BIT_6 & this->m_firstByteResponse)
-                pwOut.puts("\t6: Parameter error" CRLF);
+                printer->puts("\t6: Parameter error" CRLF);
             if (BIT_7 & this->m_firstByteResponse)
-                pwOut.puts("\t7: Something is really screwed up. This should "
-                        "always be 0." CRLF);
+                printer->puts("\t7: Something is really screwed up. This "
+                              "should always be 0." CRLF);
         }
 
     public:

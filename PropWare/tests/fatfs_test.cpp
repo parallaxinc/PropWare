@@ -35,17 +35,23 @@
 #include <PropWare/fatfs.h>
 #include "PropWareTests.h"
 
-PropWare::BlockStorage *driver;
-PropWare::FatFS        *testable;
+using namespace PropWare;
 
-const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
-const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
-const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
-const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
+BlockStorage *driver;
+FatFS        *testable;
+
+const Pin::Mask MOSI = Pin::P0;
+const Pin::Mask MISO = Pin::P1;
+const Pin::Mask SCLK = Pin::P2;
+const Pin::Mask CS   = Pin::P4;
+
+BlockStorage* getDriver() {
+    return new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
+}
 
 SETUP {
-    driver = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
-                              SCLK, CS);
+    testable = new FatFS(getDriver());
+    testable->mount();
 }
 
 TEARDOWN {
@@ -53,9 +59,22 @@ TEARDOWN {
 }
 
 TEST(Constructor) {
-    setUp();
+    testable = new FatFS(getDriver());
 
-    testable = new PropWare::FatFS(driver);
+    tearDown();
+}
+
+TEST(ReadBootSector) {
+    testable = new FatFS(getDriver());
+    ASSERT_EQ(FatFS::NO_ERROR, testable->m_driver->start());
+    testable->m_buf.buf = (uint8_t *) malloc(driver->get_sector_size());
+
+    FatFS::InitFATInfo fatInfo;
+    fatInfo.bootSector = 0;
+    ASSERT_EQ(FatFS::NO_ERROR, testable->read_boot_sector(&fatInfo));
+
+    // We're just going to assume the boot sector is not at sector 0
+    ASSERT_NEQ(0, fatInfo.bootSector);
 
     tearDown();
 }
@@ -63,8 +82,7 @@ TEST(Constructor) {
 TEST(Mount) {
     setUp();
 
-    testable = new PropWare::FatFS(driver);
-    testable->mount();
+    ASSERT_EQ(FatFS::NO_ERROR, testable->mount());
 
     tearDown();
 }
@@ -73,6 +91,7 @@ int main () {
     START(FatFSTest);
 
     RUN_TEST(Constructor);
+    RUN_TEST(ReadBootSector);
     RUN_TEST(Mount);
 
     COMPLETE();

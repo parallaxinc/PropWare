@@ -29,6 +29,7 @@
 #include <PropWare/blockstorage.h>
 #include <PropWare/printer/printer.h>
 #include <PropWare/filesystem.h>
+#include <PropWare/fatfile.h>
 
 namespace PropWare {
 
@@ -52,9 +53,25 @@ class FatFS : public Filesystem {
             /** Last FatFS error */END_ERROR = INVALID_FILESYSTEM
         } ErrorCode;
 
+        class FatBuffer;
+
     public:
         FatFS (BlockStorage *driver) {
-            this->m_driver = driver;
+            this->m_driver     = driver;
+            this->m_mounted    = false;
+            this->m_error      = NO_ERROR;
+            this->m_fatMod     = false;
+            this->m_nextFileId = 0;
+            this->m_buf.buf    = NULL;
+            this->m_fat        = NULL;
+        }
+
+        ~FatFS () {
+            if (NULL != this->m_buf.buf)
+                free(this->m_buf.buf);
+
+            if (NULL != this->m_fat)
+                free(this->m_fat);
         }
 
         /**
@@ -65,34 +82,157 @@ class FatFS : public Filesystem {
         PropWare::ErrorCode mount (const uint8_t partition = 0) {
             PropWare::ErrorCode err;
 
-            // Start the driver
-            this->m_driver->start();
+            if (this->m_mounted)
+                return Filesystem::FILESYSTEM_ALREADY_MOUNTED;
 
-            // FAT system determination variables:
+            // Start the driver
+            check_errors(this->m_driver->start());
+            this->m_fatMod = false;
+            this->m_nextFileId = 0;
+
             FatFS::InitFATInfo fatInfo;
-            fatInfo.bootSector = 0;
 
             // Allocate the buffers
-            this->m_buf.buf = (uint8_t *) malloc(
-                    this->m_driver->get_sector_size());
-            this->m_fat = (uint8_t *) malloc(this->m_driver->get_sector_size());
+            if (NULL == this->m_buf.buf)
+                this->m_buf.buf =
+                        (uint8_t *) malloc(this->m_driver->get_sector_size());
+            if (NULL == this->m_fat)
+                this->m_fat =
+                        (uint8_t *) malloc(this->m_driver->get_sector_size());
 
             check_errors(this->read_boot_sector(&fatInfo));
-
             check_errors(this->common_boot_sector_parser(&fatInfo));
-
             this->partition_info_parser(&fatInfo);
-
             check_errors(this->determine_fat_type(&fatInfo));
-
             this->store_root_info(&fatInfo);
-
             check_errors(this->read_fat_and_root_sectors());
 
             this->m_mounted = true;
 
             return 0;
         }
+
+        PropWare::ErrorCode unmount () {
+            // TODO: Lots more to do here!
+
+            if (this->m_mounted) {
+                if (NULL != this->m_buf.buf) {
+                    free(this->m_buf.buf);
+                    this->m_buf.buf = NULL;
+                }
+
+                if (NULL != this->m_fat) {
+                    free(this->m_fat);
+                    this->m_fat = NULL;
+                }
+            }
+
+            return NO_ERROR;
+        }
+
+/*        File* fopen (const char *name, const char mode[], uint8_t *buf = 0) {
+            PropWare::ErrorCode err;
+            uint16_t            fileEntryOffset = 0;
+
+            // If no file was passed, create one
+            FatFile *f = (FatFile *) malloc(sizeof(FatFile));
+
+            // Attach the buffer to the file
+            if (NULL == buf)
+                f->buf->buf =
+                        (uint8_t *) malloc(this->m_driver->get_sector_size());
+            else
+                f->buf->buf = buf;
+
+            Filesystem::set_file_id(f, this->m_nextFileId++);
+            Filesystem::set_file_rPtr(f, 0);
+            Filesystem::set_file_wPtr(f, 0);
+            Filesystem::set_file_mode(f, File::get_mode(mode));
+
+            // Attempt to find the file
+            if ((err = this->find(name, &fileEntryOffset))) {
+                // Find returned an error; ensure it was EOC...
+                if (FatFS::EOC_END == err) {
+                    // And return a FILE_NOT_FOUND error if using read only mode
+                    if (File::READ == Filesystem::get_file_mode(f)) {
+                        this->m_error = Filesystem::FILENAME_NOT_FOUND;
+                        return NULL;
+                    }
+                    // Or create the file for any other mode
+                    else {
+                        // File wasn't found and the cluster is full; add another
+                        // to the directory
+                        check_fs_error(this->extend_fat(&this->m_buf));
+                        check_fs_error(this->load_next_sector(&this->m_buf));
+                    }
+                }
+                if (FatFS::EOC_END == err || FatFS::FILENAME_NOT_FOUND == err) {
+                    // File wasn't found, but there is still room in this
+                    // cluster (or a new cluster was just added)
+                    check_fs_error(this->create_file(name, &fileEntryOffset));
+                }
+                // SD::find returned unknown error - throw it
+                else {
+                    this->m_error = err;
+                    return NULL;
+                }
+            }
+
+            // `name` was found successfully, determine if it is a file or
+            // directory
+            if (FatFS::SUB_DIR
+                    & this->m_buf.buf[fileEntryOffset
+                    + FatFS::FILE_ATTRIBUTE_OFFSET])
+                return Filesystem::ENTRY_NOT_FILE;
+
+            // Passed the file-not-directory test, load it into the buffer and
+            // update status variables
+            f->buf->id = Filesystem::get_file_id(f);
+            f->curSector = 0;
+            if (FatFS::FAT_16 == this->m_filesystem)
+                f->buf->curAllocUnit = this->read_rev_dat16(
+                        &(this->m_buf.buf[fileEntryOffset
+                                + FatFS::FILE_START_CLSTR_LOW]));
+            else {
+                f->buf->curAllocUnit = this->read_rev_dat16(
+                        &(this->m_buf.buf[fileEntryOffset
+                                + FatFS::FILE_START_CLSTR_LOW]));
+                f->buf->curAllocUnit |= this->read_rev_dat16(
+                        &(this->m_buf.buf[fileEntryOffset
+                                + FatFS::FILE_START_CLSTR_HIGH])) << 16;
+
+                // Clear the highest 4 bits - they are always reserved
+                f->buf->curAllocUnit &= 0x0FFFFFFF;
+            }
+            f->firstAllocUnit = f->buf->curAllocUnit;
+            f->curCluster = 0;
+            f->buf->curClusterStartAddr = this->find_sector_from_alloc(
+                    f->buf->curAllocUnit);
+            f->dirSectorAddr = this->m_buf.curClusterStartAddr
+                    + this->m_buf.curSectorOffset;
+            f->fileEntryOffset = fileEntryOffset;
+            check_fs_error(
+                    this->get_fat_value(f->buf->curAllocUnit,
+                                        &(f->buf->nextAllocUnit)));
+            f->buf->curSectorOffset = 0;
+            Filesystem::set_file_length(f, this->read_rev_dat32(
+                    &(this->m_buf.buf[
+                            fileEntryOffset + FatFS::FILE_LEN_OFFSET])));
+            // Determine the number of sectors currently allocated to this file;
+            // useful in the case that the file needs to be extended
+            f->maxSectors = Filesystem::get_file_length(f) >>
+                    BlockStorage::SECTOR_SIZE_SHIFT;
+            if (!(f->maxSectors))
+                f->maxSectors = (uint32_t) (1 << this->m_sectorsPerCluster_shift);
+            while (f->maxSectors % (1 << this->m_sectorsPerCluster_shift))
+                ++(f->maxSectors);
+            f->buf->mod = false;
+            check_fs_error(
+                    this->read_data_block(f->buf->curClusterStartAddr,
+                                          f->buf->buf));
+
+            return 0;
+        }*/
 
     private:
         // Boot sector addresses/values
@@ -114,14 +254,11 @@ class FatFS : public Filesystem {
         static const uint16_t FAT16_CLSTR_CNT     = 65525;
 
         // FAT file/directory values
-        static const uint8_t FILE_ENTRY_LENGTH = 32;  // An entry in a directory uses 32 bytes
-        static const uint8_t DELETED_FILE_MARK = 0xE5;  // Marks that a file has been deleted here, continue to the next entry
-    #define SD_FILE_NAME_LEN        8
-        static const uint8_t FILE_NAME_LEN = SD_FILE_NAME_LEN;  // 8 characters in the standard file name
-    #define SD_FILE_EXTENSION_LEN   3
-        static const uint8_t FILE_EXTENSION_LEN = SD_FILE_EXTENSION_LEN;  // 3 character file name extension
-    #define SD_FILENAME_STR_LEN     SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2
-        static const uint8_t FILENAME_STR_LEN      = SD_FILENAME_STR_LEN;
+        static const uint8_t FILE_ENTRY_LENGTH     = 32;  // An entry in a directory uses 32 bytes
+        static const uint8_t DELETED_FILE_MARK     = 0xE5;  // Marks that a file has been deleted here, continue to the next entry
+        static const uint8_t FILE_NAME_LEN         = 8;  // 8 characters in the standard file name
+        static const uint8_t FILE_EXTENSION_LEN    = 3;  // 3 character file name extension
+        static const uint8_t FILENAME_STR_LEN      = FILE_NAME_LEN + FILE_EXTENSION_LEN + 2;
         static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
         static const uint8_t FILE_START_CLSTR_LOW  = 0x1A;  // Starting cluster number
         static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High word (16-bits) of the starting cluster number (FAT32 only)
@@ -167,12 +304,18 @@ class FatFS : public Filesystem {
                 uint32_t clusterCount;
         } InitFATInfo;
 
+        /**
+         * @brief       TODO: What's this do?
+         *
+         * @param[out]  fatInfo     Store information about the FAT here
+         *
+         * @return 0 upon success, error code otherwise
+         */
         inline PropWare::ErrorCode read_boot_sector (InitFATInfo *fatInfo) {
             PropWare::ErrorCode err;
             // Read in first sector (and use default buffer)
             check_errors(
-                    this->m_driver->read_data_block(fatInfo->bootSector,
-                                                    this->m_buf.buf));
+                    this->m_driver->read_data_block(0, this->m_buf.buf));
             // Check if sector 0 is boot sector or MBR; if MBR, skip to boot
             // sector at first partition
             if (FatFS::BOOT_SECTOR_ID
@@ -183,14 +326,8 @@ class FatFS : public Filesystem {
                 check_errors(
                         this->m_driver->read_data_block(fatInfo->bootSector,
                                                         this->m_buf.buf));
-            }
-
-            // Print the boot sector if requested
-#if (defined SD_OPTION_VERBOSE && defined SD_OPTION_VERBOSE_BLOCKS)
-            pwOut.printf("***BOOT SECTOR***" CRLF);
-            this->print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
-            pwOut.put_char('\n');
-#endif
+            } else
+                fatInfo->bootSector = 0;
 
             return 0;
         }
@@ -399,26 +536,19 @@ class FatFS : public Filesystem {
             PropWare::ErrorCode err;
             uint32_t            firstAvailableAllocUnit;
 
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Reading from the FAT..." CRLF);
-            pwOut.printf("\tLooking for entry: 0x%08X / %u" CRLF, fatEntry, fatEntry);
-#endif
-
             // Do we need to load a new fat sector?
             if ((fatEntry >> this->m_entriesPerFatSector_Shift)
                     != this->m_curFatSector) {
-#ifdef SD_OPTION_FILE_WRITE
                 // If the currently loaded FAT sector has been modified, save it
                 if (this->m_fatMod) {
-                    this->write_data_block(
+                    this->m_driver->write_data_block(
                             this->m_curFatSector + this->m_fatStart,
                             this->m_fat);
-                    this->write_data_block(
+                    this->m_driver->write_data_block(
                             this->m_curFatSector + this->m_fatStart
                             + this->m_fatSize, this->m_fat);
                     this->m_fatMod = false;
                 }
-#endif
                 // Need new sector, load it
                 this->m_curFatSector = fatEntry
                         >> this->m_entriesPerFatSector_Shift;
@@ -426,20 +556,9 @@ class FatFS : public Filesystem {
                         this->m_driver->read_data_block(
                                 this->m_curFatSector + this->m_fatStart,
                                 this->m_fat));
-#if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-                this->print_hex_block(this->m_fat, SD::SECTOR_SIZE);
-#endif
             }
             firstAvailableAllocUnit = this->m_curFatSector
                     << this->m_entriesPerFatSector_Shift;
-
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("\tLooks like I need FAT sector: 0x%08X / %u" CRLF,
-                    this->m_curFatSector, this->m_curFatSector);
-            pwOut.printf("\tWith an offset of: 0x%04x / %u" CRLF,
-                    (fatEntry - firstAvailableAllocUnit) << 2,
-                    (fatEntry - firstAvailableAllocUnit) << 2);
-#endif
 
             // The necessary FAT sector has been loaded and the next allocation
             // unit is known, proceed with loading the next data sector and
@@ -455,11 +574,260 @@ class FatFS : public Filesystem {
                         (fatEntry - firstAvailableAllocUnit) << 2, this->m_fat);
             // Clear the highest 4 bits - they are always reserved
             *value &= 0x0FFFFFFF;
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("\tReceived value: 0x%08X / %u" CRLF, *value, *value);
-#endif
 
             return 0;
+        }
+
+        /**
+         * @brief       Find a file entry (file or sub-directory)
+         *
+         * Find a file or directory that matches the name in *filename in the
+         * current directory; its relative location is communicated by
+         * placing it in the address of *fileEntryOffset
+         *
+         * @param[out]  *fileEntryOffset    The buffer offset will be returned
+         *                                  via this address if the file is
+         *                                  found
+         * @param[in]   *filename           C-string representing the short
+         *                                  (standard) filename
+         *
+         * @return      Returns 0 upon success, error code otherwise (common
+         *              error code is SD_EOC_END for end-of-chain or
+         *              file-not-found marker)
+         */
+        PropWare::ErrorCode find (uint16_t *fileEntryOffset,
+                                  const char *filename) {
+            PropWare::ErrorCode err;
+            char readEntryName[FatFS::FILENAME_STR_LEN];
+
+                // Save the current buffer
+                if (this->m_buf.mod) {
+                    check_errors(
+                            this->m_driver->write_data_block(
+                                    this->m_buf.curClusterStartAddr
+                                            + this->m_buf.curSectorOffset,
+                                    this->m_buf.buf));
+                    this->m_buf.mod = false;
+                }
+
+            *fileEntryOffset = 0;
+
+            // If we aren't looking at the beginning of the directory cluster,
+            // we must backtrack to the beginning and then begin listing files
+            if (this->m_buf.curSectorOffset
+                    || (this->find_sector_from_alloc(this->m_dir_firstAllocUnit)
+                    != this->m_buf.curClusterStartAddr)) {
+                this->m_buf.curClusterStartAddr = this->find_sector_from_alloc(
+                        this->m_dir_firstAllocUnit);
+                this->m_buf.curSectorOffset = 0;
+                this->m_buf.curAllocUnit = this->m_dir_firstAllocUnit;
+                check_fs_error(
+                        this->get_fat_value(this->m_buf.curAllocUnit,
+                                            &this->m_buf.nextAllocUnit));
+                check_fs_error(
+                        this->m_driver->read_data_block(
+                                this->m_buf.curClusterStartAddr, this->m_buf.buf));
+            }
+            this->m_buf.id = File::FOLDER_ID;
+
+            // Loop through all entries in the current directory until we find
+            // the correct one
+            // Function will exit normally with SD::EOC_END error code if the
+            // file is not found
+            while (this->m_buf.buf[*fileEntryOffset]) {
+                // Check if file is valid, retrieve the name if it is
+                if (FatFS::DELETED_FILE_MARK != this->m_buf.buf[*fileEntryOffset]) {
+                    this->get_filename(&(this->m_buf.buf[*fileEntryOffset]),
+                                       readEntryName);
+                    if (!strcmp(filename, readEntryName))
+                        // File names match, return 0 to indicate a successful
+                        // search
+                        return 0;
+                }
+
+                // Increment to the next file
+                *fileEntryOffset += FatFS::FILE_ENTRY_LENGTH;
+
+                // If it was the last entry in this sector, proceed to the next
+                // one
+                if (this->m_driver->get_sector_size() == *fileEntryOffset) {
+                    // Last entry in the sector, attempt to load a new sector
+                    // Possible error value includes end-of-chain marker
+                    check_fs_error(this->load_next_sector(&this->m_buf));
+
+                    *fileEntryOffset = 0;
+                }
+            }
+
+            return FILENAME_NOT_FOUND;
+        }
+
+
+        /**
+         * @brief       Find and return the starting sector's address for a
+         *              given allocation unit (note - not cluster)
+         *
+         * @param[in]   allocUnit   Allocation unit in FAT filesystem
+         *
+         * @return      Returns sector address of the desired allocation unit
+         */
+        uint32_t find_sector_from_alloc (uint32_t allocUnit) {
+            if (FatFS::FAT_32 == this->m_filesystem)
+                allocUnit -= this->m_rootAllocUnit;
+            else
+                allocUnit -= 2;
+            allocUnit <<= this->m_sectorsPerCluster_shift;
+            allocUnit += this->m_firstDataAddr;
+            return allocUnit;
+        }
+
+
+        /**
+         * @brief       Read the standard length name of a file entry. If an
+         *              extension exists, a period will be inserted before the
+         *              extension. A null-terminator is always appended to the
+         *              end
+         *
+         * @pre         *buf must point to the first byte in a FAT entry - no
+         *              error checking is executed on buf
+         * @pre         Errors may occur if at least 13 (8 + 1 + 3 + 1) bytes of
+         *              memory are not allocated for filename
+         *
+         * @param[in]   *buf        First byte in local memory containing a FAT
+         *                          entry
+         * @param[out]  *filename   Address in memory where the filename string
+         *                          will be stored
+         */
+        void get_filename (const uint8_t *buf, char *filename) {
+            uint8_t i, j = 0;
+
+            // Read in the first 8 characters - stop when a space is reached or
+            // 8 characters have been read, whichever comes first
+            for (i = 0; i < FatFS::FILE_NAME_LEN; ++i) {
+                if (0x05 == buf[i])
+                    filename[j++] = (char) 0xe5;
+                else if (' ' != buf[i])
+                    filename[j++] = buf[i];
+            }
+
+            // Determine if there is more past the first 8 - Again, stop when a
+            // space is reached
+            if (' ' != buf[FatFS::FILE_NAME_LEN]) {
+                filename[j++] = '.';
+                for (i = FatFS::FILE_NAME_LEN;
+                     i < FatFS::FILE_NAME_LEN + FatFS::FILE_EXTENSION_LEN; ++i) {
+                    if (' ' != buf[i])
+                        filename[j++] = buf[i];
+                }
+            }
+
+            // Insert null-terminator
+            filename[j] = 0;
+        }
+
+
+        /**
+         * @brief       Find the next sector in the FAT, directory, or file.
+         *              When it is found, load it into the appropriate global
+         *              buffer
+         *
+         * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes that can be
+         *                      filled with the requested sector
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode load_next_sector (FatFS::FatBuffer *buf) {
+                if (buf->mod)
+                    this->m_driver->write_data_block(
+                            buf->curClusterStartAddr + buf->curSectorOffset,
+                            buf->buf);
+
+            // Check for the end-of-chain marker (end of file)
+            if (((uint32_t) FatFS::EOC_BEG) <= buf->nextAllocUnit)
+                return FatFS::EOC_END;
+
+            // Are we looking at the root directory of a FAT16 system?
+            if (FatFS::FAT_16 == this->m_filesystem
+                    && this->m_rootAddr == (buf->curClusterStartAddr)) {
+                // Root dir of FAT16; Is it the last sector in the root
+                // directory?
+                if (this->m_rootDirSectors == (buf->curSectorOffset))
+                    return FatFS::EOC_END;
+                    // Root dir of FAT16; Not last sector
+                else
+                    // Any error from reading the data block will be returned to
+                    // calling function
+                    return this->m_driver->read_data_block(++(buf->curSectorOffset),
+                                                           buf->buf);
+            }
+                // We are looking at a generic data cluster.
+            else {
+                // Generic data cluster; Have we reached the end of the cluster?
+                if (((1 << this->m_sectorsPerCluster_shift) - 1)
+                        > (buf->curSectorOffset)) {
+                    // Generic data cluster; Not the end; Load next sector in
+                    // the cluster
+
+                    // Any error from reading the data block will be returned to
+                    // calling function
+                    return this->m_driver->read_data_block(
+                            ++(buf->curSectorOffset) + buf->curClusterStartAddr,
+                            buf->buf);
+                }
+                    // End of generic data cluster; Look through the FAT to find the
+                    // next cluster
+                else
+                    return this->inc_cluster(buf);
+            }
+
+            return 0;
+        }
+
+
+        /**
+         * @brief       Read the next sector from SD card into memory
+         *
+         * When the final sector of a cluster is finished,
+         * SDIncCluster can be called. The appropriate global variables will
+         * be set according (incremented or set by the FAT) and the first
+         * sector of the next cluster will be read into the desired buffer.
+         *
+         * @param[out]  *buf    Array of `SD_SECTOR_SIZE` bytes used to hold a
+         *                      sector from the SD card
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode inc_cluster (FatFS::FatBuffer *buf) {
+            PropWare::ErrorCode err;
+
+                // If the sector has been modified, write it back to the SD card
+                // before reading again
+                if (buf->mod) {
+                    check_errors(
+                            this->m_driver->write_data_block(
+                                    buf->curClusterStartAddr + buf->curSectorOffset,
+                                    buf->buf));
+                }
+                buf->mod = false;
+
+            // Update this->m_cur*
+            if (((uint32_t) FatFS::EOC_BEG) <= buf->curAllocUnit
+                    && ((uint32_t) FatFS::EOC_END) <= buf->curAllocUnit)
+                return FatFS::READING_PAST_EOC;
+            buf->curAllocUnit = buf->nextAllocUnit;
+            // Only look ahead to the next allocation unit if the current alloc
+            // unit is not EOC
+            if (!(((uint32_t) FatFS::EOC_BEG) <= buf->curAllocUnit
+                    && ((uint32_t) FatFS::EOC_END) <= buf->curAllocUnit))
+                // Current allocation unit is not EOC, read the next one
+            check_errors(
+                    this->get_fat_value(buf->curAllocUnit,
+                                        &(buf->nextAllocUnit)));
+            buf->curClusterStartAddr = this->find_sector_from_alloc(
+                    buf->curAllocUnit);
+            buf->curSectorOffset = 0;
+
+            return this->m_driver->read_data_block(buf->curClusterStartAddr, buf->buf);
         }
 
     public:
@@ -468,7 +836,9 @@ class FatFS : public Filesystem {
          * (526 if SD_OPTION_FILE_WRITE is disabled)
          */
         class FatBuffer: public BlockStorage::Buffer {
-            public:
+            friend class FatFS;
+
+            protected:
                 /** Store the current cluster's starting sector number */
                 uint32_t curClusterStartAddr;
                 /**
@@ -483,8 +853,9 @@ class FatFS : public Filesystem {
         };
 
     private:
-        BlockStorage *m_driver;
-        bool         m_mounted;
+        BlockStorage        *m_driver;
+        bool                m_mounted;
+        int                 m_nextFileId;
 
         uint8_t  m_filesystem;  // File system type - one of SD::FAT_16 or SD::FAT_32
         uint8_t  m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
@@ -496,6 +867,8 @@ class FatFS : public Filesystem {
 
         FatBuffer m_buf;
         uint8_t   *m_fat;  // Buffer for FAT entries only
+        bool      m_fatMod;
+        uint32_t  m_fatSize;
         uint16_t  m_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
         uint32_t  m_curFatSector;  // Store the current FAT sector loaded into m_fat
 

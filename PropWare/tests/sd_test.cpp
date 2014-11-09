@@ -40,18 +40,26 @@ const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
 const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
 const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
 
+void sd_error_checker (const PropWare::ErrorCode err) {
+    if (err)
+        testable->print_error_str(&pwOut, (PropWare::SD::ErrorCode) err);
+}
+
 TEARDOWN {
 }
 
 TEST(Start) {
-    MSG_IF_FAIL(1, ASSERT_FALSE(testable->start()),
-                "Failed to start %s", ":(");
+    PropWare::ErrorCode err = testable->start();
+    sd_error_checker(err);
+    ASSERT_EQ(PropWare::SD::NO_ERROR, err);
 
     tearDown();
 }
 
 TEST(ReadBlock) {
-    ASSERT_FALSE(testable->start());
+    PropWare::ErrorCode err = testable->start();
+    sd_error_checker(err);
+    ASSERT_EQ(0, err);
 
     // Create a buffer and initialize all values to 0. Surely the first sector
     // of the SD card won't be _all_ zeros!
@@ -60,7 +68,9 @@ TEST(ReadBlock) {
         FAIL("Buffer could not be allocated");
 
     // Read in a block...
-    ASSERT_FALSE(testable->read_data_block(0, buffer));
+    err = testable->read_data_block(0, buffer);
+    sd_error_checker(err);
+    ASSERT_EQ(PropWare::SD::NO_ERROR, err);
 
     // And make sure at least _one_ of the bytes is non-zero
     for (unsigned int j = 0; j < sizeof(buffer); ++j)

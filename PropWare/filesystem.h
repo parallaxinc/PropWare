@@ -26,10 +26,25 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
+#include <PropWare/file.h>
+
+#define check_fs_error(x) if ((err = x)) {this->m_error = err;return NULL;}
 
 namespace PropWare {
 
 class Filesystem {
+public:
+    typedef enum {
+                                  NO_ERROR = 0,
+                                  ERROR_BEG = 1,
+        /** Filesystem Error  0 */FILE_ALREADY_EXISTS = ERROR_BEG,
+        /** Filesystem Error  1 */INVALID_FILE_MODE,
+        /** Filesystem Error  2 */ENTRY_NOT_FILE,
+        /** Filesystem Error  3 */ENTRY_NOT_DIR,
+        /** Filesystem Error  4 */FILENAME_NOT_FOUND,
+        /** Filesystem Error  5 */FILESYSTEM_ALREADY_MOUNTED
+    } ErrorCode;
+
 public:
     /**
      * @brief       Mount a filesystem
@@ -40,6 +55,76 @@ public:
      * @return  Returns 0 upon success, error code otherwise
      */
     virtual PropWare::ErrorCode mount (const uint8_t partition = 0) = 0;
+
+    /**
+     * @brief   Unmount the filesystem. If none is mounted, immediately return
+     *
+     * @return  Returns 0 upon success, error code otherwise
+     */
+    virtual PropWare::ErrorCode unmount () = 0;
+
+    /**
+     * @brief       Open a file from the given filesystem
+     *
+     * @param[out]  *f      If the method succeeded, the file will be stored
+     *                      in this address. If a null pointer is passed,
+     *                      a new File instance will be instantiated
+     * @param[in]   *name   Name (or full file path) to open
+     * @param[in[   mode[]  Mode to open the file as
+     *
+     * @return      The newly opened file pointer is returned if successful,
+     *              otherwise NULL is returned and an error code is set
+     *              internally (@see PropWare::Filesystem::get_error)
+     */
+//    virtual File* fopen (const char *name, const char mode[]) = 0;
+
+    /**
+     * @brief   Determine what error (if any) occurred. Error code is reset
+     *          after call
+     *
+     * @return  Returns 0 when no error has yet occurred, otherwise error code
+     */
+    PropWare::ErrorCode get_error () {
+        PropWare::ErrorCode err = this->m_error;
+        this->m_error = NO_ERROR;
+        return err;
+    }
+
+protected:
+    static inline uint8_t get_file_id (File *f) {
+        return f->id;
+    }
+
+    static inline void set_file_id (File *f, const uint8_t id) {
+        f->id = id;
+    }
+
+    static inline void set_file_rPtr (File *f, const uint32_t rPtr) {
+        f->rPtr = rPtr;
+    }
+
+    static inline void set_file_wPtr (File *f, const uint32_t wPtr) {
+        f->wPtr = wPtr;
+    }
+
+    static inline File::Mode get_file_mode (File *f) {
+        return f->mode;
+    }
+
+    static inline void set_file_mode (File *f, const File::Mode mode) {
+        f->mode = mode;
+    }
+
+    static inline uint32_t get_file_length (File *f) {
+        return f->length;
+    }
+
+    static inline void set_file_length (File *f, const uint32_t length) {
+        f->length = length;
+    }
+
+protected:
+    PropWare::ErrorCode m_error;
 };
 
 }

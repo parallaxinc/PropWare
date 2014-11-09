@@ -36,13 +36,11 @@ class BlockStorage {
                 uint8_t *buf;
                 /** Buffer ID - determine who owns the current information */
                 int8_t  id;
-#ifdef SD_OPTION_FILE_WRITE
                 /**
                  * When set, the currently loaded sector has been modified since
                  * it was read from the SD card
                  */
                 bool mod;
-#endif
         };
 
     public:
@@ -51,14 +49,14 @@ class BlockStorage {
         virtual ErrorCode read_data_block (uint32_t address, uint8_t *buf) = 0;
 
         ErrorCode read_data_block (uint32_t address,
-                const BlockStorage::Buffer *buffer) {
+                                   const BlockStorage::Buffer *buffer) {
             return this->read_data_block(address, buffer->buf);
         }
 
         virtual ErrorCode write_data_block (uint32_t address, uint8_t *dat) = 0;
 
         ErrorCode write_data_block (uint32_t address,
-                const BlockStorage::Buffer *buffer) {
+                                    const BlockStorage::Buffer *buffer) {
             return this->write_data_block(address, buffer->buf);
         }
 
@@ -67,23 +65,23 @@ class BlockStorage {
         }
 
         virtual uint16_t get_short (const uint16_t offset,
-                const uint8_t *buf) const = 0;
+                                    const uint8_t *buf) const = 0;
 
         virtual uint32_t get_long (const uint16_t offset,
-                const uint8_t *buf) const = 0;
+                                   const uint8_t *buf) const = 0;
 
         uint8_t get_byte (const uint16_t offset,
-                const BlockStorage::Buffer *buf) const {
+                          const BlockStorage::Buffer *buf) const {
             return get_byte(offset, buf->buf);
         }
 
         uint16_t get_short (const uint16_t offset,
-                const BlockStorage::Buffer *buf) const {
+                            const BlockStorage::Buffer *buf) const {
             return get_short(offset, buf->buf);
         }
 
         uint32_t get_long (const uint16_t offset,
-                const BlockStorage::Buffer *buf) const {
+                           const BlockStorage::Buffer *buf) const {
             return get_long(offset, buf->buf);
         }
 
