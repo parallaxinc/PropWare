@@ -38,31 +38,36 @@ namespace PropWare {
  * @brief   Container class that has formatting methods for human-readable
  *          output. This class can be constructed and used for easy and
  *          efficient output via any communication protocol.
- *          <p>
- *          <b>Printing to Terminal</b>
- *          <p>
- *          To print to the standard terminal, simply use the existing object,
- *          `pwOut`:
- *          <p>
- *          `pwOut.printf("Hello, world!" CRLF);`
- *          <p>
- *          The `CRLF` macro is an easy way to add a line break to your
- *          print statements.
- *          <p>
- *          <b>Creating Custom `Printers`</b>
- *          <p>
- *          To create your own `Printer`, you will first need an instance of
- *          any object that implements the `PrintCapable` interface. Your code
- *          might look something like this:
- *          <p>
- *          `PropWare::HD44780       myLCD;`<br>
- *          `const PropWare::Printer lcdPrinter(&myLCD);`<br>
- *          `lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);`<br>
- *          `lcdPrinter.printf("Hello, LCD!" CRLF);`
- *          <p>
- *          Adding `const` in front of the `Printer` declaration allows the
- *          compiler to make some extra optimizations and is encouraged when
- *          possible.
+ *
+ * <b>Printing to Terminal</b>
+ * <p>
+ * To print to the standard terminal, simply use the existing object,
+ * `pwOut`:
+ *
+ * @code
+ * pwOut.printf("Hello, world!" CRLF);
+ * @endcode
+ *
+ * The `CRLF` macro is an easy way to add a line break to your
+ * print statements.
+ * <p>
+ * <b>Creating Custom `Printers`</b>
+ * <p>
+ * To create your own `Printer`, you will first need an instance of
+ * any object that implements the `PrintCapable` interface. Your code
+ * might look something like this:
+ *
+ * @code
+ * PropWare::HD44780       myLCD;
+ * const PropWare::Printer lcdPrinter(&myLCD);
+ *
+ * lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
+ * lcdPrinter.printf("Hello, LCD!" CRLF);
+ * @endcode
+ *
+ * Adding `const` in front of the `Printer` declaration allows the
+ * compiler to make some extra optimizations and is encouraged when
+ * possible.
  */
 class Printer {
     public:
