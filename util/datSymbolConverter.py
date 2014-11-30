@@ -32,6 +32,8 @@ def parse_args():
     parser.add_argument('-i', '--input', dest='input', required=True,
                         help='Create binary distributions for all tagged commits as well')
     parser.add_argument('-o', '--output', dest='output', required=True, help='Output file path')
+    parser.add_argument('-v', '--verbose', dest='verbose', required=False, action='store', nargs='?',
+                        type=bool, help='Enable verbose output')
     return parser.parse_args()
 
 
@@ -51,12 +53,17 @@ if '__main__' == __name__:
     if os.path.exists(tmp_input_file):
         os.remove(tmp_input_file)
 
+    if args.verbose:
+        print('cp %s %s' % (input_file_path, tmp_input_file))
     shutil.copy2(input_file_path, tmp_input_file)
 
     cmd = [objcopy, '-Ibinary', '-Opropeller-elf-gcc', '-Bpropeller', input_file_name, output_file_name]
-    print(' '.join(cmd))
+    if args.verbose:
+        print(' '.join(cmd))
     ret = subprocess.call(cmd, cwd=tmp)
     if 0 != ret:
         raise Exception('Renaming symbols failed for ' + input_file_path)
 
+    if args.verbose:
+        print('cp %s %s' % (tmp_output_file, output_file_path))
     shutil.copy2(tmp_output_file, output_file_path)

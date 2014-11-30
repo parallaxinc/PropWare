@@ -32,6 +32,7 @@
 #include <propeller.h>
 #include <sys/null.h>
 #include <cstdint>
+#include <stdlib.h>
 
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller
@@ -132,6 +133,17 @@ class Utility {
         }
 
         /**
+         * @brief       Count the number of set bits in a parameter
+         *
+         * @param[in]   par     Parameter whose bits should be counted
+         *
+         * @return      Number of bits that are non-zero in par
+         */
+        static uint8_t count_bits (int32_t par) {
+            return count_bits((uint32_t) par);
+        }
+
+        /**
          * @brief       Determine the number of microseconds passed since a
          *              starting point
          *
@@ -139,11 +151,50 @@ class Utility {
          *
          * @return      Microseconds since start
          */
-        static uint32_t measure_time_interval (
-                const register uint32_t start) {
+        static uint32_t measure_time_interval (const register uint32_t start) {
             uint32_t interval = CNT - start;
 
             return interval/MICROSECOND;
+        }
+
+        /**
+         * @brief       Determine the number of microseconds passed since a
+         *              starting point
+         *
+         * @param[in]   start   A value from the system counter (CNT)
+         *
+         * @return      Microseconds since start
+         */
+        static uint32_t measure_time_interval (const register int32_t start) {
+            return measure_time_interval((uint32_t) start);
+        }
+
+        static size_t get_largest_free_block_size (
+                const uint8_t precision = 32) {
+            size_t        largestSuccess  = 0;
+            size_t        smallestFailure = 32*1024;
+            size_t        nextAttempt     = 32*1024;
+
+            uint8_t *ptr = NULL;
+
+            do {
+                ptr = (uint8_t *) malloc(nextAttempt);
+
+                // If the allocation succeeded, free the memory as quickly as
+                // possible
+                if (NULL != ptr) {
+                    free(ptr);
+                    largestSuccess = nextAttempt;
+                } else
+                    // If the allocation fails, try the next smallest
+                    smallestFailure = nextAttempt;
+
+
+                nextAttempt = (smallestFailure - largestSuccess) / 2 +
+                        largestSuccess;
+            } while (precision < (smallestFailure - largestSuccess));
+
+            return largestSuccess;
         }
 };
 

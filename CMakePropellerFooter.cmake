@@ -41,7 +41,33 @@ endif ()
 # End library dependencies
 ################################################################################
 
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE C)
+macro (list_contains result request)
+  set (${result})
+  foreach (listItem ${ARGN})
+    if (${request} STREQUAL ${listItem})
+      set (${result} TRUE)
+    endif ()
+  endforeach ()
+endmacro()
+
+get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+list_contains(use_c C ${_languages})
+if (use_c)
+    set(linker_language C)
+else ()
+    list_contains(use_cxx CXX ${_languages})
+    if (use_cxx)
+        set(linker_language CXX)
+    else ()
+        message(FATAL_ERROR
+            "PropWare requires at linking with C or CXX. Please enable at least one of those languages")
+    endif ()
+endif ()
+
+SET_TARGET_PROPERTIES(${PROJECT_NAME}
+    PROPERTIES
+    LINKER_LANGUAGE
+    ${linker_language})
 include_directories(SYSTEM ${PROPWARE_PATH})
 
 # Only add these custom targets if we're not compiling the PropWare library
