@@ -34,6 +34,13 @@
 
 namespace PropWare {
 
+#ifndef S_ISNAN
+#define S_ISNAN(x) (x != x)
+#endif  /* !defined(S_ISNAN) */
+#ifndef S_ISINF
+#define S_ISINF(x) (x != 0.0 && x + x == x)
+#endif  /* !defined(S_ISINF) */
+
 /**
  * @brief   Container class that has formatting methods for human-readable
  *          output. This class can be constructed and used for easy and
@@ -70,6 +77,23 @@ namespace PropWare {
  * possible.
  */
 class Printer {
+    public:
+        struct Format {
+            uint16_t width;
+            uint16_t precision;
+            uint8_t  radix;
+            char     fillChar;
+
+            Format () : width(0),
+                        precision(6),
+                        radix(10),
+                        fillChar(DEFAULT_FILL_CHAR) {
+            }
+        };
+
+        static const char   DEFAULT_FILL_CHAR = ' ';
+        static const Format DEFAULT_FORMAT;
+
     public:
         /**
          * @brief   Construct a Printer instance that will use the given
@@ -108,7 +132,7 @@ class Printer {
          *                          value.
          */
         virtual void put_int (int32_t x, uint16_t width = 0,
-                              const char fillChar = ' ',
+                              const char fillChar = DEFAULT_FILL_CHAR,
                               const bool bypassLock = false) const {
             if (0 > x)
                 this->m_printCapable->put_char('-');
@@ -127,7 +151,7 @@ class Printer {
          *                          value.
          */
         virtual void put_uint (uint32_t x, uint16_t width = 0,
-                               const char fillChar = ' ',
+                               const char fillChar = DEFAULT_FILL_CHAR,
                                const bool bypassLock = false) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
@@ -164,7 +188,7 @@ class Printer {
          *                          value.
          */
         virtual void put_hex (uint32_t x, uint16_t width = 0,
-                              const char fillChar = ' ',
+                              const char fillChar = DEFAULT_FILL_CHAR,
                               const bool bypassLock = false) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
@@ -192,14 +216,6 @@ class Printer {
                 this->m_printCapable->put_char(buf[i - j - 1]);
         }
 
-#ifdef ENABLE_PROPWARE_PRINT_FLOAT
-#ifndef S_ISNAN
-#define S_ISNAN(x) (x != x)
-#endif  /* !defined(S_ISNAN) */
-#ifndef S_ISINF
-#define S_ISINF(x) (x != 0.0 && x + x == x)
-#endif  /* !defined(S_ISINF) */
-
         /**
          * @brief       Print a floating point number with a given width and
          *              precision
@@ -219,7 +235,7 @@ class Printer {
          */
         virtual void put_float (double f, uint16_t width = 0,
                                 uint16_t precision = 6,
-                                const char fillChar = ' ',
+                                const char fillChar = DEFAULT_FILL_CHAR,
                                 const bool bypassLock = false) const {
             ////////////////////////////////////////////////////////////////////
             // Code taken straight from Parallax's floatToString! Thank you!!!
@@ -359,7 +375,10 @@ class Printer {
 
             this->m_printCapable->puts(s);
         }
-#endif
+
+        void printf(const char *fmt) const {
+            this->print(fmt);
+        }
 
         /**
          * @brief       Similar in functionality to the C-standard, this method
@@ -378,7 +397,7 @@ class Printer {
          *              A single space will be printed in place of unsupported
          *              formats
          *
-         * @param[in]   fmt     Format string such as `Hello, %%s!` which can be
+         * @param[in]   *fmt    Format string such as `Hello, %%s!` which can be
          *                      used to print anyone's name in place of `%%s`
          * @param[in]   ...     Variable number of arguments passed here.
          *                      Continuing with the `Hello, %%s!` example, a
@@ -392,12 +411,11 @@ class Printer {
          *                      Which would print:<br>
          *                        `2 + 3 = 5`
          */
-        void printf (const char fmt[], ...) const {
-            va_list    list;
-            va_start(list, fmt);
+        template<typename T, typename... Targs>
+        void printf (const char *fmt, const T first, Targs... Fargs) const{
             const char *s = fmt;
-            char       c, fillChar;
-            uint16_t   width;
+            char       c;
+            Format     format;
 
             if (0 <= this->m_lock)
                 while (lockset(this->m_lock));
@@ -408,57 +426,55 @@ class Printer {
                 if ('%' == c) {
                     c = *(++s);
 
-                    (c == '0') ? fillChar = '0' : fillChar = ' ';
+                    (c == '0')
+                            ? format.fillChar = '0'
+                            : format.fillChar = DEFAULT_FILL_CHAR;
 
-                    width = 0;
+                    format.width = 0;
                     while (c && isdigit(c)) {
-                        width = 10 * width + (c - '0');
-                        c     = *(++s);
+                        format.width = 10 * format.width + (c - '0');
+                        c = *(++s);
                     }
 
-                    uint8_t precision = 6;
                     if (c == '.') {
-                        precision = 0;
-                        c         = *(++s);
+                        format.precision = 0;
+                        c = *(++s);
                         while (c && isdigit(c)) {
-                            precision = 10 * precision + (c - '0');
-                            c         = *(++s);
+                            format.precision = 10 * format.precision
+                                    + (c - '0');
+                            c = *(++s);
                         }
                     }
 
-                    switch (c) {
-                        case 'i':
-                        case 'd':
-                            this->put_int(va_arg(list, int32_t), width,
-                                          fillChar, true);
-                            break;
-                        case 'u':
-                            this->put_uint(va_arg(list, uint32_t), width,
-                                           fillChar, true);
-                            break;
-                        case 's':
-                            this->m_printCapable->puts(va_arg(list, char *));
-                            break;
-                        case 'c':
-                            this->m_printCapable->put_char(va_arg(list, int));
-                            break;
-                        case 'X':
-                            this->put_hex(va_arg(list, uint32_t), width,
-                                          fillChar, true);
-                            break;
-#ifdef ENABLE_PROPWARE_PRINT_FLOAT
-                        case 'f':
-                            this->put_float(va_arg(list, double), width,
-                                            precision, fillChar, true);
-                            break;
-#endif
-                        case '%':
-                            this->m_printCapable->put_char('%');
-                            break;
-                        default:
-                            va_arg(list, int);  // Increment va_arg pointer
-                            this->m_printCapable->put_char(' ');
-                            break;
+                    if ('%' == c)
+                        this->print(c);
+                    else {
+                        switch (c) {
+                            case 'i':
+                            case 'd':
+                                this->print((int32_t) first, format, true);
+                                break;
+                            case 'X':
+                                format.radix = 16;
+                                // No "break;" after 'X' - let it flow into 'u'
+                            case 'u':
+                                this->print((uint32_t) first, format, true);
+                                break;
+                            case 'f':
+                            case 's':
+                            case 'c':
+                                this->print(first, format, true);
+                                break;
+                            default:
+                                this->m_printCapable->put_char(
+                                        DEFAULT_FILL_CHAR);
+                                break;
+                        }
+                        if (0 == sizeof...(Fargs))
+                            this->print(s);
+                        else
+                            this->printf(s, Fargs...);
+                        return;
                     }
                 } else
                     this->m_printCapable->put_char(*s);
@@ -470,28 +486,71 @@ class Printer {
 //                this->printCapable->puts("cleared" CRLF);
                 lockclr(this->m_lock);
             }
-
-            va_end(list);
         }
 
-        inline void print (const int x) const {
-            this->put_int(x);
-        }
-
-        inline void print (const char c) const {
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   c       Character to be printed
+         * @param       format  Unused
+         */
+        void print (const char c, const Format format = DEFAULT_FORMAT,
+                    const bool bypassLock = false) const {
             this->put_char(c);
         }
 
-        inline void print (const char string[]) const {
+        /**
+         * @brief       Print a null-terminated string
+         *
+         * @param[in]   string[]    String to be printed
+         * @param       format      Unused
+         */
+        void print (const char string[], const Format format = DEFAULT_FORMAT,
+                    const bool bypassLock = false) const {
             this->puts(string);
         }
 
-
-#ifdef ENABLE_PROPWARE_PRINT_FLOAT
-        inline void print (const float x) const {
-            this->put_float(x);
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param       format
+         */
+        void print (const uint32_t x, const Format format = DEFAULT_FORMAT,
+                    const bool bypassLock = false) const {
+            switch (format.radix) {
+                case 16:
+                    this->put_hex(x, format.width, format.fillChar,
+                                  bypassLock);
+                    break;
+                default:
+                    this->put_uint(x, format.width, format.fillChar,
+                                   bypassLock);
+            }
         }
-#endif
+
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param       format
+         */
+        void print (const int32_t x, const Format format = DEFAULT_FORMAT,
+                    const bool bypassLock = false) const {
+            this->put_int(x, format.width, format.fillChar, bypassLock);
+        }
+
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param       format
+         */
+        void print (const double f, const Format format = DEFAULT_FORMAT,
+                    const bool bypassLock = false) const {
+            this->put_float(f, format.width, format.precision, format.fillChar,
+                            bypassLock);
+        }
 
     protected:
         const PrintCapable *m_printCapable;

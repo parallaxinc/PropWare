@@ -260,6 +260,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         [_msbMask] "r" (msbMask));
             } while (--bits);
 
+        // TODO: Delete this when debugging is complete
         Port::flash_port(BYTE_2, data >> 8);
         Port::flash_port(BYTE_2, data);
         Port::flash_port(BYTE_2, data << 8);

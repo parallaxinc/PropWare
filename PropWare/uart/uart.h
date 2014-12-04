@@ -198,7 +198,7 @@ class UART : public virtual PrintCapable {
          * @param[in]   words   Number of words to be sent
          */
         HUBTEXT virtual void send_array (const char array[],
-                uint32_t words) const = 0;
+                                         uint32_t words) const = 0;
 };
 
 }

@@ -21,7 +21,7 @@ set(CMAKE_ECOGCXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -mcog -xc++ -r")
 # File names
 set(CMAKE_STATIC_LIBRARY_PREFIX lib)
 set(CMAKE_STATIC_LIBRARY_SUFFIX .a)
-set(CMAKE_EXECUTABLE_SUFFIX .elf)
+set(CMAKE_EXECUTABLE_SUFFIX .elf CACHE STRING "Executable suffix")
 
 ################################################################################
 ### Flags

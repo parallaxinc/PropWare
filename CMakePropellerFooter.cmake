@@ -50,6 +50,7 @@ macro (list_contains result request)
   endforeach ()
 endmacro()
 
+# Set the correct linker language
 get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 list_contains(use_c C ${_languages})
 if (use_c)

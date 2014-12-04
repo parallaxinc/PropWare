@@ -14,12 +14,15 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-#set(PROPWARE_PRINT_FLOAT ON)
+set(PROPWARE_PRINT_FLOAT OFF)
 set(LINK_TINY ON)
+set(LINK_PROPWARE OFF)
 
-project(Hello_Demo)
+project(Hello_Demo C CXX DAT)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME})
+add_executable(${PROJECT_NAME}
+    ${PROJECT_NAME}
+    pst.dat)
 
 ################################################################################
 ### Template code. Do not modify                                               #

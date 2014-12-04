@@ -185,7 +185,7 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::set_baud_rate
          */
-        virtual void set_baud_rate (const int32_t baudRate) {
+        void set_baud_rate (const int32_t baudRate) {
             this->m_bitCycles = CLKFREQ / baudRate;
         }
 
@@ -238,7 +238,7 @@ class AbstractSimplexUART : public virtual UART {
          * @see PropWare::UART::send_array
          */
         HUBTEXT virtual void send_array (const char array[],
-                    uint32_t words) const {
+                                         uint32_t words) const {
                 char *arrayPtr = (char *) array;
                 register uint32_t wideData;
                 register uint32_t dataMask    = this->m_dataMask;
@@ -404,8 +404,8 @@ class AbstractSimplexUART : public virtual UART {
         __attribute__ ((fcache))
 #endif
         void shift_out_data (register uint32_t data, register uint32_t bits,
-                const register uint32_t bitCycles,
-                const register uint32_t txMask) const {
+                             const register uint32_t bitCycles,
+                             const register uint32_t txMask) const {
 #ifndef DOXYGEN_IGNORE
             volatile uint32_t waitCycles;
 
