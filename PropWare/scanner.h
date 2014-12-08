@@ -25,10 +25,6 @@
 
 #pragma once
 
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/scancapable.h>
 #include <PropWare/printer.h>

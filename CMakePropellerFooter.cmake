@@ -69,7 +69,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME}
     PROPERTIES
     LINKER_LANGUAGE
     ${linker_language})
-include_directories(SYSTEM ${PROPWARE_PATH})
+include_directories(${PROPWARE_PATH})
 
 # Only add these custom targets if we're not compiling the PropWare library
 if (NOT DEFINED PROPWARE_MAIN_PACKAGE)

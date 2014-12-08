@@ -30,9 +30,8 @@
 #else
 
 #include <propeller.h>
-#include <sys/null.h>
 #include <cstdint>
-#include <stdlib.h>
+#include <cstdlib>
 
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller
@@ -200,4 +199,4 @@ class Utility {
 
 }
 
-#endif
+#endif /* ifdef ASM_OBJ_FILE */

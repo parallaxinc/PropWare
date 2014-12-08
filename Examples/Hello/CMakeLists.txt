@@ -16,7 +16,6 @@ set(CXX_FLAGS )
 
 set(PROPWARE_PRINT_FLOAT OFF)
 set(LINK_TINY ON)
-set(LINK_PROPWARE OFF)
 
 project(Hello_Demo C CXX DAT)
 

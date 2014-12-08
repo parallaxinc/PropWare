@@ -24,11 +24,6 @@
 */
 
 #pragma once
-
-#include <stdarg.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
 
@@ -37,9 +32,12 @@ namespace PropWare {
 #ifndef S_ISNAN
 #define S_ISNAN(x) (x != x)
 #endif  /* !defined(S_ISNAN) */
+
 #ifndef S_ISINF
 #define S_ISINF(x) (x != 0.0 && x + x == x)
 #endif  /* !defined(S_ISINF) */
+
+#define isdigit(x) ('0' <= x && x <= '9')
 
 /**
  * @brief   Container class that has formatting methods for human-readable
@@ -78,6 +76,8 @@ namespace PropWare {
  */
 class Printer {
     public:
+        static const char DEFAULT_FILL_CHAR = ' ';
+
         struct Format {
             uint16_t width;
             uint16_t precision;
@@ -91,7 +91,6 @@ class Printer {
             }
         };
 
-        static const char   DEFAULT_FILL_CHAR = ' ';
         static const Format DEFAULT_FORMAT;
 
     public:
@@ -110,14 +109,16 @@ class Printer {
         /**
          * @see PropWare::PrintCapable::put_char
          */
-        virtual void put_char (const char c) const {
+        virtual void put_char (const char c,
+                               const bool bypassLock = false) const {
             this->m_printCapable->put_char(c);
         }
 
         /**
          * @see PropWare::PrintCapable::puts
          */
-        virtual void puts (const char string[]) const {
+        virtual void puts (const char string[],
+                           const bool bypassLock = false) const {
             this->m_printCapable->puts(string);
         }
 
@@ -339,9 +340,8 @@ class Printer {
                 }
                 j = p;
             }
-            else {
+            else
                 j = q;
-            }
 
             /* Append with fractional */
             if (precision > 0)
@@ -359,16 +359,14 @@ class Printer {
             j--;
             if (s[j] >= '5') {
                 j--;
-                for (; (j >= 0); j--) {
-                    if ((s[j] < '0') || (s[j] > '9')) continue;
-                    if (s[j] < '9') {
-                        s[j]++;
-                        break;
+                for (; (j >= 0); j--)
+                    if (!(s[j] < '0' || s[j] > '9')) {
+                        if (s[j] < '9') {
+                            s[j]++;
+                            break;
+                        } else
+                            s[j] = '0';
                     }
-                    else {
-                        s[j] = '0';
-                    }
-                }
             }
 
             s[m] = 0;
@@ -377,7 +375,7 @@ class Printer {
         }
 
         void printf(const char *fmt) const {
-            this->print(fmt);
+            this->puts(fmt);
         }
 
         /**
@@ -412,7 +410,7 @@ class Printer {
          *                        `2 + 3 = 5`
          */
         template<typename T, typename... Targs>
-        void printf (const char *fmt, const T first, Targs... Fargs) const{
+        void printf (const char *fmt, const T first, Targs... remaining) const {
             const char *s = fmt;
             char       c;
             Format     format;
@@ -425,30 +423,32 @@ class Printer {
 
                 if ('%' == c) {
                     c = *(++s);
+                    if ('%' == c)
+                        this->m_printCapable->put_char(c);
+                    else {
+                        if (c == '0')
+                            format.fillChar = '0';
+                        else
+                            format.fillChar = DEFAULT_FILL_CHAR;
 
-                    (c == '0')
-                            ? format.fillChar = '0'
-                            : format.fillChar = DEFAULT_FILL_CHAR;
-
-                    format.width = 0;
-                    while (c && isdigit(c)) {
-                        format.width = 10 * format.width + (c - '0');
-                        c = *(++s);
-                    }
-
-                    if (c == '.') {
-                        format.precision = 0;
-                        c = *(++s);
+                        format.width = 0;
                         while (c && isdigit(c)) {
-                            format.precision = 10 * format.precision
-                                    + (c - '0');
+                            format.width = 10 * format.width + (c - '0');
                             c = *(++s);
                         }
-                    }
 
-                    if ('%' == c)
-                        this->print(c);
-                    else {
+                        if (c == '.') {
+                            format.precision = 0;
+                            c = *(++s);
+                            while (c && isdigit(c)) {
+                                format.precision = 10 * format.precision
+                                        + (c - '0');
+                                c = *(++s);
+                            }
+                        }
+
+                        ++s;
+
                         switch (c) {
                             case 'i':
                             case 'd':
@@ -470,10 +470,11 @@ class Printer {
                                         DEFAULT_FILL_CHAR);
                                 break;
                         }
-                        if (0 == sizeof...(Fargs))
-                            this->print(s);
-                        else
-                            this->printf(s, Fargs...);
+                        if (0 == sizeof...(remaining))
+                            this->puts(s);
+                        else {
+                            this->printf(s, remaining...);
+                        }
                         return;
                     }
                 } else
