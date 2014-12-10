@@ -68,7 +68,7 @@ int main () {
 
     // Start our new cog and initialize the speaking UART
     const uint8_t cog = init_main_cog(&threadData, &speaker);
-    pwSyncOut.printf("New cog %u. Ready to send!!!" CRLF, cog);
+//    pwSyncOut.printf("New cog %u. Ready to send!!!" CRLF, cog); // TODO
 
     while (1) {
         waitcnt(500 * MILLISECOND + CNT);
@@ -93,14 +93,14 @@ void listen_silently (void *arg) {
 
     // Initialize the listener UART and clear the buffer
     init_listener_cog(buffer, &listener);
-    pwSyncOut.puts("Ready to receive!" CRLF);
+//    pwSyncOut.puts("Ready to receive!" CRLF); // TODO
 
     while (1) {
         chars = 0;
         if ((err = listener.fgets(buffer, &chars)))
             error(err);
 
-        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, chars, buffer);
+//        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, chars, buffer); // TODO
     }
 }
 
@@ -117,7 +117,7 @@ void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    pwSyncOut.printf("Unknown error: %u" CRLF, err);
+//    pwSyncOut.printf("Unknown error: %u" CRLF, err); // TODO
 
     while (1) {
         debugLEDs.write((uint32_t) err);

@@ -102,21 +102,20 @@ class Printer {
          *                          object such as a PropWare::UART
          */
         Printer (const PrintCapable *printCapable)
-                : m_printCapable(printCapable),
-                  m_lock(-1) {
+                : m_printCapable(printCapable) {
         }
 
         /**
          * @see PropWare::PrintCapable::put_char
          */
-        void put_char (const char c, const bool bypassLock = false) const {
+        void put_char (const char c) const {
             this->m_printCapable->put_char(c);
         }
 
         /**
          * @see PropWare::PrintCapable::puts
          */
-        void puts (const char string[], const bool bypassLock = false) const {
+        void puts (const char string[]) const {
             this->m_printCapable->puts(string);
         }
 
@@ -131,12 +130,11 @@ class Printer {
          *                          value.
          */
         void put_int (int32_t x, uint16_t width = 0,
-                      const char fillChar = DEFAULT_FILL_CHAR,
-                      const bool bypassLock = false) const {
+                      const char fillChar = DEFAULT_FILL_CHAR) const {
             if (0 > x)
                 this->m_printCapable->put_char('-');
 
-            this->put_uint((uint32_t) abs(x), width, fillChar, true);
+            this->put_uint((uint32_t) abs(x), width, fillChar);
         }
 
         /**
@@ -146,12 +144,9 @@ class Printer {
          * @param[in]   width       Minimum number of characters to print
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
-         * @param[in]   bypassLock  For internal use only. Leave as default
-         *                          value.
          */
         void put_uint (uint32_t x, uint16_t width = 0,
-                       const char fillChar = DEFAULT_FILL_CHAR,
-                       const bool bypassLock = false) const {
+                       const char fillChar = DEFAULT_FILL_CHAR) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
             uint8_t       i = 0;
@@ -187,8 +182,7 @@ class Printer {
          *                          value.
          */
         void put_hex (uint32_t x, uint16_t width = 0,
-                      const char fillChar = DEFAULT_FILL_CHAR,
-                      const bool bypassLock = false) const {
+                      const char fillChar = DEFAULT_FILL_CHAR) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
 
@@ -226,12 +220,9 @@ class Printer {
          *                          the decimal point
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
-         * @param[in]   bypassLock  For internal use only. Leave as default
-         *                          value.
          */
         void put_float (double f, uint16_t width = 0, uint16_t precision = 6,
-                        const char fillChar = DEFAULT_FILL_CHAR,
-                        const bool bypassLock = false) const {
+                        const char fillChar = DEFAULT_FILL_CHAR) const {
             ////////////////////////////////////////////////////////////////////
             // Code taken straight from Parallax's floatToString! Thank you!!!
             ////////////////////////////////////////////////////////////////////
@@ -372,7 +363,7 @@ class Printer {
          * @see PropWare::Printer::printf(const char *fmt, const T first,
          * Targs... remaining)
          */
-        void printf(const char *fmt, const bool bypassLock = false) const {
+        void printf(const char *fmt) const {
             this->puts(fmt);
         }
 
@@ -413,9 +404,6 @@ class Printer {
             char       c;
             Format     format;
 
-            if (0 <= this->m_lock)
-                while (lockset(this->m_lock));
-
             while (*s) {
                 c = *s;
 
@@ -450,18 +438,18 @@ class Printer {
                         switch (c) {
                             case 'i':
                             case 'd':
-                                this->print((int32_t) first, format, true);
+                                this->print((int32_t) first, format);
                                 break;
                             case 'X':
                                 format.radix = 16;
                                 // No "break;" after 'X' - let it flow into 'u'
                             case 'u':
-                                this->print((uint32_t) first, format, true);
+                                this->print((uint32_t) first, format);
                                 break;
                             case 'f':
                             case 's':
                             case 'c':
-                                this->print(first, format, true);
+                                this->print(first, format);
                                 break;
                             default:
                                 this->m_printCapable->put_char(
@@ -480,11 +468,6 @@ class Printer {
 
                 ++s;
             }
-
-            if (0 <= this->m_lock) {
-//                this->printCapable->puts("cleared" CRLF);
-                lockclr(this->m_lock);
-            }
         }
 
         /**
@@ -493,8 +476,7 @@ class Printer {
          * @param[in]   c       Character to be printed
          * @param       format  Unused
          */
-        void print (const char c, const Format format = DEFAULT_FORMAT,
-                    const bool bypassLock = false) const {
+        void print (const char c, const Format format = DEFAULT_FORMAT) const {
             this->put_char(c);
         }
 
@@ -504,8 +486,8 @@ class Printer {
          * @param[in]   string[]    String to be printed
          * @param       format      Unused
          */
-        void print (const char string[], const Format format = DEFAULT_FORMAT,
-                    const bool bypassLock = false) const {
+        void print (const char string[],
+                    const Format format = DEFAULT_FORMAT) const {
             this->puts(string);
         }
 
@@ -515,16 +497,14 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param       format
          */
-        void print (const uint32_t x, const Format format = DEFAULT_FORMAT,
-                    const bool bypassLock = false) const {
+        void print (const uint32_t x,
+                    const Format format = DEFAULT_FORMAT) const {
             switch (format.radix) {
                 case 16:
-                    this->put_hex(x, format.width, format.fillChar,
-                                  bypassLock);
+                    this->put_hex(x, format.width, format.fillChar);
                     break;
                 default:
-                    this->put_uint(x, format.width, format.fillChar,
-                                   bypassLock);
+                    this->put_uint(x, format.width, format.fillChar);
             }
         }
 
@@ -534,9 +514,9 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param       format
          */
-        void print (const int32_t x, const Format format = DEFAULT_FORMAT,
-                    const bool bypassLock = false) const {
-            this->put_int(x, format.width, format.fillChar, bypassLock);
+        void print (const int32_t x,
+                    const Format format = DEFAULT_FORMAT) const {
+            this->put_int(x, format.width, format.fillChar);
         }
 
         /**
@@ -545,15 +525,13 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param       format
          */
-        void print (const double f, const Format format = DEFAULT_FORMAT,
-                    const bool bypassLock = false) const {
-            this->put_float(f, format.width, format.precision, format.fillChar,
-                            bypassLock);
+        void print (const double f,
+                    const Format format = DEFAULT_FORMAT) const {
+            this->put_float(f, format.width, format.precision, format.fillChar);
         }
 
     protected:
         const PrintCapable *m_printCapable;
-        int32_t            m_lock; // Only used in PropWare::SynchronousPrinter
 };
 
 }

@@ -33,7 +33,7 @@ namespace PropWare {
  * @brief   IMPORTANT! SynchronousPrinter is not yet working! DO NOT attempt to
  *          use SynchronousPrinter until this note disappears
  */
-class SynchronousPrinter: public Printer {
+class SynchronousPrinter {
     public:
         /**
          * @brief   Creates a synchronous instance of a Printer that can be used
@@ -44,7 +44,7 @@ class SynchronousPrinter: public Printer {
          *                          shared across multiple cogs
          */
         SynchronousPrinter (PrintCapable const *printCapable)
-                : Printer(printCapable) {
+                : m_printCapable(printCapable) {
             this->m_lock = locknew();
             lockclr(this->m_lock);
         }
@@ -90,83 +90,9 @@ class SynchronousPrinter: public Printer {
             return this->hasLock();
         }
 
-        /**
-         * @see PropWare::Printer::put_char
-         */
-        void put_char (const char c) const {
-            while (lockset(this->m_lock));
-            Printer::put_char(c);
-            lockclr(this->m_lock);
-        }
-
-        /**
-         * @see PropWare::Printer::puts
-         */
-        void puts (const char string[]) const {
-            while (lockset(this->m_lock));
-            this->m_printCapable->puts(string);
-            lockclr(this->m_lock);
-        }
-
-        /**
-         * @see PropWare::Printer::put_int
-         */
-        void put_int (int32_t x, uint16_t width = 0, const char fillChar = ' ',
-                      const bool bypassLock = false) const {
-            if (bypassLock)
-                Printer::put_int(x, width, fillChar, true);
-            else {
-                while (lockset(this->m_lock));
-                Printer::put_int(x, width, fillChar, true);
-                lockclr(this->m_lock);
-            }
-        }
-
-        /**
-         * @see PropWare::Printer::put_uint
-         */
-        void put_uint (uint32_t x, uint16_t width = 0,
-                       const char fillChar = ' ',
-                       const bool bypassLock = false) const {
-            if (bypassLock)
-                Printer::put_uint(x, width, fillChar, true);
-            else {
-                while (lockset(this->m_lock));
-                Printer::put_uint(x, width, fillChar, true);
-                lockclr(this->m_lock);
-            }
-        }
-
-        /**
-         * @see PropWare::Printer::put_hex
-         */
-        void put_hex (uint32_t x, uint16_t width = 0, const char fillChar = ' ',
-                      const bool bypassLock = false) const {
-            if (bypassLock)
-                Printer::put_hex(x, width, fillChar, true);
-            else {
-                while (lockset(this->m_lock));
-                Printer::put_hex(x, width, fillChar, true);
-                lockclr(this->m_lock);
-            }
-        }
-
-#ifdef ENABLE_PROPWARE_PRINT_FLOAT
-        /**
-         * @see PropWare::Printer::put_float
-         */
-        void put_float (double f, uint16_t width, uint16_t precision,
-                        const char fillChar,
-                        const bool bypassLock = false) const {
-            if (bypassLock)
-                Printer::put_float(f, width, precision, fillChar, true);
-            else {
-                while (lockset(this->m_lock));
-                Printer::put_float(f, width, precision, fillChar, true);
-                lockclr(this->m_lock);
-            }
-        }
-#endif
+    protected:
+        const PrintCapable *m_printCapable;
+        int m_lock;
 };
 
 }
