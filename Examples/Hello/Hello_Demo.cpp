@@ -40,7 +40,7 @@ int main () {
 #ifdef TEST_PROPWARE
         pwOut.printf("Hello, world! %03d 0x%02X" CRLF, i, i);
 #elif defined TEST_SIMPLE
-        print("Hello, world! %03d 0x%02x\n", i, i);
+        printi("Hello, world! %03d 0x%02x\n", i, i);
 #elif defined TEST_TINYSTREAM
         std::cout << "Hello, world! " << i << ' ' << i << std::endl;
 #elif defined TEST_TINYIO

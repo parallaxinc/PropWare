@@ -102,23 +102,21 @@ class Printer {
          *                          object such as a PropWare::UART
          */
         Printer (const PrintCapable *printCapable)
-                : m_printCapable(printCapable) {
-            this->m_lock = -1;
+                : m_printCapable(printCapable),
+                  m_lock(-1) {
         }
 
         /**
          * @see PropWare::PrintCapable::put_char
          */
-        virtual void put_char (const char c,
-                               const bool bypassLock = false) const {
+        void put_char (const char c, const bool bypassLock = false) const {
             this->m_printCapable->put_char(c);
         }
 
         /**
          * @see PropWare::PrintCapable::puts
          */
-        virtual void puts (const char string[],
-                           const bool bypassLock = false) const {
+        void puts (const char string[], const bool bypassLock = false) const {
             this->m_printCapable->puts(string);
         }
 
@@ -132,9 +130,9 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        virtual void put_int (int32_t x, uint16_t width = 0,
-                              const char fillChar = DEFAULT_FILL_CHAR,
-                              const bool bypassLock = false) const {
+        void put_int (int32_t x, uint16_t width = 0,
+                      const char fillChar = DEFAULT_FILL_CHAR,
+                      const bool bypassLock = false) const {
             if (0 > x)
                 this->m_printCapable->put_char('-');
 
@@ -151,9 +149,9 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        virtual void put_uint (uint32_t x, uint16_t width = 0,
-                               const char fillChar = DEFAULT_FILL_CHAR,
-                               const bool bypassLock = false) const {
+        void put_uint (uint32_t x, uint16_t width = 0,
+                       const char fillChar = DEFAULT_FILL_CHAR,
+                       const bool bypassLock = false) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
             uint8_t       i = 0;
@@ -188,9 +186,9 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        virtual void put_hex (uint32_t x, uint16_t width = 0,
-                              const char fillChar = DEFAULT_FILL_CHAR,
-                              const bool bypassLock = false) const {
+        void put_hex (uint32_t x, uint16_t width = 0,
+                      const char fillChar = DEFAULT_FILL_CHAR,
+                      const bool bypassLock = false) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
 
@@ -221,9 +219,6 @@ class Printer {
          * @brief       Print a floating point number with a given width and
          *              precision
          *
-         * @note        This function is _only_ enabled when the CMake option,
-         *              `PROPWARE_PRINT_FLOAT` is turned on.
-         *
          * @param[in]   f           Number to print
          * @param[in]   width       Number of integer digits to print (includes
          *                          decimal point)
@@ -234,10 +229,9 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        virtual void put_float (double f, uint16_t width = 0,
-                                uint16_t precision = 6,
-                                const char fillChar = DEFAULT_FILL_CHAR,
-                                const bool bypassLock = false) const {
+        void put_float (double f, uint16_t width = 0, uint16_t precision = 6,
+                        const char fillChar = DEFAULT_FILL_CHAR,
+                        const bool bypassLock = false) const {
             ////////////////////////////////////////////////////////////////////
             // Code taken straight from Parallax's floatToString! Thank you!!!
             ////////////////////////////////////////////////////////////////////
@@ -374,7 +368,11 @@ class Printer {
             this->m_printCapable->puts(s);
         }
 
-        void printf(const char *fmt) const {
+        /**
+         * @see PropWare::Printer::printf(const char *fmt, const T first,
+         * Targs... remaining)
+         */
+        void printf(const char *fmt, const bool bypassLock = false) const {
             this->puts(fmt);
         }
 
@@ -400,11 +398,11 @@ class Printer {
          * @param[in]   ...     Variable number of arguments passed here.
          *                      Continuing with the `Hello, %%s!` example, a
          *                      single argument could be passed such as:<br>
-         *                        `Printer::printf("Hello, %s!", "David");`<br>
+         *                        `pwOut.printf("Hello, %s!", "David");`<br>
          *                      and "Hello, David!" would be sent out the serial
          *                      port. Multiple arguments can be used as well,
          *                      such as:<br>
-         *                        `Printer::printf("%i + %i = %i", 2, 3, 2 +
+         *                        `pwOut.printf("%i + %i = %i", 2, 3, 2 +
          *                        3);`<br>
          *                      Which would print:<br>
          *                        `2 + 3 = 5`
