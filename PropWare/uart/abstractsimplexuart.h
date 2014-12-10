@@ -185,14 +185,14 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::set_baud_rate
          */
-        virtual void set_baud_rate (const uint32_t baudRate) {
+        void set_baud_rate (const int32_t baudRate) {
             this->m_bitCycles = CLKFREQ / baudRate;
         }
 
         /**
          * @see PropWare::UART::get_baud_rate
          */
-        uint32_t get_baud_rate () const {
+        int32_t get_baud_rate () const {
             return CLKFREQ / this->m_bitCycles;
         }
 
@@ -201,6 +201,13 @@ class AbstractSimplexUART : public virtual UART {
          */
         HUBTEXT virtual void send (uint16_t originalData) const {
             uint32_t wideData = originalData;
+
+            // Set pin as output
+            __asm__ volatile (
+                    "or outa, %0 \n\t"
+                    "or dira, %0 \n\t"
+                    :
+                    : "r" (this->m_tx.get_mask()));
 
             // Add parity bit
             if (UART::EVEN_PARITY == this->m_parity) {
@@ -228,95 +235,108 @@ class AbstractSimplexUART : public virtual UART {
         }
 
         /**
-         * @see PropWare::UART::puts
+         * @see PropWare::UART::send_array
+         */
+        HUBTEXT virtual void send_array (const char array[],
+                                         uint32_t words) const {
+                char *arrayPtr = (char *) array;
+                register uint32_t wideData;
+                register uint32_t dataMask    = this->m_dataMask;
+                register uint32_t parityMask  = this->m_parityMask;
+                register uint32_t stopBitMask = this->m_stopBitMask;
+                register uint32_t totalBits   = this->m_totalBits;
+                register uint32_t bitCycles   = this->m_bitCycles;
+                register uint32_t txMask      = this->m_tx.get_mask();
+
+                // Set pin as output
+                __asm__ volatile (
+                        "or outa, %0 \n\t"
+                        "or dira, %0 \n\t"
+                        :
+                        : "r" (txMask));
+
+                switch (this->m_parity) {
+                    case UART::NO_PARITY:
+                        do {
+                            // Add stop bits
+                            wideData = this->m_stopBitMask | *arrayPtr;
+
+                            // Add start bit
+                            wideData <<= 1;
+
+                            this->shift_out_data(wideData, totalBits, bitCycles,
+                                    txMask);
+
+                            // Increment the character pointer
+                            ++arrayPtr;
+                        } while (--words);
+                        break;
+                    case UART::ODD_PARITY:
+                        do {
+                            wideData = (uint32_t) *arrayPtr;
+
+                            // Add parity
+                            __asm__ volatile(
+                                    "test %[_data], %[_dataMask] wc \n\t"
+                                    "muxnc %[_data], %[_parityMask] \n\t"
+                                    : [_data] "+r" (wideData)
+                                    : [_dataMask] "r" (dataMask),
+                                    [_parityMask] "r" (parityMask));
+
+                            // Add stop bits
+                            wideData |= stopBitMask;
+
+                            // Add start bit
+                            wideData <<= 1;
+
+                            this->shift_out_data(wideData, totalBits, bitCycles,
+                                    txMask);
+
+                            // Increment the character pointer
+                            ++arrayPtr;
+                        } while (--words);
+                        break;
+                    case UART::EVEN_PARITY:
+                        do {
+                            wideData = (uint32_t) *arrayPtr;
+
+                            // Add parity
+                            __asm__ volatile(
+                                    "test %[_data], %[_dataMask] wc \n\t"
+                                    "muxc %[_data], %[_parityMask]"
+                                    : [_data] "+r" (wideData)
+                                    : [_dataMask] "r" (this->m_dataMask),
+                                    [_parityMask] "r" (this->m_parityMask));
+
+                            // Add stop bits
+                            wideData |= this->m_stopBitMask;
+
+                            // Add start bit
+                            wideData <<= 1;
+
+                            this->shift_out_data(wideData, totalBits, bitCycles,
+                                    txMask);
+
+                            // Increment the character pointer
+                            ++arrayPtr;
+                        } while (--words);
+                        break;
+                }
+            }
+
+        /**
+         * @see PropWare::PrintCapable::put_char
+         */
+        void put_char (const char c) const {
+            this->send((uint16_t) c);
+        }
+
+        /**
+         * @see PropWare::PrintCapable::puts
          */
         void puts (const char string[]) const {
             const uint32_t length = strlen(string);
             this->send_array(string, length);
-        }
-
-        /**
-         * @see PropWare::UART::send_array
-         */
-        HUBTEXT virtual void send_array (const char array[],
-                uint32_t words) const {
-            char *arrayPtr = (char *) array;
-            register uint32_t wideData;
-            register uint32_t dataMask    = this->m_dataMask;
-            register uint32_t parityMask  = this->m_parityMask;
-            register uint32_t stopBitMask = this->m_stopBitMask;
-            register uint32_t totalBits   = this->m_totalBits;
-            register uint32_t bitCycles   = this->m_bitCycles;
-            register uint32_t txMask      = this->m_tx.get_mask();
-
-            switch (this->m_parity) {
-                case UART::NO_PARITY:
-                    do {
-                        // Add stop bits
-                        wideData = this->m_stopBitMask | *arrayPtr;
-
-                        // Add start bit
-                        wideData <<= 1;
-
-                        this->shift_out_data(wideData, totalBits, bitCycles,
-                                txMask);
-
-                        // Increment the character pointer
-                        ++arrayPtr;
-                    } while (--words);
-                    break;
-                case UART::ODD_PARITY:
-                    do {
-                        wideData = (uint32_t) *arrayPtr;
-
-                        // Add parity
-                        __asm__ volatile(
-                                "test %[_data], %[_dataMask] wc \n\t"
-                                "muxnc %[_data], %[_parityMask]"
-                                : [_data] "+r" (wideData)
-                                : [_dataMask] "r" (dataMask),
-                                [_parityMask] "r" (parityMask));
-
-                        // Add stop bits
-                        wideData |= stopBitMask;
-
-                        // Add start bit
-                        wideData <<= 1;
-
-                        this->shift_out_data(wideData, totalBits, bitCycles,
-                                txMask);
-
-                        // Increment the character pointer
-                        ++arrayPtr;
-                    } while (--words);
-                    break;
-                case UART::EVEN_PARITY:
-                    do {
-                        wideData = (uint32_t) *arrayPtr;
-
-                        // Add parity
-                        __asm__ volatile(
-                                "test %[_data], %[_dataMask] wc \n\t"
-                                "muxc %[_data], %[_parityMask]"
-                                : [_data] "+r" (wideData)
-                                : [_dataMask] "r" (this->m_dataMask),
-                                [_parityMask] "r" (this->m_parityMask));
-
-                        // Add stop bits
-                        wideData |= this->m_stopBitMask;
-
-                        // Add start bit
-                        wideData <<= 1;
-
-                        this->shift_out_data(wideData, totalBits, bitCycles,
-                                txMask);
-
-                        // Increment the character pointer
-                        ++arrayPtr;
-                    } while (--words);
-                    break;
-            }
-
         }
 
     protected:
@@ -328,7 +348,9 @@ class AbstractSimplexUART : public virtual UART {
             this->set_data_width(UART::DEFAULT_DATA_WIDTH);
             this->set_parity(UART::DEFAULT_PARITY);
             this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(UART::DEFAULT_BAUD);
+            this->set_tx_mask(
+                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_TX));
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
         }
 
         /**
@@ -382,8 +404,8 @@ class AbstractSimplexUART : public virtual UART {
         __attribute__ ((fcache))
 #endif
         void shift_out_data (register uint32_t data, register uint32_t bits,
-                const register uint32_t bitCycles,
-                const register uint32_t txMask) const {
+                             const register uint32_t bitCycles,
+                             const register uint32_t txMask) const {
 #ifndef DOXYGEN_IGNORE
             volatile uint32_t waitCycles;
 

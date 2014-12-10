@@ -21,17 +21,13 @@ set(CMAKE_ECOGCXX_FLAGS_INIT "${CMAKE_CXX_FLAGS_INIT} -mcog -xc++ -r")
 # File names
 set(CMAKE_STATIC_LIBRARY_PREFIX lib)
 set(CMAKE_STATIC_LIBRARY_SUFFIX .a)
-set(CMAKE_EXECUTABLE_SUFFIX .elf)
+set(CMAKE_EXECUTABLE_SUFFIX .elf CACHE STRING "Executable suffix")
 
 ################################################################################
 ### Flags
 ################################################################################
 # Set flags
 set(CMAKE_AR_FLAGS "cr")
-set(LDFLAGS "-Xlinker") # -Map=main.rawmap")
-
-# Add library search paths
-set(CMAKE_EXE_LINKER_FLAGS "${LDFLAGS}")
 
 ################################################################################
 ### Compilers
@@ -59,8 +55,6 @@ set(CMAKE_C_ARCHIVE_FINISH
 
 set(CMAKE_C_LINK_EXECUTABLE
 "<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> -o<TARGET> <OBJECTS> <LINK_LIBRARIES>")
-
-include_directories(${PROPWARE_PATH})
 
 mark_as_advanced(
     CMAKE_BUILD_TYPE

@@ -21,7 +21,21 @@ if (AUTO_CXX_STD)
     set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
 endif ()
 
-# Check if the deprecated variable name is set
+# Linker pruning is broken when used with the cog memory model. See the
+# following thread for a workaround:
+# http://forums.parallax.com/showthread.php/157878-Simple-blinky-program-and-linker-pruning
+if (NOT((MODEL STREQUAL "cog") OR (MODEL STREQUAL "COG")))
+    if (AUTO_CUT_SECTIONS)
+        set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
+    endif ()
+endif ()
+
+if (PROPWARE_PRINT_FLOAT)
+    add_definitions(-DENABLE_PROPWARE_PRINT_FLOAT)
+endif ()
+
+# Check if a deprecated variable name is set
 if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")
     set(C_FLAGS ${CFLAGS})
@@ -29,6 +43,9 @@ if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     set(CFLAGS )
     set(CXXFLAGS )
 endif()
+
+set(COMMON_FLAGS "-save-temps ${COMMON_FLAGS}")
+#set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=main.rawmap ${CMAKE_EXE_LINKER_FLAGS}")
 
 # Overwite the old flags
 set(CMAKE_ASM_FLAGS     "${COMMON_FLAGS}    ${ASM_FLAGS}")

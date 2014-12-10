@@ -23,7 +23,19 @@
  * SOFTWARE.
  */
 
-#include "DuplexUART_Demo.h"
+// Includes
+#include <PropWare/PropWare.h>
+#include <PropWare/uart/halfduplexuart.h>
+#include <PropWare/synchronousprinter.h>
+
+uint8_t init_main_cog (_thread_state_t *threadData,
+                       PropWare::SimplexUART *speaker);
+
+void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener);
+
+void listen_silently (void *arg);
+
+void error (const PropWare::ErrorCode err);
 
 // Create an easy-to-test number pattern - useful when testing with a logic
 // analyzer
@@ -38,18 +50,13 @@ char g_numberPattern[] = {
         0x80,
         0x00};
 
-// Need to use HalfDuplex instead of Simplex so that multiple cogs can use the
-// same port. Otherwise, any cog _not_ writing to the pin would hold the pin
-// high
-const PropWare::HalfDuplexUART g_printer(PropWare::UART::PARALLAX_STANDARD_TX);
 // Create the test string - useful when testing with a terminal
-const char                   TEST_STRING[] = "Hello world!";
-const uint32_t               BAUD_RATE = 115200;
-const PropWare::Port::Mask   TX_PIN     = PropWare::Port::P12;
-const PropWare::Port::Mask   RX_PIN     = PropWare::Port::P13;
-const PropWare::UART::Parity PARITY     = PropWare::UART::NO_PARITY;
-const uint16_t               STACK_SIZE = 256;
-volatile uint8_t             g_stringLength;
+const char                   TEST_STRING[] = "Hello, world!\n";
+const uint32_t               BAUD_RATE     = 200;
+const PropWare::Port::Mask   TX_PIN        = PropWare::Port::P12;
+const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
+const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
+const uint16_t               STACK_SIZE    = 256;
 uint32_t                     threadStack[STACK_SIZE];
 
 /**
@@ -61,7 +68,7 @@ int main () {
 
     // Start our new cog and initialize the speaking UART
     const uint8_t cog = init_main_cog(&threadData, &speaker);
-    g_printer.puts("Ready to send!!!" CRLF);
+//    pwSyncOut.printf("New cog %u. Ready to send!!!" CRLF, cog); // TODO
 
     while (1) {
         waitcnt(500 * MILLISECOND + CNT);
@@ -73,26 +80,27 @@ uint8_t init_main_cog (_thread_state_t *threadData,
         PropWare::SimplexUART *speaker) {
     speaker->set_baud_rate(BAUD_RATE);
     speaker->set_parity(PARITY);
-    g_stringLength = (uint8_t) (strlen(TEST_STRING) + 1);
 
     return (uint8_t) _start_cog_thread(threadStack + STACK_SIZE,
             listen_silently, (void *) NULL, threadData);
 }
 
 void listen_silently (void *arg) {
-    char buffer[sizeof(TEST_STRING)];
+    PropWare::ErrorCode      err;
+    char                     buffer[sizeof(TEST_STRING)];
     PropWare::HalfDuplexUART listener(RX_PIN);
+    int32_t                  chars;
 
     // Initialize the listener UART and clear the buffer
     init_listener_cog(buffer, &listener);
-    g_printer.puts("Ready to receive!" CRLF);
+//    pwSyncOut.puts("Ready to receive!" CRLF); // TODO
 
     while (1) {
-        listener.receive_array(buffer, (uint32_t) (g_stringLength - 1));
+        chars = 0;
+        if ((err = listener.fgets(buffer, &chars)))
+            error(err);
 
-        g_printer.puts("Data: \"");
-        g_printer.puts(buffer);
-        g_printer.puts("\"" CRLF);
+//        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, chars, buffer); // TODO
     }
 }
 
@@ -109,9 +117,7 @@ void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    g_printer.puts("Unknown error ");
-    g_printer.send('0' + err);
-    g_printer.puts(CRLF);
+//    pwSyncOut.printf("Unknown error: %u" CRLF, err); // TODO
 
     while (1) {
         debugLEDs.write((uint32_t) err);

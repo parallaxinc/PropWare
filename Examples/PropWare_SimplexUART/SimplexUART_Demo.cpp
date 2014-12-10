@@ -23,15 +23,22 @@
  * SOFTWARE.
  */
 
-#include "SimplexUART_Demo.h"
+// Includes
+#include <PropWare/PropWare.h>
+#include <PropWare/uart/simplexuart.h>
+#include <PropWare/printer.h>
 
-static const uint32_t BAUD_RATE = 115200;
+void error (const PropWare::ErrorCode err);
+
+const int32_t BAUD_RATE = 115200;
+const int32_t DELAY     = 200;
 
 /**
  * @brief   Write "Hello world!" out via UART protocol
  */
 int main () {
     PropWare::ErrorCode err;
+    PropWare::SimplexUART uart;
 
     // Create an easy-to-test number pattern - useful when testing with a logic
     // analyzer
@@ -44,16 +51,11 @@ int main () {
             0xaa,
             0xff,
             0x80,
-            0x00 };
+            0x00 }; // Make sure we have a null-terminator for puts
 
     // Create the test string - useful when testing with a terminal
     char string[] = "Hello world! This is my most favoritest sentence "
             "ever!!!" CRLF;
-
-    // Create pointer variables that can be incremented in a loop
-    char *s;
-
-    PropWare::SimplexUART uart(PropWare::UART::PARALLAX_STANDARD_TX);
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
     uart.set_baud_rate(BAUD_RATE);
@@ -64,24 +66,13 @@ int main () {
     uart.set_parity(PropWare::UART::NO_PARITY);
 
     while (1) {
-        s = numberPattern;         // Set the pointer to the beginning of the string
-        while (*s) {        // Loop until we read the null-terminator
-            uart.send((uint16_t) *s);  // Output the next character of the string
+        // Test the number pattern
+        uart.puts(numberPattern);
+        waitcnt(DELAY * MILLISECOND + CNT);
 
-            // Increment the character pointer
-            ++s;
-        }
-
-        waitcnt(MILLISECOND + CNT);
-
-        for (s = numberPattern; *s; ++s)
-            uart.send((uint16_t) *s);
-
-        waitcnt(MILLISECOND + CNT);
-
+        // Test a basic string
         uart.puts(string);
-
-        waitcnt(MILLISECOND + CNT);
+        waitcnt(DELAY * MILLISECOND + CNT);
     }
 }
 

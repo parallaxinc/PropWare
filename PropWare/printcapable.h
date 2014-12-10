@@ -1,11 +1,7 @@
 /**
- * @file    SD_Demo.h
- */
-/**
- * @brief   Demonstrate various functions including writing to files and the
- *          Shell
+ * @file        printer.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -27,42 +23,34 @@
  * SOFTWARE.
  */
 
-#ifndef SD_DEMO_H_
-#define SD_DEMO_H_
+#pragma once
+
+namespace PropWare {
 
 /**
- * @defgroup    _propware_example_sd    SD Card Demo
- * @ingroup     _propware_examples
- * @{
+ * @brief    Interface for all classes capable of printing
  */
+class PrintCapable {
+    public:
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   c   Individual char to be printed
+         */
+        virtual void put_char (const char c) const = 0;
 
-//#define DEBUG
-//#define LOW_RAM_MODE
-//#define TEST_WRITE
-#define TEST_SHELL
+        /**
+         * @brief       Send a null-terminated character array. Though this method
+         *              could be created using put_char, some objects (such as
+         *              PropWare::UART), have optimized methods for sending a string
+         *              and PrintCapable::puts can utilize them.
+         *
+         * @pre         `string[]` must be terminated with a null terminator
+         *
+         * @param[in]   string[]    Array of data words with the final word
+         *                          being 0 - the null terminator
+         */
+        virtual void puts (const char string[]) const = 0;
+};
 
-// Includes
-#include <propeller.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/sd.h>
-#include <PropWare/pin.h>
-#include <PropWare/port.h>
-#include <simpletext.h>
-
-/** Pin number for MOSI (master out - slave in) */
-#define MOSI        PropWare::Port::P0
-/** Pin number for MISO (master in - slave out) */
-#define MISO        PropWare::Port::P1
-/** Pin number for the clock signal */
-#define SCLK        PropWare::Port::P2
-/** Pin number for chip select */
-#define CS          PropWare::Port::P4
-
-#define OLD_FILE    "STUFF.TXT"
-#define NEW_FILE    "TEST.TXT"
-
-void error (const PropWare::ErrorCode err, const PropWare::SD *sd);
-
-/**@}*/
-
-#endif /* SD_DEMO_H_ */
+}

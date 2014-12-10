@@ -1,10 +1,7 @@
 /**
- * @file    L3G_Demo.h
- */
-/**
- * @brief   Demonstration using various functions of the L3G gyroscope
+ * @file        scancapable.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -26,34 +23,22 @@
  * SOFTWARE.
  */
 
-#ifndef L3G_DEMO_H_
-#define L3G_DEMO_H_
+#pragma once
+
+namespace PropWare {
 
 /**
- * @defgroup    _propware_example_l3g   L3G Gyroscope Demo
- * @ingroup     _propware_examples
- * @{
+ * @brief    Interface for all classes capable of printing
  */
+class ScanCapable {
+    public:
+        static const char STRING_DELIMITER = '\n';
 
-#include <propeller.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/l3g.h>
-#include <PropWare/spi.h>
-#include <PropWare/pin.h>
-#include <PropWare/port.h>
-#include <simpletools.h>
+    public:
+        /**
+         * @brief       Read and return a single character (blocking)
+         */
+        virtual char get_char () const = 0;
+};
 
-/** Pin number for MOSI (master out - slave in) */
-#define MOSI                PropWare::Port::P0
-/** Pin number for MISO (master in - slave out) */
-#define MISO                PropWare::Port::P1
-/** Pin number for the clock signal */
-#define SCLK                PropWare::Port::P2
-/** Pin number for chip select */
-#define CS                  PropWare::Port::P6
-
-void error (const PropWare::ErrorCode err);
-
-/**@}*/
-
-#endif /* L3G_DEMO_H_ */
+}

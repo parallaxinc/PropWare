@@ -5,7 +5,10 @@
  */
 
 // Includes
-#include "Concurrency_Demo.h"
+#include <PropWare/PropWare.h>
+#include <PropWare/pin.h>
+
+void blinkAnLEDSome (void *arg);
 
 volatile int lock = locknew();
 

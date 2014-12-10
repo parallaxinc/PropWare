@@ -1,8 +1,5 @@
 /**
- * @file    SimplexUART_Demo.h
- */
-/**
- * @brief   Write "Hello world!" out via UART protocol
+ * @file    synchronousprinter.cpp
  *
  * @author  David Zemon
  *
@@ -26,23 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef SimplexUART_DEMO_H_
-#define SimplexUART_DEMO_H_
+#include <PropWare/synchronousprinter.h>
+#include <PropWare/uart/sharedsimplexuart.h>
 
-/**
- * @defgroup    _propware_example_simplexUart   SimplexUART Demo
- * @ingroup     _propware_examples
- * @{
- */
-
-// Includes
-#include <propeller.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/uart/simplexuart.h>
-#include <PropWare/port.h>
-
-void error (const PropWare::ErrorCode err);
-
-/**@}*/
-
-#endif /* SimplexUART_DEMO_H_ */
+const PropWare::SharedSimplexUART  _g_sharedSimplexUart;
+const PropWare::SynchronousPrinter pwSyncOut(&_g_sharedSimplexUart);

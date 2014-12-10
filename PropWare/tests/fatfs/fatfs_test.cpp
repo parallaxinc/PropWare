@@ -1,10 +1,15 @@
 /**
- * @file    SPI_Demo.h
- */
-/**
- * @brief   Write "Hello world!" out via SPI protocol and receive an echo
+ * @file    fatfs_test.cpp
  *
  * @author  David Zemon
+ *
+ * Hardware:
+ *      SD card connected with the following pins:
+ *          - MOSI = P0
+ *          - MISO = P1
+ *          - SCLK = P2
+ *          - CS   = P4
+ *      FAT16 or FAT32 Filesystem on the first partition of the SD card
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -26,41 +31,49 @@
  * SOFTWARE.
  */
 
-#ifndef SPI_DEMO_H_
-#define SPI_DEMO_H_
+#include <PropWare/sd.h>
+#include <PropWare/fatfs.h>
+#include "../PropWareTests.h"
 
-/**
- * @defgroup    _propware_example_spi   SPI Demo
- * @ingroup     _propware_examples
- * @{
- */
+PropWare::BlockStorage *driver;
+PropWare::FatFS        *testable;
 
-// Includes
-#include <propeller.h>
-#include <tinyio.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/spi.h>
-#include <PropWare/pin.h>
-#include <PropWare/port.h>
+const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
+const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
+const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
+const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
 
-/** Pin number for MOSI (master out - slave in) */
-#define MOSI                PropWare::Port::P0
-/** Pin number for MISO (master in - slave out) */
-#define MISO                PropWare::Port::P1
-/** Pin number for the clock signal */
-#define SCLK                PropWare::Port::P2
-/** Pin number for chip select */
-#define CS                  PropWare::Port::P6
+SETUP {
+    driver = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
+                              SCLK, CS);
+}
 
-/** Frequency (in hertz) to run the SPI module */
-#define FREQ                100000
-/** The SPI mode to run */
-#define MODE                PropWare::SPI::MODE_0
-/** Determine if the LSB or MSB should be sent first for each byte */
-#define BITMODE             PropWare::SPI::MSB_FIRST
+TEARDOWN {
+    delete driver;
+}
 
-void error (const PropWare::ErrorCode err, const PropWare::SPI *spi);
+TEST(Constructor) {
+    setUp();
 
-/**@}*/
+    testable = new PropWare::FatFS(driver);
 
-#endif /* SPI_DEMO_H_ */
+    tearDown();
+}
+
+TEST(Mount) {
+    setUp();
+
+    testable = new PropWare::FatFS(driver);
+    testable->mount();
+
+    tearDown();
+}
+
+int main () {
+    START(FatFSTest);
+
+    RUN_TEST(Constructor);
+    RUN_TEST(Mount);
+
+    COMPLETE();
+}

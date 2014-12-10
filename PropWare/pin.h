@@ -35,10 +35,6 @@ namespace PropWare {
  */
 class Pin: public PropWare::Port {
     public:
-        /** Number of milliseconds to delay during debounce */
-        static const uint8_t DEBOUNCE_DELAY = 3;
-
-    public:
         static void flash_pin (const Pin::Mask pinMask,
                 const uint32_t iterations = 10) {
             Port::flash_port(pinMask, pinMask, iterations);
@@ -76,36 +72,37 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @brief       Create a Pin variable
-         *
-         * @param[in]   pinNum  0-indexed integer value representing pin-number
-         */
-        Pin (const uint8_t pinNum) {
-            this->m_mask = PropWare::Port::convert(pinNum);
-        }
-
-        /**
-         * @brief       Create a Pin variable
-         *
-         * @param[in]   pinNum      0-indexed integer value representing
-         *                          pin-number
-         * @param[in]   direction   Direction to initialize pin; One of
-         *                          PropWare::Pin::Dir
-         */
-        Pin (const uint8_t pinNum, const Pin::Dir direction) {
-            this->m_mask = PropWare::Port::convert(pinNum);
-            this->set_dir(direction);
-        }
-
-        /**
          * @see PropWare::Port::set_mask()
          */
         void set_mask (const PropWare::Port::Mask mask) {
             this->PropWare::Port::set_mask(mask);
         }
 
+        /**
+         * @brief       Set a Pin's mask based on the pin number (an integer,
+         *              0 through 31
+         *
+         * @param[in]   pinNum  An integer 0-31 representing GPIO pins P0-P31
+         */
+        void set_pin_num (const uint8_t pinNum) {
+            if (31 <= pinNum)
+                this->m_mask = Pin::NULL_PIN;
+            else
+                this->m_mask = 1 << pinNum;
+        }
+
+        /**
+         * @see PropWare::Port::get_mask()
+         */
         PropWare::Port::Mask get_mask () const {
             return (PropWare::Port::Mask) this->m_mask;
+        }
+
+        void write (const bool value) {
+            if (value)
+                this->set();
+            else
+                this->clear();
         }
 
         /**
@@ -151,16 +148,6 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @brief   Allow easy switch-press detection of any pin; Includes
-         *          de-bounce protection
-         *
-         * @return  Returns 1 or 0 depending on whether the switch was pressed
-         */
-        bool is_switch_low () const {
-            return this->is_switch_low(PropWare::Pin::DEBOUNCE_DELAY);
-        }
-
-        /**
          * @brief       Allow easy switch-press detection of any pin; Includes
          *              de-bounce protection
          *
@@ -170,12 +157,11 @@ class Pin: public PropWare::Port {
          * @return      Returns 1 or 0 depending on whether the switch was
          *              pressed
          */
-        bool is_switch_low (const uint16_t debounceDelayInMillis) const {
+        bool is_switch_low (const uint16_t debounceDelayInMillis = 3) const {
             this->set_dir(PropWare::Pin::IN);  // Set the pin as input
 
             if (!(this->read())) {   // If pin is grounded (aka, pressed)
-                // Delay 3 ms
-                waitcnt(debounceDelayInMillis*MILLISECOND + CNT);
+                waitcnt(debounceDelayInMillis * MILLISECOND + CNT);
 
                 return !(this->read());  // Check if it's still pressed
             }

@@ -23,7 +23,30 @@
  * SOFTWARE.
  */
 
-#include "SD_Demo.h"
+//#define DEBUG
+//#define LOW_RAM_MODE
+//#define TEST_WRITE
+#define TEST_SHELL
+
+// Includes
+#include <PropWare/PropWare.h>
+#include <PropWare/sd.h>
+#include <PropWare/pin.h>
+#include <PropWare/port.h>
+
+/** Pin number for MOSI (master out - slave in) */
+#define MOSI        PropWare::Port::P0
+/** Pin number for MISO (master in - slave out) */
+#define MISO        PropWare::Port::P1
+/** Pin number for the clock signal */
+#define SCLK        PropWare::Port::P2
+/** Pin number for chip select */
+#define CS          PropWare::Port::P4
+
+#define OLD_FILE    "STUFF.TXT"
+#define NEW_FILE    "TEST.TXT"
+
+void error (const PropWare::ErrorCode err, const PropWare::SD *sd);
 
 // Main function
 int main () {
@@ -143,11 +166,12 @@ int main () {
 void error (const PropWare::ErrorCode err, const PropWare::SD *sd) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        PropWare::SPI::get_instance()->print_error_str(
-                (PropWare::SPI::ErrorCode) err);
-    else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
-        sd->print_error_str((PropWare::SD::ErrorCode) err);
+    // TODO: Renable this once SD has been completely refactored
+//    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
+//        PropWare::SPI::get_instance()->print_error_str(
+//                (PropWare::SPI::ErrorCode) err);
+//    else if (PropWare::SD::BEG_ERROR <= err && err < PropWare::SD::END_ERROR)
+//        sd->print_error_str((PropWare::SD::ErrorCode) err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

@@ -27,34 +27,14 @@
 
 #include <PropWare/uart/simplexuart.h>
 #include <PropWare/uart/duplexuart.h>
+#include <PropWare/scancapable.h>
 
 namespace PropWare {
 
 class AbstractDuplexUART: public virtual DuplexUART,
+                          public virtual ScanCapable,
                           public AbstractSimplexUART {
     public:
-        /**
-         * @see PropWare::SimplexUART::AbstractSimplexUART()
-         */
-        AbstractDuplexUART () :
-                AbstractSimplexUART() {
-        }
-
-        /**
-         * @brief       Initialize a UART module with both pin masks
-         *
-         * @param[in]   tx  Pin mask for TX (transmit) pin
-         * @param[in]   rx  Pin mask for RX (receive) pin
-         */
-        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) {
-            this->AbstractSimplexUART::set_data_width(this->m_dataWidth);
-
-            // Set rx direction second so that, in the case of half-duplex, the
-            // pin floats high
-            this->set_tx_mask(tx);
-            this->set_rx_mask(rx);
-        }
-
         /**
          * @see PropWare::UART::set_rx_mask
          */
@@ -74,7 +54,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @see PropWare::UART::set_data_width
          */
         virtual ErrorCode set_data_width (const uint8_t dataWidth) {
-            ErrorCode err = this->AbstractSimplexUART::set_data_width(dataWidth);
+            ErrorCode err = AbstractSimplexUART::set_data_width(dataWidth);
             if (err)
                 return err;
 
@@ -88,7 +68,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @see PropWare::UART::set_parity
          */
         virtual void set_parity (const UART::Parity parity) {
-            this->AbstractSimplexUART::set_parity(parity);
+            AbstractSimplexUART::set_parity(parity);
             this->set_msb_mask();
             this->set_receivable_bits();
         }
@@ -96,16 +76,16 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive
          */
-        HUBTEXT virtual uint32_t receive () const {
-            ErrorCode err;
+        HUBTEXT uint32_t receive () const {
             uint32_t rxVal;
-            uint32_t wideParityMask = this->m_parityMask;
             uint32_t wideDataMask = this->m_dataMask;
 
-            uint32_t evenParityResult;
+            // Set RX as input
+            __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
             rxVal = this->shift_in_data(this->m_receivableBits,
-                    this->m_bitCycles, this->m_rx.get_mask(), this->m_msbMask);
+                                        this->m_bitCycles,
+                                        this->m_rx.get_mask(), this->m_msbMask);
 
             if (this->m_parity && 0 != this->checkParity(rxVal))
                 return (uint32_t) -1;
@@ -116,39 +96,101 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive_array
          */
-        HUBTEXT virtual ErrorCode receive_array (char *buffer,
-                uint32_t words) const {
-            uint32_t wideData;
+        HUBTEXT ErrorCode receive_array (char buffer[], int32_t *length,
+                                         const uint32_t delim = '\n') const {
+            if (NULL == length)
+                return NULL_POINTER;
+            else if (0 == *length)
+                *length = INT32_MAX;
+            int32_t wordCnt = 0;
 
             // Check if the total receivable bits can fit within a byte
-            if (8 >= this->m_receivableBits) {
-                this->shift_in_array((uint32_t) buffer, words,
-                        this->m_receivableBits, this->m_bitCycles,
-                        this->m_rx.get_mask(), this->m_msbMask);
+            if (0 && 8 >= this->m_receivableBits) {
+                // Set RX as input
+                __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
-                for (uint32_t i = words; i; --i) {
-                    wideData = (uint32_t) buffer[i];
-                    if (0 != this->checkParity(wideData))
-                        return UART::PARITY_ERROR;
-                }
+                *length = this->shift_in_byte_array((uint32_t) buffer,
+                                                    *length,
+                                                    delim,
+                                                    this->m_receivableBits,
+                                                    this->m_bitCycles,
+                                                    this->m_rx.get_mask(),
+                                                    this->m_msbMask);
+
+                if (NO_PARITY != this->m_parity)
+                    for (int32_t i = 0; i < *length; --i)
+                        if (0 != this->checkParity((uint32_t) buffer[i]))
+                            return UART::PARITY_ERROR;
             }
             // If total receivable bits does not fit within a byte, shift in
             // one word at a time (this offers no speed improvement - it is
             // only here for user convenience)
-            else
+            else {
+                uint32_t temp;
+
                 do {
-                    *buffer = (char) this->shift_in_data(this->m_receivableBits,
-                            this->m_bitCycles, this->m_rx.get_mask(),
-                            this->m_msbMask);
-                    if (-1 == *buffer)
+                    if (-1 == (temp = this->receive()))
                         return UART::PARITY_ERROR;
+
+                    *buffer = temp;
                     ++buffer;
-                } while (--words);
+                    ++wordCnt;
+                } while (temp != delim && wordCnt < *length);
+
+                *length = wordCnt;
+            }
 
             return NO_ERROR;
         }
 
+        /**
+         * @see PropWare::ScanCapable::get_char
+         */
+        char get_char () const {
+            return this->receive();
+        }
+
+        PropWare::ErrorCode fgets (char string[], int32_t *length) const {
+            int32_t originalLength = *length;
+
+            PropWare::ErrorCode err;
+            if ((err = this->receive_array(string, length,
+                                           ScanCapable::STRING_DELIMITER)))
+                return err;
+            else {
+                // Replace delimiter with null-terminator IFF we found one
+                if (*length != originalLength
+                        || ScanCapable::STRING_DELIMITER
+                        == string[originalLength])
+                    string[*length - 1] = '\0';
+                return NO_ERROR;
+            }
+        }
+
     protected:
+        /**
+         * @see PropWare::SimplexUART::AbstractSimplexUART()
+         */
+        AbstractDuplexUART () :
+                AbstractSimplexUART() {
+            this->set_rx_mask(
+                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_RX));
+        }
+
+        /**
+         * @brief       Initialize a UART module with both pin masks
+         *
+         * @param[in]   tx  Pin mask for TX (transmit) pin
+         * @param[in]   rx  Pin mask for RX (receive) pin
+         */
+        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) :
+                AbstractSimplexUART() {
+            // Set rx direction second so that, in the case of half-duplex, the
+            // pin floats high
+            this->set_tx_mask(tx);
+            this->set_rx_mask(rx);
+        }
+
         /**
          * @brief   Set a bit-mask for the data word's MSB (assuming LSB is bit
          *          0 - the start bit is not taken into account)
@@ -218,10 +260,17 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         [_msbMask] "r" (msbMask));
             } while (--bits);
 
+        // TODO: Delete this when debugging is complete
+        Port::flash_port(BYTE_2, data >> 8);
+        Port::flash_port(BYTE_2, data);
+        Port::flash_port(BYTE_2, data << 8);
+        Port::flash_port(BYTE_2, data << 16);
+
             __asm__ volatile ("waitpeq %[_rxMask], %[_rxMask]"
                     :  // No outputs
                     : [_rxMask] "r" (rxMask));
 #endif
+
             return data;
         }
 
@@ -229,7 +278,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @brief       Shift in an array of data (FCache function)
          *
          * @param[in]   bufferAddr
-         * @param[in]   words
+         * @param[in]   maxLength
+         * @param[in]   delim
          * @param[in]   bits
          * @param[in]   bitCycles
          * @param[in]   rxMask
@@ -238,13 +288,16 @@ class AbstractDuplexUART: public virtual DuplexUART,
 #ifndef DOXYGEN_IGNORE
         __attribute__ ((fcache))
 #endif
-        void shift_in_array (register uint32_t bufferAddr,
-                register uint32_t words, const register uint32_t bits,
-                const register uint32_t bitCycles,
-                const register uint32_t rxMask,
-                const register uint32_t msbMask) const {
+        uint32_t shift_in_byte_array (register uint32_t bufferAddr,
+                                  int32_t maxLength,
+                                  const register char delim,
+                                  const register uint32_t bits,
+                                  const register uint32_t bitCycles,
+                                  const register uint32_t rxMask,
+                                  const register uint32_t msbMask) const {
 #ifndef DOXYGEN_IGNORE
             volatile register uint32_t data           = 0;
+            volatile register int32_t wordCnt        = 0;
             volatile register uint32_t bitIdx         = bits;
             volatile register uint32_t waitCycles;
             volatile register uint32_t initWaitCycles = (bitCycles >> 1)
@@ -305,14 +358,17 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         // Clear the data register
                         "mov %[_data], #0\n\t"
 
-                        // Increment the buffer address
-                        "add %[_bufAdr], #1"
+                        // Increment the buffer address and total word count
+                        "add %[_wordCnt], #1\n\t"
 
                         :// Outputs
                         [_bufAdr] "+r" (bufferAddr),
+                        [_wordCnt] "+r" (wordCnt),
                         [_data] "+r" (data)
                         : [_rxMask] "r" (rxMask));
-            } while (--words);
+            } while (*((char *)bufferAddr++) != delim && wordCnt < maxLength);
+
+            return wordCnt;
 #endif
         }
 

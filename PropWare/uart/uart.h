@@ -26,16 +26,19 @@
 #pragma once
 
 #include <sys/thread.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
+#include <PropWare/printcapable.h>
 
 namespace PropWare {
 
 /**
  * @brief    Interface for all UART devices
  */
-class UART {
+class UART : public virtual PrintCapable {
     public:
         typedef enum {
             /** No parity */NO_PARITY,
@@ -68,18 +71,20 @@ class UART {
              * The requested stop bit width is not between 1 and 14 (inclusive)
              */
             INVALID_STOP_BIT_WIDTH,
+            /** Null pointer was passed as an argument */
+            NULL_POINTER,
             /** Last error code used by PropWare::UART */
-            END_ERROR = UART::INVALID_STOP_BIT_WIDTH
+            END_ERROR = UART::NULL_POINTER
         } ErrorCode;
 
     public:
-        static const uint8_t      DEFAULT_DATA_WIDTH     = 8;
+        static const uint8_t  DEFAULT_DATA_WIDTH         = 8;
         static const UART::Parity DEFAULT_PARITY         = NO_PARITY;
         static const uint8_t      DEFAULT_STOP_BIT_WIDTH = 1;
-        static const uint32_t     DEFAULT_BAUD           = 115200;
 
-        static const Port::Mask PARALLAX_STANDARD_TX = Port::P30;
-        static const Port::Mask PARALLAX_STANDARD_RX = Port::P31;
+        static const int *DEFAULT_BAUD;
+        static const int *PARALLAX_STANDARD_TX;
+        static const int *PARALLAX_STANDARD_RX;
 
     public:
         /**
@@ -137,7 +142,7 @@ class UART {
          * @return      Returns 0 upon success; Failure can occur when an
          *              invalid value is passed into stopBitWidth
          */
-        virtual ErrorCode set_stop_bit_width (const uint8_t stopBitWidth) =0;
+        virtual ErrorCode set_stop_bit_width (const uint8_t stopBitWidth) = 0;
 
         /**
          * @brief   Retrieve the current number of stop bits in use
@@ -160,7 +165,7 @@ class UART {
          *              when baudRate is set too high for the Propeller's clock
          *              frequency
          */
-        virtual void set_baud_rate (const uint32_t baudRate) = 0;
+        virtual void set_baud_rate (const int32_t baudRate) = 0;
 
         /**
          * @brief   Retrieve the current baud rate
@@ -168,7 +173,7 @@ class UART {
          * @return  Returns an approximation  of the current baud rate; Value is
          *          not exact due to integer math
          */
-        virtual uint32_t get_baud_rate () const = 0;
+        virtual int32_t get_baud_rate () const = 0;
 
         /**
          * @brief       Send a word of data out the serial port
@@ -187,23 +192,13 @@ class UART {
         /**
          * @brief       Send a null-terminated character array
          *
-         * @pre         `*string` must be terminated with a null terminator
-         *
-         * @param[in]   *string     Array of data words with the final word
-         *                          being 0 - the null terminator
-         */
-        virtual void puts (const char string[]) const = 0;
-
-        /**
-         * @brief       Send a null-terminated character array
-         *
          * @pre         `words` must be greater than 0
          *
          * @param[in]   array[] Array of data words
          * @param[in]   words   Number of words to be sent
          */
         HUBTEXT virtual void send_array (const char array[],
-                uint32_t words) const = 0;
+                                         uint32_t words) const = 0;
 };
 
 }

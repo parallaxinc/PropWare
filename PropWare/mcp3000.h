@@ -26,7 +26,6 @@
 
 #pragma once
 
-#include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/spi.h>
 

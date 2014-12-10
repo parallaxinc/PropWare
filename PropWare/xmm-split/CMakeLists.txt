@@ -9,27 +9,37 @@ set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL xmm-split)
 include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+include_directories(${PROPWARE_PATH})
 
 project(PropWare_${MODEL})
 
 add_library(${PROJECT_NAME} STATIC
-        ../uart/abstractduplexuart
-        ../uart/abstractsimplexuart
-        ../uart/duplexuart
-        ../uart/fullduplexuart
-        ../uart/halfduplexuart
+        ../blockstorage
+        ../fatfs
+        ../filesystem
         ../hd44780
         ../l3g
         ../max6675
         ../mcp3000
         ../pin
         ../port
+        ../printcapable
+        ../printer
         ../PropWare
+        ../scancapable
+        ../scanner
         ../sd
         ../seeedtft
         ../seeedtftfast
         ../seeedtftfast_as.S
-        ../uart/simplexuart
         ../spi
         ../spi_as.S
+        ../synchronousprinter
+        ../uart/abstractduplexuart
+        ../uart/abstractsimplexuart
+        ../uart/duplexuart
+        ../uart/fullduplexuart
+        ../uart/halfduplexuart
+        ../uart/simplexuart
+        ../uart/sharedsimplexuart
         ../uart/uart)

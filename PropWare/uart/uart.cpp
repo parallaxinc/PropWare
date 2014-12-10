@@ -1,20 +1,7 @@
 /**
- * @file        MultiCogBlinky_Demo.h
- */
-/**
- * @brief       Blink an LED on each of the 8 Propeller cogs
+ * @file    uart.cpp
  *
- * This file is nearly a direct copy of SimpleIDE's blinkcogs.c. Some changes
- * were made to highlight the helpfulness of PropWare.
- *
- * Make all propeller cogs blink assigned pins at exactly the same rate and
- * time to demonstrate the precision of the _start_cog_thread method. This
- * program and method uses 8 LMM C program COG "threads" of execution
- * simultaneously.
- *
- * This program should be compiled with the LMM memory model.
- *
- * @author      Modified by David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -36,26 +23,12 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <PropWare/uart/uart.h>
 
-/**
- * @defgroup    _propware_example_propware  PropWare Basics
- * @ingroup     _propware_examples
- * @{
- */
+int _cfg_rxpin    = -1;
+int _cfg_txpin    = -1;
+int _cfg_baudrate = -1;
 
-// Note the lack of an include for propeller.h; This is because PropWare.h will
-// include propeller.h for you
-#include <PropWare/PropWare.h>
-#include <PropWare/pin.h>
-#include <sys/thread.h>
-#include <simpletext.h>
-
-/**
- * @brief       Toggle thread function gets started in an LMM COG.
- *
- * @param[in]   *arg    pin number to toggle
- */
-void do_toggle (void *arg);
-
-/*@}*/
+const int *PropWare::UART::DEFAULT_BAUD         = &_cfg_baudrate;
+const int *PropWare::UART::PARALLAX_STANDARD_TX = &_cfg_txpin;
+const int *PropWare::UART::PARALLAX_STANDARD_RX = &_cfg_rxpin;

@@ -281,7 +281,8 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      = cogc=C ecogc=C cogcxx=C++ ecogcxx=C++ cogcpp=C++ ecogcpp=C++
+EXTENSION_MAPPING      = cogc=C ecogc=C cogcxx=C++ ecogcxx=C++ cogcpp=C++ \
+                         ecogcpp=C++
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -309,7 +310,7 @@ AUTOLINK_SUPPORT       = YES
 # diagrams that involve STL classes more complete and accurate.
 # The default value is: NO.
 
-BUILTIN_STL_SUPPORT    = NO
+BUILTIN_STL_SUPPORT    = YES
 
 # If you use Microsoft's C++/CLI language, you should set this option to YES to
 # enable parsing support.
@@ -774,10 +775,12 @@ INPUT_ENCODING         = UTF-8
 # *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf,
 # *.qsf, *.as and *.js.
 
-FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.idl *.ddl *.odl *.h *.hh \
-                         *.hxx *.hpp *.h++ *.cs *.d *.php *.php4 *.php5 *.phtml *.inc *.m *.markdown *.md *.mm *.dox \
-                         *.py *.f90 *.f *.for *.tcl *.vhd *.vhdl *.ucf *.qsf *.as *.js *.cogc *.ecogc *.cogcxx \
-                         *.cogcpp *.ecogcxx *.ecogcpp
+FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp \
+                         *.i++ *.inl *.idl *.ddl *.odl *.h *.hh *.hxx *.hpp \
+                         *.h++ *.cs *.d *.php *.php4 *.php5 *.phtml *.inc *.m \
+                         *.markdown *.md *.mm *.dox *.py *.f90 *.f *.for *.tcl \
+                         *.vhd *.vhdl *.ucf *.qsf *.as *.js *.cogc *.ecogc \
+                         *.cogcxx *.cogcpp *.ecogcxx *.ecogcpp
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -813,7 +816,7 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */bin/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -1952,7 +1955,7 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = DOXYGEN_IGNORE
+PREDEFINED             = DOXYGEN_IGNORE ENABLE_PROPWARE_PRINT_FLOAT
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

@@ -1,8 +1,5 @@
 /**
- * @file    MAX6675_Demo.h
- */
-/**
- * @brief   Display the temperature on stdout and a character LCD
+ * @file    scanner.cpp
  *
  * @author  David Zemon
  *
@@ -26,44 +23,9 @@
  * SOFTWARE.
  */
 
-#ifndef MAX6675_DEMO_H_
-#define MAX6675_DEMO_H_
+#include <PropWare/scanner.h>
+#include <PropWare/printer.h>
+#include <PropWare/uart/halfduplexuart.h>
 
-/**
- * @defgroup    _propware_example_max6675  MAX6675 Demo
- * @ingroup     _propware_examples
- * @{
- */
-
-#include <tinyio.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/hd44780.h>
-#include <PropWare/max6675.h>
-#include <PropWare/spi.h>
-
-/** Pin number for MOSI (master out - slave in) */
-#define MOSI            PropWare::Port::P0
-/** Pin number for MISO (master in - slave out) */
-#define MISO            PropWare::Port::P1
-/** Pin number for the clock signal */
-#define SCLK            PropWare::Port::P2
-/** Pin number for chip select */
-#define CS              PropWare::Port::P5
-#define FREQ            10000
-
-#define DEBUG_LEDS      PropWare::BYTE_2
-
-#define RS              PropWare::Port::P14
-#define RW              PropWare::Port::P12
-#define EN              PropWare::Port::P10
-
-#define FIRST_DATA_PIN  PropWare::Port::P19
-#define BITMODE         PropWare::HD44780::BM_8
-
-#define DIMENSIONS      PropWare::HD44780::DIM_16x2
-
-void error (const PropWare::ErrorCode err);
-
-/**@}*/
-
-#endif /* MAX6675_DEMO_H_ */
+const PropWare::HalfDuplexUART _g_halfDuplexUart;
+const PropWare::Scanner        pwIn(&_g_halfDuplexUart, &pwOut);

@@ -23,7 +23,28 @@
  * SOFTWARE.
  */
 
-#include "SPI_Demo.h"
+// Includes
+#include <PropWare/PropWare.h>
+#include <PropWare/spi.h>
+#include <PropWare/uart/simplexuart.h>
+
+void error (const PropWare::ErrorCode err, const PropWare::SPI *spi);
+
+/** Pin number for MOSI (master out - slave in) */
+const PropWare::Port::Mask MOSI = PropWare::Port::P0;
+/** Pin number for MISO (master in - slave out) */
+const PropWare::Port::Mask MISO = PropWare::Port::P1;
+/** Pin number for the clock signal */
+const PropWare::Port::Mask SCLK = PropWare::Port::P2;
+/** Pin number for chip select */
+const PropWare::Port::Mask CS   = PropWare::Port::P6;
+
+/** Frequency (in hertz) to run the SPI module */
+const uint32_t               FREQ    = 100000;
+/** The SPI mode to run */
+const PropWare::SPI::Mode    MODE    = PropWare::SPI::MODE_0;
+/** Determine if the LSB or MSB should be sent first for each byte */
+const PropWare::SPI::BitMode BITMODE = PropWare::SPI::MSB_FIRST;
 
 /**
  * @brief   Write "Hello world!" out via SPI protocol and receive an echo
@@ -70,7 +91,7 @@ int main () {
             ++s;
 
             // Print the character to the screen
-            putchar(in);
+            pwOut.put_char(in);
         }
 
         // Signal that the entire string has been sent
@@ -84,9 +105,9 @@ void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
-        spi->print_error_str((PropWare::SPI::ErrorCode) err);
+        spi->print_error_str(&pwOut, (PropWare::SPI::ErrorCode) err);
     } else
-        printf("Unknown error %u" CRLF, err);
+        pwOut.printf("Unknown error %u" CRLF, err);
 
     while (1) {
         debugLEDs.write(err);

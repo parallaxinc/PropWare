@@ -26,12 +26,11 @@
 
 #pragma once
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <propeller.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
+#include <PropWare/printcapable.h>
+#include <PropWare/printer.h>
 
 namespace PropWare {
 
@@ -41,7 +40,7 @@ namespace PropWare {
  *
  * @note        Does not natively support 40x4 or 24x4 character displays
  */
-class HD44780 {
+class HD44780 : public PrintCapable {
     public:
         /**
          * @brief   LCD databus width
@@ -170,8 +169,9 @@ class HD44780 {
          *** Public Functions ***
          ************************/
         HD44780 () {
-            this->m_curRow = 0;
-            this->m_curCol = 0;
+            this->m_curPos = &(this->m_bogus);
+            this->m_curPos->row = 0;
+            this->m_curPos->col = 0;
         }
 
         /**
@@ -275,8 +275,8 @@ class HD44780 {
          */
         void clear (void) {
             this->cmd(PropWare::HD44780::CLEAR);
-            this->m_curRow = 0;
-            this->m_curCol = 0;
+            this->m_curPos->row = 0;
+            this->m_curPos->col = 0;
             waitcnt(1530*MICROSECOND + CNT);
         }
 
@@ -286,7 +286,7 @@ class HD44780 {
          * @param[in]   row     Zero-indexed row to place the cursor
          * @param[in]   col     Zero indexed column to place the cursor
          */
-        void move (const uint8_t row, const uint8_t col) {
+        void move (const uint8_t row, const uint8_t col) const {
             uint8_t ddramLine, addr = 0;
 
             // Handle weird special case where a single row LCD is split across
@@ -312,46 +312,42 @@ class HD44780 {
             }
 
             this->cmd(addr | PropWare::HD44780::SET_DDRAM_ADDR);
-            this->m_curRow = row;
-            this->m_curCol = col;
+            this->m_curPos->row = row;
+            this->m_curPos->col = col;
         }
 
         /**
-         * @brief       Print a string to the LCD
+         * @see PropWare::PrintCapable::puts
          *
-         * Via a series of calls to HD44780_putchar, prints each character
+         * Via a series of calls to HD44780::put_char, prints each character
          * individually
-         *
-         * @param[in]   *str    Address where c-string can be found (must be
-         *                      null-terminated)
          */
-        void putStr (const char str[]) {
-            const char *s = str;
+        void puts (const char string[]) const {
+            const char *s = (char *) string;
 
             while (*s) {
-                this->putChar(*s);
+                this->put_char(*s);
                 ++s;
             }
         }
 
         /**
-         * @brief       Print a single char to the LCD and increment the pointer
-         *              (automatic)
-         *
-         * @param[in]   c   Individual char to be printed
+         * @see PropWare::PrintCapable::put_char
          */
-        void putChar (const char c) {
+        void put_char (const char c) const {
             // For manual new-line characters...
             if ('\n' == c) {
-                if (++this->m_curRow == this->m_memMap.charRows)
-                    this->m_curRow = 0;
-                this->m_curCol = 0;
-                this->move(this->m_curRow, this->m_curCol);
+                this->m_curPos->row++;
+                if (this->m_curPos->row == this->m_memMap.charRows)
+                    this->m_curPos->row = 0;
+                this->m_curPos->col = 0;
+                this->move(this->m_curPos->row, this->m_curPos->col);
             } else if ('\t' == c) {
                 do {
-                    this->putChar(' ');
-                } while (this->m_curCol % PropWare::HD44780::TAB_WIDTH);
-            }
+                    this->put_char(' ');
+                } while (this->m_curPos->col % PropWare::HD44780::TAB_WIDTH);
+            } else if ('\r' == c)
+                this->move(this->m_curPos->row, 0);
             // And for everything else...
             else {
                 //set RS to data and RW to write
@@ -359,15 +355,15 @@ class HD44780 {
                 this->write((const uint8_t) c);
 
                 // Insert a line wrap if necessary
-                ++this->m_curCol;
-                if (this->m_memMap.charColumns == this->m_curCol)
-                    this->putChar('\n');
+                ++this->m_curPos->col;
+                if (this->m_memMap.charColumns == this->m_curPos->col)
+                    this->put_char('\n');
 
                 // Handle weird special case where a single row LCD is split
                 // across multiple DDRAM lines (i.e., 16x1 type 1)
                 if (this->m_memMap.ddramCharRowBreak
                         > this->m_memMap.ddramLineEnd)
-                    this->move(this->m_curRow, this->m_curCol);
+                    this->move(this->m_curPos->row, this->m_curPos->col);
             }
         }
 
@@ -376,22 +372,23 @@ class HD44780 {
          *
          * @param[in]  command  8-bit command to send to the LCD
          */
-        void cmd (const uint8_t command) {
+        void cmd (const uint8_t command) const {
             //set RS to command mode and RW to write
             this->m_rs.clear();
             this->write(command);
         }
 
-        static void print_error_str (const HD44780::ErrorCode err) {
+        static void print_error_str (const Printer *printer,
+                const HD44780::ErrorCode err) {
             char str[] = "HD44780 Error %u: %s\n";
 
             switch (err) {
                 case PropWare::HD44780::INVALID_CTRL_SGNL:
-                    printf(str, err - PropWare::HD44780::BEG_ERROR,
+                    printer->printf(str, err - PropWare::HD44780::BEG_ERROR,
                             "invalid control signal");
                     break;
                 case PropWare::HD44780::INVALID_DIMENSIONS:
-                    printf(str, err - PropWare::HD44780::BEG_ERROR,
+                    printer->printf(str, err - PropWare::HD44780::BEG_ERROR,
                             "invalid LCD dimension; please choose from the "
                                     "HD44780::Dimensions type");
                     break;
@@ -407,7 +404,7 @@ class HD44780 {
          *
          * @param[in]   val     Value to be written
          */
-        void write (const uint8_t val) {
+        void write (const uint8_t val) const {
             // Clear RW to signal write value
             this->m_rw.clear();
 
@@ -430,7 +427,7 @@ class HD44780 {
          * @brief   Toggle the enable pin, inducing a write to the LCD's
          *          register
          */
-        void clock_pulse (void) {
+        void clock_pulse (void) const {
             this->m_en.set();
             waitcnt(MILLISECOND + CNT);
             this->m_en.clear();
@@ -441,6 +438,7 @@ class HD44780 {
          *          and shouldn't occur
          */
         void generate_mem_map (const HD44780::Dimensions dimensions) {
+            // TODO: Make this a look-up table instead of a switch-case
             switch (dimensions) {
                 case PropWare::HD44780::DIM_8x1:
                     this->m_memMap.charRows = 1;
@@ -531,15 +529,22 @@ class HD44780 {
             }
         }
 
+    private:
+        typedef struct {
+            uint8_t row;
+            uint8_t col;
+        } Position;
+
     protected:
-        uint8_t             m_curRow;
-        uint8_t             m_curCol;
         HD44780::MemMap     m_memMap;
 
     private:
-        PropWare::Pin        m_rs, m_rw, m_en;
-        PropWare::SimplePort m_dataPort;
-        HD44780::Bitmode     m_bitmode;
+        // Horrible bad hack so that methods can be const
+        Position         m_bogus;
+        Position         *m_curPos;
+        Pin              m_rs, m_rw, m_en;
+        SimplePort       m_dataPort;
+        HD44780::Bitmode m_bitmode;
 };
 
 }

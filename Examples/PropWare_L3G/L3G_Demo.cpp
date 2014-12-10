@@ -24,14 +24,29 @@
  */
 
 // Includes
-#include "L3G_Demo.h"
+#include <PropWare/PropWare.h>
+#include <PropWare/l3g.h>
+#include <PropWare/uart/simplexuart.h>
+
+/** Pin number for MOSI (master out - slave in) */
+const PropWare::Port::Mask MOSI = PropWare::Port::P0;
+/** Pin number for MISO (master in - slave out) */
+const PropWare::Port::Mask MISO = PropWare::Port::P1;
+/** Pin number for the clock signal */
+const PropWare::Port::Mask SCLK = PropWare::Port::P2;
+/** Pin number for chip select */
+const PropWare::Port::Mask CS   = PropWare::Port::P6;
+/** Frequency (in Hertz) to run the SPI protocol */
+const uint32_t             FREQ = 10000;
+
+void error (const PropWare::ErrorCode err);
 
 // Main function
 int main () {
     PropWare::ErrorCode err;
-    int16_t             gyroVals[3];
-    PropWare::SPI       *spi = PropWare::SPI::get_instance();
-    PropWare::L3G       gyro(spi);
+    int16_t                     gyroVals[3];
+    PropWare::SPI               *spi = PropWare::SPI::get_instance();
+    PropWare::L3G               gyro(spi);
 
     if ((err = gyro.start(MOSI, MISO, SCLK, CS)))
         error(err);
@@ -53,7 +68,7 @@ int main () {
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::Y]),
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::Z]));
 
-        print("Gyro vals... X: %d\tY: %d\tZ: %d" CRLF,
+        pwOut.printf("Gyro vals... X: %d\tY: %d\tZ: %d" CRLF,
               gyroVals[PropWare::L3G::X],
               gyroVals[PropWare::L3G::Y],
               gyroVals[PropWare::L3G::Z]);

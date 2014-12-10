@@ -1,8 +1,5 @@
 /**
- * @file    HD44780_Demo.h
- */
-/**
- * @brief   Display "Hello world" on LCD screen and demonstrate line-wrapping
+ * @file    printer.cpp
  *
  * @author  David Zemon
  *
@@ -26,38 +23,9 @@
  * SOFTWARE.
  */
 
-#ifndef HD44780_DEMO_H_
-#define HD44780_DEMO_H_
+#include <PropWare/printer.h>
+#include <PropWare/uart/simplexuart.h>
 
-/**
- * @defgroup _propware_examples_hd44780 Character LCD Demo
- * @ingroup _propware_examples
- * @{
- */
-
-#include <propeller.h>
-#include <tinyio.h>
-#include <PropWare/PropWare.h>
-#include <PropWare/hd44780.h>
-
-#define RS                  PropWare::Port::P14
-#define RW                  PropWare::Port::P12
-#define EN                  PropWare::Port::P10
-
-#define FIRST_DATA_PIN      PropWare::Port::P19
-#define BITMODE             PropWare::HD44780::BM_8
-#define DIMENSIONS          PropWare::HD44780::DIM_16x2
-
-/**
- * @brief       Enter an infinite loop that blinks the error code on the
- *              QUICKSTART's 8 onboard LEDs
- *
- * @param[in]   err     Error code
- */
-void error (const PropWare::ErrorCode err);
-
-/**@}*/
-
-/*@}*/
-
-#endif /* HD44780_DEMO_H_ */
+const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
+const PropWare::SimplexUART     _g_simplexUart;
+const PropWare::Printer         pwOut(&_g_simplexUart);

@@ -23,15 +23,37 @@
  * SOFTWARE.
  */
 
-#include "MAX6675_Demo.h"
+#include <PropWare/PropWare.h>
+#include <PropWare/hd44780.h>
+#include <PropWare/max6675.h>
+
+/** Pin number for MOSI (master out - slave in) */
+const PropWare::Port::Mask MOSI = PropWare::Port::P0;
+/** Pin number for MISO (master in - slave out) */
+const PropWare::Port::Mask MISO = PropWare::Port::P1;
+/** Pin number for the clock signal */
+const PropWare::Port::Mask SCLK = PropWare::Port::P2;
+/** Pin number for chip select */
+const PropWare::Port::Mask CS   = PropWare::Port::P5;
+const uint32_t             FREQ = 10000;
+
+const PropWare::Port::Mask          RS             = PropWare::Port::P16;
+const PropWare::Port::Mask          RW             = PropWare::Port::P17;
+const PropWare::Port::Mask          EN             = PropWare::Port::P18;
+const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
+const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
+const PropWare::HD44780::Dimensions DIMENSIONS     =
+                                            PropWare::HD44780::DIM_16x2;
+
+void error (const PropWare::ErrorCode err);
 
 int main () {
     PropWare::ErrorCode err;
     uint16_t data;
     uint32_t loopCounter;
-    char buffer[128];
 
     PropWare::HD44780 lcd;
+    PropWare::Printer lcdPrinter(&lcd);
     PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::MAX6675 thermo(spi);
 
@@ -47,7 +69,7 @@ int main () {
     // configuration
     thermo.always_set_spi_mode(1);
 
-    lcd.putStr("Welcome to the MAX6675 demo!\n");
+    lcd.puts("Welcome to the MAX6675 demo!\n");
 
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
@@ -56,8 +78,7 @@ int main () {
             error(err);
 
         lcd.clear();
-        sprintf(buffer, "Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
-        lcd.putStr(buffer);
+        lcdPrinter.printf("Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
 
         waitcnt(loopCounter);
     }
