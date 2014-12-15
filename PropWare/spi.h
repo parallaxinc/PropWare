@@ -31,7 +31,7 @@
 #include <sys/thread.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
 
 /** @name   SPI Extra Code Options

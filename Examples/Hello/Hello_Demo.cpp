@@ -14,7 +14,7 @@
 #include <PropWare/PropWare.h>
 
 #ifdef TEST_PROPWARE
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 #elif defined TEST_SIMPLE
 #include <simpletext.h>
 #elif defined TEST_TINYSTREAM

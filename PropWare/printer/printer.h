@@ -530,6 +530,12 @@ class Printer {
             this->put_float(f, format.width, format.precision, format.fillChar);
         }
 
+        template<typename T>
+        const Printer& operator<< (const T arg) const {
+            this->print(arg);
+            return *this;
+        }
+
     protected:
         const PrintCapable *m_printCapable;
 };

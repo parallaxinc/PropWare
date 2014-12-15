@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 
 namespace PropWare {
 

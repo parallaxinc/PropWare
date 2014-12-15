@@ -9,7 +9,7 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/pin.h>
 #include <PropWare/uart/simplexuart.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 
 /**
 * @brief       Toggle thread function gets started in an LMM COG.

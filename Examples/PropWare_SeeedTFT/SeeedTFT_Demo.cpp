@@ -9,7 +9,7 @@
 #include <PropWare/seeedtft.h>
 #include <PropWare/seeedtftfast.h>
 #include <PropWare/uart/simplexuart.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 
 // Main function
 int main () {

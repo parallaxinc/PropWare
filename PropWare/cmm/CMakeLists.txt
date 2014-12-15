@@ -24,7 +24,7 @@ add_library(${PROJECT_NAME} STATIC
         ../pin
         ../port
         ../printcapable
-        ../printer
+        ../printer/printer
         ../PropWare
         ../scancapable
         ../scanner

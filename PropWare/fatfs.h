@@ -27,7 +27,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/blockstorage.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 #include <PropWare/filesystem.h>
 
 namespace PropWare {

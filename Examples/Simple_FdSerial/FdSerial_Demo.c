@@ -1,7 +1,12 @@
-/**
- * @file    printer.cpp
+/*
+ * @file FdSerial_Demo.c
  *
  * @author  David Zemon
+ *
+ * Please note that FdSerial support requires the inclusion of the file
+ * `pst.dat` as a source file for this project. Because the file is no longer
+ * included as part of the Simple libraries you must copy it from this project
+ * to your own before attempting to compile.
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,9 +28,14 @@
  * SOFTWARE.
  */
 
-#include <PropWare/printer.h>
-#include <PropWare/uart/simplexuart.h>
+#include <fdserial.h>
 
-const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
-const PropWare::SimplexUART     _g_simplexUart;
-const PropWare::Printer         pwOut(&_g_simplexUart);
+int main () {
+
+    fdserial *serial = fdserial_open(31, 30, 0, 115200);
+
+    while (1)
+        dprint(serial, "Hello, world!\n");
+
+    return 0;
+}

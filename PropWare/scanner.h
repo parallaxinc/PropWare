@@ -27,7 +27,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/scancapable.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 #include <PropWare/uart/halfduplexuart.h>
 
 namespace PropWare {

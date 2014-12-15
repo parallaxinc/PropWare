@@ -30,7 +30,7 @@
 #include <PropWare/pin.h>
 #include <PropWare/port.h>
 #include <PropWare/printcapable.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 
 namespace PropWare {
 

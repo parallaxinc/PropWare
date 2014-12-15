@@ -25,35 +25,43 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-#include <PropWare/printer.h>
-#include <PropWare/scanner.h>
 #include <PropWare/port.h>
-#include <simple/simpletext.h>
+#include <PropWare/printer/printer.h>
+#include <PropWare/scanner.h>
 
+bool isAnswerNo (char const userInput[]);
 void error (const PropWare::ErrorCode err);
 
 int main () {
     // A nice big buffer that can hold up to 63 characters from the user (the
     // 64th is used by the null-terminator)
     char userInput[64];
+    char name[64];
 
     pwOut.printf("Hello! I'd like to teach you how to use PropWare to read "
                          "from the terminal!" CRLF);
 
-    while (1) {
+    do {
         pwOut.printf("First, what's your name?" CRLF ">>> ");
-//    getStr(userInput, sizeof(userInput));
-//    pwIn.gets(userInput, sizeof(userInput));
-//    char c = pwIn.get_char();
-        PropWare::HalfDuplexUART poo;
-        char                     c = poo.get_char();
+        pwIn.gets(userInput, sizeof(userInput));
+        strcpy(name, userInput);
 
-        pwOut.printf("I got: \"0x%02X\". Is that right?" CRLF ">>> ", c);
-    }
+        pwOut.printf("I got [%s]. Is that right?" CRLF ">>> ", userInput);
+        pwIn.gets(userInput, sizeof(userInput));
+        PropWare::Utility::to_lower(userInput);
+    } while (isAnswerNo(userInput));
+
+    pwOut.printf("Hello, %s!" CRLF, name);
+    return 0;
+}
+
+bool isAnswerNo (char const userInput[]) {
+    return 0 == strcmp("n", userInput) || 0 == strcmp("no", userInput);
 }
 
 void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Port::OUT);
+    const PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8,
+                                         PropWare::Port::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

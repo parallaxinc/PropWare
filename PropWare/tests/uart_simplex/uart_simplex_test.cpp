@@ -1,5 +1,5 @@
 /**
- * @file    HD44780_Demo.cpp
+ * @file    uart_simplex_test.cpp
  *
  * @author  David Zemon
  *
@@ -23,32 +23,27 @@
  * SOFTWARE.
  */
 
-#include <PropWare/PropWare.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/hd44780.h>
+#include "../PropWareTests.h"
+#include <PropWare/uart/simplexuart.h>
 
-// Control pins
-const PropWare::Port::Mask RS = PropWare::Port::P16;
-const PropWare::Port::Mask RW = PropWare::Port::P17;
-const PropWare::Port::Mask EN = PropWare::Port::P18;
+PropWare::SimplexUART *testable;
 
-// Data pins
-const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
-const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
-const PropWare::HD44780::Dimensions DIMENSIONS     =
-                                            PropWare::HD44780::DIM_16x2;
+const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
 
-// Main function
+TEARDOWN {
+}
+
+TEST(Start) {
+
+    tearDown();
+}
+
 int main () {
-    // Create and initialize our LCD object
-    PropWare::HD44780 lcd;
-    lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
+    START(SDTest);
 
-    // Create a printer for easy, formatted writing to the LCD
-    PropWare::Printer lcdPrinter(&lcd);
+    testable = new PropWare::SimplexUART();
 
-    // Print to the LCD (exactly 32 characters so that we fill up both lines)
-    lcdPrinter.printf("%u %s%d 0x%07X", 123456789, "Hello!", -12345, 0xabcdef);
+    RUN_TEST(Start);
 
-    return 0;
+    COMPLETE();
 }

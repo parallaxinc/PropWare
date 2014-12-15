@@ -55,15 +55,15 @@ TEST(ReadBlock) {
 
     // Create a buffer and initialize all values to 0. Surely the first sector
     // of the SD card won't be _all_ zeros!
-    uint8_t buffer[PropWare::SD::SECTOR_SIZE];
-    for (int i = 0; i < sizeof(buffer); ++i)
-        buffer[i] = 0;
+    uint8_t *buffer = (uint8_t *) calloc(1, PropWare::SD::SECTOR_SIZE);
+    if (NULL == buffer)
+        FAIL("Buffer could not be allocated");
 
     // Read in a block...
     ASSERT_FALSE(testable->read_data_block(0, buffer));
 
     // And make sure at least _one_ of the bytes is non-zero
-    for (int j = 0; j < sizeof(buffer); ++j)
+    for (unsigned int j = 0; j < sizeof(buffer); ++j)
         if (buffer[j])
             tearDown();
 

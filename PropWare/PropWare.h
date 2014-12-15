@@ -32,6 +32,7 @@
 #include <propeller.h>
 #include <cstdint>
 #include <cstdlib>
+#include <cctype>
 
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller
@@ -194,6 +195,16 @@ class Utility {
             } while (precision < (smallestFailure - largestSuccess));
 
             return largestSuccess;
+        }
+
+        static void to_lower (char string[]) {
+            for (int i = 0; i < strlen(string); ++i)
+                string[i] = tolower(string[i]);
+        }
+
+        static void to_upper (char string[]) {
+            for (int i = 0; i < strlen(string); ++i)
+                string[i] = toupper(string[i]);
         }
 };
 

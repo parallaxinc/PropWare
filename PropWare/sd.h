@@ -32,7 +32,7 @@
 #include <PropWare/blockstorage.h>
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 
 namespace PropWare {
 
