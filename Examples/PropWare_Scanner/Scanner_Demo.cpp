@@ -1,5 +1,5 @@
 /**
- * @file    SimplexUART_Demo.cpp
+ * @file    Scanner_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -29,6 +29,23 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
 
+
+class YesNoComparator : public PropWare::Comparator<char> {
+    public:
+        YesNoComparator () {}
+
+        virtual bool valid (const char *userInput) const {
+            char buffer[16];
+            strcpy(buffer, userInput);
+            PropWare::Utility::to_lower(buffer);
+            return 0 == strcmp("n", buffer) ||
+                    0 == strcmp("no", buffer) ||
+                    0 == strcmp("y", buffer) ||
+                    0 == strcmp("yes", buffer);
+        }
+};
+const YesNoComparator yesNoComparator;
+
 bool isAnswerNo (char const userInput[]);
 void error (const PropWare::ErrorCode err);
 
@@ -46,9 +63,11 @@ int main () {
         pwIn.gets(userInput, sizeof(userInput));
         strcpy(name, userInput);
 
-        pwOut.printf("I got [%s]. Is that right?" CRLF ">>> ", userInput);
-        pwIn.gets(userInput, sizeof(userInput));
-        PropWare::Utility::to_lower(userInput);
+        pwOut.printf("I received [%s]." CRLF, name);
+        pwIn.input_prompt("Is that right?" CRLF ">>> ",
+                          "Please enter either 'yes' or 'no' (y/n)" CRLF ">>> ",
+                          userInput, sizeof(userInput),
+                          yesNoComparator);
     } while (isAnswerNo(userInput));
 
     pwOut.printf("Hello, %s!" CRLF, name);
@@ -65,8 +84,8 @@ void error (const PropWare::ErrorCode err) {
 
     while (1) {
         debugLEDs.write((uint32_t) err);
-        waitcnt(100*MILLISECOND);
+        waitcnt(100 * MILLISECOND);
         debugLEDs.write(0);
-        waitcnt(100*MILLISECOND);
+        waitcnt(100 * MILLISECOND);
     }
 }

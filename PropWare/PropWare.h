@@ -198,14 +198,20 @@ class Utility {
         }
 
         static void to_lower (char string[]) {
-            for (int i = 0; i < strlen(string); ++i)
+            for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = tolower(string[i]);
         }
 
         static void to_upper (char string[]) {
-            for (int i = 0; i < strlen(string); ++i)
+            for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = toupper(string[i]);
         }
+};
+
+template<typename T>
+class Comparator {
+    public:
+        virtual bool valid (const T *lhs) const = 0;
 };
 
 }
