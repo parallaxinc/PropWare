@@ -399,7 +399,7 @@ class Printer {
          *                        `2 + 3 = 5`
          */
         template<typename T, typename... Targs>
-        void printf (const char *fmt, const T first, Targs... remaining) const {
+        void printf (const char fmt[], const T first, const Targs... remaining) const {
             const char *s = fmt;
             char       c;
             Format     format;

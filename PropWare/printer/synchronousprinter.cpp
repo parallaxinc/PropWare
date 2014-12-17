@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-#include <PropWare/synchronousprinter.h>
+#include <PropWare/printer/synchronousprinter.h>
 #include <PropWare/uart/sharedsimplexuart.h>
 
 const PropWare::SharedSimplexUART  _g_sharedSimplexUart;
-const PropWare::SynchronousPrinter pwSyncOut(&_g_sharedSimplexUart);
+const PropWare::Printer            _g_printer(&_g_sharedSimplexUart);
+const PropWare::SynchronousPrinter pwSyncOut(&_g_printer);

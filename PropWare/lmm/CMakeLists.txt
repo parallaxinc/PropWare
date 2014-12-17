@@ -25,6 +25,7 @@ add_library(${PROJECT_NAME} STATIC
         ../port
         ../printcapable
         ../printer/printer
+        ../printer/synchronousprinter
         ../PropWare
         ../scancapable
         ../scanner
@@ -34,7 +35,6 @@ add_library(${PROJECT_NAME} STATIC
         ../seeedtftfast_as.S
         ../spi
         ../spi_as.S
-        ../synchronousprinter
         ../uart/abstractduplexuart
         ../uart/abstractsimplexuart
         ../uart/duplexuart
