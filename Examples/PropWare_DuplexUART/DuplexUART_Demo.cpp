@@ -64,7 +64,7 @@ int main () {
 void start_listener (_thread_state_t *threadData, PropWare::SimplexUART *speaker) {
     speaker->set_baud_rate(BAUD_RATE);
     speaker->set_parity(PARITY);
-    pwSyncOut.printf("New cog %u. Ready to send!!!" CRLF,
+    pwSyncOut.printf("New cog ID: %u. Ready to send!!!" CRLF,
                      _start_cog_thread(threadStack + STACK_SIZE, listen_silently, (void *) NULL, threadData));
 }
 

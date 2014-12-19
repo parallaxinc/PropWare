@@ -41,18 +41,19 @@ namespace PropWare {
 * @brief    Interface for all classes capable of scanning
 */
 class Scanner {
-public:
     public:
-        Scanner (const ScanCapable *scanCapable,
-                 const Printer *printer) : m_scanCapable(scanCapable),
-                                           m_printer(printer) {
+        static const char DEFAULT_DELIMITER = '\n';
+
+    public:
+        Scanner (const ScanCapable *scanCapable, const Printer *printer)
+                : m_scanCapable(scanCapable), m_printer(printer) {
         }
 
         /**
          * @see PropWare::ScanCapable::get_char
          */
         char get_char () const {
-            char c = this->m_scanCapable->get_char();
+            const char c = this->m_scanCapable->get_char();
             this->m_printer->put_char(c);
             return c;
         }
@@ -60,7 +61,7 @@ public:
         /**
          * @see PropWare::ScanCapable::fgets
          */
-        ErrorCode gets (char string[], int32_t length) const {
+        ErrorCode gets (char string[], int32_t length, const char delimiter = DEFAULT_DELIMITER) const {
             char *buf = string;
             while (0 < --length) {
                 char ch = this->m_scanCapable->get_char();
@@ -77,7 +78,7 @@ public:
 
                 this->m_printer->put_char(ch);
 
-                if ('\n' == ch)
+                if (delimiter == ch)
                     break;
                 else
                     *(buf++) = ch;
@@ -115,9 +116,8 @@ public:
             return *this;
         }
 
-        void input_prompt (const char prompt[], const char failureResponse[],
-                           char userInput[], const size_t bufferLength,
-                           const Comparator<char> &comparator) const {
+        void input_prompt (const char prompt[], const char failureResponse[], char userInput[],
+                           const size_t bufferLength, const Comparator<char> &comparator) const {
             do {
                 this->m_printer->puts(prompt);
                 this->gets(userInput, bufferLength);
@@ -130,8 +130,7 @@ public:
         }
 
         template<typename T>
-        void input_prompt (const char prompt[], const char failureResponse[],
-                           T *userInput,
+        void input_prompt (const char prompt[], const char failureResponse[], T *userInput,
                            const Comparator<T> &comparator) const {
             do {
                 this->m_printer->puts(prompt);

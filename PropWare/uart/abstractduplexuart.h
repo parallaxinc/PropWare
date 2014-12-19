@@ -95,8 +95,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive_array
          */
-        HUBTEXT ErrorCode receive_array (char buffer[], int32_t *length,
-                                         const uint32_t delim = '\n') const {
+        HUBTEXT ErrorCode receive_array (char buffer[], int32_t *length, const uint32_t delim = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
@@ -149,21 +148,16 @@ class AbstractDuplexUART: public virtual DuplexUART,
             return this->receive();
         }
 
-        PropWare::ErrorCode fgets (char string[], int32_t *length) const {
-            int32_t originalLength = *length;
+        PropWare::ErrorCode fgets (char string[], int32_t *bufferSize) const {
+            const int32_t originalBufferSize = *bufferSize;
 
             PropWare::ErrorCode err;
-            if ((err = this->receive_array(string, length,
-                                           ScanCapable::STRING_DELIMITER)))
-                return err;
-            else {
-                // Replace delimiter with null-terminator IFF we found one
-                if (*length != originalLength
-                        || ScanCapable::STRING_DELIMITER
-                        == string[originalLength])
-                    string[*length - 1] = '\0';
-                return NO_ERROR;
-            }
+            check_errors(this->receive_array(string, bufferSize));
+
+            // Replace delimiter with null-terminator IFF we found one
+            if (*bufferSize != originalBufferSize || '\n' == string[originalBufferSize])
+                string[*bufferSize - 1] = '\0';
+            return NO_ERROR;
         }
 
     protected:

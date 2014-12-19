@@ -32,11 +32,9 @@ namespace PropWare {
  */
 class ScanCapable {
     public:
-        static const char STRING_DELIMITER = '\n';
-
-    public:
         /**
-         * @brief       Read and return a single character (blocking)
+         * @brief   Read and return a single character. Whether the method is blocking or not depends entirely on
+         *          the implementation
          */
         virtual char get_char () const = 0;
 };
