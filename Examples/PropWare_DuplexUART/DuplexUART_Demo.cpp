@@ -23,18 +23,12 @@
  * SOFTWARE.
  */
 
-// Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/uart/halfduplexuart.h>
 #include <PropWare/printer/synchronousprinter.h>
-
-void start_listener (_thread_state_t *threadData, PropWare::SimplexUART *speaker);
-
-void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener);
-
-void listen_silently (void *arg);
-
-void error (const PropWare::ErrorCode err);
+#include <PropWare/runnable.h>
+#include <stdint-gcc.h>
+#include <stddef.h>
 
 // Create the test string - useful when testing with a terminal
 const char                   TEST_STRING[] = "Hello, world!\n";
@@ -42,59 +36,41 @@ const uint32_t               BAUD_RATE     = 200;
 const PropWare::Port::Mask   TX_PIN        = PropWare::Port::P12;
 const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
 const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
-const uint16_t               STACK_SIZE    = 256;
-uint32_t                     threadStack[STACK_SIZE];
+uint32_t                     threadStack[256];
+
+class Listener : public PropWare::Runnable {
+    public:
+        Listener(uint32_t const *stack, size_t const stackSizeInBytes)
+                : Runnable(stack, stackSizeInBytes) {
+        }
+
+        void run();
+
+        void init();
+
+    private:
+        PropWare::HalfDuplexUART m_listener;
+        char buffer[sizeof(TEST_STRING)];
+};
+
+void error (const PropWare::ErrorCode err);
 
 /**
  * @brief   Write "Hello world!" out via UART protocol and receive an echo
  */
 int main () {
-    static _thread_state_t threadData;
+    const Listener listener(threadStack, sizeof(threadStack));
     PropWare::SimplexUART  speaker(TX_PIN);
 
     // Start our new cog and initialize the speaking UART
-    start_listener(&threadData, &speaker);
+    speaker.set_baud_rate(BAUD_RATE);
+    speaker.set_parity(PARITY);
+    pwSyncOut.printf("New cog ID: %d. Ready to send!!!" CRLF, PropWare::Runnable::invoke(listener));
 
     while (1) {
         waitcnt(5 * MILLISECOND + CNT);
         speaker.puts(TEST_STRING);
     }
-}
-
-void start_listener (_thread_state_t *threadData, PropWare::SimplexUART *speaker) {
-    speaker->set_baud_rate(BAUD_RATE);
-    speaker->set_parity(PARITY);
-    pwSyncOut.printf("New cog ID: %u. Ready to send!!!" CRLF,
-                     _start_cog_thread(threadStack + STACK_SIZE, listen_silently, (void *) NULL, threadData));
-}
-
-void listen_silently (void *arg) {
-    PropWare::ErrorCode      err;
-    char                     buffer[sizeof(TEST_STRING)];
-    PropWare::HalfDuplexUART listener(RX_PIN);
-    int32_t                  receivedLength;
-
-    // Initialize the listener UART and clear the buffer
-    init_listener_cog(buffer, &listener);
-    pwSyncOut.print("Ready to receive!" CRLF);
-
-    while (1) {
-        receivedLength = 0;
-        if ((err = listener.fgets(buffer, &receivedLength)))
-            error(err);
-
-        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, receivedLength, buffer);
-    }
-}
-
-void init_listener_cog (char buffer[], PropWare::HalfDuplexUART *listener) {
-    listener->set_baud_rate(BAUD_RATE);
-    listener->set_parity(PARITY);
-    memset(buffer, 0, sizeof(TEST_STRING));
-
-    // A very short wait to ensure the main cog has finished printing its "I'm ready" statement before we start
-    // printing ours
-    waitcnt(10 * MILLISECOND + CNT);
 }
 
 void error (const PropWare::ErrorCode err) {
@@ -108,4 +84,31 @@ void error (const PropWare::ErrorCode err) {
         debugLEDs.write(0);
         waitcnt(100 * MILLISECOND);
     }
+}
+
+void Listener::run() {
+    PropWare::ErrorCode err;
+    int32_t receivedLength;
+
+    this->init();
+    pwSyncOut.print("Ready to receive!" CRLF);
+
+    while (1) {
+        receivedLength = 0;
+        if ((err = this->m_listener.fgets(buffer, &receivedLength)))
+            error(err);
+
+        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, receivedLength, buffer);
+    }
+}
+
+void Listener::init() {
+    this->m_listener.set_rx_mask(RX_PIN);
+    this->m_listener.set_baud_rate(BAUD_RATE);
+    this->m_listener.set_parity(PARITY);
+    memset(buffer, 0, sizeof(buffer));
+
+    // A very short wait to ensure the main cog has finished printing its "I'm ready" statement before we start
+    // printing ours
+    waitcnt(10 * MILLISECOND + CNT);
 }
