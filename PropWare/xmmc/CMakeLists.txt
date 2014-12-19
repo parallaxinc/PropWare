@@ -27,6 +27,7 @@ add_library(${PROJECT_NAME} STATIC
         ../printer/printer
         ../printer/synchronousprinter
         ../PropWare
+        ../runnable
         ../scancapable
         ../scanner
         ../seeedtft
