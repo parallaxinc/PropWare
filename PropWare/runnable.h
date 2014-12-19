@@ -32,28 +32,31 @@
 namespace PropWare {
 
 class Runnable {
-public:
-    template<class T>
-    static int8_t invoke (T &runnable) {
-        return (int8_t) _start_cog_thread(runnable.get_stack_top(), (void (*) (void *)) &T::run, (void *) &runnable,
-                                          &(runnable.m_threadData));
-    }
+    public:
+        template<class T>
+        static int8_t invoke (T &runnable) {
+            return (int8_t) _start_cog_thread(runnable.get_stack_top(), (void (*) (void *)) &T::run, (void *) &runnable,
+                                              &(runnable.m_threadData));
+        }
 
-public:
-    Runnable (const uint32_t *stack, const size_t stackSizeInBytes)
-            : m_stack(stack), m_stackSizeInBytes(stackSizeInBytes) {}
+    public:
+        Runnable (const uint32_t *stack, const size_t stackSizeInBytes)
+                : m_stack(stack), m_stackSizeInBytes(stackSizeInBytes) {
+        }
 
-    virtual void run () = 0;
+        virtual void run () = 0;
 
-private:
-    void *get_stack_top () const {
-        return (void *) (m_stack + (m_stackSizeInBytes >> 2) - 1);
-    }
+    protected:
+        const uint32_t *m_stack;
+        const size_t   m_stackSizeInBytes;
 
-private:
-    const uint32_t        *m_stack;
-    const size_t m_stackSizeInBytes;
-    _thread_state_t m_threadData;
+    private:
+        void *get_stack_top () const {
+            return (void *) (m_stack + (m_stackSizeInBytes >> 2) - 1);
+        }
+
+    private:
+        _thread_state_t m_threadData;
 };
 
 }
