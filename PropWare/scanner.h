@@ -30,9 +30,10 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/uart/halfduplexuart.h>
 
-extern const char* _scanf_getl(const char *str, int* dst, int base,
-                               unsigned width, int isSigned);
-extern const char* _scanf_getf(const char *str, float* dst);
+extern "C" {
+extern const char *_scanf_getl (const char *str, int *dst, int base, unsigned width, int isSigned);
+extern const char *_scanf_getf (const char *str, float *dst);
+}
 
 namespace PropWare {
 
@@ -75,13 +76,11 @@ public:
                 }
 
                 this->m_printer->put_char(ch);
-                if (ch == '\r')
-                    this->m_printer->put_char('\n');
 
-                if (ch == '\r' || ch == '\n')
+                if ('\n' == ch)
                     break;
-
-                *(buf++) = ch;
+                else
+                    *(buf++) = ch;
             }
             *buf = 0;
 

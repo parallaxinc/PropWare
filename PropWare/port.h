@@ -217,6 +217,14 @@ class Port {
                 return PropWare::Port::IN;
         }
 
+        void set_dir_out () const {
+            DIRA |= this->m_mask;
+        }
+
+        void set_dir_in () const {
+            DIRA &= ~(this->m_mask);
+        }
+
         /**
          * @brief   Set selected output port high (set all pins to 1)
          *

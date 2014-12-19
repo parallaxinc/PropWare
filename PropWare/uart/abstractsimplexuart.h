@@ -203,11 +203,8 @@ class AbstractSimplexUART : public virtual UART {
             uint32_t wideData = originalData;
 
             // Set pin as output
-            __asm__ volatile (
-                    "or outa, %0 \n\t"
-                    "or dira, %0 \n\t"
-                    :
-                    : "r" (this->m_tx.get_mask()));
+            this->m_tx.set();
+            this->m_tx.set_dir_out();
 
             // Add parity bit
             if (UART::EVEN_PARITY == this->m_parity) {
@@ -249,11 +246,8 @@ class AbstractSimplexUART : public virtual UART {
                 register uint32_t txMask      = this->m_tx.get_mask();
 
                 // Set pin as output
-                __asm__ volatile (
-                        "or outa, %0 \n\t"
-                        "or dira, %0 \n\t"
-                        :
-                        : "r" (txMask));
+                this->m_tx.set();
+                this->m_tx.set_dir_out();
 
                 switch (this->m_parity) {
                     case UART::NO_PARITY:

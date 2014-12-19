@@ -36,15 +36,3 @@ PropWare is developed by David Zemon.
 Code contributions can be made by either 
 [contacting David Zemon](http://david.zemon.name/professional/contact.shtml) or forking 
 the repository and creating a pull request.
-
-Planned Enhancements/Known Issues
----------------------------------
-* Add Spin language compatibility
-* Add support for ActivityBot's [ADC](http://www.ti.com/lit/ds/symlink/adc124s021.pdf) and DAC
-* SD Demo does not fit in LMM mode
-* PropWare::SD class contains shell methods - these should be brought out to their class
-* SD & FAT16/32 driver
-  * Traverse directories (implies ability to open files/directories not in the current 
-    directory)
-* Add "SPIShiftIn_Multi", which will repeatedly shift in values and allow for the selection 
-  between \*_Fast or normal using a parameter
