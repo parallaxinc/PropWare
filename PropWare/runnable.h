@@ -36,7 +36,7 @@ class Runnable {
         template<class T>
         static int8_t invoke (T &runnable) {
             return (int8_t) _start_cog_thread(runnable.get_stack_top(), (void (*) (void *)) &T::run, (void *) &runnable,
-                                              &(runnable.m_threadData));
+                                              &runnable.m_threadData);
         }
 
     public:

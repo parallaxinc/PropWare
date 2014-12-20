@@ -27,8 +27,6 @@
 #include <PropWare/uart/halfduplexuart.h>
 #include <PropWare/printer/synchronousprinter.h>
 #include <PropWare/runnable.h>
-#include <stdint-gcc.h>
-#include <stddef.h>
 
 // Create the test string - useful when testing with a terminal
 const char                   TEST_STRING[] = "Hello, world!\n";
@@ -59,7 +57,7 @@ void error (const PropWare::ErrorCode err);
  * @brief   Write "Hello world!" out via UART protocol and receive an echo
  */
 int main () {
-    const Listener listener(threadStack, sizeof(threadStack));
+    Listener listener(threadStack, sizeof(threadStack));
     PropWare::SimplexUART  speaker(TX_PIN);
 
     // Start our new cog and initialize the speaking UART
