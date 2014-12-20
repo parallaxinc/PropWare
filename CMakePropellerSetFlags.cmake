@@ -2,6 +2,8 @@
 ### Finalize Compile Flags
 ################################################################################
 
+include_directories(${PROPWARE_PATH})
+
 # Handle user options
 if (32_BIT_DOUBLES)
     set(C_FLAGS "${C_FLAGS} -m32bit-doubles")

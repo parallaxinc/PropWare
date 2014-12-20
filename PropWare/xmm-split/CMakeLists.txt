@@ -8,7 +8,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL xmm-split)
-include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
 include_directories(${PROPWARE_PATH})
 
 project(PropWare_${MODEL})

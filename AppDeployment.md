@@ -33,12 +33,7 @@ Starting a New Project
        avionics.S
        rf_transceiver.ecogc)
 
-   ################################################################################
-   ### Template code. Do not modify                                               #
-                                                                                  #
-   # This must be the last line of the file                                       #
-   include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-   ################################################################################
+   createTopProject(${PROJECT_NAME})
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2. Write your source code.
 3. At the terminal, enter your project's directory. Type `cmake -G "Unix Makefiles" .`. This will generate a Makefile

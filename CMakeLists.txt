@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.0.0)
 
-include(./CMakePropellerHeader.cmake)
+if (DEFINED PROPWARE_PATH)
+   set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
+else ()
+   set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
+endif ()
+include(./CMakePropellerDefOptions.cmake)
 set(CMAKE_BUILD_TYPE None)
 
 set(PROPWARE_PRINT_FLOAT ON)

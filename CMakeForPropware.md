@@ -21,12 +21,7 @@ project(HelloWorld)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-# This must be the last line of the file                                       #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-################################################################################
+createTopProject(${PROJECT_NAME})
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Note the two sections marked as "Template code." Make sure these two pieces begin and end each of your
   CMakeLists.txt files. They load the standard Propeller settings for your project.
@@ -77,12 +72,7 @@ add_executable(${PROJECT_NAME}
     avionics.S
     rf_transceiver.ecogc)
 
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-# This must be the last line of the file                                       #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-################################################################################
+createTopProject(${PROJECT_NAME})
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Common CMake variables in PropWare 
