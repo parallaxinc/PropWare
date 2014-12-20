@@ -78,12 +78,23 @@ class Scanner {
 
                 this->m_printer->put_char(ch);
 
-                if (delimiter == ch)
+                if ('\r' == ch)
+                    this->m_printer->put_char('\n');
+
+                if ('\r' == ch || '\n' == ch)
                     break;
                 else
                     *(buf++) = ch;
             }
             *buf = 0;
+
+            // Delete a dangling carriage return that will arise every time a user presses their "enter" key
+            // ... but apparently propeller-load doesn't send a line feed - only carriage return... alright then
+            // Below code block is waiting for resolution from the following thread:
+            //   http://forums.parallax.com/showthread.php/158824-propeller-load-bug-or-feature-no-line-feed-character
+            /*const size_t newLength = strlen(buf);
+            if ('\r' == buf[newLength])
+                buf[newLength] = 0;*/
 
             return 0;
         }
