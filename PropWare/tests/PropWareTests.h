@@ -29,6 +29,9 @@
 #include <PropWare/printer/printer.h>
 #include "c++allocate.h"
 
+#define protected public
+#define private   public
+
 void _runPropWareUnitTest (bool (*test) (void), const char testName[],
                            const bool expectValue, bool *result) {
     if (expectValue == test())
@@ -61,13 +64,13 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     return 0
 
 #define TEST(testName) \
-    bool TEST_ ## testName ()
+    bool testName ()
 
 #define RUN_TEST(testName) \
-    _runPropWareUnitTest(TEST_ ## testName, #testName, true, &passed)
+    _runPropWareUnitTest(testName, #testName, true, &passed)
 
 #define EXPECT_FAIL(testName) \
-    _runPropWareUnitTest(TEST_ ## testName, #testName, false, &passed)
+    _runPropWareUnitTest(testName, #testName, false, &passed)
 
 #define FAIL(message) \
     return false;

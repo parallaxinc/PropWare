@@ -33,7 +33,7 @@
 
 #include <PropWare/sd.h>
 #include <PropWare/fatfs.h>
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 
 PropWare::BlockStorage *driver;
 PropWare::FatFS        *testable;

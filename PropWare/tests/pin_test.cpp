@@ -27,7 +27,7 @@
  */
 
 #include <PropWare/pin.h>
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 
 PropWare::Pin             *testable;
 PropWare::Pin             *helper;

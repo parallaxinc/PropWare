@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 #include <PropWare/uart/simplexuart.h>
 
 PropWare::SimplexUART *testable;

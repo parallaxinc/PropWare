@@ -1,7 +1,7 @@
 include(${PROPWARE_PATH}/CMakePropellerLibDeps.cmake)
 include(${PROPWARE_PATH}/CMakePropellerSetLinker.cmake)
 
-macro (createTopProject projectName)
+macro (create_top_project projectName)
 
     include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
     setLibraryDependencies(${projectName})
@@ -26,7 +26,7 @@ macro (createTopProject projectName)
 
 endmacro()
 
-macro (createProject projectName)
+macro (create_project projectName)
 
     include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
     setLibraryDependencies(${projectName})
@@ -49,4 +49,14 @@ macro (createProject projectName)
                 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
     endif ()
 
+endmacro()
+
+macro (create_executable name src1)
+    add_executable(${name} ${src1} ${ARGN})
+    create_project(${name})
+endmacro()
+
+macro (create_simple_executable name src1)
+    add_executable(${name} ${src1} ${ARGN})
+    create_top_project(${name})
 endmacro()

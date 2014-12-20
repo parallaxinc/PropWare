@@ -21,7 +21,7 @@ project(HelloWorld)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-createTopProject(${PROJECT_NAME})
+create_top_project(${PROJECT_NAME})
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Note the two sections marked as "Template code." Make sure these two pieces begin and end each of your
   CMakeLists.txt files. They load the standard Propeller settings for your project.
@@ -72,7 +72,7 @@ add_executable(${PROJECT_NAME}
     avionics.S
     rf_transceiver.ecogc)
 
-createTopProject(${PROJECT_NAME})
+create_top_project(${PROJECT_NAME})
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Common CMake variables in PropWare 

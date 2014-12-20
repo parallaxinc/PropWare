@@ -16,6 +16,4 @@ set(CXX_FLAGS )
 
 project(MAX6675_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME})
-
-createTopProject(${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})

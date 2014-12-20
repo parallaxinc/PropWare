@@ -19,7 +19,5 @@ set(LINK_TINY ON)
 
 project(Hybrid_Demo)
 
-add_executable(${PROJECT_NAME}
+create_simple_executable(${PROJECT_NAME}
     ${PROJECT_NAME})
-
-createTopProject(${PROJECT_NAME})

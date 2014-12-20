@@ -33,7 +33,7 @@ Starting a New Project
        avionics.S
        rf_transceiver.ecogc)
 
-   createTopProject(${PROJECT_NAME})
+   create_top_project(${PROJECT_NAME})
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2. Write your source code.
 3. At the terminal, enter your project's directory. Type `cmake -G "Unix Makefiles" .`. This will generate a Makefile

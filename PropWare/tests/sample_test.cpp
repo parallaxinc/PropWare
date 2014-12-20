@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 
 
 TEARDOWN {
