@@ -330,7 +330,8 @@ class AbstractSimplexUART : public virtual UART {
          */
         void puts (const char string[]) const {
             const uint32_t length = strlen(string);
-            this->send_array(string, length);
+            if (length)
+                this->send_array(string, length);
         }
 
     protected:
