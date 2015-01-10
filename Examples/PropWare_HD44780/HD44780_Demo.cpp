@@ -35,8 +35,7 @@ const PropWare::Port::Mask EN = PropWare::Port::P18;
 // Data pins
 const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
 const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
-const PropWare::HD44780::Dimensions DIMENSIONS     =
-                                            PropWare::HD44780::DIM_16x2;
+const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::DIM_16x2;
 
 // Main function
 int main () {

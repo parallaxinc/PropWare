@@ -48,7 +48,7 @@ class Runnable {
 
     protected:
         const uint32_t *m_stack;
-        const size_t   m_stackSizeInBytes;
+        size_t         m_stackSizeInBytes;
 
     private:
         void *get_stack_top () const {

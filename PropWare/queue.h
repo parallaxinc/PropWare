@@ -48,6 +48,10 @@ class Queue {
             return 0 == this->size();
         }
 
+        bool is_full () const {
+            return this->m_arrayLength == this->size();
+        }
+
         void clear () {
             this->m_size = 0;
         }
@@ -145,9 +149,9 @@ class Queue {
         T *m_array;
         const size_t m_arrayLength;
 
-        size_t m_size;
-        int m_head;
-        int m_tail;
+        volatile size_t m_size;
+        volatile int m_head;
+        volatile int m_tail;
 };
 
 }

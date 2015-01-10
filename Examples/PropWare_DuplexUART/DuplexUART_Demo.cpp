@@ -89,7 +89,7 @@ void Listener::run() {
     int32_t receivedLength;
 
     this->init();
-    pwSyncOut.print("Ready to receive!" CRLF);
+    pwSyncOut.printf("Ready to receive!" CRLF);
 
     while (1) {
         receivedLength = 0;

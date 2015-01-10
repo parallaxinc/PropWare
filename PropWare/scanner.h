@@ -42,6 +42,14 @@ namespace PropWare {
 */
 class Scanner {
     public:
+        typedef enum {
+            /** No error */               NO_ERROR  = 0,
+            /** First Scanner error */    BEG_ERROR,
+            /** Scanner Error  0 */       BAD_INPUT = BEG_ERROR,
+            /** Last Scanner error code */END_ERROR = BAD_INPUT
+        } ErrorCode;
+
+    public:
         static const char DEFAULT_DELIMITER = '\n';
 
     public:
@@ -88,45 +96,80 @@ class Scanner {
             }
             *buf = 0;
 
-            // Delete a dangling carriage return that will arise every time a user presses their "enter" key
-            // ... but apparently propeller-load doesn't send a line feed - only carriage return... alright then
-            // Below code block is waiting for resolution from the following thread:
-            //   http://forums.parallax.com/showthread.php/158824-propeller-load-bug-or-feature-no-line-feed-character
-            /*const size_t newLength = strlen(buf);
-            if ('\r' == buf[newLength])
-                buf[newLength] = 0;*/
-
-            return 0;
+            return NO_ERROR;
         }
 
         const Scanner& operator>> (char &c) const {
-            char userInput[2];
-            this->gets(userInput, sizeof(userInput));
-            c = userInput[0];
+            this->get(c);
             return *this;
         }
 
         const Scanner& operator>> (uint32_t &x) const {
-            char userInput[32];
-            this->gets(userInput, sizeof(userInput));
-            _scanf_getl(userInput, (int *) &x, 10, 11, false);
+            get(x);
             return *this;
         }
 
         const Scanner& operator>> (int32_t &x) const {
-            char userInput[32];
-            this->gets(userInput, sizeof(userInput));
-            _scanf_getl(userInput, &x, 10, 11, true);
+            get(x);
             return *this;
         }
 
         const Scanner& operator>> (float &f) const {
-            char userInput[32];
-            this->gets(userInput, sizeof(userInput));
-            _scanf_getf(userInput, &f);
             return *this;
         }
 
+        const ErrorCode get (char &c) const {
+            ErrorCode err;
+            char userInput[2];
+            check_errors(this->gets(userInput, sizeof(userInput)));
+            if ('\0' == c)
+                return BAD_INPUT;
+            else {
+                c = userInput[0];
+                return NO_ERROR;
+            }
+        }
+
+        const ErrorCode get(uint32_t &x) const {
+            ErrorCode  err;
+            char userInput[32];
+            check_errors(this->gets(userInput, sizeof(userInput)));
+            if (0 == _scanf_getl(userInput, (int *) &x, 10, 11, false))
+                return BAD_INPUT;
+            else
+                return NO_ERROR;
+        }
+
+        const ErrorCode get(int32_t &x) const {
+            ErrorCode  err;
+            char userInput[32];
+            check_errors(this->gets(userInput, sizeof(userInput)));
+            if (0 == _scanf_getl(userInput, &x, 10, 11, false))
+                return BAD_INPUT;
+            else
+                return NO_ERROR;
+        }
+
+        const ErrorCode get(float &f) const {
+            ErrorCode err;
+            char userInput[32];
+            check_errors(this->gets(userInput, sizeof(userInput)));
+            if (0 == _scanf_getf(userInput, &f))
+                return BAD_INPUT;
+            else
+                return NO_ERROR;
+        }
+
+        /**
+         * @brief
+         *
+         * @param[in]   prompt[]            User prompt which will be displayed before each attempt to read the serial
+         *                                  bus
+         * @param[in]   failureResponse[]   Message to be displayed after each incorrect input
+         * @param[out]  userInput[]         Buffer that can be used for storing the user's input
+         * @param[in]   bufferLength        Size (in bytes) of the `userInput[]` buffer
+         * @param[in]   comparator          Determines whether or not the received input was valid
+         */
         void input_prompt (const char prompt[], const char failureResponse[], char userInput[],
                            const size_t bufferLength, const Comparator<char> &comparator) const {
             do {
@@ -140,17 +183,28 @@ class Scanner {
             } while (1);
         }
 
+        /**
+         * @brief
+         *
+         * @param[in]   prompt[]            User prompt which will be displayed before each attempt to read the serial
+         *                                  bus
+         * @param[in]   failureResponse[]   Message to be displayed after each incorrect input
+         * @param[out]  *userInput          Resulting value will be stored at this address
+         * @param[in]   comparator          Determines whether or not the received input was valid
+         */
         template<typename T>
         void input_prompt (const char prompt[], const char failureResponse[], T *userInput,
                            const Comparator<T> &comparator) const {
+            const T original = *userInput;
+            ErrorCode err;
             do {
                 this->m_printer->puts(prompt);
-                *this >> *userInput;
-
-                if (comparator.valid(userInput))
+                err = this->get(*userInput);
+                if (NO_ERROR == err && comparator.valid(userInput))
                     return;
-                else
-                    this->m_printer->puts(failureResponse);
+
+                this->m_printer->puts(failureResponse);
+                *userInput = original;
             } while (1);
         }
 
