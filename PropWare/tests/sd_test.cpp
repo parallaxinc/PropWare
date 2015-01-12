@@ -30,7 +30,7 @@
  * SOFTWARE.
  */
 
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 #include <PropWare/sd.h>
 
 PropWare::SD *testable;
@@ -61,8 +61,7 @@ TEST(ReadBlock) {
     sd_error_checker(err);
     ASSERT_EQ(0, err);
 
-    // Create a buffer and initialize all values to 0. Surely the first sector
-    // of the SD card won't be _all_ zeros!
+    // Create a buffer and initialize all values to 0. Surely the first sector of the SD card won't be _all_ zeros!
     uint8_t *buffer = (uint8_t *) calloc(1, PropWare::SD::SECTOR_SIZE);
     if (NULL == buffer)
         FAIL("Buffer could not be allocated");
@@ -77,16 +76,15 @@ TEST(ReadBlock) {
         if (buffer[j])
             tearDown();
 
-    // If the whole loop finished, that means none of the bytes changed. That
-    // _can't_ be right so go ahead and call it a failure
+    // If the whole loop finished, that means none of the bytes changed. That _can't_ be right so go ahead and call it
+    // a failure
     FAIL();
 }
 
 int main () {
     START(SDTest);
 
-    testable = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
-                                SCLK, CS);
+    testable = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO, SCLK, CS);
 
     RUN_TEST(Start);
     RUN_TEST(ReadBlock);

@@ -31,7 +31,7 @@
  * SOFTWARE.
  */
 
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 #include <PropWare/sd.h>
 #include <PropWare/fatfs.h>
 
