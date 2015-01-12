@@ -45,8 +45,6 @@
 /**
  * Allows for fast send and receive routines without error checking or timing
  * delays; Normal routines still available when enabled
- *
- * TODO: Use the counter module instead of "xor clkPin, clkPin"
  * <p>
  * DEFAULT: On
  */

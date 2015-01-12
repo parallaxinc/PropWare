@@ -37,7 +37,6 @@
 
 using namespace PropWare;
 
-BlockStorage *driver;
 FatFS        *testable;
 
 const Pin::Mask MOSI = Pin::P0;
@@ -55,7 +54,8 @@ SETUP {
 }
 
 TEARDOWN {
-    delete driver;
+    delete testable->m_driver;
+    delete testable;
 }
 
 TEST(Constructor) {
@@ -66,15 +66,16 @@ TEST(Constructor) {
 
 TEST(ReadBootSector) {
     testable = new FatFS(getDriver());
-    ASSERT_EQ(FatFS::NO_ERROR, testable->m_driver->start());
-    testable->m_buf.buf = (uint8_t *) malloc(driver->get_sector_size());
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, testable->m_driver->start());
+
+    testable->m_buf.buf = (uint8_t *) malloc(testable->m_driver->get_sector_size());
 
     FatFS::InitFATInfo fatInfo;
     fatInfo.bootSector = 0;
-    ASSERT_EQ(FatFS::NO_ERROR, testable->read_boot_sector(&fatInfo));
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, testable->read_boot_sector(&fatInfo));
 
     // We're just going to assume the boot sector is not at sector 0
-    ASSERT_NEQ(0, fatInfo.bootSector);
+    ASSERT_NEQ_MSG(0, fatInfo.bootSector);
 
     tearDown();
 }
@@ -82,7 +83,7 @@ TEST(ReadBootSector) {
 TEST(Mount) {
     setUp();
 
-    ASSERT_EQ(FatFS::NO_ERROR, testable->mount());
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, testable->mount());
 
     tearDown();
 }

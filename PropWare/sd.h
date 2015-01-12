@@ -49,13 +49,13 @@ class SD: public BlockStorage {
         typedef enum {
             /** No error */           NO_ERROR    = 0,
             /** First SD error code */BEG_ERROR   = SPI::END_ERROR + 1,
-            /** SD Error  7 */        INVALID_CMD = BEG_ERROR,
-            /** SD Error  8 */        READ_TIMEOUT,
-            /** SD Error  9 */        INVALID_NUM_BYTES,
-            /** SD Error 10 */        INVALID_RESPONSE,
-            /** SD Error 11 */        INVALID_INIT,
-            /** SD Error 12 */        INVALID_DAT_START_ID,
-            /** SD Error 20 */        CMD8_FAILURE,
+            /** SD Error 01 */        INVALID_CMD = BEG_ERROR,
+            /** SD Error 02 */        READ_TIMEOUT,
+            /** SD Error 03 */        INVALID_NUM_BYTES,
+            /** SD Error 04 */        INVALID_RESPONSE,
+            /** SD Error 05 */        INVALID_INIT,
+            /** SD Error 06 */        INVALID_DAT_START_ID,
+            /** SD Error 07 */        CMD8_FAILURE,
             /** Last SD error code */ END_ERROR   = CMD8_FAILURE
         } ErrorCode;
 
@@ -282,8 +282,7 @@ class SD: public BlockStorage {
                 return CMD8_FAILURE;
 
             // The card is idle, that's good. Let's make sure we get the correct response back
-            if ((HOST_VOLTAGE_3V3 != response[2])
-                    || (R7_CHECK_PATTERN != response[3]))
+            if ((HOST_VOLTAGE_3V3 != response[2]) || (R7_CHECK_PATTERN != response[3]))
                 return CMD8_FAILURE;
 
             return NO_ERROR;
@@ -321,8 +320,6 @@ class SD: public BlockStorage {
             // "idle" response
             check_errors(this->send_command(CMD_IDLE, 0, CRC_IDLE));
             this->get_response(RESPONSE_LEN_R1, response);
-
-            Port::flash_port(BYTE_2, this->m_firstByteResponse << 16);
 
             // Check if idle
             if (RESPONSE_IDLE == this->m_firstByteResponse)
@@ -374,13 +371,11 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
+        /**
+         * @brief   Initialization nearly complete, increase clock speed
+         */
         inline PropWare::ErrorCode increase_throttle () {
-            PropWare::ErrorCode err;
-
-            // Initialization nearly complete, increase clock
-            check_errors(this->m_spi->set_clock(FULL_SPEED_SPI));
-
-            return NO_ERROR;
+            return this->m_spi->set_clock(FULL_SPEED_SPI);
         }
 
         /**
@@ -508,8 +503,7 @@ class SD: public BlockStorage {
 #ifdef SPI_OPTION_FAST
                         check_errors(this->m_spi->shift_in_fast(8, dat++, sizeof(*dat)));
 #else
-                        check_errors(this->m_spi->shift_in(8, dat++,
-                                        sizeof(*dat)));
+                        check_errors(this->m_spi->shift_in(8, dat++, sizeof(*dat)));
 #endif
                     }
 
@@ -633,9 +627,9 @@ class SD: public BlockStorage {
         static const uint32_t SINGLE_BYTE_WIGGLE_ROOM;
 
         // SD Commands
-        static const uint8_t CMD_IDLE           = 0x40 + 0;  // Send card into idle state
-        static const uint8_t CMD_INTERFACE_COND = 0x40 + 8;  // Send interface condition and host voltage range
-        static const uint8_t CMD_RD_CSD         = 0x40 + 9;  // Request "Card Specific Data" block contents
+        static const uint8_t CMD_IDLE           = 0x40 + 0;   // Send card into idle state
+        static const uint8_t CMD_INTERFACE_COND = 0x40 + 8;   // Send interface condition and host voltage range
+        static const uint8_t CMD_RD_CSD         = 0x40 + 9;   // Request "Card Specific Data" block contents
         static const uint8_t CMD_RD_CID         = 0x40 + 10;  // Request "Card Identification" block contents
         static const uint8_t CMD_RD_BLOCK       = 0x40 + 17;  // Request data block
         static const uint8_t CMD_WR_BLOCK       = 0x40 + 24;  // Write data block
