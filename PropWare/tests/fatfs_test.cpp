@@ -48,6 +48,15 @@ BlockStorage* getDriver() {
     return new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
 }
 
+void error_checker (const ErrorCode err) {
+    if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
+        SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
+    else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
+        ((SD *) testable->m_driver)->print_error_str(&pwOut, (const SD::ErrorCode) err);
+    else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
+        pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)" CRLF, err - FatFS::BEG_ERROR, err);
+}
+
 SETUP {
     testable = new FatFS(getDriver());
     testable->mount();
@@ -65,14 +74,20 @@ TEST(Constructor) {
 }
 
 TEST(ReadBootSector) {
+    ErrorCode err;
+
     testable = new FatFS(getDriver());
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, testable->m_driver->start());
+    err = testable->m_driver->start();
+    error_checker(err);
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     testable->m_buf.buf = (uint8_t *) malloc(testable->m_driver->get_sector_size());
 
     FatFS::InitFATInfo fatInfo;
     fatInfo.bootSector = 0;
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, testable->read_boot_sector(&fatInfo));
+    err = testable->read_boot_sector(&fatInfo);
+    error_checker(err);
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     // We're just going to assume the boot sector is not at sector 0
     ASSERT_NEQ_MSG(0, fatInfo.bootSector);
@@ -81,9 +96,13 @@ TEST(ReadBootSector) {
 }
 
 TEST(Mount) {
+    ErrorCode err;
+
     setUp();
 
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, testable->mount());
+    err = testable->mount();
+    error_checker(err);
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     tearDown();
 }

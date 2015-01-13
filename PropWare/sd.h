@@ -211,11 +211,11 @@ class SD: public BlockStorage {
         }
 
         uint16_t get_short (const uint16_t offset, const uint8_t *buf) const {
-            return (buf[1] << 8) + buf[0];
+            return (buf[offset + 1] << 8) + buf[offset];
         }
 
         uint32_t get_long (const uint16_t offset, const uint8_t *buf) const {
-            return (buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0];
+            return (buf[offset + 3] << 24) + (buf[offset + 2] << 16) + (buf[offset + 1] << 8) + buf[offset];
         }
 
 #ifdef SD_OPTION_FILE_WRITE

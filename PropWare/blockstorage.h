@@ -26,6 +26,7 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
+#include <PropWare/printer/printer.h>
 
 namespace PropWare {
 class BlockStorage {
@@ -44,19 +45,45 @@ class BlockStorage {
         };
 
     public:
+        static void print_block (const Printer *printer, const uint8_t data[], const size_t words,
+                                 const uint8_t wordsPerLine) {
+            uint8_t lines = words / wordsPerLine;
+            if (words % wordsPerLine)
+                ++lines;
+
+            for (uint16_t line = 0; line < lines; ++line) {
+                const uint16_t baseAddress = line * wordsPerLine;
+                printer->printf("0x%04X: ", baseAddress);
+
+                // Print hex values
+                for (uint8_t offset = 0; offset < wordsPerLine; ++offset)
+                    printer->printf("%02X ", (unsigned int) data[baseAddress + offset]);
+
+                // Print ASCII values
+                for (uint8_t offset = 0; offset < wordsPerLine; ++offset) {
+                    const char nextChar = data[baseAddress + offset];
+                    if (32 <= nextChar && 126 <= nextChar)
+                        printer->print(nextChar);
+                    else
+                        printer->print('.');
+                }
+
+                printer->print(CRLF);
+            }
+        }
+
+    public:
         virtual ErrorCode start() = 0;
 
         virtual ErrorCode read_data_block (uint32_t address, uint8_t *buf) = 0;
 
-        ErrorCode read_data_block (uint32_t address,
-                                   const BlockStorage::Buffer *buffer) {
+        ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
             return this->read_data_block(address, buffer->buf);
         }
 
         virtual ErrorCode write_data_block (uint32_t address, uint8_t *dat) = 0;
 
-        ErrorCode write_data_block (uint32_t address,
-                                    const BlockStorage::Buffer *buffer) {
+        ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
             return this->write_data_block(address, buffer->buf);
         }
 
@@ -64,24 +91,19 @@ class BlockStorage {
             return buf[offset];
         }
 
-        virtual uint16_t get_short (const uint16_t offset,
-                                    const uint8_t *buf) const = 0;
+        virtual uint16_t get_short (const uint16_t offset, const uint8_t *buf) const = 0;
 
-        virtual uint32_t get_long (const uint16_t offset,
-                                   const uint8_t *buf) const = 0;
+        virtual uint32_t get_long (const uint16_t offset, const uint8_t *buf) const = 0;
 
-        uint8_t get_byte (const uint16_t offset,
-                          const BlockStorage::Buffer *buf) const {
+        uint8_t get_byte (const uint16_t offset, const BlockStorage::Buffer *buf) const {
             return get_byte(offset, buf->buf);
         }
 
-        uint16_t get_short (const uint16_t offset,
-                            const BlockStorage::Buffer *buf) const {
+        uint16_t get_short (const uint16_t offset, const BlockStorage::Buffer *buf) const {
             return get_short(offset, buf->buf);
         }
 
-        uint32_t get_long (const uint16_t offset,
-                           const BlockStorage::Buffer *buf) const {
+        uint32_t get_long (const uint16_t offset, const BlockStorage::Buffer *buf) const {
             return get_long(offset, buf->buf);
         }
 
@@ -89,4 +111,5 @@ class BlockStorage {
 
         virtual uint8_t get_sector_size_shift () const = 0;
 };
+
 }
