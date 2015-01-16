@@ -158,13 +158,13 @@ class SD: public BlockStorage {
          * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
          *
          * @param[in]   address     Number of bytes to send
-         * @param[out]  *dat        Location in chip memory to store data block;
+         * @param[out]  dat[]       Location in chip memory to store data block;
          *                          If NULL is sent, the default internal buffer
          *                          will be used
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_data_block (uint32_t address, uint8_t *buf) {
+        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
 
@@ -173,8 +173,8 @@ class SD: public BlockStorage {
                 this->m_spi->shift_in(8, &temp, sizeof(temp));
 
             /**
-             * Special error handling is needed to ensure that, if an error is
-             * thrown, chip select is set high again before returning the error
+             * Special error handling is needed to ensure that, if an error is thrown, chip select is set high again
+             * before returning the error
              */
             this->m_cs.clear();
             err     = this->send_command(CMD_RD_BLOCK, address, CRC_OTHER);
@@ -210,11 +210,11 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
-        uint16_t get_short (const uint16_t offset, const uint8_t *buf) const {
+        uint16_t get_short (const uint16_t offset, const uint8_t buf[]) const {
             return (buf[offset + 1] << 8) + buf[offset];
         }
 
-        uint32_t get_long (const uint16_t offset, const uint8_t *buf) const {
+        uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const {
             return (buf[offset + 3] << 24) + (buf[offset + 2] << 16) + (buf[offset + 1] << 8) + buf[offset];
         }
 

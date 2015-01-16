@@ -98,8 +98,7 @@ TEST(ReadBootSector) {
 TEST(Mount) {
     ErrorCode err;
 
-    setUp();
-
+    testable = new FatFS(getDriver());
     err = testable->mount();
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);

@@ -43,13 +43,13 @@ class FatFS : public Filesystem {
         typedef enum {
                                    NO_ERROR  = 0,
                                    BEG_ERROR = HD44780_MAX_ERROR + 1,
-            /** FatFS Error 1 */   EMPTY_FAT_ENTRY,
-            /** FatFS Error 2 */   INVALID_PTR_ORIGIN,
-            /** FatFS Error 3 */   INVALID_FAT_APPEND,
-            /** FatFS Error 4 */   TOO_MANY_FATS,
-            /** FatFS Error 5 */   READING_PAST_EOC,
-            /** FatFS Error 6 */   FILE_WITHOUT_BUFFER,
-            /** FatFS Error 7 */   INVALID_FILESYSTEM,
+            /** FatFS Error 0 */   EMPTY_FAT_ENTRY = BEG_ERROR,
+            /** FatFS Error 1 */   INVALID_PTR_ORIGIN,
+            /** FatFS Error 2 */   INVALID_FAT_APPEND,
+            /** FatFS Error 3 */   TOO_MANY_FATS,
+            /** FatFS Error 4 */   READING_PAST_EOC,
+            /** FatFS Error 5 */   FILE_WITHOUT_BUFFER,
+            /** FatFS Error 6 */   INVALID_FILESYSTEM,
             /** Last FatFS error */END_ERROR = INVALID_FILESYSTEM
         } ErrorCode;
 
@@ -314,10 +314,10 @@ class FatFS : public Filesystem {
             // Read in first sector (and use default buffer)
             check_errors(this->m_driver->read_data_block(0, this->m_buf.buf));
 
-            // Check if sector 0 is boot sector or MBR; if MBR, skip to boot
-            // sector at first partition
+            // Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector at first partition
             if (FatFS::BOOT_SECTOR_ID != this->m_driver->get_byte(FatFS::BOOT_SECTOR_ID_ADDR, this->m_buf.buf)) {
                 fatInfo->bootSector = this->m_driver->get_long(FatFS::BOOT_SECTOR_BACKUP, this->m_buf.buf);
+
                 check_errors(this->m_driver->read_data_block(fatInfo->bootSector, this->m_buf.buf));
             } else
                 fatInfo->bootSector = 0;
@@ -330,9 +330,6 @@ class FatFS : public Filesystem {
 
             // Determine number of sectors per cluster
             temp = this->m_driver->get_byte(FatFS::CLUSTER_SIZE_ADDR, this->m_buf.buf);
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Preliminary sectors per cluster: %u" CRLF, temp);
-#endif
             this->m_sectorsPerCluster_shift = 0;
             while (temp) {
                 temp >>= 1;
@@ -372,35 +369,12 @@ class FatFS : public Filesystem {
             fatInfo->dataSectors   = fatInfo->totalSectors - (fatInfo->rsvdSectorCount + fatInfo->numFATs *
                     fatInfo->FATSize + fatInfo->rootEntryCount);
             fatInfo->clusterCount  = fatInfo->dataSectors >> this->m_sectorsPerCluster_shift;
-
-#ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Sectors per cluster: %u" CRLF,
-                    1 << this->m_sectorsPerCluster_shift);
-            pwOut.printf("Reserved sector count: 0x%08X / %u" CRLF,
-                    fatInfo->rsvdSectorCount, fatInfo->rsvdSectorCount);
-            pwOut.printf("Number of FATs: 0x%02X / %u" CRLF, fatInfo->numFATs,
-                    fatInfo->numFATs);
-            pwOut.printf("Total sector count: 0x%08X / %u" CRLF,
-                    fatInfo->totalSectors,
-                    fatInfo->totalSectors);
-            pwOut.printf("Total cluster count: 0x%08X / %u" CRLF,
-                    fatInfo->clusterCount,
-                    fatInfo->clusterCount);
-            pwOut.printf("Total data sectors: 0x%08X / %u" CRLF, fatInfo->dataSectors,
-                    fatInfo->dataSectors);
-            pwOut.printf("FAT Size: 0x%04x / %u" CRLF, fatInfo->FATSize,
-                    fatInfo->FATSize);
-            pwOut.printf("Root directory sectors: 0x%08X / %u" CRLF,
-                    this->m_rootDirSectors, this->m_rootDirSectors);
-            pwOut.printf("Root entry count: 0x%08X / %u" CRLF, fatInfo->rootEntryCount,
-                    fatInfo->rootEntryCount);
-#endif
         }
 
         inline PropWare::ErrorCode determine_fat_type (InitFATInfo *fatInfo) {
             // Determine and store FAT type
-            if (FatFS::FAT12_CLSTR_CNT > fatInfo->clusterCount)
-                return FatFS::INVALID_FILESYSTEM;
+            if (FatFS::FAT12_CLSTR_CNT > fatInfo->clusterCount) {
+                return FatFS::INVALID_FILESYSTEM;}
             else if (FatFS::FAT16_CLSTR_CNT > fatInfo->clusterCount) {
 #ifdef SD_OPTION_VERBOSE
                 pwOut.printf("\n***FAT type is FAT16***" CRLF);

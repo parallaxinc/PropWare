@@ -51,6 +51,12 @@ class BlockStorage {
             if (words % wordsPerLine)
                 ++lines;
 
+            // Printer header row
+            printer->printf("         0 ");
+            for (uint8_t i = 1; i < wordsPerLine; ++i)
+                printer->printf("%2X ", i);
+            printer->print(CRLF);
+
             for (uint16_t line = 0; line < lines; ++line) {
                 const uint16_t baseAddress = line * wordsPerLine;
                 printer->printf("0x%04X: ", baseAddress);
@@ -75,7 +81,7 @@ class BlockStorage {
     public:
         virtual ErrorCode start() = 0;
 
-        virtual ErrorCode read_data_block (uint32_t address, uint8_t *buf) = 0;
+        virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) = 0;
 
         ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
             return this->read_data_block(address, buffer->buf);
@@ -91,9 +97,9 @@ class BlockStorage {
             return buf[offset];
         }
 
-        virtual uint16_t get_short (const uint16_t offset, const uint8_t *buf) const = 0;
+        virtual uint16_t get_short (const uint16_t offset, const uint8_t buf[]) const = 0;
 
-        virtual uint32_t get_long (const uint16_t offset, const uint8_t *buf) const = 0;
+        virtual uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const = 0;
 
         uint8_t get_byte (const uint16_t offset, const BlockStorage::Buffer *buf) const {
             return get_byte(offset, buf->buf);
