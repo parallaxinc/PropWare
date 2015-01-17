@@ -130,11 +130,11 @@ TEST(Mount_withParameter4) {
 int main () {
     START(FatFSTest);
 
-    RUN_TEST(Constructor);
-    RUN_TEST(ReadMasterBootRecord);
-    RUN_TEST(Mount);
-    RUN_TEST(Mount_withParameter0);
-    RUN_TEST(Mount_withParameter4);
+//    RUN_TEST(Constructor);
+//    RUN_TEST(ReadMasterBootRecord);
+//    RUN_TEST(Mount);
+//    RUN_TEST(Mount_withParameter0);
+//    RUN_TEST(Mount_withParameter4);
 
     COMPLETE();
 }

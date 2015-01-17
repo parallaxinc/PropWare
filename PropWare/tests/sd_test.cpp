@@ -45,40 +45,87 @@ void sd_error_checker (const PropWare::ErrorCode err) {
         testable->print_error_str(&pwOut, (PropWare::SD::ErrorCode) err);
 }
 
-TEARDOWN {
-}
+TEARDOWN {}
 
 TEST(Start) {
     PropWare::ErrorCode err = testable->start();
     sd_error_checker(err);
-    ASSERT_EQ(PropWare::SD::NO_ERROR, err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
 
     tearDown();
 }
 
 TEST(ReadBlock) {
+    uint8_t buffer[PropWare::SD::SECTOR_SIZE];
+
     PropWare::ErrorCode err = testable->start();
     sd_error_checker(err);
-    ASSERT_EQ(0, err);
+    ASSERT_EQ_MSG(0, err);
 
-    // Create a buffer and initialize all values to 0. Surely the first sector of the SD card won't be _all_ zeros!
-    uint8_t *buffer = (uint8_t *) calloc(1, PropWare::SD::SECTOR_SIZE);
-    if (NULL == buffer)
-        FAIL("Buffer could not be allocated");
+    // Initialize all values of the buffer to 0. Surely the first sector of the SD card won't be _all_ zeros!
+    memset(buffer, 0, sizeof(buffer));
 
     // Read in a block...
     err = testable->read_data_block(0, buffer);
     sd_error_checker(err);
-    ASSERT_EQ(PropWare::SD::NO_ERROR, err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
 
     // And make sure at least _one_ of the bytes is non-zero
+    bool success = false;
     for (unsigned int j = 0; j < sizeof(buffer); ++j)
         if (buffer[j])
-            tearDown();
+            success = true;
+    free(buffer);
 
-    // If the whole loop finished, that means none of the bytes changed. That _can't_ be right so go ahead and call it
-    // a failure
-    FAIL();
+    ASSERT_TRUE(success);
+
+    tearDown();
+}
+
+TEST(WriteBlock) {
+    uint8_t originalBlock[PropWare::SD::SECTOR_SIZE];
+    uint8_t moddedBlock[PropWare::SD::SECTOR_SIZE];
+    const uint8_t *myData = 0;
+
+    PropWare::ErrorCode err = testable->start();
+    sd_error_checker(err);
+    ASSERT_EQ_MSG(0, err);
+
+    // Read in a block...
+    err = testable->read_data_block(0, originalBlock);
+    sd_error_checker(err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
+    MESSAGE("WriteBlock: Original block read in");
+
+    // Try writing a random block of memory
+    err = testable->write_block(PropWare::SD::SECTOR_SIZE, myData);
+    sd_error_checker(err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
+    MESSAGE("WriteBlock: Random block written");
+
+    // Read the block back in to a new buffer. Make sure it matches the data written.
+    err = testable->read_data_block(0, moddedBlock);
+    sd_error_checker(err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
+    MESSAGE("WriteBlock: Modded block read");
+    ASSERT_EQ_MSG(0, memcmp(myData, moddedBlock, PropWare::SD::SECTOR_SIZE));
+    MESSAGE("WriteBlock: Modded block equals random block");
+
+    // Write the original block back to the SD card
+    err = testable->write_block(PropWare::SD::SECTOR_SIZE, originalBlock);
+    sd_error_checker(err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
+    MESSAGE("WriteBlock: Original block written back");
+
+    // Read the block back in to a new buffer. Make sure it matches the data written.
+    err = testable->read_data_block(0, moddedBlock);
+    sd_error_checker(err);
+    ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
+    MESSAGE("WriteBlock: Modded block read again");
+    ASSERT_EQ_MSG(0, memcmp(originalBlock, moddedBlock, PropWare::SD::SECTOR_SIZE));
+    MESSAGE("WriteBlock: Modded block matches original");
+
+    tearDown();
 }
 
 int main () {
@@ -88,6 +135,7 @@ int main () {
 
     RUN_TEST(Start);
     RUN_TEST(ReadBlock);
+    RUN_TEST(WriteBlock);
 
     COMPLETE();
 }

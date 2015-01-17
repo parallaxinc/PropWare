@@ -9,7 +9,7 @@ include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
 ################################################################################
 
 set(BOARD QUICKSTART)
-set(MODEL lmm)
+set(MODEL cmm)
 set(COMMON_FLAGS "-Os")
 
 project(propware_tests)

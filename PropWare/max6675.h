@@ -31,14 +31,12 @@
 namespace PropWare {
 
 /**
- * @brief   K-type thermocouple amplifier driver using SPI communication for the
- *          Parallax Propeller
+ * @brief   K-type thermocouple amplifier driver using SPI communication for the Parallax Propeller
  */
 class MAX6675 {
     public:
         /**
-         * @brief       Construction requires an instance of the SPI module;
-         *              the SPI module does not need to be started
+         * @brief       Construction requires an instance of the SPI module; the SPI module does not need to be started
          *
          * @param[in]   *spi    Constructed SPI module
          */
@@ -57,24 +55,15 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
-                const PropWare::Port::Mask miso,
-                const PropWare::Port::Mask sclk,
-                const PropWare::Port::Mask cs) {
+        PropWare::ErrorCode start (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk,
+                                   const Port::Mask cs) {
             PropWare::ErrorCode err;
 
-            if (!this->m_spi->is_running()) {
-                check_errors(
-                        this->m_spi->start(mosi, miso, sclk,
-                                PropWare::MAX6675::SPI_DEFAULT_FREQ,
-                                PropWare::MAX6675::SPI_MODE,
-                                PropWare::MAX6675::SPI_BITMODE));
-            } else {
-                check_errors(
-                        this->m_spi->set_mode(PropWare::MAX6675::SPI_MODE));
-                check_errors(
-                        this->m_spi->set_bit_mode(
-                                PropWare::MAX6675::SPI_BITMODE));
+            if (!this->m_spi->is_running())
+                check_errors(this->m_spi->start(mosi, miso, sclk, SPI_DEFAULT_FREQ, SPI_MODE, SPI_BITMODE));
+            else {
+                check_errors(this->m_spi->set_mode(SPI_MODE));
+                check_errors(this->m_spi->set_bit_mode(SPI_BITMODE));
             }
 
             this->m_cs.set_mask(cs);
@@ -85,13 +74,11 @@ class MAX6675 {
         }
 
         /**
-         * @brief       Choose whether to always set the SPI mode and bitmode
-         *              before reading or writing to the chip; Useful when
-         *              multiple devices are connected to the SPI bus
+         * @brief       Choose whether to always set the SPI mode and bitmode before reading or writing to the chip;
+         *              Useful when multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes
-         *                              will always be set before a read or
-         *                              write routine
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will always be set before a read or write
+         *                              routine
          */
         void always_set_spi_mode (const bool alwaysSetMode) {
             this->m_alwaysSetMode = alwaysSetMode;
@@ -100,8 +87,8 @@ class MAX6675 {
         /**
          * @brief       Read data in fixed-point form
          *
-         * 12-bit data is stored where lower 2 bits are fractional and upper
-         * 10 bits are the whole number. Value presented in degrees Celsius
+         * 12-bit data is stored where lower 2 bits are fractional and upper10 bits are the whole number. Value
+         * presented in degrees Celsius
          *
          * @param[out]  *dat    Address where data should be stored
          *
@@ -111,18 +98,13 @@ class MAX6675 {
             PropWare::ErrorCode err;
 
             if (this->m_alwaysSetMode) {
-                check_errors(
-                        this->m_spi->set_mode(PropWare::MAX6675::SPI_MODE));
-                check_errors(
-                        this->m_spi->set_bit_mode(
-                                PropWare::MAX6675::SPI_BITMODE));
+                check_errors(this->m_spi->set_mode(SPI_MODE));
+                check_errors(this->m_spi->set_bit_mode(SPI_BITMODE));
             }
 
             *dat = 0;
             this->m_cs.clear();
-            check_errors(
-                    this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat,
-                            sizeof(*dat)));
+            check_errors(this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat));
             this->m_cs.set();
 
             return 0;
@@ -164,15 +146,15 @@ class MAX6675 {
         }
 
     private:
-        static const uint32_t SPI_DEFAULT_FREQ = 1000000;
-        static const SPI::Mode    SPI_MODE     = SPI::MODE_1;
-        static const SPI::BitMode SPI_BITMODE  = SPI::MSB_FIRST;
-        static const uint8_t      BIT_WIDTH    = 12;
+        static const uint32_t     SPI_DEFAULT_FREQ = 1000000;
+        static const SPI::Mode    SPI_MODE         = SPI::MODE_1;
+        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
+        static const uint8_t      BIT_WIDTH        = 12;
 
     private:
-        SPI           *m_spi;
-        PropWare::Pin m_cs;
-        bool          m_alwaysSetMode;
+        SPI  *m_spi;
+        Pin  m_cs;
+        bool m_alwaysSetMode;
 };
 
 }
