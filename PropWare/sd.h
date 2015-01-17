@@ -49,13 +49,13 @@ class SD: public BlockStorage {
         typedef enum {
             /** No error */           NO_ERROR    = 0,
             /** First SD error code */BEG_ERROR   = SPI::END_ERROR + 1,
-            /** SD Error 01 */        INVALID_CMD = BEG_ERROR,
-            /** SD Error 02 */        READ_TIMEOUT,
-            /** SD Error 03 */        INVALID_NUM_BYTES,
-            /** SD Error 04 */        INVALID_RESPONSE,
-            /** SD Error 05 */        INVALID_INIT,
-            /** SD Error 06 */        INVALID_DAT_START_ID,
-            /** SD Error 07 */        CMD8_FAILURE,
+            /** SD Error 0 */         INVALID_CMD = BEG_ERROR,
+            /** SD Error 1 */         READ_TIMEOUT,
+            /** SD Error 2 */         INVALID_NUM_BYTES,
+            /** SD Error 3 */         INVALID_RESPONSE,
+            /** SD Error 4 */         INVALID_INIT,
+            /** SD Error 5 */         INVALID_DAT_START_ID,
+            /** SD Error 6 */         CMD8_FAILURE,
             /** Last SD error code */ END_ERROR   = CMD8_FAILURE
         } ErrorCode;
 
@@ -170,7 +170,7 @@ class SD: public BlockStorage {
 
             // Wait until the SD card is no longer busy
             while (!temp)
-                this->m_spi->shift_in(8, &temp, sizeof(temp));
+                this->m_spi->shift_in(8, &temp);
 
             /**
              * Special error handling is needed to ensure that, if an error is thrown, chip select is set high again
@@ -199,7 +199,7 @@ class SD: public BlockStorage {
 
             // Wait until the SD card is no longer busy
             while (!temp)
-                this->m_spi->shift_in(8, &temp, 1);
+                this->m_spi->shift_in(8, &temp);
 
             this->m_cs.clear();
             check_errors(this->send_command(CMD_WR_BLOCK, address, CRC_OTHER));
@@ -216,6 +216,18 @@ class SD: public BlockStorage {
 
         uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const {
             return (buf[offset + 3] << 24) + (buf[offset + 2] << 16) + (buf[offset + 1] << 8) + buf[offset];
+        }
+
+        void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const {
+            buf[offset + 1] = value >> 8;
+            buf[offset] = value;
+        }
+
+        void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const {
+            buf[offset + 3] = value >> 24;
+            buf[offset + 2] = value >> 16;
+            buf[offset + 1] = value >> 8;
+            buf[offset] = value;
         }
 
 #ifdef SD_OPTION_FILE_WRITE
@@ -420,7 +432,7 @@ class SD: public BlockStorage {
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse, sizeof(this->m_firstByteResponse)));
+                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -437,7 +449,7 @@ class SD: public BlockStorage {
 
                 // Read remaining bytes
                 while (numBytes--)
-                    check_errors(this->m_spi->shift_in(8, dat++, sizeof(*dat)));
+                    check_errors(this->m_spi->shift_in(8, dat++));
             } else
                 return INVALID_RESPONSE;
 
@@ -467,7 +479,7 @@ class SD: public BlockStorage {
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse, sizeof(this->m_firstByteResponse)));
+                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -481,7 +493,7 @@ class SD: public BlockStorage {
                 // Ignore blank data again
                 timeout = RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(this->m_spi->shift_in(8, dat, sizeof(*dat)));
+                    check_errors(this->m_spi->shift_in(8, dat));
 
                     // Check for timeout
                     if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -501,9 +513,9 @@ class SD: public BlockStorage {
 #endif
                     while (bytes--) {
 #ifdef SPI_OPTION_FAST
-                        check_errors(this->m_spi->shift_in_fast(8, dat++, sizeof(*dat)));
+                        check_errors(this->m_spi->shift_in_fast(8, dat++));
 #else
-                        check_errors(this->m_spi->shift_in(8, dat++, sizeof(*dat)));
+                        check_errors(this->m_spi->shift_in(8, dat++));
 #endif
                     }
 
@@ -511,7 +523,7 @@ class SD: public BlockStorage {
                     for (i = 0; i < 2; ++i) {
                         timeout = RESPONSE_TIMEOUT + CNT;
                         do {
-                            check_errors(this->m_spi->shift_in(8, &checksum, sizeof(checksum)));
+                            check_errors(this->m_spi->shift_in(8, &checksum));
 
                             // Check for timeout
                             if ((timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -540,15 +552,14 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write_block (uint16_t bytes, uint8_t *dat) {
+        PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) {
             PropWare::ErrorCode err;
             uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(
-                        this->m_spi->shift_in(8, &this->m_firstByteResponse, sizeof(this->m_firstByteResponse)));
+                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -576,8 +587,7 @@ class SD: public BlockStorage {
                 // Receive and digest response token
                 timeout = RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(
-                            this->m_spi->shift_in(8, &this->m_firstByteResponse, sizeof(this->m_firstByteResponse)));
+                    check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
 
                     // Check for timeout
                     if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)

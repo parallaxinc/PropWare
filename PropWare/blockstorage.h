@@ -31,22 +31,26 @@
 namespace PropWare {
 class BlockStorage {
     public:
-        class Buffer {
-            public:
-                /**  Buffer data buffer */
-                uint8_t *buf;
-                /** Buffer ID - determine who owns the current information */
-                int8_t  id;
-                /**
-                 * When set, the currently loaded sector has been modified since
-                 * it was read from the SD card
-                 */
-                bool mod;
+        struct Buffer {
+            /**  Buffer data */
+            uint8_t  *buf;
+            /** Buffer ID - determine who owns the current information */
+            int8_t   id;
+            /** When set, the currently loaded sector has been modified since it was read from the SD card */
+            bool     mod;
+            /** Store the current cluster's starting sector number */
+            uint32_t curTier2StartAddr;
+            /** Store the current sector offset from the beginning of the cluster */
+            uint8_t  curTier1Offset;
+            /** Store the current allocation unit */
+            uint32_t curTier3;
+            /** Look-ahead at the next FAT entry */
+            uint32_t nextTier3;
         };
 
     public:
-        static void print_block (const Printer &printer, const uint8_t data[], const size_t words,
-                                 const uint8_t wordsPerLine) {
+        static void print_block (const Printer &printer, const uint8_t data[], const size_t words = 512,
+                                 const uint8_t wordsPerLine = 16) {
             uint8_t lines = words / wordsPerLine;
             if (words % wordsPerLine)
                 ++lines;
@@ -101,17 +105,13 @@ class BlockStorage {
 
         virtual uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const = 0;
 
-        uint8_t get_byte (const uint16_t offset, const BlockStorage::Buffer *buf) const {
-            return get_byte(offset, buf->buf);
+        void write_byte (const uint16_t offset, uint8_t buf[], const uint8_t value) const {
+            buf[offset] = value;
         }
 
-        uint16_t get_short (const uint16_t offset, const BlockStorage::Buffer *buf) const {
-            return get_short(offset, buf->buf);
-        }
+        virtual void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const = 0;
 
-        uint32_t get_long (const uint16_t offset, const BlockStorage::Buffer *buf) const {
-            return get_long(offset, buf->buf);
-        }
+        virtual void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const = 0;
 
         virtual uint16_t get_sector_size () const = 0;
 

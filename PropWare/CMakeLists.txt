@@ -1,6 +1,8 @@
 set(PROPWARE_SOURCES
         ../blockstorage
+        ../fatfile
         ../fatfs
+        ../file
         ../filesystem
         ../hd44780
         ../l3g

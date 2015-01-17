@@ -34,15 +34,18 @@ namespace PropWare {
 
 class Filesystem {
 public:
+#define HD44780_MAX_ERROR    64
     typedef enum {
-                                  NO_ERROR = 0,
-                                  ERROR_BEG = 1,
-        /** Filesystem Error  0 */FILE_ALREADY_EXISTS = ERROR_BEG,
-        /** Filesystem Error  1 */INVALID_FILE_MODE,
-        /** Filesystem Error  2 */ENTRY_NOT_FILE,
-        /** Filesystem Error  3 */ENTRY_NOT_DIR,
-        /** Filesystem Error  4 */FILENAME_NOT_FOUND,
-        /** Filesystem Error  5 */FILESYSTEM_ALREADY_MOUNTED
+                                   NO_ERROR            = 0,
+                                   ERROR_BEG           = HD44780_MAX_ERROR + 1,
+        /** Filesystem Error  0 */ FILE_ALREADY_EXISTS = ERROR_BEG,
+        /** Filesystem Error  1 */ INVALID_FILE_MODE,
+        /** Filesystem Error  2 */ ENTRY_NOT_FILE,
+        /** Filesystem Error  3 */ ENTRY_NOT_DIR,
+        /** Filesystem Error  4 */ FILENAME_NOT_FOUND,
+        /** Filesystem error  5 */ BAD_FILE_MODE,
+        /** Filesystem Error  5 */ FILESYSTEM_ALREADY_MOUNTED,
+        /** End Filesystem error */END_ERROR           = FILESYSTEM_ALREADY_MOUNTED
     } ErrorCode;
 
 public:
@@ -63,20 +66,27 @@ public:
      */
     virtual PropWare::ErrorCode unmount () = 0;
 
+    File* fopen (const char *name, const char modeStr[], BlockStorage::Buffer *buffer = NULL) {
+        File::Mode mode = File::get_mode(modeStr);
+        if (File::Mode::ERROR == mode)
+            this->m_error = BAD_FILE_MODE;
+            return NULL;
+        return fopen(name, mode, buffer);
+    }
+
     /**
      * @brief       Open a file from the given filesystem
      *
-     * @param[out]  *f      If the method succeeded, the file will be stored
-     *                      in this address. If a null pointer is passed,
-     *                      a new File instance will be instantiated
-     * @param[in]   *name   Name (or full file path) to open
-     * @param[in[   mode[]  Mode to open the file as
+     * @param[in]   *name       Path to file that should be opened
+     * @param[in]   mode        Mode to open the file as
+     * @param[in]   *buffer     Optional buffer can be used by the file. If no buffer is passed in, the Filesystem's
+     *                          shared buffer will be used by the file. Passing a dedicated buffer is only
+     *                          recommended when opening more than one file
      *
-     * @return      The newly opened file pointer is returned if successful,
-     *              otherwise NULL is returned and an error code is set
-     *              internally (@see PropWare::Filesystem::get_error)
+     * @return      The newly opened file pointer is returned if successful, otherwise NULL is returned and an error
+     *              code is set internally (@see PropWare::Filesystem::get_error)
      */
-//    virtual File* fopen (const char *name, const char mode[]) = 0;
+    virtual File* fopen (const char *name, const File::Mode mode, BlockStorage::Buffer *buffer = NULL) = 0;
 
     /**
      * @brief   Determine what error (if any) occurred. Error code is reset

@@ -33,21 +33,37 @@ namespace PropWare {
 class FatFile : public File {
     friend class FatFS;
 
+    public:
+        FatFile (BlockStorage::Buffer *buffer, const int id, const Mode mode) {
+            construct(this, buffer, id, mode);
+        }
+
+    private:
+        static FatFile *build (BlockStorage::Buffer *buffer, const int id, const Mode mode) {
+            FatFile *f = (FatFile *) malloc(sizeof(FatFile));
+            construct(f, buffer, id, mode);
+            return f;
+        }
+
+        static void construct (FatFile *f, BlockStorage::Buffer *buffer, const int id, const Mode mode) {
+            f->buf       = buffer;
+            f->id        = id;
+            f->rPtr      = 0;
+            f->wPtr      = 0;
+            f->mode      = mode;
+            f->buf->id   = id;
+            f->curSector = 0;
+        }
+
     protected:
         BlockStorage::Buffer *buf;
         /** Maximum number of sectors currently allocated to a file */
         uint32_t             maxSectors;
-        /**
-         * When the length of a file is changed, this variable will be
-         * set, otherwise cleared
-         */
+        /** When the length of a file is changed, this variable will be set, otherwise cleared */
         bool                 mod;
         /** File's starting allocation unit */
         uint32_t             firstAllocUnit;
-        /**
-         * like curSectorOffset, but does not reset upon loading a new
-         * cluster
-         */
+        /** like curSectorOffset, but does not reset upon loading a new cluster */
         uint32_t             curSector;
         /** like curSector, but for allocation units */
         uint32_t             curCluster;
