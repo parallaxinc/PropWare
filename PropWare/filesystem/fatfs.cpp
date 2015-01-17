@@ -1,7 +1,7 @@
 /**
- * @file        file.h
+ * @file    fatfs.cpp
  *
- * @author      David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,53 +23,9 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <PropWare/filesystem/fatfs.h>
 
-#include <PropWare/PropWare.h>
-#include <PropWare/filesystem.h>
-
-namespace PropWare {
-
-class File {
-friend class Filesystem;
-
-public:
-    typedef enum {
-        ERROR,
-        READ,
-        WRITE,
-        APPEND,
-        R_UPDATE,
-        W_UPDATE,
-        A_UPDATE
-    } Mode;
-
-    // Signal that the contents of a buffer are a directory
-    static const int8_t FOLDER_ID = -1;
-public:
-    static Mode get_mode (const char mode[]) {
-        Mode retVal = ERROR;
-
-        if (strstr(mode, "r"))
-            retVal = READ;
-        else if (strstr(mode, "w"))
-            retVal = WRITE;
-        else if (strstr(mode, "a"))
-            retVal = APPEND;
-
-        if (ERROR != retVal && strstr(mode, "+"))
-            retVal = (Mode) ((int) retVal + 3);
-
-        return retVal;
-    }
-
-protected:
-    /** determine if the buffer is owned by this file */
-    uint8_t    id;
-    uint32_t   wPtr;
-    uint32_t   rPtr;
-    File::Mode mode;
-    uint32_t   length;
-};
-
-}
+const uint8_t PropWare::FatFS::PARTITION_IDS[54] = {0x01, 0x04, 0x06, 0x07, 0x08, 0x0B, 0x0C, 0x0E, 0x11, 0x12, 0x14,
+        0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x24, 0x27, 0x28, 0x56, 0x84, 0x86, 0x8B, 0x8D, 0x90, 0x92, 0x97, 0x98, 0x9A,
+        0xAA, 0xB6, 0xBB, 0xBC, 0xC0, 0xC1, 0xC6, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCE, 0xD0, 0xD1, 0xD4, 0xD6, 0xDB,
+        0xDE, 0xE1, 0xE4, 0xE5, 0xEF, 0xF2, 0xFE};

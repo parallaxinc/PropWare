@@ -1,9 +1,9 @@
 set(PROPWARE_SOURCES
-        ../blockstorage
-        ../fatfile
-        ../fatfs
-        ../file
-        ../filesystem
+        ../filesystem/blockstorage
+        ../filesystem/fatfile
+        ../filesystem/fatfs
+        ../filesystem/file
+        ../filesystem/filesystem
         ../hd44780
         ../l3g
         ../max6675
@@ -18,7 +18,7 @@ set(PROPWARE_SOURCES
         ../runnable
         ../scancapable
         ../scanner
-        ../sd
+        ../filesystem/sd
         ../seeedtft
         ../seeedtftfast
         ../seeedtftfast_as.S

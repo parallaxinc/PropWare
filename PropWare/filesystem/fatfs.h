@@ -26,10 +26,10 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-#include <PropWare/blockstorage.h>
 #include <PropWare/printer/printer.h>
-#include <PropWare/filesystem.h>
-#include <PropWare/fatfile.h>
+#include <PropWare/filesystem/blockstorage.h>
+#include <PropWare/filesystem/filesystem.h>
+#include <PropWare/filesystem/fatfile.h>
 
 namespace PropWare {
 

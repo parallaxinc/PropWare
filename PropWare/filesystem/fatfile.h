@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include <PropWare/file.h>
-#include <PropWare/filesystem.h>
+#include <PropWare/filesystem/file.h>
+#include <PropWare/filesystem/filesystem.h>
 
 namespace PropWare {
 

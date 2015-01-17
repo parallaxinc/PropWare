@@ -32,8 +32,8 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/sd.h>
-#include <PropWare/fatfs.h>
+#include <PropWare/filesystem/sd.h>
+#include <PropWare/filesystem/fatfs.h>
 
 using namespace PropWare;
 

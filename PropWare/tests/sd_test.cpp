@@ -31,7 +31,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/sd.h>
+#include <PropWare/filesystem/sd.h>
 
 PropWare::SD *testable;
 

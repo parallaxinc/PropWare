@@ -1,7 +1,7 @@
 /**
- * @file    sd.cpp
+ * @file        file.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,9 +23,53 @@
  * SOFTWARE.
  */
 
-// Includes
-#include <PropWare/sd.h>
+#pragma once
 
-const uint32_t PropWare::SD::RESPONSE_TIMEOUT        = 100 * MILLISECOND;
-const uint32_t PropWare::SD::SEND_ACTIVE_TIMEOUT     = 500 * MILLISECOND;
-const uint32_t PropWare::SD::SINGLE_BYTE_WIGGLE_ROOM = 150 * MICROSECOND;
+#include <PropWare/PropWare.h>
+#include <PropWare/filesystem/filesystem.h>
+
+namespace PropWare {
+
+class File {
+    friend class Filesystem;
+
+    public:
+        typedef enum {
+            ERROR,
+            READ,
+            WRITE,
+            APPEND,
+            R_UPDATE,
+            W_UPDATE,
+            A_UPDATE
+        } Mode;
+
+        // Signal that the contents of a buffer are a directory
+        static const int8_t FOLDER_ID = -1;
+    public:
+        static Mode get_mode (const char mode[]) {
+            Mode retVal = ERROR;
+
+            if (strstr(mode, "r"))
+                retVal = READ;
+            else if (strstr(mode, "w"))
+                retVal = WRITE;
+            else if (strstr(mode, "a"))
+                retVal = APPEND;
+
+            if (ERROR != retVal && strstr(mode, "+"))
+                retVal = (Mode) ((int) retVal + 3);
+
+            return retVal;
+        }
+
+    protected:
+        /** determine if the buffer is owned by this file */
+        uint8_t    id;
+        uint32_t   wPtr;
+        uint32_t   rPtr;
+        File::Mode mode;
+        uint32_t   length;
+};
+
+}
