@@ -55,26 +55,14 @@ class UART : public virtual PrintCapable {
          * Error codes - Proceeded by SD, SPI, and HD44780
          */
         typedef enum {
-            /** No errors; Successful completion of the function */
-            NO_ERROR = 0,
-            /** First error code for PropWare::UART */
-            BEG_ERROR = UART_ERRORS_BASE,
-            /** The requested baud rate is too high */
-            BAUD_TOO_HIGH = BEG_ERROR,
-            /** A parity error has occurred during read */
-            PARITY_ERROR,
-            /**
-             * The requested data width is not between 1 and 16 (inclusive)
-             */
-            INVALID_DATA_WIDTH,
-            /**
-             * The requested stop bit width is not between 1 and 14 (inclusive)
-             */
-            INVALID_STOP_BIT_WIDTH,
-            /** Null pointer was passed as an argument */
-            NULL_POINTER,
-            /** Last error code used by PropWare::UART */
-            END_ERROR = UART::NULL_POINTER
+            /** No errors; Successful completion of the function */                NO_ERROR      = 0,
+            /** First error code for PropWare::UART */                             BEG_ERROR = UART_ERRORS_BASE,
+            /** The requested baud rate is too high */                             BAUD_TOO_HIGH = BEG_ERROR,
+            /** A parity error has occurred during read */                         PARITY_ERROR,
+            /** The requested data width is not between 1 and 16 (inclusive) */    INVALID_DATA_WIDTH,
+            /** The requested stop bit width is not between 1 and 14 (inclusive) */INVALID_STOP_BIT_WIDTH,
+            /** Null pointer was passed as an argument */                          NULL_POINTER,
+            /** Last error code used by PropWare::UART */                          END_ERROR     = UART::NULL_POINTER
         } ErrorCode;
 
     public:

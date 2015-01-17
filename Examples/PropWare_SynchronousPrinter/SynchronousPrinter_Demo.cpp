@@ -32,7 +32,7 @@ int main (int argc, char *argv[]) {
             PropWare::Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
 
     for (n = 1; n < COGS; n++) {
-        cog = (int8_t) _start_cog_thread(cog_stack[n] + sizeof(cog_stack[n]), run_cog, nullptr, &thread_data);
+        cog = (int8_t) _start_cog_thread(cog_stack[n] + sizeof(cog_stack[n]), run_cog, NULL, &thread_data);
         pwSyncOut.printf("Toggle COG %d Started" CRLF, cog);
     }
 

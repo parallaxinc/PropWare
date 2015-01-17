@@ -127,7 +127,7 @@ class Queue {
 
                 return *retVal;
             } else
-                return * (T *) nullptr;
+                return * (T *) NULL;
         }
 
         /**
@@ -142,7 +142,7 @@ class Queue {
         }
 
         bool check(const T &value) const {
-            return &value == nullptr;
+            return &value == NULL;
         }
 
     private:
