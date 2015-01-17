@@ -25,7 +25,6 @@
 
 #include "PropWareTests.h"
 
-
 TEARDOWN {
 }
 

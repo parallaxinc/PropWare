@@ -73,10 +73,14 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     _runPropWareUnitTest(testName, #testName, false, &passed)
 
 #define FAIL(message) \
-    return false;
+    _tearDown(); \
+    return false
 
 #define ASSERT(actual) \
-    if (!actual) return false;
+    if (!actual) { \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_TRUE(actual) \
     ASSERT(actual)
@@ -85,12 +89,16 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     ASSERT(false == actual)
 
 #define ASSERT_EQ(expected, actual) \
-    if ((expected) != (actual)) \
-        return false
+    if ((expected) != (actual)) { \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_NEQ(lhs, rhs) \
-    if ((lhs) == (rhs)) \
-        return false
+    if ((lhs) == (rhs)) { \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
@@ -99,6 +107,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut.puts("`; Acutal: `"); \
         pwOut.print(actual); \
         pwOut.puts("`" CRLF); \
+        _tearDown(); \
         return false; \
     }
 
@@ -109,6 +118,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut.puts("` == `"); \
         pwOut.print(rhs); \
         pwOut.puts("`" CRLF); \
+        _tearDown(); \
         return false; \
     }
 
@@ -117,12 +127,14 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         public:                                     \
             static bool checkAssert () {            \
                 assertion;                          \
+                _tearDown();                        \
                 return true;                        \
             }                                       \
     };                                              \
                                                     \
     if (!_AssertionCheck ## id::checkAssert()) {    \
         MESSAGE(__VA_ARGS__);                       \
+        _tearDown();                                \
         return false;                               \
     }
 
