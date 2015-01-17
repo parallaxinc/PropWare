@@ -73,7 +73,7 @@ TEST(Constructor) {
     tearDown();
 }
 
-TEST(ReadBootSector) {
+TEST(ReadMasterBootRecord) {
     ErrorCode err;
 
     testable = new FatFS(getDriver());
@@ -85,7 +85,7 @@ TEST(ReadBootSector) {
 
     FatFS::InitFATInfo fatInfo;
     fatInfo.bootSector = 0;
-    err = testable->read_boot_sector(&fatInfo);
+    err = testable->read_boot_sector(fatInfo, 0);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
@@ -106,12 +106,35 @@ TEST(Mount) {
     tearDown();
 }
 
+TEST(Mount_withParameter0) {
+    ErrorCode err;
+
+    testable = new FatFS(getDriver());
+    err = testable->mount(0);
+    error_checker(err);
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
+
+    tearDown();
+}
+
+TEST(Mount_withParameter4) {
+    ErrorCode err;
+
+    testable = new FatFS(getDriver());
+    err = testable->mount(4);
+    ASSERT_EQ_MSG(FatFS::INVALID_FILESYSTEM, err);
+
+    tearDown();
+}
+
 int main () {
     START(FatFSTest);
 
     RUN_TEST(Constructor);
-    RUN_TEST(ReadBootSector);
+    RUN_TEST(ReadMasterBootRecord);
     RUN_TEST(Mount);
+    RUN_TEST(Mount_withParameter0);
+    RUN_TEST(Mount_withParameter4);
 
     COMPLETE();
 }

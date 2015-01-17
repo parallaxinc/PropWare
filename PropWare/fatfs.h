@@ -49,7 +49,8 @@ class FatFS : public Filesystem {
             /** FatFS Error 3 */   TOO_MANY_FATS,
             /** FatFS Error 4 */   READING_PAST_EOC,
             /** FatFS Error 5 */   FILE_WITHOUT_BUFFER,
-            /** FatFS Error 6 */   INVALID_FILESYSTEM,
+            /** FatFS Error 6 */   PARTITION_DOES_NOT_EXIST,
+            /** FatFS Error 7 */   INVALID_FILESYSTEM,
             /** Last FatFS error */END_ERROR = INVALID_FILESYSTEM
         } ErrorCode;
 
@@ -84,6 +85,8 @@ class FatFS : public Filesystem {
 
             if (this->m_mounted)
                 return Filesystem::FILESYSTEM_ALREADY_MOUNTED;
+            else if (3 < partition)
+                return INVALID_FILESYSTEM;
 
             // Start the driver
             check_errors(this->m_driver->start());
@@ -98,7 +101,7 @@ class FatFS : public Filesystem {
             if (NULL == this->m_fat)
                 this->m_fat = (uint8_t *) malloc(this->m_driver->get_sector_size());
 
-            check_errors(this->read_boot_sector(&fatInfo));
+            check_errors(this->read_boot_sector(fatInfo, partition));
             check_errors(this->common_boot_sector_parser(&fatInfo));
             this->partition_info_parser(&fatInfo);
             check_errors(this->determine_fat_type(&fatInfo));
@@ -233,23 +236,28 @@ class FatFS : public Filesystem {
         }*/
 
     private:
+        // Valid partition IDs for FAT volumes
+        static const uint8_t PARTITION_IDS[54];
+
         // Boot sector addresses/values
-        static const uint8_t  FAT_16              = 2;  // A FAT entry in FAT16 is 2-bytes
-        static const uint8_t  FAT_32              = -4;  // A FAT entry in FAT32 is 4-bytes
-        static const uint8_t  BOOT_SECTOR_ID      = 0xEB;
-        static const uint8_t  BOOT_SECTOR_ID_ADDR = 0;
-        static const uint16_t BOOT_SECTOR_BACKUP  = 0x1C6;
-        static const uint8_t  CLUSTER_SIZE_ADDR   = 0x0D;
-        static const uint8_t  RSVD_SCTR_CNT_ADDR  = 0x0E;
-        static const uint8_t  NUM_FATS_ADDR       = 0x10;
-        static const uint8_t  ROOT_ENTRY_CNT_ADDR = 0x11;
-        static const uint8_t  TOT_SCTR_16_ADDR    = 0x13;
-        static const uint8_t  FAT_SIZE_16_ADDR    = 0x16;
-        static const uint8_t  TOT_SCTR_32_ADDR    = 0x20;
-        static const uint8_t  FAT_SIZE_32_ADDR    = 0x24;
-        static const uint8_t  ROOT_CLUSTER_ADDR   = 0x2c;
-        static const uint16_t FAT12_CLSTR_CNT     = 4085;
-        static const uint16_t FAT16_CLSTR_CNT     = 65525;
+        static const uint8_t  FAT_16                 = 2;  // A FAT entry in FAT16 is 2-bytes
+        static const uint8_t  FAT_32                 = -4;  // A FAT entry in FAT32 is 4-bytes
+        static const uint8_t  BOOT_SECTOR_ID         = 0xEB;
+        static const uint8_t  BOOT_SECTOR_ID_ADDR    = 0;
+        static const uint16_t PARTITION_TABLE_START  = 0x1BE;
+        static const uint8_t  PARTITION_ID_OFFSET    = 0x04;
+        static const uint8_t  PARTITION_START_OFFSET = 0x08;
+        static const uint8_t  CLUSTER_SIZE_ADDR      = 0x0D;
+        static const uint8_t  RSVD_SCTR_CNT_ADDR     = 0x0E;
+        static const uint8_t  NUM_FATS_ADDR          = 0x10;
+        static const uint8_t  ROOT_ENTRY_CNT_ADDR    = 0x11;
+        static const uint8_t  TOT_SCTR_16_ADDR       = 0x13;
+        static const uint8_t  FAT_SIZE_16_ADDR       = 0x16;
+        static const uint8_t  TOT_SCTR_32_ADDR       = 0x20;
+        static const uint8_t  FAT_SIZE_32_ADDR       = 0x24;
+        static const uint8_t  ROOT_CLUSTER_ADDR      = 0x2c;
+        static const uint16_t FAT12_CLSTR_CNT        = 4085;
+        static const uint16_t FAT16_CLSTR_CNT        = 65525;
 
         // FAT file/directory values
         static const uint8_t FILE_ENTRY_LENGTH     = 32;  // An entry in a directory uses 32 bytes
@@ -303,26 +311,47 @@ class FatFS : public Filesystem {
         } InitFATInfo;
 
         /**
-         * @brief       TODO: What's this do?
+         * @brief       Read the master boot record and load in the boot sector for the requested partition
          *
          * @param[out]  fatInfo     Store information about the FAT here
+         * @param[in]   partition   0-indexed description of the requested partition
          *
          * @return 0 upon success, error code otherwise
          */
-        inline PropWare::ErrorCode read_boot_sector (InitFATInfo *fatInfo) {
+        inline PropWare::ErrorCode read_boot_sector (InitFATInfo &fatInfo, const uint8_t partition) {
             PropWare::ErrorCode err;
-            // Read in first sector (and use default buffer)
+
+            // Read first sector into the default buffer
             check_errors(this->m_driver->read_data_block(0, this->m_buf.buf));
+            const uint8_t bootSectorId = this->m_driver->get_byte(FatFS::BOOT_SECTOR_ID_ADDR, this->m_buf.buf);
 
-            // Check if sector 0 is boot sector or MBR; if MBR, skip to boot sector at first partition
-            if (FatFS::BOOT_SECTOR_ID != this->m_driver->get_byte(FatFS::BOOT_SECTOR_ID_ADDR, this->m_buf.buf)) {
-                fatInfo->bootSector = this->m_driver->get_long(FatFS::BOOT_SECTOR_BACKUP, this->m_buf.buf);
-
-                check_errors(this->m_driver->read_data_block(fatInfo->bootSector, this->m_buf.buf));
-            } else
-                fatInfo->bootSector = 0;
+            // If we don't have a master boot record, the job is simple...
+            if (FatFS::BOOT_SECTOR_ID == bootSectorId) {
+                // Make sure the user requested partition 0 and then call it done
+                if (0 == partition)
+                    fatInfo.bootSector = 0;
+                else
+                    // A boot sector at address 0 means only one partition exists on the entire device
+                    return PARTITION_DOES_NOT_EXIST;
+            }
+            // Sector 0 is the master boot record - great. Parse the partition table and read in the boot sector
+            else {
+                const uint16_t partitionRow = PARTITION_TABLE_START + (partition << 4);
+                check_errors(this->is_fat_volume(this->m_buf.buf[partitionRow + PARTITION_ID_OFFSET]));
+                fatInfo.bootSector = this->m_driver->get_long(partitionRow + PARTITION_START_OFFSET, this->m_buf.buf);
+                check_errors(this->m_driver->read_data_block(fatInfo.bootSector, this->m_buf.buf));
+            }
 
             return 0;
+        }
+
+        inline PropWare::ErrorCode is_fat_volume (const uint8_t partitionId) {
+            for (uint8_t i = 0; i < sizeof(PARTITION_IDS); ++i)
+                if (PARTITION_IDS[i] == partitionId) {
+                    return NO_ERROR;
+                }
+
+            return INVALID_FILESYSTEM;
         }
 
         inline PropWare::ErrorCode common_boot_sector_parser (InitFATInfo *fatInfo) {

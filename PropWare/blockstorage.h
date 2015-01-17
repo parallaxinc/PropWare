@@ -45,36 +45,36 @@ class BlockStorage {
         };
 
     public:
-        static void print_block (const Printer *printer, const uint8_t data[], const size_t words,
+        static void print_block (const Printer &printer, const uint8_t data[], const size_t words,
                                  const uint8_t wordsPerLine) {
             uint8_t lines = words / wordsPerLine;
             if (words % wordsPerLine)
                 ++lines;
 
             // Printer header row
-            printer->printf("         0 ");
+            printer.printf("         0 ");
             for (uint8_t i = 1; i < wordsPerLine; ++i)
-                printer->printf("%2X ", i);
-            printer->print(CRLF);
+                printer.printf("%2X ", i);
+            printer.print(CRLF);
 
             for (uint16_t line = 0; line < lines; ++line) {
                 const uint16_t baseAddress = line * wordsPerLine;
-                printer->printf("0x%04X: ", baseAddress);
+                printer.printf("0x%04X: ", baseAddress);
 
                 // Print hex values
                 for (uint8_t offset = 0; offset < wordsPerLine; ++offset)
-                    printer->printf("%02X ", (unsigned int) data[baseAddress + offset]);
+                    printer.printf("%02X ", (unsigned int) data[baseAddress + offset]);
 
                 // Print ASCII values
                 for (uint8_t offset = 0; offset < wordsPerLine; ++offset) {
                     const char nextChar = data[baseAddress + offset];
-                    if (32 <= nextChar && 126 <= nextChar)
-                        printer->print(nextChar);
+                    if (32 <= nextChar && nextChar <= 126)
+                        printer.print(nextChar);
                     else
-                        printer->print('.');
+                        printer.print('.');
                 }
 
-                printer->print(CRLF);
+                printer.print(CRLF);
             }
         }
 
