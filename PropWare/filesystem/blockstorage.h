@@ -91,7 +91,7 @@ class BlockStorage {
             return this->read_data_block(address, buffer->buf);
         }
 
-        virtual ErrorCode write_data_block (uint32_t address, uint8_t *dat) = 0;
+        virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) = 0;
 
         ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
             return this->write_data_block(address, buffer->buf);

@@ -55,7 +55,7 @@ TEST(Start) {
     tearDown();
 }
 
-TEST(ReadBlock) {
+TEST(ReadDataBlock) {
     uint8_t buffer[PropWare::SD::SECTOR_SIZE];
 
     PropWare::ErrorCode err = testable->start();
@@ -82,29 +82,30 @@ TEST(ReadBlock) {
     tearDown();
 }
 
-TEST(WriteBlock) {
+TEST(WriteDataBlock) {
     uint8_t originalBlock[PropWare::SD::SECTOR_SIZE];
     uint8_t moddedBlock[PropWare::SD::SECTOR_SIZE];
     const uint8_t *myData = 0;
+    const uint8_t sdBlockAddr = 0;
 
     PropWare::ErrorCode err = testable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
     // Read in a block...
-    err = testable->read_data_block(0, originalBlock);
+    err = testable->read_data_block(sdBlockAddr, originalBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Original block read in");
 
     // Try writing a random block of memory
-    err = testable->write_block(PropWare::SD::SECTOR_SIZE, myData);
+    err = testable->write_data_block(sdBlockAddr, myData);
     sd_error_checker(err);
     ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Random block written");
 
     // Read the block back in to a new buffer. Make sure it matches the data written.
-    err = testable->read_data_block(0, moddedBlock);
+    err = testable->read_data_block(sdBlockAddr, moddedBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Modded block read");
@@ -112,13 +113,13 @@ TEST(WriteBlock) {
     MESSAGE("WriteBlock: Modded block equals random block");
 
     // Write the original block back to the SD card
-    err = testable->write_block(PropWare::SD::SECTOR_SIZE, originalBlock);
+    err = testable->write_data_block(sdBlockAddr, originalBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Original block written back");
 
     // Read the block back in to a new buffer. Make sure it matches the data written.
-    err = testable->read_data_block(0, moddedBlock);
+    err = testable->read_data_block(sdBlockAddr, moddedBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(PropWare::SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Modded block read again");
@@ -134,8 +135,8 @@ int main () {
     testable = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO, SCLK, CS);
 
     RUN_TEST(Start);
-    RUN_TEST(ReadBlock);
-    RUN_TEST(WriteBlock);
+    RUN_TEST(ReadDataBlock);
+    RUN_TEST(WriteDataBlock);
 
     COMPLETE();
 }

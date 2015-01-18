@@ -193,7 +193,7 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write_data_block (uint32_t address, uint8_t *dat) {
+        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
 
@@ -420,8 +420,9 @@ class SD: public BlockStorage {
          * @brief       receive response and data from SD card over SPI
          *
          * @param[in]   numBytes    Number of bytes to receive
-         * @param[out]  *dat        Location in memory with enough space to
-         *                          store `bytes` bytes of data
+         * @param[out]  *dat        Location in memory with enough space to store `bytes` bytes of data
+         *
+         * @pre         Chip select must be activated prior to invocation
          *
          * @return      Returns 0 for success, else error code
          */
@@ -467,12 +468,13 @@ class SD: public BlockStorage {
          * @brief       Receive data from SD card via SPI
          *
          * @param[in]   bytes   Number of bytes to receive
-         * @param[out]  *dat    Location in memory with enough space to store
-         *                      `bytes` bytes of data
+         * @param[out]  dat[]   Location in memory with enough space to store `bytes` bytes of data
+         *
+         * @pre         Chip select must be activated prior to invocation
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t *dat) {
+        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[]) {
             uint8_t  i, err, checksum;
             uint32_t timeout;
 
@@ -510,7 +512,7 @@ class SD: public BlockStorage {
                         this->m_spi->shift_in_sector(dat, 1);
                         bytes = 0;
                     }
-#endif
+#else
                     while (bytes--) {
 #ifdef SPI_OPTION_FAST
                         check_errors(this->m_spi->shift_in_fast(8, dat++));
@@ -518,7 +520,7 @@ class SD: public BlockStorage {
                         check_errors(this->m_spi->shift_in(8, dat++));
 #endif
                     }
-
+#endif
                     // Read two more bytes for checksum - throw away data
                     for (i = 0; i < 2; ++i) {
                         timeout = RESPONSE_TIMEOUT + CNT;
@@ -598,6 +600,20 @@ class SD: public BlockStorage {
                 if (RSPNS_TKN_ACCPT != (this->m_firstByteResponse & (uint8_t) RSPNS_TKN_BITS))
                     return INVALID_RESPONSE;
             }
+
+            // After sending the data, provide the device with clocks signals until it has finished writing data
+            // internally
+            char temp;
+            timeout = RESPONSE_TIMEOUT + CNT;
+            do {
+                check_errors(this->m_spi->shift_in(8, &temp));
+
+                // Check for timeout
+                if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
+                    return READ_TIMEOUT;
+
+                // wait for transmission end
+            } while (0xff != temp);
 
             return NO_ERROR;
         }
