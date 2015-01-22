@@ -77,16 +77,22 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     return false
 
 #define ASSERT(actual) \
-    if (!actual) { \
+    if (!(actual)) { \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_TRUE(actual) \
-    ASSERT(actual)
+    ASSERT(true == (actual))
 
 #define ASSERT_FALSE(actual) \
-    ASSERT(false == actual)
+    ASSERT(false == (actual))
+
+#define ASSERT_NULL(actual) \
+    ASSERT_TRUE(NULL == (int) (actual))
+
+#define ASSERT_NOT_NULL(actual) \
+    ASSERT_FALSE(NULL == (int) (actual))
 
 #define ASSERT_EQ(expected, actual) \
     if ((expected) != (actual)) { \

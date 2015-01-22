@@ -152,6 +152,43 @@ TEST(CheckAssertNeqMsg_ExpectFailure) {
     return true;
 }
 
+TEST(CheckAssertNull) {
+    ASSERT_NULL(NULL);
+
+    int *p = NULL;
+    ASSERT_NULL(p);
+
+    return true;
+}
+
+TEST(CheckAssertNull_1_ExpectFailure) {
+    ASSERT_NULL(1);
+
+    return true;
+}
+
+TEST(CheckAssertNull_Neg1_ExpectFailure) {
+    ASSERT_NULL(-1);
+
+    return true;
+}
+
+TEST(CheckAssertNotNull) {
+    ASSERT_NOT_NULL(1);
+
+    int y = 4;
+    int *p = &y;
+    ASSERT_NOT_NULL(p);
+
+    return true;
+}
+
+TEST(CheckAssertNotNull_ExpectFailure) {
+    ASSERT_NOT_NULL(NULL);
+
+    return true;
+}
+
 TEST(PrintUserMessage) {
     MESSAGE("Hello, this is a simple message.");
     MESSAGE("My name is %s!", "David");
@@ -198,6 +235,11 @@ int main () {
     EXPECT_FAIL(CheckAssertNeq_ExpectFailure);
     RUN_TEST(CheckAssertNeqMsg);
     EXPECT_FAIL(CheckAssertNeqMsg_ExpectFailure);
+    RUN_TEST(CheckAssertNull);
+    EXPECT_FAIL(CheckAssertNull_1_ExpectFailure);
+    EXPECT_FAIL(CheckAssertNull_Neg1_ExpectFailure);
+    RUN_TEST(CheckAssertNotNull);
+    EXPECT_FAIL(CheckAssertNotNull_ExpectFailure);
     RUN_TEST(PrintUserMessage);
     RUN_TEST(MsgIfFail);
     EXPECT_FAIL(MsgIfFail_ExpectFailure);
