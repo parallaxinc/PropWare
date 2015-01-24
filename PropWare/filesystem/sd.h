@@ -85,7 +85,7 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start () {
+        PropWare::ErrorCode start () const {
             PropWare::ErrorCode err;
             uint8_t             response[16];
 
@@ -164,7 +164,7 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) {
+        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) const {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
 
@@ -193,7 +193,7 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) {
+        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
 
@@ -266,7 +266,7 @@ class SD: public BlockStorage {
         /***********************
          *** Private Methods ***
          ***********************/
-        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response[]) {
+        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response[]) const {
             PropWare::ErrorCode err;
             uint8_t             i, j;
             bool                stageCleared;
@@ -303,7 +303,7 @@ class SD: public BlockStorage {
         /**
          * @brief   Send numerous clocks to the card to allow it to perform internal initialization
          */
-        inline PropWare::ErrorCode power_up () {
+        inline PropWare::ErrorCode power_up () const {
             uint8_t             i;
             PropWare::ErrorCode err;
 
@@ -325,7 +325,7 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
-        inline PropWare::ErrorCode reset (uint8_t response[], bool &isIdle) {
+        inline PropWare::ErrorCode reset (uint8_t response[], bool &isIdle) const {
             PropWare::ErrorCode err;
 
             // Send SD into idle state, retrieve a response and ensure it is the
@@ -340,7 +340,7 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
-        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared) {
+        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared) const {
             PropWare::ErrorCode err;
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
@@ -352,7 +352,7 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
-        inline PropWare::ErrorCode activate (uint8_t response[]) {
+        inline PropWare::ErrorCode activate (uint8_t response[]) const {
             PropWare::ErrorCode err;
             uint32_t            timeout;
             uint32_t            longWiggleRoom = 3 * MILLISECOND;
@@ -386,7 +386,7 @@ class SD: public BlockStorage {
         /**
          * @brief   Initialization nearly complete, increase clock speed
          */
-        inline PropWare::ErrorCode increase_throttle () {
+        inline PropWare::ErrorCode increase_throttle () const {
             return this->m_spi->set_clock(FULL_SPEED_SPI);
         }
 
@@ -426,14 +426,14 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t *dat) {
+        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t *dat) const {
             PropWare::ErrorCode err;
             uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
+                check_errors(this->m_spi->shift_in(8, (uint8_t *) &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -474,14 +474,14 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[]) {
+        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[]) const {
             uint8_t  i, err, checksum;
             uint32_t timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
+                check_errors(this->m_spi->shift_in(8, (uint8_t *) &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -554,14 +554,14 @@ class SD: public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) {
+        PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) const {
             PropWare::ErrorCode err;
             uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
+                check_errors(this->m_spi->shift_in(8, (uint8_t *) &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -589,7 +589,7 @@ class SD: public BlockStorage {
                 // Receive and digest response token
                 timeout = RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
+                    check_errors(this->m_spi->shift_in(8, (uint8_t *) &this->m_firstByteResponse));
 
                     // Check for timeout
                     if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)

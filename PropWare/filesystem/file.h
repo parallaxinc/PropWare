@@ -46,18 +46,19 @@ class File {
 
         // Signal that the contents of a buffer are a directory
         static const int8_t FOLDER_ID = -1;
+
     public:
-        static Mode get_mode (const char mode[]) {
+        static Mode to_mode (const char modeStr[]) {
             Mode retVal = ERROR;
 
-            if (strstr(mode, "r"))
+            if (strstr(modeStr, "r"))
                 retVal = READ;
-            else if (strstr(mode, "w"))
+            else if (strstr(modeStr, "w"))
                 retVal = WRITE;
-            else if (strstr(mode, "a"))
+            else if (strstr(modeStr, "a"))
                 retVal = APPEND;
 
-            if (ERROR != retVal && strstr(mode, "+"))
+            if (ERROR != retVal && strstr(modeStr, "+"))
                 retVal = (Mode) ((int) retVal + 3);
 
             return retVal;

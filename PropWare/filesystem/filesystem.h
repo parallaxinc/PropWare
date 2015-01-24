@@ -53,8 +53,7 @@ public:
     /**
      * @brief       Mount a filesystem
      *
-     * @param[in]   partition   If multiple partitions are supported, the
-     *                          partition number can be specified here
+     * @param[in]   partition   If multiple partitions are supported, the partition number can be specified here
      *
      * @return  Returns 0 upon success, error code otherwise
      */
@@ -68,7 +67,7 @@ public:
     virtual PropWare::ErrorCode unmount () = 0;
 
     File* fopen (const char *name, const char modeStr[], BlockStorage::Buffer *buffer = NULL) {
-        File::Mode mode = File::get_mode(modeStr);
+        File::Mode mode = File::to_mode(modeStr);
         if (File::Mode::ERROR == mode)
             this->m_error = BAD_FILE_MODE;
             return NULL;

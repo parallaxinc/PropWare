@@ -23,8 +23,19 @@
  * SOFTWARE.
  */
 
-extern "C" void __cxa_pure_virtual () {
+extern "C" {
+
+void __cxa_pure_virtual () {
     // TODO: Provide some cool way for the user to enter their own error code
     while (1) {
     }
+
+}
+
+void __gxx_personality_sj0 () {
+    // TODO: Provide some cool way for the user to enter their own error code
+    while (1) {
+    }
+}
+
 }

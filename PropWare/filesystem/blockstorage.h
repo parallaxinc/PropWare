@@ -83,17 +83,17 @@ class BlockStorage {
         }
 
     public:
-        virtual ErrorCode start() = 0;
+        virtual ErrorCode start() const = 0;
 
-        virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) = 0;
+        virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) const = 0;
 
-        ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
+        ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
             return this->read_data_block(address, buffer->buf);
         }
 
-        virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) = 0;
+        virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const = 0;
 
-        ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
+        ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
             return this->write_data_block(address, buffer->buf);
         }
 

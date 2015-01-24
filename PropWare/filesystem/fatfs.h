@@ -54,18 +54,22 @@ class FatFS : public Filesystem {
         } ErrorCode;
 
     public:
-        FatFS (BlockStorage *driver) {
-            this->m_driver     = driver;
-            this->m_mounted    = false;
-            this->m_error      = NO_ERROR;
-            this->m_fatMod     = false;
-            this->m_nextFileId = 0;
-            this->m_buf.buf    = NULL;
-            this->m_fat        = NULL;
-            this->m_sectorSize = this->m_driver->get_sector_size();
+
+        FatFS (const BlockStorage *driver) : m_driver(driver),
+                                             m_sectorSize(driver->get_sector_size()),
+                                             m_sectorsPerCluster_shift(driver->get_sector_size_shift()),
+                                             m_mounted(false),
+                                             m_nextFileId(0),
+                                             m_fat(NULL),
+                                             m_fatMod(false) {
+            this->m_error = NO_ERROR;
+            this->m_buf.buf = NULL;
         }
 
         ~FatFS () {
+            if (this->m_mounted)
+                this->unmount();
+
             if (NULL != this->m_buf.buf)
                 free(this->m_buf.buf);
 
@@ -75,8 +79,6 @@ class FatFS : public Filesystem {
 
         /**
          * @see PropWare::Filesystem::mount
-         *
-         * @note    Does not yet support multiple partitions
          */
         PropWare::ErrorCode mount (const uint8_t partition = 0) {
             PropWare::ErrorCode err;
@@ -150,6 +152,7 @@ class FatFS : public Filesystem {
                         check_fs_error(this->load_next_sector(&this->m_buf));
                     }
                 }
+
                 if (EOC_END == err || FILENAME_NOT_FOUND == err) {
                     // File wasn't found, but there is still room in this
                     // cluster (or a new cluster was just added)
@@ -335,15 +338,6 @@ class FatFS : public Filesystem {
 
         inline PropWare::ErrorCode common_boot_sector_parser (InitFATInfo *fatInfo) {
             uint8_t temp;
-
-            // Determine number of sectors per cluster
-            temp = this->m_driver->get_byte(CLUSTER_SIZE_ADDR, this->m_buf.buf);
-            this->m_sectorsPerCluster_shift = 0;
-            while (temp) {
-                temp >>= 1;
-                ++this->m_sectorsPerCluster_shift;
-            }
-            --this->m_sectorsPerCluster_shift;
 
             // Get the reserved sector count
             fatInfo->rsvdSectorCount = this->m_driver->get_short(RSVD_SCTR_CNT_ADDR, this->m_buf.buf);
@@ -954,7 +948,6 @@ class FatFS : public Filesystem {
             return retVal;
         }
 
-
         /**
          * @brief       Allocate space for a new file
          *
@@ -1051,7 +1044,6 @@ class FatFS : public Filesystem {
             return 0;
         }
 
-
         /**
          * @brief       Print the attributes and name of a file entry
          *
@@ -1107,13 +1099,13 @@ class FatFS : public Filesystem {
         }
 
     private:
-        BlockStorage *m_driver;
-        bool         m_mounted;
-        int          m_nextFileId;
+        const BlockStorage *m_driver;
+        const uint16_t     m_sectorSize;
+        const uint8_t      m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
+        bool               m_mounted;
+        int                m_nextFileId;
 
-        uint8_t  m_filesystem;  // File system type - one of FAT_16 or FAT_32
-        uint16_t m_sectorSize;
-        uint8_t  m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
+        uint8_t m_filesystem;  // File system type - one of FAT_16 or FAT_32
         uint32_t m_rootDirSectors;  // Number of sectors for the root directory
         uint32_t m_fatStart;  // Starting block address of the FAT
         uint32_t m_rootAddr;  // Starting block address of the root directory

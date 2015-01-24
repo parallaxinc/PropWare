@@ -37,14 +37,14 @@
 
 using namespace PropWare;
 
-FatFS        *testable;
+FatFS *testable;
 
 const Pin::Mask MOSI = Pin::P0;
 const Pin::Mask MISO = Pin::P1;
 const Pin::Mask SCLK = Pin::P2;
 const Pin::Mask CS   = Pin::P4;
 
-BlockStorage* getDriver() {
+BlockStorage *getDriver () {
     return new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
 }
 
@@ -59,7 +59,6 @@ void error_checker (const ErrorCode err) {
 
 SETUP {
     testable = new FatFS(getDriver());
-    testable->mount();
 }
 
 TEARDOWN {
@@ -68,15 +67,16 @@ TEARDOWN {
 }
 
 TEST(Constructor) {
-    testable = new FatFS(getDriver());
+    setUp();
 
     tearDown();
 }
 
 TEST(ReadMasterBootRecord) {
+    setUp();
+
     ErrorCode err;
 
-    testable = new FatFS(getDriver());
     err = testable->m_driver->start();
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
@@ -95,10 +95,11 @@ TEST(ReadMasterBootRecord) {
     tearDown();
 }
 
-TEST(Mount) {
+TEST(Mount_defaultParameters) {
+    setUp();
+
     ErrorCode err;
 
-    testable = new FatFS(getDriver());
     err = testable->mount();
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
@@ -107,9 +108,10 @@ TEST(Mount) {
 }
 
 TEST(Mount_withParameter0) {
+    setUp();
+
     ErrorCode err;
 
-    testable = new FatFS(getDriver());
     err = testable->mount(0);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
@@ -118,9 +120,10 @@ TEST(Mount_withParameter0) {
 }
 
 TEST(Mount_withParameter4) {
+    setUp();
+
     ErrorCode err;
 
-    testable = new FatFS(getDriver());
     err = testable->mount(4);
     ASSERT_EQ_MSG(FatFS::INVALID_FILESYSTEM, err);
 
@@ -130,11 +133,11 @@ TEST(Mount_withParameter4) {
 int main () {
     START(FatFSTest);
 
-//    RUN_TEST(Constructor);
-//    RUN_TEST(ReadMasterBootRecord);
-//    RUN_TEST(Mount);
-//    RUN_TEST(Mount_withParameter0);
-//    RUN_TEST(Mount_withParameter4);
+    RUN_TEST(Constructor);
+    RUN_TEST(ReadMasterBootRecord);
+    RUN_TEST(Mount_defaultParameters);
+    RUN_TEST(Mount_withParameter0);
+    RUN_TEST(Mount_withParameter4);
 
     COMPLETE();
 }
