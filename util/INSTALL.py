@@ -248,8 +248,7 @@ class Installer(object):
                 'PropGCC will be installed to %s. Press enter to continue or type another existing path to download '
                 'to a new directory.\n>>> ', Installer._is_acceptable_path, '"%s" is not a directory or contains a '
                                                                             'space. Please provide an existing '
-                                                                            'directory',
-                self._propgcc_parent)
+                                                                            'directory', self._propgcc_parent)
             self._add_propgcc_to_path = True
 
         # ##
@@ -289,6 +288,7 @@ class Installer(object):
 
         # Don't overwrite the PATH variable!!!
         if 'PATH' == key.upper():
+            # noinspection PyAugmentAssignment
             os.environ[key] = value + os.pathsep + os.environ[key]
         else:
             os.environ[key] = value
@@ -301,6 +301,7 @@ class Installer(object):
 
         # Don't overwrite the PATH variable!!!
         if 'PATH' == key.upper():
+            # noinspection PyAugmentAssignment
             os.environ[key] = value + os.pathsep + os.environ[key]
         else:
             os.environ[key] = value
@@ -439,6 +440,12 @@ class DebInstaller(NixInstaller):
                 print(' '.join(cmd))
                 subprocess.call(cmd)
 
+        # Install zlib1g:i386 if not already installed (a dependency of PropGCC)
+        if DebInstaller._needs_zlib1g():
+            cmd = ['sudo', 'apt-get', 'install', 'zlib1g:i386']
+            print(' '.join(cmd))
+            subprocess.call(cmd)
+
         # Also, add user to "dialout" group if necessary
         if not self._user_in_dialout:
             cmd = ['sudo', 'usermod', '-a', '-G', 'dialout', os.environ['USER']]
@@ -472,6 +479,17 @@ class DebInstaller(NixInstaller):
         cmd = ['dpkg-query', '-l', 'libc6*']
         package_list = subprocess.check_output(cmd).split(bytes('\n'))
         matcher = re.compile('.*libc6(:|-)i386.*')
+        for package in package_list:
+            if matcher.match(package):
+                return False
+
+        return True
+
+    @classmethod
+    def _needs_zlib1g(cls):
+        cmd = ['dpkg-query', '-l', 'zlib1g:i386']
+        package_list = subprocess.check_output(cmd).split(bytes('\n'))
+        matcher = re.compile('.*zlib1g:i386.*')
         for package in package_list:
             if matcher.match(package):
                 return False
