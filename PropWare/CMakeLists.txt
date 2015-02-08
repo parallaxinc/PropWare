@@ -1,3 +1,38 @@
+set(PROPWARE_SOURCES
+        ../filesystem/blockstorage
+        ../filesystem/fatfile
+        ../filesystem/fatfs
+        ../filesystem/file
+        ../filesystem/filesystem
+        ../hd44780
+        ../l3g
+        ../max6675
+        ../mcp3000
+        ../pin
+        ../port
+        ../printcapable
+        ../printer/printer
+        ../printer/synchronousprinter
+        ../PropWare
+        ../queue
+        ../runnable
+        ../scancapable
+        ../scanner
+        ../filesystem/sd
+        ../seeedtft
+        ../seeedtftfast
+        ../seeedtftfast_as.S
+        ../spi
+        ../spi_as.S
+        ../uart/abstractduplexuart
+        ../uart/abstractsimplexuart
+        ../uart/duplexuart
+        ../uart/fullduplexuart
+        ../uart/halfduplexuart
+        ../uart/simplexuart
+        ../uart/sharedsimplexuart
+        ../uart/uart)
+
 add_subdirectory(cmm)
 add_subdirectory(lmm)
 add_subdirectory(xmmc)

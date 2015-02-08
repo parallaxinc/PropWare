@@ -15,6 +15,7 @@ Useful links
 ------------
 * PropWare Links
     * [Home](http://david.zemon.name/PropWare)
+    * [Issue Tracker](https://github.com/DavidZemon/PropWare/issues)
     * [Source code](https://github.com/DavidZemon/PropWare)
     * [PropWare binary](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip)
     * [Forum thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)

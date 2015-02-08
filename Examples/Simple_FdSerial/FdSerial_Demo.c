@@ -1,15 +1,12 @@
-/**
- * @file    fatfs_test.cpp
+/*
+ * @file FdSerial_Demo.c
  *
  * @author  David Zemon
  *
- * Hardware:
- *      SD card connected with the following pins:
- *          - MOSI = P0
- *          - MISO = P1
- *          - SCLK = P2
- *          - CS   = P4
- *      FAT16 or FAT32 Filesystem on the first partition of the SD card
+ * Please note that FdSerial support requires the inclusion of the file
+ * `pst.dat` as a source file for this project. Because the file is no longer
+ * included as part of the Simple libraries you must copy it from this project
+ * to your own before attempting to compile.
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -31,49 +28,14 @@
  * SOFTWARE.
  */
 
-#include <PropWare/sd.h>
-#include <PropWare/fatfs.h>
-#include "../PropWareTests.h"
-
-PropWare::BlockStorage *driver;
-PropWare::FatFS        *testable;
-
-const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
-const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
-const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
-const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
-
-SETUP {
-    driver = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
-                              SCLK, CS);
-}
-
-TEARDOWN {
-    delete driver;
-}
-
-TEST(Constructor) {
-    setUp();
-
-    testable = new PropWare::FatFS(driver);
-
-    tearDown();
-}
-
-TEST(Mount) {
-    setUp();
-
-    testable = new PropWare::FatFS(driver);
-    testable->mount();
-
-    tearDown();
-}
+#include <fdserial.h>
 
 int main () {
-    START(FatFSTest);
 
-    RUN_TEST(Constructor);
-    RUN_TEST(Mount);
+    fdserial *serial = fdserial_open(31, 30, 0, 115200);
 
-    COMPLETE();
+    while (1)
+        dprint(serial, "Hello, world!\n");
+
+    return 0;
 }

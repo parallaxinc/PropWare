@@ -8,7 +8,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL lmm)
-include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
 
 project(Simple_${MODEL})
 

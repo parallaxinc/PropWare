@@ -24,7 +24,6 @@
  */
 
 #include <PropWare/scanner.h>
-#include <PropWare/printer.h>
 #include <PropWare/uart/halfduplexuart.h>
 
 const PropWare::HalfDuplexUART _g_halfDuplexUart;

@@ -399,7 +399,7 @@ class Printer {
          *                        `2 + 3 = 5`
          */
         template<typename T, typename... Targs>
-        void printf (const char *fmt, const T first, Targs... remaining) const {
+        void printf (const char fmt[], const T first, const Targs... remaining) const {
             const char *s = fmt;
             char       c;
             Format     format;
@@ -528,6 +528,12 @@ class Printer {
         void print (const double f,
                     const Format format = DEFAULT_FORMAT) const {
             this->put_float(f, format.width, format.precision, format.fillChar);
+        }
+
+        template<typename T>
+        const Printer& operator<< (const T arg) const {
+            this->print(arg);
+            return *this;
         }
 
     protected:

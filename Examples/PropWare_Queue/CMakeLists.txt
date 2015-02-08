@@ -14,12 +14,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-project(pin_test)
+project(Queue_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME})
-
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-################################################################################
+create_simple_executable(${PROJECT_NAME}
+    ${PROJECT_NAME})

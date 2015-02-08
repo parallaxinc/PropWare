@@ -26,8 +26,11 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 #include "c++allocate.h"
+
+#define protected public
+#define private   public
 
 void _runPropWareUnitTest (bool (*test) (void), const char testName[],
                            const bool expectValue, bool *result) {
@@ -61,33 +64,47 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     return 0
 
 #define TEST(testName) \
-    bool TEST_ ## testName ()
+    bool testName ()
 
 #define RUN_TEST(testName) \
-    _runPropWareUnitTest(TEST_ ## testName, #testName, true, &passed)
+    _runPropWareUnitTest(testName, #testName, true, &passed)
 
 #define EXPECT_FAIL(testName) \
-    _runPropWareUnitTest(TEST_ ## testName, #testName, false, &passed)
+    _runPropWareUnitTest(testName, #testName, false, &passed)
 
 #define FAIL(message) \
-    return false;
+    _tearDown(); \
+    return false
 
 #define ASSERT(actual) \
-    if (!actual) return false;
+    if (!(actual)) { \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_TRUE(actual) \
-    ASSERT(actual)
+    ASSERT(true == (actual))
 
 #define ASSERT_FALSE(actual) \
-    ASSERT(false == actual)
+    ASSERT(false == (actual))
+
+#define ASSERT_NULL(actual) \
+    ASSERT_TRUE(NULL == (int) (actual))
+
+#define ASSERT_NOT_NULL(actual) \
+    ASSERT_FALSE(NULL == (int) (actual))
 
 #define ASSERT_EQ(expected, actual) \
-    if ((expected) != (actual)) \
-        return false
+    if ((expected) != (actual)) { \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_NEQ(lhs, rhs) \
-    if ((lhs) == (rhs)) \
-        return false
+    if ((lhs) == (rhs)) { \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
@@ -96,6 +113,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut.puts("`; Acutal: `"); \
         pwOut.print(actual); \
         pwOut.puts("`" CRLF); \
+        _tearDown(); \
         return false; \
     }
 
@@ -106,6 +124,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut.puts("` == `"); \
         pwOut.print(rhs); \
         pwOut.puts("`" CRLF); \
+        _tearDown(); \
         return false; \
     }
 
@@ -114,12 +133,14 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         public:                                     \
             static bool checkAssert () {            \
                 assertion;                          \
+                _tearDown();                        \
                 return true;                        \
             }                                       \
     };                                              \
                                                     \
     if (!_AssertionCheck ## id::checkAssert()) {    \
         MESSAGE(__VA_ARGS__);                       \
+        _tearDown();                                \
         return false;                               \
     }
 

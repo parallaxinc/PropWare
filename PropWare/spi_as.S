@@ -196,7 +196,7 @@ READ                    // Interpret the bit count and mode of output for this r
 
                         // Determine clock phase and bit mode...
                         cmp bitMode, #SPI_bitMode_BIT wz    '' First up is determining bitMode
-        if_z            jmp #read_msb_first
+        if_nz           jmp #read_msb_first
 
                         cmp clkPhase, #SPI_PHASE_BIT wz     '' So it's LSB first, now determine CPHA
         if_z            call #lsb_cpha1
@@ -324,7 +324,7 @@ READ_fast               // Interpret the bit count and mode of output for this r
 
                         // Determine clock phase and bit mode...
                         cmp bitMode, #SPI_bitMode_BIT wz    '' First up is determining bitMode
-        if_z            jmp #read_msb_first_fast
+        if_nz           jmp #read_msb_first_fast
 
                         cmp clkPhase, #SPI_PHASE_BIT wz     '' So it's LSB first, now determine CPHA
         if_z            call #lsb_post_fast

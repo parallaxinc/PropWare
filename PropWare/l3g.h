@@ -50,12 +50,9 @@ class L3G {
          * Sensitivity measured in degrees per second
          */
         typedef enum {
-            /** 250 degrees per second */
-            DPS_250  = 0x00,
-            /** 500 degrees per second */
-            DPS_500  = 0x10,
-            /** 2000 degrees per second */
-            DPS_2000 = 0x20
+            /** 250 degrees per second */ DPS_250  = 0x00,
+            /** 500 degrees per second */ DPS_500  = 0x10,
+            /** 2000 degrees per second */DPS_2000 = 0x20
         } DPSMode;
 
     public:
@@ -111,23 +108,17 @@ class L3G {
          *
          * @return       Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::Port::Mask mosi,
-                                   const PropWare::Port::Mask miso,
-                                   const PropWare::Port::Mask sclk,
-                                   const PropWare::Port::Mask cs) {
+        PropWare::ErrorCode start (const PropWare::Port::Mask mosi, const PropWare::Port::Mask miso,
+                                   const PropWare::Port::Mask sclk, const PropWare::Port::Mask cs) {
             PropWare::ErrorCode err;
 
             // Ensure SPI module started
             if (this->m_spi->is_running()) {
                 check_errors(this->m_spi->set_mode(PropWare::L3G::SPI_MODE));
-                check_errors(
-                        this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE));
+                check_errors(this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE));
             } else {
-                check_errors(
-                        this->m_spi->start(mosi, miso, sclk,
-                                           PropWare::L3G::SPI_DEFAULT_FREQ,
-                                           PropWare::L3G::SPI_MODE,
-                                           PropWare::L3G::SPI_BITMODE));
+                check_errors(this->m_spi->start(mosi, miso, sclk, PropWare::L3G::SPI_DEFAULT_FREQ,
+                                                PropWare::L3G::SPI_MODE, PropWare::L3G::SPI_BITMODE));
             }
 
             this->m_cs.set_mask(cs);
@@ -143,13 +134,11 @@ class L3G {
         }
 
         /**
-         * @brief       Choose whether to always set the SPI mode and bitmode
-         *              before reading or writing to the L3G module; Useful when
-         *              multiple devices are connected to the SPI bus
+         * @brief       Choose whether to always set the SPI mode and bitmode before reading or writing to the L3G
+         *              module; Useful when multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes
-         *                              will always be set before a read or
-         *                              write routine
+         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will always be set before a read or write
+         *                              routine
          */
         void always_set_spi_mode (const bool alwaysSetMode) {
             this->m_alwaysSetMode = alwaysSetMode;
@@ -163,8 +152,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const PropWare::L3G::Axis axis,
-                                  int16_t *val) const {
+        PropWare::ErrorCode read (const PropWare::L3G::Axis axis, int16_t *val) const {
             return this->read16(PropWare::L3G::OUT_X_L + (axis << 1), val);
         }
 
@@ -204,8 +192,7 @@ class L3G {
         /**
          * @brief       Read data from all three axes
          *
-         * @param[out]  *val    Starting address for data to be placed; 6
-         *                      contiguous bytes of space are required for the
+         * @param[out]  *val    Starting address for data to be placed; 6 contiguous bytes of space are required for the
          *                      read routine
          *
          * @return      Returns 0 upon success, error code otherwise
@@ -222,12 +209,9 @@ class L3G {
 
             this->m_cs.clear();
             check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::X]),
-                                               sizeof(val[PropWare::L3G::X])));
-            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Y]),
-                                               sizeof(val[PropWare::L3G::Y])));
-            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Z]),
-                                               sizeof(val[PropWare::L3G::Z])));
+            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::X])));
+            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Y])));
+            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Z])));
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary
@@ -255,8 +239,7 @@ class L3G {
             this->m_dpsMode = dpsMode;
             check_errors(this->maybe_set_spi_mode());
 
-            check_errors(this->read8(PropWare::L3G::CTRL_REG4,
-                                     (int8_t *) &oldValue));
+            check_errors(this->read8(PropWare::L3G::CTRL_REG4, (int8_t *) &oldValue));
             oldValue &= ~(BIT_5 | BIT_4);
             oldValue |= dpsMode;
             check_errors(this->write8(PropWare::L3G::CTRL_REG4, oldValue));
@@ -274,16 +257,13 @@ class L3G {
         }
 
         /**
-         * @brief       Convert the raw, integer value from the gyro into units
-         *              of degrees-per-second
+         * @brief       Convert the raw, integer value from the gyro into units of degrees-per-second
          *
-         * @pre         Input value must have been read in when the DPS setting
-         *              was set to the same value as it is during this function
-         *              execution. If the input value was read with a different
-         *              DPS setting, use
-         *              PropWare::L3G::convert_to_dps(const int16_t rawValue,
-         *              const PropWare::L3G::DPSMode dpsMode) to specify the
-         *              correct DPS setting
+         *
+         * @pre         Input value must have been read in when the DPS setting was set to the same value as it is
+         *              during this function execution. If the input value was read with a different DPS setting, use
+         *              `PropWare::L3G::convert_to_dps(const int16_t rawValue, const PropWare::L3G::DPSMode dpsMode)`
+         *              to specify the correct DPS setting
          *
          * @param[in]   rawValue    Value from the gyroscope
          *
@@ -294,17 +274,14 @@ class L3G {
         }
 
         /**
-         * @brief       Convert the raw, integer value from the gyro into units
-         *              of degrees-per-second
+         * @brief       Convert the raw, integer value from the gyro into units of degrees-per-second
          *
          * @param[in]   rawValue    Value from the gyroscope
-         * @param[in]   dpsMode     The DPS setting used at the time of reading
-         *                          rawValue
+         * @param[in]   dpsMode     The DPS setting used at the time of reading rawValue
          *
          * @return      Returns the rotational value in degrees-per-second
          */
-        static float convert_to_dps (const int16_t rawValue,
-                                     const PropWare::L3G::DPSMode dpsMode) {
+        static float convert_to_dps (const int16_t rawValue, const PropWare::L3G::DPSMode dpsMode) {
             switch (dpsMode) {
                 case PropWare::L3G::DPS_250:
                     return (float) (rawValue * 0.00875);
@@ -399,7 +376,7 @@ class L3G {
 
             this->m_cs.clear();
             check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(this->m_spi->shift_in(8, dat, sizeof(*dat)));
+            check_errors(this->m_spi->shift_in(8, dat));
             this->m_cs.set();
 
             return 0;
@@ -423,7 +400,7 @@ class L3G {
 
             this->m_cs.clear();
             check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(this->m_spi->shift_in(16, dat, sizeof(*dat)));
+            check_errors(this->m_spi->shift_in(16, dat));
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary

@@ -1,14 +1,7 @@
 /**
- * @file    sd_test.cpp
+ * @file    uart_simplex_test.cpp
  *
  * @author  David Zemon
- *
- * Hardware:
- *      SD card connected with the following pins:
- *          - MOSI = P0
- *          - MISO = P1
- *          - SCLK = P2
- *          - CS   = P4
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -30,56 +23,27 @@
  * SOFTWARE.
  */
 
-#include <PropWare/sd.h>
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
+#include <PropWare/uart/simplexuart.h>
 
-PropWare::SD *testable;
+PropWare::SimplexUART *testable;
 
 const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
-const PropWare::Pin::Mask MISO = PropWare::Pin::P1;
-const PropWare::Pin::Mask SCLK = PropWare::Pin::P2;
-const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
 
 TEARDOWN {
 }
 
 TEST(Start) {
-    MSG_IF_FAIL(1, ASSERT_FALSE(testable->start()),
-                "Failed to start %s", ":(");
 
     tearDown();
-}
-
-TEST(ReadBlock) {
-    ASSERT_FALSE(testable->start());
-
-    // Create a buffer and initialize all values to 0. Surely the first sector
-    // of the SD card won't be _all_ zeros!
-    uint8_t buffer[PropWare::SD::SECTOR_SIZE];
-    for (int i = 0; i < sizeof(buffer); ++i)
-        buffer[i] = 0;
-
-    // Read in a block...
-    ASSERT_FALSE(testable->read_data_block(0, buffer));
-
-    // And make sure at least _one_ of the bytes is non-zero
-    for (int j = 0; j < sizeof(buffer); ++j)
-        if (buffer[j])
-            tearDown();
-
-    // If the whole loop finished, that means none of the bytes changed. That
-    // _can't_ be right so go ahead and call it a failure
-    FAIL();
 }
 
 int main () {
     START(SDTest);
 
-    testable = new PropWare::SD(PropWare::SPI::get_instance(), MOSI, MISO,
-                                SCLK, CS);
+    testable = new PropWare::SimplexUART();
 
     RUN_TEST(Start);
-    RUN_TEST(ReadBlock);
 
     COMPLETE();
 }

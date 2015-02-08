@@ -16,10 +16,4 @@ set(CXX_FLAGS )
 
 project(SPI_Demo)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME})
-
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-################################################################################
+create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})

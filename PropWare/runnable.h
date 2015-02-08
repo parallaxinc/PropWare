@@ -1,7 +1,7 @@
 /**
- * @file    sd.cpp
+ * @file        runnable.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,9 +23,40 @@
  * SOFTWARE.
  */
 
-// Includes
-#include <PropWare/sd.h>
+#pragma once
 
-const uint32_t PropWare::SD::RESPONSE_TIMEOUT        = 100 * MILLISECOND;
-const uint32_t PropWare::SD::SEND_ACTIVE_TIMEOUT     = 500 * MILLISECOND;
-const uint32_t PropWare::SD::SINGLE_BYTE_WIGGLE_ROOM = 150 * MICROSECOND;
+#include <cstdint>
+#include <sys/thread.h>
+#include <stdlib.h>
+
+namespace PropWare {
+
+class Runnable {
+    public:
+        template<class T>
+        static int8_t invoke (T &runnable) {
+            return (int8_t) _start_cog_thread(runnable.get_stack_top(), (void (*) (void *)) &T::run, (void *) &runnable,
+                                              &runnable.m_threadData);
+        }
+
+    public:
+        Runnable (const uint32_t *stack, const size_t stackSizeInBytes)
+                : m_stack(stack), m_stackSizeInBytes(stackSizeInBytes) {
+        }
+
+        virtual void run () = 0;
+
+    protected:
+        const uint32_t *m_stack;
+        size_t         m_stackSizeInBytes;
+
+    private:
+        void *get_stack_top () const {
+            return (void *) (m_stack + (m_stackSizeInBytes >> 2) - 1);
+        }
+
+    private:
+        _thread_state_t m_threadData;
+};
+
+}

@@ -19,6 +19,16 @@ import tempfile
 import subprocess
 import shutil
 
+DOWNLOAD_URL_CMAKE_DEB = 'http://www.cmake.org/files/v3.1/cmake-3.1.1-Linux-i386.tar.gz'
+DOWNLOAD_URL_CMAKE_WIN = 'http://www.cmake.org/files/v3.1/cmake-3.1.1-win32-x86.zip'
+DOWNLOAD_URL_CMAKE_MAC = 'http://www.cmake.org/files/v3.1/cmake-3.1.1-Darwin-universal.tar.gz'
+DOWNLOAD_URL_PROPGCC_DEB = 'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0_2408-i686-linux.tar.gz'
+DOWNLOAD_URL_PROPGCC_WIN = 'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0-i686-windows.zip'
+DOWNLOAD_URL_PROPGCC_MAC = 'http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz'
+ROOT_DIR_NAME_CMAKE_DEB = 'cmake-3.1.1-Linux-i386'
+ROOT_DIR_NAME_CMAKE_WIN = 'cmake-3.1.1-win32-x86'
+ROOT_DIR_NAME_CMAKE_MAC = 'cmake-3.1.1-Darwin64-universal'
+
 try:
     # noinspection PyUnresolvedReferences
     import grp
@@ -238,8 +248,7 @@ class Installer(object):
                 'PropGCC will be installed to %s. Press enter to continue or type another existing path to download '
                 'to a new directory.\n>>> ', Installer._is_acceptable_path, '"%s" is not a directory or contains a '
                                                                             'space. Please provide an existing '
-                                                                            'directory',
-                self._propgcc_parent)
+                                                                            'directory', self._propgcc_parent)
             self._add_propgcc_to_path = True
 
         # ##
@@ -279,6 +288,7 @@ class Installer(object):
 
         # Don't overwrite the PATH variable!!!
         if 'PATH' == key.upper():
+            # noinspection PyAugmentAssignment
             os.environ[key] = value + os.pathsep + os.environ[key]
         else:
             os.environ[key] = value
@@ -291,6 +301,7 @@ class Installer(object):
 
         # Don't overwrite the PATH variable!!!
         if 'PATH' == key.upper():
+            # noinspection PyAugmentAssignment
             os.environ[key] = value + os.pathsep + os.environ[key]
         else:
             os.environ[key] = value
@@ -406,10 +417,9 @@ class DebInstaller(NixInstaller):
     def __init__(self):
         super(DebInstaller, self).__init__()
 
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Linux-i386.tar.gz'
-        self._cmake_root_dir_name = 'cmake-3.0.2-Linux-i386'
-        self._propgcc_download_url = \
-            'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0_2408-i686-linux.tar.gz'
+        self._cmake_download_url = DOWNLOAD_URL_CMAKE_DEB
+        self._cmake_root_dir_name = ROOT_DIR_NAME_CMAKE_DEB
+        self._propgcc_download_url = DOWNLOAD_URL_PROPGCC_DEB
         self._user_in_dialout = os.environ['USER'] in grp.getgrnam('dialout')[3]
 
     def _warn_make_instructions(self):
@@ -429,6 +439,12 @@ class DebInstaller(NixInstaller):
                 cmd = ['sudo', 'apt-get', 'install', 'libc6:i386']
                 print(' '.join(cmd))
                 subprocess.call(cmd)
+
+        # Install zlib1g:i386 if not already installed (a dependency of PropGCC)
+        if DebInstaller._needs_zlib1g():
+            cmd = ['sudo', 'apt-get', 'install', 'zlib1g:i386']
+            print(' '.join(cmd))
+            subprocess.call(cmd)
 
         # Also, add user to "dialout" group if necessary
         if not self._user_in_dialout:
@@ -470,6 +486,17 @@ class DebInstaller(NixInstaller):
         return True
 
     @classmethod
+    def _needs_zlib1g(cls):
+        cmd = ['dpkg-query', '-l', 'zlib1g:i386']
+        package_list = subprocess.check_output(cmd).split(bytes('\n'))
+        matcher = re.compile('.*zlib1g:i386.*')
+        for package in package_list:
+            if matcher.match(package):
+                return False
+
+        return True
+
+    @classmethod
     def _add_root_env_var(cls, key, value):
         # Must be done before parent method - the parent method will add it to os.environ
         needs_adding = key not in os.environ
@@ -487,9 +514,9 @@ class DebInstaller(NixInstaller):
 class MacInstaller(NixInstaller):
     def __init__(self):
         super(MacInstaller, self).__init__()
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-Darwin-universal.tar.gz'
-        self._cmake_root_dir_name = 'cmake-3.0.2-Darwin64-universal'
-        self._propgcc_download_url = 'http://david.zemon.name/downloads/PropGCC-osx_10.6.8_v1_0_0.tar.gz'
+        self._cmake_download_url = DOWNLOAD_URL_CMAKE_MAC
+        self._cmake_root_dir_name = ROOT_DIR_NAME_CMAKE_MAC
+        self._propgcc_download_url = DOWNLOAD_URL_PROPGCC_MAC
 
     def _warn_make_instructions(self):
         print('WARNING: Make was not detected on your system. You can install it by following these instructions:\n\t'
@@ -507,9 +534,9 @@ class MacInstaller(NixInstaller):
 class WinInstaller(Installer):
     def __init__(self):
         super(WinInstaller, self).__init__()
-        self._cmake_download_url = 'http://www.cmake.org/files/v3.0/cmake-3.0.2-win32-x86.zip'
-        self._cmake_root_dir_name = 'cmake-3.0.2-win32-x86'
-        self._propgcc_download_url = 'http://david.zemon.name/downloads/propellergcc-alpha_v1_9_0-i686-windows.zip'
+        self._cmake_download_url = DOWNLOAD_URL_CMAKE_WIN
+        self._cmake_root_dir_name = ROOT_DIR_NAME_CMAKE_WIN
+        self._propgcc_download_url = DOWNLOAD_URL_PROPGCC_WIN
         self._export_env_var = 'set'
         self.cmd_sep = '&'
 

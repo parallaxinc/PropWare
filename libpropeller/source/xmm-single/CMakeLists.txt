@@ -12,7 +12,7 @@ set(MODEL xmm-single)
 project(Libpropeller_${MODEL})
 include(../libpropellerObjects.cmake)
 
-include(${PROPWARE_PATH}/SetPropWareFlags.cmake)
+include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
 include_directories(${PROPWARE_PATH})
 add_library(${PROJECT_NAME} STATIC ${LIBPROPELLER_OBJECTS})
 

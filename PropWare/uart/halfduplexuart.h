@@ -54,13 +54,13 @@ class HalfDuplexUART: public AbstractDuplexUART {
         virtual void send (uint16_t originalData) const {
             AbstractDuplexUART::send(originalData);
 
-            this->m_tx.set_dir(Port::IN);
+            this->m_tx.set_dir_in();
         }
 
         virtual void send_array (char const array[], uint32_t words) const {
             AbstractDuplexUART::send_array(array, words);
 
-            this->m_tx.set_dir(Port::IN);
+            this->m_tx.set_dir_in();
         }
 };
 

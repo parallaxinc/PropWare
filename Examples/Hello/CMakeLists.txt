@@ -19,12 +19,6 @@ set(LINK_TINY ON)
 
 project(Hello_Demo C CXX DAT)
 
-add_executable(${PROJECT_NAME}
+create_simple_executable(${PROJECT_NAME}
     ${PROJECT_NAME}
     pst.dat)
-
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-################################################################################

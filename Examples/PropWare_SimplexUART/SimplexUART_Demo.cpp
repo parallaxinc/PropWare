@@ -26,7 +26,7 @@
 // Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/uart/simplexuart.h>
-#include <PropWare/printer.h>
+#include <PropWare/printer/printer.h>
 
 void error (const PropWare::ErrorCode err);
 

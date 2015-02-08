@@ -14,12 +14,6 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-project(sample_test)
+project(FdSerial_Demo C CXX DAT)
 
-add_executable(${PROJECT_NAME} ${PROJECT_NAME})
-
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-include(${PROPWARE_PATH}/CMakePropellerFooter.cmake)                           #
-################################################################################
+create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME} pst.dat)

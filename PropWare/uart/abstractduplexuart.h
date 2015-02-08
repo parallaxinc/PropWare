@@ -54,9 +54,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @see PropWare::UART::set_data_width
          */
         virtual ErrorCode set_data_width (const uint8_t dataWidth) {
-            ErrorCode err = AbstractSimplexUART::set_data_width(dataWidth);
-            if (err)
-                return err;
+            ErrorCode err;
+            check_errors(AbstractSimplexUART::set_data_width(dataWidth));
 
             this->set_msb_mask();
             this->set_receivable_bits();
@@ -96,8 +95,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive_array
          */
-        HUBTEXT ErrorCode receive_array (char buffer[], int32_t *length,
-                                         const uint32_t delim = '\n') const {
+        HUBTEXT ErrorCode receive_array (char buffer[], int32_t *length, const uint32_t delim = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
@@ -105,7 +103,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
             int32_t wordCnt = 0;
 
             // Check if the total receivable bits can fit within a byte
-            if (0 && 8 >= this->m_receivableBits) {
+            if (8 >= this->m_receivableBits) {
                 // Set RX as input
                 __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
@@ -150,29 +148,29 @@ class AbstractDuplexUART: public virtual DuplexUART,
             return this->receive();
         }
 
-        PropWare::ErrorCode fgets (char string[], int32_t *length) const {
-            int32_t originalLength = *length;
+        PropWare::ErrorCode fgets (char string[], int32_t *bufferSize) const {
+            const int32_t originalBufferSize = *bufferSize;
 
             PropWare::ErrorCode err;
-            if ((err = this->receive_array(string, length,
-                                           ScanCapable::STRING_DELIMITER)))
-                return err;
-            else {
-                // Replace delimiter with null-terminator IFF we found one
-                if (*length != originalLength
-                        || ScanCapable::STRING_DELIMITER
-                        == string[originalLength])
-                    string[*length - 1] = '\0';
-                return NO_ERROR;
-            }
+            check_errors(this->receive_array(string, bufferSize));
+
+            // Replace delimiter with null-terminator IFF we found one
+            if (*bufferSize != originalBufferSize || '\n' == string[originalBufferSize])
+                string[*bufferSize - 1] = '\0';
+            return NO_ERROR;
         }
 
     protected:
         /**
          * @see PropWare::SimplexUART::AbstractSimplexUART()
          */
-        AbstractDuplexUART () :
-                AbstractSimplexUART() {
+        AbstractDuplexUART () {
+            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
+            this->set_parity(UART::DEFAULT_PARITY);
+            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
+            this->set_tx_mask(
+                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_TX));
             this->set_rx_mask(
                     (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_RX));
         }
@@ -183,8 +181,12 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @param[in]   tx  Pin mask for TX (transmit) pin
          * @param[in]   rx  Pin mask for RX (receive) pin
          */
-        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) :
-                AbstractSimplexUART() {
+        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) {
+            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
+            this->set_parity(UART::DEFAULT_PARITY);
+            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
+
             // Set rx direction second so that, in the case of half-duplex, the
             // pin floats high
             this->set_tx_mask(tx);
@@ -223,8 +225,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
                 const register uint32_t bitCycles,
                 const register uint32_t rxMask,
                 const register uint32_t msbMask) const {
-            volatile register uint32_t data;
-            volatile register uint32_t waitCycles;
+            register uint32_t data;
+            register uint32_t waitCycles;
 
 #ifndef DOXYGEN_IGNORE
             __asm__ volatile (
@@ -245,30 +247,22 @@ class AbstractDuplexUART: public virtual DuplexUART,
                     [_bitCycles] "r" (bitCycles));
 
             do {
+                // Wait for the next bit
+                waitCycles = waitcnt2(waitCycles, bitCycles);
                 __asm__ volatile (
-                        // Wait for the next bit
-                        "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
                         "shr %[_data],# 1\n\t"
                         "test %[_rxMask],ina wz \n\t"
                         "muxnz %[_data], %[_msbMask]"
                         :// Outputs
-                        [_waitCycles] "+r" (waitCycles),
                         [_data] "+r" (data)
                         :// Inputs
-                        [_bitCycles] "r" (bitCycles),
                         [_rxMask] "r" (rxMask),
                         [_msbMask] "r" (msbMask));
             } while (--bits);
 
-        // TODO: Delete this when debugging is complete
-        Port::flash_port(BYTE_2, data >> 8);
-        Port::flash_port(BYTE_2, data);
-        Port::flash_port(BYTE_2, data << 8);
-        Port::flash_port(BYTE_2, data << 16);
-
-            __asm__ volatile ("waitpeq %[_rxMask], %[_rxMask]"
-                    :  // No outputs
-                    : [_rxMask] "r" (rxMask));
+            // wait for the line to go high (as it will when the stop bit
+            // arrives)
+            __builtin_propeller_waitpeq(rxMask, rxMask);
 #endif
 
             return data;
@@ -297,7 +291,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
                                   const register uint32_t msbMask) const {
 #ifndef DOXYGEN_IGNORE
             volatile register uint32_t data           = 0;
-            volatile register int32_t wordCnt        = 0;
+            volatile register int32_t  wordCnt        = 0;
             volatile register uint32_t bitIdx         = bits;
             volatile register uint32_t waitCycles;
             volatile register uint32_t initWaitCycles = (bitCycles >> 1)
@@ -368,7 +362,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         : [_rxMask] "r" (rxMask));
             } while (*((char *)bufferAddr++) != delim && wordCnt < maxLength);
 
-            return wordCnt;
+            return (uint32_t) wordCnt;
 #endif
         }
 

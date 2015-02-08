@@ -27,7 +27,7 @@
  */
 
 #include <PropWare/pin.h>
-#include "../PropWareTests.h"
+#include "PropWareTests.h"
 
 PropWare::Pin             *testable;
 PropWare::Pin             *helper;
@@ -96,6 +96,24 @@ TEST(SetDir) {
 
     testable->set_dir(PropWare::Pin::OUT);
     ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
+
+    tearDown();
+}
+
+TEST(SetDirOut) {
+    testable = new PropWare::Pin(TEST_MASK);
+
+    testable->set_dir_out();
+    ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
+
+    tearDown();
+}
+
+TEST(SetDirIn) {
+    testable = new PropWare::Pin(TEST_MASK);
+
+    testable->set_dir_in();
+    ASSERT_EQ(PropWare::Pin::IN, testable->get_dir());
 
     tearDown();
 }
@@ -200,6 +218,8 @@ int main () {
     RUN_TEST(SetMask);
     RUN_TEST(SetPinNum);
     RUN_TEST(SetDir);
+    RUN_TEST(SetDirOut);
+    RUN_TEST(SetDirIn);
     RUN_TEST(Set);
     RUN_TEST(High);
     RUN_TEST(On);

@@ -31,7 +31,6 @@ def set_environ_var(name, value):
     assert (isinstance(value, str))
 
     key = None
-    reg = None
     try:
         path = r'Environment'
         key = OpenKey(HKEY_CURRENT_USER, path, 0, KEY_ALL_ACCESS)  # Don't specify parameter name; it changed in Python3
@@ -49,8 +48,6 @@ def set_environ_var(name, value):
     finally:
         if None != key:
             CloseKey(key)
-        if None != reg:
-            CloseKey(reg)
 
 
 if '__main__' == __name__:
