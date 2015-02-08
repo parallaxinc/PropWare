@@ -19,18 +19,17 @@ include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
 
 project(HelloWorld)
 
-add_executable(${PROJECT_NAME} main.cpp)
-
-create_top_project(${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} main.cpp)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-* Note the two sections marked as "Template code." Make sure these two pieces begin and end each of your
-  CMakeLists.txt files. They load the standard Propeller settings for your project.
+* Note the section marked as "Template code." Make sure this piece begins each of your CMakeLists.txt files. It loads 
+  the standard Propeller settings for your project.
 * Next we name our project: `project(HelloWorld)`. This name can be anything you'd like so long as there is no 
   whitespace.
-* Finally, we need to tell CMake what files should be compiled: `add_executable(${PROJECT_NAME} main.cpp)`.
-  The first parameter (`${PROJECT_NAME}`) _must_ be exactly as you see it - PropWare's build system relies on your 
-  executable being named the same as your project. Next, simply list off each of your source files (separated by 
-  whitespace).
+* Finally, we need to tell CMake what files should be compiled: `create_simple_executable(${PROJECT_NAME} main.cpp)`.
+  The first parameter (`${PROJECT_NAME}`) is the name of your executable. Generally, I use the project name 
+  (`${PROJECT_NAME}` is an automatically-created CMake variable which, in this case, would resolve to `HelloWorld`), 
+  but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
+  (separated by whitespace).
 * There is LOTS more information about creating CMakeLists.txt files for PropWare projects on the [CMakeLists.txt 
   Files for PropWare](./md_CMakeListsForPropware.html) page.
 
@@ -66,13 +65,11 @@ set(ECOGC_FLAGS "--bogus")
 
 project(Quadcopter C CXX ASM ECOGC)
 
-add_executable(${PROJECT_NAME} 
+create_simple_executable(${PROJECT_NAME} 
     ${PROJECT_NAME}
     motor_drivers
     avionics.S
     rf_transceiver.ecogc)
-
-create_top_project(${PROJECT_NAME})
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Common CMake variables in PropWare 
@@ -82,17 +79,20 @@ create_top_project(${PROJECT_NAME})
 * MODEL: \[default: `lmm`\] This option should be one of `cog`, `cmm`, `lmm`, `xmm-single`, `xmm-split`, or `xmmc`. Read 
   more about PropGCC's memory models [here](https://code.google.com/p/propgcc/wiki/PropGccInDepth).
 * COMMON_FLAGS: Any options applied to the `COMMON_FLAGS` variable will be applied to assembly, C and C++ files.
-  This includes cogc, ecogc, cogcpp, and ecogcpp but not Spin. Your optimization level should be set here to apply 
-  across your entire project.
+  This includes `cogc`, `ecogc`, `cogcpp`, and `ecogcpp` but not `Spin`. Your optimization level should be set here to 
+  apply across your entire project.
 
 ### Project Languages
 CMake will default to enabling only C and C++ in your project. If your project uses more than these two languages, 
-you must add with either the [project](http://www.cmake.org/cmake/help/v3.0/command/project.html#command:project) or 
-[enable_language](http://www.cmake.org/cmake/help/v3.0/command/enable_language.html#command:enable_language) function.
+you must add them with either the [project](http://www.cmake.org/cmake/help/v3.0/command/project.html#command:project)
+or [enable_language](http://www.cmake.org/cmake/help/v3.0/command/enable_language.html#command:enable_language) 
+function.
 
 ### Adding Source Files
-* All source files must be defined in the [add_executable](http://www.cmake.org/cmake/help/v3.0/command/add_executable)
-  function
+* All source files must be defined in the `create_simple_executable` function. It is a wrapper around
+  [add_executable](http://www.cmake.org/cmake/help/v3.0/command/add_executable) that sets various configuration 
+  options for the Propeller and PropGCC build system. The parameters to this function match those of 
+  [add_executable](http://www.cmake.org/cmake/help/v3.0/command/add_executable).
 * Each source file is separated by any amount of whitespace
 * Normal C and C++ files do not need their extensions explicitly defined.
 * The various COG languages _do_ need their extensions explicitly defined, as does assembly.
@@ -127,7 +127,7 @@ Options
 -------
 
 CMake options allow you to have fine-grain control over what compilation flags are used by default. Most users will 
-want to leave all options set to their default values, but those doing special projects or using conflict libraries 
+want to leave all options set to their default values, but those doing special projects or using conflicting libraries 
 can change the options to suit their needs.
 
 ### 32_BIT_DOUBLES

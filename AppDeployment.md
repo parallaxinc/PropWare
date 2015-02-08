@@ -27,13 +27,11 @@ Starting a New Project
    
    project(Quadcopter C CXX ASM ECOGC)
 
-   add_executable(${PROJECT_NAME} 
+   create_simple_executable(${PROJECT_NAME} 
        ${PROJECT_NAME}
        motor_drivers
        avionics.S
        rf_transceiver.ecogc)
-
-   create_top_project(${PROJECT_NAME})
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2. Write your source code.
 3. At the terminal, enter your project's directory. Type `cmake -G "Unix Makefiles" .`. This will generate a Makefile
