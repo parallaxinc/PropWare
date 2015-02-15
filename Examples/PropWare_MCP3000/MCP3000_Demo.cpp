@@ -23,10 +23,9 @@
  * SOFTWARE.
  */
 
-#include <stdlib.h>
 #include <PropWare/PropWare.h>
+#include <PropWare/printer/printer.h>
 #include <PropWare/mcp3000.h>
-#include <PropWare/uart/simplexuart.h>
 
 /**
 * @brief       Report errors to the Debug LEDs for user interpretation
@@ -114,4 +113,3 @@ void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
         waitcnt(150*MILLISECOND + CNT);
     }
 }
-
