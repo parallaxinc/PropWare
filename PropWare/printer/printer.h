@@ -492,6 +492,16 @@ class Printer {
         }
 
         /**
+         * @brief       Print a null-terminated string followed by a newline (CRLF)
+         *
+         * @param[in]   string[]    String to be printed
+         */
+        void println (const char string[]) const {
+            this->puts(string);
+            this->puts(CRLF);
+        }
+
+        /**
          * @brief       Print a single character
          *
          * @param[in]   x           Unsigned value to be printed
