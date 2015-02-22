@@ -226,12 +226,11 @@ class AbstractDuplexUART: public virtual DuplexUART,
                 const register uint32_t rxMask,
                 const register uint32_t msbMask) const {
             register uint32_t data;
-            register uint32_t waitCycles;
+            register uint32_t waitCycles = bitCycles;
 
 #ifndef DOXYGEN_IGNORE
             __asm__ volatile (
                     // Initialize the waitCycles variable
-                    "mov %[_waitCycles], %[_bitCycles]\n\t"
                     "shr %[_waitCycles], #1\n\t"
                     "add %[_waitCycles], %[_bitCycles]\n\t"
 
