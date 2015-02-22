@@ -206,6 +206,10 @@ class Utility {
             for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = toupper(string[i]);
         }
+
+        static const char* to_string (const bool b) {
+            return b ? "true" : "false";
+        }
 };
 
 template<typename T>
