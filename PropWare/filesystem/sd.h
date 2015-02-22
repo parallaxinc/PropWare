@@ -638,7 +638,7 @@ class SD: public BlockStorage {
                               "should always be 0." CRLF);
         }
 
-    public:
+    private:
         /*************************
          *** Private Constants ***
          *************************/
@@ -693,14 +693,18 @@ class SD: public BlockStorage {
          *** Private Member Variable ***
          *******************************/
         SPI *m_spi;
-        Pin m_cs;  // Chip select pin mask
+        Pin m_cs;  // Chip select pin
 
         Pin::Mask m_mosi;
         Pin::Mask m_miso;
         Pin::Mask m_sclk;
 
-        // First byte response receives special treatment to allow for proper debugging
+        // First byte response receives special treatment to allow for verbose debugging
         uint8_t m_firstByteResponse;
 };
+
+const uint32_t SD::RESPONSE_TIMEOUT        = 100 * MILLISECOND;
+const uint32_t SD::SEND_ACTIVE_TIMEOUT     = 500 * MILLISECOND;
+const uint32_t SD::SINGLE_BYTE_WIGGLE_ROOM = 150 * MICROSECOND;
 
 }

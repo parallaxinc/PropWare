@@ -49,6 +49,11 @@ class BlockStorage {
         };
 
     public:
+        static void print_block (const Printer &printer, const Buffer &buffer, const size_t words = 512,
+                                 const uint8_t wordsPerLine = 16) {
+            print_block(printer, buffer.buf, words, wordsPerLine);
+        }
+
         static void print_block (const Printer &printer, const uint8_t data[], const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
             uint8_t lines = words / wordsPerLine;

@@ -9,11 +9,11 @@ include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
 ################################################################################
 
 set(BOARD QUICKSTART)
-set(MODEL cmm)
+set(MODEL lmm)
 set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-project(SD_Demo)
+project(FatFS_Demo)
 
 create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})

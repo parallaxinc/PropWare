@@ -62,6 +62,8 @@ SETUP {
 }
 
 TEARDOWN {
+
+
     delete testable->m_driver;
     delete testable;
 }
@@ -83,14 +85,12 @@ TEST(ReadMasterBootRecord) {
 
     testable->m_buf.buf = (uint8_t *) malloc(testable->m_driver->get_sector_size());
 
-    FatFS::InitFATInfo fatInfo;
-    fatInfo.bootSector = 0;
-    err = testable->read_boot_sector(fatInfo, 0);
+    err = testable->read_boot_sector(0);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     // We're just going to assume the boot sector is not at sector 0
-    ASSERT_NEQ_MSG(0, fatInfo.bootSector);
+    ASSERT_NEQ_MSG(0, testable->m_initFatInfo.bootSector);
 
     tearDown();
 }
@@ -103,6 +103,8 @@ TEST(Mount_defaultParameters) {
     err = testable->mount();
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
+    // This test is meant to be run with a FAT32 filesystem
+    ASSERT_EQ_MSG(FatFS::FAT_32, testable->m_filesystem);
 
     tearDown();
 }
@@ -125,7 +127,24 @@ TEST(Mount_withParameter4) {
     ErrorCode err;
 
     err = testable->mount(4);
-    ASSERT_EQ_MSG(FatFS::INVALID_FILESYSTEM, err);
+    ASSERT_EQ_MSG(FatFS::UNSUPPORTED_FILESYSTEM, err);
+
+    tearDown();
+}
+
+TEST(Fopen) {
+    setUp();
+
+    ErrorCode err;
+
+    err = testable->mount();
+    error_checker(err);
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
+
+    File *f = testable->fopen("fat_test.cpp", File::Mode::READ);
+    if (NULL == f)
+        error_checker(testable->get_error());
+    ASSERT_NOT_NULL(f);
 
     tearDown();
 }
@@ -138,6 +157,7 @@ int main () {
     RUN_TEST(Mount_defaultParameters);
     RUN_TEST(Mount_withParameter0);
     RUN_TEST(Mount_withParameter4);
+    RUN_TEST(Fopen);
 
     COMPLETE();
 }
