@@ -502,6 +502,13 @@ class Printer {
         }
 
         /**
+         * @brief   Print a newline (CRLF)
+         */
+        void println () const {
+            this->puts(CRLF);
+        }
+
+        /**
          * @brief       Print a single character
          *
          * @param[in]   x           Unsigned value to be printed
