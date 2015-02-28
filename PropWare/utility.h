@@ -87,6 +87,17 @@ class Utility {
             return measure_time_interval((uint32_t) start);
         }
 
+        /**
+         * @brief       Determine the size of the largest block of free memory
+         *
+         * `malloc` is used to find free memory. Be aware that the execution time of `malloc` is not predictable and
+         * it is called repeatedly - so this method can, potentially, take a long time to execute
+         *
+         * @param[in]   precision   The precision (in bytes) with which the method will be executed. Result can be
+         *                          off by +/- `precision` bytes. Lower values will increase execution time
+         *
+         * @return      Returns the size of the largest free block of memory
+         */
         static size_t get_largest_free_block_size (const uint8_t precision = 32) {
             size_t largestSuccess  = 0;
             size_t smallestFailure = 32 * 1024;
@@ -114,16 +125,31 @@ class Utility {
             return largestSuccess;
         }
 
+        /**
+         * @brief       Convert each alphabetical character in a null-terminated character array to lowercase letters
+         *
+         * @param[out]  Characters array to be converted
+         */
         static void to_lower (char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = tolower(string[i]);
         }
 
+        /**
+         * @brief       Convert each alphabetical character in a null-terminated character array to uppercase letters
+         *
+         * @param[out]  Characters array to be converted
+         */
         static void to_upper (char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = toupper(string[i]);
         }
 
+        /**
+         * @brief       Convert a boolean to the string-literal either `"true"` or `"false"`
+         *
+         * @param[in]   b   Boolean to be checked
+         */
         static const char *to_string (const bool b) {
             return b ? "true" : "false";
         }
