@@ -14,7 +14,6 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-set(PROPWARE_PRINT_FLOAT OFF)
 set(LINK_TINY ON)
 
 project(Hello_Demo C CXX DAT)

@@ -25,6 +25,7 @@
 
 // Includes
 #include <PropWare/PropWare.h>
+#include <PropWare/utility.h>
 #include <PropWare/printer/printer.h>
 
 void sampleCountBits ();
