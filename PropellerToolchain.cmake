@@ -34,6 +34,7 @@ set(CMAKE_OBJCOPY      ${GCC_PATH}/propeller-elf-objcopy${GCC_SUFFIX} CACHE FILE
 set(CMAKE_OBJDUMP      ${GCC_PATH}/propeller-elf-objdump${GCC_SUFFIX} CACHE FILEPATH "Object dump")
 set(CMAKE_AR           ${GCC_PATH}/propeller-elf-ar${GCC_SUFFIX} CACHE FILEPATH "Archiver")
 set(CMAKE_ELF_LOADER   ${GCC_PATH}/propeller-load${GCC_SUFFIX} CACHE FILEPATH "Elf loader")
+set(CMAKE_GDB          ${GCC_PATH}/propeller-elf-gdb${GCC_SUFFIX} CACHE FILEPATH "GNU DeBugger (GDB)")
 
 set(CMAKE_COGC_COMPILER    ${CMAKE_C_COMPILER})
 set(CMAKE_COGCXX_COMPILER  ${CMAKE_CXX_COMPILER})

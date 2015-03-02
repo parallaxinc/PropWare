@@ -1,7 +1,7 @@
 if (DEFINED PROPWARE_PATH)
-   set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
 else ()
-   set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
+    set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
 endif ()
 
 # Printf with float support
