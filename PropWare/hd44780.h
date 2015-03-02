@@ -392,6 +392,8 @@ class HD44780 : public PrintCapable {
                             "invalid LCD dimension; please choose from the "
                                     "HD44780::Dimensions type");
                     break;
+                default:
+                    break;
             }
         }
 

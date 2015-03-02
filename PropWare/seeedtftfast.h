@@ -83,17 +83,17 @@ class SeeedTFTFast : public PropWare::SeeedTFT {
 
     protected:
         virtual void sendCommand (const uint8_t index) const {
-            PropWare::SeeedTFTFast::mailbox = index << 8 + SEND_CMD;
+            PropWare::SeeedTFTFast::mailbox = (index << 8) + SEND_CMD;
         }
 
         virtual void sendData (const uint16_t data) const {
-            PropWare::SeeedTFTFast::mailbox = data << 8 + SEND_DATA;
+            PropWare::SeeedTFTFast::mailbox =(data << 8) + SEND_DATA;
         }
 
         virtual void sendMultiData(const uint16_t data,
                 const size_t len) const {
             if (1 < len)
-                PropWare::SeeedTFTFast::mailbox = (len - 1) << 8 + REPEAT;
+                PropWare::SeeedTFTFast::mailbox = ((len - 1) << 8) + REPEAT;
             this->sendData(data);
             while (0 != PropWare::SeeedTFTFast::mailbox);
         }
