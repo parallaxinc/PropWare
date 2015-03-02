@@ -26,5 +26,5 @@
 #include <PropWare/scanner.h>
 #include <PropWare/uart/halfduplexuart.h>
 
-const PropWare::HalfDuplexUART _g_halfDuplexUart;
-const PropWare::Scanner        pwIn(&_g_halfDuplexUart, &pwOut);
+PropWare::HalfDuplexUART _g_halfDuplexUart;
+PropWare::Scanner        pwIn(&_g_halfDuplexUart, &pwOut);

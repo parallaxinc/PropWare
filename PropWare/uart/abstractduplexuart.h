@@ -144,7 +144,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * @see PropWare::ScanCapable::get_char
          */
-        char get_char () const {
+        char get_char () {
             return this->receive();
         }
 
@@ -221,11 +221,9 @@ class AbstractDuplexUART: public virtual DuplexUART,
 #ifndef DOXYGEN_IGNORE
         __attribute__ ((fcache))
 #endif
-        uint32_t shift_in_data (register uint32_t bits,
-                const register uint32_t bitCycles,
-                const register uint32_t rxMask,
-                const register uint32_t msbMask) const {
-            register uint32_t data;
+        uint32_t shift_in_data (register uint32_t bits, const register uint32_t bitCycles,
+                                const register uint32_t rxMask, const register uint32_t msbMask) const {
+            register uint32_t data = 0;
             register uint32_t waitCycles = bitCycles;
 
 #ifndef DOXYGEN_IGNORE
@@ -281,20 +279,20 @@ class AbstractDuplexUART: public virtual DuplexUART,
 #ifndef DOXYGEN_IGNORE
         __attribute__ ((fcache))
 #endif
-        uint32_t shift_in_byte_array (register uint32_t bufferAddr,
-                                  int32_t maxLength,
-                                  const register char delim,
-                                  const register uint32_t bits,
-                                  const register uint32_t bitCycles,
-                                  const register uint32_t rxMask,
-                                  const register uint32_t msbMask) const {
+        uint32_t shift_in_byte_array (register uint32_t bufferAddr, int32_t maxLength, const register char delim,
+                                      const register uint32_t bits, const register uint32_t bitCycles,
+                                      const register uint32_t rxMask, const register uint32_t msbMask) const {
 #ifndef DOXYGEN_IGNORE
             volatile register uint32_t data           = 0;
             volatile register int32_t  wordCnt        = 0;
             volatile register uint32_t bitIdx         = bits;
             volatile register uint32_t waitCycles;
-            volatile register uint32_t initWaitCycles = (bitCycles >> 1)
-                    + bitCycles;
+            volatile register uint32_t initWaitCycles = (bitCycles >> 1) + bitCycles;
+
+            /**
+             * FIXME: Despite careful use of do{}while(--var); loops, this is still not be compiled correctly.
+             *        This method probably needs to be written entirely in assembly
+             */
 
             do {
                 /**
