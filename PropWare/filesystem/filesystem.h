@@ -88,6 +88,8 @@ public:
      */
     virtual File* fopen (const char *name, const File::Mode mode, BlockStorage::Buffer *buffer = NULL) = 0;
 
+    virtual PropWare::ErrorCode close (File *f) = 0;
+
     /**
      * @brief   Determine what error (if any) occurred. Error code is reset
      *          after call
@@ -98,39 +100,6 @@ public:
         PropWare::ErrorCode err = this->m_error;
         this->m_error = NO_ERROR;
         return err;
-    }
-
-protected:
-    static inline uint8_t get_file_id (File *f) {
-        return f->id;
-    }
-
-    static inline void set_file_id (File *f, const uint8_t id) {
-        f->id = id;
-    }
-
-    static inline void set_file_rPtr (File *f, const uint32_t rPtr) {
-        f->rPtr = rPtr;
-    }
-
-    static inline void set_file_wPtr (File *f, const uint32_t wPtr) {
-        f->wPtr = wPtr;
-    }
-
-    static inline File::Mode get_file_mode (File *f) {
-        return f->mode;
-    }
-
-    static inline void set_file_mode (File *f, const File::Mode mode) {
-        f->mode = mode;
-    }
-
-    static inline uint32_t get_file_length (File *f) {
-        return f->length;
-    }
-
-    static inline void set_file_length (File *f, const uint32_t length) {
-        f->length = length;
     }
 
 protected:

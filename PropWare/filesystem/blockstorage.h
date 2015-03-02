@@ -102,6 +102,15 @@ class BlockStorage {
             return this->write_data_block(address, buffer->buf);
         }
 
+        ErrorCode flush_buffer (Buffer *buffer) const {
+            PropWare::ErrorCode err;
+            if (buffer->mod) {
+                check_errors(this->write_data_block(buffer->curTier2StartAddr + buffer->curTier1Offset, buffer->buf));
+                buffer->mod = false;
+            }
+            return 0;
+        }
+
         uint8_t get_byte (const uint16_t offset, const uint8_t *buf) const {
             return buf[offset];
         }

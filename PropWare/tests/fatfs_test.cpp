@@ -9,7 +9,7 @@
  *          - MISO = P1
  *          - SCLK = P2
  *          - CS   = P4
- *      FAT16 or FAT32 Filesystem on the first partition of the SD card
+ *      FAT32 Filesystem on the first partition of the SD card
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -132,7 +132,7 @@ TEST(Mount_withParameter4) {
     tearDown();
 }
 
-TEST(Fopen) {
+TEST(FopenAndClose) {
     setUp();
 
     ErrorCode err;
@@ -141,10 +141,14 @@ TEST(Fopen) {
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
-    File *f = testable->fopen("fat_test.cpp", File::Mode::READ);
+    File *f = testable->fopen("fat_test.txt", File::Mode::READ);
     if (NULL == f)
         error_checker(testable->get_error());
     ASSERT_NOT_NULL(f);
+
+    err = testable->close(f);
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
 
     tearDown();
 }
@@ -157,7 +161,7 @@ int main () {
     RUN_TEST(Mount_defaultParameters);
     RUN_TEST(Mount_withParameter0);
     RUN_TEST(Mount_withParameter4);
-    RUN_TEST(Fopen);
+    RUN_TEST(FopenAndClose);
 
     COMPLETE();
 }

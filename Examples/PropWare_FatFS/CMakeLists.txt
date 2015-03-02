@@ -14,6 +14,10 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
+# This demo does not rely on any non-PropWare classes. It is therefore compatible with the `WHOLE_PROGRAM` option, which
+# allows PropGCC to perform more agressive optimizations
+set(WHOLE_PROGRAM ON)
+
 project(FatFS_Demo)
 
 create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
