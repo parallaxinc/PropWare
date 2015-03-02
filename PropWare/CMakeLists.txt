@@ -1,4 +1,5 @@
 set(PROPWARE_SOURCES
+        ../c++allocate.h
         ../filesystem/blockstorage
         ../filesystem/fatfile
         ../filesystem/fatfs
@@ -31,7 +32,8 @@ set(PROPWARE_SOURCES
         ../uart/halfduplexuart
         ../uart/simplexuart
         ../uart/sharedsimplexuart
-        ../uart/uart)
+        ../uart/uart
+        ../utility)
 
 add_subdirectory(cmm)
 add_subdirectory(lmm)

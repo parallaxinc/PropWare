@@ -29,6 +29,9 @@
 
 namespace PropWare {
 
+/**
+ * Basic, static, convenience methods
+ */
 class Utility {
     public:
         /**
