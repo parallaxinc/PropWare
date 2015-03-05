@@ -1,5 +1,5 @@
 /**
- * @file    fatfs_test.cpp
+ * @file    fatfile_test.cpp
  *
  * @author  David Zemon
  *
@@ -9,7 +9,7 @@
  *          - MISO = P1
  *          - SCLK = P2
  *          - CS   = P4
- *      FAT32 Filesystem on the first partition of the SD card
+ *      FAT16 or FAT32 Filesystem on the first partition of the SD card
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -34,112 +34,88 @@
 #include "PropWareTests.h"
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fatfs.h>
+#include <PropWare/filesystem/fatfile.h>
 
 using namespace PropWare;
-
-FatFS *testable;
 
 const Pin::Mask MOSI = Pin::P0;
 const Pin::Mask MISO = Pin::P1;
 const Pin::Mask SCLK = Pin::P2;
 const Pin::Mask CS   = Pin::P4;
 
-BlockStorage *getDriver () {
-    return new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
-}
+const char FILE_NAME[] = "fat_test.txt";
+FatFS *g_fs;
+FatFile *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
-        ((SD *) testable->m_driver)->print_error_str(&pwOut, (const SD::ErrorCode) err);
+        ((SD *) g_fs->m_driver)->print_error_str(&pwOut, (const SD::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
         pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)" CRLF, err - FatFS::BEG_ERROR, err);
 }
 
 SETUP {
-    testable = new FatFS(getDriver());
+    testable = new FatFile(*g_fs, FILE_NAME, File::READ);
+    testable->open();
 }
 
 TEARDOWN {
-
-
-    delete testable->m_driver;
     delete testable;
 }
 
-TEST(Constructor) {
-    setUp();
+TEST(ConstructorDestructor) {
+    testable = new FatFile(*g_fs, FILE_NAME, File::READ);
+
+    ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
+    ASSERT_EQ_MSG(0, strcmp(FILE_NAME, testable->m_name));
+    ASSERT_EQ_MSG(File::READ, testable->m_mode);
+    ASSERT_EQ_MSG(false, testable->m_mod);
+    ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
 
     tearDown();
 }
 
-TEST(ReadMasterBootRecord) {
+TEST(OpenClose) {
     setUp();
 
     ErrorCode err;
 
-    err = testable->m_driver->start();
+    err = testable->open();
     error_checker(err);
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
+    ASSERT_EQ_MSG(0, err);
 
-    testable->m_buf.buf = (uint8_t *) malloc(testable->m_driver->get_sector_size());
-
-    err = testable->read_boot_sector(0);
+    err = testable->close();
     error_checker(err);
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
-
-    // We're just going to assume the boot sector is not at sector 0
-    ASSERT_NEQ_MSG(0, testable->m_initFatInfo.bootSector);
+    ASSERT_EQ_MSG(0, err);
 
     tearDown();
 }
 
-TEST(Mount_defaultParameters) {
+TEST(Get_char) {
     setUp();
 
-    ErrorCode err;
-
-    err = testable->mount();
-    error_checker(err);
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
-    // This test is meant to be run with a FAT32 filesystem
-    ASSERT_EQ_MSG(FatFS::FAT_32, testable->m_filesystem);
-
-    tearDown();
-}
-
-TEST(Mount_withParameter0) {
-    setUp();
-
-    ErrorCode err;
-
-    err = testable->mount(0);
-    error_checker(err);
-    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
-
-    tearDown();
-}
-
-TEST(Mount_withParameter4) {
-    setUp();
-
-    ErrorCode err;
-
-    err = testable->mount(4);
-    ASSERT_EQ_MSG(FatFS::UNSUPPORTED_FILESYSTEM, err);
+    const char c = testable->get_char();
 
     tearDown();
 }
 
 int main () {
-    START(FatFSTest);
+    START(FatFileTest);
 
-    RUN_TEST(Constructor);
-    RUN_TEST(ReadMasterBootRecord);
-    RUN_TEST(Mount_defaultParameters);
-    RUN_TEST(Mount_withParameter0);
-    RUN_TEST(Mount_withParameter4);
+    PropWare::ErrorCode err;
+
+    FatFS fs(new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS));
+    if ((err = fs.mount())) {
+        error_checker(err);
+        passed = false;
+        COMPLETE();
+    }
+    g_fs = &fs;
+
+    RUN_TEST(ConstructorDestructor);
+    RUN_TEST(OpenClose);
 
     COMPLETE();
 }

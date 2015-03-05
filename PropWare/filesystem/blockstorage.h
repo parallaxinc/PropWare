@@ -102,7 +102,12 @@ class BlockStorage {
             return this->write_data_block(address, buffer->buf);
         }
 
-        ErrorCode flush_buffer (Buffer *buffer) const {
+        /**
+         * @brief       Flush the contents of a buffer
+         *
+         * @param[in]   buffer  Buffer to be written to the SD card - written only it was modified
+         */
+        ErrorCode flush (Buffer *buffer) const {
             PropWare::ErrorCode err;
             if (buffer->mod) {
                 check_errors(this->write_data_block(buffer->curTier2StartAddr + buffer->curTier1Offset, buffer->buf));

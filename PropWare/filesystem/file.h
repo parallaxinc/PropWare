@@ -32,9 +32,6 @@
 namespace PropWare {
 
 class File : public ScanCapable {
-    friend class Filesystem;
-    friend class FatFS;
-
     public:
         typedef enum {
             ERROR,
@@ -49,9 +46,6 @@ class File : public ScanCapable {
         typedef enum {
             NO_ERROR = 0
         } ErrorCode;
-
-        // Signal that the contents of a buffer are a directory
-        static const int8_t FOLDER_ID = -1;
 
     public:
         static Mode to_mode (const char modeStr[]) {
@@ -69,26 +63,27 @@ class File : public ScanCapable {
 
             return retVal;
         }
-    static const char* to_string (const Mode mode) {
-        switch (mode) {
-            case ERROR:
-                return "error";
-            case READ:
-                return "r";
-            case WRITE:
-                return "w";
-            case APPEND:
-                return "a";
-            case R_UPDATE:
-                return "r+";
-            case W_UPDATE:
-                return "w+";
-            case A_UPDATE:
-                return "a+";
-            default:
-                return "?";
+
+        static const char* to_string (const Mode mode) {
+            switch (mode) {
+                case ERROR:
+                    return "error";
+                case READ:
+                    return "r";
+                case WRITE:
+                    return "w";
+                case APPEND:
+                    return "a";
+                case R_UPDATE:
+                    return "r+";
+                case W_UPDATE:
+                    return "w+";
+                case A_UPDATE:
+                    return "a+";
+                default:
+                    return "?";
+            }
         }
-    }
 
     public:
         virtual PropWare::ErrorCode flush () = 0;
@@ -101,32 +96,31 @@ class File : public ScanCapable {
         /**
          * Files can only be created by their respective Filesystems
          */
-        File (const BlockStorage *driver, BlockStorage::Buffer *buffer, const int id, const Mode mode,
-              const Printer *logger = &pwOut) : m_logger(logger),
-                                                m_driver(driver),
-                                                m_buf(buffer),
-                                                m_mod(false),
-                                                m_id(id),
-                                                m_rPtr(0),
-                                                m_wPtr(0),
-                                                m_mode(mode) {
-            this->m_buf->id = id;
+        File (Filesystem &fs, const char name[], const Mode mode, const Printer *logger = &pwOut)
+                : m_logger(logger),
+                  m_mode(mode),
+                  m_id(fs.next_file_id()),
+                  m_rPtr(0),
+                  m_wPtr(0),
+                  m_mod(false) {
+            strcpy(this->m_name, name);
         }
+
+        virtual PropWare::ErrorCode open (BlockStorage::Buffer *buffer = NULL) = 0;
 
         PropWare::ErrorCode close () {
             return this->flush();
         }
 
-        void print_status () {
+        void print_status () const {
             this->print_status("File");
         }
 
-        void print_status (const char classStr[]) {
+        void print_status (const char classStr[]) const {
             this->m_logger->printf("File Status - PropWare::%s@0x%08X" CRLF, classStr, (unsigned int) this);
             this->m_logger->println("Common");
             this->m_logger->println("======");
             this->m_logger->printf("\tFile name: %s" CRLF, this->m_name);
-            this->m_logger->printf("\tDriver: 0x%08X" CRLF, (unsigned int) this->m_driver);
             this->m_logger->printf("\tBuffer: 0x%08X" CRLF, (unsigned int) this->m_buf);
             this->m_logger->printf("\tModified: %s" CRLF, Utility::to_string(this->m_mod));
             this->m_logger->printf("\tFile ID: %u" CRLF, this->m_id);
@@ -139,17 +133,16 @@ class File : public ScanCapable {
     protected:
         char                 m_name[13];
         const Printer        *m_logger;
-        const BlockStorage   *m_driver;
         BlockStorage::Buffer *m_buf;
-
-        /** When the length of a file is changed, this variable will be set, otherwise cleared */
-        bool       m_mod;
+        const File::Mode     m_mode;
         /** determine if the buffer is owned by this file */
-        uint8_t    m_id;
+        uint8_t              m_id;
+
+        uint32_t   m_length;
         uint32_t   m_rPtr;
         uint32_t   m_wPtr;
-        File::Mode m_mode;
-        uint32_t   m_length;
+        /** When the length of a file is changed, this variable will be set, otherwise cleared */
+        bool       m_mod;
 };
 
 }

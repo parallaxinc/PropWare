@@ -30,7 +30,6 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/filesystem/blockstorage.h>
 #include <PropWare/filesystem/filesystem.h>
-#include <PropWare/filesystem/fatfile.h>
 #include <PropWare/c++allocate.h>
 
 namespace PropWare {
@@ -59,16 +58,10 @@ class FatFS : public Filesystem {
         } ErrorCode;
 
     public:
-        FatFS (const BlockStorage *driver,
-               const Printer *logger = &pwOut) : m_logger(logger),
-                                                 m_driver(driver),
-                                                 m_sectorSize(driver->get_sector_size()),
-                                                 m_mounted(false),
-                                                 m_fat(NULL),
-                                                 m_fatMod(false),
-                                                 m_nextFileId(0) {
-            this->m_error   = NO_ERROR;
-            this->m_buf.buf = NULL;
+        FatFS (const BlockStorage *driver, const Printer *logger = &pwOut)
+                : Filesystem(driver, logger),
+                  m_fat(NULL),
+                  m_fatMod(false) {
         }
 
         ~FatFS () {
@@ -135,100 +128,6 @@ class FatFS : public Filesystem {
             }
 
             return NO_ERROR;
-        }
-
-        File *fopen (const char name[], const File::Mode mode, BlockStorage::Buffer *buffer = NULL) {
-            PropWare::ErrorCode err;
-            uint16_t            fileEntryOffset = 0;
-
-            // Attempt to find the file
-            if ((err = this->find(name, &fileEntryOffset))) {
-                // Find returned an error; ensure it was EOC...
-                if (EOC_END == err) {
-                    // And throw a FILE_NOT_FOUND error if using read only mode
-                    if (File::READ == mode) {
-                        this->m_error = Filesystem::FILENAME_NOT_FOUND;
-                        return NULL;
-                    }
-                    // Or create the file for any other mode
-                    else {
-                        // File wasn't found and the cluster is full; add another
-                        // to the directory
-                        check_fs_error(this->extend_fat(&this->m_buf));
-                        check_fs_error(this->load_next_sector(&this->m_buf));
-                    }
-                }
-
-                if (FILENAME_NOT_FOUND == err) {
-                    // File wasn't found, but there is still room in this
-                    // cluster (or a new cluster was just added)
-                    check_fs_error(this->create_file(name, &fileEntryOffset));
-                }
-                // find returned unknown error - throw it
-                else {
-                    this->m_error = err;
-                    return NULL;
-                }
-            }
-
-            // `name` was found successfully, determine if it is a file or
-            // directory
-            if (SUB_DIR & this->m_buf.buf[fileEntryOffset + FILE_ATTRIBUTE_OFFSET]) {
-                this->m_error = Filesystem::ENTRY_NOT_FILE;
-                return NULL;
-            }
-
-            // Instantiate the file
-            BlockStorage::Buffer *fileBuffer;
-            if (NULL == buffer)
-                fileBuffer = &this->m_buf;
-            else
-                fileBuffer = buffer;
-            check_fs_error(this->m_driver->flush_buffer(fileBuffer));
-            FatFile *f = new FatFile(this->m_driver, fileBuffer, this->m_nextFileId++, mode);
-
-            // Passed the file-not-directory test, load it into the buffer and
-            // update status variables
-            if (FAT_16 == this->m_filesystem)
-                f->m_buf->curTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf.buf);
-            else {
-                f->m_buf->curTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf.buf);
-                uint16_t highWord = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_HIGH, this->m_buf.buf);
-                f->m_buf->curTier3 |= highWord << 16;
-
-                // Clear the highest 4 bits - they are always reserved
-                f->m_buf->curTier3 &= 0x0FFFFFFF;
-            }
-
-            strcpy(f->m_name, name);
-            f->firstTier3 = f->m_buf->curTier3;
-            f->m_curTier2               = 0;
-            f->m_buf->curTier2StartAddr = this->find_sector_from_alloc(f->m_buf->curTier3);
-            f->m_dirTier1Addr           = this->m_buf.curTier2StartAddr + this->m_buf.curTier1Offset;
-            f->fileEntryOffset          = fileEntryOffset;
-            check_fs_error(this->get_fat_value(f->m_buf->curTier3, &(f->m_buf->nextTier3)));
-            f->m_buf->curTier1Offset = 0;
-            f->m_length =  this->m_driver->get_long(fileEntryOffset + FatFile::FILE_LEN_OFFSET, this->m_buf.buf);
-
-            // Determine the number of sectors currently allocated to this file;
-            // useful in the case that the file needs to be extended
-            f->m_maxTier1s     = f->m_length >> this->m_driver->get_sector_size_shift();
-            if (!(f->m_maxTier1s))
-                f->m_maxTier1s = (uint32_t) (1 << this->m_sectorsPerCluster_shift);
-            while (f->m_maxTier1s % (1 << this->m_sectorsPerCluster_shift))
-                ++(f->m_maxTier1s);
-            check_fs_error(this->m_driver->read_data_block(f->m_buf->curTier2StartAddr, f->m_buf->buf));
-
-            return f;
-        }
-
-        /**
-         * @brief    Close and remove a file from RAM
-         */
-        PropWare::ErrorCode close (File *f) {
-            const PropWare::ErrorCode err = f->close();
-            delete f;
-            return err;
         }
 
     private:
@@ -305,6 +204,7 @@ class FatFS : public Filesystem {
                 uint32_t clusterCount;
         } InitFATInfo;
 
+    private:
         /**
          * @brief       Read the master boot record and load in the boot sector for the requested partition
          *
@@ -380,28 +280,28 @@ class FatFS : public Filesystem {
             uint8_t sectorsPerCluster = this->m_driver->get_byte(SEC_PER_CLSTR_ADDR, this->m_buf.buf);
             switch (sectorsPerCluster) {
                 case 1:
-                    this->m_sectorsPerCluster_shift = 0;
+                    this->m_tier1sPerTier2Shift = 0;
                     break;
                 case 2:
-                    this->m_sectorsPerCluster_shift = 1;
+                    this->m_tier1sPerTier2Shift = 1;
                     break;
                 case 4:
-                    this->m_sectorsPerCluster_shift = 2;
+                    this->m_tier1sPerTier2Shift = 2;
                     break;
                 case 8:
-                    this->m_sectorsPerCluster_shift = 3;
+                    this->m_tier1sPerTier2Shift = 3;
                     break;
                 case 16:
-                    this->m_sectorsPerCluster_shift = 4;
+                    this->m_tier1sPerTier2Shift = 4;
                     break;
                 case 32:
-                    this->m_sectorsPerCluster_shift = 5;
+                    this->m_tier1sPerTier2Shift = 5;
                     break;
                 case 64:
-                    this->m_sectorsPerCluster_shift = 6;
+                    this->m_tier1sPerTier2Shift = 6;
                     break;
                 case 128:
-                    this->m_sectorsPerCluster_shift = 7;
+                    this->m_tier1sPerTier2Shift = 7;
                     break;
                 default:
                     return BAD_SECTORS_PER_CLUSTER;
@@ -430,7 +330,7 @@ class FatFS : public Filesystem {
 
             // Compute necessary numbers to determine FAT type (12/16/32)
             i->dataSectors         = totalSectors - (i->rsvdSectorCount + i->numFATs * fatSize + i->rootDirSectors);
-            i->clusterCount        = i->dataSectors >> this->m_sectorsPerCluster_shift;
+            i->clusterCount        = i->dataSectors >> this->m_tier1sPerTier2Shift;
             this->m_rootDirSectors = (i->rootEntryCount * 32) >> this->m_driver->get_sector_size_shift();
         }
 
@@ -585,21 +485,21 @@ class FatFS : public Filesystem {
             char readEntryName[FILENAME_STR_LEN];
 
             // Save the current buffer
-            check_errors(this->m_driver->flush_buffer(&this->m_buf));
+            check_errors(this->m_driver->flush(&this->m_buf));
 
             *fileEntryOffset = 0;
 
             // If we aren't looking at the beginning of the directory cluster, we must backtrack to the beginning and
             // then begin listing files
             if (this->m_buf.curTier1Offset
-                    || (this->find_sector_from_alloc(this->m_dir_firstAllocUnit) != this->m_buf.curTier2StartAddr)) {
+                    || (this->compute_tier1_from_tier3(this->m_dir_firstAllocUnit) != this->m_buf.curTier2StartAddr)) {
                 this->m_buf.curTier1Offset = 0;
-                this->m_buf.curTier2StartAddr = this->find_sector_from_alloc(this->m_dir_firstAllocUnit);
+                this->m_buf.curTier2StartAddr = this->compute_tier1_from_tier3(this->m_dir_firstAllocUnit);
                 this->m_buf.curTier3 = this->m_dir_firstAllocUnit;
                 check_errors(this->get_fat_value(this->m_buf.curTier3, &this->m_buf.nextTier3));
                 check_errors(this->m_driver->read_data_block(this->m_buf.curTier2StartAddr, this->m_buf.buf));
             }
-            this->m_buf.id = File::FOLDER_ID;
+            this->m_buf.id = FOLDER_ID;
 
             // Loop through all entries in the current directory until we find the correct one
             // Function will exit normally with EOC_END error code if the file is not found
@@ -642,12 +542,12 @@ class FatFS : public Filesystem {
          *
          * @return      Returns sector address of the desired allocation unit
          */
-        uint32_t find_sector_from_alloc (uint32_t allocUnit) {
+        uint32_t compute_tier1_from_tier3 (uint32_t allocUnit) const {
             if (FAT_32 == this->m_filesystem)
                 allocUnit -= this->m_rootAllocUnit;
             else
                 allocUnit -= 2;
-            allocUnit <<= this->m_sectorsPerCluster_shift;
+            allocUnit <<= this->m_tier1sPerTier2Shift;
             allocUnit += this->m_firstDataAddr;
             return allocUnit;
         }
@@ -706,7 +606,7 @@ class FatFS : public Filesystem {
          */
         PropWare::ErrorCode load_next_sector (BlockStorage::Buffer *buf) {
             PropWare::ErrorCode err;
-            check_errors(this->m_driver->flush_buffer(buf));
+            check_errors(this->m_driver->flush(buf));
 
             // Check for the end-of-chain marker (end of file)
             if (((uint32_t) EOC_BEG) <= buf->nextTier3)
@@ -728,7 +628,7 @@ class FatFS : public Filesystem {
                 // We are looking at a generic data cluster.
             else {
                 // Generic data cluster; Have we reached the end of the cluster?
-                if (((1 << this->m_sectorsPerCluster_shift) - 1) > (buf->curTier1Offset)) {
+                if (((1 << this->m_tier1sPerTier2Shift) - 1) > (buf->curTier1Offset)) {
                     // Generic data cluster; Not the end; Load next sector in
                     // the cluster
 
@@ -763,7 +663,7 @@ class FatFS : public Filesystem {
 
             // If the sector has been modified, write it back to the SD card
             // before reading again
-            check_errors(this->m_driver->flush_buffer(buf));
+            check_errors(this->m_driver->flush(buf));
 
             // Update this->m_cur*
             if (((uint32_t) EOC_BEG) <= buf->curTier3
@@ -776,7 +676,7 @@ class FatFS : public Filesystem {
                     && ((uint32_t) EOC_END) <= buf->curTier3))
                 // Current allocation unit is not EOC, read the next one
             check_errors(this->get_fat_value(buf->curTier3, &(buf->nextTier3)));
-            buf->curTier2StartAddr = this->find_sector_from_alloc(buf->curTier3);
+            buf->curTier2StartAddr = this->compute_tier1_from_tier3(buf->curTier3);
             buf->curTier1Offset = 0;
 
             return this->m_driver->read_data_block(buf->curTier2StartAddr, buf->buf);
@@ -995,102 +895,6 @@ class FatFS : public Filesystem {
         }
 
         /**
-         * @brief       Allocate space for a new file
-         *
-         * @param[in]   *name               Character array for the new file
-         * @param[in]   *fileEntryOffset    Offset from the currently loaded directory entry where the file's metadata
-         *                                  should be written
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode create_file (const char *name, const uint16_t *fileEntryOffset) {
-            uint8_t i, j;
-            // *name is only checked for uppercase
-            char uppercaseName[FILENAME_STR_LEN];
-            uint32_t allocUnit;
-
-#ifdef SD_OPTION_VERBOSE
-            this->m_logger->printf("Creating new file: %s" CRLF, name);
-#endif
-
-            // Parameter checking...
-            if (FILENAME_STR_LEN < strlen(name))
-                return INVALID_FILENAME;
-
-            // Convert the name to uppercase
-            strcpy(uppercaseName, name);
-            Utility::to_upper(uppercaseName);
-
-            // Write the file fields in order...
-
-            /* 1) Short file name */
-            // Write first section
-            for (i = 0; '.' != uppercaseName[i] && 0 != uppercaseName[i]; ++i)
-                this->m_buf.buf[*fileEntryOffset + i] = (uint8_t) uppercaseName[i];
-            // Check if there is an extension
-            if (uppercaseName[i]) {
-                // There might be an extension - pad first name with spaces
-                for (j = i; j < FILE_NAME_LEN; ++j)
-                    this->m_buf.buf[*fileEntryOffset + j] = ' ';
-                // Check if there is a period, as one would expect for a file
-                // name with an extension
-                if ('.' == uppercaseName[i]) {
-                    // Extension exists, write it
-                    ++i;        // Skip the period
-                    // Insert extension, character-by-character
-                    for (j = FILE_NAME_LEN; uppercaseName[i]; ++j)
-                        this->m_buf.buf[*fileEntryOffset + j] = (uint8_t) uppercaseName[i++];
-                    // Pad extension with spaces
-                    for (; j < FILE_NAME_LEN + FILE_EXTENSION_LEN; ++j)
-                        this->m_buf.buf[*fileEntryOffset + j] = ' ';
-                }
-                    // If it wasn't a period or null terminator, throw an error
-                else
-                    return INVALID_FILENAME;
-            }
-            // No extension, pad with spaces
-            else
-                for (; i < (FILE_NAME_LEN + FILE_EXTENSION_LEN); ++i)
-                    this->m_buf.buf[*fileEntryOffset + i] = ' ';
-
-            /* 2) Write attribute field... */
-            // TODO: Allow for file attribute flags to be set, such as
-            //       READ_ONLY, SUB_DIR, etc
-            // Archive flag should be set because the file is new
-            this->m_buf.buf[*fileEntryOffset + FILE_ATTRIBUTE_OFFSET] = ARCHIVE;
-            this->m_buf.mod = true;
-
-#ifdef SD_OPTION_VERBOSE
-            print_file_entry(&(this->m_buf.buf[*fileEntryOffset]), uppercaseName);
-#endif
-
-#if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-            BlockStorage::print_block(pwOut, this->m_buf.buf);
-#endif
-
-            /**
-             * 3) Find a spot in the FAT (do not check for a full FAT, assume
-             *    space is available)
-             */
-            allocUnit = this->find_empty_space(0);
-            this->m_driver->write_short(*fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf.buf, allocUnit);
-            if (FAT_32 == this->m_filesystem)
-                this->m_driver->write_short(*fileEntryOffset + FILE_START_CLSTR_HIGH, this->m_buf.buf, allocUnit >> 16);
-
-            /* 4) Write the size of the file (currently 0) */
-            this->m_driver->write_long(*fileEntryOffset + FatFile::FILE_LEN_OFFSET, this->m_buf.buf, 0);
-
-#if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-            this->m_logger->printf("New file entry at offset 0x%08X / %u looks like..." CRLF, *fileEntryOffset, *fileEntryOffset);
-            BlockStorage::print_block(pwOut, this->m_buf.buf);
-#endif
-
-            this->m_buf.mod = true;
-
-            return 0;
-        }
-
-        /**
          * @brief       Print the attributes and name of a file entry
          *
          * @param[in]   *fileEntry  Address of the first byte of the file entry
@@ -1152,7 +956,7 @@ class FatFS : public Filesystem {
             this->m_logger->println("======");
             this->m_logger->printf("Driver address: 0x%08X" CRLF, (unsigned int) this->m_driver);
             this->m_logger->printf("Block size: %u" CRLF, this->m_sectorSize);
-            this->m_logger->printf("Blocks-per-cluster shift: %u" CRLF, this->m_sectorsPerCluster_shift);
+            this->m_logger->printf("Blocks-per-cluster shift: %u" CRLF, this->m_tier1sPerTier2Shift);
             this->m_logger->println();
 
             // FILESYSTEM
@@ -1202,7 +1006,7 @@ class FatFS : public Filesystem {
             this->m_logger->printf("\tFirst FAT sector: 0x%08X" CRLF, this->m_fatStart);
             this->m_logger->printf("\tRoot directory alloc. unit: 0x%08X" CRLF, this->m_rootAllocUnit);
             this->m_logger->printf("\tCalculated root directory sector: 0x%08X" CRLF,
-                                   this->find_sector_from_alloc(this->m_rootAllocUnit));
+                                   this->compute_tier1_from_tier3(this->m_rootAllocUnit));
             this->m_logger->printf("\tRoot directory sector: 0x%08X" CRLF, this->m_rootAddr);
             this->m_logger->printf("\tRoot directory size (in sectors): %u" CRLF, this->m_rootDirSectors);
             this->m_logger->printf("\tFirst data sector: 0x%08X" CRLF, this->m_firstDataAddr);
@@ -1236,13 +1040,8 @@ class FatFS : public Filesystem {
         }
 
     private:
-        const Printer      *m_logger;
-        const BlockStorage *m_driver;
-        const uint16_t     m_sectorSize;
 
-        bool        m_mounted;
         InitFATInfo m_initFatInfo;
-        uint8_t     m_sectorsPerCluster_shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
         uint8_t     m_filesystem;  // File system type - one of FAT_16 or FAT_32
         char        m_label[9]; // Filesystem label
         uint32_t    m_fatStart;  // Starting block address of the FAT
@@ -1255,9 +1054,7 @@ class FatFS : public Filesystem {
         uint8_t     *m_fat;  // Buffer for FAT entries only
         bool        m_fatMod;
 
-        BlockStorage::Buffer m_buf;
         uint32_t             m_curFatSector;  // Store the current FAT sector loaded into m_fat
-        int                  m_nextFileId;
         uint32_t             m_dir_firstAllocUnit;  // Store the current directory's starting allocation unit
 };
 
