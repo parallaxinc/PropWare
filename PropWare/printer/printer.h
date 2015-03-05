@@ -27,6 +27,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
+#include <PropWare/utility.h>
 
 namespace PropWare {
 
@@ -502,6 +503,16 @@ class Printer {
          */
         void println () const {
             this->puts(CRLF);
+        }
+
+        /**
+         * @brief       Print a boolean as either "true" or "false"
+         *
+         * @param[in]   b       Boolean to be printed
+         * @param       format
+         */
+        void print (const bool b, const Format format = DEFAULT_FORMAT) const {
+            this->puts(Utility::to_string(b));
         }
 
         /**
