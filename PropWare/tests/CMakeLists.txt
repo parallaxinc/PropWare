@@ -10,12 +10,13 @@ include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
 
 set(BOARD QUICKSTART)
 set(MODEL cmm)
-set(COMMON_FLAGS "-Os")
+set(COMMON_FLAGS "-Os -g")
 
 project(propware_tests)
 
 create_executable(sample_test           sample_test)
 create_executable(pin_test              pin_test)
+create_executable(fatfile_test          fatfile_test)
 create_executable(fatfs_test            fatfs_test)
 create_executable(uart_simplex_test     uart_simplex_test)
 create_executable(sd_test               sd_test)

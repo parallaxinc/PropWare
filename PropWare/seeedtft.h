@@ -222,8 +222,7 @@ class SeeedTFT {
                 ascii -= 0x20;
 
             for (uint8_t i = 0; i < 8; i++) {
-                uint8_t temp =
-                        PropWare::SeeedTFT::SIMPLE_FONT[ascii][i];
+                uint8_t temp = PropWare::SeeedTFT::SIMPLE_FONT[(uint8_t) ascii][i];
                 for (uint8_t j = 0; j < 8; j++) {
                     if ((temp >> j) & PropWare::BIT_0)
                         switch (this->m_displayDirection) {

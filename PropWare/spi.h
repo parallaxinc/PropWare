@@ -102,7 +102,7 @@ class SPI : public PrintCapable,
             /** Mode 0 */MODE_0,
             /** Mode 1 */MODE_1,
             /** Mode 2 */MODE_2,
-            /** Mode 3 */MODE_3,
+            /** Mode 3 */MODE_3
         } Mode;
 
         /**

@@ -25,10 +25,11 @@
 
 // Includes
 #include <PropWare/PropWare.h>
+#include <PropWare/utility.h>
+#include <PropWare/utility.h>
 #include <PropWare/port.h>
 #include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
-
 
 class YesNoComparator : public PropWare::Comparator<char> {
     public:

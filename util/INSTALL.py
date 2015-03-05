@@ -488,13 +488,13 @@ class DebInstaller(NixInstaller):
     @classmethod
     def _needs_zlib1g(cls):
         cmd = ['dpkg-query', '-l', 'zlib1g:i386']
-        package_list = subprocess.check_output(cmd).split(bytes('\n'))
-        matcher = re.compile('.*zlib1g:i386.*')
-        for package in package_list:
-            if matcher.match(package):
-                return False
+        try:
+            subprocess.check_output(cmd).split(bytes('\n'))
+        except subprocess.CalledProcessError:
+            # If dpkg-query returned an error, the package could not be found and we'll need to install it
+            return True
 
-        return True
+        return False
 
     @classmethod
     def _add_root_env_var(cls, key, value):

@@ -53,14 +53,14 @@ class Scanner {
         static const char DEFAULT_DELIMITER = '\n';
 
     public:
-        Scanner (const ScanCapable *scanCapable, const Printer *printer)
+        Scanner (ScanCapable *scanCapable, const Printer *printer)
                 : m_scanCapable(scanCapable), m_printer(printer) {
         }
 
         /**
          * @see PropWare::ScanCapable::get_char
          */
-        char get_char () const {
+        char get_char () {
             const char c = this->m_scanCapable->get_char();
             this->m_printer->put_char(c);
             return c;
@@ -69,7 +69,7 @@ class Scanner {
         /**
          * @see PropWare::ScanCapable::fgets
          */
-        ErrorCode gets (char string[], int32_t length, const char delimiter = DEFAULT_DELIMITER) const {
+        ErrorCode gets (char string[], int32_t length, const char delimiter = DEFAULT_DELIMITER) {
             char *buf = string;
             while (0 < --length) {
                 char ch = this->m_scanCapable->get_char();
@@ -99,26 +99,26 @@ class Scanner {
             return NO_ERROR;
         }
 
-        const Scanner& operator>> (char &c) const {
+        const Scanner& operator>> (char &c) {
             this->get(c);
             return *this;
         }
 
-        const Scanner& operator>> (uint32_t &x) const {
+        const Scanner& operator>> (uint32_t &x) {
             get(x);
             return *this;
         }
 
-        const Scanner& operator>> (int32_t &x) const {
+        const Scanner& operator>> (int32_t &x) {
             get(x);
             return *this;
         }
 
-        const Scanner& operator>> (float &f) const {
+        const Scanner& operator>> (float &f) {
             return *this;
         }
 
-        const ErrorCode get (char &c) const {
+        const ErrorCode get (char &c) {
             ErrorCode err;
             char userInput[2];
             check_errors(this->gets(userInput, sizeof(userInput)));
@@ -130,7 +130,7 @@ class Scanner {
             }
         }
 
-        const ErrorCode get(uint32_t &x) const {
+        const ErrorCode get(uint32_t &x) {
             ErrorCode  err;
             char userInput[32];
             check_errors(this->gets(userInput, sizeof(userInput)));
@@ -140,7 +140,7 @@ class Scanner {
                 return NO_ERROR;
         }
 
-        const ErrorCode get(int32_t &x) const {
+        const ErrorCode get(int32_t &x) {
             ErrorCode  err;
             char userInput[32];
             check_errors(this->gets(userInput, sizeof(userInput)));
@@ -150,7 +150,7 @@ class Scanner {
                 return NO_ERROR;
         }
 
-        const ErrorCode get(float &f) const {
+        const ErrorCode get(float &f) {
             ErrorCode err;
             char userInput[32];
             check_errors(this->gets(userInput, sizeof(userInput)));
@@ -171,7 +171,7 @@ class Scanner {
          * @param[in]   comparator          Determines whether or not the received input was valid
          */
         void input_prompt (const char prompt[], const char failureResponse[], char userInput[],
-                           const size_t bufferLength, const Comparator<char> &comparator) const {
+                           const size_t bufferLength, const Comparator<char> &comparator) {
             do {
                 this->m_printer->puts(prompt);
                 this->gets(userInput, bufferLength);
@@ -194,7 +194,7 @@ class Scanner {
          */
         template<typename T>
         void input_prompt (const char prompt[], const char failureResponse[], T *userInput,
-                           const Comparator<T> &comparator) const {
+                           const Comparator<T> &comparator) {
             const T original = *userInput;
             ErrorCode err;
             do {
@@ -209,10 +209,10 @@ class Scanner {
         }
 
     private:
-        const ScanCapable *m_scanCapable;
+        ScanCapable *m_scanCapable;
         const Printer     *m_printer;
 };
 
 }
 
-extern const PropWare::Scanner pwIn;
+extern PropWare::Scanner pwIn;

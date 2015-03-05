@@ -49,6 +49,11 @@ class BlockStorage {
         };
 
     public:
+        static void print_block (const Printer &printer, const Buffer &buffer, const size_t words = 512,
+                                 const uint8_t wordsPerLine = 16) {
+            print_block(printer, buffer.buf, words, wordsPerLine);
+        }
+
         static void print_block (const Printer &printer, const uint8_t data[], const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
             uint8_t lines = words / wordsPerLine;
@@ -95,6 +100,20 @@ class BlockStorage {
 
         ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
             return this->write_data_block(address, buffer->buf);
+        }
+
+        /**
+         * @brief       Flush the contents of a buffer
+         *
+         * @param[in]   buffer  Buffer to be written to the SD card - written only it was modified
+         */
+        ErrorCode flush (Buffer *buffer) const {
+            PropWare::ErrorCode err;
+            if (buffer->mod) {
+                check_errors(this->write_data_block(buffer->curTier2StartAddr + buffer->curTier1Offset, buffer->buf));
+                buffer->mod = false;
+            }
+            return 0;
         }
 
         uint8_t get_byte (const uint16_t offset, const uint8_t *buf) const {

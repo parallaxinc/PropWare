@@ -24,8 +24,10 @@
 */
 
 #pragma once
+
 #include <PropWare/PropWare.h>
 #include <PropWare/printcapable.h>
+#include <PropWare/utility.h>
 
 namespace PropWare {
 
@@ -129,10 +131,9 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        void put_int (int32_t x, uint16_t width = 0,
-                      const char fillChar = DEFAULT_FILL_CHAR) const {
+        void put_int (int32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
             if (0 > x)
-                this->m_printCapable->put_char('-');
+                this->put_char('-');
 
             this->put_uint((uint32_t) abs(x), width, fillChar);
         }
@@ -145,8 +146,7 @@ class Printer {
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
          */
-        void put_uint (uint32_t x, uint16_t width = 0,
-                       const char fillChar = DEFAULT_FILL_CHAR) const {
+        void put_uint (uint32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
             const uint8_t radix = 10;
             char          buf[sizeof(x) * 8];
             uint8_t       i = 0;
@@ -162,12 +162,12 @@ class Printer {
             if (width && width > i) {
                 width -= i;
                 while (width--)
-                    this->m_printCapable->put_char(fillChar);
+                    this->put_char(fillChar);
             }
 
             // Reverse the character array
             for (uint8_t j = 0; j < i; ++j)
-                this->m_printCapable->put_char(buf[i - j - 1]);
+                this->put_char(buf[i - j - 1]);
         }
 
         /**
@@ -181,8 +181,7 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        void put_hex (uint32_t x, uint16_t width = 0,
-                      const char fillChar = DEFAULT_FILL_CHAR) const {
+        void put_hex (uint32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
             char    buf[sizeof(x)*2];
             uint8_t temp, j, i = 0;
 
@@ -201,12 +200,12 @@ class Printer {
             if (width && width > i) {
                 width -= i;
                 while (width--)
-                    this->m_printCapable->put_char(fillChar);
+                    this->put_char(fillChar);
             }
 
             // Reverse the character array
             for (j = 0; j < i; ++j)
-                this->m_printCapable->put_char(buf[i - j - 1]);
+                this->put_char(buf[i - j - 1]);
         }
 
         /**
@@ -251,13 +250,13 @@ class Printer {
             int n;
 
             if (S_ISNAN(f)) {
-                this->m_printCapable->puts("nan");
+                this->puts("nan");
             }
             if (S_ISINF(f)) {
                 if (((int) f) & 0x80000000)
-                    this->m_printCapable->puts("-inf");
+                    this->puts("-inf");
                 else
-                    this->m_printCapable->puts("inf");
+                    this->puts("inf");
             }
 
             /* clamp the digits. */
@@ -356,7 +355,7 @@ class Printer {
 
             s[m] = 0;
 
-            this->m_printCapable->puts(s);
+            this->puts(s);
         }
 
         /**
@@ -410,7 +409,7 @@ class Printer {
                 if ('%' == c) {
                     c = *(++s);
                     if ('%' == c)
-                        this->m_printCapable->put_char(c);
+                        this->put_char(c);
                     else {
                         if (c == '0')
                             format.fillChar = '0';
@@ -452,8 +451,7 @@ class Printer {
                                 this->print(first, format);
                                 break;
                             default:
-                                this->m_printCapable->put_char(
-                                        DEFAULT_FILL_CHAR);
+                                this->put_char(DEFAULT_FILL_CHAR);
                                 break;
                         }
                         if (0 == sizeof...(remaining))
@@ -464,7 +462,7 @@ class Printer {
                         return;
                     }
                 } else
-                    this->m_printCapable->put_char(*s);
+                    this->put_char(*s);
 
                 ++s;
             }
@@ -486,9 +484,35 @@ class Printer {
          * @param[in]   string[]    String to be printed
          * @param       format      Unused
          */
-        void print (const char string[],
-                    const Format format = DEFAULT_FORMAT) const {
+        void print (const char string[], const Format format = DEFAULT_FORMAT) const {
             this->puts(string);
+        }
+
+        /**
+         * @brief       Print a null-terminated string followed by a newline (CRLF)
+         *
+         * @param[in]   string[]    String to be printed
+         */
+        void println (const char string[]) const {
+            this->puts(string);
+            this->puts(CRLF);
+        }
+
+        /**
+         * @brief   Print a newline (CRLF)
+         */
+        void println () const {
+            this->puts(CRLF);
+        }
+
+        /**
+         * @brief       Print a boolean as either "true" or "false"
+         *
+         * @param[in]   b       Boolean to be printed
+         * @param       format
+         */
+        void print (const bool b, const Format format = DEFAULT_FORMAT) const {
+            this->puts(Utility::to_string(b));
         }
 
         /**
@@ -497,8 +521,7 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param       format
          */
-        void print (const uint32_t x,
-                    const Format format = DEFAULT_FORMAT) const {
+        void print (const uint32_t x, const Format format = DEFAULT_FORMAT) const {
             switch (format.radix) {
                 case 16:
                     this->put_hex(x, format.width, format.fillChar);
@@ -514,8 +537,7 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param       format
          */
-        void print (const int32_t x,
-                    const Format format = DEFAULT_FORMAT) const {
+        void print (const int32_t x, const Format format = DEFAULT_FORMAT) const {
             this->put_int(x, format.width, format.fillChar);
         }
 
@@ -525,8 +547,7 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param       format
          */
-        void print (const double f,
-                    const Format format = DEFAULT_FORMAT) const {
+        void print (const double f, const Format format = DEFAULT_FORMAT) const {
             this->put_float(f, format.width, format.precision, format.fillChar);
         }
 

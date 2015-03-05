@@ -73,7 +73,7 @@ class Queue {
             else {
                 ++this->m_head;
                 // If the head has reached the end of the memory block, rollover
-                if (this->m_arrayLength == this->m_head)
+                if (this->m_arrayLength == (unsigned int) this->m_head)
                     this->m_head = 0;
             }
 

@@ -1,5 +1,5 @@
 /**
- * @file    fatfs.cpp
+ * @file    FatFS_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -23,9 +23,27 @@
  * SOFTWARE.
  */
 
+#include <PropWare/PropWare.h>
 #include <PropWare/filesystem/fatfs.h>
+#include <PropWare/filesystem/sd.h>
+#include <simple/simpletools.h>
 
-const uint8_t PropWare::FatFS::PARTITION_IDS[54] = {0x01, 0x04, 0x06, 0x07, 0x08, 0x0B, 0x0C, 0x0E, 0x11, 0x12, 0x14,
-        0x16, 0x17, 0x1B, 0x1C, 0x1E, 0x24, 0x27, 0x28, 0x56, 0x84, 0x86, 0x8B, 0x8D, 0x90, 0x92, 0x97, 0x98, 0x9A,
-        0xAA, 0xB6, 0xBB, 0xBC, 0xC0, 0xC1, 0xC6, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCE, 0xD0, 0xD1, 0xD4, 0xD6, 0xDB,
-        0xDE, 0xE1, 0xE4, 0xE5, 0xEF, 0xF2, 0xFE};
+using namespace PropWare;
+
+int main () {
+    const SD driver(SPI::get_instance(), Pin::P0, Pin::P1, Pin::P2, Pin::P4);
+    FatFS filesystem(&driver);
+
+    filesystem.mount();
+
+//    sd_mount(1, 2, 0, 4);
+//
+//    DIR *dir = opendir("/");
+//    pwOut.printf("Dir = %08X" CRLF, (unsigned int) dir);
+//
+//    dirent *ent;
+//    while ((ent = readdir(dir)))
+//        pwOut.printf("%s" CRLF, ent->d_name);
+
+    return 0;
+}

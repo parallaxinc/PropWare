@@ -27,7 +27,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/printer/printer.h>
-#include "c++allocate.h"
+#include <PropWare/c++allocate.h>
 
 #define protected public
 #define private   public
