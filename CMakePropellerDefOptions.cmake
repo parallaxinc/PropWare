@@ -12,6 +12,7 @@ option(LINK_LIBPROPELLER "Link with libpropeller library" ON)
 option(LINK_SIMPLE "Link with Parallax's Simple library" ON)
 option(LINK_PROPWARE "Link with PropWare library" ON)
 option(LINK_TINY "Link with Parllax's tiny library (deprecated)" OFF)
+option(LINK_MATH "Link with Parallax's math library" ON)
 
 # Compilation options
 option(32_BIT_DOUBLES "Set all doubles to 32-bits (-m32bit-doubles)" ON)
