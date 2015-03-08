@@ -42,7 +42,7 @@ const PropWare::Pin::Mask CS   = PropWare::Pin::P4;
 
 void sd_error_checker (const PropWare::ErrorCode err) {
     if (err)
-        testable->print_error_str(&pwOut, (PropWare::SD::ErrorCode) err);
+        testable->print_error_str(pwOut, (PropWare::SD::ErrorCode) err);
 }
 
 TEARDOWN {}

@@ -122,31 +122,31 @@ class SD: public BlockStorage {
          *
          * @param[in]   err     Error number used to determine error string
          */
-        void print_error_str (const Printer *printer, const ErrorCode err) const {
+        void print_error_str (const Printer &printer, const ErrorCode err) const {
             const char    str[]         = "SD Error %u: %s" CRLF;
             const uint8_t relativeError = err - BEG_ERROR;
 
             switch (err) {
                 case INVALID_CMD:
-                    printer->printf(str, relativeError, "Invalid command");
+                    printer.printf(str, relativeError, "Invalid command");
                     break;
                 case READ_TIMEOUT:
-                    printer->printf(str, relativeError, "Timed out during read");
+                    printer.printf(str, relativeError, "Timed out during read");
                     break;
                 case INVALID_NUM_BYTES:
-                    printer->printf(str, relativeError, "Invalid number of bytes");
+                    printer.printf(str, relativeError, "Invalid number of bytes");
                     break;
                 case INVALID_RESPONSE:
-                    printer->printf("SD Error %u: %s%u" CRLF, relativeError, "Invalid first-byte response" CRLF
+                    printer.printf("SD Error %u: %s%u" CRLF, relativeError, "Invalid first-byte response" CRLF
                                             "\tReceived: ", this->m_firstByteResponse);
                     this->first_byte_expansion(printer);
                     break;
                 case INVALID_INIT:
-                    printer->printf("SD Error %u: %s" CRLF "\tResponse: %u" CRLF, relativeError,
+                    printer.printf("SD Error %u: %s" CRLF "\tResponse: %u" CRLF, relativeError,
                                     "Invalid response during initialization", this->m_firstByteResponse);
                     break;
                 case INVALID_DAT_START_ID:
-                    printer->printf("SD Error %u: %s%u" CRLF, relativeError, "Invalid data-start ID" CRLF
+                    printer.printf("SD Error %u: %s%u" CRLF, relativeError, "Invalid data-start ID" CRLF
                                             "\tReceived: ", this->m_firstByteResponse);
                     break;
                 default:
@@ -618,23 +618,23 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion(const Printer *printer) const {
+        void first_byte_expansion(const Printer &printer) const {
             if (BIT_0 & this->m_firstByteResponse)
-                printer->puts("\t0: Idle" CRLF);
+                printer.puts("\t0: Idle" CRLF);
             if (BIT_1 & this->m_firstByteResponse)
-                printer->puts("\t1: Erase reset" CRLF);
+                printer.puts("\t1: Erase reset" CRLF);
             if (BIT_2 & this->m_firstByteResponse)
-                printer->puts("\t2: Illegal command" CRLF);
+                printer.puts("\t2: Illegal command" CRLF);
             if (BIT_3 & this->m_firstByteResponse)
-                printer->puts("\t3: Communication CRC error" CRLF);
+                printer.puts("\t3: Communication CRC error" CRLF);
             if (BIT_4 & this->m_firstByteResponse)
-                printer->puts("\t4: Erase sequence error" CRLF);
+                printer.puts("\t4: Erase sequence error" CRLF);
             if (BIT_5 & this->m_firstByteResponse)
-                printer->puts("\t5: Address error" CRLF);
+                printer.puts("\t5: Address error" CRLF);
             if (BIT_6 & this->m_firstByteResponse)
-                printer->puts("\t6: Parameter error" CRLF);
+                printer.puts("\t6: Parameter error" CRLF);
             if (BIT_7 & this->m_firstByteResponse)
-                printer->puts("\t7: Something is really screwed up. This "
+                printer.puts("\t7: Something is really screwed up. This "
                               "should always be 0." CRLF);
         }
 

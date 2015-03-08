@@ -24,8 +24,9 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/filesystem/fatfs.h>
 #include <PropWare/filesystem/sd.h>
+#include <PropWare/filesystem/fat/fatfs.h>
+#include <PropWare/filesystem/fat/fatfilereader.h>
 #include <simple/simpletools.h>
 
 using namespace PropWare;
@@ -33,8 +34,10 @@ using namespace PropWare;
 int main () {
     const SD driver(SPI::get_instance(), Pin::P0, Pin::P1, Pin::P2, Pin::P4);
     FatFS filesystem(&driver);
-
     filesystem.mount();
+
+    FatFileReader reader(filesystem, "fat_test.txt");
+    reader.open();
 
 //    sd_mount(1, 2, 0, 4);
 //
