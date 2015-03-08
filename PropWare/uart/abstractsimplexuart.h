@@ -321,14 +321,14 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::PrintCapable::put_char
          */
-        void put_char (const char c) const {
+        void put_char (const char c) {
             this->send((uint16_t) c);
         }
 
         /**
          * @see PropWare::PrintCapable::puts
          */
-        void puts (const char string[]) const {
+        void puts (const char string[]) {
             const uint32_t length = strlen(string);
             if (length)
                 this->send_array(string, length);

@@ -33,8 +33,17 @@ namespace PropWare {
 class File {
     public:
         typedef enum {
-            NO_ERROR = 0
+            NO_ERROR = 0,
+            BEG_ERROR = Filesystem::BEG_ERROR + 1,
+            EOF_ERROR,
+            END_ERROR
         } ErrorCode;
+
+        typedef enum {
+            /** beginning of the stream */       BEG,
+            /** current position in the stream */CUR,
+            /** end of the stream */             END
+        } SeekDir;
 
     public:
         virtual ~File () {
@@ -71,7 +80,8 @@ class File {
                 : m_logger(&logger),
                   m_driver(fs.get_driver()),
                   m_id(fs.next_file_id()),
-                  m_mod(false) {
+                  m_mod(false),
+                  m_error(NO_ERROR) {
             strcpy(this->m_name, name);
             Utility::to_upper(this->m_name);
 
@@ -79,6 +89,36 @@ class File {
                 this->m_buf = fs.get_buffer();
             else
                 this->m_buf = buffer;
+        }
+
+        PropWare::ErrorCode seek (int32_t &ptr, const int32_t pos, const SeekDir way) {
+            int32_t absolute;
+            switch (way) {
+                case BEG:
+                    if (pos > this->m_length || 0 > pos)
+                        return EOF_ERROR;
+                    else {
+                        ptr = pos;
+                        break;
+                    }
+                case CUR:
+                    absolute = pos + ptr;
+                    if (0 > pos || pos > this->m_length)
+                        return EOF_ERROR;
+                    else {
+                        ptr = (uint32_t) absolute;
+                        break;
+                    }
+                case END:
+                    absolute = this->m_length - pos;
+                    if (0 > pos || pos > this->m_length)
+                        return EOF_ERROR;
+                    else {
+                        ptr = (uint32_t) absolute;
+                        break;
+                    }
+            }
+            return NO_ERROR;
         }
 
         void print_status (const char classStr[] = "File", const bool printBlocks = false) const {
@@ -122,8 +162,10 @@ class File {
         uint8_t              m_id;
 
         /** When the length of a file is changed, this variable will be set, otherwise cleared */
-        bool       m_mod;
-        uint32_t   m_length;
+        bool    m_mod;
+        int32_t m_length;
+
+        PropWare::ErrorCode m_error;
 };
 
 }

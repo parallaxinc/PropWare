@@ -41,9 +41,9 @@ namespace PropWare {
 class UART : public virtual PrintCapable {
     public:
         typedef enum {
-            /** No parity */NO_PARITY,
+            /** No parity */  NO_PARITY,
             /** Even parity */EVEN_PARITY,
-            /** Odd parity */ODD_PARITY
+            /** Odd parity */ ODD_PARITY
         } Parity;
 
         /** Number of allocated error codes for UART */

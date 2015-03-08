@@ -101,7 +101,6 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
 
             // Determine if the correct sector is loaded
             if (this->m_buf->id != this->m_id) {
-                pwOut.println("Reloading buffer!");
                 check_errors(this->reload_buf());
             } else if (sectorOffset != this->m_curTier1) {
                 check_errors(this->load_sector_from_offset(sectorOffset));

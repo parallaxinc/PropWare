@@ -281,6 +281,8 @@ class FatFile : virtual public File {
         PropWare::ErrorCode reload_buf () {
             PropWare::ErrorCode err;
 
+            this->m_driver->flush(this->m_buf);
+
             // Set current values to show that the first sector of the file is
             // loaded. SDLoadSectorFromOffset() loads the sector unconditionally
             // before returning so we do not need to load the sector here

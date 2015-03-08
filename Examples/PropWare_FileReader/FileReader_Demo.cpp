@@ -1,5 +1,5 @@
 /**
- * @file    FatFS_Demo.cpp
+ * @file    FileReader_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -26,11 +26,11 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/printer/printer.h>
 
-// 25,440 bytes loaded via propeller-load
-//#define TEST_PROPWARE
+// 24,964 bytes loaded via propeller-load
+#define TEST_PROPWARE
 
 // 24,416 bytes loaded via propeller-load
-#define TEST_SIMPLE
+//#define TEST_SIMPLE
 
 #if (defined TEST_PROPWARE)
 #include <PropWare/filesystem/sd.h>

@@ -103,7 +103,7 @@ class Printer {
          * @param   *printCapable   The address of any initialized communication
          *                          object such as a PropWare::UART
          */
-        Printer (const PrintCapable *printCapable)
+        Printer (PrintCapable *printCapable)
                 : m_printCapable(printCapable) {
         }
 
@@ -558,7 +558,7 @@ class Printer {
         }
 
     protected:
-        const PrintCapable *m_printCapable;
+        PrintCapable *m_printCapable;
 };
 
 }

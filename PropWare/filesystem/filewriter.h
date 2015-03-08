@@ -31,10 +31,30 @@
 namespace PropWare {
 
 class FileWriter : public File, public PrintCapable {
-public:
-    FileWriter (Filesystem &fs, char const name[], Printer const *logger)
-            : File(fs, name, logger) {
-    }
+    public:
+        FileWriter (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
+                    const Printer &logger = pwOut)
+                : File(fs, name, buffer, logger),
+                  m_ptr(0) {
+        }
+
+        void put_char (const char c) {
+        }
+
+        inline bool eof () const {
+            return this->m_length == this->m_ptr;
+        }
+
+        inline int32_t tell () const {
+            return this->m_ptr;
+        }
+
+        inline PropWare::ErrorCode seek (const int32_t pos, const SeekDir way) {
+            return this->File::seek(this->m_ptr, pos, way);
+        }
+
+    protected:
+        int32_t m_ptr;
 };
 
 }

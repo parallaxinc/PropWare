@@ -37,7 +37,7 @@ class PrintCapable {
          *
          * @param[in]   c   Individual char to be printed
          */
-        virtual void put_char (const char c) const = 0;
+        virtual void put_char (const char c) = 0;
 
         /**
          * @brief       Send a null-terminated character array. Though this method
@@ -50,7 +50,7 @@ class PrintCapable {
          * @param[in]   string[]    Array of data words with the final word
          *                          being 0 - the null terminator
          */
-        virtual void puts (const char string[]) const = 0;
+        virtual void puts (const char string[]) = 0;
 };
 
 }
