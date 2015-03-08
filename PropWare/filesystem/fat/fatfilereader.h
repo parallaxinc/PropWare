@@ -32,8 +32,7 @@ namespace PropWare {
 
 class FatFileReader : virtual public FatFile, virtual public FileReader {
     public:
-        FatFileReader (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
-                       const Printer &logger = pwOut)
+        FatFileReader (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
                   FileReader(fs, name, buffer, logger) {
@@ -52,48 +51,65 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             if (this->is_directory(fileEntryOffset))
                 return Filesystem::ENTRY_NOT_FILE;
 
+            // Passed the file-not-directory test. Prepare the buffer for loading the file
             check_errors(this->m_driver->flush(this->m_buf));
 
-            // Passed the file-not-directory test, load it into the buffer and
-            // update status variables
+            // Save the file entry's sector address
+            this->m_dirTier1Addr = this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset;
+
+            // Determine the file's first allocation unit
             if (FatFS::FAT_16 == this->m_fs->m_filesystem)
-                this->m_buf->curTier3 = this->m_driver->get_short(
-                        fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf->buf);
+                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
+                                                                  this->m_buf->buf);
             else {
-                this->m_buf->curTier3 = this->m_driver->get_short(
-                        fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf->buf);
-                uint16_t highWord = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_HIGH,
-                                                                        this->m_buf->buf);
-                this->m_buf->curTier3 |= highWord << 16;
+                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
+                                                                  this->m_buf->buf);
+                const uint16_t highWord = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_HIGH,
+                                                                    this->m_buf->buf);
+                this->firstTier3 |= highWord << 16;
 
                 // Clear the highest 4 bits - they are always reserved
-                this->m_buf->curTier3 &= 0x0FFFFFFF;
+                this->firstTier3 &= 0x0FFFFFFF;
             }
 
-            this->firstTier3               = this->m_buf->curTier3;
-            this->m_curTier2               = 0;
-            this->m_buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->m_buf->curTier3);
-            this->m_dirTier1Addr           = this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset;
-            this->fileEntryOffset          = fileEntryOffset;
-            check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &(this->m_buf->nextTier3)));
-            this->m_buf->curTier1Offset = 0;
-            this->m_length              = this->m_driver->get_long(fileEntryOffset + FatFileReader::FILE_LEN_OFFSET,
-                                                                             this->m_buf->buf);
+            // Compute some stuffs for the file
+            this->m_curTier2      = 0;
+            this->fileEntryOffset = fileEntryOffset;
+            this->m_length        = this->m_driver->get_long(fileEntryOffset + FatFileReader::FILE_LEN_OFFSET,
+                                                             this->m_buf->buf);
 
-            // Determine the number of sectors currently allocated to this file;
-            // useful in the case that the file needs to be extended
-            this->m_maxTier1s     = this->m_length >> this->m_driver->get_sector_size_shift();
-            if (!(this->m_maxTier1s))
-                this->m_maxTier1s = (uint32_t) (1 << this->m_fs->get_tier1s_per_tier2_shift());
-            while (this->m_maxTier1s % (1 << this->m_fs->get_tier1s_per_tier2_shift()))
-                ++(this->m_maxTier1s);
+            // Claim this buffer as our own
+            this->m_buf->id = this->m_id;
+            this->m_buf->curTier1Offset = 0;
+            this->m_buf->curTier3 = this->firstTier3;
+            this->m_buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->firstTier3);
+            check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &(this->m_buf->nextTier3)));
+
+            // Finally, read the first sector
             check_errors(this->m_driver->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf));
 
             return NO_ERROR;
         }
 
-        char get_char () {
-            return '\0';
+        PropWare::ErrorCode safe_get_char (char &c) {
+            PropWare::ErrorCode err;
+
+            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->m_sectorSize);
+
+            // Determine if the currently loaded sector is what we need
+            const uint32_t sectorOffset = (this->m_ptr >> this->m_fs->m_driver->get_sector_size_shift());
+
+            // Determine if the correct sector is loaded
+            if (this->m_buf->id != this->m_id) {
+                pwOut.println("Reloading buffer!");
+                check_errors(this->reload_buf());
+            } else if (sectorOffset != this->m_curTier1) {
+                check_errors(this->load_sector_from_offset(sectorOffset));
+            }
+            ++(this->m_ptr);
+            c = this->m_buf->buf[bufferOffset];
+
+            return NO_ERROR;
         }
 };
 

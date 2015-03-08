@@ -33,7 +33,7 @@ namespace PropWare {
 class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
 public:
-    FatFileWriter (FatFS &fs, char const name[], Printer const *logger)
+    FatFileWriter (FatFS &fs, const char name[], const Printer *logger)
             : File(fs, name, logger),
               FatFile(fs, name, logger),
               FileWriter(fs, name, logger) {
@@ -62,6 +62,9 @@ public:
         return NO_ERROR;
     }
 
+    private:
+        /** Maximum number of sectors currently allocated to a file */
+        uint32_t m_maxTier1s;
 };
 
 }

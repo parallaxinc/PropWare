@@ -94,6 +94,8 @@ TEST(OpenClose) {
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
+    ASSERT_NEQ_MSG(0, testable->get_length());
+
     err = testable->close();
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
@@ -101,11 +103,15 @@ TEST(OpenClose) {
     tearDown();
 }
 
-TEST(GetChar) {
+TEST(SafeGetChar) {
+    PropWare::ErrorCode err;
     setUp();
 
-    const char c = testable->get_char();
-    MESSAGE("Char: %c", c);
+    char c;
+    err = testable->safe_get_char(c);
+    check_errors(err);
+    ASSERT_EQ_MSG(0, err);
+    ASSERT_NEQ_MSG('\0', c);
 
     tearDown();
 }
@@ -125,7 +131,7 @@ int main () {
 
     RUN_TEST(ConstructorDestructor);
     RUN_TEST(OpenClose);
-//    RUN_TEST(GetChar);
+    RUN_TEST(SafeGetChar);
 
     COMPLETE();
 }

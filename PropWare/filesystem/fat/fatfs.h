@@ -48,15 +48,12 @@ class FatFS : public Filesystem {
                                    NO_ERROR  = 0,
                                    BEG_ERROR = Filesystem::END_ERROR + 1,
             /** FatFS Error 0 */   EMPTY_FAT_ENTRY = BEG_ERROR,
-            /** FatFS Error 1 */   INVALID_PTR_ORIGIN,
-            /** FatFS Error 2 */   INVALID_FAT_APPEND,
-            /** FatFS Error 3 */   TOO_MANY_FATS,
-            /** FatFS Error 4 */   BAD_SECTORS_PER_CLUSTER,
-            /** FatFS Error 5 */   READING_PAST_EOC,
-            /** FatFS Error 6 */   FILE_WITHOUT_BUFFER,
-            /** FatFS Error 7 */   PARTITION_DOES_NOT_EXIST,
-            /** FatFS Error 8 */   INVALID_FILENAME,
-            /** FatFS Error 9 */   UNSUPPORTED_FILESYSTEM,
+            /** FatFS Error 1 */   INVALID_FAT_APPEND,
+            /** FatFS Error 2 */   TOO_MANY_FATS,
+            /** FatFS Error 3 */   BAD_SECTORS_PER_CLUSTER,
+            /** FatFS Error 4 */   READING_PAST_EOC,
+            /** FatFS Error 5 */   PARTITION_DOES_NOT_EXIST,
+            /** FatFS Error 6 */   UNSUPPORTED_FILESYSTEM,
             /** Last FatFS error */END_ERROR = UNSUPPORTED_FILESYSTEM
         } ErrorCode;
 

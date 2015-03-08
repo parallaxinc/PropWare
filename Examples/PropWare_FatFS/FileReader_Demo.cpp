@@ -24,14 +24,26 @@
  */
 
 #include <PropWare/PropWare.h>
+#include <PropWare/printer/printer.h>
+
+// 25,440 bytes loaded via propeller-load
+//#define TEST_PROPWARE
+
+// 24,416 bytes loaded via propeller-load
+#define TEST_SIMPLE
+
+#if (defined TEST_PROPWARE)
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
+#elif (defined TEST_SIMPLE)
 #include <simple/simpletools.h>
+#endif
 
 using namespace PropWare;
 
 int main () {
+#ifdef TEST_PROPWARE
     const SD driver(SPI::get_instance(), Pin::P0, Pin::P1, Pin::P2, Pin::P4);
     FatFS filesystem(&driver);
     filesystem.mount();
@@ -39,14 +51,26 @@ int main () {
     FatFileReader reader(filesystem, "fat_test.txt");
     reader.open();
 
-//    sd_mount(1, 2, 0, 4);
-//
-//    DIR *dir = opendir("/");
-//    pwOut.printf("Dir = %08X" CRLF, (unsigned int) dir);
-//
-//    dirent *ent;
-//    while ((ent = readdir(dir)))
-//        pwOut.printf("%s" CRLF, ent->d_name);
+    while (!reader.eof()) {
+        char c = reader.get_char();
+        if ('\n' == c)
+            pwOut << CRLF;
+        else
+            pwOut << c;
+    }
+#elif (defined TEST_SIMPLE)
+    sd_mount(1, 2, 0, 4);
+
+    FILE *f = fopen("fat_test.txt", "r");
+
+    while (!feof(f)) {
+        int c = fgetc(f);
+        if ('\n' == c)
+            pwOut << CRLF;
+        else
+            pwOut << (char) c;
+    }
+#endif
 
     return 0;
 }

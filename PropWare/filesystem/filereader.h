@@ -32,14 +32,46 @@ namespace PropWare {
 
 class FileReader : virtual public File, virtual public ScanCapable {
     public:
-        FileReader (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
-                    const Printer &logger = pwOut)
-                : File(fs, name, buffer, logger) {
-        }
-
         PropWare::ErrorCode flush () {
             return NO_ERROR;
         }
+
+        virtual PropWare::ErrorCode safe_get_char (char &c) = 0;
+
+        char get_char () {
+            char c;
+            const PropWare::ErrorCode err = this->safe_get_char(c);
+            if (err) {
+                this->m_error = err;
+                return '\0';
+            } else
+                return c;
+        }
+
+        /**
+         * @brief       Determine whether the read pointer has reached the end of the file
+         *
+         * @return      Returns true if the pointer points to the end of the file, false otherwise
+         */
+        inline bool eof () const {
+            return this->m_length == this->m_ptr;
+        }
+
+        PropWare::ErrorCode get_error () const {
+            return this->m_error;
+        }
+
+    protected:
+        FileReader (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
+                    const Printer &logger = pwOut)
+                : File(fs, name, buffer, logger),
+                  m_ptr(0),
+                  m_error(NO_ERROR) {
+        }
+
+    protected:
+        uint32_t m_ptr;
+        PropWare::ErrorCode m_error;
 };
 
 }

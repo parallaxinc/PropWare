@@ -59,12 +59,15 @@ class File {
 
         virtual PropWare::ErrorCode flush () = 0;
 
+        uint32_t get_length () const {
+            return this->m_length;
+        }
+
     protected:
         /**
          * Files can only be created by their respective Filesystems
          */
-        File (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
-              const Printer &logger = pwOut)
+        File (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : m_logger(&logger),
                   m_driver(fs.get_driver()),
                   m_id(fs.next_file_id()),
@@ -118,9 +121,9 @@ class File {
         /** determine if the buffer is owned by this file */
         uint8_t              m_id;
 
-        uint32_t   m_length;
         /** When the length of a file is changed, this variable will be set, otherwise cleared */
         bool       m_mod;
+        uint32_t   m_length;
 };
 
 }
