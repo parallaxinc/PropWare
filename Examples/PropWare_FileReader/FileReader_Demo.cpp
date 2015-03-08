@@ -27,10 +27,10 @@
 #include <PropWare/printer/printer.h>
 
 // 25,008 bytes loaded via propeller-load
-//#define TEST_PROPWARE
+#define TEST_PROPWARE
 
 // 24,444 bytes loaded via propeller-load
-#define TEST_SIMPLE
+//#define TEST_SIMPLE
 
 #if (defined TEST_PROPWARE)
 #include <PropWare/filesystem/sd.h>
