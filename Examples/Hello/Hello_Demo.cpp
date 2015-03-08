@@ -50,7 +50,7 @@ int main () {
         // `pst.dat` as a source file for this project. Because the file is no
         // longer included as part of the Simple libraries you must copy it from
         // this project to your own before attempting to compile.
-        dprint(serial, "Hello, world! %03d 0x%02x\n", i, i);
+        dprinti(serial, "Hello, world! %03d 0x%02x\n", i, i);
 #endif
         i++;
         waitcnt(250 * MILLISECOND + CNT);

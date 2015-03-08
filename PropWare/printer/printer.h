@@ -137,11 +137,12 @@ class Printer {
          * @param[in]   bypassLock  For internal use only. Leave as default
          *                          value.
          */
-        void put_int (int32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
+        void put_int (int32_t x, const uint8_t radix = 10, uint16_t width = 0,
+                      const char fillChar = DEFAULT_FILL_CHAR) const {
             if (0 > x)
                 this->put_char('-');
 
-            this->put_uint((uint32_t) abs(x), width, fillChar);
+            this->put_uint((uint32_t) abs(x), radix, width, fillChar);
         }
 
         /**
@@ -152,15 +153,16 @@ class Printer {
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
          */
-        void put_uint (uint32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
-            const uint8_t radix = 10;
-            char          buf[sizeof(x) * 8];
-            uint8_t       i = 0;
+        void put_uint (uint32_t x, const uint8_t radix = 10, uint16_t width = 0,
+                       const char fillChar = DEFAULT_FILL_CHAR) const {
+            char    buf[sizeof(x) * 8]; // Max size would be a single character for each bit - aka, bytes * 8
+            uint8_t i = 0;
 
             // Create a character array in reverse order, starting with the
             // tens digit and working toward the largest digit
             do {
-                buf[i] = x % radix + '0';
+                const uint8_t digit = x % radix;
+                buf[i] = digit > 9 ? digit + 'A' - 10 : digit + '0';
                 x /= radix;
                 ++i;
             } while (x);
@@ -173,44 +175,6 @@ class Printer {
 
             // Reverse the character array
             for (uint8_t j = 0; j < i; ++j)
-                this->put_char(buf[i - j - 1]);
-        }
-
-        /**
-         * @brief       Print an integer in base 16 (hexadecimal) with capital
-         *              letters
-         *
-         * @param[in]   x           Integer to be printed
-         * @param[in]   width       Minimum number of characters to print
-         * @param[in]   fillChar    Character to print to the left of the number
-         *                          if the number's width is less than `width`
-         * @param[in]   bypassLock  For internal use only. Leave as default
-         *                          value.
-         */
-        void put_hex (uint32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
-            char    buf[sizeof(x)*2];
-            uint8_t temp, j, i = 0;
-
-            while (x) {
-                temp = x & NIBBLE_0;
-                if (temp < 10)
-                    buf[i] = temp + '0';
-                else {
-                    temp -= 10;
-                    buf[i] = temp + 'A';
-                }
-                ++i;
-                x >>= 4;
-            }
-
-            if (width && width > i) {
-                width -= i;
-                while (width--)
-                    this->put_char(fillChar);
-            }
-
-            // Reverse the character array
-            for (j = 0; j < i; ++j)
                 this->put_char(buf[i - j - 1]);
         }
 
@@ -528,13 +492,7 @@ class Printer {
          * @param       format
          */
         void print (const uint32_t x, const Format format = DEFAULT_FORMAT) const {
-            switch (format.radix) {
-                case 16:
-                    this->put_hex(x, format.width, format.fillChar);
-                    break;
-                default:
-                    this->put_uint(x, format.width, format.fillChar);
-            }
+            this->put_uint(x, format.radix, format.width, format.fillChar);
         }
 
         /**
@@ -544,7 +502,7 @@ class Printer {
          * @param       format
          */
         void print (const int32_t x, const Format format = DEFAULT_FORMAT) const {
-            this->put_int(x, format.width, format.fillChar);
+            this->put_int(x, format.radix, format.width, format.fillChar);
         }
 
         /**
