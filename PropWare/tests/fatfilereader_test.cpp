@@ -33,8 +33,8 @@
 
 #include "PropWareTests.h"
 #include <PropWare/filesystem/sd.h>
-#include <PropWare/filesystem/fatfs.h>
-#include <PropWare/filesystem/fatfile.h>
+#include <PropWare/filesystem/fat/fatfs.h>
+#include <PropWare/filesystem/fat/fatfilereader.h>
 
 using namespace PropWare;
 
@@ -45,19 +45,21 @@ const Pin::Mask CS   = Pin::P4;
 
 const char FILE_NAME[] = "fat_test.txt";
 FatFS *g_fs;
-FatFile *testable;
+FatFileReader *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
-        ((SD *) g_fs->m_driver)->print_error_str(&pwOut, (const SD::ErrorCode) err);
+        ((SD *) g_fs->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
+    else if (Filesystem::BEG_ERROR <= err && err <= Filesystem::END_ERROR)
+        FatFS::print_error_str(pwOut, (const Filesystem::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
         pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)" CRLF, err - FatFS::BEG_ERROR, err);
 }
 
 SETUP {
-    testable = new FatFile(*g_fs, FILE_NAME, File::READ);
+    testable = new FatFileReader(*g_fs, FILE_NAME);
     testable->open();
 }
 
@@ -66,25 +68,33 @@ TEARDOWN {
 }
 
 TEST(ConstructorDestructor) {
-    testable = new FatFile(*g_fs, FILE_NAME, File::READ);
+    testable = new FatFileReader(*g_fs, FILE_NAME);
 
-    ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
-    ASSERT_EQ_MSG(0, strcmp(FILE_NAME, testable->m_name));
-    ASSERT_EQ_MSG(File::READ, testable->m_mode);
-    ASSERT_EQ_MSG(false, testable->m_mod);
+    char upperName[13];
+    strcpy(upperName, FILE_NAME);
+    Utility::to_upper(upperName);
+    // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
+    ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, upperName));
+
+    ASSERT_EQ_MSG(0, strcmp(upperName, testable->m_name));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
+    ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
+    ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
+    ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
+    ASSERT_EQ_MSG(false, testable->m_mod);
 
     tearDown();
 }
 
 TEST(OpenClose) {
-    setUp();
-
     ErrorCode err;
+    testable = new FatFileReader(*g_fs, FILE_NAME);
 
     err = testable->open();
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
+
+    ASSERT_NEQ_MSG(0, testable->get_length());
 
     err = testable->close();
     error_checker(err);
@@ -93,16 +103,21 @@ TEST(OpenClose) {
     tearDown();
 }
 
-TEST(Get_char) {
+TEST(SafeGetChar) {
+    PropWare::ErrorCode err;
     setUp();
 
-    const char c = testable->get_char();
+    char c;
+    err = testable->safe_get_char(c);
+    check_errors(err);
+    ASSERT_EQ_MSG(0, err);
+    ASSERT_NEQ_MSG('\0', c);
 
     tearDown();
 }
 
 int main () {
-    START(FatFileTest);
+    START(FatFileReaderTest);
 
     PropWare::ErrorCode err;
 
@@ -116,6 +131,7 @@ int main () {
 
     RUN_TEST(ConstructorDestructor);
     RUN_TEST(OpenClose);
+    RUN_TEST(SafeGetChar);
 
     COMPLETE();
 }

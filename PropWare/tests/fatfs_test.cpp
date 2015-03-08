@@ -33,7 +33,7 @@
 
 #include "PropWareTests.h"
 #include <PropWare/filesystem/sd.h>
-#include <PropWare/filesystem/fatfs.h>
+#include <PropWare/filesystem/fat/fatfs.h>
 
 using namespace PropWare;
 
@@ -52,7 +52,7 @@ void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
-        ((SD *) testable->m_driver)->print_error_str(&pwOut, (const SD::ErrorCode) err);
+        ((SD *) testable->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
         pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)" CRLF, err - FatFS::BEG_ERROR, err);
 }

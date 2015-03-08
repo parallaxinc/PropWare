@@ -1,7 +1,7 @@
 /**
- * @file    FatFS_Demo.cpp
+ * @file        filewriter.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,27 +23,18 @@
  * SOFTWARE.
  */
 
-#include <PropWare/PropWare.h>
-#include <PropWare/filesystem/fatfs.h>
-#include <PropWare/filesystem/sd.h>
-#include <simple/simpletools.h>
+#pragma once
 
-using namespace PropWare;
+#include <PropWare/filesystem/file.h>
+#include <PropWare/printcapable.h>
 
-int main () {
-    const SD driver(SPI::get_instance(), Pin::P0, Pin::P1, Pin::P2, Pin::P4);
-    FatFS filesystem(&driver);
+namespace PropWare {
 
-    filesystem.mount();
+class FileWriter : public File, public PrintCapable {
+public:
+    FileWriter (Filesystem &fs, char const name[], Printer const *logger)
+            : File(fs, name, logger) {
+    }
+};
 
-//    sd_mount(1, 2, 0, 4);
-//
-//    DIR *dir = opendir("/");
-//    pwOut.printf("Dir = %08X" CRLF, (unsigned int) dir);
-//
-//    dirent *ent;
-//    while ((ent = readdir(dir)))
-//        pwOut.printf("%s" CRLF, ent->d_name);
-
-    return 0;
 }

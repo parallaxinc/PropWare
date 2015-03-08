@@ -53,8 +53,16 @@ class Scanner {
         static const char DEFAULT_DELIMITER = '\n';
 
     public:
-        Scanner (ScanCapable *scanCapable, const Printer *printer)
-                : m_scanCapable(scanCapable), m_printer(printer) {
+        /**
+         * @brief   Construct a Scanner instance and control whether or not received characters are echoed back via the
+         *          `*printer` argument.
+         *
+         * @param   *scanCapable    Object capable of scanning for characters
+         * @param   *printer        If non-null, scanned characters will be echoed out this printer
+         */
+        Scanner (ScanCapable *scanCapable, const Printer *printer = NULL)
+                : m_scanCapable(scanCapable),
+                  m_printer(printer) {
         }
 
         /**
@@ -62,7 +70,8 @@ class Scanner {
          */
         char get_char () {
             const char c = this->m_scanCapable->get_char();
-            this->m_printer->put_char(c);
+            if (NULL != this->m_printer)
+                this->m_printer->put_char(c);
             return c;
         }
 
@@ -76,7 +85,8 @@ class Scanner {
 
                 if (ch == 8 || ch == 127) {
                     if (buf > string) {
-                        this->m_printer->puts("\010 \010");
+                        if (NULL != this->m_printer)
+                            this->m_printer->puts("\010 \010");
                         ++length;
                         --buf;
                     }
@@ -84,10 +94,12 @@ class Scanner {
                     continue;
                 }
 
-                this->m_printer->put_char(ch);
+                if (NULL != this->m_printer) {
+                    this->m_printer->put_char(ch);
 
-                if ('\r' == ch)
-                    this->m_printer->put_char('\n');
+                    if ('\r' == ch)
+                        this->m_printer->put_char('\n');
+                }
 
                 if ('\r' == ch || '\n' == ch)
                     break;

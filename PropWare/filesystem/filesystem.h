@@ -28,8 +28,6 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/filesystem/blockstorage.h>
 
-#define check_fs_error(x) if ((err = x)) {this->m_error = err;return NULL;}
-
 namespace PropWare {
 
 class Filesystem {
@@ -40,13 +38,11 @@ class Filesystem {
 #define HD44780_MAX_ERROR    64
         typedef enum {
                                        NO_ERROR            = 0,
-                                       ERROR_BEG           = HD44780_MAX_ERROR + 1,
-            /** Filesystem Error  0 */ FILE_ALREADY_EXISTS = ERROR_BEG,
-            /** Filesystem Error  1 */ INVALID_FILE_MODE,
+                                       BEG_ERROR           = HD44780_MAX_ERROR + 1,
+            /** Filesystem Error  0 */ FILE_ALREADY_EXISTS = BEG_ERROR,
             /** Filesystem Error  2 */ ENTRY_NOT_FILE,
             /** Filesystem Error  3 */ ENTRY_NOT_DIR,
             /** Filesystem Error  4 */ FILENAME_NOT_FOUND,
-            /** Filesystem error  5 */ BAD_FILE_MODE,
             /** Filesystem Error  5 */ FILESYSTEM_ALREADY_MOUNTED,
             /** End Filesystem error */END_ERROR           = FILESYSTEM_ALREADY_MOUNTED
         } ErrorCode;
@@ -61,19 +57,28 @@ class Filesystem {
          */
         virtual PropWare::ErrorCode mount (const uint8_t partition = 0) = 0;
 
-        /**
-         * @brief       Open a file from the given filesystem
-         *
-         * @param[in]   *name       Path to file that should be opened
-         * @param[in]   mode        Mode to open the file as
-         * @param[in]   *buffer     Optional buffer can be used by the file. If no buffer is passed in, the Filesystem's
-         *                          shared buffer will be used by the file. Passing a dedicated buffer is only
-         *                          recommended when opening more than one file
-         *
-         * @return      The newly opened file pointer is returned if successful, otherwise NULL is returned and an error
-         *              code is set internally (@see PropWare::Filesystem::get_error)
-         */
-//        virtual File* fopen (const char *name, const File::Mode mode, BlockStorage::Buffer *buffer = NULL) = 0;
+    public:
+        static void print_error_str (const Printer &printer, const ErrorCode err) {
+            switch (err) {
+                case FILE_ALREADY_EXISTS:
+                    printer.println("File already exists");
+                    break;
+                case ENTRY_NOT_FILE:
+                    printer.println("Entry is not a file");
+                    break;
+                case ENTRY_NOT_DIR:
+                    printer.println("Entry is not a directory");
+                    break;
+                case FILENAME_NOT_FOUND:
+                    printer.println("Filename was not found");
+                    break;
+                case FILESYSTEM_ALREADY_MOUNTED:
+                    printer.println("Filesystem is already mounted");
+                    break;
+                default:
+                    printer.printf("Unknown error: %u" CRLF, err);
+            }
+        }
 
     protected:
         // Signal that the contents of a buffer are a directory

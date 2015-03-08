@@ -544,7 +544,7 @@ class SPI : public PrintCapable,
                 this->put_char(*sPtr++);
         }
 
-        char get_char () const {
+        char get_char () {
             char c = 0;
             this->shift_in(8, &c);
             return c;
