@@ -44,11 +44,11 @@ class SynchronousPrinter {
          * @param   *printer    Address of an instance of a PropWare::Printer device that can be shared across
          * multiple cogs
          */
-        SynchronousPrinter (Printer const *printer)
-                : m_printer(printer) {
-            this->m_lock = locknew();
+        SynchronousPrinter (const Printer *printer)
+                : m_printer(printer),
+                  m_lock(locknew()),
+                  m_borrowed(false) {
             lockclr(this->m_lock);
-            this->m_borrowed = false;
         }
 
         /**
