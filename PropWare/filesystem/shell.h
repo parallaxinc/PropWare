@@ -91,9 +91,8 @@ public:
         uint8_t             i, j;
         PropWare::ErrorCode err                             = 0;
 
-        this->m_printer->printf("Welcome to David's quick shell! "
-                       "There is no help, nor much to do." CRLF);
-        this->m_printer->printf("Have fun..." CRLF);
+        this->m_printer->println("Welcome to David's quick shell! There is no help, nor much to do.");
+        this->m_printer->println("Have fun...");
 
         // Loop until the user types the SD::SHELL_EXIT string
         while (strcmp(usrInput, this->SHELL_EXIT)) {

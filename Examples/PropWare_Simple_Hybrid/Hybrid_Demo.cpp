@@ -31,11 +31,11 @@ int main () {
     const PropWare::Printer myPrinter(&mySimpleCompatiblePrinter);
 
     putStr("Hello from the Simple function!\n");
-    myPrinter.puts("Hello from PropWare's Printer!" CRLF);
-    myPrinter.print("Hello from yet another Printer function!" CRLF);
-    myPrinter.printf("All methods have their own merrits. Choose one that works well for you." CRLF);
+    myPrinter.puts("Hello from PropWare's Printer!\n");
+    myPrinter.print("Hello from yet another Printer function!\n");
+    myPrinter.printf("All methods have their own merrits. Choose one that works well for you.\n");
     myPrinter.println("Printer::println() can be handy if you just want to print a single string");
-    myPrinter << "For lovers of C++ streams, you can even use the << operator!" CRLF;
+    myPrinter << "For lovers of C++ streams, you can even use the << operator!\n";
 
     return 0;
 }

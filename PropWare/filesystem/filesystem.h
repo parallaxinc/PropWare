@@ -76,7 +76,7 @@ class Filesystem {
                     printer.println("Filesystem is already mounted");
                     break;
                 default:
-                    printer.printf("Unknown error: %u" CRLF, err);
+                    printer.printf("Unknown error: %u\n", err);
             }
         }
 

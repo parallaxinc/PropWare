@@ -38,7 +38,7 @@ int main () {
 
     while (1) {
 #ifdef TEST_PROPWARE
-        pwOut.printf("Hello, world! %03d 0x%02X" CRLF, i, i);
+        pwOut.printf("Hello, world! %03d 0x%02X\n", i, i);
 #elif defined TEST_SIMPLE
         printi("Hello, world! %03d 0x%02x\n", i, i);
 #elif defined TEST_TINYSTREAM

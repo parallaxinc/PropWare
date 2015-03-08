@@ -275,7 +275,7 @@ class FatFS : public Filesystem {
                     this->m_tier1sPerTier2Shift = 7;
                     break;
                 default:
-                    pwOut.printf("Sectors per cluster (bad) = %u" CRLF, sectorsPerCluster);
+                    pwOut.printf("Sectors per cluster (bad) = %u\n", sectorsPerCluster);
                     return BAD_SECTORS_PER_CLUSTER;
             }
 
@@ -507,20 +507,10 @@ class FatFS : public Filesystem {
             // - it is used throughout this function as the original starting
             // point
 
-#if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-            this->m_logger->printf(CRLF "*** SDFindEmptySpace() initialized with FAT sector ""0x%08X / %u loaded ***" CRLF,
-                         this->m_curFatSector, this->m_curFatSector);
-            BlockStorage::print_block(pwOut, this->m_fat);
-#endif
-
             // Find the first empty allocation unit and write the EOC marker
             if (FAT_16 == this->m_filesystem) {
                 // Loop until we find an empty cluster
                 while (this->m_driver->get_short(allocOffset, this->m_fat)) {
-#if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-                    this->m_logger->printf("Searching the following sector..." CRLF);
-                    BlockStorage::print_block(pwOut, this->m_fat);
-#endif
                     // Stop when we either reach the end of the current block or
                     // find an empty cluster
                     while (this->m_driver->get_short(allocOffset, this->m_fat) && (this->m_sectorSize > allocOffset))
@@ -530,21 +520,11 @@ class FatFS : public Filesystem {
                         // If the currently loaded FAT sector has been modified,
                         // save it
                         if (this->m_fatMod) {
-#ifdef SD_OPTION_VERBOSE
-                                this->m_logger->printf("FAT sector has been modified; saving now... ");
-#endif
                             this->m_driver->write_data_block(this->m_curFatSector, this->m_fat);
                             this->m_driver->write_data_block(this->m_curFatSector + this->m_fatSize, this->m_fat);
-#ifdef SD_OPTION_VERBOSE
-                                this->m_logger->printf("done!" CRLF);
-#endif
                             this->m_fatMod = false;
                         }
                         // Read the next fat sector
-#ifdef SD_OPTION_VERBOSE
-                            this->m_logger->printf("SDFindEmptySpace() is reading in sector address: 0x%08X / %u" CRLF, fatSectorAddr + 1,
-                                    fatSectorAddr + 1);
-#endif
                         this->m_driver->read_data_block(++fatSectorAddr, this->m_fat);
                     }
                 }
@@ -559,7 +539,7 @@ class FatFS : public Filesystem {
                 // Loop until we find an empty cluster
                 while (this->m_driver->get_long(allocOffset, this->m_fat) & 0x0fffffff) {
 #if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
-                    this->m_logger->printf("Searching the following sector..." CRLF);
+                    this->m_logger->printf("Searching the following sector...\n");
                     BlockStorage::print_block(pwOut, this->m_fat);
 #endif
                     // Stop when we either reach the end of the current block or
@@ -569,7 +549,7 @@ class FatFS : public Filesystem {
                         allocOffset += FAT_32;
 
 #ifdef SD_OPTION_VERBOSE
-                        this->m_logger->printf("Broke while loop... why? Offset = 0x%04x / %u" CRLF, allocOffset, allocOffset);
+                        this->m_logger->printf("Broke while loop... why? Offset = 0x%04x / %u\n", allocOffset, allocOffset);
 #endif
                     // If we reached the end of a sector...
                     if (this->m_sectorSize <= allocOffset) {
@@ -581,13 +561,13 @@ class FatFS : public Filesystem {
                             this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart + this->m_fatSize,
                                                              this->m_fat);
 #ifdef SD_OPTION_VERBOSE
-                                this->m_logger->printf("done!" CRLF);
+                                this->m_logger->printf("done!\n");
 #endif
                             this->m_fatMod = false;
                         }
                         // Read the next fat sector
 #ifdef SD_OPTION_VERBOSE
-                            this->m_logger->printf("SDFindEmptySpace() is reading in sector address: 0x%08X / %u" CRLF,
+                            this->m_logger->printf("SDFindEmptySpace() is reading in sector address: 0x%08X / %u\n",
                                          fatSectorAddr + 1, fatSectorAddr + 1);
 #endif
                         this->m_driver->read_data_block(++fatSectorAddr, this->m_fat);
@@ -601,7 +581,7 @@ class FatFS : public Filesystem {
 
 #ifdef SD_OPTION_VERBOSE
             const uint32_t addr = this->m_curFatSector << this->m_entriesPerFatSector_Shift + allocOffset / this->m_filesystem;
-            this->m_logger->printf("Available space found: 0x%08X / %u" CRLF, addr, addr);
+            this->m_logger->printf("Available space found: 0x%08X / %u\n", addr, addr);
 #endif
 
             // If we loaded a new fat sector (and then modified it directly
@@ -622,13 +602,13 @@ class FatFS : public Filesystem {
 
         void print_status (const bool printBlocks = false, const uint8_t blockLineLength = 16) {
             this->m_logger->println("######################################################");
-            this->m_logger->printf("# FAT Filesystem Status - PropWare::FatFS@0x%08X #" CRLF, (unsigned int) this);
+            this->m_logger->printf("# FAT Filesystem Status - PropWare::FatFS@0x%08X #\n", (unsigned int) this);
             // DRIVER
             this->m_logger->println("Driver");
             this->m_logger->println("======");
-            this->m_logger->printf("Driver address: 0x%08X" CRLF, (unsigned int) this->m_driver);
-            this->m_logger->printf("Block size: %u" CRLF, this->m_sectorSize);
-            this->m_logger->printf("Blocks-per-cluster shift: %u" CRLF, this->m_tier1sPerTier2Shift);
+            this->m_logger->printf("Driver address: 0x%08X\n", (unsigned int) this->m_driver);
+            this->m_logger->printf("Block size: %u\n", this->m_sectorSize);
+            this->m_logger->printf("Blocks-per-cluster shift: %u\n", this->m_tier1sPerTier2Shift);
             this->m_logger->println();
 
             // FILESYSTEM
@@ -642,46 +622,46 @@ class FatFS : public Filesystem {
             // FILESYSTEM - FAT Initialization Constants
             this->m_logger->println("\tInitialization Numbers");
             this->m_logger->println("\t----------------------------");
-            this->m_logger->printf("\tNumber of FATs: %u" CRLF, this->m_initFatInfo.numFATs);
-            this->m_logger->printf("\tRoot entry count: 0x%08X/%u" CRLF, this->m_initFatInfo.rootEntryCount,
+            this->m_logger->printf("\tNumber of FATs: %u\n", this->m_initFatInfo.numFATs);
+            this->m_logger->printf("\tRoot entry count: 0x%08X/%u\n", this->m_initFatInfo.rootEntryCount,
                                    this->m_initFatInfo.rootEntryCount);
-            this->m_logger->printf("\tRoot dir sectors: 0x%08X/%u" CRLF, this->m_initFatInfo.rootDirSectors,
+            this->m_logger->printf("\tRoot dir sectors: 0x%08X/%u\n", this->m_initFatInfo.rootDirSectors,
                                    this->m_initFatInfo.rootDirSectors);
-            this->m_logger->printf("\tReserved sector count: 0x%08X/%u" CRLF, this->m_initFatInfo.rsvdSectorCount,
+            this->m_logger->printf("\tReserved sector count: 0x%08X/%u\n", this->m_initFatInfo.rsvdSectorCount,
                                    this->m_initFatInfo.rsvdSectorCount);
-            this->m_logger->printf("\tTotal sectors: 0x%08X/%u" CRLF, this->m_initFatInfo.totalSectors,
+            this->m_logger->printf("\tTotal sectors: 0x%08X/%u\n", this->m_initFatInfo.totalSectors,
                                    this->m_initFatInfo.totalSectors);
-            this->m_logger->printf("\tFAT size: 0x%08X/%u" CRLF, this->m_initFatInfo.FATSize, this->m_initFatInfo
+            this->m_logger->printf("\tFAT size: 0x%08X/%u\n", this->m_initFatInfo.FATSize, this->m_initFatInfo
                     .FATSize);
-            this->m_logger->printf("\tData sectors: 0x%08X/%u" CRLF, this->m_initFatInfo.dataSectors,
+            this->m_logger->printf("\tData sectors: 0x%08X/%u\n", this->m_initFatInfo.dataSectors,
                                    this->m_initFatInfo.dataSectors);
-            this->m_logger->printf("\tBoot sector: 0x%08X/%u" CRLF, this->m_initFatInfo.bootSector,
+            this->m_logger->printf("\tBoot sector: 0x%08X/%u\n", this->m_initFatInfo.bootSector,
                                    this->m_initFatInfo.bootSector);
-            this->m_logger->printf("\tCluster count: 0x%08X/%u" CRLF, this->m_initFatInfo.clusterCount,
+            this->m_logger->printf("\tCluster count: 0x%08X/%u\n", this->m_initFatInfo.clusterCount,
                                    this->m_initFatInfo.clusterCount);
             this->m_logger->println();
 
             // FILESYSTEM - Partition
             this->m_logger->println("\tPartition");
             this->m_logger->println("\t=========");
-            this->m_logger->printf("\tLabel: %s" CRLF, this->m_label);
+            this->m_logger->printf("\tLabel: %s\n", this->m_label);
             switch(this->m_filesystem) {
                 case FAT_32:
-                    this->m_logger->printf("\tFilesystem: FAT 32" CRLF);
+                    this->m_logger->printf("\tFilesystem: FAT 32\n");
                     break;
                 case FAT_16:
-                    this->m_logger->printf("\tFilesystem: FAT 16" CRLF);
+                    this->m_logger->printf("\tFilesystem: FAT 16\n");
                     break;
                 default:
-                    this->m_logger->printf("\tFilesystem: unknown (%d)" CRLF, this->m_filesystem);
+                    this->m_logger->printf("\tFilesystem: unknown (%d)\n", this->m_filesystem);
             }
-            this->m_logger->printf("\tFirst FAT sector: 0x%08X" CRLF, this->m_fatStart);
-            this->m_logger->printf("\tRoot directory alloc. unit: 0x%08X" CRLF, this->m_rootAllocUnit);
-            this->m_logger->printf("\tCalculated root directory sector: 0x%08X" CRLF,
+            this->m_logger->printf("\tFirst FAT sector: 0x%08X\n", this->m_fatStart);
+            this->m_logger->printf("\tRoot directory alloc. unit: 0x%08X\n", this->m_rootAllocUnit);
+            this->m_logger->printf("\tCalculated root directory sector: 0x%08X\n",
                                    this->compute_tier1_from_tier3(this->m_rootAllocUnit));
-            this->m_logger->printf("\tRoot directory sector: 0x%08X" CRLF, this->m_rootAddr);
-            this->m_logger->printf("\tRoot directory size (in sectors): %u" CRLF, this->m_rootDirSectors);
-            this->m_logger->printf("\tFirst data sector: 0x%08X" CRLF, this->m_firstDataAddr);
+            this->m_logger->printf("\tRoot directory sector: 0x%08X\n", this->m_rootAddr);
+            this->m_logger->printf("\tRoot directory size (in sectors): %u\n", this->m_rootDirSectors);
+            this->m_logger->printf("\tFirst data sector: 0x%08X\n", this->m_firstDataAddr);
             this->m_logger->println();
 
             if (printBlocks) {
@@ -696,14 +676,14 @@ class FatFS : public Filesystem {
             if (this->m_buf.buf == NULL)
                 this->m_logger->println("\tEmpty");
             else {
-                this->m_logger->printf("\tID: %d" CRLF, this->m_buf.id);
-                this->m_logger->printf("\tModdified: %s" CRLF, Utility::to_string(this->m_buf.mod));
-                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u" CRLF, this->m_buf.curTier2StartAddr,
+                this->m_logger->printf("\tID: %d\n", this->m_buf.id);
+                this->m_logger->printf("\tModdified: %s\n", Utility::to_string(this->m_buf.mod));
+                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", this->m_buf.curTier2StartAddr,
                                        this->m_buf.curTier2StartAddr);
-                this->m_logger->printf("\tCur. sector offset from cluster start: %u" CRLF, this->m_buf.curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u" CRLF, this->m_buf.curTier3,
+                this->m_logger->printf("\tCur. sector offset from cluster start: %u\n", this->m_buf.curTier1Offset);
+                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf.curTier3,
                                        this->m_buf.curTier3);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u" CRLF, this->m_buf.nextTier3,
+                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf.nextTier3,
                                        this->m_buf.nextTier3);
                 if (printBlocks)
                     BlockStorage::print_block(*this->m_logger, this->m_buf, this->m_sectorSize, blockLineLength);

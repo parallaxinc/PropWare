@@ -26,11 +26,11 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/printer/printer.h>
 
-// 24,964 bytes loaded via propeller-load
-#define TEST_PROPWARE
+// 25,008 bytes loaded via propeller-load
+//#define TEST_PROPWARE
 
-// 24,416 bytes loaded via propeller-load
-//#define TEST_SIMPLE
+// 24,444 bytes loaded via propeller-load
+#define TEST_SIMPLE
 
 #if (defined TEST_PROPWARE)
 #include <PropWare/filesystem/sd.h>
@@ -51,25 +51,15 @@ int main () {
     FatFileReader reader(filesystem, "fat_test.txt");
     reader.open();
 
-    while (!reader.eof()) {
-        char c = reader.get_char();
-        if ('\n' == c)
-            pwOut << CRLF;
-        else
-            pwOut << c;
-    }
+    while (!reader.eof())
+        pwOut << reader.get_char();
 #elif (defined TEST_SIMPLE)
     sd_mount(1, 2, 0, 4);
 
     FILE *f = fopen("fat_test.txt", "r");
 
-    while (!feof(f)) {
-        int c = fgetc(f);
-        if ('\n' == c)
-            pwOut << CRLF;
-        else
-            pwOut << (char) c;
-    }
+    while (!feof(f))
+        pwOut << (char) fgetc(f);
 #endif
 
     return 0;

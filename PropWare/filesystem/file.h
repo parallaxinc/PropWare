@@ -122,31 +122,31 @@ class File {
         }
 
         void print_status (const char classStr[] = "File", const bool printBlocks = false) const {
-            this->m_logger->printf("File Status - PropWare::%s@0x%08X" CRLF, classStr, (unsigned int) this);
+            this->m_logger->printf("File Status - PropWare::%s@0x%08X\n", classStr, (unsigned int) this);
             this->m_logger->println("=========================================");
             this->m_logger->println("Common");
             this->m_logger->println("------");
-            this->m_logger->printf("\tFile name: %s" CRLF, this->m_name);
-            this->m_logger->printf("\tLogger: 0x%08X" CRLF, (unsigned int) this->m_logger);
-            this->m_logger->printf("\tDriver: 0x%08X" CRLF, (unsigned int) this->m_driver);
-            this->m_logger->printf("\tBuffer: 0x%08X" CRLF, (unsigned int) this->m_buf);
-            this->m_logger->printf("\tModified: %s" CRLF, Utility::to_string(this->m_mod));
-            this->m_logger->printf("\tFile ID: %u" CRLF, this->m_id);
-            this->m_logger->printf("\tLength: 0x%08X/%u" CRLF, this->m_length, this->m_length);
+            this->m_logger->printf("\tFile name: %s\n", this->m_name);
+            this->m_logger->printf("\tLogger: 0x%08X\n", (unsigned int) this->m_logger);
+            this->m_logger->printf("\tDriver: 0x%08X\n", (unsigned int) this->m_driver);
+            this->m_logger->printf("\tBuffer: 0x%08X\n", (unsigned int) this->m_buf);
+            this->m_logger->printf("\tModified: %s\n", Utility::to_string(this->m_mod));
+            this->m_logger->printf("\tFile ID: %u\n", this->m_id);
+            this->m_logger->printf("\tLength: 0x%08X/%u\n", this->m_length, this->m_length);
 
             this->m_logger->println("Buffer");
             this->m_logger->println("------");
             if (this->m_buf->buf == NULL)
                 this->m_logger->println("\tEmpty");
             else {
-                this->m_logger->printf("\tID: %d" CRLF, this->m_buf->id);
-                this->m_logger->printf("\tModdified: %s" CRLF, Utility::to_string(this->m_buf->mod));
-                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u" CRLF, this->m_buf->curTier2StartAddr,
+                this->m_logger->printf("\tID: %d\n", this->m_buf->id);
+                this->m_logger->printf("\tModdified: %s\n", Utility::to_string(this->m_buf->mod));
+                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", this->m_buf->curTier2StartAddr,
                                        this->m_buf->curTier2StartAddr);
-                this->m_logger->printf("\tCur. sector offset from cluster start: %u" CRLF, this->m_buf->curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u" CRLF, this->m_buf->curTier3,
+                this->m_logger->printf("\tCur. sector offset from cluster start: %u\n", this->m_buf->curTier1Offset);
+                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf->curTier3,
                                        this->m_buf->curTier3);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u" CRLF, this->m_buf->nextTier3,
+                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->nextTier3,
                                        this->m_buf->nextTier3);
                 if (printBlocks)
                     BlockStorage::print_block(*this->m_logger, *this->m_buf);

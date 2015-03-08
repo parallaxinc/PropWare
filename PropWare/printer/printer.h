@@ -1,27 +1,27 @@
 /**
-* @file        printer.h
-*
-* @author      David Zemon
-*
-* @copyright
-* The MIT License (MIT)<br>
-* <br>Copyright (c) 2013 David Zemon<br>
-* <br>Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"), to
-* deal in the Software without restriction, including without limitation the
-* rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-* sell copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:<br>
-* <br>The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.<br>
-* <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * @file        printer.h
+ *
+ * @author      David Zemon
+ *
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #pragma once
 
@@ -42,22 +42,17 @@ namespace PropWare {
 #define isdigit(x) ('0' <= x && x <= '9')
 
 /**
- * @brief   Container class that has formatting methods for human-readable
- *          output. This class can be constructed and used for easy and
- *          efficient output via any communication protocol.
+ * @brief   Container class that has formatting methods for human-readable output. This class can be constructed and
+ *          used for easy and efficient output via any communication protocol.
  *
  * <b>Printing to Terminal</b>
  * <p>
- * To print to the standard terminal, simply use the existing object,
- * `pwOut`:
+ * To print to the standard terminal, simply use the existing object, `pwOut`:
  *
  * @code
- * pwOut.printf("Hello, world!" CRLF);
+ * pwOut.printf("Hello, world!\n");
  * @endcode
  *
- * The `CRLF` macro is an easy way to add a line break to your
- * print statements.
- * <p>
  * <b>Creating Custom `Printers`</b>
  * <p>
  * To create your own `Printer`, you will first need an instance of
@@ -69,7 +64,7 @@ namespace PropWare {
  * const PropWare::Printer lcdPrinter(&myLCD);
  *
  * lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
- * lcdPrinter.printf("Hello, LCD!" CRLF);
+ * lcdPrinter.printf("Hello, LCD!\n");
  * @endcode
  *
  * Adding `const` in front of the `Printer` declaration allows the
@@ -103,14 +98,17 @@ class Printer {
          * @param   *printCapable   The address of any initialized communication
          *                          object such as a PropWare::UART
          */
-        Printer (PrintCapable *printCapable)
-                : m_printCapable(printCapable) {
+        Printer (PrintCapable *printCapable, const bool cooked = true)
+                : m_printCapable(printCapable),
+                  m_cooked(cooked) {
         }
 
         /**
          * @see PropWare::PrintCapable::put_char
          */
         void put_char (const char c) const {
+            if (this->m_cooked && '\n' == c)
+                this->m_printCapable->put_char('\r');
             this->m_printCapable->put_char(c);
         }
 
@@ -118,7 +116,11 @@ class Printer {
          * @see PropWare::PrintCapable::puts
          */
         void puts (const char string[]) const {
-            this->m_printCapable->puts(string);
+            if (this->m_cooked)
+                for (const char *s = string; *s; ++s)
+                    this->put_char(*s);
+            else
+                this->m_printCapable->puts(string);
         }
 
         /**
@@ -489,20 +491,20 @@ class Printer {
         }
 
         /**
-         * @brief       Print a null-terminated string followed by a newline (CRLF)
+         * @brief       Print a null-terminated string followed by a newline ('\n')
          *
          * @param[in]   string[]    String to be printed
          */
         void println (const char string[]) const {
             this->puts(string);
-            this->puts(CRLF);
+            this->put_char('\n');
         }
 
         /**
-         * @brief   Print a newline (CRLF)
+         * @brief   Print a newline ('\n')
          */
         void println () const {
-            this->puts(CRLF);
+            this->put_char('\n');
         }
 
         /**
@@ -559,6 +561,7 @@ class Printer {
 
     protected:
         PrintCapable *m_printCapable;
+        bool m_cooked;
 };
 
 }

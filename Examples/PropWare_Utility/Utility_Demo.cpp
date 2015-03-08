@@ -33,8 +33,7 @@ void sampleTimeMeasurement ();
 void sampleFreeMemory ();
 
 int main () {
-    pwOut.printf("Hello! Let's explore some of PropWare's utility functions"
-                         CRLF);
+    pwOut.println("Hello! Let's explore some of PropWare's utility functions");
 
     sampleCountBits();
     sampleTimeMeasurement();
@@ -45,24 +44,21 @@ int main () {
 
 void sampleTimeMeasurement () {
     unsigned int start = CNT;
-    pwOut.printf(CRLF "/*** Timing Events ***/" CRLF);
-    pwOut.printf("But how long does it take to send each of these messages?"
-                         CRLF);
+    pwOut.println("\n/*** Timing Events ***/");
+    pwOut.println("But how long does it take to send each of these messages?");
     uint32_t timeInMicros = PropWare::Utility::measure_time_interval(start);
-    pwOut.printf("Well that previous message took precisely %u microseconds."
-                         CRLF, timeInMicros);
+    pwOut.printf("Well that previous message took precisely %u microseconds.\n", timeInMicros);
 }
 
 void sampleCountBits () {
     int bits = 0x42;
-    pwOut.printf(CRLF "/*** Counting Bits in a Variable ***/" CRLF);
-    pwOut.printf("How many bits are set in 0x%02X?" CRLF, bits);
-    pwOut.printf("\tThe answer is... %u" CRLF,
-                 PropWare::Utility::count_bits(bits));
+    pwOut.println("\n/*** Counting Bits in a Variable ***/");
+    pwOut.printf("How many bits are set in 0x%02X?\n", bits);
+    pwOut.printf("\tThe answer is... %u\n", PropWare::Utility::count_bits(bits));
 }
 
 void sampleFreeMemory () {
-    pwOut.printf(CRLF "/*** Free Memory Determination ***/" CRLF);
-    pwOut.printf("The largest contiguous block of free memory is %u bytes" CRLF,
+    pwOut.println("\n/*** Free Memory Determination ***/");
+    pwOut.printf("The largest contiguous block of free memory is %u bytes\n",
                  PropWare::Utility::get_largest_free_block_size());
 }

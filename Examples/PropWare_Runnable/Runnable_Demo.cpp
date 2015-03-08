@@ -16,7 +16,7 @@ class TalkingThread : public PropWare::Runnable {
 
         void run () {
             while (1) {
-                pwSyncOut.printf("Hello from cog %u (0x%08X)! %u" CRLF, cogid(), (unsigned int) this, CNT);
+                pwSyncOut.printf("Hello from cog %u (0x%08X)! %u\n", cogid(), (unsigned int) this, CNT);
                 waitcnt(250 * MILLISECOND + CNT);
             }
         }
@@ -47,16 +47,16 @@ int main (int argc, char *argv[]) {
     BlinkingThread blink17(stack[2], sizeof(stack[2]), PropWare::Pin::P17);
 
     int8_t cog = PropWare::Runnable::invoke(talkingThread);
-    pwSyncOut.printf("Talking thread (0x%08X) started in cog %d" CRLF, (unsigned int) &talkingThread, cog);
+    pwSyncOut.printf("Talking thread (0x%08X) started in cog %d\n", (unsigned int) &talkingThread, cog);
 
     cog = PropWare::Runnable::invoke(blink16);
-    pwSyncOut.printf("Blink16 thread (0x%08X) started in cog %d" CRLF, (unsigned int) &blink16, cog);
+    pwSyncOut.printf("Blink16 thread (0x%08X) started in cog %d\n", (unsigned int) &blink16, cog);
 
     cog = PropWare::Runnable::invoke(blink17);
-    pwSyncOut.printf("Blink17 thread (0x%08X) started in cog %d" CRLF, (unsigned int) &blink17, cog);
+    pwSyncOut.printf("Blink17 thread (0x%08X) started in cog %d\n", (unsigned int) &blink17, cog);
 
     while (1) {
-        pwSyncOut.printf("Hello from cog %u! %u" CRLF, cogid(), CNT);
+        pwSyncOut.printf("Hello from cog %u! %u\n", cogid(), CNT);
         waitcnt(250 * MILLISECOND + CNT);
     }
 }

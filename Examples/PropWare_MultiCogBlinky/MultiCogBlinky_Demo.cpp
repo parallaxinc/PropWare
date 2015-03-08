@@ -49,7 +49,7 @@ int main (int argc, char* argv[]) {
     for (n = 1; n < COGS; n++) {
         cog = (int8_t) _start_cog_thread(cog_stack[n] + STACK_SIZE, run_cog,
                                          (void *) &pins[n], &thread_data);
-        pwOut.printf("Toggle COG %d Started" CRLF, cog);
+        pwOut.printf("Toggle COG %d Started\n", cog);
     }
 
     pin.set_mask(pins[0]);

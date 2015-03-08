@@ -75,7 +75,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    pwOut.printf("Welcome to the MCP3000 demo!" CRLF);
+    pwOut.printf("Welcome to the MCP3000 demo!\n");
 
     while (1) {
         loopCounter = SECOND / 2 + CNT;
@@ -94,7 +94,7 @@ int main () {
             scale.write(ledOutput);
         }
 
-        pwOut.printf("Channel %d is reading: %d" CRLF, CHANNEL, data);
+        pwOut.printf("Channel %d is reading: %d\n", CHANNEL, data);
     }
 }
 

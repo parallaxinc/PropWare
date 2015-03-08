@@ -33,7 +33,7 @@ int main (int argc, char *argv[]) {
 
     for (n = 1; n < COGS; n++) {
         cog = (int8_t) _start_cog_thread(cog_stack[n] + sizeof(cog_stack[n]), run_cog, NULL, &thread_data);
-        pwSyncOut.printf("Toggle COG %d Started" CRLF, cog);
+        pwSyncOut.printf("Toggle COG %d Started\n", cog);
     }
 
     startCnt = CNT;
@@ -43,7 +43,7 @@ int main (int argc, char *argv[]) {
         // Visual recognition that the cog is running
         PropWare::Pin::flash_pin((PropWare::Port::Mask) (1 << (cogid() + 16)), 3);
 
-        pwSyncOut.printf("Hello from cog %d" CRLF, cogid());
+        pwSyncOut.printf("Hello from cog %d\n", cogid());
         nextCnt = waitcnt2(nextCnt, wait_time);
     }
     return 0;
@@ -61,7 +61,7 @@ void run_cog (void *arg) {
         // Visual recognition that the cog is running
         PropWare::Pin::flash_pin(pinMaskOfCogId, 3);
 
-        pwSyncOut.printf("Hello from cog %d" CRLF, cogid());
+        pwSyncOut.printf("Hello from cog %d\n", cogid());
         nextCnt = waitcnt2(nextCnt, wait_time);
     }
 }

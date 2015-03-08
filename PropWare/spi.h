@@ -550,20 +550,20 @@ class SPI : public PrintCapable,
 
             switch (err) {
                 case INVALID_PIN:
-                    *printer << str << relativeErr << ": Invalid pin" CRLF;
+                    *printer << str << relativeErr << ": Invalid pin\n";
                     break;
                 case INVALID_MODE:
-                    *printer << str << relativeErr << ": Invalid mode" CRLF;
+                    *printer << str << relativeErr << ": Invalid mode\n";
                     break;
                 case INVALID_PIN_MASK:
-                    *printer << str << relativeErr << ": Invalid pin mask" CRLF;
+                    *printer << str << relativeErr << ": Invalid pin mask\n";
                     break;
                 case TOO_MANY_BITS:
-                    *printer << str << relativeErr << ": Incapable of handling so many bits in an argument" CRLF;
+                    *printer << str << relativeErr << ": Incapable of handling so many bits in an argument\n";
                     break;
                 case TIMEOUT:
-                    *printer << str << relativeErr << ": Timed out during parameter passing" CRLF;
-                    *printer << "\tCalling function was " << this->m_errorInMethod << "()" CRLF;
+                    *printer << str << relativeErr << ": Timed out during parameter passing\n";
+                    *printer << "\tCalling function was " << this->m_errorInMethod << "()\n";
                     break;
                 case TIMEOUT_RD:
                     *printer << str << relativeErr << ": Timed out during parameter read";
@@ -583,9 +583,9 @@ class SPI : public PrintCapable,
                 default:
                     // Is the error an SPI error?
                     if (err > BEG_ERROR && err < (BEG_ERROR + END_ERROR))
-                        *printer << "Unknown SPI error " << relativeErr << CRLF;
+                        *printer << "Unknown SPI error " << relativeErr << '\n';
                     else
-                        *printer << "Unknown error " << err << CRLF;
+                        *printer << "Unknown error " << err << '\n';
             }
         }
 

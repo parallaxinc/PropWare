@@ -63,7 +63,7 @@ int main () {
     // Start our new cog and initialize the speaking UART
     speaker.set_baud_rate(BAUD_RATE);
     speaker.set_parity(PARITY);
-    pwSyncOut.printf("New cog ID: %d. Ready to send!!!" CRLF, PropWare::Runnable::invoke(listener));
+    pwSyncOut.printf("New cog ID: %d. Ready to send!!!\n", PropWare::Runnable::invoke(listener));
 
     while (1) {
         waitcnt(5 * MILLISECOND + CNT);
@@ -74,7 +74,7 @@ int main () {
 void error (const PropWare::ErrorCode err) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
-    pwSyncOut.printf("Unknown error: %u" CRLF, err);
+    pwSyncOut.printf("Unknown error: %u\n", err);
 
     while (1) {
         debugLEDs.write((uint32_t) err);
@@ -89,14 +89,14 @@ void Listener::run() {
     int32_t receivedLength;
 
     this->init();
-    pwSyncOut.printf("Ready to receive!" CRLF);
+    pwSyncOut.printf("Ready to receive!\n");
 
     while (1) {
         receivedLength = 0;
         if ((err = this->m_listener.fgets(buffer, &receivedLength)))
             error(err);
 
-        pwSyncOut.printf("Data (%d chars): \"%s\"" CRLF, receivedLength, buffer);
+        pwSyncOut.printf("Data (%d chars): \"%s\"\n", receivedLength, buffer);
     }
 }
 

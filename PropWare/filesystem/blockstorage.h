@@ -61,10 +61,10 @@ class BlockStorage {
                 ++lines;
 
             // Printer header row
-            printer.printf("         0 ");
+            printer << "         0 ";
             for (uint8_t i = 1; i < wordsPerLine; ++i)
                 printer.printf("%2X ", i);
-            printer.print(CRLF);
+            printer << '\n';
 
             for (uint16_t line = 0; line < lines; ++line) {
                 const uint16_t baseAddress = line * wordsPerLine;
@@ -78,12 +78,12 @@ class BlockStorage {
                 for (uint8_t offset = 0; offset < wordsPerLine; ++offset) {
                     const char nextChar = data[baseAddress + offset];
                     if (32 <= nextChar && nextChar <= 126)
-                        printer.print(nextChar);
+                        printer << nextChar;
                     else
-                        printer.print('.');
+                        printer << '.';
                 }
 
-                printer.print(CRLF);
+                printer << '\n';
             }
         }
 

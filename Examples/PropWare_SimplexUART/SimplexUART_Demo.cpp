@@ -55,7 +55,7 @@ int main () {
 
     // Create the test string - useful when testing with a terminal
     char string[] = "Hello world! This is my most favoritest sentence "
-            "ever!!!" CRLF;
+            "ever!!!\n";
 
     // Typical RS232 settings (default settings for PropGCC serial comms)
     uart.set_baud_rate(BAUD_RATE);

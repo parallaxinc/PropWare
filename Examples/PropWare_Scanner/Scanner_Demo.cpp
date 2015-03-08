@@ -26,7 +26,6 @@
 // Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/utility.h>
-#include <PropWare/utility.h>
 #include <PropWare/port.h>
 #include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
@@ -56,22 +55,19 @@ int main () {
     char userInput[64];
     char name[64];
 
-    pwOut.printf("Hello! I'd like to teach you how to use PropWare to read "
-                         "from the terminal!" CRLF);
+    pwOut.printf("Hello! I'd like to teach you how to use PropWare to read from the terminal!\n");
 
     do {
-        pwOut.printf("First, what's your name?" CRLF ">>> ");
+        pwOut.printf("First, what's your name?\n>>> ");
         pwIn.gets(userInput, sizeof(userInput));
         strcpy(name, userInput);
 
-        pwOut.printf("I received [%s]." CRLF, name);
-        pwIn.input_prompt("Is that right?" CRLF ">>> ",
-                          "Please enter either 'yes' or 'no' (y/n)" CRLF ">>> ",
-                          userInput, sizeof(userInput),
-                          yesNoComparator);
+        pwOut.printf("I received [%s].\n", name);
+        pwIn.input_prompt("Is that right?\n>>> ", "Please enter either 'yes' or 'no' (y/n)\n>>> ",
+                          userInput, sizeof(userInput), yesNoComparator);
     } while (isAnswerNo(userInput));
 
-    pwOut.printf("Hello, %s!" CRLF, name);
+    pwOut.printf("Hello, %s!\n", name);
     return 0;
 }
 
@@ -80,8 +76,7 @@ bool isAnswerNo (char const userInput[]) {
 }
 
 void error (const PropWare::ErrorCode err) {
-    const PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8,
-                                         PropWare::Port::OUT);
+    const PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Port::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);
