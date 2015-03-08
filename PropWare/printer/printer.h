@@ -103,6 +103,10 @@ class Printer {
                   m_cooked(cooked) {
         }
 
+        void set_cooked (const bool cooked) {
+            this->m_cooked = cooked;
+        }
+
         /**
          * @see PropWare::PrintCapable::put_char
          */
