@@ -27,6 +27,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/scancapable.h>
+#include <PropWare/comparator.h>
 #include <PropWare/printer/printer.h>
 #include <PropWare/uart/halfduplexuart.h>
 

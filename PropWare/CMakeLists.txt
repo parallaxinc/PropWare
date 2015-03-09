@@ -1,5 +1,6 @@
 set(PROPWARE_SOURCES
     ../c++allocate.h
+    ../comparator
     ../filesystem/blockstorage
     ../filesystem/fat/fatfile
     ../filesystem/fat/fatfilereader
@@ -9,6 +10,7 @@ set(PROPWARE_SOURCES
     ../filesystem/filereader
     ../filesystem/filesystem
     ../filesystem/filewriter
+    ../filesystem/sd
     ../hd44780
     ../l3g
     ../max6675
@@ -23,12 +25,13 @@ set(PROPWARE_SOURCES
     ../runnable
     ../scancapable
     ../scanner
-    ../filesystem/sd
     ../seeedtft
     ../seeedtftfast
     ../seeedtftfast_as.S
     ../spi
     ../spi_as.S
+    ../stringbuilder
+    ../staticstringbuilder
     ../uart/abstractduplexuart
     ../uart/abstractsimplexuart
     ../uart/duplexuart

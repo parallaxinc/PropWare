@@ -9,17 +9,11 @@ include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
 ################################################################################
 
 set(BOARD QUICKSTART)
-set(MODEL cmm)
-set(COMMON_FLAGS "-Os -g")
+set(MODEL lmm)
+set(COMMON_FLAGS "-Os")
+set(C_FLAGS )
+set(CXX_FLAGS )
 
-project(propware_tests)
+project(StringBuilder_Demo)
 
-create_executable(sample_test           sample_test)
-create_executable(pin_test              pin_test)
-create_executable(fatfilereader_test    fatfilereader_test)
-create_executable(fatfs_test            fatfs_test)
-create_executable(uart_simplex_test     uart_simplex_test)
-create_executable(sd_test               sd_test)
-create_executable(stringbuilder_test    stringbuilder_test)
-create_executable(queue_test            queue_test)
-create_executable(utility_test          utility_test)
+create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})

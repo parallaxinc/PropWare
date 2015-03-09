@@ -196,26 +196,6 @@ TEST(PrintUserMessage) {
     return true;
 }
 
-TEST(MsgIfFail) {
-    MSG_IF_FAIL(1, ASSERT(true), "FAIL!!! You should not see this message!");
-
-    tearDown();
-}
-
-TEST(MsgIfFail_ExpectFailure) {
-    MSG_IF_FAIL(2, ASSERT(false),
-                "Sample message upon failing this assertion (expected).");
-
-    tearDown();
-}
-
-TEST(MsgIfFail_WithArgs_ExpectFailure) {
-    MSG_IF_FAIL(2, ASSERT(false),
-                "Sample message upon failing this assertion %s.", "(expected)");
-
-    tearDown();
-}
-
 int main () {
     START(SampleTest);
 
@@ -241,9 +221,6 @@ int main () {
     RUN_TEST(CheckAssertNotNull);
     EXPECT_FAIL(CheckAssertNotNull_ExpectFailure);
     RUN_TEST(PrintUserMessage);
-    RUN_TEST(MsgIfFail);
-    EXPECT_FAIL(MsgIfFail_ExpectFailure);
-    EXPECT_FAIL(MsgIfFail_WithArgs_ExpectFailure);
 
     COMPLETE();
 }

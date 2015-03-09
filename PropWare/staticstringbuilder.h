@@ -1,5 +1,5 @@
 /**
- * @file    Blinky_Demo.cpp
+ * @file    staticstringbuilder.h
  *
  * @author  David Zemon
  *
@@ -23,15 +23,48 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #include <PropWare/PropWare.h>
-#include <PropWare/pin.h>
+#include <PropWare/printcapable.h>
 
-int main () {
-    PropWare::Pin led(PropWare::Pin::P16, PropWare::Pin::OUT);
+namespace PropWare {
 
-    while (1) {
-        led.toggle();
-        waitcnt(CLKFREQ / 4 + CNT);
-    }
+class StaticStringBuilder : public PrintCapable {
+    public:
+        StaticStringBuilder (char buffer[])
+                : m_string(buffer),
+                  m_size(0) {
+            this->m_string[0] = '\0';
+        }
+
+        void put_char (const char c) {
+            this->m_string[this->m_size++] = c;
+            this->m_string[this->m_size] = '\0';
+        }
+
+        void puts (const char string[]) {
+            for (const char *s = string; *s; ++s)
+                this->m_string[this->m_size++] = *s;
+            this->m_string[this->m_size] = '\0';
+        }
+
+        const char * to_string () const {
+            return this->m_string;
+        }
+
+        uint16_t get_size () const {
+            return this->m_size;
+        }
+
+        void clear () {
+            this->m_string[0] = '\0';
+            this->m_size   = 0;
+        }
+
+    private:
+        uint16_t m_size;
+        char     *m_string;
+};
+
 }
-

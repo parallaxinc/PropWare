@@ -1,5 +1,5 @@
 /**
- * @file    Blinky_Demo.cpp
+ * @file    comparator.h
  *
  * @author  David Zemon
  *
@@ -23,15 +23,6 @@
  * SOFTWARE.
  */
 
-#include <PropWare/PropWare.h>
-#include <PropWare/pin.h>
+#include <PropWare/comparator.h>
 
-int main () {
-    PropWare::Pin led(PropWare::Pin::P16, PropWare::Pin::OUT);
-
-    while (1) {
-        led.toggle();
-        waitcnt(CLKFREQ / 4 + CNT);
-    }
-}
-
+const PropWare::NonNegativeIntegerComparator NON_NEGATIVE_COMP;

@@ -65,17 +65,14 @@ class Utility {
         }
 
         /**
-         * @brief       Determine the number of microseconds passed since a
-         *              starting point
+         * @brief       Determine the number of microseconds passed since a starting point
          *
          * @param[in]   start   A value from the system counter (CNT)
          *
          * @return      Microseconds since start
          */
-        static uint32_t measure_time_interval (const register uint32_t start) {
-            uint32_t interval = CNT - start;
-
-            return interval / MICROSECOND;
+        static inline uint32_t measure_time_interval (const register uint32_t start) {
+            return (CNT - start) / MICROSECOND;
         }
 
         /**
@@ -86,7 +83,7 @@ class Utility {
          *
          * @return      Microseconds since start
          */
-        static uint32_t measure_time_interval (const register int32_t start) {
+        static inline uint32_t measure_time_interval (const register int32_t start) {
             return measure_time_interval((uint32_t) start);
         }
 
@@ -157,7 +154,24 @@ class Utility {
             return b ? "true" : "false";
         }
 
-    private:
+        /**
+         * @brief       Compute the mathematical expression `log_2(x)`. Result is in fixed-point format (16 digits to
+         *              the left and right of the decimal point
+         *
+         * Contributed by Dave Hein
+         */
+        static int rom_log (int x) {
+            int exp;
+            unsigned short *ptr;
+
+            if (!x) return 0;
+
+            for (exp = 31; x > 0; exp--) x <<= 1;
+            ptr = (unsigned short *)((((unsigned int)x) >> 19) + 0xb000);
+            return (exp << 16) | *ptr;
+        }
+
+private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
          *          `uint8_t bits = PropWare::Utility::count_bits(0x03);`

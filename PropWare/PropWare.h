@@ -109,12 +109,6 @@ typedef enum {
     WORD_1 = 0xffff0000
 } Word;
 
-template<typename T>
-class Comparator {
-    public:
-        virtual bool valid (const T *lhs) const = 0;
-};
-
 }
 
 #endif /* ifdef ASM_OBJ_FILE */

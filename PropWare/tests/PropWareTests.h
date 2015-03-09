@@ -78,30 +78,49 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 
 #define ASSERT(actual) \
     if (!(actual)) { \
+        pwOut << "#\t\t`ASSERT(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_TRUE(actual) \
-    ASSERT(true == (actual))
+    if (true == !(actual)) { \
+        pwOut << "#\t\t`ASSERT_TRUE(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_FALSE(actual) \
-    ASSERT(false == (actual))
+    if (false == !(actual)) { \
+        pwOut << "#\t\t`ASSERT_FALSE(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_NULL(actual) \
-    ASSERT_TRUE(NULL == (int) (actual))
+    if (NULL != (actual)) { \
+        pwOut << "#\t\t`ASSERT_NULL(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_NOT_NULL(actual) \
-    ASSERT_FALSE(NULL == (int) (actual))
+    if (NULL == (actual)) { \
+        pwOut << "#\t\t`ASSERT_NULL(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_EQ(expected, actual) \
     if ((expected) != (actual)) { \
+        pwOut << "#\t\t`ASSERT_EQ(" << #expected << ", " << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NEQ(lhs, rhs) \
     if ((lhs) == (rhs)) { \
+        pwOut << "#\t\t`ASSERT_NEQ(" << #lhs << ", " << #rhs << ")`\n"; \
         _tearDown(); \
         return false; \
     }
@@ -109,6 +128,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
         pwOut << "#\tExpected: `" << expected << "`; Acutal: `" << actual << "`\n"; \
+        pwOut << "#\t\t`ASSERT_EQ_MSG(" << #expected << ", " << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
@@ -116,27 +136,10 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define ASSERT_NEQ_MSG(lhs, rhs) \
     if ((lhs) == (rhs)) { \
         pwOut << "#\tExpected mismatch. Got: `" << lhs << "` == `" << rhs << "`\n"; \
+        pwOut << "#\t\t`ASSERT_NEQ_MSG(" << #lhs << ", " << #rhs << ")`\n"; \
         _tearDown(); \
         return false; \
     }
-
-#define MSG_IF_FAIL(id, assertion, ...)             \
-    class _AssertionCheck ## id {                   \
-        public:                                     \
-            static bool checkAssert () {            \
-                assertion;                          \
-                _tearDown();                        \
-                return true;                        \
-            }                                       \
-    };                                              \
-                                                    \
-    if (!_AssertionCheck ## id::checkAssert()) {    \
-        MESSAGE(__VA_ARGS__);                       \
-        _tearDown();                                \
-        return false;                               \
-    }
-
-
 
 #define SETUP \
     void setUp ()
