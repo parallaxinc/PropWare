@@ -65,6 +65,18 @@ class FileReader : virtual public File, virtual public ScanCapable {
             return this->File::seek(this->m_ptr, pos, way);
         }
 
+        PropWare::ErrorCode safe_peek (char &c) {
+            const PropWare::ErrorCode err = this->safe_get_char(c);
+            this->m_ptr--;
+            return err;
+        }
+
+        char peek () {
+            const char c = get_char();
+            this->m_ptr--;
+            return c;
+        }
+
         PropWare::ErrorCode get_error () const {
             return this->m_error;
         }
