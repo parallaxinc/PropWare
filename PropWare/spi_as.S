@@ -268,43 +268,34 @@ SEND_fast               // Interpret the bit count and mode of output for this s
 
 SEND_rd_data_fast       call #READ_DATA
                         test mailbox, dataMask wz       '' Is BIT_31 cleared? (Implying data vs command)
-        if_nz           jmp #SEND_rd_data               '' If not z, value is not data. Try again
+        if_nz           jmp #SEND_rd_data_fast          '' If not z, value is not data. Try again
 
                         mov data, mailbox               '' Initialize 'data' register
 
-                        mov clock, cnt                  '' \__Prepare a register with the system counter for use in the *_CLOCK functions
-                        add clock, clkDelay             '' /
                         cmp bitMode, #SPI_bitMode_BIT wz        '' Is bitMode MSB first or LSB first?
-        if_z            jmp #msb_first
+        if_nz           jmp #lsb_first_fast
 
-                        // LSB_FIRST Initialization
-                        mov loopIdx, negOne
-                        sub bitCount, #1
-                        jmp #lsb_first
+                        // MSB first fast initialization
+                        mov temp, #32
+                        sub temp, bitCount
+                        shl data, temp
 
 msb_first_fast          // MSB_FIRST Routine
-                        sub bitCount, #1 wz
-                        mov temp, data
-                        shr temp, bitCount
-                        test temp, #BIT_0 wc
+                        rcl data, #1 wc                 '' `dataMask` may not seem very obvious - but it is initialized to BIT_31, so it works in this case
                         muxc outa, mosi
                         xor outa, sclk
                         xor outa, sclk
-        if_nz           jmp #msb_first
+                        djnz bitCount, #msb_first_fast
 
                         // SEND complete, return to loop
-                        jmp #SEND_complete
+                        jmp #SEND_complete_fast
 
 lsb_first_fast          // LSB_FIRST Routine
-                        add loopIdx, #1
-                        mov temp, data
-                        shr temp, loopIdx
-                        test temp, #BIT_0 wc
+                        rcr data, #1 wc
                         muxc outa, mosi
                         xor outa, sclk
                         xor outa, sclk
-                        cmp bitCount, loopIdx wz
-        if_nz           jmp #lsb_first
+                        djnz bitCount, #lsb_first_fast
 
                         // SEND complete, return to loop
 SEND_complete_fast      wrlong negOne, par              '' Indicate that send is complete and C-cog can continue execution
@@ -318,9 +309,6 @@ READ_fast               // Interpret the bit count and mode of output for this r
                         shr bitCount, #SPI_BITS_OFFSET  '' Shift bit count into the lsb
                         mov loopIdx, bitCount           '' Create a second storage register for the bit count - used in LSB modes
                         mov data, #0                    '' Clear out the data register, ready for input
-
-                        mov clock, cnt
-                        add clock, clkDelay
 
                         // Determine clock phase and bit mode...
                         cmp bitMode, #SPI_bitMode_BIT wz    '' First up is determining bitMode

@@ -513,11 +513,7 @@ class SD: public BlockStorage {
                     }
 #else
                     while (bytes--) {
-#ifdef SPI_OPTION_FAST
                         check_errors(this->m_spi->shift_in_fast(8, dat++));
-#else
-                        check_errors(this->m_spi->shift_in(8, dat++));
-#endif
                     }
 #endif
                     // Read two more bytes for checksum - throw away data
@@ -578,11 +574,7 @@ class SD: public BlockStorage {
 
                 // Send all bytes
                 while (bytes--) {
-#ifdef SPI_OPTION_FAST
                     check_errors(this->m_spi->shift_out_fast(8, *(dat++)));
-#else
-                    check_errors(this->m_spi->shift_out(8, *(dat++)));
-#endif
                 }
 
                 // Receive and digest response token
