@@ -18,3 +18,6 @@ add_subdirectory(simple)
 add_subdirectory(libpropeller)
 add_subdirectory(PropWare)
 add_subdirectory(Examples)
+
+add_custom_target(docs
+    cd ${CMAKE_SOURCE_DIR} && doxygen Doxyfile)

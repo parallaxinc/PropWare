@@ -67,6 +67,34 @@ class Utility {
         /**
          * @brief       Determine the number of microseconds passed since a starting point
          *
+         * GCC is very clever about optimizations - sometimes too clever. Be sure that your start variable is declared
+         * as `volatile`. For instance, the following code is likely to be optimized by GCC in such a way that this
+         * function returns 0:
+         *
+         * @code
+         * const uint32_t start = CNT;
+         * foo();
+         * pwOut << "Runtime was " << Utility::measure_time_interval(start) << " milliseconds\n";
+         * @endcode
+         *
+         * This is because GCC sees that `start` is never modified by the call to `foo()`, so it optimizes the above
+         * code into the following:
+         *
+         * @code
+         * foo();
+         * pwOut << "Runtime was " << Utility::measure_time_interval(CNT) << " milliseconds\n";
+         * @endcode
+         *
+         * Not too helpful :(
+         *
+         * Instead, simply add the keyword `volatile` to your variable, and all will be good:
+         *
+         * @code
+         * const volatile uint32_t start = CNT;
+         * foo();
+         * pwOut << "Runtime was " << Utility::measure_time_interval(start) << " milliseconds\n";
+         * @endcode
+         *
          * @param[in]   start   A value from the system counter (CNT)
          *
          * @return      Microseconds since start
@@ -76,12 +104,7 @@ class Utility {
         }
 
         /**
-         * @brief       Determine the number of microseconds passed since a
-         *              starting point
-         *
-         * @param[in]   start   A value from the system counter (CNT)
-         *
-         * @return      Microseconds since start
+         * @overload static inline uint32_t measure_time_interval (const register uint32_t start)
          */
         static inline uint32_t measure_time_interval (const register int32_t start) {
             return measure_time_interval((uint32_t) start);
