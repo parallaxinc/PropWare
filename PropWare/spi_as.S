@@ -276,10 +276,7 @@ SEND_rd_data_fast       call #READ_DATA
         if_nz           jmp #lsb_first_fast
 
                         // MSB first fast initialization
-                        mov temp, #32
-                        sub temp, bitCount
-                        shl data, temp
-
+                        ror data, bitCount
 msb_first_fast          // MSB_FIRST Routine
                         rcl data, #1 wc                 '' `dataMask` may not seem very obvious - but it is initialized to BIT_31, so it works in this case
                         muxc outa, mosi
