@@ -120,7 +120,8 @@ class SD: public BlockStorage {
         /**
          * @brief   Create a human-readable error string
          *
-         * @param[in]   err     Error number used to determine error string
+         * @param[in]   printer     Printer used for logging the message
+         * @param[in]   err         Error number used to determine error string
          */
         void print_error_str (const Printer &printer, const ErrorCode err) const {
             const uint8_t relativeError = err - BEG_ERROR;
@@ -157,7 +158,7 @@ class SD: public BlockStorage {
          * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
          *
          * @param[in]   address     Number of bytes to send
-         * @param[out]  dat[]       Location in chip memory to store data block;
+         * @param[out]  buf[]       Location in chip memory to store data block;
          *                          If NULL is sent, the default internal buffer
          *                          will be used
          *

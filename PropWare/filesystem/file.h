@@ -33,10 +33,10 @@ namespace PropWare {
 class File {
     public:
         typedef enum {
-            NO_ERROR = 0,
-            BEG_ERROR = Filesystem::BEG_ERROR + 1,
-            EOF_ERROR,
-            END_ERROR
+            /** Successful completion */NO_ERROR  = 0,
+            /** First error code */     BEG_ERROR = Filesystem::BEG_ERROR + 1,
+            /** End of file */          EOF_ERROR,
+            /** Final error code */     END_ERROR = EOF_ERROR
         } ErrorCode;
 
         typedef enum {
@@ -46,28 +46,40 @@ class File {
         } SeekDir;
 
     public:
+        /**
+         * Destructor
+         */
         virtual ~File () {
             this->close();
         }
 
         /**
-         * @brief       Open a file
-         *
-         * @param[in]   *buffer     Optional buffer can be used by the file. If no buffer is passed in, the
-         *                          Filesystem's shared buffer will be used by the file. Passing a dedicated buffer
-         *                          is only recommended when opening more than one simultaneously
+         * @brief       Open the file
          *
          * @return      0 upon success, error code otherwise
          */
         virtual PropWare::ErrorCode open () = 0;
 
+        /**
+         * @brief   Close a file - a required step in any workflow that includes opening a file
+         *
+         * @return      0 upon success, error code otherwise
+         */
         virtual PropWare::ErrorCode close () {
 //            return this->flush();
             return NO_ERROR;
         }
 
+        /**
+         * @brief   Flush any modified data back to the SD card
+         *
+         * @return      0 upon success, error code otherwise
+         */
         virtual PropWare::ErrorCode flush () = 0;
 
+        /**
+         * @brief   Return the number of bytes (characters) in the file
+         */
         uint32_t get_length () const {
             return this->m_length;
         }
@@ -91,6 +103,15 @@ class File {
                 this->m_buf = buffer;
         }
 
+        /**
+         * @brief       Move the given pointer to a specified address
+         *
+         * @param[out]  &ptr    Pointer to be moved
+         * @param[in]   pos     Scale that the pointer should be moved
+         * @param[in]   way     Starting position for the movement
+         *
+         * @return      0 upon success, error code otherwise
+         */
         PropWare::ErrorCode seek (int32_t &ptr, const int32_t pos, const SeekDir way) {
             int32_t absolute;
             switch (way) {
@@ -121,6 +142,12 @@ class File {
             return NO_ERROR;
         }
 
+        /**
+         * @brief       Print various data on a file - useful for debugging
+         *
+         * @param[in]   classStr[]      Used to help determine which concrete class called this method
+         * @param[in]   printBlocks     Determine whether or not to print the content of the file's buffer
+         */
         void print_status (const char classStr[] = "File", const bool printBlocks = false) const {
             this->m_logger->printf("File Status - PropWare::%s@0x%08X\n", classStr, (unsigned int) this);
             this->m_logger->println("=========================================");

@@ -57,6 +57,11 @@ class Filesystem {
          */
         virtual PropWare::ErrorCode mount (const uint8_t partition = 0) = 0;
 
+        /**
+         * @brief   Unmount the filesystem by flushing all dirty buffers
+         */
+        virtual PropWare::ErrorCode unmount () = 0;
+
     public:
         static void print_error_str (const Printer &printer, const ErrorCode err) {
             switch (err) {

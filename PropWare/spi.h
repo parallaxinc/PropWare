@@ -617,12 +617,6 @@ class SPI : public PrintCapable,
          * @brief       Read the value that the SPI cog just shifted in
          *
          * @param[out]  *par    Address to store the parameter
-         * @param[in]   size    Number of bytes allocated to *data; Example:
-         *                        int newVal;
-         *                        spi.read_par(&newVal, sizeof(newVal));
-         *                      Or if using a pointer:
-         *                        int *newVal;
-         *                        spi.read_par(newVal, sizeof(*newVal));
          *
          * @return      Returns 0 upon success, error code otherwise
          */

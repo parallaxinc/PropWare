@@ -33,7 +33,7 @@ namespace PropWare {
  * @brief   Print formatted text to a serial terminal, an LCD, or any other device from any cog at any time with no
  *          worries about contention.
  *
- * @warn    SynchronousPrinter is only software - it can not magically introduce a pull-up resistor on the TX line as
+ * @warning SynchronousPrinter is only software - it can not magically introduce a pull-up resistor on the TX line as
  *          is needed for synchronous printing by various Propeller boards, including the Quickstart.
  */
 class SynchronousPrinter {

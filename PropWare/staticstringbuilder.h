@@ -63,8 +63,8 @@ class StaticStringBuilder : public PrintCapable {
         }
 
     private:
-        uint16_t m_size;
         char     *m_string;
+        uint16_t m_size;
 };
 
 }

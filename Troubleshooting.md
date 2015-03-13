@@ -17,3 +17,10 @@ array), and all other arguments (if they exist) must be one of the following typ
 * `float` or `double`
 * Any pointer type (`int *`, `MyClass *`, etc). Note that `char *` will be treated specially - as a string, not an 
   `uint32_t`
+
+Looks like I cant clone or update the git repository for libpropeller. Sorry!
+-----------------------------------------------------------------------------
+
+`libpropeller` is a fantastic C++ library provided by forum user SRLM. His code resides in a separate github repository.
+PropWare's installation script attempts to use `git` to pull the latest changes for `libpropeller` before recompiling.
+The above message is displayed any time that update fails.

@@ -104,7 +104,7 @@ class Utility {
         }
 
         /**
-         * @overload static inline uint32_t measure_time_interval (const register uint32_t start)
+         * @overload
          */
         static inline uint32_t measure_time_interval (const register int32_t start) {
             return measure_time_interval((uint32_t) start);
@@ -151,7 +151,7 @@ class Utility {
         /**
          * @brief       Convert each alphabetical character in a null-terminated character array to lowercase letters
          *
-         * @param[out]  Characters array to be converted
+         * @param[out]  string[]    Characters array to be converted
          */
         static void to_lower (char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
@@ -161,7 +161,7 @@ class Utility {
         /**
          * @brief       Convert each alphabetical character in a null-terminated character array to uppercase letters
          *
-         * @param[out]  Characters array to be converted
+         * @param[out]  string[]    Characters array to be converted
          */
         static void to_upper (char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
@@ -178,10 +178,14 @@ class Utility {
         }
 
         /**
-         * @brief       Compute the mathematical expression `log_2(x)`. Result is in fixed-point format (16 digits to
-         *              the left and right of the decimal point
+         * @brief       Compute the mathematical expression log<sub>2</sub>(x). Result is in fixed-point format (16
+         *              digits to the left and right of the decimal point
          *
          * Contributed by Dave Hein
+         *
+         * @param[in]   x   Input to log function
+         *
+         * @return      Result of log function
          */
         static int rom_log (int x) {
             int exp;
