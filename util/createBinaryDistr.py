@@ -107,10 +107,11 @@ class CreateBinaryDistr(object):
         with ZipFile(archive_name, 'w') as archive:
             # Add all whitelisted files (see CreateBinaryDistr._is_whitelisted() ) so long as they are not within a
             # blacklisted directory
+            PROPWARE_ROOT_NAME = CreateBinaryDistr.PROPWARE_ROOT.split('/')[-1]
             for root, dirs, files in os.walk(CreateBinaryDistr.PROPWARE_ROOT):
                 # First, determine whether or not the directory we are iterating over is blacklisted...
                 path_list = root.split('/')
-                propware_root_index = path_list.index('PropWare')
+                propware_root_index = path_list.index(PROPWARE_ROOT_NAME)
                 try:
                     # Currently, the only blacklisted directories are direct children of the PropWare root
                     is_blacklisted = path_list[propware_root_index + 1] in CreateBinaryDistr.BLACKLISTED_DIRECTORIES
