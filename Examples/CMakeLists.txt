@@ -1,5 +1,6 @@
 add_subdirectory(PropWare_Blinky)
 add_subdirectory(Concurrency)
+add_subdirectory(GettingStarted)
 add_subdirectory(Hello)
 add_subdirectory(Libpropeller_Pwm32)
 add_subdirectory(PropWare_DuplexUART)
