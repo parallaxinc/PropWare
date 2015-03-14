@@ -27,7 +27,7 @@ class CreateBinaryDistr(object):
     ARCHIVE_FILE_NAME = "PropWare_%s.zip"
     WHITELISTED_FILES = ["CMakeLists.txt", "Doxyfile", "README", "run_all_tests", "run_unit"]
     WHITELIST_EXTENSIONS = ["dox", "md", "py", "pl", "elf", "rb", "jpg", "lang", "pdf", "png", "cmake", "in"]
-    BLACKLISTED_DIRECTORIES = ["docs", ".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
+    BLACKLISTED_DIRECTORIES = [".idea", ".settings", ".git", propwareUtils.DOWNLOADS_DIRECTORY]
     BRANCHES = ["master", "development", "release-2.0", "release-2.0-nightly"]
     TAGS = ["v1.1", "v1.2", "v2.0-beta1", "v2.0-beta2", "v2.0-beta3", "v2.0-beta4"]
     CURRENT_SUGGESTION = "release-2.0"
@@ -90,7 +90,7 @@ class CreateBinaryDistr(object):
             # Compile the static libraries and example projects
             CreateBinaryDistr._compile()
 
-            archive_name = self._create_archive(branch)
+            archive_name = self.create_archive(branch)
 
             self.successes.append(branch)
             if CreateBinaryDistr.CURRENT_SUGGESTION == branch:
@@ -101,7 +101,7 @@ class CreateBinaryDistr(object):
         CreateBinaryDistr._clean()
 
     @classmethod
-    def _create_archive(cls, branch):
+    def create_archive(cls, branch):
         # Generate the archive
         archive_name = CreateBinaryDistr.ARCHIVE_FILE_NAME % branch
         with ZipFile(archive_name, 'w') as archive:
@@ -164,24 +164,26 @@ class CreateBinaryDistr(object):
     def _checkout(branch):
         assert (isinstance(branch, str))
 
-        try:
-            CreateBinaryDistr._clean_untracked()
-            sys.stdout.flush()
-            subprocess.check_output(["git", "checkout", branch])
-        except subprocess.CalledProcessError:
-            print("Failed to checkout " + branch, file=sys.stderr)
-            return 1
-
-        if branch not in CreateBinaryDistr.TAGS:
+        # Only checkout a new branch if we're told to
+        if 'current' != branch:
             try:
-                subprocess.check_output(["git", "pull"])
+                CreateBinaryDistr._clean_untracked()
+                sys.stdout.flush()
+                subprocess.check_output(["git", "checkout", branch])
             except subprocess.CalledProcessError:
-                print("Failed to pull latest sources", file=sys.stderr)
+                print("Failed to checkout " + branch, file=sys.stderr)
                 return 1
 
-        sys.stdout.flush()
-        print("Now in branch: " + branch)
-        sys.stdout.flush()
+            if branch not in CreateBinaryDistr.TAGS:
+                try:
+                    subprocess.check_output(["git", "pull"])
+                except subprocess.CalledProcessError:
+                    print("Failed to pull latest sources", file=sys.stderr)
+                    return 1
+
+            sys.stdout.flush()
+            print("Now in branch: " + branch)
+            sys.stdout.flush()
 
         return 0
 
@@ -279,15 +281,22 @@ def parse_args():
                                                  " of PropWare")
     parser.add_argument("--tags", action="store_true",
                         help="Create binary distributions for all tagged commits as well")
+    parser.add_argument("-a", "--archive", dest='archive', action='store', type=str,
+                        help='If set, it will be assumed that PropWare has already been compiled and all that is '
+                             'needed is for a zip to be created. The value should be the name of the current branch')
     return parser.parse_args()
 
 
 if "__main__" == __name__:
     cli_args = parse_args()
 
-    branches = CreateBinaryDistr.BRANCHES
-    if cli_args.tags:
-        branches += CreateBinaryDistr.TAGS
-
     runMe = CreateBinaryDistr()
-    runMe.run(branches)
+
+    if cli_args.archive:
+        CreateBinaryDistr.create_archive(cli_args.archive)
+    else:
+        branches = CreateBinaryDistr.BRANCHES
+        if cli_args.tags:
+            branches += CreateBinaryDistr.TAGS
+
+        runMe.run(branches)
