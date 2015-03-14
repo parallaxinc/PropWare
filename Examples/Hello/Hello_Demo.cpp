@@ -28,6 +28,7 @@
 //#define TEST_TINYSTREAM
 //#define TEST_TINYIO
 //#define TEST_FDSERIAL
+//#define TEST_LIBPROPELLER
 
 // Includes
 #include <PropWare/PropWare.h>
@@ -45,6 +46,15 @@ std::stream cout;
 #include <tinyio.h>
 #elif defined TEST_FDSERIAL
 #include <fdserial.h>
+#elif defined TEST_LIBPROPELLER
+#include <libpropeller/serial/serial.h>
+
+#endif
+
+#ifndef TEST_PROPWARE
+int _cfg_rxpin    = -1;
+int _cfg_txpin    = -1;
+int _cfg_baudrate = -1;
 #endif
 
 // Main function
@@ -52,7 +62,10 @@ int main () {
     uint32_t i = 0;
 
 #ifdef TEST_FDSERIAL
-    fdserial *serial = fdserial_open(31, 30, 0, 115200);
+    fdserial *serial = fdserial_open(_cfg_rxpin, _cfg_txpin, 0, _cfg_baudrate);
+#elif defined TEST_LIBPROPELLER
+    libpropeller::Serial serial;
+    serial.Start(_cfg_rxpin, _cfg_txpin, _cfg_baudrate);
 #endif
 
     while (1) {
@@ -70,6 +83,8 @@ int main () {
         // longer included as part of the Simple libraries you must copy it from
         // this project to your own before attempting to compile.
         dprinti(serial, "Hello, world! %03d 0x%02x\n", i, i);
+#elif defined TEST_LIBPROPELLER
+        serial.PutFormatted("Hello, world! %03d 0x%02X\r\n", i, i);
 #endif
         i++;
         waitcnt(250 * MILLISECOND + CNT);
