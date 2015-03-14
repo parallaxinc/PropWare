@@ -21,3 +21,6 @@ add_subdirectory(Examples)
 
 add_custom_target(docs
     cd ${CMAKE_SOURCE_DIR} && doxygen Doxyfile)
+
+include(./CMakePropWareInstall.cmake)
+include(./CMakePropWarePackage.cmake)
