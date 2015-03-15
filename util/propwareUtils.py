@@ -119,7 +119,7 @@ def find(name, path):
 
 
 def check_proper_working_dir():
-    if 'createBinaryDistr.py' not in os.listdir('.'):
+    if 'propwareUtils.py' not in os.listdir('.'):
         raise IncorrectStartingDirectoryException()
 
     if ' ' in os.path.abspath('..'):
