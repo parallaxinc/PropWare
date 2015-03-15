@@ -1,5 +1,8 @@
-Installation
-============
+Chapter 1: Installation
+=======================
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[>> Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_CMakeTutorial.html)
 
 Microsoft Windows
 -----------------
@@ -50,3 +53,6 @@ Mac OSX
 I have _no_ idea what will happen on a Mac. I don't own a Mac. If you are reading this and you have a Mac, I'd greatly
 appreciate you [getting in contact with me](mailto:david@zemon.name) to help me iron out any existing bugs in the 
 installation script. You don't have to have any prerequisite knowledge to help - I just need something to test on.
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[>> Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_CMakeTutorial.html)

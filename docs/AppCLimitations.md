@@ -1,5 +1,9 @@
-Limitations
-===========
+Appendix C: Limitations
+=======================
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_CXXCrashCourse.html)<br />
+[>> Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_Troubleshooting.html)
 
 Spin
 ----
@@ -31,3 +35,7 @@ add_executable(${PROJECT_NAME}
     my_driver
     pst.dat)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_CXXCrashCourse.html)<br />
+[>> Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_Troubleshooting.html)

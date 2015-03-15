@@ -1,5 +1,8 @@
-Troubleshooting FAQ
-===================
+Appendix D: Troubleshooting FAQ
+===============================
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_Limitations.html)<br />
 
 C and C++ are not the simplest languages on the planet, and using them on an embedded system doesn't help. Hopefully
 you'll be able to find answers to some of your problems on this page.
@@ -24,3 +27,6 @@ Looks like I cant clone or update the git repository for libpropeller. Sorry!
 `libpropeller` is a fantastic C++ library provided by forum user SRLM. His code resides in a separate github repository.
 PropWare's installation script attempts to use `git` to pull the latest changes for `libpropeller` before recompiling.
 The above message is displayed any time that update fails.
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_Limitations.html)<br />

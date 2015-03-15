@@ -1,5 +1,9 @@
-CMake for PropWare
-===========================
+Appendix A: CMake for PropWare
+==============================
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_AppDeployment.html)<br />
+[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_CXXCrashCourse.html)
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
 Remember that PropWare uses CMake 3.0.
@@ -31,7 +35,7 @@ create_simple_executable(${PROJECT_NAME} main.cpp)
   but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
   (separated by whitespace).
 * There is LOTS more information about creating CMakeLists.txt files for PropWare projects on the [CMakeLists.txt 
-  Files for PropWare](./md_CMakeListsForPropware.html) page.
+  Files for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeListsForPropware.html) page.
 
 Typical Use Case
 ----------------
@@ -182,3 +186,7 @@ and an option will be added. It is believed that these flags will always be desi
 * ECOGCXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
 * Linker: None
 * Archiver: `cr`
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_AppDeployment.html)<br />
+[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_CXXCrashCourse.html)

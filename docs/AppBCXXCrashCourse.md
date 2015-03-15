@@ -1,5 +1,9 @@
-C++ Crash Course
-================
+Appendix B: C++ Crash Course
+============================
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html)<br />
+[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_Limitations.html)
 
 For those coming from a background in Parallax's Spin language, your only concern will be syntax: the C-family of 
 languages is wildly different. Don't worry - it's 
@@ -77,7 +81,7 @@ C-Family Syntax
       printf("The current value of `i`: %d", i);
   }
   
-  // C must have the index declared prior to the loop
+  // C typically has (and sometimes requires) the index declared prior to the loop
   int i;
   for (i = 0; i < 10; i++) {
       printf("The current value of `i`: %d", i);
@@ -173,3 +177,7 @@ Now that both classes are surrounded by a namespace, our code can use both class
 Including Separate Files
 ------------------------
 Coming soon!
+
+[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
+[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html)<br />
+[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_Limitations.html)

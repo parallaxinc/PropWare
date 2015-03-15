@@ -3,6 +3,8 @@
 /docs/latex
 /docs/man
 /docs/rtf
+/docs/xml
+/docs/docbook
 .idea/
 /simple
 /libpropeller
