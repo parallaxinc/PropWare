@@ -24,7 +24,7 @@ Looks like I cant clone or update the git repository for libpropeller. Sorry!
 -----------------------------------------------------------------------------
 
 `libpropeller` is a fantastic C++ library provided by forum user SRLM. His code resides in a separate github repository.
-PropWare's installation script attempts to use `git` to pull the latest changes for `libpropeller` before recompiling.
+%PropWare's installation script attempts to use `git` to pull the latest changes for `libpropeller` before recompiling.
 The above message is displayed any time that update fails.
 
 [<< Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)<br />

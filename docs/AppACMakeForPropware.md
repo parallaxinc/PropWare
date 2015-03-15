@@ -5,7 +5,7 @@ Appendix A: CMake for PropWare
 [>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
-Remember that PropWare uses CMake 3.0.
+Remember that %PropWare uses CMake 3.0.
 
 Bare Minimum
 ------------
@@ -33,7 +33,7 @@ create_simple_executable(${PROJECT_NAME} main.cpp)
   (`${PROJECT_NAME}` is an automatically-created CMake variable which, in this case, would resolve to `HelloWorld`), 
   but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
   (separated by whitespace).
-* There is LOTS more information about creating CMakeLists.txt files for PropWare projects in 
+* There is LOTS more information about creating CMakeLists.txt files for %PropWare projects in 
   [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
 
 Typical Use Case
@@ -75,7 +75,7 @@ create_simple_executable(${PROJECT_NAME}
     rf_transceiver.ecogc)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Common CMake variables in PropWare 
+### Common CMake variables in %PropWare 
 * BOARD: The `BOARD` variable can be used to identify your physical hardware. PropGCC uses this to determine
   how many bytes of EEPROM, default baud rate for RS232, and other functions. Any board available in SimpleIDE
   is available here as well - they are reading from the same configuration pool (`<PropGCC root>/propeller-load`).
@@ -157,7 +157,7 @@ Link the target executable with the libpropeller library.
 ### LINK_PROPWARE
 \[default: ON\]
 
-Link the target executable with the PropWare library.
+Link the target executable with the %PropWare library.
 
 ### LINK_SIMPLE
 \[default: ON\]

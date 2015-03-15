@@ -4,13 +4,13 @@ Chapter 4: Create a PropWare Application
 [<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)<br />
 [>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)
 
-PropWare makes building and running applications easy. Below are instructions for creating a new project, followed by
+%PropWare makes building and running applications easy. Below are instructions for creating a new project, followed by
 importing that project into your favorite IDE.
 
 Starting a New Project
 ----------------------
-1. The defining piece of a PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
-   standards. Full details on CMake files in relation to PropWare can be found in
+1. The defining piece of a %PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
+   standards. Full details on CMake files in relation to %PropWare can be found in
    [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html), but a typical use case with four 
    source code files is provided below.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
@@ -47,7 +47,7 @@ Starting a New Project
       press any of them once. Do not use Control-C.
   * `make run`: The `run` target will load your program to EEPROM and return to command prompt.
 
-Importing PropWare Projects into Eclipse (and other IDEs)
+Importing %PropWare Projects into Eclipse (and other IDEs)
 ---------------------------------------------------------
 1. For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
    `Eclipse IDE for C/C++ Developers` [here](http://www.eclipse.org/downloads/) and download the appropriate package
@@ -64,13 +64,13 @@ Importing PropWare Projects into Eclipse (and other IDEs)
   3. On the next page, ensure `Select root directory:` is selected at the top and then click `Browse...`. Find the
      parent folder of your project (for example, if your project is `C:\Users\David\Hello`, then choose 
      `C:\Users\David`).
-  4. At least one project should populate in the box below. Ensure your new PropWare project and only your new
-     PropWare project is selected.
+  4. At least one project should populate in the box below. Ensure your new %PropWare project and only your new
+     %PropWare project is selected.
   5. Eclipse will import all necessary settings as soon as you click `Finish`. Compile flags, include directories and
      required source files will all be ready to go.
 6. Compiling your program and loading to EEPROM can be done easily from within Eclipse. Compiling is as simple as 
    clicking the hammer icon or using `Control-B`. Writing to EEPROM requires creating a new Run Configuration.
-  - I do not recommend attempting to create a Run Configuration for PropWare's `debug` configuration. PropGCC's 
+  - I do not recommend attempting to create a Run Configuration for %PropWare's `debug` configuration. PropGCC's 
     terminal does not play well with either Eclipse or JetBrains CLion. Use the terminal for debugging, exactly as
     described in "Starting a New Project" step 4.
 

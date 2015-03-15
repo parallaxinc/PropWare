@@ -34,7 +34,7 @@ Breakdown:
   more files named "Makefile".
    
   The first argument, `-G "Unix Makefiles"`, tells CMake exactly what flavor of Make we're using. As reasoned in the
-  `What is Make?` section above, we will always be using `Unix Makefiles` for PropWare projects.
+  `What is Make?` section above, we will always be using `Unix Makefiles` for %PropWare projects.
 
   The second argument is the source directory of your project. This directory must contain a `CMakeLists.txt` file as
   described in step 1 of 
@@ -47,14 +47,14 @@ Breakdown:
 * `make`: Make is old, flexible, and great. CMake has done all the work though and no extra arguments are needed for
   this command. After successfully running CMake, simply type `make` - character for character. When it
   completes successfully, your project will have been compiled into its binary format, ready to be programmed to your
-  Propeller. PropWare provides some extra "targets" to make your life even easier though. Try typing `make debug` to 
+  Propeller. %PropWare provides some extra "targets" to make your life even easier though. Try typing `make debug` to 
   write your program to RAM and open a terminal (like Parallax's PST) or `make run` to write your program to EEPROM.
   
 CMakeLists.txt
 --------------
 
 As described in [Chapter 4](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html), the CMakeLists.txt file is 
-required for all CMake (and therefore PropWare) applications. The file must be named "CMakeLists.txt" - character for 
+required for all CMake (and therefore %PropWare) applications. The file must be named "CMakeLists.txt" - character for 
 character. 
 
 The contents of the file are simple - many useful tips can be gleaned from both 
@@ -86,7 +86,7 @@ that you made some changes to your code and Make hasn't picked them up (and ther
 Make the "clean" target will delete all compiled objects and let you start over (`make clean`). You can remove old files
 and recompile new ones in a single step with `make clean all` (order matters).
 
-PropWare provides two extra targets for your convenience. 
+%PropWare provides two extra targets for your convenience. 
 * The `debug` target will compile your code, write it to your Propeller's HUB RAM and then start a serial terminal to
   aid in debugging your application. When you are finished, press any of the arrow keys on your keyboard (don't use 
   `Control-C` - it doesn't seem to like that) and you will be returned to your normal command prompt.

@@ -11,7 +11,7 @@ not hard.
 For C developers with no background in Spin, the biggest hurdle will be learning about the famed "object-oriented 
 programming" (still not hard).
 
-There are lots of code examples throughout PropWare and libpropeller's source code, so please feel free to peruse them.
+There are lots of code examples throughout %PropWare and libpropeller's source code, so please feel free to peruse them.
 You should also take advantage of the example projects provided in the `Examples` directory.
 
 C-Family Syntax
