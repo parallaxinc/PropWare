@@ -1,9 +1,8 @@
 Appendix A: CMake for PropWare
 ==============================
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_AppDeployment.html)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_CXXCrashCourse.html)
+[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
+[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
 Remember that PropWare uses CMake 3.0.
@@ -34,8 +33,8 @@ create_simple_executable(${PROJECT_NAME} main.cpp)
   (`${PROJECT_NAME}` is an automatically-created CMake variable which, in this case, would resolve to `HelloWorld`), 
   but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
   (separated by whitespace).
-* There is LOTS more information about creating CMakeLists.txt files for PropWare projects on the [CMakeLists.txt 
-  Files for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeListsForPropware.html) page.
+* There is LOTS more information about creating CMakeLists.txt files for PropWare projects in 
+  [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
 
 Typical Use Case
 ----------------
@@ -187,6 +186,5 @@ and an option will be added. It is believed that these flags will always be desi
 * Linker: None
 * Archiver: `cr`
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_AppDeployment.html)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_CXXCrashCourse.html)
+[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
+[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)

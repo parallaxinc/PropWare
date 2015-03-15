@@ -1,9 +1,8 @@
 Chapter 3: Run an Example Project
 =================================
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_CMakeTutorial.html)<br />
-[>> Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_AppDeployment.html)
+[<< Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)<br />
+[>> Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)
 
 PropWare comes pre-packaged with lots of example projects ready-to-go! Some were written to demonstrate PropWare 
 classes, others show how to implement familiar code from the Parallax Learn library in a PropWare application. Here's
@@ -36,6 +35,5 @@ the gist for you:
   This final command should program the Propeller's RAM and start a terminal to display any output from the board. The
   GettingStarted project is a great place to start - it does not require any specific board or connected hardware.
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_CMakeTutorial.html)<br />
-[>> Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_AppDeployment.html)
+[<< Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)<br />
+[>> Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)

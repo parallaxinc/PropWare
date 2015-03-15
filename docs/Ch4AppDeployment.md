@@ -1,9 +1,8 @@
 Chapter 4: Create a PropWare Application
 ================================================
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_RunningExampleProjects.html)<br />
-[>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html)
+[<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)<br />
+[>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)
 
 PropWare makes building and running applications easy. Below are instructions for creating a new project, followed by
 importing that project into your favorite IDE.
@@ -11,9 +10,9 @@ importing that project into your favorite IDE.
 Starting a New Project
 ----------------------
 1. The defining piece of a PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
-   standards. Full details on CMake files in relation to PropWare can be found on the 
-   [CMake For PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html) page, but a typical use case 
-   with four source code files is provided below.
+   standards. Full details on CMake files in relation to PropWare can be found in
+   [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html), but a typical use case with four 
+   source code files is provided below.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
    ####################################################################################
    ### Template code. Do not modify                                                   #
@@ -52,7 +51,7 @@ Importing PropWare Projects into Eclipse (and other IDEs)
 ---------------------------------------------------------
 1. For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
    `Eclipse IDE for C/C++ Developers` [here](http://www.eclipse.org/downloads/) and download the appropriate package
-2. Create your [CMakeLists.txt file](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html).
+2. Create your [CMakeLists.txt file](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
 3. For any source file that does not yet exist, create an empty file in its place. CMake will throw errors if your
    CMakeLists.txt file references any non-existing source files.
 4. At the terminal, enter your project's directory and type `cmake -G "Eclipse CDT4 - Unix Makefiles" .`. Notice that
@@ -75,6 +74,5 @@ Importing PropWare Projects into Eclipse (and other IDEs)
     terminal does not play well with either Eclipse or JetBrains CLion. Use the terminal for debugging, exactly as
     described in "Starting a New Project" step 4.
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_RunningExampleProjects.html)<br />
-[>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html)
+[<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)<br />
+[>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)

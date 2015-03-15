@@ -1,9 +1,8 @@
 Appendix B: C++ Crash Course
 ============================
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html)<br />
-[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_Limitations.html)
+[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)<br />
+[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)
 
 For those coming from a background in Parallax's Spin language, your only concern will be syntax: the C-family of 
 languages is wildly different. Don't worry - it's 
@@ -178,6 +177,5 @@ Including Separate Files
 ------------------------
 Coming soon!
 
-[Getting Started Index](http://david.zemon.name/PropWare/md_docs_GettingStarted.html)<br />
-[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_CMakeForPropware.html)<br />
-[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_Limitations.html)
+[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)<br />
+[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)
