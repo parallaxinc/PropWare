@@ -97,17 +97,20 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->m_sectorSize);
 
             // Determine if the currently loaded sector is what we need
-            const uint32_t sectorOffset = (this->m_ptr >> this->m_fs->m_driver->get_sector_size_shift());
+            const uint32_t sectorOffset = (uint32_t) this->m_ptr >> this->m_fs->m_driver->get_sector_size_shift();
 
             // Determine if the correct sector is loaded
             if (this->m_buf->id != this->m_id) {
-                pwOut.println("Reloading buffer!");
                 check_errors(this->reload_buf());
             } else if (sectorOffset != this->m_curTier1) {
                 check_errors(this->load_sector_from_offset(sectorOffset));
             }
-            ++(this->m_ptr);
+
+            // Get the character
             c = this->m_buf->buf[bufferOffset];
+
+            // Finally done. Increment the pointer
+            ++(this->m_ptr);
 
             return NO_ERROR;
         }

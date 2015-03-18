@@ -65,28 +65,48 @@ class Utility {
         }
 
         /**
-         * @brief       Determine the number of microseconds passed since a
-         *              starting point
+         * @brief       Determine the number of microseconds passed since a starting point
+         *
+         * GCC is very clever about optimizations - sometimes too clever. Be sure that your start variable is declared
+         * as `volatile`. For instance, the following code is likely to be optimized by GCC in such a way that this
+         * function returns 0:
+         *
+         * @code
+         * const uint32_t start = CNT;
+         * foo();
+         * pwOut << "Runtime was " << Utility::measure_time_interval(start) << " milliseconds\n";
+         * @endcode
+         *
+         * This is because GCC sees that `start` is never modified by the call to `foo()`, so it optimizes the above
+         * code into the following:
+         *
+         * @code
+         * foo();
+         * pwOut << "Runtime was " << Utility::measure_time_interval(CNT) << " milliseconds\n";
+         * @endcode
+         *
+         * Not too helpful :(
+         *
+         * Instead, simply add the keyword `volatile` to your variable, and all will be good:
+         *
+         * @code
+         * const volatile uint32_t start = CNT;
+         * foo();
+         * pwOut << "Runtime was " << Utility::measure_time_interval(start) << " milliseconds\n";
+         * @endcode
          *
          * @param[in]   start   A value from the system counter (CNT)
          *
          * @return      Microseconds since start
          */
-        static uint32_t measure_time_interval (const register uint32_t start) {
-            uint32_t interval = CNT - start;
-
-            return interval / MICROSECOND;
+        static inline uint32_t measure_time_interval (const register uint32_t start) {
+            return (CNT - start) / MICROSECOND;
         }
 
         /**
-         * @brief       Determine the number of microseconds passed since a
-         *              starting point
-         *
-         * @param[in]   start   A value from the system counter (CNT)
-         *
-         * @return      Microseconds since start
+         * @overload
          */
-        static uint32_t measure_time_interval (const register int32_t start) {
+        static inline uint32_t measure_time_interval (const register int32_t start) {
             return measure_time_interval((uint32_t) start);
         }
 
@@ -131,7 +151,7 @@ class Utility {
         /**
          * @brief       Convert each alphabetical character in a null-terminated character array to lowercase letters
          *
-         * @param[out]  Characters array to be converted
+         * @param[out]  string[]    Characters array to be converted
          */
         static void to_lower (char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
@@ -141,7 +161,7 @@ class Utility {
         /**
          * @brief       Convert each alphabetical character in a null-terminated character array to uppercase letters
          *
-         * @param[out]  Characters array to be converted
+         * @param[out]  string[]    Characters array to be converted
          */
         static void to_upper (char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
@@ -157,7 +177,28 @@ class Utility {
             return b ? "true" : "false";
         }
 
-    private:
+        /**
+         * @brief       Compute the mathematical expression log<sub>2</sub>(x). Result is in fixed-point format (16
+         *              digits to the left and right of the decimal point
+         *
+         * Contributed by Dave Hein
+         *
+         * @param[in]   x   Input to log function
+         *
+         * @return      Result of log function
+         */
+        static int rom_log (int x) {
+            int exp;
+            unsigned short *ptr;
+
+            if (!x) return 0;
+
+            for (exp = 31; x > 0; exp--) x <<= 1;
+            ptr = (unsigned short *)((((unsigned int)x) >> 19) + 0xb000);
+            return (exp << 16) | *ptr;
+        }
+
+private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
          *          `uint8_t bits = PropWare::Utility::count_bits(0x03);`

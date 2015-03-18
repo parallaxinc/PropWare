@@ -3,13 +3,14 @@
  *
  * @author  David Zemon
  *
- * Hardware:
- *      SD card connected with the following pins:
+ * Prerequisites:
+ *      - SD card connected with the following pins:
  *          - MOSI = P0
  *          - MISO = P1
  *          - SCLK = P2
  *          - CS   = P4
- *      FAT16 or FAT32 Filesystem on the first partition of the SD card
+ *      - FAT16 or FAT32 Filesystem on the first partition of the SD card
+ *      - File named "fat_test.txt" in this directory should be loaded into the root directory
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -35,6 +36,7 @@
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
+#include <PropWare/staticstringbuilder.h>
 
 using namespace PropWare;
 
@@ -55,12 +57,19 @@ void error_checker (const ErrorCode err) {
     else if (Filesystem::BEG_ERROR <= err && err <= Filesystem::END_ERROR)
         FatFS::print_error_str(pwOut, (const Filesystem::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
-        pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)" CRLF, err - FatFS::BEG_ERROR, err);
+        pwOut << "No print string yet for FatFS's error #" << err - FatFS::BEG_ERROR << " (raw = " << err << ")\n";
+    else if (err)
+        pwOut << "Unknown error: " << err << '\n';
 }
 
 SETUP {
+    PropWare::ErrorCode err;
     testable = new FatFileReader(*g_fs, FILE_NAME);
-    testable->open();
+    err = testable->open();
+    if (err) {
+        MESSAGE("Setup failed!");
+        error_checker(err);
+    }
 }
 
 TEARDOWN {
@@ -109,9 +118,57 @@ TEST(SafeGetChar) {
 
     char c;
     err = testable->safe_get_char(c);
-    check_errors(err);
+    error_checker(err);
     ASSERT_EQ_MSG(0, err);
-    ASSERT_NEQ_MSG('\0', c);
+    ASSERT_EQ_MSG('/', c);
+
+    tearDown();
+}
+
+TEST(Tell) {
+    PropWare::ErrorCode err;
+    setUp();
+
+    for (int i = 0; i < 1024; ++i) {
+        char c;
+        err = testable->safe_get_char(c);
+        error_checker(err);
+        ASSERT_EQ_MSG(0, err);
+
+        ASSERT_EQ_MSG(i + 1, testable->tell());
+    }
+
+    tearDown();
+}
+
+TEST(Seek) {
+    const int SEEK_ITERATIONS = 2048;
+    char stringBuffer[SEEK_ITERATIONS];
+    StaticStringBuilder stringBuilder(stringBuffer);
+    PropWare::ErrorCode err;
+    setUp();
+
+    for (int i = 0; i < SEEK_ITERATIONS - 1; ++i) {
+        char c;
+        err = testable->safe_get_char(c);
+        error_checker(err);
+        ASSERT_EQ_MSG(0, err);
+        stringBuilder.put_char(c);
+    }
+
+    srand(CNT);
+    for (int i = 0; i < 128; ++i) {
+        const int charIndex = rand() % (SEEK_ITERATIONS - 1);
+        err = testable->seek(charIndex, File::BEG);
+        error_checker(err);
+        ASSERT_EQ_MSG(0, err);
+
+        char actual;
+        err = testable->safe_get_char(actual);
+        error_checker(err);
+        ASSERT_EQ_MSG(0, err);
+        ASSERT_EQ_MSG(stringBuilder.to_string()[charIndex], actual);
+    }
 
     tearDown();
 }
@@ -132,6 +189,8 @@ int main () {
     RUN_TEST(ConstructorDestructor);
     RUN_TEST(OpenClose);
     RUN_TEST(SafeGetChar);
+    RUN_TEST(Tell);
+    RUN_TEST(Seek);
 
     COMPLETE();
 }

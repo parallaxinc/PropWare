@@ -1,5 +1,8 @@
-C++ Crash Course
-================
+Appendix B: C++ Crash Course
+============================
+
+[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)<br />
+[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)
 
 For those coming from a background in Parallax's Spin language, your only concern will be syntax: the C-family of 
 languages is wildly different. Don't worry - it's 
@@ -8,7 +11,7 @@ not hard.
 For C developers with no background in Spin, the biggest hurdle will be learning about the famed "object-oriented 
 programming" (still not hard).
 
-There are lots of code examples throughout PropWare and libpropeller's source code, so please feel free to peruse them.
+There are lots of code examples throughout %PropWare and libpropeller's source code, so please feel free to peruse them.
 You should also take advantage of the example projects provided in the `Examples` directory.
 
 C-Family Syntax
@@ -77,7 +80,7 @@ C-Family Syntax
       printf("The current value of `i`: %d", i);
   }
   
-  // C must have the index declared prior to the loop
+  // C typically has (and sometimes requires) the index declared prior to the loop
   int i;
   for (i = 0; i < 10; i++) {
       printf("The current value of `i`: %d", i);
@@ -173,3 +176,6 @@ Now that both classes are surrounded by a namespace, our code can use both class
 Including Separate Files
 ------------------------
 Coming soon!
+
+[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)<br />
+[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)

@@ -35,32 +35,32 @@
 void _runPropWareUnitTest (bool (*test) (void), const char testName[],
                            const bool expectValue, bool *result) {
     if (expectValue == test())
-        pwOut.printf("#\tSUCCESS: %s" CRLF, testName);
+        pwOut << "#\tSUCCESS: " << testName << '\n';
     else {
-        pwOut.printf("#\t***FAIL: %s" CRLF, testName);
+        pwOut << "#\t***FAIL: " << testName << '\n';
         *result = false;
     }
 }
 
 #define MESSAGE(...) \
     pwOut.printf("#\t- " __VA_ARGS__); \
-    pwOut.puts(CRLF)
+    pwOut << '\n';
 
 #define START(testSuiteName) \
     bool passed = true; \
     const char suiteName[] = #testSuiteName; \
-    pwOut.printf( \
+    pwOut.println( \
         "####################" \
         "####################" \
         "####################" \
-        "####################" CRLF); \
-    pwOut.printf("# Test suite: %s" CRLF, suiteName)
+        "####################"); \
+    pwOut << "# Test suite: " << suiteName << '\n';
 
 #define COMPLETE() \
     if (!passed) \
-        pwOut.printf("# Test FAILURE" CRLF); \
+        pwOut.println("# Test FAILURE"); \
     else \
-        pwOut.print("done..." CRLF); \
+        pwOut.println("done..."); \
     return 0
 
 #define TEST(testName) \
@@ -78,73 +78,68 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 
 #define ASSERT(actual) \
     if (!(actual)) { \
+        pwOut << "#\t\t`ASSERT(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_TRUE(actual) \
-    ASSERT(true == (actual))
+    if (true == !(actual)) { \
+        pwOut << "#\t\t`ASSERT_TRUE(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_FALSE(actual) \
-    ASSERT(false == (actual))
+    if (false == !(actual)) { \
+        pwOut << "#\t\t`ASSERT_FALSE(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_NULL(actual) \
-    ASSERT_TRUE(NULL == (int) (actual))
+    if (NULL != (actual)) { \
+        pwOut << "#\t\t`ASSERT_NULL(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_NOT_NULL(actual) \
-    ASSERT_FALSE(NULL == (int) (actual))
+    if (NULL == (actual)) { \
+        pwOut << "#\t\t`ASSERT_NULL(" << #actual << ")`\n"; \
+        _tearDown(); \
+        return false; \
+    }
 
 #define ASSERT_EQ(expected, actual) \
     if ((expected) != (actual)) { \
+        pwOut << "#\t\t`ASSERT_EQ(" << #expected << ", " << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NEQ(lhs, rhs) \
     if ((lhs) == (rhs)) { \
+        pwOut << "#\t\t`ASSERT_NEQ(" << #lhs << ", " << #rhs << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
-        pwOut.puts("#\tExpected: `"); \
-        pwOut.print(expected); \
-        pwOut.puts("`; Acutal: `"); \
-        pwOut.print(actual); \
-        pwOut.puts("`" CRLF); \
+        pwOut << "#\tExpected: `" << expected << "`; Acutal: `" << actual << "`\n"; \
+        pwOut << "#\t\t`ASSERT_EQ_MSG(" << #expected << ", " << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NEQ_MSG(lhs, rhs) \
     if ((lhs) == (rhs)) { \
-        pwOut.puts("#\tExpected mismatch. Got: `"); \
-        pwOut.print(lhs); \
-        pwOut.puts("` == `"); \
-        pwOut.print(rhs); \
-        pwOut.puts("`" CRLF); \
+        pwOut << "#\tExpected mismatch. Got: `" << lhs << "` == `" << rhs << "`\n"; \
+        pwOut << "#\t\t`ASSERT_NEQ_MSG(" << #lhs << ", " << #rhs << ")`\n"; \
         _tearDown(); \
         return false; \
     }
-
-#define MSG_IF_FAIL(id, assertion, ...)             \
-    class _AssertionCheck ## id {                   \
-        public:                                     \
-            static bool checkAssert () {            \
-                assertion;                          \
-                _tearDown();                        \
-                return true;                        \
-            }                                       \
-    };                                              \
-                                                    \
-    if (!_AssertionCheck ## id::checkAssert()) {    \
-        MESSAGE(__VA_ARGS__);                       \
-        _tearDown();                                \
-        return false;                               \
-    }
-
-
 
 #define SETUP \
     void setUp ()

@@ -34,21 +34,16 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
 
-/** @name   SPI Extra Code Options
- * @{ */
+/**
+ * @name   SPI Extra Code Options
+ * @{
+ */
 /**
  * Parameter checking within each function call. I recommend you leave this option enabled unless speed is critical
  * <p>
  * DEFAULT: On
  */
 #define SPI_OPTION_DEBUG_PARAMS
-/**
- * Allows for fast send and receive routines without error checking or timing
- * delays; Normal routines still available when enabled
- * <p>
- * DEFAULT: On
- */
-#define SPI_OPTION_FAST
 /**
  * TODO: Figure out why this doesn't work... :(
  * <p>
@@ -77,7 +72,7 @@ extern uint32_t _SPIStartCog (void *arg);
 class SPI : public PrintCapable,
             public ScanCapable {
 #define check_errors_w_str(x, y) \
-        if ((err = x)) {strcpy(this->m_bogusStr, y);return err;}
+        if ((err = x)) {strcpy(this->m_errorInMethod, y);return err;}
 
     public:
         /**
@@ -158,11 +153,8 @@ class SPI : public PrintCapable,
          *          Creating multiple instances of PropWare::SPI allows the user to have multiple, independent SPI
          *          modules for simultaneous communication
          */
-        SPI () {
-            this->m_mailbox = &this->m_bogus;
-            *this->m_mailbox = -1;
-            this->m_cog = -1;
-            this->m_bogusStr = this->m_errorInMethod;
+        SPI () : m_mailbox(-1),
+                 m_cog(-1) {
         }
 
     public:
@@ -206,22 +198,22 @@ class SPI : public PrintCapable,
                 // Start GAS cog
                 // Set the mailbox to 0 (anything other than -1) so that we know
                 // when the SPI cog has started
-                *this->m_mailbox = 0;
-                this->m_cog = PropWare::_SPIStartCog((void *) this->m_mailbox);
+                this->m_mailbox = 0;
+                this->m_cog = PropWare::_SPIStartCog((void *) &this->m_mailbox);
                 if (!this->is_running())
                     return COG_NOT_STARTED;
 
                 // Pass in all parameters
                 check_errors_w_str(this->wait(), str);
-                *this->m_mailbox = mosi;
+                this->m_mailbox = mosi;
                 check_errors_w_str(this->wait(), str);
-                *this->m_mailbox = Pin::convert(mosi);
+                this->m_mailbox = Pin::convert(mosi);
                 check_errors_w_str(this->wait(), str);
-                *this->m_mailbox = miso;
+                this->m_mailbox = miso;
                 check_errors_w_str(this->wait(), str);
-                *this->m_mailbox = Pin::convert(miso);
+                this->m_mailbox = Pin::convert(miso);
                 check_errors_w_str(this->wait(), str);
-                *this->m_mailbox = sclk;
+                this->m_mailbox = sclk;
             }
 
             check_errors_w_str(this->set_mode(mode), str);
@@ -243,7 +235,7 @@ class SPI : public PrintCapable,
 
             cogstop(this->m_cog);
             this->m_cog = -1;
-            *this->m_mailbox = -1;
+            this->m_mailbox = -1;
 
             return NO_ERROR;
         }
@@ -266,7 +258,7 @@ class SPI : public PrintCapable,
             const uint32_t timeoutCnt = TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
-            while (-1 != *this->m_mailbox)
+            while (-1 != this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < TIMEOUT_WIGGLE_ROOM)
                     return TIMEOUT;
 
@@ -280,7 +272,7 @@ class SPI : public PrintCapable,
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        PropWare::ErrorCode set_mode (const Mode mode) const {
+        PropWare::ErrorCode set_mode (const Mode mode) {
             PropWare::ErrorCode err;
             char str[] = "set_mode";
 
@@ -289,10 +281,9 @@ class SPI : public PrintCapable,
 
             // Wait for SPI cog to go idle
             check_errors_w_str(this->wait(), str);
-
-            *this->m_mailbox = SET_MODE;
+            this->m_mailbox = SET_MODE;
             check_errors_w_str(this->wait(), str);
-            *this->m_mailbox = mode;
+            this->m_mailbox = mode;
 
             return NO_ERROR;
         }
@@ -305,7 +296,7 @@ class SPI : public PrintCapable,
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        PropWare::ErrorCode set_bit_mode (const BitMode bitmode) const {
+        PropWare::ErrorCode set_bit_mode (const BitMode bitmode) {
             PropWare::ErrorCode err;
             char str[] = "set_bit_mode";
 
@@ -317,9 +308,9 @@ class SPI : public PrintCapable,
 #endif
 
             check_errors_w_str(this->wait(), str);
-            *this->m_mailbox = SET_BITMODE;
+            this->m_mailbox = SET_BITMODE;
             check_errors_w_str(this->wait(), str);
-            *this->m_mailbox = bitmode;
+            this->m_mailbox = bitmode;
 
             return NO_ERROR;
         }
@@ -332,7 +323,7 @@ class SPI : public PrintCapable,
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode set_clock (const int32_t frequency) const {
+        PropWare::ErrorCode set_clock (const int32_t frequency) {
             PropWare::ErrorCode err;
             char str[] = "set_clock";
 
@@ -346,11 +337,11 @@ class SPI : public PrintCapable,
             // Wait for SPI cog to go idle
             check_errors_w_str(this->wait(), str);
             // Prepare cog for clock frequency change
-            *this->m_mailbox = SET_FREQ;
+            this->m_mailbox = SET_FREQ;
             // Wait for the ready command
             check_errors_w_str(this->wait_specific(SET_FREQ), str);
             // Send new frequency
-            *this->m_mailbox = (CLKFREQ / frequency) >> 1;
+            this->m_mailbox = (CLKFREQ / frequency) >> 1;
 
             return NO_ERROR;
         }
@@ -362,7 +353,7 @@ class SPI : public PrintCapable,
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode get_clock (int32_t *frequency) const {
+        PropWare::ErrorCode get_clock (int32_t *frequency) {
             PropWare::ErrorCode err;
             char str[] = "get_clock";
 
@@ -376,7 +367,7 @@ class SPI : public PrintCapable,
             check_errors_w_str(this->wait(), str);
 
             // Call GAS function
-            *this->m_mailbox = GET_FREQ;
+            this->m_mailbox = GET_FREQ;
             check_errors_w_str(this->wait_specific(GET_FREQ), str);
 
             this->read_par(frequency);
@@ -397,7 +388,7 @@ class SPI : public PrintCapable,
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode shift_out (uint8_t bits, uint32_t value) const {
+        PropWare::ErrorCode shift_out (uint8_t bits, uint32_t value) {
             PropWare::ErrorCode err;
             char str[] = "shift_out";
 
@@ -413,14 +404,14 @@ class SPI : public PrintCapable,
             check_errors_w_str(this->wait(), str);
 
             // Call GAS function
-            *this->m_mailbox = SEND | (bits << BITS_OFFSET);
+            this->m_mailbox = SEND | (bits << BITS_OFFSET);
             check_errors_w_str(
                     this->wait_specific(
                             SEND | (bits << BITS_OFFSET)), str);
 
             // Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to
             // say the value being passed is not -1?
-            *this->m_mailbox = (atomic_t) (value & (~BIT_31));
+            this->m_mailbox = (atomic_t) (value & (~BIT_31));
 
             return NO_ERROR;
         }
@@ -434,7 +425,7 @@ class SPI : public PrintCapable,
          * @return      Returns 0 upon success, otherwise error code
          */
         template<typename T>
-        PropWare::ErrorCode shift_in (const uint8_t bits, T *data) const {
+        PropWare::ErrorCode shift_in (const uint8_t bits, T *data) {
             PropWare::ErrorCode err;
             const char str[] = "shift_in";
 
@@ -450,7 +441,7 @@ class SPI : public PrintCapable,
             check_errors_w_str(this->wait(), str);
 
             // Call GAS function
-            *this->m_mailbox = READ | (bits << BITS_OFFSET);
+            this->m_mailbox = READ | (bits << BITS_OFFSET);
 
             // Read in parameter
             check_errors_w_str(this->read_par(data), str);
@@ -458,7 +449,6 @@ class SPI : public PrintCapable,
             return NO_ERROR;
         }
 
-#ifdef SPI_OPTION_FAST
         /**
          * @brief       Send a value out to a peripheral device
          *
@@ -472,19 +462,18 @@ class SPI : public PrintCapable,
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode shift_out_fast (uint8_t bits, uint32_t value) const {
+        PropWare::ErrorCode shift_out_fast (uint8_t bits, uint32_t value) {
             // NOTE: No debugging within this function to allow for fastest possible execution time
             // Wait to ensure the SPI cog is in its idle state
             this->wait();
 
             // Call GAS function
-            *this->m_mailbox = SEND_FAST
-                    | (bits << BITS_OFFSET);
+            this->m_mailbox = SEND_FAST | (bits << BITS_OFFSET);
             this->wait();
 
             // Pass parameter in; Bit 31 is cleared to indicate data is being sent. Without this limitation, who's to
             // say the value being passed is not -1?
-            *this->m_mailbox = (atomic_t) (value & (~BIT_31));
+            this->m_mailbox = (atomic_t) (value & (~BIT_31));
 
             return NO_ERROR;
         }
@@ -499,19 +488,19 @@ class SPI : public PrintCapable,
          * @param[out]  *data   Received data will be stored at this address
          */
         template<typename T>
-        PropWare::ErrorCode shift_in_fast (const uint8_t bits, T *data) const {
+        PropWare::ErrorCode shift_in_fast (const uint8_t bits, T *data) {
             // Wait until idle state, then send function and mode bits
             this->wait();
-            *this->m_mailbox = READ_FAST | (bits << BITS_OFFSET);
+            this->m_mailbox = READ_FAST | (bits << BITS_OFFSET);
 
             // Wait for a value to be written
-            while (-1 == *this->m_mailbox)
+            while (-1 == this->m_mailbox)
                 waitcnt(TIMEOUT_WIGGLE_ROOM + CNT);
 
-            *data = *this->m_mailbox;
+            *data = this->m_mailbox;
 
             // Signal that value is saved and GAS cog can continue execution
-            *this->m_mailbox = -1;
+            this->m_mailbox = -1;
 
             return NO_ERROR;
         }
@@ -522,23 +511,22 @@ class SPI : public PrintCapable,
          * @param[out]  *addr       First hub address where the data should be written
          * @param[in]   blocking    When set to non-zero, function will not return until the data transfer is complete
          */
-        PropWare::ErrorCode shift_in_sector (const uint8_t addr[], const uint8_t blocking) const {
+        PropWare::ErrorCode shift_in_sector (const uint8_t addr[], const uint8_t blocking) {
             this->wait();
-            *this->m_mailbox = READ_SECTOR;
+            this->m_mailbox = READ_SECTOR;
             this->wait();
-            *this->m_mailbox = (atomic_t) addr;
+            this->m_mailbox = (atomic_t) addr;
             if (blocking)
                 return this->wait();
             else
                 return NO_ERROR;
         }
-#endif
 
-        void put_char (const char c) const {
+        void put_char (const char c) {
             this->shift_out(8, (uint32_t) c);
         }
 
-        void puts (const char string[]) const {
+        void puts (const char string[]) {
             char *sPtr = (char *) string;
             while (sPtr)
                 this->put_char(*sPtr++);
@@ -557,53 +545,47 @@ class SPI : public PrintCapable,
          * @param[in]   err         Error number used to determine error string
          */
         void print_error_str (const Printer *printer, const ErrorCode err) const {
-            char str[] = "SPI Error %u: %s" CRLF;
+            const char str[] = "SPI Error ";
+            const int relativeErr = err - BEG_ERROR;
 
             switch (err) {
                 case INVALID_PIN:
-                    printer->printf(str, (err - BEG_ERROR),
-                            "Invalid pin");
+                    *printer << str << relativeErr << ": Invalid pin\n";
                     break;
                 case INVALID_MODE:
-                    printer->printf(str, (err - BEG_ERROR),
-                            "Invalid mode");
+                    *printer << str << relativeErr << ": Invalid mode\n";
                     break;
                 case INVALID_PIN_MASK:
-                    printer->printf(str, (err - BEG_ERROR),
-                            "Invalid pin mask");
+                    *printer << str << relativeErr << ": Invalid pin mask\n";
                     break;
                 case TOO_MANY_BITS:
-                    printer->printf(str, (err - BEG_ERROR),
-                                    "Incapable of handling so many bits in an argument");
+                    *printer << str << relativeErr << ": Incapable of handling so many bits in an argument\n";
                     break;
                 case TIMEOUT:
-                    printer->printf("SPI Error %u: %s\n\tCalling function was %s()" CRLF,
-                                    (err - BEG_ERROR), "Timed out during parameter passing",
-                                    this->m_errorInMethod);
+                    *printer << str << relativeErr << ": Timed out during parameter passing\n";
+                    *printer << "\tCalling function was " << this->m_errorInMethod << "()\n";
                     break;
                 case TIMEOUT_RD:
-                    printer->printf(str, (err - BEG_ERROR), "Timed out during parameter read");
+                    *printer << str << relativeErr << ": Timed out during parameter read";
                     break;
                 case COG_NOT_STARTED:
-                    printer->printf(str, (err - BEG_ERROR), "SPI's GAS cog was not started");
+                    *printer << str << relativeErr << ": SPI's GAS cog was not started";
                     break;
                 case MODULE_NOT_RUNNING:
-                    printer->printf(str, (err - BEG_ERROR), "SPI GAS cog not running");
+                    *printer << str << relativeErr << ": SPI GAS cog not running";
                     break;
                 case INVALID_FREQ:
-                    printer->printf(str, (err - BEG_ERROR), "Frequency set too high");
+                    *printer << str << relativeErr << ": Frequency set too high";
                     break;
                 case ADDR_MISALIGN:
-                    printer->printf(str, (err - BEG_ERROR), "Passed in address is miss aligned");
+                    *printer << str << relativeErr << ": Passed in address is miss aligned";
                     break;
                 default:
                     // Is the error an SPI error?
-                    if (err > BEG_ERROR
-                            && err < (BEG_ERROR + END_ERROR))
-                        printer->printf("Unknown SPI error %u\n", (err - BEG_ERROR));
+                    if (err > BEG_ERROR && err < (BEG_ERROR + END_ERROR))
+                        *printer << "Unknown SPI error " << relativeErr << '\n';
                     else
-                        printer->printf("Unknown error %u\n", (err));
-                    break;
+                        *printer << "Unknown error " << err << '\n';
             }
         }
 
@@ -635,27 +617,21 @@ class SPI : public PrintCapable,
          * @brief       Read the value that the SPI cog just shifted in
          *
          * @param[out]  *par    Address to store the parameter
-         * @param[in]   size    Number of bytes allocated to *data; Example:
-         *                        int newVal;
-         *                        spi.read_par(&newVal, sizeof(newVal));
-         *                      Or if using a pointer:
-         *                        int *newVal;
-         *                        spi.read_par(newVal, sizeof(*newVal));
          *
          * @return      Returns 0 upon success, error code otherwise
          */
         template<typename T>
-        PropWare::ErrorCode read_par (T *par) const {
+        PropWare::ErrorCode read_par (T *par) {
             const uint32_t timeoutCnt = TIMEOUT_VAL + CNT;
 
             // Wait for a value to be written
-            while (-1 == *this->m_mailbox)
+            while (-1 == this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < TIMEOUT_WIGGLE_ROOM)
                     return TIMEOUT_RD;
 
-            *par = *this->m_mailbox;
+            *par = this->m_mailbox;
 
-            *this->m_mailbox = -1;
+            this->m_mailbox = -1;
 
             return NO_ERROR;
         }
@@ -671,7 +647,7 @@ class SPI : public PrintCapable,
             const uint32_t timeoutCnt = TIMEOUT_VAL + CNT;
 
             // Wait for GAS cog to read in value and write -1
-            while (value == (uint32_t) *this->m_mailbox)
+            while (value == (uint32_t) this->m_mailbox)
                 if (abs(timeoutCnt - CNT) < TIMEOUT_WIGGLE_ROOM)
                     // Always use return instead of spi_error() for private functions
                     return TIMEOUT;
@@ -683,11 +659,9 @@ class SPI : public PrintCapable,
         /***************************************
          *** Protected Variable Declarations ***
          ***************************************/
-        volatile atomic_t m_bogus;
-        atomic_t          *m_mailbox;
+        volatile atomic_t m_mailbox;
         int8_t            m_cog;
         char              m_errorInMethod[16];
-        char              *m_bogusStr;
     };
 
 }

@@ -54,7 +54,7 @@ void error_checker (const ErrorCode err) {
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
         ((SD *) testable->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
-        pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)" CRLF, err - FatFS::BEG_ERROR, err);
+        pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)\n", err - FatFS::BEG_ERROR, err);
 }
 
 SETUP {

@@ -33,10 +33,10 @@ namespace PropWare {
 class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
 public:
-    FatFileWriter (FatFS &fs, const char name[], const Printer *logger)
-            : File(fs, name, logger),
-              FatFile(fs, name, logger),
-              FileWriter(fs, name, logger) {
+    FatFileWriter (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
+            : File(fs, name, buffer, logger),
+              FatFile(fs, name, buffer, logger),
+              FileWriter(fs, name, buffer, logger) {
     }
 
     PropWare::ErrorCode flush () {

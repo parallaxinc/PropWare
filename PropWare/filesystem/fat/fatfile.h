@@ -281,6 +281,8 @@ class FatFile : virtual public File {
         PropWare::ErrorCode reload_buf () {
             PropWare::ErrorCode err;
 
+            this->m_driver->flush(this->m_buf);
+
             // Set current values to show that the first sector of the file is
             // loaded. SDLoadSectorFromOffset() loads the sector unconditionally
             // before returning so we do not need to load the sector here
@@ -359,7 +361,7 @@ class FatFile : virtual public File {
             this->m_logger->printf("\t\t%s", filename);
             if (SUB_DIR & fileEntry[FILE_ATTRIBUTE_OFFSET])
                 this->m_logger->print('/');
-            this->m_logger->print(CRLF);
+            this->m_logger->println();
         }
 
         /**
@@ -406,14 +408,14 @@ class FatFile : virtual public File {
 
             this->m_logger->println("FAT-specific");
             this->m_logger->println("------------");
-            this->m_logger->printf("\tStarting allocation unit: 0x%08X/%u" CRLF, this->firstTier3, this->firstTier3);
-            this->m_logger->printf("\tCurrent sector (counting from first in file): 0x%08X/%u" CRLF,
+            this->m_logger->printf("\tStarting allocation unit: 0x%08X/%u\n", this->firstTier3, this->firstTier3);
+            this->m_logger->printf("\tCurrent sector (counting from first in file): 0x%08X/%u\n",
                                    this->m_curTier1, this->m_curTier1);
-            this->m_logger->printf("\tCurrent cluster (counting from first in file): 0x%08X/%u" CRLF,
+            this->m_logger->printf("\tCurrent cluster (counting from first in file): 0x%08X/%u\n",
                                    this->m_curTier2, this->m_curTier2);
-            this->m_logger->printf("\tDirectory address (sector): 0x%08X/%u" CRLF, this->m_dirTier1Addr,
+            this->m_logger->printf("\tDirectory address (sector): 0x%08X/%u\n", this->m_dirTier1Addr,
                                    this->m_dirTier1Addr);
-            this->m_logger->printf("\tFile entry offset: 0x%04X" CRLF, this->fileEntryOffset);
+            this->m_logger->printf("\tFile entry offset: 0x%04X\n", this->fileEntryOffset);
 
         }
 

@@ -120,34 +120,34 @@ class SD: public BlockStorage {
         /**
          * @brief   Create a human-readable error string
          *
-         * @param[in]   err     Error number used to determine error string
+         * @param[in]   printer     Printer used for logging the message
+         * @param[in]   err         Error number used to determine error string
          */
         void print_error_str (const Printer &printer, const ErrorCode err) const {
-            const char    str[]         = "SD Error %u: %s" CRLF;
             const uint8_t relativeError = err - BEG_ERROR;
 
             switch (err) {
                 case INVALID_CMD:
-                    printer.printf(str, relativeError, "Invalid command");
+                    printer <<  "SD Error " << relativeError << ": Invalid command\n";
                     break;
                 case READ_TIMEOUT:
-                    printer.printf(str, relativeError, "Timed out during read");
+                    printer <<  "SD Error " << relativeError << ": Timed out during read\n";
                     break;
                 case INVALID_NUM_BYTES:
-                    printer.printf(str, relativeError, "Invalid number of bytes");
+                    printer <<  "SD Error " << relativeError << ": Invalid number of bytes\n";
                     break;
                 case INVALID_RESPONSE:
-                    printer.printf("SD Error %u: %s%u" CRLF, relativeError, "Invalid first-byte response" CRLF
-                                            "\tReceived: ", this->m_firstByteResponse);
+                    printer <<  "SD Error " << relativeError << ": Invalid first-byte response\n";
+                    printer << "\tReceived: " << this->m_firstByteResponse << '\n';
                     this->first_byte_expansion(printer);
                     break;
                 case INVALID_INIT:
-                    printer.printf("SD Error %u: %s" CRLF "\tResponse: %u" CRLF, relativeError,
-                                    "Invalid response during initialization", this->m_firstByteResponse);
+                    printer <<  "SD Error " << relativeError << ": Invalid response during initialization\n";
+                    printer << "\tResponse: " << this->m_firstByteResponse << '\n';
                     break;
                 case INVALID_DAT_START_ID:
-                    printer.printf("SD Error %u: %s%u" CRLF, relativeError, "Invalid data-start ID" CRLF
-                                            "\tReceived: ", this->m_firstByteResponse);
+                    printer <<  "SD Error " << relativeError << ": Invalid data-start ID\n";
+                    printer << "\tReceived: " << this->m_firstByteResponse << '\n';
                     break;
                 default:
                     return;
@@ -158,7 +158,7 @@ class SD: public BlockStorage {
          * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
          *
          * @param[in]   address     Number of bytes to send
-         * @param[out]  dat[]       Location in chip memory to store data block;
+         * @param[out]  buf[]       Location in chip memory to store data block;
          *                          If NULL is sent, the default internal buffer
          *                          will be used
          *
@@ -514,11 +514,7 @@ class SD: public BlockStorage {
                     }
 #else
                     while (bytes--) {
-#ifdef SPI_OPTION_FAST
                         check_errors(this->m_spi->shift_in_fast(8, dat++));
-#else
-                        check_errors(this->m_spi->shift_in(8, dat++));
-#endif
                     }
 #endif
                     // Read two more bytes for checksum - throw away data
@@ -579,11 +575,7 @@ class SD: public BlockStorage {
 
                 // Send all bytes
                 while (bytes--) {
-#ifdef SPI_OPTION_FAST
                     check_errors(this->m_spi->shift_out_fast(8, *(dat++)));
-#else
-                    check_errors(this->m_spi->shift_out(8, *(dat++)));
-#endif
                 }
 
                 // Receive and digest response token
@@ -620,22 +612,22 @@ class SD: public BlockStorage {
 
         void first_byte_expansion(const Printer &printer) const {
             if (BIT_0 & this->m_firstByteResponse)
-                printer.puts("\t0: Idle" CRLF);
+                printer.puts("\t0: Idle\n");
             if (BIT_1 & this->m_firstByteResponse)
-                printer.puts("\t1: Erase reset" CRLF);
+                printer.puts("\t1: Erase reset\n");
             if (BIT_2 & this->m_firstByteResponse)
-                printer.puts("\t2: Illegal command" CRLF);
+                printer.puts("\t2: Illegal command\n");
             if (BIT_3 & this->m_firstByteResponse)
-                printer.puts("\t3: Communication CRC error" CRLF);
+                printer.puts("\t3: Communication CRC error\n");
             if (BIT_4 & this->m_firstByteResponse)
-                printer.puts("\t4: Erase sequence error" CRLF);
+                printer.puts("\t4: Erase sequence error\n");
             if (BIT_5 & this->m_firstByteResponse)
-                printer.puts("\t5: Address error" CRLF);
+                printer.puts("\t5: Address error\n");
             if (BIT_6 & this->m_firstByteResponse)
-                printer.puts("\t6: Parameter error" CRLF);
+                printer.puts("\t6: Parameter error\n");
             if (BIT_7 & this->m_firstByteResponse)
                 printer.puts("\t7: Something is really screwed up. This "
-                              "should always be 0." CRLF);
+                              "should always be 0.\n");
         }
 
     private:

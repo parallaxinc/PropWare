@@ -1,24 +1,27 @@
-Creating a PropWare Application
-===============================
+Chapter 4: Create a PropWare Application
+================================================
 
-PropWare makes building and running applications very easy. Below are three different methods for building and
-deploying a PropGCC application using PropWare.
+[<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)<br />
+[>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)
+
+%PropWare makes building and running applications easy. Below are instructions for creating a new project, followed by
+importing that project into your favorite IDE.
 
 Starting a New Project
 ----------------------
-1. The defining piece of a PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
-   standards. Full details on CMake files in relation to PropWare can be found on the 
-   [CMake For PropWare](./md_CMakeForPropware.html) page, but a typical use case is provided below.
+1. The defining piece of a %PropWare project is the `CMakeLists.txt` file. It must be named "CMakeLists.txt" as per CMake
+   standards. Full details on CMake files in relation to %PropWare can be found in
+   [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html), but a typical use case with four 
+   source code files is provided below.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-   ################################################################################
-   ### Template code. Do not modify                                               #
-                                                                                  #
-   cmake_minimum_required (VERSION 3.0.0)                                         #
-   # Aside from cmake_minimum_required, this must be the first two lines          #
-   # of the file                                                                  #
-   file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
-   include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
-   ################################################################################
+   ####################################################################################
+   ### Template code. Do not modify                                                   #
+                                                                                      #
+   cmake_minimum_required (VERSION 3.0.0)                                             #
+   # Aside from cmake_minimum_required, this must be the first two lines of the file  #
+   file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                              #
+   include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                               #
+   ####################################################################################
 
    set(BOARD QUICKSTART)
    set(MODEL cmm)
@@ -44,11 +47,11 @@ Starting a New Project
       press any of them once. Do not use Control-C.
   * `make run`: The `run` target will load your program to EEPROM and return to command prompt.
 
-Importing PropWare Projects into Eclipse (and other IDEs)
+Importing %PropWare Projects into Eclipse (and other IDEs)
 ---------------------------------------------------------
 1. For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
    `Eclipse IDE for C/C++ Developers` [here](http://www.eclipse.org/downloads/) and download the appropriate package
-2. Create your [CMakeLists.txt file](./md_CMakeForPropware.html).
+2. Create your [CMakeLists.txt file](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
 3. For any source file that does not yet exist, create an empty file in its place. CMake will throw errors if your
    CMakeLists.txt file references any non-existing source files.
 4. At the terminal, enter your project's directory and type `cmake -G "Eclipse CDT4 - Unix Makefiles" .`. Notice that
@@ -61,12 +64,15 @@ Importing PropWare Projects into Eclipse (and other IDEs)
   3. On the next page, ensure `Select root directory:` is selected at the top and then click `Browse...`. Find the
      parent folder of your project (for example, if your project is `C:\Users\David\Hello`, then choose 
      `C:\Users\David`).
-  4. At least one project should populate in the box below. Ensure your new PropWare project and only your new
-     PropWare project is selected.
+  4. At least one project should populate in the box below. Ensure your new %PropWare project and only your new
+     %PropWare project is selected.
   5. Eclipse will import all necessary settings as soon as you click `Finish`. Compile flags, include directories and
      required source files will all be ready to go.
 6. Compiling your program and loading to EEPROM can be done easily from within Eclipse. Compiling is as simple as 
    clicking the hammer icon or using `Control-B`. Writing to EEPROM requires creating a new Run Configuration.
-  - I do not recommend attempting to create a Run Configuration for PropWare's `debug` configuration. PropGCC's 
+  - I do not recommend attempting to create a Run Configuration for %PropWare's `debug` configuration. PropGCC's 
     terminal does not play well with either Eclipse or JetBrains CLion. Use the terminal for debugging, exactly as
     described in "Starting a New Project" step 4.
+
+[<< Chapter 3: Run an Example Project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)<br />
+[>> Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)

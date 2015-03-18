@@ -322,7 +322,7 @@ class HD44780 : public PrintCapable {
          * Via a series of calls to HD44780::put_char, prints each character
          * individually
          */
-        void puts (const char string[]) const {
+        void puts (const char string[]) {
             const char *s = (char *) string;
 
             while (*s) {
@@ -334,7 +334,7 @@ class HD44780 : public PrintCapable {
         /**
          * @see PropWare::PrintCapable::put_char
          */
-        void put_char (const char c) const {
+        void put_char (const char c) {
             // For manual new-line characters...
             if ('\n' == c) {
                 this->m_curPos->row++;

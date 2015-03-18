@@ -50,7 +50,7 @@ const PropWare::SPI::BitMode BITMODE = PropWare::SPI::MSB_FIRST;
  * @brief   Write "Hello world!" out via SPI protocol and receive an echo
  */
 int main () {
-    char string[] = "Hello world!" CRLF;  // Create the test string
+    char string[] = "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     char in;    // Create an input variable to store received values from SPI
     PropWare::SPI *spi = PropWare::SPI::get_instance();
@@ -107,7 +107,7 @@ void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
         spi->print_error_str(&pwOut, (PropWare::SPI::ErrorCode) err);
     } else
-        pwOut.printf("Unknown error %u" CRLF, err);
+        pwOut.printf("Unknown error %u\n", err);
 
     while (1) {
         debugLEDs.write(err);

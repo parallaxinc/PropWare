@@ -1,14 +1,16 @@
-Installation
-============
+Chapter 1: Installation
+=======================
+
+[>> Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)
 
 Microsoft Windows
 -----------------
 1. Download [PropWare](https://github.com/DavidZemon/PropWare) to your computer. You may use
    [git](http://msysgit.github.io/) to download the [source code](https://github.com/DavidZemon/PropWare) or
    you may download a [binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip).
-2. Extract the contents to a directory without any spaces. For instance, `C:\Users\David\PropWare` would be an excellent
+2. Extract the contents to a directory without any spaces. For instance, `C:\Users\David\%PropWare` would be an excellent
    choice. However, `C:\Documents and Settings\David` would be an awful choice. For Windows XP users, I am sorry. You
-   may need to use a path such as `C:\PropWare`.
+   may need to use a path such as `C:\%PropWare`.
 3. Download Python 2.7 or later. At the time of this writing,
    [Python 3.4.1](https://www.python.org/ftp/python/3.4.1/python-3.4.1.msi) is the latest Windows revision. Refer to the
    python.org [downloads page](https://www.python.org/downloads/windows/) for the complete list of downloads.
@@ -16,8 +18,8 @@ Microsoft Windows
    to install, ensure you have `Add python.exe to Path` set to install to disk.
    ![Python installation window](python_install.png)
 5. Run `INSTALL.py`:
-   * Open the PropWare root directory in your file browser
-   * Open the `util` directory within PropWare
+   * Open the %PropWare root directory in your file browser
+   * Open the `util` directory within %PropWare
    * While holding `shift`, right-click on in the file browser window (not on a file) and choose `Open command window
     here`
     ![Right-click menu to open command window](open_cmd_window.png)
@@ -43,10 +45,12 @@ You might see some questions pop up - just answer them as your heart desires. Si
 [let me know](mailto:david@zemon.name) if there is anything confusing about my wording.
 
 When you're all done, exit the terminal. If you opted to set root environment variables, you'll need to reboot your 
-computer before PropWare is usable.
+computer before %PropWare is usable.
 
 Mac OSX
 -------
 I have _no_ idea what will happen on a Mac. I don't own a Mac. If you are reading this and you have a Mac, I'd greatly
 appreciate you [getting in contact with me](mailto:david@zemon.name) to help me iron out any existing bugs in the 
 installation script. You don't have to have any prerequisite knowledge to help - I just need something to test on.
+
+[>> Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)

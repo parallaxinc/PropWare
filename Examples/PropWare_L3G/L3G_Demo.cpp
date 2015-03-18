@@ -63,12 +63,12 @@ int main () {
     while (1) {
         if ((err = gyro.read_all(gyroVals)))
             error(err);
-//        print("Gyro vals DPS... X: %2.3f\tY: %2.3f\tZ: %2.3f" CRLF,
+//        print("Gyro vals DPS... X: %2.3f\tY: %2.3f\tZ: %2.3f\n",
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::X]),
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::Y]),
 //              gyro.convert_to_dps(gyroVals[PropWare::L3G::Z]));
 
-        pwOut.printf("Gyro vals... X: %d\tY: %d\tZ: %d" CRLF,
+        pwOut.printf("Gyro vals... X: %d\tY: %d\tZ: %d\n",
               gyroVals[PropWare::L3G::X],
               gyroVals[PropWare::L3G::Y],
               gyroVals[PropWare::L3G::Z]);

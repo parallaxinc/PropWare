@@ -45,8 +45,6 @@ namespace PropWare {
 #define check_errors(x)     if ((err = x)) return err
 #endif
 
-#define CRLF                "\r\n"
-
 #define SECOND              ((uint32_t) CLKFREQ)
 #define MILLISECOND         ((uint32_t) (CLKFREQ / 1000))
 #define MICROSECOND         ((uint32_t) (MILLISECOND / 1000))
@@ -110,12 +108,6 @@ typedef enum {
     WORD_0 = 0xffff,
     WORD_1 = 0xffff0000
 } Word;
-
-template<typename T>
-class Comparator {
-    public:
-        virtual bool valid (const T *lhs) const = 0;
-};
 
 }
 

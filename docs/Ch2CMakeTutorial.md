@@ -1,5 +1,8 @@
-CMake & Make Tutorial
-=====================
+Chapter 2: CMake & Make Tutorial
+================================
+
+[<< Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)<br />
+[>> Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)
 
 What is CMake?
 --------------
@@ -31,29 +34,32 @@ Breakdown:
   more files named "Makefile".
    
   The first argument, `-G "Unix Makefiles"`, tells CMake exactly what flavor of Make we're using. As reasoned in the
-  `What is Make?` section above, we will always be using `Unix Makefiles` for PropWare projects.
+  `What is Make?` section above, we will always be using `Unix Makefiles` for %PropWare projects.
 
   The second argument is the source directory of your project. This directory must contain a `CMakeLists.txt` file as
-  described in step 1 of [Creating a PropWare Application](./md_AppDeployment.html).
-  I prefer to do "out of source" builds - which means I create a new folder within my project where all of my generated
-  and compiled files will end up. Generally, I name this folder `bin`. With this simple case, the complete command to
-  generate the Makefiles would be `cmake -G "Unix Makefiles" ..`. The `..` is a cross-platform way of saying "the
-  directory above me". For reference: `.` refers to the current directory.
+  described in step 1 of 
+  [Creating a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html). I prefer to run
+  "out of source" builds - which means I create a new folder within my project where all of my generated and compiled
+  files will end up. Generally, I name this folder `bin`. With this simple case, the complete command to generate the
+  Makefiles would be `cmake -G "Unix Makefiles" ..`. The `..` is a cross-platform way of saying "the directory above
+  me". For reference: `.` refers to the current directory.
   
 * `make`: Make is old, flexible, and great. CMake has done all the work though and no extra arguments are needed for
   this command. After successfully running CMake, simply type `make` - character for character. When it
   completes successfully, your project will have been compiled into its binary format, ready to be programmed to your
-  Propeller. PropWare provides some extra "targets" to make your life even easier though. Try typing `make debug` to 
+  Propeller. %PropWare provides some extra "targets" to make your life even easier though. Try typing `make debug` to 
   write your program to RAM and open a terminal (like Parallax's PST) or `make run` to write your program to EEPROM.
   
 CMakeLists.txt
 --------------
 
-As described in [Creating a PropWare Application](./md_AppDeployment.html), the CMakeLists.txt file is required for all
-CMake (and therefore PropWare) applications. The file must be named "CMakeLists.txt" - character for character.
+As described in [Chapter 4](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html), the CMakeLists.txt file is 
+required for all CMake (and therefore %PropWare) applications. The file must be named "CMakeLists.txt" - character for 
+character. 
 
 The contents of the file are simple - many useful tips can be gleaned from both 
-[Creating a PropWare Application](./md_AppDeployment.html) and [CMake for PropWare](./md_CMakeForPropware.html).
+[Creating a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html) and 
+[CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
 
 CMakeCache.txt
 --------------
@@ -80,7 +86,7 @@ that you made some changes to your code and Make hasn't picked them up (and ther
 Make the "clean" target will delete all compiled objects and let you start over (`make clean`). You can remove old files
 and recompile new ones in a single step with `make clean all` (order matters).
 
-PropWare provides two extra targets for your convenience. 
+%PropWare provides two extra targets for your convenience. 
 * The `debug` target will compile your code, write it to your Propeller's HUB RAM and then start a serial terminal to
   aid in debugging your application. When you are finished, press any of the arrow keys on your keyboard (don't use 
   `Control-C` - it doesn't seem to like that) and you will be returned to your normal command prompt.
@@ -93,3 +99,6 @@ After generating your Makefiles, try adding `VERBOSE=1` to your Make command. Th
 to the terminal before running it - rather than printing only a short summary of what is being done. The output is very 
 verbose and can be cumbersome to read - but it is invaluable when determining what went wrong with your compilation.
 Full command: `make VERBOSE=1`
+
+[<< Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)<br />
+[>> Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)

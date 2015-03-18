@@ -1,27 +1,27 @@
 /**
-* @file        printer.h
-*
-* @author      David Zemon
-*
-* @copyright
-* The MIT License (MIT)<br>
-* <br>Copyright (c) 2013 David Zemon<br>
-* <br>Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"), to
-* deal in the Software without restriction, including without limitation the
-* rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-* sell copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:<br>
-* <br>The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.<br>
-* <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * @file        printer.h
+ *
+ * @author      David Zemon
+ *
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #pragma once
 
@@ -42,22 +42,17 @@ namespace PropWare {
 #define isdigit(x) ('0' <= x && x <= '9')
 
 /**
- * @brief   Container class that has formatting methods for human-readable
- *          output. This class can be constructed and used for easy and
- *          efficient output via any communication protocol.
+ * @brief   Container class that has formatting methods for human-readable output. This class can be constructed and
+ *          used for easy and efficient output via any communication protocol.
  *
  * <b>Printing to Terminal</b>
  * <p>
- * To print to the standard terminal, simply use the existing object,
- * `pwOut`:
+ * To print to the standard terminal, simply use the existing object, `pwOut`:
  *
  * @code
- * pwOut.printf("Hello, world!" CRLF);
+ * pwOut.printf("Hello, world!\n");
  * @endcode
  *
- * The `CRLF` macro is an easy way to add a line break to your
- * print statements.
- * <p>
  * <b>Creating Custom `Printers`</b>
  * <p>
  * To create your own `Printer`, you will first need an instance of
@@ -69,7 +64,7 @@ namespace PropWare {
  * const PropWare::Printer lcdPrinter(&myLCD);
  *
  * lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
- * lcdPrinter.printf("Hello, LCD!" CRLF);
+ * lcdPrinter.printf("Hello, LCD!\n");
  * @endcode
  *
  * Adding `const` in front of the `Printer` declaration allows the
@@ -100,17 +95,37 @@ class Printer {
          * @brief   Construct a Printer instance that will use the given
          *          `*printCapable` instance for sending each character
          *
-         * @param   *printCapable   The address of any initialized communication
-         *                          object such as a PropWare::UART
+         * @param   *printCapable   The address of any initialized communication object such as a PropWare::UART
+         * @param   cooked          True to turn cooked mode on, false to turn it off. See
+         *                          PropWare::Printer::set_cooked for more information
          */
-        Printer (const PrintCapable *printCapable)
-                : m_printCapable(printCapable) {
+        Printer (PrintCapable *printCapable, const bool cooked = true)
+                : m_printCapable(printCapable),
+                  m_cooked(cooked) {
+        }
+
+        /**
+         * @brief       Turn on or off cooked mode.
+         *
+         * Cooked mode prefixes all instances of the newline character (`\n`) with a carriage return (`\r`). This is
+         * required by many serial programs and is the default for PropGCC's serial routines. The default status for
+         * a Printer is also on. This can, however, have adverse affects if you are trying to use a printer to send
+         * raw data between two devices rather than human-readable data.
+         *
+         * Read more on [WikiPedia](http://en.wikipedia.org/wiki/Cooked_mode) about cooked mode_
+         *
+         * @param[in]   cooked  Turn on cooked mode if true, otherwise turn off
+         */
+        void set_cooked (const bool cooked) {
+            this->m_cooked = cooked;
         }
 
         /**
          * @see PropWare::PrintCapable::put_char
          */
         void put_char (const char c) const {
+            if (this->m_cooked && '\n' == c)
+                this->m_printCapable->put_char('\r');
             this->m_printCapable->put_char(c);
         }
 
@@ -118,43 +133,49 @@ class Printer {
          * @see PropWare::PrintCapable::puts
          */
         void puts (const char string[]) const {
-            this->m_printCapable->puts(string);
+            if (this->m_cooked)
+                for (const char *s = string; *s; ++s)
+                    this->put_char(*s);
+            else
+                this->m_printCapable->puts(string);
         }
 
         /**
          * @brief       Print a signed integer in base 10
          *
          * @param[in]   x           Integer to be printed
+         * @param[in]   radix       Radix to print the integer (aka, the base of the number)
          * @param[in]   width       Minimum number of characters to print
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
-         * @param[in]   bypassLock  For internal use only. Leave as default
-         *                          value.
          */
-        void put_int (int32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
+        void put_int (int32_t x, const uint8_t radix = 10, uint16_t width = 0,
+                      const char fillChar = DEFAULT_FILL_CHAR) const {
             if (0 > x)
                 this->put_char('-');
 
-            this->put_uint((uint32_t) abs(x), width, fillChar);
+            this->put_uint((uint32_t) abs(x), radix, width, fillChar);
         }
 
         /**
          * @brief       Print an unsigned integer in base 10
          *
          * @param[in]   x           Integer to be printed
+         * @param[in]   radix       Radix to print the integer (aka, the base of the number)
          * @param[in]   width       Minimum number of characters to print
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
          */
-        void put_uint (uint32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
-            const uint8_t radix = 10;
-            char          buf[sizeof(x) * 8];
-            uint8_t       i = 0;
+        void put_uint (uint32_t x, const uint8_t radix = 10, uint16_t width = 0,
+                       const char fillChar = DEFAULT_FILL_CHAR) const {
+            char    buf[sizeof(x) * 8]; // Max size would be a single character for each bit - aka, bytes * 8
+            uint8_t i = 0;
 
             // Create a character array in reverse order, starting with the
             // tens digit and working toward the largest digit
             do {
-                buf[i] = x % radix + '0';
+                const uint8_t digit = x % radix;
+                buf[i] = digit > 9 ? digit + 'A' - 10 : digit + '0';
                 x /= radix;
                 ++i;
             } while (x);
@@ -167,44 +188,6 @@ class Printer {
 
             // Reverse the character array
             for (uint8_t j = 0; j < i; ++j)
-                this->put_char(buf[i - j - 1]);
-        }
-
-        /**
-         * @brief       Print an integer in base 16 (hexadecimal) with capital
-         *              letters
-         *
-         * @param[in]   x           Integer to be printed
-         * @param[in]   width       Minimum number of characters to print
-         * @param[in]   fillChar    Character to print to the left of the number
-         *                          if the number's width is less than `width`
-         * @param[in]   bypassLock  For internal use only. Leave as default
-         *                          value.
-         */
-        void put_hex (uint32_t x, uint16_t width = 0, const char fillChar = DEFAULT_FILL_CHAR) const {
-            char    buf[sizeof(x)*2];
-            uint8_t temp, j, i = 0;
-
-            while (x) {
-                temp = x & NIBBLE_0;
-                if (temp < 10)
-                    buf[i] = temp + '0';
-                else {
-                    temp -= 10;
-                    buf[i] = temp + 'A';
-                }
-                ++i;
-                x >>= 4;
-            }
-
-            if (width && width > i) {
-                width -= i;
-                while (width--)
-                    this->put_char(fillChar);
-            }
-
-            // Reverse the character array
-            for (j = 0; j < i; ++j)
                 this->put_char(buf[i - j - 1]);
         }
 
@@ -231,7 +214,7 @@ class Printer {
             union convert {
                 float v;
                 int   w;
-            } fval;
+            }    fval;
 
             int m = 0;
             int k = 0;
@@ -240,9 +223,9 @@ class Printer {
             int sign = 0;
             int g    = 0;
 
-            int   reps  = 0;
+            int   reps = 0;
             float scale;
-            int   ctr   = 0;
+            int   ctr  = 0;
 
             int offset;
             int p;
@@ -359,43 +342,51 @@ class Printer {
         }
 
         /**
-         * @see PropWare::Printer::printf(const char *fmt, const T first,
-         * Targs... remaining)
-         */
-        void printf(const char *fmt) const {
-            this->puts(fmt);
-        }
-
-        /**
-         * @brief       Similar in functionality to the C-standard, this method
-         *              supports formatted printing using the following formats:
+         * @brief       Similar in functionality to the C-standard function printf
          *
-         *                - \%i - Signed integer (32-bit max)
-         *                - \%d - Signed integer (32-bit max)
-         *                - \%u - Unsigned integer (32-bit max)
-         *                - \%s - String
-         *                - \%c - Single character
-         *                - \%X - Hexadecimal with capital letters
-         *                - \%f - Floating point number (must have CMake option
-         *                  `PROPWARE_PRINT_FLOAT` enabled)
-         *                - \%\% - Literal percent sign ('\%')
+         * This method supports formatted printing using the following formats:
          *
-         *              A single space will be printed in place of unsupported
-         *              formats
+         *   - \%i - Signed integer (32-bit max)
+         *   - \%d - Signed integer (32-bit max)
+         *   - \%u - Unsigned integer (32-bit max)
+         *   - \%s - String
+         *   - \%c - Single character
+         *   - \%X - Hexadecimal with capital letters
+         *   - \%f - Floating point number
+         *   - \%\% - Literal percent sign (\%)
+         *
+         * A single space will be printed in place of unsupported formats.
+         *
+         * @warning     Unlike the C-standard printf function, this method will not forcefully cast your parameters to
+         *              the type specified in your format string. If you would like to print an `int` as a character,
+         *              you must cast it in the method call. For instance:
+         *              @code
+         *              const int i = 7;
+         *              pwOut.printf("The %ith letter is %c\n", i, i + 'A' - 1);
+         *              @endcode
+         *              will print `The 7th letter is 71`. Notice that `i` was not cast to a char and printed as `G`.
+         *              Instead, we need to write the above function like so:
+         *              @code
+         *              const int i = 7;
+         *              pwOut.printf("The %ith letter is %c\n", i, (char) (i + 'A' - 1));
+         *              @endcode
+         *              This is a little more work, but it enables GCC to make excellent optimizations, and doesn't
+         *              require the use of separate `print` and `printi` methods, as Parallax's Simple library does.
+         *
          *
          * @param[in]   *fmt    Format string such as `Hello, %%s!` which can be
          *                      used to print anyone's name in place of `%%s`
-         * @param[in]   ...     Variable number of arguments passed here.
-         *                      Continuing with the `Hello, %%s!` example, a
-         *                      single argument could be passed such as:<br>
-         *                        `pwOut.printf("Hello, %s!", "David");`<br>
-         *                      and "Hello, David!" would be sent out the serial
-         *                      port. Multiple arguments can be used as well,
-         *                      such as:<br>
-         *                        `pwOut.printf("%i + %i = %i", 2, 3, 2 +
-         *                        3);`<br>
-         *                      Which would print:<br>
-         *                        `2 + 3 = 5`
+         * @param[in]   ...     Variable number of arguments passed here. Continuing with the `Hello, %%s!` example, a
+         *                      single argument could be passed such as:
+         *                      @code
+         *                      pwOut.printf("Hello, %s!", "David");
+         *                      @endcode
+         *                      and `Hello, David!` would be sent out the serial port. Multiple arguments can be used as
+         *                      well, such as:
+         *                      @code
+         *                      pwOut.printf("%i + %i = %i", 2, 3, 2 + 3);
+         *                      @endcode
+         *                      Which would print: `2 + 3 = 5`
          */
         template<typename T, typename... Targs>
         void printf (const char fmt[], const T first, const Targs... remaining) const {
@@ -469,6 +460,13 @@ class Printer {
         }
 
         /**
+         * @overload
+         */
+        void printf (const char *fmt) const {
+            this->puts(fmt);
+        }
+
+        /**
          * @brief       Print a single character
          *
          * @param[in]   c       Character to be printed
@@ -489,76 +487,89 @@ class Printer {
         }
 
         /**
-         * @brief       Print a null-terminated string followed by a newline (CRLF)
+         * @brief       Print a null-terminated string followed by a newline ('\n')
          *
          * @param[in]   string[]    String to be printed
          */
         void println (const char string[]) const {
             this->puts(string);
-            this->puts(CRLF);
+            this->put_char('\n');
         }
 
         /**
-         * @brief   Print a newline (CRLF)
+         * @brief   Print a newline ('\n')
          */
         void println () const {
-            this->puts(CRLF);
+            this->put_char('\n');
         }
 
         /**
          * @brief       Print a boolean as either "true" or "false"
          *
          * @param[in]   b       Boolean to be printed
-         * @param       format
+         * @param       format  Unused
          */
         void print (const bool b, const Format format = DEFAULT_FORMAT) const {
             this->puts(Utility::to_string(b));
         }
 
         /**
-         * @brief       Print a single character
+         * @brief       Print an unsigned integer with the given format
          *
          * @param[in]   x           Unsigned value to be printed
-         * @param       format
+         * @param[in]   format      Format of the integer
          */
         void print (const uint32_t x, const Format format = DEFAULT_FORMAT) const {
-            switch (format.radix) {
-                case 16:
-                    this->put_hex(x, format.width, format.fillChar);
-                    break;
-                default:
-                    this->put_uint(x, format.width, format.fillChar);
-            }
+            this->put_uint(x, format.radix, format.width, format.fillChar);
         }
 
         /**
          * @brief       Print a single character
          *
          * @param[in]   x           Unsigned value to be printed
-         * @param       format
+         * @param[in]   format      Format of the integer
          */
         void print (const int32_t x, const Format format = DEFAULT_FORMAT) const {
-            this->put_int(x, format.width, format.fillChar);
+            this->put_int(x, format.radix, format.width, format.fillChar);
         }
 
         /**
          * @brief       Print a single character
          *
-         * @param[in]   x           Unsigned value to be printed
-         * @param       format
+         * @param[in]   f           Unsigned value to be printed
+         * @param[in]   format      Format of the number
          */
         void print (const double f, const Format format = DEFAULT_FORMAT) const {
             this->put_float(f, format.width, format.precision, format.fillChar);
         }
 
+        /**
+         * @brief   The `<<` operator allows for highly optimized use of the Printer.
+         *
+         * Using the `<<` operator tells GCC _exactly_ what types of arguments are being used at compilation time, and
+         * GCC can therefore include only those functions in the binary. Some similar optimizations can be made with
+         * PropWare::Printer::printf, but not  as many. Unless you need special formatting (such as whitespace
+         * padding or specific widths), your code will be best optimized if you only use this method for printing,
+         * and never PropWare::Printer::printf.
+         *
+         * Converting PropWare::Printer::printf to use the `<<` operator:
+         *
+         * @code
+         * const char name[] = "David";  // My name
+         * const int i = 7;             //
+         * pwOut.printf("Hello, %s! The %dth character of the alphabet is %c.\n", name, i, i + 'A' - 1);
+         * pwOut << "Hello, " << name << "! The " << i << "th character of the alphabet is" << (char) i + 'A' - 1 << ".\n";
+         * @endcode
+         */
         template<typename T>
-        const Printer& operator<< (const T arg) const {
+        const Printer &operator<< (const T arg) const {
             this->print(arg);
             return *this;
         }
 
     protected:
-        const PrintCapable *m_printCapable;
+        PrintCapable *m_printCapable;
+        bool         m_cooked;
 };
 
 }

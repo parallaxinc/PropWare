@@ -27,5 +27,5 @@
 #include <PropWare/uart/simplexuart.h>
 
 const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
-const PropWare::SimplexUART     _g_simplexUart;
+PropWare::SimplexUART           _g_simplexUart;
 const PropWare::Printer         pwOut(&_g_simplexUart);

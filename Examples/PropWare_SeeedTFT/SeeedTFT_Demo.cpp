@@ -22,7 +22,7 @@ int main () {
             PropWare::Pin::P12, PropWare::Pin::P11);
     totalTime = CNT - startTimer;
 
-    pwOut.printf("Initialization time: %u (ms)" CRLF,
+    pwOut.printf("Initialization time: %u (ms)\n",
             totalTime / MILLISECOND);
 
     startTimer = CNT;
@@ -31,7 +31,7 @@ int main () {
     tft.drawString((char *) "Happy!", 0, 200, 2, PropWare::SeeedTFT::WHITE);
     tft.drawString((char *) "Happy!", 0, 240, 4, PropWare::SeeedTFT::WHITE);
     totalTime = CNT - startTimer;
-    pwOut.printf("Text print time: %u (ms)" CRLF, totalTime / MILLISECOND);
+    pwOut.printf("Text print time: %u (ms)\n", totalTime / MILLISECOND);
 
     return 0;
 }

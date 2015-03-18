@@ -57,6 +57,26 @@ class FileReader : virtual public File, virtual public ScanCapable {
             return this->m_length == this->m_ptr;
         }
 
+        inline int32_t tell () const {
+            return this->m_ptr;
+        }
+
+        inline PropWare::ErrorCode seek (const int32_t pos, const SeekDir way) {
+            return this->File::seek(this->m_ptr, pos, way);
+        }
+
+        PropWare::ErrorCode safe_peek (char &c) {
+            const PropWare::ErrorCode err = this->safe_get_char(c);
+            this->m_ptr--;
+            return err;
+        }
+
+        char peek () {
+            const char c = get_char();
+            this->m_ptr--;
+            return c;
+        }
+
         PropWare::ErrorCode get_error () const {
             return this->m_error;
         }
@@ -65,13 +85,11 @@ class FileReader : virtual public File, virtual public ScanCapable {
         FileReader (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
                     const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
-                  m_ptr(0),
-                  m_error(NO_ERROR) {
+                  m_ptr(0) {
         }
 
     protected:
-        uint32_t m_ptr;
-        PropWare::ErrorCode m_error;
+        int32_t m_ptr;
 };
 
 }

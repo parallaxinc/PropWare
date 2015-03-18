@@ -33,32 +33,53 @@ namespace PropWare {
 class File {
     public:
         typedef enum {
-            NO_ERROR = 0
+            /** Successful completion */NO_ERROR  = 0,
+            /** First error code */     BEG_ERROR = Filesystem::BEG_ERROR + 1,
+            /** End of file */          EOF_ERROR,
+            /** Final error code */     END_ERROR = EOF_ERROR
         } ErrorCode;
 
+        typedef enum {
+            /** beginning of the stream */       BEG,
+            /** current position in the stream */CUR,
+            /** end of the stream */             END
+        } SeekDir;
+
     public:
+        /**
+         * Destructor
+         */
         virtual ~File () {
             this->close();
         }
 
         /**
-         * @brief       Open a file
-         *
-         * @param[in]   *buffer     Optional buffer can be used by the file. If no buffer is passed in, the
-         *                          Filesystem's shared buffer will be used by the file. Passing a dedicated buffer
-         *                          is only recommended when opening more than one simultaneously
+         * @brief       Open the file
          *
          * @return      0 upon success, error code otherwise
          */
         virtual PropWare::ErrorCode open () = 0;
 
+        /**
+         * @brief   Close a file - a required step in any workflow that includes opening a file
+         *
+         * @return      0 upon success, error code otherwise
+         */
         virtual PropWare::ErrorCode close () {
 //            return this->flush();
             return NO_ERROR;
         }
 
+        /**
+         * @brief   Flush any modified data back to the SD card
+         *
+         * @return      0 upon success, error code otherwise
+         */
         virtual PropWare::ErrorCode flush () = 0;
 
+        /**
+         * @brief   Return the number of bytes (characters) in the file
+         */
         uint32_t get_length () const {
             return this->m_length;
         }
@@ -71,7 +92,8 @@ class File {
                 : m_logger(&logger),
                   m_driver(fs.get_driver()),
                   m_id(fs.next_file_id()),
-                  m_mod(false) {
+                  m_mod(false),
+                  m_error(NO_ERROR) {
             strcpy(this->m_name, name);
             Utility::to_upper(this->m_name);
 
@@ -81,32 +103,77 @@ class File {
                 this->m_buf = buffer;
         }
 
+        /**
+         * @brief       Move the given pointer to a specified address
+         *
+         * @param[out]  &ptr    Pointer to be moved
+         * @param[in]   pos     Scale that the pointer should be moved
+         * @param[in]   way     Starting position for the movement
+         *
+         * @return      0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode seek (int32_t &ptr, const int32_t pos, const SeekDir way) {
+            int32_t absolute;
+            switch (way) {
+                case BEG:
+                    if (pos > this->m_length || 0 > pos)
+                        return EOF_ERROR;
+                    else {
+                        ptr = pos;
+                        break;
+                    }
+                case CUR:
+                    absolute = pos + ptr;
+                    if (0 > pos || pos > this->m_length)
+                        return EOF_ERROR;
+                    else {
+                        ptr = (uint32_t) absolute;
+                        break;
+                    }
+                case END:
+                    absolute = this->m_length - pos;
+                    if (0 > pos || pos > this->m_length)
+                        return EOF_ERROR;
+                    else {
+                        ptr = (uint32_t) absolute;
+                        break;
+                    }
+            }
+            return NO_ERROR;
+        }
+
+        /**
+         * @brief       Print various data on a file - useful for debugging
+         *
+         * @param[in]   classStr[]      Used to help determine which concrete class called this method
+         * @param[in]   printBlocks     Determine whether or not to print the content of the file's buffer
+         */
         void print_status (const char classStr[] = "File", const bool printBlocks = false) const {
-            this->m_logger->printf("File Status - PropWare::%s@0x%08X" CRLF, classStr, (unsigned int) this);
+            this->m_logger->printf("File Status - PropWare::%s@0x%08X\n", classStr, (unsigned int) this);
             this->m_logger->println("=========================================");
             this->m_logger->println("Common");
             this->m_logger->println("------");
-            this->m_logger->printf("\tFile name: %s" CRLF, this->m_name);
-            this->m_logger->printf("\tLogger: 0x%08X" CRLF, (unsigned int) this->m_logger);
-            this->m_logger->printf("\tDriver: 0x%08X" CRLF, (unsigned int) this->m_driver);
-            this->m_logger->printf("\tBuffer: 0x%08X" CRLF, (unsigned int) this->m_buf);
-            this->m_logger->printf("\tModified: %s" CRLF, Utility::to_string(this->m_mod));
-            this->m_logger->printf("\tFile ID: %u" CRLF, this->m_id);
-            this->m_logger->printf("\tLength: 0x%08X/%u" CRLF, this->m_length, this->m_length);
+            this->m_logger->printf("\tFile name: %s\n", this->m_name);
+            this->m_logger->printf("\tLogger: 0x%08X\n", (unsigned int) this->m_logger);
+            this->m_logger->printf("\tDriver: 0x%08X\n", (unsigned int) this->m_driver);
+            this->m_logger->printf("\tBuffer: 0x%08X\n", (unsigned int) this->m_buf);
+            this->m_logger->printf("\tModified: %s\n", Utility::to_string(this->m_mod));
+            this->m_logger->printf("\tFile ID: %u\n", this->m_id);
+            this->m_logger->printf("\tLength: 0x%08X/%u\n", this->m_length, this->m_length);
 
             this->m_logger->println("Buffer");
             this->m_logger->println("------");
             if (this->m_buf->buf == NULL)
                 this->m_logger->println("\tEmpty");
             else {
-                this->m_logger->printf("\tID: %d" CRLF, this->m_buf->id);
-                this->m_logger->printf("\tModdified: %s" CRLF, Utility::to_string(this->m_buf->mod));
-                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u" CRLF, this->m_buf->curTier2StartAddr,
+                this->m_logger->printf("\tID: %d\n", this->m_buf->id);
+                this->m_logger->printf("\tModdified: %s\n", Utility::to_string(this->m_buf->mod));
+                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", this->m_buf->curTier2StartAddr,
                                        this->m_buf->curTier2StartAddr);
-                this->m_logger->printf("\tCur. sector offset from cluster start: %u" CRLF, this->m_buf->curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u" CRLF, this->m_buf->curTier3,
+                this->m_logger->printf("\tCur. sector offset from cluster start: %u\n", this->m_buf->curTier1Offset);
+                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf->curTier3,
                                        this->m_buf->curTier3);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u" CRLF, this->m_buf->nextTier3,
+                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->nextTier3,
                                        this->m_buf->nextTier3);
                 if (printBlocks)
                     BlockStorage::print_block(*this->m_logger, *this->m_buf);
@@ -122,8 +189,10 @@ class File {
         uint8_t              m_id;
 
         /** When the length of a file is changed, this variable will be set, otherwise cleared */
-        bool       m_mod;
-        uint32_t   m_length;
+        bool    m_mod;
+        int32_t m_length;
+
+        PropWare::ErrorCode m_error;
 };
 
 }
