@@ -122,6 +122,12 @@ class SynchronousPrinter {
             lockclr(this->m_lock);
         }
 
+        void println (const char string[]) const {
+            while(lockset(this->m_lock));
+            this->m_printer->println(string);
+            lockclr(this->m_lock);
+        }
+
         /**
          * @see PropWare::Printer::printf(const char fmt[])
          */
