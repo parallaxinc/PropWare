@@ -1,6 +1,11 @@
 include(${PROPWARE_PATH}/CMakePropellerLibDeps.cmake)
 include(${PROPWARE_PATH}/CMakePropellerSetLinker.cmake)
 
+set(ALL_DEPENDS
+	PropWare_cmm PropWare_lmm PropWare_xmmc PropWare_xmm-split PropWare_xmm-single
+	Libpropeller_cog Libpropeller_cmm Libpropeller_lmm Libpropeller_xmmc Libpropeller_xmm-split Libpropeller_xmm-single
+	Simple_cog Simple_cmm Simple_lmm Simple_xmmc Simple_xmm-split Simple_xmm-single)
+
 macro (create_top_project projectName)
 
     include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
@@ -8,7 +13,9 @@ macro (create_top_project projectName)
     setLinker(${projectName})
 
     # Only add these custom targets if we're not compiling the PropWare library
-    if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
+    if (DEFINED PROPWARE_MAIN_PACKAGE)
+        add_dependencies(${projectName} ${ALL_DEPENDS})
+    else ()
         if (DEFINED BOARD)
             set(BOARDFLAG -b${BOARD})
         endif ()
@@ -45,7 +52,9 @@ macro (create_project projectName)
     setLinker(${projectName})
 
     # Only add these custom targets if we're not compiling the PropWare library
-    if (NOT DEFINED PROPWARE_MAIN_PACKAGE)
+    if (DEFINED PROPWARE_MAIN_PACKAGE)
+        add_dependencies(${projectName} ${ALL_DEPENDS})
+    else ()
         if (DEFINED BOARD)
             set(BOARDFLAG -b${BOARD})
         endif()
