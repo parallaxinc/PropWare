@@ -43,7 +43,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             uint16_t            fileEntryOffset = 0;
 
             // Attempt to find the file
-            if ((err = this->find(this->m_name, &fileEntryOffset)))
+            if ((err = this->find(this->get_name(), &fileEntryOffset)))
                 // Find returned an error; ensure it was EOC...
                 return FatFS::EOC_END == err ? Filesystem::FILENAME_NOT_FOUND : err;
 
@@ -94,10 +94,10 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
         PropWare::ErrorCode safe_get_char (char &c) {
             PropWare::ErrorCode err;
 
-            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->m_sectorSize);
+            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->get_driver()->get_sector_size());
 
             // Determine if the currently loaded sector is what we need
-            const uint32_t sectorOffset = (uint32_t) this->m_ptr >> this->m_fs->m_driver->get_sector_size_shift();
+            const uint32_t sectorOffset = (uint32_t) this->m_ptr >> this->m_fs->get_driver()->get_sector_size_shift();
 
             // Determine if the correct sector is loaded
             if (this->m_buf->id != this->m_id) {

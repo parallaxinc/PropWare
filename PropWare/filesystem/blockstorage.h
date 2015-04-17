@@ -33,19 +33,19 @@ class BlockStorage {
     public:
         struct Buffer {
             /**  Buffer data */
-            uint8_t  *buf;
+            uint8_t      *buf;
             /** Buffer ID - determine who owns the current information */
-            int8_t   id;
-            /** When set, the currently loaded sector has been modified since it was read from the SD card */
-            bool     mod;
+            int          id;
             /** Store the current cluster's starting sector number */
-            uint32_t curTier2StartAddr;
+            uint32_t     curTier2StartAddr;
             /** Store the current sector offset from the beginning of the cluster */
-            uint8_t  curTier1Offset;
+            unsigned int curTier1Offset;
             /** Store the current allocation unit */
-            uint32_t curTier3;
+            uint32_t     curTier3;
             /** Look-ahead at the next FAT entry */
-            uint32_t nextTier3;
+            uint32_t     nextTier3;
+            /** When set, the currently loaded sector has been modified since it was read from the SD card */
+            bool         mod;
         };
 
     public:

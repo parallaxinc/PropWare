@@ -45,13 +45,13 @@ class File {
             /** end of the stream */             END
         } SeekDir;
 
+        static const unsigned int MAX_FILENAME_LENGTH = 32;
+
     public:
         /**
          * Destructor
          */
-        virtual ~File () {
-            this->close();
-        }
+        virtual ~File () {}
 
         /**
          * @brief       Open the file
@@ -66,8 +66,7 @@ class File {
          * @return      0 upon success, error code otherwise
          */
         virtual PropWare::ErrorCode close () {
-//            return this->flush();
-            return NO_ERROR;
+            return this->flush();
         }
 
         /**
@@ -80,7 +79,7 @@ class File {
         /**
          * @brief   Return the number of bytes (characters) in the file
          */
-        uint32_t get_length () const {
+        int32_t get_length () const {
             return this->m_length;
         }
 
@@ -94,9 +93,6 @@ class File {
                   m_id(fs.next_file_id()),
                   m_mod(false),
                   m_error(NO_ERROR) {
-            strcpy(this->m_name, name);
-            Utility::to_upper(this->m_name);
-
             if (NULL == buffer)
                 this->m_buf = fs.get_buffer();
             else
@@ -181,16 +177,16 @@ class File {
         }
 
     protected:
-        char                 m_name[13];
+        char                 m_name[MAX_FILENAME_LENGTH];
         const Printer        *m_logger;
         const BlockStorage   *m_driver;
         BlockStorage::Buffer *m_buf;
         /** determine if the buffer is owned by this file */
-        uint8_t              m_id;
+        int                  m_id;
 
+        int32_t m_length;
         /** When the length of a file is changed, this variable will be set, otherwise cleared */
         bool    m_mod;
-        int32_t m_length;
 
         PropWare::ErrorCode m_error;
 };

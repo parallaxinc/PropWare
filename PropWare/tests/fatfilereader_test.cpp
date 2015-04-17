@@ -46,6 +46,7 @@ const Pin::Mask SCLK = Pin::P2;
 const Pin::Mask CS   = Pin::P4;
 
 const char FILE_NAME[] = "fat_test.txt";
+const char FILE_NAME_UPPER[] = "FAT_TEST.TXT";
 FatFS *g_fs;
 FatFileReader *testable;
 
@@ -79,13 +80,10 @@ TEARDOWN {
 TEST(ConstructorDestructor) {
     testable = new FatFileReader(*g_fs, FILE_NAME);
 
-    char upperName[13];
-    strcpy(upperName, FILE_NAME);
-    Utility::to_upper(upperName);
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
-    ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, upperName));
+    ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, FILE_NAME_UPPER));
 
-    ASSERT_EQ_MSG(0, strcmp(upperName, testable->m_name));
+    ASSERT_EQ_MSG(0, strcmp(FILE_NAME_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);

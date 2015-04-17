@@ -38,6 +38,10 @@ class FileWriter : public File, public PrintCapable {
                   m_ptr(0) {
         }
 
+        virtual ~FileWriter () {
+            this->close();
+        }
+
         void put_char (const char c) {
         }
 
