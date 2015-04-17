@@ -1,5 +1,5 @@
 /**
- * @file    fatfile_test.cpp
+ * @file    fatfilereader_test.cpp
  *
  * @author  David Zemon
  *
