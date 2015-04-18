@@ -75,7 +75,6 @@ TEST(ReadDataBlock) {
     for (unsigned int j = 0; j < sizeof(buffer); ++j)
         if (buffer[j])
             success = true;
-    free(buffer);
 
     ASSERT_TRUE(success);
 
