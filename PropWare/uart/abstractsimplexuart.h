@@ -61,7 +61,23 @@ namespace PropWare {
     <li>Max transmit speed [average bitrate of PropWare::UART::puts() w/ 8N1 config]: 2,680,144</li>
     <li>TODO: Determine maximum baudrate that receive_array() and receive() can
     read data in 8N1 configuration with minimum stop-bits between each word</li>
-    <li>PropWare::UART::send() and PropWare::UART::puts() minimum delay between each character: 1.0 us</li>
+    <li>PropWare::UART::send() vs PropWare::UART::puts() minimum delay between
+    each character
+        <ul>
+            <li>CMM:
+                 <ul>
+                     <li>send: 63.0 us</li>
+                     <li>puts/send_array: 1.0 us</li>
+                 </ul>
+            </li>
+            <li>LMM:
+                 <ul>
+                     <li>send: 15.6 us</li>
+                     <li>puts/send_array: 1.0 us</li>
+                 </ul>
+            </li>
+        </ul>
+     </li>
  </ul>
 @endhtmlonly
  */
@@ -426,7 +442,7 @@ class AbstractSimplexUART : public virtual UART {
         inline void shift_out_data (uint32_t data, uint32_t bits, const uint32_t bitCycles,
                                     const uint32_t txMask) const {
 #ifndef DOXYGEN_IGNORE
-            uint32_t waitCycles = bitCycles;
+            volatile uint32_t waitCycles = bitCycles;
             __asm__ volatile (
                     "        fcache #(ShiftOutDataEnd - ShiftOutDataStart)                     \n\t"
                     "        .compress off                                                     \n\t"
