@@ -204,7 +204,7 @@ class AbstractSimplexUART : public virtual UART {
          */
         HUBTEXT virtual void send_array (const char array[], uint32_t words) const {
             char *arrayPtr = (char *) array;
-            register uint32_t wideData, data, waitCycles, bits;
+            uint32_t data = 0, waitCycles = 0, bits = 0;
 
             // Set pin as output
             this->m_tx.set();
@@ -426,13 +426,12 @@ class AbstractSimplexUART : public virtual UART {
         inline void shift_out_data (uint32_t data, uint32_t bits, const uint32_t bitCycles,
                                     const uint32_t txMask) const {
 #ifndef DOXYGEN_IGNORE
-            uint32_t waitCycles;
+            uint32_t waitCycles = bitCycles;
             __asm__ volatile (
                     "        fcache #(ShiftOutDataEnd - ShiftOutDataStart)                     \n\t"
                     "        .compress off                                                     \n\t"
 
                     "ShiftOutDataStart:                                                        \n\t"
-                    "        mov %[_waitCycles], %[_bitCycles]                                 \n\t"
                     "        add %[_waitCycles], CNT                                           \n\t"
 
                     "loop%=:                                                                   \n\t"
