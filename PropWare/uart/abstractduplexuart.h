@@ -218,48 +218,44 @@ class AbstractDuplexUART: public virtual DuplexUART,
         /**
          * Shift in one word of data (FCache function)
          */
-#ifndef DOXYGEN_IGNORE
-        __attribute__ ((fcache))
-#endif
-        uint32_t shift_in_data (register uint32_t bits, const register uint32_t bitCycles,
-                                const register uint32_t rxMask, const register uint32_t msbMask) const {
-            register uint32_t data = 0;
-            register uint32_t waitCycles = bitCycles;
+        uint32_t shift_in_data (uint_fast8_t bits, const uint32_t bitCycles, const register uint32_t rxMask,
+                                const uint32_t msbMask) const {
+            volatile uint32_t data = 0;
+            volatile uint32_t waitCycles = bitCycles;
 
 #ifndef DOXYGEN_IGNORE
             __asm__ volatile (
-                    // Initialize the waitCycles variable
-                    "shr %[_waitCycles], #1\n\t"
-                    "add %[_waitCycles], %[_bitCycles]\n\t"
+                    "        fcache #(ShiftInDataEnd - ShiftInDataStart)                    \n\t"
+                    "        .compress off                                                  \n\t"
 
-                    // Wait for the start bit
-                    "waitpne %[_rxMask], %[_rxMask]\n\t"
+                    "ShiftInDataStart:                                                      \n\t"
+                    "       shr %[_waitCycles], #1                                          \n\t"
+                    "       add %[_waitCycles], %[_bitCycles]                               \n\t"
+                    "       waitpne %[_rxMask], %[_rxMask]                                  \n\t"
+                    "       add %[_waitCycles], CNT                                         \n\t"
 
-                    // Begin the timer
-                    "add %[_waitCycles], CNT \n\t"
+                    // Receive a word
+                    "loop%=:                                                                \n\t"
+                    "       waitcnt %[_waitCycles], %[_bitCycles]                           \n\t"
+                    "       shr %[_data],# 1                                                \n\t"
+                    "       test %[_rxMask],ina wz                                          \n\t"
+                    "       muxnz %[_data], %[_msbMask]                                     \n\t"
+                    "       djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftInDataStart)  \n\t"
+
+                    // Wait for a stop bit
+                    "       waitpeq %[_rxMask], %[_rxMask]                                  \n\t"
+
+                    "       jmp __LMM_RET                                                   \n\t"
+                    "ShiftInDataEnd:                                                        \n\t"
+                    "       .compress default                                               \n\t"
                     :// Outputs
-                    [_waitCycles] "+r" (waitCycles)
+                    [_data] "+r"(data),
+                    [_waitCycles] "+r" (waitCycles),
+                    [_bits] "+r" (bits)
                     :// Inputs
-                    [_rxMask] "r" (rxMask),
+                    [_rxMask] "r"(rxMask),
+                    [_msbMask] "r"(msbMask),
                     [_bitCycles] "r" (bitCycles));
-
-            do {
-                // Wait for the next bit
-                waitCycles = waitcnt2(waitCycles, bitCycles);
-                __asm__ volatile (
-                        "shr %[_data],# 1\n\t"
-                        "test %[_rxMask],ina wz \n\t"
-                        "muxnz %[_data], %[_msbMask]"
-                        :// Outputs
-                        [_data] "+r" (data)
-                        :// Inputs
-                        [_rxMask] "r" (rxMask),
-                        [_msbMask] "r" (msbMask));
-            } while (--bits);
-
-            // wait for the line to go high (as it will when the stop bit
-            // arrives)
-            __builtin_propeller_waitpeq(rxMask, rxMask);
 #endif
 
             return data;
@@ -323,7 +319,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         [_initWaitCycles] "r" (initWaitCycles));
 
                 // Perform receive loop
-                do {
+                for (; --bitIdx;) {
                     __asm__ volatile (
                             // Wait for the next bit
                             "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
@@ -337,7 +333,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
                             [_bitCycles] "r" (bitCycles),
                             [_rxMask] "r" (rxMask),
                             [_msbMask] "r" (msbMask));
-                } while (--bitIdx);
+                };
 
                 __asm__ volatile (
                         // Write the word back to the buffer in HUB memory
