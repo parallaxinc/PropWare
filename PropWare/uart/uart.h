@@ -66,9 +66,11 @@ class UART : public virtual PrintCapable {
         } ErrorCode;
 
     public:
-        static const uint8_t  DEFAULT_DATA_WIDTH         = 8;
+        static const uint8_t      DEFAULT_DATA_WIDTH     = 8;
         static const UART::Parity DEFAULT_PARITY         = NO_PARITY;
         static const uint8_t      DEFAULT_STOP_BIT_WIDTH = 1;
+
+        static const int MAX_BAUD = 4413793;
 
         static const int *DEFAULT_BAUD;
         static const int *PARALLAX_STANDARD_TX;

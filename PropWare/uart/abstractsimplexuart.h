@@ -54,12 +54,7 @@ namespace PropWare {
     <li>All tests performed with XTAL @ 80 MHz</li>
     <li>Max speed [baud]:
         <ul>
-            <li>Send
-                <ul>
-                    <li>CMM: 1,428,550</li>
-                    <li>LMM: 1,428,550</li>
-                </ul>
-            </li>
+            <li>Send: 4,413,793</li>
             <li>Receive
                 <ul>
                     <li>CMM: 740,720</li>
@@ -68,11 +63,10 @@ namespace PropWare {
             </li>
         </ul>
     </li>
-    <li>Max transmit speed [average bitrate of PropWare::UART::puts() w/ 8N1
-    config]:
+    <li>Max transmit speed [average bitrate of PropWare::UART::puts() w/ 8N1 config]:
         <ul>
-            <li>CMM: 339,227</li>
-            <li>LMM: 673,230</li>
+            <li>CMM: 346,807</li>
+            <li>LMM: 917,827</li>
         </ul>
     </li>
     <li>TODO: Determine maximum baudrate that receive_array() and receive() can
@@ -395,33 +389,32 @@ class AbstractSimplexUART : public virtual UART {
          * @param[in]   bitCycles   Delay between each bit; Unit is clock cycles
          * @param[in]   txMask      Pin mask of the TX pin
          */
+        inline void shift_out_data (uint32_t data, uint32_t bits, const uint32_t bitCycles,
+                                    const uint32_t txMask) const {
 #ifndef DOXYGEN_IGNORE
-        __attribute__ ((fcache))
-#endif
-        void shift_out_data (register uint32_t data, register uint32_t bits,
-                             const register uint32_t bitCycles,
-                             const register uint32_t txMask) const {
-#ifndef DOXYGEN_IGNORE
-            volatile uint32_t waitCycles;
-
+            uint32_t waitCycles;
             __asm__ volatile (
-                    "mov %[_waitCycles], %[_bitCycles]\n\t"
-                    "add %[_waitCycles], CNT \n\t"
-                    :  // Outputs
-                    [_waitCycles] "+r" (waitCycles)
-                    :// Inputs
-                    [_bitCycles] "r" (bitCycles));
+                    "        fcache #(ShiftOutDataEnd - ShiftOutDataStart)                     \n\t"
+                    "        .compress off                                                     \n\t"
 
-            do {
-                __asm__ volatile(
-                        "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
-                        "shr %[_data],#1 wc \n\t"
-                        "muxc outa, %[_mask]"
-                        : [_data] "+r" (data),
-                        [_waitCycles] "+r" (waitCycles)
-                        : [_mask] "r" (txMask),
-                        [_bitCycles] "r" (bitCycles));
-            } while (--bits);
+                    "ShiftOutDataStart:                                                        \n\t"
+                    "        mov %[_waitCycles], %[_bitCycles]                                 \n\t"
+                    "        add %[_waitCycles], CNT                                           \n\t"
+
+                    "loop%=:                                                                   \n\t"
+                    "        waitcnt %[_waitCycles], %[_bitCycles]                             \n\t"
+                    "        shr %[_data],#1 wc                                                \n\t"
+                    "        muxc outa, %[_mask]                                               \n\t"
+                    "        djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftOutDataStart)   \n\t"
+
+                    "        jmp __LMM_RET                                                     \n\t"
+                    "ShiftOutDataEnd:                                                          \n\t"
+                    "        .compress default                                                 \n\t"
+                    : [_data] "+r"(data),
+                    [_waitCycles] "+r"(waitCycles),
+                    [_bits] "+r" (bits)
+                    : [_mask] "r"(txMask),
+                    [_bitCycles] "r"(bitCycles));
 #endif
         }
 
