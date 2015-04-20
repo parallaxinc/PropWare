@@ -88,7 +88,7 @@ class Port {
          *
          * @note        Return value is 0-indexed
          *
-         * @param[in]   mask    Value with only a single bit set high 
+         * @param[in]   mask    Value with only a single bit set high
          *                      representing Propeller pin (i.e.: 0x80 would
          *                      be pin 7)
          *
@@ -198,7 +198,7 @@ class Port {
          * @brief       Set port as either input or output
          *
          * @param[in]   direction   I/O direction to set selected pins; must be
-         *                          one of PropWare::Port::IN or 
+         *                          one of PropWare::Port::IN or
          *                          PropWare::Port::OUT
          */
         void set_dir (const PropWare::Port::Dir direction) const {
@@ -217,12 +217,12 @@ class Port {
                 return PropWare::Port::IN;
         }
 
-        void set_dir_out () const {
+        inline void set_dir_out () const {
             DIRA |= this->m_mask;
         }
 
-        void set_dir_in () const {
-            DIRA &= ~(this->m_mask);
+        inline void set_dir_in () const {
+            __asm__ volatile ("andn dira, %0" : : "r" (this->m_mask));
         }
 
         /**
