@@ -79,14 +79,12 @@ class AbstractDuplexUART: public virtual DuplexUART,
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
 
-            // Set RX as input
-            __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
+            this->m_rx.set_dir_in();
 
-            rxVal = this->shift_in_data(this->m_receivableBits,
-                                        this->m_bitCycles,
-                                        this->m_rx.get_mask(), this->m_msbMask);
+            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_rx.get_mask(),
+                                        this->m_msbMask);
 
-            if (this->m_parity && 0 != this->checkParity(rxVal))
+            if (this->m_parity && 0 != this->check_parity(rxVal))
                 return (uint32_t) -1;
 
             return rxVal & wideDataMask;
@@ -107,17 +105,11 @@ class AbstractDuplexUART: public virtual DuplexUART,
                 // Set RX as input
                 __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
-                *length = this->shift_in_byte_array((uint32_t) buffer,
-                                                    *length,
-                                                    delim,
-                                                    this->m_receivableBits,
-                                                    this->m_bitCycles,
-                                                    this->m_rx.get_mask(),
-                                                    this->m_msbMask);
+                *length = this->shift_in_byte_array((uint32_t) buffer, *length, delim);
 
                 if (NO_PARITY != this->m_parity)
                     for (int32_t i = 0; i < *length; --i)
-                        if (0 != this->checkParity((uint32_t) buffer[i]))
+                        if (0 != this->check_parity((uint32_t) buffer[i]))
                             return UART::PARITY_ERROR;
             }
             // If total receivable bits does not fit within a byte, shift in
@@ -148,6 +140,15 @@ class AbstractDuplexUART: public virtual DuplexUART,
             return this->receive();
         }
 
+        /**
+         * @brief   Read words from the bus until a newline character (`\\n`) is received or the buffer is filled
+         *
+         * If found, the newline character will be replaced with a null-terminator. If the buffer is filled before a
+         * newline is found, no null-terminator will be inserted
+         *
+         * @param[in]   string[]        Output buffer which should store the data
+         * @param[out]  *bufferSize     Address where the new length of the buffer will be written
+         */
         PropWare::ErrorCode fgets (char string[], int32_t *bufferSize) const {
             const int32_t originalBufferSize = *bufferSize;
 
@@ -266,97 +267,83 @@ class AbstractDuplexUART: public virtual DuplexUART,
          *
          * @param[in]   bufferAddr
          * @param[in]   maxLength
-         * @param[in]   delim
-         * @param[in]   bits
-         * @param[in]   bitCycles
-         * @param[in]   rxMask
-         * @param[in]   msbMask
+         * @param[in]   delimiter
          */
+        int shift_in_byte_array (uint32_t bufferAddr, const int maxLength, const char delimiter) const {
+            volatile uint32_t data           = 0;
+            volatile int      wordCnt        = 0;
+            volatile uint32_t bitIdx         = 0;
+            volatile uint32_t waitCycles     = 0;
+            volatile uint32_t initWaitCycles = (this->m_bitCycles >> 1) + this->m_bitCycles;
+
 #ifndef DOXYGEN_IGNORE
-        __attribute__ ((fcache))
+            // Initialize variables
+            __asm__ volatile (
+                    "        fcache #(ShiftInArrayDataEnd - ShiftInArrayDataStart)                      \n\t"
+                    "        .compress off                                                              \n\t"
+
+                    "ShiftInArrayDataStart:                                                             \n\t"
+                    "outerLoop%=:                                                                       \n\t"
+                    // Initialize the index variable
+                    "       mov %[_bitIdx], %[_bits]                                                    \n\t"
+                    // Re-initialize the timer
+                    "       mov %[_waitCycles], %[_initWaitCycles]                                      \n\t"
+                    // Wait for the start bit
+                    "       waitpne %[_rxMask], %[_rxMask]                                              \n\t"
+                    // Begin the timer
+                    "       add %[_waitCycles], CNT                                                     \n\t"
+
+                    "innerLoop%=:                                                                       \n\t"
+                    // Wait for the next bit
+                    "       waitcnt %[_waitCycles], %[_bitCycles]                                       \n\t"
+                    "       shr %[_data], #1                                                            \n\t"
+                    "       test %[_rxMask], ina wz                                                     \n\t"
+                    "       muxnz %[_data], %[_msbMask]                                                 \n\t"
+                    "       djnz %[_bitIdx], #__LMM_FCACHE_START+(innerLoop%= - ShiftInArrayDataStart)  \n\t"
+
+                    // Write the word back to the buffer in HUB memory
+                    "       wrbyte %[_data], %[_bufAdr]                                                 \n\t"
+
+                    // Check if we hit the delimiter (store result in Z)
+                    "       and %[_data], #0xff                                                         \n\t"
+                    "       cmp %[_data], %[_delim] wz                                                  \n\t"
+
+                    // Clear the data register
+                    "       mov %[_data], #0                                                            \n\t"
+                    // Increment the buffer address and total word count
+                    "       add %[_wordCnt], #1                                                         \n\t"
+                    "       add %[_bufAdr], #1                                                          \n\t"
+
+                    // Check if we hit the end of the buffer (store result in C)
+                    "       cmp %[_wordCnt], %[_maxLength] wc                                           \n\t"
+
+                    // Wait for the stop bits
+                    "       waitpeq %[_rxMask], %[_rxMask]                                              \n\t"
+
+                    // Finally, loop to the beginning if the delimiter is not equal to our most recent word and
+                    // the buffer is not about to overflow
+                    "if_nz_and_c jmp #__LMM_FCACHE_START+(outerLoop%= - ShiftInArrayDataStart)          \n\t"
+
+                    "       jmp __LMM_RET                                                               \n\t"
+                    "ShiftInArrayDataEnd:                                                               \n\t"
+                    "       .compress default                                                           \n\t"
+                    :// Outputs
+                    [_bitIdx] "+r" (bitIdx),
+                    [_waitCycles] "+r" (waitCycles),
+                    [_data] "+r" (data),
+                    [_bufAdr] "+r" (bufferAddr),
+                    [_wordCnt] "+r" (wordCnt)
+                    :// Inputs
+                    [_rxMask] "r" (this->m_rx.get_mask()),
+                    [_bits] "r" (this->m_receivableBits),
+                    [_bitCycles] "r" (this->m_bitCycles),
+                    [_initWaitCycles] "r" (initWaitCycles),
+                    [_msbMask] "r" (this->m_msbMask),
+                    [_delim] "r" (delimiter),
+                    [_maxLength] "r" (maxLength));
 #endif
-        uint32_t shift_in_byte_array (register uint32_t bufferAddr, int32_t maxLength, const register char delim,
-                                      const register uint32_t bits, const register uint32_t bitCycles,
-                                      const register uint32_t rxMask, const register uint32_t msbMask) const {
-#ifndef DOXYGEN_IGNORE
-            volatile register uint32_t data           = 0;
-            volatile register int32_t  wordCnt        = 0;
-            volatile register uint32_t bitIdx         = bits;
-            volatile register uint32_t waitCycles;
-            volatile register uint32_t initWaitCycles = (bitCycles >> 1) + bitCycles;
 
-            /**
-             * FIXME: Despite careful use of do{}while(--var); loops, this is still not be compiled correctly.
-             *        This method probably needs to be written entirely in assembly
-             */
-
-            do {
-                /**
-                 *  Receive one word
-                 */
-
-                // Initialize variables
-                __asm__ volatile (
-                        // Initialize the index variable
-                        "mov %[_bitIdx], %[_bits]\n\t"
-
-                        // Re-initialize the timer
-                        "mov %[_waitCycles], %[_initWaitCycles]\n\t"
-
-                        // Wait for the start bit
-                        "waitpne %[_rxMask], %[_rxMask]\n\t"
-
-                        // Begin the timer
-                        "add %[_waitCycles], CNT \n\t"
-
-                        :// Outputs
-                        [_bitIdx] "+r" (bitIdx),
-                        [_waitCycles] "+r" (waitCycles)
-                        :// Inputs
-                        [_rxMask] "r" (rxMask),
-                        [_bits] "r" (bits),
-                        [_bitCycles] "r" (bitCycles),
-                        [_initWaitCycles] "r" (initWaitCycles));
-
-                // Perform receive loop
-                for (; --bitIdx;) {
-                    __asm__ volatile (
-                            // Wait for the next bit
-                            "waitcnt %[_waitCycles], %[_bitCycles]\n\t"
-                            "shr %[_data],# 1\n\t"
-                            "test %[_rxMask],ina wz \n\t"
-                            "muxnz %[_data], %[_msbMask]\n\t"
-                            :// Outputs
-                            [_waitCycles] "+r" (waitCycles),
-                            [_data] "+r" (data)
-                            :// Inputs
-                            [_bitCycles] "r" (bitCycles),
-                            [_rxMask] "r" (rxMask),
-                            [_msbMask] "r" (msbMask));
-                };
-
-                __asm__ volatile (
-                        // Write the word back to the buffer in HUB memory
-                        "wrbyte %[_data], %[_bufAdr]\n\t"
-
-                        // Wait for the stop bits
-                        "waitpeq %[_rxMask], %[_rxMask]\n\t"
-
-                        // Clear the data register
-                        "mov %[_data], #0\n\t"
-
-                        // Increment the buffer address and total word count
-                        "add %[_wordCnt], #1\n\t"
-
-                        :// Outputs
-                        [_bufAdr] "+r" (bufferAddr),
-                        [_wordCnt] "+r" (wordCnt),
-                        [_data] "+r" (data)
-                        : [_rxMask] "r" (rxMask));
-            } while (*((char *)bufferAddr++) != delim && wordCnt < maxLength);
-
-            return (uint32_t) wordCnt;
-#endif
+            return wordCnt;
         }
 
         /**
@@ -367,7 +354,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
          *
          * @return      0 for proper parity; -1 for parity error
          */
-        HUBTEXT ErrorCode checkParity (uint32_t rxVal) const {
+        HUBTEXT ErrorCode check_parity (uint32_t rxVal) const {
             uint32_t evenParityResult;
             uint32_t wideParityMask = this->m_parityMask;
             uint32_t wideDataMask   = this->m_dataMask;

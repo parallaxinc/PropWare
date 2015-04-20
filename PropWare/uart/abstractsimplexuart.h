@@ -52,28 +52,25 @@ namespace PropWare {
 @htmlonly
 <ul>
     <li>All tests performed with XTAL @ 80 MHz</li>
-    <li>Max speed [baud]:
+    <li>Max burst speed:
         <ul>
-            <li>Send: 4,410,000</li>
-            <li>Receive: 740,720</li>
+            <li>Send: <b>4,444,444 baud</b></li>
+            <li>Receive: <b>2,750,000 baud</b></li>
         </ul>
     </li>
-    <li>Max transmit speed [average bitrate of PropWare::UART::puts() w/ 8N1 config]: 2,680,144</li>
-    <li>TODO: Determine maximum baudrate that receive_array() and receive() can
-    read data in 8N1 configuration with minimum stop-bits between each word</li>
-    <li>PropWare::UART::send() vs PropWare::UART::puts() minimum delay between
-    each character
+    <li>Max transmit throughput (average bitrate of puts/send_array w/ 8N1 config): <b>2,680,144 bps</b></li>
+    <li>Transmit delay between words for single- and multi-byte routines
         <ul>
             <li>CMM:
                  <ul>
-                     <li>send: 63.0 us</li>
-                     <li>puts/send_array: 1.0 us</li>
+                     <li>send: <b>63.0 us</b></li>
+                     <li>puts/send_array: <b>1.0 us</b></li>
                  </ul>
             </li>
             <li>LMM:
                  <ul>
-                     <li>send: 15.6 us</li>
-                     <li>puts/send_array: 1.0 us</li>
+                     <li>send: <b>15.6 us</b></li>
+                     <li>puts/send_array: <b>1.0 us</b></li>
                  </ul>
             </li>
         </ul>
