@@ -198,6 +198,20 @@ class Utility {
             return (exp << 16) | *ptr;
         }
 
+        /**
+         * @brief       Reverse some of the bits in `x`
+         *
+         * See the `rev` assembly instruction
+         *
+         * @param[in]   x       Value to be reversed
+         * @param[in]   bits    The least significant `32-bits` bits will reversed
+         *
+         * @return      A bitwise flip of some of the bits in `x`
+         */
+        inline static unsigned int reverse (unsigned int x, unsigned int bits = 0) {
+            return __builtin_propeller_rev(x, bits);
+        }
+
 private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
