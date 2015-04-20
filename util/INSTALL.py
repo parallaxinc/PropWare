@@ -176,8 +176,8 @@ class Installer(object):
             if 0 != subprocess.call(run_cmake, cwd=build_dir):
                 raise CMakeFailedException()
 
-            # Dependency scanning isn't perfect. Seems to fail with 8 threads, so let's limit it to 4
-            cpu_count = 4 if multiprocessing.cpu_count() > 4 else multiprocessing.cpu_count()
+            # cpu_count = multiprocessing.cpu_count()
+            cpu_count = 1  # Dependency scanning is failing horribly. Don't use multithreading until it's fixed
             run_make = ['make', '-j%d' % cpu_count]
             print(' '.join(run_make))
             subprocess.call(run_make, cwd=build_dir)

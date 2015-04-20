@@ -66,9 +66,11 @@ class UART : public virtual PrintCapable {
         } ErrorCode;
 
     public:
-        static const uint8_t  DEFAULT_DATA_WIDTH         = 8;
+        static const uint8_t      DEFAULT_DATA_WIDTH     = 8;
         static const UART::Parity DEFAULT_PARITY         = NO_PARITY;
         static const uint8_t      DEFAULT_STOP_BIT_WIDTH = 1;
+
+        static const int MAX_BAUD = 4413793;
 
         static const int *DEFAULT_BAUD;
         static const int *PARALLAX_STANDARD_TX;
@@ -178,15 +180,14 @@ class UART : public virtual PrintCapable {
         virtual void send (uint16_t originalData) const = 0;
 
         /**
-         * @brief       Send a null-terminated character array
+         * @brief       Send an array of 8-bit (or smaller) words
          *
          * @pre         `words` must be greater than 0
          *
          * @param[in]   array[] Array of data words
          * @param[in]   words   Number of words to be sent
          */
-        HUBTEXT virtual void send_array (const char array[],
-                                         uint32_t words) const = 0;
+        HUBTEXT virtual void send_array (const char array[], uint32_t words) const = 0;
 };
 
 }

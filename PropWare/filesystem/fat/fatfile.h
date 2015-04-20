@@ -64,10 +64,17 @@ class FatFile : virtual public File {
         static const char    ARCHIVE_CHAR      = 'a';
         static const char    ARCHIVE_CHAR_     = '.';
 
+    public:
+        const char * get_name () const {
+            return this->m_name;
+        }
+
     protected:
         FatFile (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   m_fs(&fs) {
+            strcpy(this->m_name, name);
+            Utility::to_upper(this->m_name);
         }
 
         const uint8_t get_file_attributes (uint16_t fileEntryOffset) const {
@@ -100,7 +107,7 @@ class FatFile : virtual public File {
             char readEntryName[FILENAME_STR_LEN];
 
             // Save the current buffer
-            check_errors(this->m_fs->m_driver->flush(this->m_buf));
+            check_errors(this->m_fs->get_driver()->flush(this->m_buf));
 
             *fileEntryOffset = 0;
 
@@ -111,7 +118,7 @@ class FatFile : virtual public File {
                 this->m_buf->curTier1Offset    = 0;
                 this->m_buf->curTier3          = this->m_fs->m_dir_firstAllocUnit;
                 check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &this->m_buf->nextTier3));
-                check_errors(this->m_fs->m_driver->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf));
+                check_errors(this->m_fs->get_driver()->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf));
             }
             this->m_buf->id = Filesystem::FOLDER_ID;
 
@@ -201,7 +208,7 @@ class FatFile : virtual public File {
          */
         PropWare::ErrorCode load_next_sector (BlockStorage::Buffer *buf) {
             PropWare::ErrorCode err;
-            check_errors(this->m_fs->m_driver->flush(buf));
+            check_errors(this->m_fs->get_driver()->flush(buf));
 
             // Check for the end-of-chain marker (end of file)
             if (((uint32_t) FatFS::EOC_BEG) <= buf->nextTier3)
@@ -209,35 +216,29 @@ class FatFile : virtual public File {
 
             // Are we looking at the root directory of a FAT16 system?
             if (FatFS::FAT_16 == this->m_fs->m_filesystem && this->m_fs->m_rootAddr == (buf->curTier2StartAddr)) {
-                // Root dir of FAT16; Is it the last sector in the root
-                // directory?
+                // Root dir of FAT16; Is it the last sector in the root directory?
                 if (this->m_fs->m_rootDirSectors == (buf->curTier1Offset))
                     return FatFS::EOC_END;
                     // Root dir of FAT16; Not last sector
                 else
-                    // Any error from reading the data block will be returned to
-                    // calling function
-                    return this->m_fs->m_driver->read_data_block(++(buf->curTier1Offset), buf->buf);
+                    // Any error from reading the data block will be returned to calling function
+                    return this->m_fs->get_driver()->read_data_block(++(buf->curTier1Offset), buf->buf);
             }
                 // We are looking at a generic data cluster.
             else {
                 // Generic data cluster; Have we reached the end of the cluster?
-                if (((1 << this->m_fs->m_tier1sPerTier2Shift) - 1) > (buf->curTier1Offset)) {
-                    // Generic data cluster; Not the end; Load next sector in
-                    // the cluster
+                if (((1 << this->m_fs->get_tier1s_per_tier2_shift()) - 1) > (buf->curTier1Offset)) {
+                    // Generic data cluster; Not the end; Load next sector in the cluster
 
-                    // Any error from reading the data block will be returned to
-                    // calling function
+                    // Any error from reading the data block will be returned to calling function
                     buf->curTier1Offset++;
-                    return this->m_fs->m_driver->read_data_block(buf->curTier1Offset + buf->curTier2StartAddr, buf->buf);
+                    return this->m_fs->get_driver()->read_data_block(buf->curTier1Offset + buf->curTier2StartAddr,
+                                                                     buf->buf);
                 }
-                    // End of generic data cluster; Look through the FAT to find the
-                    // next cluster
+                    // End of generic data cluster; Look through the FAT to find the next cluster
                 else
                     return this->inc_cluster(buf);
             }
-
-            return 0;
         }
 
         /**
@@ -253,7 +254,7 @@ class FatFile : virtual public File {
          */
         PropWare::ErrorCode inc_cluster (BlockStorage::Buffer *buf) {
             PropWare::ErrorCode err;
-            check_errors(this->m_fs->m_driver->flush(buf));
+            check_errors(this->m_fs->get_driver()->flush(buf));
 
             // Update this->m_cur*
             if (((uint32_t) FatFS::EOC_BEG) <= buf->curTier3
@@ -269,7 +270,7 @@ class FatFile : virtual public File {
             buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(buf->curTier3);
             buf->curTier1Offset = 0;
 
-            return this->m_fs->m_driver->read_data_block(buf->curTier2StartAddr, buf->buf);
+            return this->m_fs->get_driver()->read_data_block(buf->curTier2StartAddr, buf->buf);
         }
 
         const bool buffer_holds_directory_start () const {

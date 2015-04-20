@@ -1,5 +1,5 @@
 /**
- * @file    fatfilereader_test.cpp
+ * @file    fatfilewriter_test.cpp
  *
  * @author  David Zemon
  *
@@ -35,8 +35,7 @@
 #include "PropWareTests.h"
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
-#include <PropWare/filesystem/fat/fatfilereader.h>
-#include <PropWare/staticstringbuilder.h>
+#include <PropWare/filesystem/fat/fatfilewriter.h>
 
 using namespace PropWare;
 
@@ -45,10 +44,10 @@ const Pin::Mask MISO = Pin::P1;
 const Pin::Mask SCLK = Pin::P2;
 const Pin::Mask CS   = Pin::P4;
 
-const char FILE_NAME[] = "fat_test.txt";
-const char FILE_NAME_UPPER[] = "FAT_TEST.TXT";
-FatFS *g_fs;
-FatFileReader *testable;
+const char    FILE_NAME[]       = "fat_test.txt";
+const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
+FatFS         *g_fs;
+FatFileWriter *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
@@ -65,8 +64,8 @@ void error_checker (const ErrorCode err) {
 
 SETUP {
     PropWare::ErrorCode err;
-    testable = new FatFileReader(*g_fs, FILE_NAME);
-    err = testable->open();
+    testable = new FatFileWriter(*g_fs, FILE_NAME);
+    err      = testable->open();
     if (err) {
         MESSAGE("Setup failed!");
         error_checker(err);
@@ -78,7 +77,7 @@ TEARDOWN {
 }
 
 TEST(ConstructorDestructor) {
-    testable = new FatFileReader(*g_fs, FILE_NAME);
+    testable = new FatFileWriter(*g_fs, FILE_NAME);
 
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
     ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, FILE_NAME_UPPER));
@@ -89,84 +88,6 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
     ASSERT_EQ_MSG(false, testable->m_mod);
-
-    tearDown();
-}
-
-TEST(OpenClose) {
-    ErrorCode err;
-    testable = new FatFileReader(*g_fs, FILE_NAME);
-
-    err = testable->open();
-    error_checker(err);
-    ASSERT_EQ_MSG(0, err);
-
-    ASSERT_NEQ_MSG(0, testable->get_length());
-
-    err = testable->close();
-    error_checker(err);
-    ASSERT_EQ_MSG(0, err);
-
-    tearDown();
-}
-
-TEST(SafeGetChar) {
-    PropWare::ErrorCode err;
-    setUp();
-
-    char c;
-    err = testable->safe_get_char(c);
-    error_checker(err);
-    ASSERT_EQ_MSG(0, err);
-    ASSERT_EQ_MSG('/', c);
-
-    tearDown();
-}
-
-TEST(Tell) {
-    PropWare::ErrorCode err;
-    setUp();
-
-    for (int i = 0; i < 1024; ++i) {
-        char c;
-        err = testable->safe_get_char(c);
-        error_checker(err);
-        ASSERT_EQ_MSG(0, err);
-
-        ASSERT_EQ_MSG(i + 1, testable->tell());
-    }
-
-    tearDown();
-}
-
-TEST(Seek) {
-    const int SEEK_ITERATIONS = 2048;
-    char stringBuffer[SEEK_ITERATIONS];
-    StaticStringBuilder stringBuilder(stringBuffer);
-    PropWare::ErrorCode err;
-    setUp();
-
-    for (int i = 0; i < SEEK_ITERATIONS - 1; ++i) {
-        char c;
-        err = testable->safe_get_char(c);
-        error_checker(err);
-        ASSERT_EQ_MSG(0, err);
-        stringBuilder.put_char(c);
-    }
-
-    srand(CNT);
-    for (int i = 0; i < 128; ++i) {
-        const int charIndex = rand() % (SEEK_ITERATIONS - 1);
-        err = testable->seek(charIndex, File::BEG);
-        error_checker(err);
-        ASSERT_EQ_MSG(0, err);
-
-        char actual;
-        err = testable->safe_get_char(actual);
-        error_checker(err);
-        ASSERT_EQ_MSG(0, err);
-        ASSERT_EQ_MSG(stringBuilder.to_string()[charIndex], actual);
-    }
 
     tearDown();
 }
@@ -182,13 +103,10 @@ int main () {
         passed = false;
         COMPLETE();
     }
+
     g_fs = &fs;
 
     RUN_TEST(ConstructorDestructor);
-    RUN_TEST(OpenClose);
-    RUN_TEST(SafeGetChar);
-    RUN_TEST(Tell);
-    RUN_TEST(Seek);
 
     COMPLETE();
 }

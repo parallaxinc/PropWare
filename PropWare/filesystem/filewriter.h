@@ -30,7 +30,7 @@
 
 namespace PropWare {
 
-class FileWriter : public File, public PrintCapable {
+class FileWriter : virtual public File, public PrintCapable {
     public:
         FileWriter (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
                     const Printer &logger = pwOut)

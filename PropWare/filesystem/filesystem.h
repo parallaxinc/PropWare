@@ -47,6 +47,9 @@ class Filesystem {
             /** End Filesystem error */END_ERROR           = FILESYSTEM_ALREADY_MOUNTED
         } ErrorCode;
 
+        // Signal that the contents of a buffer are a directory
+        static const int8_t FOLDER_ID = -1;
+
     public:
         /**
          * @brief       Mount a filesystem
@@ -61,6 +64,10 @@ class Filesystem {
          * @brief   Unmount the filesystem by flushing all dirty buffers
          */
         virtual PropWare::ErrorCode unmount () = 0;
+
+        const BlockStorage * get_driver () const {
+            return this->m_driver;
+        }
 
     public:
         static void print_error_str (const Printer &printer, const ErrorCode err) {
@@ -86,10 +93,6 @@ class Filesystem {
         }
 
     protected:
-        // Signal that the contents of a buffer are a directory
-        static const int8_t FOLDER_ID = -1;
-
-    protected:
         Filesystem (const BlockStorage *driver, const Printer *logger = &pwOut)
                 : m_logger(logger),
                   m_driver(driver),
@@ -103,10 +106,6 @@ class Filesystem {
 
         int next_file_id () {
             return this->m_nextFileId++;
-        }
-
-        const BlockStorage * get_driver () const {
-            return this->m_driver;
         }
 
         BlockStorage::Buffer * get_buffer () {

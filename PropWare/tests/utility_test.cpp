@@ -159,7 +159,7 @@ TEST(RomLog) {
 }
 
 TEST(MeasureTimeInterval) {
-    const int expected = 1000;
+    const unsigned int expected = 1000;
 
     unsigned int start = CNT;
     waitcnt(expected * MILLISECOND + CNT);

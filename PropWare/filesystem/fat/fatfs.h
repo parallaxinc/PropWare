@@ -686,7 +686,6 @@ class FatFS : public Filesystem {
         }
 
     private:
-
         InitFATInfo m_initFatInfo;
         uint8_t     m_filesystem;  // File system type - one of FAT_16 or FAT_32
         char        m_label[9]; // Filesystem label
@@ -698,7 +697,7 @@ class FatFS : public Filesystem {
         uint32_t    m_fatSize;
         uint16_t    m_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
         uint8_t     *m_fat;  // Buffer for FAT entries only
-        bool m_fatMod;
+        bool        m_fatMod;
 
         uint32_t m_curFatSector;  // Store the current FAT sector loaded into m_fat
         uint32_t m_dir_firstAllocUnit;  // Store the current directory's starting allocation unit

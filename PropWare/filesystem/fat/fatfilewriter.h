@@ -39,6 +39,18 @@ public:
               FileWriter(fs, name, buffer, logger) {
     }
 
+    virtual ~FatFileWriter () {
+        this->close();
+    }
+
+    PropWare::ErrorCode open () {
+        return NO_ERROR;
+    }
+
+    virtual PropWare::ErrorCode close () {
+        return this->flush();
+    }
+
     PropWare::ErrorCode flush () {
         PropWare::ErrorCode err;
 
@@ -54,7 +66,7 @@ public:
 
             // Finally, edit the length of the file
             this->m_driver->write_long(this->fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf,
-                                       this->m_length);
+                                       (const uint32_t) this->m_length);
             this->m_buf->mod = true;
             check_errors(this->m_driver->flush(this->m_buf));
         }
@@ -62,9 +74,10 @@ public:
         return NO_ERROR;
     }
 
-    private:
-        /** Maximum number of sectors currently allocated to a file */
-        uint32_t m_maxTier1s;
+
+    virtual void puts (char const string[]) {
+        // TODO
+    }
 };
 
 }

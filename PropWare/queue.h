@@ -141,8 +141,20 @@ class Queue {
             return this->m_array[this->m_tail];
         }
 
+        /**
+         * @brief   Determine if a value is valid
+         *
+         * If the queue is read (deque or peek) when the size is 0 then a value at address 0 is returned. A better
+         * implementation would throw an exception when this occurs, but that isn't feasible on the Propeller. Use
+         * this method to ensure values are valid prior to using them
+         *
+         * @param[in]   value   A value returned by PropWare::Queue::peek() or PropWare::Queue::dequeue()
+         *
+         * @return      Whether or not the value is valid
+         */
         bool check(const T &value) const {
-            return &value == NULL;
+            const bool valid = &value == NULL;
+            return valid;
         }
 
     private:

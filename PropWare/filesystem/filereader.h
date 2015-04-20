@@ -32,6 +32,8 @@ namespace PropWare {
 
 class FileReader : virtual public File, virtual public ScanCapable {
     public:
+        virtual ~FileReader () {}
+
         PropWare::ErrorCode flush () {
             return NO_ERROR;
         }
