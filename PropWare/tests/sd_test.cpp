@@ -37,11 +37,6 @@ using namespace PropWare;
 
 SD *testable;
 
-const Pin::Mask MOSI = Pin::P0;
-const Pin::Mask MISO = Pin::P1;
-const Pin::Mask SCLK = Pin::P2;
-const Pin::Mask CS   = Pin::P4;
-
 void sd_error_checker (const ErrorCode err) {
     if (err)
         testable->print_error_str(pwOut, (SD::ErrorCode) err);
@@ -133,7 +128,7 @@ TEST(WriteDataBlock) {
 int main () {
     START(SDTest);
 
-    testable = new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
+    testable = new SD();
 
     RUN_TEST(Start);
     RUN_TEST(ReadDataBlock);

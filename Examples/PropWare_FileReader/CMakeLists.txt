@@ -7,7 +7,7 @@ file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                           
 include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                              #
 ###################################################################################
 
-set(BOARD QUICKSTART)
+set(BOARD dna)
 set(MODEL lmm)
 set(COMMON_FLAGS "-Os")
 set(C_FLAGS )

@@ -176,7 +176,7 @@ int main () {
 
     PropWare::ErrorCode err;
 
-    FatFS fs(new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS));
+    FatFS fs(new SD());
     if ((err = fs.mount())) {
         error_checker(err);
         passed = false;
@@ -189,6 +189,8 @@ int main () {
     RUN_TEST(SafeGetChar);
     RUN_TEST(Tell);
     RUN_TEST(Seek);
+
+    delete fs.get_driver();
 
     COMPLETE();
 }

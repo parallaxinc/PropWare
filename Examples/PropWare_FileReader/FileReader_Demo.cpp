@@ -44,7 +44,7 @@ using namespace PropWare;
 
 int main () {
 #ifdef TEST_PROPWARE
-    const SD driver(SPI::get_instance(), Pin::P0, Pin::P1, Pin::P2, Pin::P4);
+    const SD driver;
     FatFS filesystem(&driver);
     filesystem.mount();
 
@@ -54,7 +54,7 @@ int main () {
     while (!reader.eof())
         pwOut << reader.get_char();
 #elif (defined TEST_SIMPLE)
-    sd_mount(1, 2, 0, 4);
+    sd_mount(0, 1, 2, 3);
 
     FILE *f = fopen("fat_test.txt", "r");
 

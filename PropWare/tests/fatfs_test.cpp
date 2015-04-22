@@ -39,15 +39,6 @@ using namespace PropWare;
 
 FatFS *testable;
 
-const Pin::Mask MOSI = Pin::P0;
-const Pin::Mask MISO = Pin::P1;
-const Pin::Mask SCLK = Pin::P2;
-const Pin::Mask CS   = Pin::P4;
-
-BlockStorage *getDriver () {
-    return new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
-}
-
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
@@ -58,7 +49,7 @@ void error_checker (const ErrorCode err) {
 }
 
 SETUP {
-    testable = new FatFS(getDriver());
+    testable = new FatFS(new SD());
 }
 
 TEARDOWN {
