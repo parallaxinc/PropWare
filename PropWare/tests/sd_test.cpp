@@ -35,7 +35,7 @@
 
 using namespace PropWare;
 
-SD *testable;
+static SD *testable;
 
 void sd_error_checker (const ErrorCode err) {
     if (err)

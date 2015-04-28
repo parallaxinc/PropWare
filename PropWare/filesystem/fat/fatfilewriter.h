@@ -44,10 +44,27 @@ public:
     }
 
     PropWare::ErrorCode open () {
-        return NO_ERROR;
+        PropWare::ErrorCode err;
+        uint16_t            fileEntryOffset = 0;
+
+        if ((err = this->find(this->get_name(), &fileEntryOffset))) {
+            switch (err) {
+                case FatFS::EOC_END:
+                    // TODO: Enlarge cluster
+                    ;
+                case Filesystem::FILENAME_NOT_FOUND:
+                    // TODO: Create empty file
+                    break;
+                default:
+                    return err;
+            }
+        }
+
+        return this->open_existing_file(fileEntryOffset);
     }
 
-    virtual PropWare::ErrorCode close () {
+
+    PropWare::ErrorCode close () {
         return this->flush();
     }
 

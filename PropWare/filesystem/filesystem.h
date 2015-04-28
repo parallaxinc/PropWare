@@ -48,7 +48,7 @@ class Filesystem {
         } ErrorCode;
 
         // Signal that the contents of a buffer are a directory
-        static const int8_t FOLDER_ID = -1;
+        static const int FOLDER_ID = INT32_MAX;
 
     public:
         /**

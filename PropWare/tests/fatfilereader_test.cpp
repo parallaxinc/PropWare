@@ -40,15 +40,11 @@
 
 using namespace PropWare;
 
-const Pin::Mask MOSI = Pin::P0;
-const Pin::Mask MISO = Pin::P1;
-const Pin::Mask SCLK = Pin::P2;
-const Pin::Mask CS   = Pin::P4;
-
-const char FILE_NAME[] = "fat_test.txt";
-const char FILE_NAME_UPPER[] = "FAT_TEST.TXT";
-FatFS *g_fs;
-FatFileReader *testable;
+static const char    FILE_NAME[]       = "fat_test.txt";
+static const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
+static const char    BOGUS_FILE_NAME[] = "bogus.txt";
+static FatFS         *g_fs;
+static FatFileReader *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
@@ -63,10 +59,18 @@ void error_checker (const ErrorCode err) {
         pwOut << "Unknown error: " << err << '\n';
 }
 
+void clear_buffer (File *file) {
+    BlockStorage::Buffer *buffer = file->m_buf;
+    file->m_driver->flush(buffer);
+    for (unsigned int i = 0; i < file->m_driver->get_sector_size(); ++i)
+        buffer->buf[i] = 0;
+    buffer->id = -2;
+}
+
 SETUP {
     PropWare::ErrorCode err;
     testable = new FatFileReader(*g_fs, FILE_NAME);
-    err = testable->open();
+    err      = testable->open();
     if (err) {
         MESSAGE("Setup failed!");
         error_checker(err);
@@ -74,6 +78,7 @@ SETUP {
 }
 
 TEARDOWN {
+    clear_buffer(testable);
     delete testable;
 }
 
@@ -88,8 +93,25 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
+    ASSERT_EQ_MSG(-1, testable->get_length());
     ASSERT_EQ_MSG(false, testable->m_mod);
 
+    tearDown();
+}
+
+TEST(Exists_doeesNotExist) {
+    testable = new FatFileReader(*g_fs, BOGUS_FILE_NAME);
+    ASSERT_FALSE(testable->exists());
+    tearDown();
+}
+
+TEST(Exists_doesExist) {
+    testable                   = new FatFileReader(*g_fs, FILE_NAME);
+
+    PropWare::ErrorCode err;
+    const bool          exists = testable->exists(err);
+    error_checker(err);
+    ASSERT_TRUE(exists)
     tearDown();
 }
 
@@ -106,6 +128,13 @@ TEST(OpenClose) {
     err = testable->close();
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
+
+    tearDown();
+}
+
+TEST(Open_NonExistantFile) {
+    testable = new FatFileReader(*g_fs, BOGUS_FILE_NAME);
+    ASSERT_EQ_MSG(Filesystem::FILENAME_NOT_FOUND, testable->open());
 
     tearDown();
 }
@@ -140,8 +169,8 @@ TEST(Tell) {
 }
 
 TEST(Seek) {
-    const int SEEK_ITERATIONS = 2048;
-    char stringBuffer[SEEK_ITERATIONS];
+    const int           SEEK_ITERATIONS = 2048;
+    char                stringBuffer[SEEK_ITERATIONS];
     StaticStringBuilder stringBuilder(stringBuffer);
     PropWare::ErrorCode err;
     setUp();
@@ -182,10 +211,13 @@ int main () {
         passed = false;
         COMPLETE();
     }
-    g_fs = &fs;
+    g_fs     = &fs;
 
     RUN_TEST(ConstructorDestructor);
+    RUN_TEST(Exists_doesExist);
+    RUN_TEST(Exists_doeesNotExist);
     RUN_TEST(OpenClose);
+    RUN_TEST(Open_NonExistantFile);
     RUN_TEST(SafeGetChar);
     RUN_TEST(Tell);
     RUN_TEST(Seek);

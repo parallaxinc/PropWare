@@ -69,6 +69,17 @@ class FatFile : virtual public File {
             return this->m_name;
         }
 
+        bool exists () const {
+            uint16_t temp = 0;
+            return NO_ERROR == this->find(this->get_name(), &temp);
+        }
+
+        bool exists (PropWare::ErrorCode &err) const {
+            uint16_t temp = 0;
+            err = this->find(this->get_name(), &temp);
+            return NO_ERROR == err;
+        }
+
     protected:
         FatFile (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
@@ -102,7 +113,7 @@ class FatFile : virtual public File {
          *              error code is FatFS::EOC_END for end-of-chain or
          *              file-not-found marker)
          */
-        PropWare::ErrorCode find (const char *filename, uint16_t *fileEntryOffset) {
+        PropWare::ErrorCode find (const char *filename, uint16_t *fileEntryOffset) const {
             PropWare::ErrorCode err;
             char readEntryName[FILENAME_STR_LEN];
 
@@ -111,15 +122,8 @@ class FatFile : virtual public File {
 
             *fileEntryOffset = 0;
 
-            // If we aren't looking at the beginning of the directory cluster, we must backtrack to the beginning and
-            // then begin listing files
-            if (this->m_buf->curTier1Offset || !this->buffer_holds_directory_start()) {
-                this->m_buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->m_fs->m_dir_firstAllocUnit);
-                this->m_buf->curTier1Offset    = 0;
-                this->m_buf->curTier3          = this->m_fs->m_dir_firstAllocUnit;
-                check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &this->m_buf->nextTier3));
-                check_errors(this->m_fs->get_driver()->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf));
-            }
+            if (!this->buffer_holds_directory_start())
+                check_errors(this->reload_directory_start());
             this->m_buf->id = Filesystem::FOLDER_ID;
 
             // Loop through all entries in the current directory until we find the correct one
@@ -150,6 +154,53 @@ class FatFile : virtual public File {
             return FatFS::FILENAME_NOT_FOUND;
         }
 
+        /**
+         * @brief   Open a file that already has a slot in the current buffer
+         */
+        PropWare::ErrorCode open_existing_file (const uint16_t fileEntryOffset) {
+            PropWare::ErrorCode err;
+
+            if (this->is_directory(fileEntryOffset))
+                return Filesystem::ENTRY_NOT_FILE;
+
+            // Passed the file-not-directory test. Prepare the buffer for loading the file
+            check_errors(this->m_driver->flush(this->m_buf));
+
+            // Save the file entry's sector address
+            this->m_dirTier1Addr = this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset;
+
+            // Determine the file's first allocation unit
+            if (FatFS::FAT_16 == this->m_fs->m_filesystem)
+                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
+                                                             this->m_buf->buf);
+            else {
+                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
+                                                             this->m_buf->buf);
+                const uint16_t highWord = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_HIGH,
+                                                                    this->m_buf->buf);
+                this->firstTier3 |= highWord << 16;
+
+                // Clear the highest 4 bits - they are always reserved
+                this->firstTier3 &= 0x0FFFFFFF;
+            }
+
+            // Compute some stuffs for the file
+            this->m_curTier2      = 0;
+            this->fileEntryOffset = fileEntryOffset;
+            this->m_length        = this->m_driver->get_long(fileEntryOffset + FatFile::FILE_LEN_OFFSET,
+                                                             this->m_buf->buf);
+
+            // Claim this buffer as our own
+            this->m_buf->id = this->m_id;
+            this->m_buf->curTier1Offset = 0;
+            this->m_buf->curTier3 = this->firstTier3;
+            this->m_buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->firstTier3);
+            check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &(this->m_buf->nextTier3)));
+
+            // Finally, read the first sector
+            return this->m_driver->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf);
+        }
+
         bool file_deleted (const uint16_t fileEntryOffset) const {
             return DELETED_FILE_MARK == this->m_buf->buf[fileEntryOffset];
         }
@@ -170,7 +221,7 @@ class FatFile : virtual public File {
          * @param[out]  *filename   Address in memory where the filename string
          *                          will be stored
          */
-        void get_filename (const uint8_t *buf, char *filename) {
+        void get_filename (const uint8_t *buf, char *filename) const {
             uint8_t i, j = 0;
 
             // Read in the first 8 characters - stop when a space is reached or
@@ -206,7 +257,7 @@ class FatFile : virtual public File {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode load_next_sector (BlockStorage::Buffer *buf) {
+        PropWare::ErrorCode load_next_sector (BlockStorage::Buffer *buf) const {
             PropWare::ErrorCode err;
             check_errors(this->m_fs->get_driver()->flush(buf));
 
@@ -252,7 +303,7 @@ class FatFile : virtual public File {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode inc_cluster (BlockStorage::Buffer *buf) {
+        PropWare::ErrorCode inc_cluster (BlockStorage::Buffer *buf) const {
             PropWare::ErrorCode err;
             check_errors(this->m_fs->get_driver()->flush(buf));
 
@@ -273,10 +324,23 @@ class FatFile : virtual public File {
             return this->m_fs->get_driver()->read_data_block(buf->curTier2StartAddr, buf->buf);
         }
 
-        const bool buffer_holds_directory_start () const {
-            const uint32_t curDirectoryStartAddress
-                                   = this->m_fs->compute_tier1_from_tier3(this->m_fs->m_dir_firstAllocUnit);
-            return curDirectoryStartAddress == this->m_buf->curTier2StartAddr;
+        inline const bool buffer_holds_directory_start () const {
+            if (Filesystem::FOLDER_ID == this->m_buf->id && 0 == this->m_buf->curTier1Offset) {
+                const uint32_t curDirectoryStartAddress
+                                       = this->m_fs->compute_tier1_from_tier3(this->m_fs->m_dir_firstAllocUnit);
+                return curDirectoryStartAddress == this->m_buf->curTier2StartAddr;
+            } else
+                return false;
+        }
+
+        inline const PropWare::ErrorCode reload_directory_start () const {
+            PropWare::ErrorCode err;
+            this->m_buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->m_fs->m_dir_firstAllocUnit);
+            this->m_buf->curTier1Offset    = 0;
+            this->m_buf->curTier3          = this->m_fs->m_dir_firstAllocUnit;
+            check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &this->m_buf->nextTier3));
+            check_errors(this->m_fs->get_driver()->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf));
+            return NO_ERROR;
         }
 
         PropWare::ErrorCode reload_buf () {

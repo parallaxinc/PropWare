@@ -48,47 +48,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
                 return FatFS::EOC_END == err ? Filesystem::FILENAME_NOT_FOUND : err;
 
             // `name` was found successfully
-            if (this->is_directory(fileEntryOffset))
-                return Filesystem::ENTRY_NOT_FILE;
-
-            // Passed the file-not-directory test. Prepare the buffer for loading the file
-            check_errors(this->m_driver->flush(this->m_buf));
-
-            // Save the file entry's sector address
-            this->m_dirTier1Addr = this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset;
-
-            // Determine the file's first allocation unit
-            if (FatFS::FAT_16 == this->m_fs->m_filesystem)
-                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
-                                                                  this->m_buf->buf);
-            else {
-                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
-                                                                  this->m_buf->buf);
-                const uint16_t highWord = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_HIGH,
-                                                                    this->m_buf->buf);
-                this->firstTier3 |= highWord << 16;
-
-                // Clear the highest 4 bits - they are always reserved
-                this->firstTier3 &= 0x0FFFFFFF;
-            }
-
-            // Compute some stuffs for the file
-            this->m_curTier2      = 0;
-            this->fileEntryOffset = fileEntryOffset;
-            this->m_length        = this->m_driver->get_long(fileEntryOffset + FatFileReader::FILE_LEN_OFFSET,
-                                                             this->m_buf->buf);
-
-            // Claim this buffer as our own
-            this->m_buf->id = this->m_id;
-            this->m_buf->curTier1Offset = 0;
-            this->m_buf->curTier3 = this->firstTier3;
-            this->m_buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->firstTier3);
-            check_errors(this->m_fs->get_fat_value(this->m_buf->curTier3, &(this->m_buf->nextTier3)));
-
-            // Finally, read the first sector
-            check_errors(this->m_driver->read_data_block(this->m_buf->curTier2StartAddr, this->m_buf->buf));
-
-            return NO_ERROR;
+            return this->open_existing_file(fileEntryOffset);
         }
 
         PropWare::ErrorCode safe_get_char (char &c) {

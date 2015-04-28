@@ -37,7 +37,7 @@
 
 using namespace PropWare;
 
-FatFS *testable;
+static FatFS *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)

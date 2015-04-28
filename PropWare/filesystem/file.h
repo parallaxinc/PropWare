@@ -91,6 +91,7 @@ class File {
                 : m_logger(&logger),
                   m_driver(fs.get_driver()),
                   m_id(fs.next_file_id()),
+                  m_length(-1),
                   m_mod(false),
                   m_error(NO_ERROR) {
             if (NULL == buffer)

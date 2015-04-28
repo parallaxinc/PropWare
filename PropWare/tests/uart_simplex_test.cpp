@@ -26,7 +26,7 @@
 #include "PropWareTests.h"
 #include <PropWare/uart/simplexuart.h>
 
-PropWare::SimplexUART *testable;
+static PropWare::SimplexUART *testable;
 
 const PropWare::Pin::Mask MOSI = PropWare::Pin::P0;
 

@@ -39,15 +39,11 @@
 
 using namespace PropWare;
 
-const Pin::Mask MOSI = Pin::P0;
-const Pin::Mask MISO = Pin::P1;
-const Pin::Mask SCLK = Pin::P2;
-const Pin::Mask CS   = Pin::P4;
-
-const char    FILE_NAME[]       = "fat_test.txt";
-const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
-FatFS         *g_fs;
-FatFileWriter *testable;
+static const char    FILE_NAME[]       = "fat_test.txt";
+static const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
+static const char    BOGUS_FILE_NAME[] = "bogus.txt";
+static FatFS         *g_fs;
+static FatFileWriter *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
@@ -62,6 +58,14 @@ void error_checker (const ErrorCode err) {
         pwOut << "Unknown error: " << err << '\n';
 }
 
+void clear_buffer (File *file) {
+    BlockStorage::Buffer *buffer = file->m_buf;
+    file->m_driver->flush(buffer);
+    for (unsigned int i = 0; i < file->m_driver->get_sector_size(); ++i)
+        buffer->buf[i] = 0;
+    buffer->id = -2;
+}
+
 SETUP {
     PropWare::ErrorCode err;
     testable = new FatFileWriter(*g_fs, FILE_NAME);
@@ -73,21 +77,75 @@ SETUP {
 }
 
 TEARDOWN {
+    clear_buffer(testable);
     delete testable;
 }
 
 TEST(ConstructorDestructor) {
-    testable = new FatFileWriter(*g_fs, FILE_NAME);
-
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
     ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, FILE_NAME_UPPER));
+
+    testable = new FatFileWriter(*g_fs, FILE_NAME);
 
     ASSERT_EQ_MSG(0, strcmp(FILE_NAME_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
+    ASSERT_EQ_MSG(-1, testable->get_length());
     ASSERT_EQ_MSG(false, testable->m_mod);
+
+    tearDown();
+}
+
+TEST(Exists_doeesNotExist) {
+    testable = new FatFileWriter(*g_fs, BOGUS_FILE_NAME);
+    ASSERT_FALSE(testable->exists());
+    tearDown();
+}
+
+TEST(Exists_doesExist) {
+    testable = new FatFileWriter(*g_fs, FILE_NAME);
+
+    PropWare::ErrorCode err;
+    const bool exists = testable->exists(err);
+    error_checker(err);
+    ASSERT_TRUE(exists)
+    tearDown();
+}
+
+TEST(OpenClose_ExistingFile) {
+    ErrorCode err;
+
+    testable = new FatFileWriter(*g_fs, FILE_NAME);
+
+    if ((err = testable->open()))
+        error_checker(err);
+    ASSERT_EQ_MSG(0, err);
+
+    ASSERT_NEQ_MSG(0, testable->get_length());
+
+    if ((err = testable->close()));
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
+
+    tearDown();
+}
+
+TEST(OpenCloseDelete_NonExistingFile) {
+    ErrorCode err;
+
+    testable = new FatFileWriter(*g_fs, BOGUS_FILE_NAME);
+
+    ASSERT_FALSE(testable->exists());
+
+    if ((err = testable->open()))
+        error_checker(err);
+    ASSERT_EQ_MSG(0, err);
+
+    ASSERT_EQ_MSG(0, testable->get_length());
+
+
 
     tearDown();
 }
@@ -97,18 +155,21 @@ int main () {
 
     START(FatFileReaderTest);
 
-    FatFS fs(new SD());
-    if ((err = fs.mount())) {
+    g_fs = new FatFS(new SD());
+    if ((err = g_fs->mount())) {
         error_checker(err);
         passed = false;
         COMPLETE();
     }
 
-    g_fs = &fs;
-
     RUN_TEST(ConstructorDestructor);
+    RUN_TEST(Exists_doeesNotExist);
+    RUN_TEST(Exists_doesExist);
+    RUN_TEST(OpenClose_ExistingFile);
+//    RUN_TEST(OpenCloseDelete_NonExistingFile);
 
-    delete fs.get_driver();
+    delete g_fs->get_driver();
+    delete g_fs;
 
     COMPLETE();
 }

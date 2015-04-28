@@ -409,7 +409,7 @@ class Printer {
 
                         format.width = 0;
                         while (c && isdigit(c)) {
-                            format.width = 10 * format.width + (c - '0');
+                            format.width = (uint16_t) (10 * format.width + (c - '0'));
                             c = *(++s);
                         }
 
@@ -417,8 +417,7 @@ class Printer {
                             format.precision = 0;
                             c = *(++s);
                             while (c && isdigit(c)) {
-                                format.precision = 10 * format.precision
-                                        + (c - '0');
+                                format.precision = (uint16_t) (10 * format.precision + (c - '0'));
                                 c = *(++s);
                             }
                         }
@@ -462,7 +461,7 @@ class Printer {
         /**
          * @overload
          */
-        void printf (const char *fmt) const {
+        void printf (const char fmt[]) const {
             this->puts(fmt);
         }
 
