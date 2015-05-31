@@ -4,9 +4,6 @@ else ()
     set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
 endif ()
 
-# Printf with float support
-option(PROPWARE_PRINT_FLOAT "Enable floating point support in PropWare's printf method" OFF)
-
 # Linker options
 option(LINK_LIBPROPELLER "Link with libpropeller library" ON)
 option(LINK_SIMPLE "Link with Parallax's Simple library" ON)

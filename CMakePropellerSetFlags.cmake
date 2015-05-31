@@ -53,14 +53,6 @@ if (NOT((MODEL STREQUAL "cog") OR (MODEL STREQUAL "COG")))
     endif ()
 endif ()
 
-if (PROPWARE_PRINT_FLOAT)
-    if (${PROPWARE_PRINT_FLOAT_SET})
-    else ()
-        set(PROPWARE_PRINT_FLOAT_SET 1)
-        add_definitions(-DENABLE_PROPWARE_PRINT_FLOAT)
-    endif ()
-endif ()
-
 # Check if a deprecated variable name is set
 if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
     if (${CFLAGS_CXXFLAGS_SET})
