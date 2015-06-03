@@ -208,7 +208,7 @@ int main () {
     FatFS fs(new SD());
     if ((err = fs.mount())) {
         error_checker(err);
-        passed = false;
+        failures = (uint8_t) -1;
         COMPLETE();
     }
     g_fs     = &fs;
