@@ -32,6 +32,10 @@ macro (create_top_project projectName)
                 ${CMAKE_GDB} ${BAUDFLAG} ${projectName}.elf
                 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
 
+        add_custom_target(test
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${projectName}.elf -r -t -q
+                DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
+
         # Add target for run (load to RAM and start terminal)
         add_custom_target(debug
                 ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${projectName}.elf -r -t
@@ -69,6 +73,10 @@ macro (create_project projectName)
         add_custom_target(gdb-${projectName}
                 ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${projectName}.elf -r -g &&
                 ${CMAKE_GDB} ${BAUDFLAG} ${projectName}.elf
+                DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
+
+        add_custom_target(test-${projectName}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${projectName}.elf -r -t -q
                 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
 
         # Add target for run (load to RAM and start terminal)

@@ -33,12 +33,12 @@
 #define private   public
 
 void _runPropWareUnitTest (bool (*test) (void), const char testName[],
-                           const bool expectValue, bool *result) {
+                           const bool expectValue, uint8_t *failures) {
     if (expectValue == test())
         pwOut << "#\tSUCCESS: " << testName << '\n';
     else {
         pwOut << "#\t***FAIL: " << testName << '\n';
-        *result = false;
+        ++(*failures);
     }
 }
 
@@ -47,7 +47,7 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     pwOut << '\n';
 
 #define START(testSuiteName) \
-    bool passed = true; \
+    uint8_t    failures    = 0; \
     const char suiteName[] = #testSuiteName; \
     pwOut.println( \
         "####################" \
@@ -57,20 +57,21 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     pwOut << "# Test suite: " << suiteName << '\n';
 
 #define COMPLETE() \
-    if (!passed) \
-        pwOut.println("# Test FAILURE"); \
+    if (failures) \
+        pwOut << "# Test FAILURES = " << (unsigned int) failures << '\n'; \
     else \
         pwOut.println("done..."); \
-    return 0
+    pwOut << (char) 0xff << (char) 0x00 << (char) failures; \
+    return failures
 
 #define TEST(testName) \
     bool testName ()
 
 #define RUN_TEST(testName) \
-    _runPropWareUnitTest(testName, #testName, true, &passed)
+    _runPropWareUnitTest(testName, #testName, true, &failures)
 
 #define EXPECT_FAIL(testName) \
-    _runPropWareUnitTest(testName, #testName, false, &passed)
+    _runPropWareUnitTest(testName, #testName, false, &failures)
 
 #define FAIL(message) \
     _tearDown(); \

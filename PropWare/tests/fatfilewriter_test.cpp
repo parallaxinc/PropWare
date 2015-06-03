@@ -158,7 +158,7 @@ int main () {
     g_fs = new FatFS(new SD());
     if ((err = g_fs->mount())) {
         error_checker(err);
-        passed = false;
+        failures = (uint8_t) -1;
         COMPLETE();
     }
 
