@@ -221,7 +221,7 @@ class FatFile : virtual public File {
          * @param[out]  *filename   Address in memory where the filename string
          *                          will be stored
          */
-        void get_filename (const uint8_t *buf, char *filename) const {
+        void get_filename (const uint8_t buf[], char filename[]) const {
             uint8_t i, j = 0;
 
             // Read in the first 8 characters - stop when a space is reached or
@@ -364,17 +364,16 @@ class FatFile : virtual public File {
         }
 
         /**
-         * @brief       Load a requested sector into the buffer independent of
-         *              the current sector or cluster
+         * @brief       Load a requested sector into the buffer independent of the current sector or cluster
          *
          * @param[in]   offset  How many sectors past the first one should be skipped (sector number of the file)
          *
          * @return      Returns 0 upon success, error code otherwise
          *
          */
-        PropWare::ErrorCode load_sector_from_offset (const uint32_t offset) {
+        PropWare::ErrorCode load_sector_from_offset (const uint32_t sectorOffset) {
             PropWare::ErrorCode err;
-            uint32_t clusterOffset = offset >> this->m_fs->m_entriesPerFatSector_Shift;
+            uint32_t clusterOffset = sectorOffset >> this->m_fs->m_tier1sPerTier2Shift;
 
             this->flush();
 
@@ -405,9 +404,8 @@ class FatFile : virtual public File {
             }
 
             // Followed by finding the correct sector
-            this->m_buf->curTier1Offset = (uint8_t) (offset
-                    % (1 << this->m_fs->m_entriesPerFatSector_Shift));
-            this->m_curTier1 = offset;
+            this->m_buf->curTier1Offset = (uint8_t) (sectorOffset % (1 << this->m_fs->m_tier1sPerTier2Shift));
+            this->m_curTier1 = sectorOffset;
             this->m_driver->read_data_block(this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset,
                                             this->m_buf->buf);
 
