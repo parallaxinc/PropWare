@@ -123,6 +123,12 @@ TEST(Mount_withParameter4) {
     tearDown();
 }
 
+TEST(ClearChain) {
+    // TODO: Write test (and don't forget to invoke it in main)
+
+    tearDown();
+}
+
 int main () {
     START(FatFSTest);
 

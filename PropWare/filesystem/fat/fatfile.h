@@ -262,7 +262,7 @@ class FatFile : virtual public File {
             check_errors(this->m_fs->get_driver()->flush(buf));
 
             // Check for the end-of-chain marker (end of file)
-            if (((uint32_t) FatFS::EOC_BEG) <= buf->nextTier3)
+            if (this->m_fs->is_eoc(buf->nextTier3))
                 return FatFS::EOC_END;
 
             // Are we looking at the root directory of a FAT16 system?
@@ -308,16 +308,14 @@ class FatFile : virtual public File {
             check_errors(this->m_fs->get_driver()->flush(buf));
 
             // Update this->m_cur*
-            if (((uint32_t) FatFS::EOC_BEG) <= buf->curTier3
-                    && ((uint32_t) FatFS::EOC_END) <= buf->curTier3)
+            if (this->m_fs->is_eoc(buf->curTier3))
                 return FatFS::READING_PAST_EOC;
             buf->curTier3 = buf->nextTier3;
-            // Only look ahead to the next allocation unit if the current alloc
-            // unit is not EOC
-            if (!(((uint32_t) FatFS::EOC_BEG) <= buf->curTier3
-                    && ((uint32_t) FatFS::EOC_END) <= buf->curTier3))
+            // Only look ahead to the next allocation unit if the current alloc unit is not EOC
+            if (!this->m_fs->is_eoc(buf->curTier3)) {
                 // Current allocation unit is not EOC, read the next one
-            check_errors(this->m_fs->get_fat_value(buf->curTier3, &(buf->nextTier3)));
+                check_errors(this->m_fs->get_fat_value(buf->curTier3, &(buf->nextTier3)));
+            }
             buf->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(buf->curTier3);
             buf->curTier1Offset = 0;
 

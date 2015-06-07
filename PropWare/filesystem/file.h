@@ -36,6 +36,7 @@ class File {
             /** Successful completion */NO_ERROR  = 0,
             /** First error code */     BEG_ERROR = Filesystem::BEG_ERROR + 1,
             /** End of file */          EOF_ERROR,
+            /** Invalid file name */    INVALID_FILENAME,
             /** Final error code */     END_ERROR = EOF_ERROR
         } ErrorCode;
 
@@ -98,6 +99,9 @@ class File {
                 this->m_buf = fs.get_buffer();
             else
                 this->m_buf = buffer;
+
+            if (Utility::empty(this->m_buf->name))
+                this->m_buf->name = name;
         }
 
         /**
@@ -172,8 +176,9 @@ class File {
                                        this->m_buf->curTier3);
                 this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->nextTier3,
                                        this->m_buf->nextTier3);
-                if (printBlocks)
+                if (printBlocks) {
                     BlockStorage::print_block(*this->m_logger, *this->m_buf);
+                }
             }
         }
 

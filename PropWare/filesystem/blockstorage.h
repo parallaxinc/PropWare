@@ -32,6 +32,8 @@ namespace PropWare {
 class BlockStorage {
     public:
         struct Buffer {
+            /** Human-readable name */
+            const char   *name;
             /**  Buffer data */
             uint8_t      *buf;
             /** Buffer ID - determine who owns the current information */
@@ -46,11 +48,18 @@ class BlockStorage {
             uint32_t     nextTier3;
             /** When set, the currently loaded sector has been modified since it was read from the SD card */
             bool         mod;
+
+            Buffer () {
+                this->name = "";
+            }
         };
 
     public:
         static void print_block (const Printer &printer, const Buffer &buffer, const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
+            if (!Utility::empty(buffer.name)) {
+                printer.printf("Name = %s\n", buffer.name);
+            }
             print_block(printer, buffer.buf, words, wordsPerLine);
         }
 

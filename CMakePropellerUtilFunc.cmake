@@ -32,7 +32,7 @@ macro (create_top_project projectName)
                 ${CMAKE_GDB} ${BAUDFLAG} ${projectName}.elf
                 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
 
-        add_custom_target(test
+        add_custom_target(test-
                 ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${projectName}.elf -r -t -q
                 DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${projectName})
 

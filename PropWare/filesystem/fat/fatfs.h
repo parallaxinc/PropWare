@@ -111,6 +111,8 @@ class FatFS : public Filesystem {
                 this->m_buf.buf = (uint8_t *) malloc(this->m_sectorSize);
             if (NULL == this->m_fat)
                 this->m_fat     = (uint8_t *) malloc(this->m_sectorSize);
+            if (Utility::empty(this->m_buf.name))
+                this->m_buf.name = "FAT shared buffer";
 
             // Excellent information on determining FAT type can be found on page 14 of the following document,
             // starting with the section "FAT Type Determination"
@@ -131,21 +133,33 @@ class FatFS : public Filesystem {
          * @see PropWare::Filesystem::unmount
          */
         PropWare::ErrorCode unmount () {
-            // TODO: Lots more to do here!
-
             if (this->m_mounted) {
+                PropWare::ErrorCode err;
+
                 if (NULL != this->m_buf.buf) {
+                    this->m_driver->flush(&this->m_buf);
                     free(this->m_buf.buf);
                     this->m_buf.buf = NULL;
                 }
 
                 if (NULL != this->m_fat) {
+                    this->flush_fat();
                     free(this->m_fat);
                     this->m_fat = NULL;
                 }
             }
 
             return NO_ERROR;
+        }
+
+        /**
+         * @brief   Determine whether the mounted filesystem is FAT16 or FAT32
+         *
+         * @return  2 (also known as PropWare::FatFS::FAT16) for FAT16, 4 (also known as PropWare::FatFS::FAT32) for
+         *          FAT32
+         */
+        uint8_t get_fs_type () {
+            return this->m_filesystem;
         }
 
     private:
@@ -171,13 +185,14 @@ class FatFS : public Filesystem {
         static const uint16_t FAT12_CLSTR_CNT        = 4085;
         static const uint16_t FAT16_CLSTR_CNT        = UINT16_MAX - 10;
 
-        static const int8_t  FREE_CLUSTER       = 0;  // Cluster is unused
-        static const int8_t  RESERVED_CLUSTER   = 1;
-        static const int8_t  RSVD_CLSTR_VAL_BEG = -15;  // First reserved cluster value
-        static const int8_t  RSVD_CLSTR_VAL_END = -9;  // Last reserved cluster value
-        static const int8_t  BAD_CLUSTER        = -8;  // Cluster is corrupt
-        static const int32_t EOC_BEG            = -7;  // First marker for end-of-chain (end of file entry within FAT)
-        static const int32_t EOC_END            = -1;  // Last marker for end-of-chain
+        static const int8_t   FREE_CLUSTER       = 0;  // Cluster is unused
+        static const int8_t   RESERVED_CLUSTER   = 1;
+        static const int8_t   RSVD_CLSTR_VAL_BEG = -15;  // First reserved cluster value
+        static const int8_t   RSVD_CLSTR_VAL_END = -10;  // Last reserved cluster value
+        static const int8_t   BAD_CLUSTER        = -9;  // Cluster is corrupt
+        static const int32_t  EOC_BEG            = -8;  // First marker for end-of-chain (end of file entry within FAT)
+        static const int32_t  EOC_END            = -1;  // Last marker for end-of-chain
+        static const uint32_t EOC_MASK           = 0x0fffffff;
 
     private:
         typedef struct {
@@ -384,6 +399,18 @@ class FatFS : public Filesystem {
             return 0;
         }
 
+        bool is_eoc (int32_t value) const {
+            switch (this->m_filesystem) {
+                case FAT_16:
+                    return EOC_END == value;
+                case FAT_32:
+                    value |= 0xf0000000;
+                    return EOC_BEG <= value && EOC_END <= value;
+                default:
+                    return false;
+            }
+        }
+
         /**
          * @brief       Read an entry from the FAT
          *
@@ -399,16 +426,8 @@ class FatFS : public Filesystem {
             uint32_t            firstAvailableAllocUnit;
 
             // Do we need to load a new fat sector?
-            if ((fatEntry >> this->m_entriesPerFatSector_Shift)
-                    != this->m_curFatSector) {
-                // If the currently loaded FAT sector has been modified, save it
-                if (this->m_fatMod) {
-                    this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat);
-                    this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart + this->m_fatSize,
-                                                     this->m_fat);
-                    this->m_fatMod = false;
-                }
-                // Need new sector, load it
+            if ((fatEntry >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
+                this->flush_fat();
                 this->m_curFatSector = fatEntry >> this->m_entriesPerFatSector_Shift;
                 check_errors(this->m_driver->read_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat));
             }
@@ -419,12 +438,14 @@ class FatFS : public Filesystem {
             // incrementing the cluster variables
 
             // Retrieve the next allocation unit number
-            if (FAT_16 == this->m_filesystem)
-                *value = this->m_driver->get_short((fatEntry - firstAvailableAllocUnit) << 1, this->m_fat);
-            else if (FAT_32 == this->m_filesystem)
-                *value = this->m_driver->get_long((fatEntry - firstAvailableAllocUnit) << 2, this->m_fat);
-            // Clear the highest 4 bits - they are always reserved
-            *value &= 0x0FFFFFFF;
+            if (FAT_16 == this->m_filesystem) {
+                *value = this->m_driver->get_short((uint16_t) ((fatEntry - firstAvailableAllocUnit) << 1), this->m_fat);
+                *value &= WORD_0;
+            } else if (FAT_32 == this->m_filesystem) {
+                *value = this->m_driver->get_long((uint16_t) ((fatEntry - firstAvailableAllocUnit) << 2), this->m_fat);
+                // Clear the highest 4 bits - they are always reserved
+                *value &= 0x0FFFFFFF;
+            }
 
             return 0;
         }
@@ -458,18 +479,10 @@ class FatFS : public Filesystem {
             PropWare::ErrorCode err;
             uint32_t            newAllocUnit;
 
-            // Do we need to load a different sector of the FAT or is the
-            // correct one currently loaded? (Correct means the sector currently
-            // containing the EOC marker)
+            // Do we need to load a different sector of the FAT or is the correct one currently loaded? (Correct means
+            // the sector currently containing the EOC marker)
             if ((buf->curTier3 >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
-                // Need new sector, save the old one...
-                if (this->m_fatMod) {
-                    this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat);
-                    this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart + this->m_fatSize,
-                                                     this->m_fat);
-                    this->m_fatMod = false;
-                }
-                // And load the new one...
+                this->flush_fat();
                 this->m_curFatSector = buf->curTier3 >> this->m_entriesPerFatSector_Shift;
                 check_errors(this->m_driver->read_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat));
             }
@@ -480,18 +493,19 @@ class FatFS : public Filesystem {
             uint16_t allocUnitOffset     = (uint16_t) (buf->curTier3 % entriesPerFatSector);
             uint16_t fatPointerAddress   = allocUnitOffset * this->m_filesystem;
             uint32_t nextSector          = this->m_driver->get_long(fatPointerAddress, this->m_fat);
-            if ((uint32_t) EOC_BEG <= nextSector)
+            if (this->is_eoc(nextSector))
                 return INVALID_FAT_APPEND;
 
             // Find where the next cluster of the file should be stored...
             newAllocUnit = this->find_empty_space(1);
 
             // Now that we know the allocation unit, write it to the FAT buffer
-            const uint16_t x = (buf->curTier3 % (1 << this->m_entriesPerFatSector_Shift)) * this->m_filesystem;
+            const uint16_t sectorOffset = (uint16_t) ((buf->curTier3 % (1 << this->m_entriesPerFatSector_Shift)) *
+                                                      this->m_filesystem);
             if (FAT_16 == this->m_filesystem)
-                this->m_driver->write_short(x, this->m_fat, newAllocUnit);
+                this->m_driver->write_short(sectorOffset, this->m_fat, (uint16_t) newAllocUnit);
             else
-                this->m_driver->write_long(x, this->m_fat, newAllocUnit);
+                this->m_driver->write_long(sectorOffset, this->m_fat, newAllocUnit);
             buf->nextTier3 = newAllocUnit;
             this->m_fatMod = true;  // And mark the buffer as modified
 
@@ -501,17 +515,15 @@ class FatFS : public Filesystem {
         /**
          * @brief       Find the first empty allocation unit in the FAT
          *
-         * The value of the first empty allocation unit is returned and its
-         * location will contain the end-of-chain marker, SD_EOC_END.
+         * The value of the first empty allocation unit is returned and its location will contain the end-of-chain
+         * marker, SD_EOC_END.
          *
-         * NOTE: It is important to realize that, though the new entry now
-         * contains an EOC marker, this function does not know what cluster is
-         * being extended and therefore the calling function must modify the
-         * previous EOC to contain the return value
+         * NOTE: It is important to realize that, though the new entry now contains an EOC marker, this function
+         * does not know what cluster is being extended and therefore the calling function must modify the previous
+         * EOC to contain the return value
          *
-         * @param[in]   restore     If non-zero, the original fat-sector will be
-         *                          restored to m_fat before returning; if zero,
-         *                          the last-used sector will remain loaded
+         * @param[in]   restore     If non-zero, the original fat-sector will be restored to m_fat before returning;
+         *                          if zero, the last-used sector will remain loaded
          *
          * @return      Returns the number of the first unused allocation unit
          */
@@ -519,71 +531,55 @@ class FatFS : public Filesystem {
             uint16_t allocOffset   = 0;
             uint32_t fatSectorAddr = this->m_curFatSector + this->m_fatStart;
             uint32_t retVal;
-            // NOTE: this->m_curFatSector is not modified until end of function
-            // - it is used throughout this function as the original starting
-            // point
+            // NOTE: this->m_curFatSector is not modified until end of function - it is used throughout this function as
+            // the original starting point
 
             // Find the first empty allocation unit and write the EOC marker
             if (FAT_16 == this->m_filesystem) {
                 // Loop until we find an empty cluster
                 while (this->m_driver->get_short(allocOffset, this->m_fat)) {
-                    // Stop when we either reach the end of the current block or
-                    // find an empty cluster
+                    // Stop when we either reach the end of the current block or find an empty cluster
                     while (this->m_driver->get_short(allocOffset, this->m_fat) && (this->m_sectorSize > allocOffset))
                         allocOffset += FAT_16;
                     // If we reached the end of a sector...
                     if (this->m_sectorSize <= allocOffset) {
-                        // If the currently loaded FAT sector has been modified,
-                        // save it
-                        if (this->m_fatMod) {
-                            this->m_driver->write_data_block(this->m_curFatSector, this->m_fat);
-                            this->m_driver->write_data_block(this->m_curFatSector + this->m_fatSize, this->m_fat);
-                            this->m_fatMod = false;
-                        }
                         // Read the next fat sector
+                        this->flush_fat();
                         this->m_driver->read_data_block(++fatSectorAddr, this->m_fat);
                     }
                 }
-                this->m_driver->write_short(allocOffset, this->m_fat, EOC_END);
+                this->m_driver->write_short(allocOffset, this->m_fat, (uint16_t) EOC_END);
                 this->m_fatMod = true;
             } else /* Implied: "if (FAT_32 == this->m_filesystem)" */{
-                // In FAT32, the first 7 usable clusters seem to be
-                // un-officially reserved for the root directory
+                // In FAT32, the first 7 usable clusters seem to be un-officially reserved for the root directory
                 if (0 == this->m_curFatSector)
-                    allocOffset = (uint16_t) (9 * this->m_filesystem);
+                    // 9 comes from the 7 un-officially reserved + 2 for the standard reservation
+                    allocOffset = (uint16_t) (9 * FAT_32);
 
                 // Loop until we find an empty cluster
-                while (this->m_driver->get_long(allocOffset, this->m_fat) & 0x0fffffff) {
-                    // Stop when we either reach the end of the current block or
-                    // find an empty cluster
-                    while ((this->m_driver->get_long(allocOffset, this->m_fat) & 0x0fffffff)
+                while (this->m_driver->get_long(allocOffset, this->m_fat) & EOC_MASK) {
+                    // Stop when we either reach the end of the current block or find an empty cluster
+                    while ((this->m_driver->get_long(allocOffset, this->m_fat) & EOC_MASK)
                             && (this->m_sectorSize > allocOffset))
                         allocOffset += FAT_32;
 
                     // If we reached the end of a sector...
                     if (this->m_sectorSize <= allocOffset) {
-                        if (this->m_fatMod) {
-                            this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat);
-                            this->m_driver->write_data_block(this->m_curFatSector + this->m_fatStart + this->m_fatSize,
-                                                             this->m_fat);
-                            this->m_fatMod = false;
-                        }
                         // Read the next fat sector
+                        this->flush_fat();
                         this->m_driver->read_data_block(++fatSectorAddr, this->m_fat);
                         allocOffset = 0;
                     }
                 }
 
-                this->m_driver->write_long(allocOffset, this->m_fat, ((uint32_t) EOC_END) & 0x0fffffff);
+                this->m_driver->write_long(allocOffset, this->m_fat, ((uint32_t) EOC_END) & EOC_MASK);
                 this->m_fatMod = true;
             }
 
             // If we loaded a new fat sector (and then modified it directly
             // above), write the sector before re-loading the original
             if ((fatSectorAddr != (this->m_curFatSector + this->m_fatStart)) && this->m_fatMod) {
-                this->m_driver->write_data_block(fatSectorAddr, this->m_fat);
-                this->m_driver->write_data_block(fatSectorAddr + this->m_fatSize, this->m_fat);
-                this->m_fatMod = false;
+                this->flush_fat();
                 this->m_driver->read_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat);
             } else
                 this->m_curFatSector = fatSectorAddr - this->m_fatStart;
@@ -592,6 +588,47 @@ class FatFS : public Filesystem {
             retVal = this->m_curFatSector << this->m_entriesPerFatSector_Shift;
             retVal += allocOffset / this->m_filesystem;
             return retVal;
+        }
+
+        PropWare::ErrorCode flush_fat () {
+            PropWare::ErrorCode err;
+            if (m_fatMod) {
+                check_errors(m_driver->write_data_block(this->m_fatStart + this->m_curFatSector, this->m_fat));
+                check_errors(m_driver->write_data_block(this->m_fatStart + this->m_curFatSector + this->m_fatSize,
+                                                        m_fat));
+                m_fatMod = false;
+            }
+
+            return NO_ERROR;
+        }
+
+        /**
+         * @brief       Remove the linked list of allocation units from the FAT (clear space)
+         *
+         * @param[in]   head    First allocation unit
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode clear_chain (const uint32_t head) {
+            PropWare::ErrorCode err;
+
+            uint32_t next = head;
+            do {
+                const uint32_t current = next;
+                check_errors(this->get_fat_value(current, &next));
+
+                const uint32_t firstAvailableAllocUnit = this->m_curFatSector << this->m_entriesPerFatSector_Shift;
+                const uint16_t sectorOffset = (uint16_t) (current - firstAvailableAllocUnit);
+
+                if (FAT_16 == this->m_filesystem)
+                    this->m_driver->write_short(sectorOffset << 1, this->m_fat, 0);
+                else if (FAT_32 == this->m_filesystem)
+                    this->m_driver->write_long(sectorOffset << 2, this->m_fat, 0);
+            } while (!this->is_eoc(next));
+
+            this->m_fatMod = true;
+
+            return NO_ERROR;
         }
 
         void print_status (const bool printBlocks = false, const uint8_t blockLineLength = 16) {
@@ -625,6 +662,7 @@ class FatFS : public Filesystem {
                                    this->m_initFatInfo.rsvdSectorCount);
             this->m_logger->printf("\tTotal sectors: 0x%08X/%u\n", this->m_initFatInfo.totalSectors,
                                    this->m_initFatInfo.totalSectors);
+            this->m_logger->printf("\tFAT Start: 0x%08X/%u\n", this->m_fatStart, this->m_fatStart);
             this->m_logger->printf("\tFAT size: 0x%08X/%u\n", this->m_initFatInfo.FATSize, this->m_initFatInfo
                     .FATSize);
             this->m_logger->printf("\tData sectors: 0x%08X/%u\n", this->m_initFatInfo.dataSectors,

@@ -77,6 +77,7 @@ SETUP {
 }
 
 TEARDOWN {
+    testable->close();
     clear_buffer(testable);
     delete testable;
 }
@@ -98,17 +99,17 @@ TEST(ConstructorDestructor) {
     tearDown();
 }
 
-TEST(Exists_doeesNotExist) {
+TEST(Exists_doesNotExist) {
     testable = new FatFileWriter(*g_fs, BOGUS_FILE_NAME);
     ASSERT_FALSE(testable->exists());
     tearDown();
 }
 
 TEST(Exists_doesExist) {
-    testable = new FatFileWriter(*g_fs, FILE_NAME);
+    testable                   = new FatFileWriter(*g_fs, FILE_NAME);
 
     PropWare::ErrorCode err;
-    const bool exists = testable->exists(err);
+    const bool          exists = testable->exists(err);
     error_checker(err);
     ASSERT_TRUE(exists)
     tearDown();
@@ -145,7 +146,24 @@ TEST(OpenCloseDelete_NonExistingFile) {
 
     ASSERT_EQ_MSG(0, testable->get_length());
 
+    err = testable->close();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->close()
 
+    clear_buffer(testable);
+    ASSERT_TRUE(testable->exists());
+
+    if ((err = testable->remove()))
+        error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->remove()
+    if ((err = testable->flush()))
+        error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->flush()
+
+
+
+    clear_buffer(testable);
+    ASSERT_FALSE(testable->exists());
 
     tearDown();
 }
@@ -155,7 +173,7 @@ int main () {
 
     START(FatFileReaderTest);
 
-    g_fs = new FatFS(new SD());
+    g_fs     = new FatFS(new SD());
     if ((err = g_fs->mount())) {
         error_checker(err);
         failures = (uint8_t) -1;
@@ -163,10 +181,10 @@ int main () {
     }
 
     RUN_TEST(ConstructorDestructor);
-    RUN_TEST(Exists_doeesNotExist);
+    RUN_TEST(Exists_doesNotExist);
     RUN_TEST(Exists_doesExist);
     RUN_TEST(OpenClose_ExistingFile);
-//    RUN_TEST(OpenCloseDelete_NonExistingFile);
+    RUN_TEST(OpenCloseDelete_NonExistingFile);
 
     delete g_fs->get_driver();
     delete g_fs;
