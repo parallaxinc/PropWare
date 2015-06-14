@@ -31,11 +31,9 @@
 namespace PropWare {
 class BlockStorage {
     public:
-        struct Buffer {
+        struct MetaData {
             /** Human-readable name */
             const char   *name;
-            /**  Buffer data */
-            uint8_t      *buf;
             /** Buffer ID - determine who owns the current information */
             int          id;
             /** Store the current cluster's starting sector number */
@@ -49,16 +47,21 @@ class BlockStorage {
             /** When set, the currently loaded sector has been modified since it was read from the SD card */
             bool         mod;
 
-            Buffer () {
+            MetaData () {
                 this->name = "";
             }
+        };
+
+        struct Buffer {
+            uint8_t  *buf;
+            MetaData *meta;
         };
 
     public:
         static void print_block (const Printer &printer, const Buffer &buffer, const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
-            if (!Utility::empty(buffer.name)) {
-                printer.printf("Name = %s\n", buffer.name);
+            if (!Utility::empty(buffer.meta->name)) {
+                printer.printf("Name = %s\n", buffer.meta->name);
             }
             print_block(printer, buffer.buf, words, wordsPerLine);
         }
@@ -105,6 +108,10 @@ class BlockStorage {
             return this->read_data_block(address, buffer->buf);
         }
 
+        ErrorCode reload_buffer (const BlockStorage::Buffer *buffer) const {
+            return this->read_data_block(buffer->meta->curTier2StartAddr + buffer->meta->curTier1Offset, buffer);
+        }
+
         virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const = 0;
 
         ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
@@ -118,9 +125,10 @@ class BlockStorage {
          */
         ErrorCode flush (Buffer *buffer) const {
             PropWare::ErrorCode err;
-            if (buffer->mod) {
-                check_errors(this->write_data_block(buffer->curTier2StartAddr + buffer->curTier1Offset, buffer->buf));
-                buffer->mod = false;
+            if (buffer->meta && buffer->meta->mod) {
+                check_errors(this->write_data_block(
+                        buffer->meta->curTier2StartAddr + buffer->meta->curTier1Offset, buffer->buf));
+                buffer->meta->mod = false;
             }
             return 0;
         }

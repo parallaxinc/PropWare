@@ -64,7 +64,7 @@ void clear_buffer (File *file) {
     file->m_driver->flush(buffer);
     for (unsigned int i = 0; i < file->m_driver->get_sector_size(); ++i)
         buffer->buf[i] = 0;
-    buffer->id = -2;
+    buffer->meta = NULL;
 }
 
 SETUP {
@@ -78,8 +78,12 @@ SETUP {
 }
 
 TEARDOWN {
-    clear_buffer(testable);
-    delete testable;
+    if (NULL != testable) {
+        testable->close();
+        clear_buffer(testable);
+        delete testable;
+        testable = NULL;
+    }
 }
 
 TEST(ConstructorDestructor) {
@@ -92,16 +96,11 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
-    ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
+    ASSERT_EQ_MSG((unsigned int) &g_fs->m_dirMeta, (unsigned int) testable->m_fsBufMeta);
+    ASSERT_EQ_MSG((unsigned int) g_fs, (unsigned int) testable->m_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
     ASSERT_EQ_MSG(false, testable->m_mod);
 
-    tearDown();
-}
-
-TEST(Exists_doeesNotExist) {
-    testable = new FatFileReader(*g_fs, BOGUS_FILE_NAME);
-    ASSERT_FALSE(testable->exists());
     tearDown();
 }
 
@@ -112,6 +111,12 @@ TEST(Exists_doesExist) {
     const bool          exists = testable->exists(err);
     error_checker(err);
     ASSERT_TRUE(exists)
+    tearDown();
+}
+
+TEST(Exists_doeesNotExist) {
+    testable = new FatFileReader(*g_fs, BOGUS_FILE_NAME);
+    ASSERT_FALSE(testable->exists());
     tearDown();
 }
 

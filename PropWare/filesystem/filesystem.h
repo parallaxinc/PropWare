@@ -100,6 +100,7 @@ class Filesystem {
                   m_mounted(false),
                   m_nextFileId(0) {
             this->m_buf.buf = NULL;
+            this->m_buf.meta = &m_dirMeta;
         }
 
         virtual uint32_t compute_tier1_from_tier3 (uint32_t allocUnit) const = 0;
@@ -122,9 +123,10 @@ class Filesystem {
         const uint16_t      m_sectorSize;
         uint8_t             m_tier1sPerTier2Shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
 
-        bool                 m_mounted;
-        BlockStorage::Buffer m_buf;
-        int                  m_nextFileId;
+        bool                   m_mounted;
+        BlockStorage::Buffer   m_buf;
+        BlockStorage::MetaData m_dirMeta;
+        int                    m_nextFileId;
 };
 
 }

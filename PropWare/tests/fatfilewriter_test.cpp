@@ -36,39 +36,45 @@
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilewriter.h>
+#include <PropWare/filesystem/fat/fatfilereader.h>
 
 using namespace PropWare;
 
-static const char    FILE_NAME[]       = "fat_test.txt";
-static const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
-static const char    BOGUS_FILE_NAME[] = "bogus.txt";
+static const char    EXISTING_FILE[]       = "fat_test.txt";
+static const char    EXISTING_FILE_UPPER[] = "FAT_TEST.TXT";
+static const char    NEW_FILE_NAME[]       = "new_test.txt";
 static FatFS         *g_fs;
 static FatFileWriter *testable;
 
 void error_checker (const ErrorCode err) {
-    if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
-        SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
-    else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
-        ((SD *) g_fs->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
-    else if (Filesystem::BEG_ERROR <= err && err <= Filesystem::END_ERROR)
-        FatFS::print_error_str(pwOut, (const Filesystem::ErrorCode) err);
-    else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
-        pwOut << "No print string yet for FatFS's error #" << err - FatFS::BEG_ERROR << " (raw = " << err << ")\n";
-    else if (err)
-        pwOut << "Unknown error: " << err << '\n';
+    if (err) {
+        if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
+            SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
+        else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
+            ((SD *) g_fs->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
+        else if (Filesystem::BEG_ERROR <= err && err <= Filesystem::END_ERROR)
+            FatFS::print_error_str(pwOut, (const Filesystem::ErrorCode) err);
+        else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
+            pwOut << "No print string yet for FatFS's error #" << err - FatFS::BEG_ERROR << " (raw = " << err << ")\n";
+        else
+            pwOut << "Unknown error: " << err << '\n';
+    }
+}
+
+void clear_buffer (const BlockStorage *driver, BlockStorage::Buffer *buffer) {
+    driver->flush(buffer);
+    for (unsigned int i = 0; i < driver->get_sector_size(); ++i)
+        buffer->buf[i] = 0;
+    buffer->meta = NULL;
 }
 
 void clear_buffer (File *file) {
-    BlockStorage::Buffer *buffer = file->m_buf;
-    file->m_driver->flush(buffer);
-    for (unsigned int i = 0; i < file->m_driver->get_sector_size(); ++i)
-        buffer->buf[i] = 0;
-    buffer->id = -2;
+    clear_buffer(file->m_driver, file->m_buf);
 }
 
 SETUP {
     PropWare::ErrorCode err;
-    testable = new FatFileWriter(*g_fs, FILE_NAME);
+    testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
     err      = testable->open();
     if (err) {
         MESSAGE("Setup failed!");
@@ -77,18 +83,22 @@ SETUP {
 }
 
 TEARDOWN {
-    testable->close();
-    clear_buffer(testable);
-    delete testable;
+    if (NULL != testable) {
+        testable->close();
+        clear_buffer(testable);
+        delete testable;
+        testable = NULL;
+    }
+    g_fs->flush_fat();
 }
 
 TEST(ConstructorDestructor) {
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
-    ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, FILE_NAME_UPPER));
+    ASSERT_NEQ_MSG(0, strcmp(EXISTING_FILE, EXISTING_FILE_UPPER));
 
-    testable = new FatFileWriter(*g_fs, FILE_NAME);
+    testable = new FatFileWriter(*g_fs, EXISTING_FILE);
 
-    ASSERT_EQ_MSG(0, strcmp(FILE_NAME_UPPER, testable->get_name()));
+    ASSERT_EQ_MSG(0, strcmp(EXISTING_FILE_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
@@ -100,13 +110,13 @@ TEST(ConstructorDestructor) {
 }
 
 TEST(Exists_doesNotExist) {
-    testable = new FatFileWriter(*g_fs, BOGUS_FILE_NAME);
+    testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
     ASSERT_FALSE(testable->exists());
     tearDown();
 }
 
 TEST(Exists_doesExist) {
-    testable                   = new FatFileWriter(*g_fs, FILE_NAME);
+    testable                   = new FatFileWriter(*g_fs, EXISTING_FILE);
 
     PropWare::ErrorCode err;
     const bool          exists = testable->exists(err);
@@ -118,15 +128,15 @@ TEST(Exists_doesExist) {
 TEST(OpenClose_ExistingFile) {
     ErrorCode err;
 
-    testable = new FatFileWriter(*g_fs, FILE_NAME);
+    testable = new FatFileWriter(*g_fs, EXISTING_FILE);
 
-    if ((err = testable->open()))
-        error_checker(err);
+    err = testable->open();
+    error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
     ASSERT_NEQ_MSG(0, testable->get_length());
 
-    if ((err = testable->close()));
+    err = testable->close();
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
@@ -136,12 +146,12 @@ TEST(OpenClose_ExistingFile) {
 TEST(OpenCloseDelete_NonExistingFile) {
     ErrorCode err;
 
-    testable = new FatFileWriter(*g_fs, BOGUS_FILE_NAME);
+    testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
 
     ASSERT_FALSE(testable->exists());
 
-    if ((err = testable->open()))
-        error_checker(err);
+    err = testable->open();
+    error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
     ASSERT_EQ_MSG(0, testable->get_length());
@@ -153,14 +163,62 @@ TEST(OpenCloseDelete_NonExistingFile) {
     clear_buffer(testable);
     ASSERT_TRUE(testable->exists());
 
-    if ((err = testable->remove()))
-        error_checker(err);
+    err = testable->remove();
+    error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->remove()
-    if ((err = testable->flush()))
-        error_checker(err);
+    err = testable->flush();
+    error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->flush()
 
+    clear_buffer(testable);
+    ASSERT_FALSE(testable->exists());
 
+    tearDown();
+}
+
+TEST(SafePutChar_FileNotOpened) {
+    // TODO
+    tearDown();
+}
+
+TEST(SafePutChar_singleChar) {
+    const char sampleChar = 'a';
+
+    PropWare::ErrorCode err;
+    setUp();
+
+    ASSERT_EQ_MSG(0, testable->get_length());
+    err = testable->safe_put_char(sampleChar);
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->safe_put_char('a')
+
+    ASSERT_EQ_MSG(1, testable->get_length());
+    err = testable->close();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->close()
+
+    {
+        const BlockStorage   *driver = testable->m_driver;
+        BlockStorage::Buffer *buffer = testable->m_buf;
+        delete testable;
+        g_fs->flush_fat();
+
+        clear_buffer(driver, buffer);
+    }
+
+    FatFileReader reader(*g_fs, NEW_FILE_NAME);
+    ASSERT_EQ_MSG(0, reader.open());
+    ASSERT_EQ_MSG(1, reader.get_length());
+    ASSERT_EQ_MSG(sampleChar, reader.get_char());
+    reader.close();
+
+    testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
+    err = testable->remove();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->remove()
+    err = testable->flush();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->flush()
 
     clear_buffer(testable);
     ASSERT_FALSE(testable->exists());
@@ -185,6 +243,7 @@ int main () {
     RUN_TEST(Exists_doesExist);
     RUN_TEST(OpenClose_ExistingFile);
     RUN_TEST(OpenCloseDelete_NonExistingFile);
+//    RUN_TEST(SafePutChar_singleChar);
 
     delete g_fs->get_driver();
     delete g_fs;

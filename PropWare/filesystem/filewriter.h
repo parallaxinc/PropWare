@@ -38,7 +38,25 @@ class FileWriter : virtual public File, public PrintCapable {
                   m_ptr(0) {
         }
 
+        virtual PropWare::ErrorCode safe_put_char (const char c) = 0;
+
         void put_char (const char c) {
+            this->safe_put_char(c);
+        }
+
+        virtual PropWare::ErrorCode safe_puts (const char string[]) {
+            PropWare::ErrorCode err;
+
+            char *s = (char *) string;
+            while (*s) {
+                check_errors(this->safe_put_char(*s));
+            }
+
+            return NO_ERROR;
+        }
+
+        void puts (const char string[]) {
+            this->safe_puts(string);
         }
 
         inline bool eof () const {

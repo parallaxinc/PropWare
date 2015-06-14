@@ -50,8 +50,7 @@ public:
         if ((err = this->find(this->get_name(), &fileEntryOffset))) {
             switch (err) {
                 case FatFS::EOC_END:
-                    // TODO: Enlarge cluster and then proceed to FILENAME_NOT_FOUND case
-                    return FatFS::EOC_END;
+                    check_errors(this->m_fs->extend_current_directory());
                 case Filesystem::FILENAME_NOT_FOUND:
                     check_errors(this->create_new_file(fileEntryOffset));
                     break;
@@ -89,15 +88,15 @@ public:
 
         this->m_driver->flush(this->m_buf);
 
-        // If the file's directory isn't loaded, load it (we need the first allocation unit)
-        if (this->m_dirTier1Addr != (this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset)) {
-            check_errors(this->m_driver->read_data_block(this->m_dirTier1Addr, this->m_buf));
-        }
+        this->m_buf->meta = &this->m_dirEntryMeta;
+        check_errors(this->m_driver->reload_buffer(this->m_buf));
+
+        this->m_buf->buf[this->fileEntryOffset] = DELETED_FILE_MARK;
+        this->m_buf->meta->mod = true;
 
         check_errors(this->m_fs->clear_chain(this->firstTier3));
-        this->m_buf->buf[this->fileEntryOffset] = DELETED_FILE_MARK;
-        this->m_buf->mod = true;
-        this->m_mod = false; // This guy is for file length and contents, not the directory entry or FAT
+
+        this->m_mod = false; // This guy is for file length, not the directory entry or FAT
 
         return NO_ERROR;
     }
@@ -110,24 +109,38 @@ public:
 
         // If we modified the length of the file...
         if (this->m_mod) {
-            // Then check if the directory sector is loaded...
-            if ((this->m_buf->curTier2StartAddr + this->m_buf->curTier1Offset) != this->m_dirTier1Addr) {
-                // And load it if it isn't
-                check_errors(this->m_driver->read_data_block(this->m_dirTier1Addr, this->m_buf));
-            }
+            this->m_buf->meta = &this->m_dirEntryMeta;
+            check_errors(this->m_driver->reload_buffer(this->m_buf));
 
             // Finally, edit the length of the file
             this->m_driver->write_long(this->fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf,
                                        (const uint32_t) this->m_length);
-            this->m_buf->mod = true;
             check_errors(this->m_driver->flush(this->m_buf));
         }
 
         return NO_ERROR;
     }
 
-    virtual void puts (char const string[]) {
-        // TODO
+    PropWare::ErrorCode safe_put_char (const char c) {
+        PropWare::ErrorCode err;
+
+        check_errors(this->load_sector_under_ptr());
+
+        // Get the character
+        const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->get_driver()->get_sector_size());
+        this->m_buf->buf[bufferOffset] = (uint8_t) c;
+        this->m_buf->meta->mod = true;
+
+        // If we extended the file, be sure to increment the length counter and make a note that the length changed
+        if (this->m_length == this->m_ptr) {
+            ++(this->m_length);
+            this->m_mod = true;
+        }
+
+        // Finally done. Increment the pointer
+        ++(this->m_ptr);
+
+        return NO_ERROR;
     }
 
 protected:
@@ -157,7 +170,7 @@ protected:
         /* 4) Write the size of the file (currently 0) */
         this->m_driver->write_long(fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf, 0);
 
-        this->m_buf->mod = true;
+        this->m_buf->meta->mod = true;
         return NO_ERROR;
     }
 

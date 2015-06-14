@@ -54,19 +54,10 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
         PropWare::ErrorCode safe_get_char (char &c) {
             PropWare::ErrorCode err;
 
-            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->get_driver()->get_sector_size());
-
-            // Determine if the currently loaded sector is what we need
-            const uint32_t sectorOffset = (uint32_t) this->m_ptr >> this->m_fs->get_driver()->get_sector_size_shift();
-
-            // Determine if the correct sector is loaded
-            if (this->m_buf->id != this->m_id) {
-                check_errors(this->reload_buf());
-            } else if (sectorOffset != this->m_curTier1) {
-                check_errors(this->load_sector_from_offset(sectorOffset));
-            }
+            check_errors(this->load_sector_under_ptr());
 
             // Get the character
+            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->get_driver()->get_sector_size());
             c = this->m_buf->buf[bufferOffset];
 
             // Finally done. Increment the pointer
