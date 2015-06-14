@@ -103,7 +103,7 @@ class Filesystem {
             this->m_buf.meta = &m_dirMeta;
         }
 
-        virtual uint32_t compute_tier1_from_tier3 (uint32_t allocUnit) const = 0;
+        virtual uint32_t compute_tier1_from_tier2 (uint32_t tier2) const = 0;
 
         int next_file_id () {
             return this->m_nextFileId++;

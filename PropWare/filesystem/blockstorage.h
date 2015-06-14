@@ -36,14 +36,14 @@ class BlockStorage {
             const char   *name;
             /** Buffer ID - determine who owns the current information */
             int          id;
-            /** Store the current cluster's starting sector number */
-            uint32_t     curTier2StartAddr;
             /** Store the current sector offset from the beginning of the cluster */
             unsigned int curTier1Offset;
+            /** Store the current cluster's starting sector number */
+            uint32_t     curTier2Addr;
             /** Store the current allocation unit */
-            uint32_t     curTier3;
+            uint32_t     curTier2;
             /** Look-ahead at the next FAT entry */
-            uint32_t     nextTier3;
+            uint32_t     nextTier2;
             /** When set, the currently loaded sector has been modified since it was read from the SD card */
             bool         mod;
 
@@ -109,7 +109,7 @@ class BlockStorage {
         }
 
         ErrorCode reload_buffer (const BlockStorage::Buffer *buffer) const {
-            return this->read_data_block(buffer->meta->curTier2StartAddr + buffer->meta->curTier1Offset, buffer);
+            return this->read_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer);
         }
 
         virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const = 0;
@@ -127,7 +127,7 @@ class BlockStorage {
             PropWare::ErrorCode err;
             if (buffer->meta && buffer->meta->mod) {
                 check_errors(this->write_data_block(
-                        buffer->meta->curTier2StartAddr + buffer->meta->curTier1Offset, buffer->buf));
+                        buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer->buf));
                 buffer->meta->mod = false;
             }
             return 0;

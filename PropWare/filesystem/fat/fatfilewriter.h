@@ -94,7 +94,7 @@ public:
         this->m_buf->buf[this->fileEntryOffset] = DELETED_FILE_MARK;
         this->m_buf->meta->mod = true;
 
-        check_errors(this->m_fs->clear_chain(this->firstTier3));
+        check_errors(this->m_fs->clear_chain(this->firstTier2));
 
         this->m_mod = false; // This guy is for file length, not the directory entry or FAT
 

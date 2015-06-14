@@ -166,17 +166,17 @@ class FatFile : virtual public File {
 
             // Determine the file's first allocation unit
             if (FatFS::FAT_16 == this->m_fs->m_filesystem)
-                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
+                this->firstTier2 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
                                                              this->m_buf->buf);
             else {
-                this->firstTier3 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
+                this->firstTier2 = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_LOW,
                                                              this->m_buf->buf);
                 const uint16_t highWord = this->m_driver->get_short(fileEntryOffset + FILE_START_CLSTR_HIGH,
                                                                     this->m_buf->buf);
-                this->firstTier3 |= highWord << 16;
+                this->firstTier2 |= highWord << 16;
 
                 // Clear the highest 4 bits - they are always reserved
-                this->firstTier3 &= 0x0FFFFFFF;
+                this->firstTier2 &= 0x0FFFFFFF;
             }
 
             // Compute some stuffs for the file
@@ -188,9 +188,9 @@ class FatFile : virtual public File {
             // Claim this buffer as our own
             this->m_contentMeta.id = this->m_id;
             this->m_contentMeta.curTier1Offset = 0;
-            this->m_contentMeta.curTier3 = this->firstTier3;
-            this->m_contentMeta.curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->firstTier3);
-            check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier3, &(this->m_buf->meta->nextTier3)));
+            this->m_contentMeta.curTier2 = this->firstTier2;
+            this->m_contentMeta.curTier2Addr = this->m_fs->compute_tier1_from_tier2(this->firstTier2);
+            check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier2, &(this->m_buf->meta->nextTier2)));
 
             // Finally, read the first sector
             this->m_buf->meta = &this->m_contentMeta;
@@ -258,11 +258,11 @@ class FatFile : virtual public File {
             check_errors(this->m_fs->get_driver()->flush(buf));
 
             // Check for the end-of-chain marker (end of file)
-            if (this->m_fs->is_eoc(buf->meta->curTier3))
+            if (this->m_fs->is_eoc(buf->meta->curTier2))
                 return FatFS::EOC_END;
 
             // Are we looking at the root directory of a FAT16 system?
-            if (FatFS::FAT_16 == this->m_fs->m_filesystem && this->m_fs->m_rootAddr == (buf->meta->curTier2StartAddr)) {
+            if (FatFS::FAT_16 == this->m_fs->m_filesystem && this->m_fs->m_rootAddr == (buf->meta->curTier2Addr)) {
                 // Root dir of FAT16; Is it the last sector in the root directory?
                 if (this->m_fs->m_rootDirSectors == buf->meta->curTier1Offset)
                     return FatFS::EOC_END;
@@ -280,7 +280,7 @@ class FatFile : virtual public File {
                     // Any error from reading the data block will be returned to calling function
                     buf->meta->curTier1Offset++;
                     return this->m_fs->get_driver()->read_data_block(
-                            buf->meta->curTier1Offset + buf->meta->curTier2StartAddr, buf->buf);
+                            buf->meta->curTier1Offset + buf->meta->curTier2Addr, buf->buf);
                 }
                     // End of generic data cluster; Look through the FAT to find the next cluster
                 else
@@ -304,31 +304,29 @@ class FatFile : virtual public File {
             check_errors(this->m_fs->get_driver()->flush(buf));
 
             // If we're at the end already, fail
-            if (this->m_fs->is_eoc(buf->meta->curTier3))
+            if (this->m_fs->is_eoc(buf->meta->curTier2))
                 return FatFS::READING_PAST_EOC;
 
             // Increment allocation unit
-            buf->meta->curTier3 = buf->meta->nextTier3;
+            buf->meta->curTier2 = buf->meta->nextTier2;
             // Only look ahead to the next allocation unit if the current alloc unit is not EOC
-            if (!this->m_fs->is_eoc(buf->meta->curTier3)) {
+            if (!this->m_fs->is_eoc(buf->meta->curTier2)) {
                 // Current allocation unit is not EOC, read the next one
-                check_errors(this->m_fs->get_fat_value(buf->meta->curTier3, &(buf->meta->nextTier3)));
+                check_errors(this->m_fs->get_fat_value(buf->meta->curTier2, &(buf->meta->nextTier2)));
             }
-            buf->meta->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(buf->meta->curTier3);
+            buf->meta->curTier2Addr = this->m_fs->compute_tier1_from_tier2(buf->meta->curTier2);
             buf->meta->curTier1Offset = 0;
 
-            return this->m_fs->get_driver()->read_data_block(buf->meta->curTier2StartAddr, buf->buf);
+            return this->m_fs->get_driver()->read_data_block(buf->meta->curTier2Addr, buf->buf);
         }
 
         const bool buffer_holds_directory_start () const {
             const bool bufferIsDirectory = &this->m_fs->m_dirMeta == this->m_buf->meta;
             const bool tier1AtStart = 0 == this->m_fs->m_dirMeta.curTier1Offset;
-            const bool tier2StartAtTier3Start = this->m_fs->compute_tier1_from_tier3(this->m_fs->m_dir_firstAllocUnit)
-                                                == this->m_fs->m_dirMeta.curTier2StartAddr;
+            const bool tier2AtStart = this->m_fs->compute_tier1_from_tier2(this->m_fs->m_dir_firstCluster) ==
+                                      this->m_fs->m_dirMeta.curTier2Addr;
 
-            return bufferIsDirectory
-                   && tier1AtStart
-                   && tier2StartAtTier3Start;
+            return bufferIsDirectory && tier1AtStart && tier2AtStart;
         }
 
         const PropWare::ErrorCode reload_directory_start () const {
@@ -339,10 +337,10 @@ class FatFile : virtual public File {
                 BlockStorage::MetaData *dirMeta = &this->m_fs->m_dirMeta;
 
                 // Reset metadata to beginning of directory
-                dirMeta->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(this->m_fs->m_dir_firstAllocUnit);
+                dirMeta->curTier2Addr = this->m_fs->compute_tier1_from_tier2(this->m_fs->m_dir_firstCluster);
                 dirMeta->curTier1Offset    = 0;
-                dirMeta->curTier3          = this->m_fs->m_dir_firstAllocUnit;
-                check_errors(this->m_fs->get_fat_value(this->m_fsBufMeta->curTier3, &this->m_fsBufMeta->nextTier3));
+                dirMeta->curTier2 = this->m_fs->m_dir_firstCluster;
+                check_errors(this->m_fs->get_fat_value(this->m_fsBufMeta->curTier2, &this->m_fsBufMeta->nextTier2));
 
                 this->m_buf->meta = dirMeta;
                 check_errors(this->m_fs->get_driver()->reload_buffer(this->m_buf));
@@ -372,35 +370,35 @@ class FatFile : virtual public File {
                 clusterOffset -= this->m_curTier2;
                 while (clusterOffset--) {
                     ++(this->m_curTier2);
-                    this->m_buf->meta->curTier3 = this->m_buf->meta->nextTier3;
-                    check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier3,
-                                                           &(this->m_buf->meta->nextTier3)));
+                    this->m_buf->meta->curTier2 = this->m_buf->meta->nextTier2;
+                    check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier2,
+                                                           &(this->m_buf->meta->nextTier2)));
                 }
-                this->m_buf->meta->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(
-                        this->m_buf->meta->curTier3);
+                this->m_buf->meta->curTier2Addr = this->m_fs->compute_tier1_from_tier2(
+                        this->m_buf->meta->curTier2);
             } else if (this->m_curTier2 > clusterOffset) {
                 // Desired cluster is an earlier cluster than the currently
                 // loaded one - this requires starting from the beginning and
                 // working forward
-                this->m_buf->meta->curTier3 = this->firstTier3;
+                this->m_buf->meta->curTier2 = this->firstTier2;
                 check_errors(
-                        this->m_fs->get_fat_value(this->m_buf->meta->curTier3, &(this->m_buf->meta->nextTier3)));
+                        this->m_fs->get_fat_value(this->m_buf->meta->curTier2, &(this->m_buf->meta->nextTier2)));
                 this->m_curTier2 = 0;
                 while (clusterOffset--) {
                     ++(this->m_curTier2);
-                    this->m_buf->meta->curTier3 = this->m_buf->meta->nextTier3;
-                    check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier3,
-                                                           &(this->m_buf->meta->nextTier3)));
+                    this->m_buf->meta->curTier2 = this->m_buf->meta->nextTier2;
+                    check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier2,
+                                                           &(this->m_buf->meta->nextTier2)));
                 }
-                this->m_buf->meta->curTier2StartAddr = this->m_fs->compute_tier1_from_tier3(
-                        this->m_buf->meta->curTier3);
+                this->m_buf->meta->curTier2Addr = this->m_fs->compute_tier1_from_tier2(
+                        this->m_buf->meta->curTier2);
             }
 
             // Followed by finding the correct sector
             this->m_buf->meta->curTier1Offset = (uint8_t) (sectorOffset % (1 << this->m_fs->m_tier1sPerTier2Shift));
             this->m_curTier1                  = sectorOffset;
             this->m_driver->read_data_block(
-                    this->m_buf->meta->curTier2StartAddr + this->m_buf->meta->curTier1Offset,
+                    this->m_buf->meta->curTier2Addr + this->m_buf->meta->curTier1Offset,
                     this->m_buf->buf);
 
             return 0;
@@ -491,7 +489,7 @@ class FatFile : virtual public File {
 
             this->m_logger->println("FAT-specific");
             this->m_logger->println("------------");
-            this->m_logger->printf("\tStarting allocation unit: 0x%08X/%u\n", this->firstTier3, this->firstTier3);
+            this->m_logger->printf("\tStarting allocation unit: 0x%08X/%u\n", this->firstTier2, this->firstTier2);
             this->m_logger->printf("\tCurrent sector (counting from first in file): 0x%08X/%u\n",
                                    this->m_curTier1, this->m_curTier1);
             this->m_logger->printf("\tCurrent cluster (counting from first in file): 0x%08X/%u\n",
@@ -505,7 +503,7 @@ class FatFile : virtual public File {
     protected:
         FatFS                  *m_fs;
         /** File's starting allocation unit */
-        uint32_t               firstTier3;
+        uint32_t firstTier2;
         /** like curTier1Offset, but does not reset upon loading a new cluster */
         uint32_t               m_curTier1;
         /** like curTier1, but for clusters */

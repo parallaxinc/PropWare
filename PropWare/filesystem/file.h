@@ -172,14 +172,14 @@ class File {
                 this->m_logger->printf("\tID: %d\n", this->m_buf->meta->id);
                 this->m_logger->printf("\tModdified: %s\n", Utility::to_string(this->m_buf->meta->mod));
                 this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n",
-                                       this->m_buf->meta->curTier2StartAddr,
-                                       this->m_buf->meta->curTier2StartAddr);
+                                       this->m_buf->meta->curTier2Addr,
+                                       this->m_buf->meta->curTier2Addr);
                 this->m_logger->printf("\tCur. sector offset from cluster start: %u\n",
                                        this->m_buf->meta->curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf->meta->curTier3,
-                                       this->m_buf->meta->curTier3);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->meta->nextTier3,
-                                       this->m_buf->meta->nextTier3);
+                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf->meta->curTier2,
+                                       this->m_buf->meta->curTier2);
+                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->meta->nextTier2,
+                                       this->m_buf->meta->nextTier2);
                 if (printBlocks) {
                     BlockStorage::print_block(*this->m_logger, *this->m_buf);
                 }

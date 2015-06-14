@@ -385,15 +385,15 @@ class FatFS : public Filesystem {
 
             // Read in the root directory, set root as current
             check_errors(this->m_driver->read_data_block(this->m_rootAddr, this->m_buf.buf));
-            this->m_buf.meta->curTier2StartAddr = this->m_rootAddr;
+            this->m_buf.meta->curTier2Addr = this->m_rootAddr;
             if (FAT_16 == this->m_filesystem) {
-                this->m_dir_firstAllocUnit = (uint32_t) -1;
-                this->m_buf.meta->curTier3       = (uint32_t) -1;
+                this->m_dir_firstCluster = (uint32_t) -1;
+                this->m_buf.meta->curTier2 = (uint32_t) -1;
             } else {
-                this->m_buf.meta->curTier3 = this->m_dir_firstAllocUnit = this->m_rootAllocUnit;
-                check_errors(this->get_fat_value(this->m_buf.meta->curTier3, &this->m_buf.meta->nextTier3));
+                this->m_buf.meta->curTier2 = this->m_dir_firstCluster = this->m_rootAllocUnit;
+                check_errors(this->get_fat_value(this->m_buf.meta->curTier2, &this->m_buf.meta->nextTier2));
             }
-            this->m_buf.meta->curTier2StartAddr = this->m_rootAddr;
+            this->m_buf.meta->curTier2Addr = this->m_rootAddr;
             this->m_buf.meta->curTier1Offset    = 0;
 
             return 0;
@@ -458,14 +458,14 @@ class FatFS : public Filesystem {
          *
          * @return      Returns sector address of the desired allocation unit
          */
-        uint32_t compute_tier1_from_tier3 (uint32_t allocUnit) const {
+        uint32_t compute_tier1_from_tier2 (uint32_t tier2) const {
             if (FatFS::FAT_32 == this->m_filesystem)
-                allocUnit -= this->m_rootAllocUnit;
+                tier2 -= this->m_rootAllocUnit;
             else
-                allocUnit -= 2;
-            allocUnit <<= this->m_tier1sPerTier2Shift;
-            allocUnit += this->m_firstDataAddr;
-            return allocUnit;
+                tier2 -= 2;
+            tier2 <<= this->m_tier1sPerTier2Shift;
+            tier2 += this->m_firstDataAddr;
+            return tier2;
         }
 
         /**
@@ -488,16 +488,16 @@ class FatFS : public Filesystem {
 
             // Do we need to load a different sector of the FAT or is the correct one currently loaded? (Correct means
             // the sector currently containing the EOC marker)
-            if ((buf->meta->curTier3 >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
+            if ((buf->meta->curTier2 >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
                 this->flush_fat();
-                this->m_curFatSector = buf->meta->curTier3 >> this->m_entriesPerFatSector_Shift;
+                this->m_curFatSector = buf->meta->curTier2 >> this->m_entriesPerFatSector_Shift;
                 check_errors(this->m_driver->read_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat));
             }
 
             // This function should only be called when a file or directory has
             // reached the end of its cluster chain
             uint16_t entriesPerFatSector = (uint16_t) (1 << this->m_entriesPerFatSector_Shift);
-            uint16_t allocUnitOffset     = (uint16_t) (buf->meta->curTier3 % entriesPerFatSector);
+            uint16_t allocUnitOffset     = (uint16_t) (buf->meta->curTier2 % entriesPerFatSector);
             uint16_t fatPointerAddress   = allocUnitOffset * this->m_filesystem;
             uint32_t nextSector          = this->m_driver->get_long(fatPointerAddress, this->m_fat);
             if (this->is_eoc(nextSector))
@@ -507,13 +507,13 @@ class FatFS : public Filesystem {
             newAllocUnit = this->find_empty_space(1);
 
             // Now that we know the allocation unit, write it to the FAT buffer
-            const uint16_t sectorOffset = (uint16_t) ((buf->meta->curTier3 %
+            const uint16_t sectorOffset = (uint16_t) ((buf->meta->curTier2 %
                     (1 << this->m_entriesPerFatSector_Shift)) * this->m_filesystem);
             if (FAT_16 == this->m_filesystem)
                 this->m_driver->write_short(sectorOffset, this->m_fat, (uint16_t) newAllocUnit);
             else
                 this->m_driver->write_long(sectorOffset, this->m_fat, newAllocUnit);
-            buf->meta->nextTier3 = newAllocUnit;
+            buf->meta->nextTier2 = newAllocUnit;
             this->m_fatMod = true;  // And mark the buffer as modified
 
             return 0;
@@ -697,7 +697,7 @@ class FatFS : public Filesystem {
             this->m_logger->printf("\tFirst FAT sector: 0x%08X\n", this->m_fatStart);
             this->m_logger->printf("\tRoot directory alloc. unit: 0x%08X\n", this->m_rootAllocUnit);
             this->m_logger->printf("\tCalculated root directory sector: 0x%08X\n",
-                                   this->compute_tier1_from_tier3(this->m_rootAllocUnit));
+                                   this->compute_tier1_from_tier2(this->m_rootAllocUnit));
             this->m_logger->printf("\tRoot directory sector: 0x%08X\n", this->m_rootAddr);
             this->m_logger->printf("\tRoot directory size (in sectors): %u\n", this->m_rootDirSectors);
             this->m_logger->printf("\tFirst data sector: 0x%08X\n", this->m_firstDataAddr);
@@ -718,11 +718,11 @@ class FatFS : public Filesystem {
                 BlockStorage::MetaData *bufMeta = this->m_buf.meta;
                 this->m_logger->printf("\tID: %d\n", bufMeta->id);
                 this->m_logger->printf("\tModdified: %s\n", Utility::to_string(bufMeta->mod));
-                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", bufMeta->curTier2StartAddr,
-                                       bufMeta->curTier2StartAddr);
+                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", bufMeta->curTier2Addr,
+                                       bufMeta->curTier2Addr);
                 this->m_logger->printf("\tCur. sector offset from cluster start: %u\n", bufMeta->curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", bufMeta->curTier3, bufMeta->curTier3);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", bufMeta->nextTier3, bufMeta->nextTier3);
+                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", bufMeta->curTier2, bufMeta->curTier2);
+                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", bufMeta->nextTier2, bufMeta->nextTier2);
                 if (printBlocks)
                     BlockStorage::print_block(*this->m_logger, this->m_buf, this->m_sectorSize, blockLineLength);
             }
@@ -744,7 +744,7 @@ class FatFS : public Filesystem {
         bool                   m_fatMod;
 
         uint32_t m_curFatSector;  // Store the current FAT sector loaded into m_fat
-        uint32_t m_dir_firstAllocUnit;  // Store the current directory's starting allocation unit
+        uint32_t m_dir_firstCluster;  // Store the current directory's starting allocation unit
 };
 
 }
