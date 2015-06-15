@@ -97,9 +97,9 @@ class File {
                   m_mod(false),
                   m_ptr(0),
                   m_error(NO_ERROR) {
-            if (NULL == buffer) {
-                this->m_buf = fs.get_buffer();
-            } else
+            if (NULL == buffer)
+                this->m_buf = &fs.m_buf;
+            else
                 this->m_buf = buffer;
 
             this->m_contentMeta.name = name;
@@ -163,34 +163,35 @@ class File {
             this->m_logger->printf("\tFile ID: %u\n", this->m_id);
             this->m_logger->printf("\tLength: 0x%08X/%d\n", this->m_length, this->m_length);
 
-            this->m_logger->println("Buffer");
-            this->m_logger->println("------");
-            if (this->m_buf->buf == NULL)
-                this->m_logger->println("\tEmpty");
-            else {
+            if (NULL != this->m_buf) {
+                this->m_logger->println("Buffer");
+                this->m_logger->println("------");
+                this->m_logger->printf("\tData address: 0x%08X\n", (unsigned int) this->m_buf->buf);
                 this->m_logger->printf("\tMeta address: 0x%08X\n", (unsigned int) this->m_buf->meta);
-                this->m_logger->printf("\tID: %d\n", this->m_buf->meta->id);
-                this->m_logger->printf("\tModdified: %s\n", Utility::to_string(this->m_buf->meta->mod));
-                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n",
-                                       this->m_buf->meta->curTier2Addr,
-                                       this->m_buf->meta->curTier2Addr);
-                this->m_logger->printf("\tCur. sector offset from cluster start: %u\n",
-                                       this->m_buf->meta->curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf->meta->curTier2,
-                                       this->m_buf->meta->curTier2);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->meta->nextTier2,
-                                       this->m_buf->meta->nextTier2);
-                if (printBlocks) {
-                    BlockStorage::print_block(*this->m_logger, *this->m_buf);
+                if (NULL != this->m_buf->buf && NULL != this->m_buf->meta) {
+                    this->m_logger->printf("\tID: %d\n", this->m_buf->meta->id);
+                    this->m_logger->printf("\tModdified: %s\n", Utility::to_string(this->m_buf->meta->mod));
+                    this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n",
+                                           this->m_buf->meta->curTier2Addr,
+                                           this->m_buf->meta->curTier2Addr);
+                    this->m_logger->printf("\tCur. sector offset from cluster start: %u\n",
+                                           this->m_buf->meta->curTier1Offset);
+                    this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_buf->meta->curTier2,
+                                           this->m_buf->meta->curTier2);
+                    this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_buf->meta->nextTier2,
+                                           this->m_buf->meta->nextTier2);
+                    if (printBlocks) {
+                        BlockStorage::print_block(*this->m_logger, *this->m_buf);
+                    }
                 }
             }
         }
 
     protected:
-        char                 m_name[MAX_FILENAME_LENGTH];
-        const Printer        *m_logger;
-        const BlockStorage   *m_driver;
-        BlockStorage::Buffer *m_buf;
+        char                   m_name[MAX_FILENAME_LENGTH];
+        const Printer          *m_logger;
+        const BlockStorage     *m_driver;
+        BlockStorage::Buffer   *m_buf;
         /** Metadata for the file's content (location on the storage device) */
         BlockStorage::MetaData m_contentMeta;
         /** Metadata for the file's directory entry */
@@ -198,7 +199,8 @@ class File {
         /** Filesystem's buffer metadata (used to determine the current directory when opening the file) */
         BlockStorage::MetaData *m_fsBufMeta;
         /** determine if the buffer is owned by this file */
-        int                  m_id;
+        // TODO: Remove this - the ID is redundant now that we have a MetaData struct and name field within it
+        int                    m_id;
 
         int32_t m_length;
         /** When the length of a file is changed, this variable will be set, otherwise cleared */

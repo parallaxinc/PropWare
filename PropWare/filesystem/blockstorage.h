@@ -119,7 +119,7 @@ class BlockStorage {
         }
 
         /**
-         * @brief       Flush the contents of a buffer
+         * @brief       Flush the contents of a buffer and mark as unmodified
          *
          * @param[in]   buffer  Buffer to be written to the SD card - written only it was modified
          */

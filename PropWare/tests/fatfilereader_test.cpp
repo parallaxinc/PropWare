@@ -96,6 +96,7 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs->get_driver(), (unsigned int) testable->m_driver);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
+    ASSERT_NEQ_MSG((unsigned int) NULL, (unsigned int) testable->m_buf->buf);
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_dirMeta, (unsigned int) testable->m_fsBufMeta);
     ASSERT_EQ_MSG((unsigned int) g_fs, (unsigned int) testable->m_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
@@ -129,6 +130,8 @@ TEST(OpenClose) {
     ASSERT_EQ_MSG(0, err);
 
     ASSERT_NEQ_MSG(0, testable->get_length());
+    ASSERT_EQ_MSG((unsigned int) &testable->m_contentMeta, (unsigned int) testable->m_buf->meta);
+    ASSERT_NEQ_MSG(0, testable->m_buf->meta->nextTier2);
 
     err = testable->close();
     error_checker(err);

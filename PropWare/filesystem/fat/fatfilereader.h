@@ -57,7 +57,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             check_errors(this->load_sector_under_ptr());
 
             // Get the character
-            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->get_driver()->get_sector_size());
+            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
             c = this->m_buf->buf[bufferOffset];
 
             // Finally done. Increment the pointer

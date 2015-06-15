@@ -31,6 +31,7 @@
 #include <PropWare/filesystem/blockstorage.h>
 #include <PropWare/filesystem/filesystem.h>
 #include <PropWare/c++allocate.h>
+
 #include <stdbool.h>
 
 namespace PropWare {
