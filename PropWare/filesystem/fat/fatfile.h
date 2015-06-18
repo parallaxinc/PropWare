@@ -429,6 +429,16 @@ class FatFile : virtual public File {
             return NO_ERROR;
         }
 
+        PropWare::ErrorCode load_directory_sector () {
+            PropWare::ErrorCode err;
+            if (&this->m_dirEntryMeta != this->m_buf->meta) {
+                this->m_driver->flush(this->m_buf);
+                this->m_buf->meta = &this->m_dirEntryMeta;
+                check_errors(this->m_driver->reload_buffer(this->m_buf));
+            }
+            return NO_ERROR;
+        }
+
         /**
          * @brief       Print the attributes and name of a file entry
          *

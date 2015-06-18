@@ -62,10 +62,6 @@ public:
         return this->open_existing_file(fileEntryOffset);
     }
 
-    PropWare::ErrorCode close () {
-        return this->flush();
-    }
-
     /**
      * @brief   Mark a file as delete and free its clusters in the FAT. File content will not be cleared unless
      *          overwritten by another file
@@ -86,10 +82,7 @@ public:
             }
         }
 
-        this->m_driver->flush(this->m_buf);
-
-        this->m_buf->meta = &this->m_dirEntryMeta;
-        check_errors(this->m_driver->reload_buffer(this->m_buf));
+        check_errors(this->load_directory_sector());
 
         this->m_buf->buf[this->fileEntryOffset] = DELETED_FILE_MARK;
         this->m_buf->meta->mod = true;
@@ -109,13 +102,15 @@ public:
 
         // If we modified the length of the file...
         if (this->m_mod) {
-            this->m_buf->meta = &this->m_dirEntryMeta;
-            check_errors(this->m_driver->reload_buffer(this->m_buf));
+            this->load_directory_sector();
 
             // Finally, edit the length of the file
+            this->m_buf->meta->mod = true;
             this->m_driver->write_long(this->fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf,
                                        (const uint32_t) this->m_length);
+
             check_errors(this->m_driver->flush(this->m_buf));
+            this->m_mod = false;
         }
 
         return NO_ERROR;

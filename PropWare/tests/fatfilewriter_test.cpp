@@ -192,7 +192,7 @@ TEST(SafePutChar_singleChar) {
     error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->safe_put_char('a')
 
-    ASSERT_EQ_MSG(1, testable->get_length());
+    ASSERT_EQ_MSG(1, testable->get_length()); // Initial write
     err = testable->close();
     error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->close()
@@ -208,7 +208,7 @@ TEST(SafePutChar_singleChar) {
 
     FatFileReader reader(*g_fs, NEW_FILE_NAME);
     ASSERT_EQ_MSG(0, reader.open());
-    ASSERT_EQ_MSG(1, reader.get_length());
+    ASSERT_EQ_MSG(1, reader.get_length()); // Reader opens file after write
     ASSERT_EQ_MSG(sampleChar, reader.get_char());
     reader.close();
 
@@ -243,7 +243,7 @@ int main () {
     RUN_TEST(Exists_doesExist);
     RUN_TEST(OpenClose_ExistingFile);
     RUN_TEST(OpenCloseDelete_NonExistingFile);
-//    RUN_TEST(SafePutChar_singleChar);
+    RUN_TEST(SafePutChar_singleChar);
 
     delete g_fs->get_driver();
     delete g_fs;
