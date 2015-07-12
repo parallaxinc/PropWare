@@ -42,7 +42,8 @@ endif ()
 # Linker pruning is broken when used with the cog memory model. See the
 # following thread for a workaround:
 # http://forums.parallax.com/showthread.php/157878-Simple-blinky-program-and-linker-pruning
-if (NOT((MODEL STREQUAL "cog") OR (MODEL STREQUAL "COG")))
+string(TOLOWER ${MODEL} MODEL_LOWERCASE)
+if (NOT((MODEL_LOWERCASE STREQUAL "cog")))
     if (AUTO_CUT_SECTIONS)
         if (${AUTO_CUT_SECTIONS_SET})
         else ()
