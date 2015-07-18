@@ -37,9 +37,6 @@ class ImportSimple:
         for library in self.libraries.keys():
             self._process_library(library)
 
-        # Create a one-line CMake file that lists all objects to be compiled into the Simple library
-        self._make_obj_list()
-
     def _get_libraries(self, learn_root):
         # Get a map of all the libraries
         for category in os.listdir(learn_root):
@@ -74,16 +71,6 @@ class ImportSimple:
                     if wtf.endswith(".dat") and wtf not in os.listdir(ImportSimple.CHEATER_DIR):
                         copy2(abs_dir_entry + os.sep + wtf, ImportSimple.CHEATER_DIR)
                         self.sourceFiles.append(wtf)
-
-    def _make_obj_list(self):
-        # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run
-        # in any guaranteed order)
-        self.sourceFiles.sort()
-        with open(ImportSimple.CHEATER_DIR + "simpleObjects.cmake", 'w') as f:
-            f.write("set(SIMPLE_OBJECTS")
-            for sourceFile in self.sourceFiles:
-                f.write('\n' + ' ' * 8 + '../' + sourceFile)
-            f.write(')')
 
     @staticmethod
     def _download_learn():

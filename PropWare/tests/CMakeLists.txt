@@ -9,9 +9,9 @@ include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                            
 
 set(BOARD dna)
 set(MODEL cmm)
-set(COMMON_FLAGS "-Os -g")
+set(COMMON_FLAGS "-Os")
 
-project(propware_tests)
+project(ProWare_Tests)
 
 create_executable(sample_test           sample_test)
 create_executable(pin_test              pin_test)

@@ -1,0 +1,48 @@
+set(CPACK_GENERATOR
+    ZIP
+    DEB
+    RPM
+    NSIS)
+
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+set(CPACK_INSTALL_CMAKE_PROJECTS
+    ${PROPWARE_PATH}/bin
+    PropWare
+    ALL
+    /)
+set(CPACK_PACKAGE_VENDOR "David Zemon")
+set(CPACK_PACKAGE_CONTACT "David Zemon <david@zemon.name>")
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION
+    ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+
+set(CPACK_CMAKE_GENERATOR "Unix Makefiles")
+set(CPACK_RESOURCE_FILE_README ${PROJECT_SOURCE_DIR}/README.md)
+
+# Debian Specific
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://david.zemon.name/PropWare")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_SECTION devel)
+set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
+
+# NSIS Specific
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+set(CPACK_NSIS_HELP_LINK "http://david.zemon.name/PropWare")
+set(CPACK_NSIS_URL_INFO_ABOUT "http://david.zemon.name/PropWare")
+set(CPACK_NSIS_CONTACT "David Zemon <david@zemon.name>")
+set(CPACK_NSIS_EXECUTABLES_DIRECTORY PropWare/cmake/bin)
+set(CPACK_NSIS_MODIFY_PATH ON)
+
+set(CPACK_COMPONENT_cmake_DISPLAY_NAME     "CMake")
+set(CPACK_COMPONENT_cmake_DESCRIPTION      "Complete CMake installation with additional files for easy Propeller development")
+set(CPACK_COMPONENT_win_cmake_DISPLAY_NAME "CMake")
+set(CPACK_COMPONENT_win_cmake_DESCRIPTION  "Complete CMake installation with additional files for easy Propeller development")
+
+# Components
+set(CPACK_RPM_COMPONENT_INSTALL ON)
+set(CPACK_DEB_COMPONENT_INSTALL ON)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+
+set(CPACK_PROJECT_CONFIG_FILE ${PROJECT_SOURCE_DIR}/CMakeCPackOptions.cmake)

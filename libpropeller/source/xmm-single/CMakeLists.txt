@@ -7,4 +7,7 @@ set(MODEL xmm-single)
 
 include(${PROJECT_SOURCE_DIR}/CMakePropellerSetFlags.cmake)
 add_library(Libpropeller_${MODEL} STATIC ${LIBPROPELLER_OBJECTS})
+install(TARGETS Libpropeller_${MODEL}
+    DESTINATION PropWare/lib
+    COMPONENT propware)
 

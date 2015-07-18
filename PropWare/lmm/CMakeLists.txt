@@ -9,8 +9,8 @@ set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL lmm)
 include(${PROPWARE_PATH}/CMakePropellerSetFlags.cmake)
-include_directories(${PROPWARE_PATH})
 
-project(PropWare_${MODEL})
-
-add_library(${PROJECT_NAME} STATIC ${PROPWARE_SOURCES})
+add_library(PropWare_${MODEL} STATIC ${PROPWARE_SOURCES})
+install(TARGETS PropWare_${MODEL}
+    DESTINATION PropWare/lib
+    COMPONENT propware)

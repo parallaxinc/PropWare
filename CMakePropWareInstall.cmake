@@ -1,24 +1,40 @@
-install(DIRECTORY .
-	DESTINATION PropWare
-	PATTERN *.py PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ
-	PATTERN CMakeFiles EXCLUDE
-	PATTERN _CPack_Packages EXCLUDE
-	PATTERN util/__pycache__
-	PATTERN .idea EXCLUDE
-	PATTERN .settings EXCLUDE
-	PATTERN .git EXCLUDE
-	PATTERN .gitignore EXCLUDE
-	PATTERN .gitattributes EXCLUDE
-	PATTERN docs/docbook EXCLUDE
-	PATTERN docs/html EXCLUDE
-	PATTERN docs/latex EXCLUDE
-	PATTERN docs/man EXCLUDE
-	PATTERN .external_downloads EXCLUDE
-	PATTERN cmake_install.cmake EXCLUDE
-	PATTERN Makefile EXCLUDE
-	PATTERN *.zip EXCLUDE
-	PATTERN *.i EXCLUDE
-	PATTERN *.ii EXCLUDE
-	REGEX bin/.*\\.s EXCLUDE
-	PATTERN *.pyc EXCLUDE)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_LINUX_CMAKE_INSTALL_DIR}
+    DESTINATION PropWare
+    COMPONENT cmake)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
+    DESTINATION PropWare
+    COMPONENT win_cmake)
 
+install(DIRECTORY CMakeModules/
+    DESTINATION PropWare/${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    COMPONENT cmake)
+install(DIRECTORY CMakeModules/
+    DESTINATION PropWare/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    COMPONENT win_cmake)
+
+install(FILES
+        CMakePropellerDefOptions.cmake
+        CMakePropellerHeader.cmake
+        CMakePropellerLibDeps.cmake
+        CMakePropellerSetFlags.cmake
+        CMakePropellerSetLinker.cmake
+        CMakePropellerUtilFunc.cmake
+    DESTINATION PropWare/${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    COMPONENT cmake)
+install(FILES
+        CMakePropellerDefOptions.cmake
+        CMakePropellerHeader.cmake
+        CMakePropellerLibDeps.cmake
+        CMakePropellerSetFlags.cmake
+        CMakePropellerSetLinker.cmake
+        CMakePropellerUtilFunc.cmake
+    DESTINATION PropWare/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    COMPONENT win_cmake)
+
+install(DIRECTORY
+        ${PROJECT_SOURCE_DIR}/PropWare
+        ${PROJECT_SOURCE_DIR}/simple
+        ${PROJECT_SOURCE_DIR}/libpropeller
+    DESTINATION PropWare/include
+    COMPONENT propware
+    FILES_MATCHING PATTERN *.h)

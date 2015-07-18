@@ -1,7 +1,5 @@
-if (DEFINED PROPWARE_PATH)
-    set(CMAKE_TOOLCHAIN_FILE ${PROPWARE_PATH}/PropellerToolchain.cmake)
-else ()
-    set(CMAKE_TOOLCHAIN_FILE $ENV{PROPWARE_PATH}/PropellerToolchain.cmake)
+if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE PropellerToolchain.cmake)
 endif ()
 
 # Linker options
