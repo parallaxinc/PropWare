@@ -46,8 +46,4 @@ ExternalProject_Add(WinCMake
 
 include(./CMakePropWareInstall.cmake)
 include(./CPackConfig.cmake)
-set(CPACK_COMPONENT_cmake_DISPLAY_NAME     "CMake")
-set(CPACK_COMPONENT_cmake_DESCRIPTION      "Complete CMake installation with additional files for easy Propeller development")
-set(CPACK_COMPONENT_win_cmake_DISPLAY_NAME "CMake")
-set(CPACK_COMPONENT_win_cmake_DESCRIPTION  "Complete CMake installation with additional files for easy Propeller development")
 include(CPack)

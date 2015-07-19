@@ -1,7 +1,7 @@
 set(CPACK_GENERATOR
-    ZIP
-    DEB
-    RPM
+#    ZIP
+#    DEB
+#    RPM
     NSIS
 )
 
@@ -25,7 +25,7 @@ set(CPACK_RESOURCE_FILE_README ${PROJECT_SOURCE_DIR}/README.md)
 # Debian Specific
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://david.zemon.name/PropWare")
 #set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_cmake_PACKAGE_DEPENDS "libc6 (>= 2.3.2), libidn11 (>= 1.13), libx11-6, libxext6")
+set(CPACK_DEBIAN_cmake_PACKAGE_DEPENDS "make, libc6 (>= 2.3.2), libidn11 (>= 1.13), libx11-6, libxext6")
 set(CPACK_DEBIAN_PACKAGE_SECTION devel)
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 
@@ -34,17 +34,34 @@ set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set(CPACK_NSIS_HELP_LINK "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_URL_INFO_ABOUT "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_CONTACT "David Zemon <david@zemon.name>")
-set(CPACK_NSIS_EXECUTABLES_DIRECTORY PropWare/cmake/bin)
-set(CPACK_NSIS_MODIFY_PATH ON)
+#set(CPACK_NSIS_MODIFY_PATH ON)
+#set(CPACK_NSIS_EXECUTABLES_DIRECTORY ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/bin)
+#set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"PATH\\\"
+#    Push \\\"A\\\"
+#    Push \\\"HKCU\\\"
+#    Push \\\"$INSTDIR\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\"
+#    Call EnvVarUpdate
+#    Pop  \\\$0" )
+#set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Push \\\"PATH\\\"
+#    Push \\\"R\\\"
+#    Push \\\"HKCU\\\"
+#    Push \\\"$INSTDIR\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\"
+#    Call un.EnvVarUpdate
+#    Pop  \\\$0")
 
-set(CPACK_COMPONENT_cmake_DISPLAY_NAME     "CMake")
-set(CPACK_COMPONENT_cmake_DESCRIPTION      "Complete CMake installation with additional files for easy Propeller development")
-set(CPACK_COMPONENT_win_cmake_DISPLAY_NAME "CMake")
-set(CPACK_COMPONENT_win_cmake_DESCRIPTION  "Complete CMake installation with additional files for easy Propeller development")
+# RPM Specific
+set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6, libxext6")
+set(CPACK_RPM_PACKAGE_PROVIDES "cmake")
 
 # Components
 set(CPACK_RPM_COMPONENT_INSTALL ON)
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENT_PROPWARE_DISPLAY_NAME  "Headers/Libraries")
+set(CPACK_COMPONENT_PROPWARE_DESCRIPTION   "Headers and static libraries for PropWare, Simple and libpropeller")
+set(CPACK_COMPONENT_CMAKE_DISPLAY_NAME     "CMake")
+set(CPACK_COMPONENT_CMAKE_DESCRIPTION      "Complete CMake installation with additional files for easy Propeller development")
+set(CPACK_COMPONENT_WIN_CMAKE_DISPLAY_NAME ${CPACK_COMPONENT_CMAKE_DISPLAY_NAME})
+set(CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION  ${CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION})
 
 set(CPACK_PROJECT_CONFIG_FILE ${PROJECT_SOURCE_DIR}/CMakeCPackOptions.cmake)
