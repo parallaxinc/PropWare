@@ -1,8 +1,8 @@
 set(CPACK_GENERATOR
-#    ZIP
+    ZIP
     DEB
-#    RPM
-#    NSIS
+    RPM
+    NSIS
 )
 
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
