@@ -1,29 +1,36 @@
 cmake_minimum_required (VERSION 3.0.0)
 
+set(PROPWARE_MAIN_PACKAGE 1)
 
-set(CMAKE_TOOLCHAIN_FILE ./PropellerToolchain.cmake)
-include(./CMakePropellerDefOptions.cmake)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/version.txt VERSION)
+string(STRIP ${VERSION} VERSION)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/CMakeModules)
+find_package(PropWare ${VERSION} REQUIRED)
+
+# Do some initial configuration that would normally be handled via FindPropWare.cmake
 set(CMAKE_BUILD_TYPE None)
 
+# Set the project, version number and all languages used
 project(PropWare
-    VERSION 2.0.0
+    VERSION ${VERSION}
     LANGUAGES C CXX ASM COGC COGCXX ECOGC ECOGCXX DAT)
-
-set(PROPWARE_MAIN_PACKAGE 1)
 
 add_subdirectory(simple)
 add_subdirectory(libpropeller)
 add_subdirectory(PropWare)
 add_subdirectory(Examples)
 
-# TODO: Use find_package(Doxygen) instead of explicitely invoking the doxygen command
-add_custom_target(docs
-    doxygen Doxyfile
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+    add_custom_target(docs
+        ${DOXYGEN_EXECUTABLE} Doxyfile
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+endif ()
 
 include(ExternalProject)
-set(CUSTOM_LINUX_CMAKE_INSTALL_DIR cmake)
-set(CUSTOM_WIN32_CMAKE_INSTALL_DIR CMake)
+set(CUSTOM_LINUX_CMAKE_INSTALL_DIR pwcmake)
+set(CUSTOM_WIN32_CMAKE_INSTALL_DIR PWCMake)
 ExternalProject_Add(CMake
     PREFIX CMake-src
     URL http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-x86_64.tar.gz

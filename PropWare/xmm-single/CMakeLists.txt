@@ -4,7 +4,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL xmm-single)
-include(${PROJECT_SOURCE_DIR}/CMakePropellerSetFlags.cmake)
+set_compile_flags()
 
 add_library(PropWare_${MODEL} STATIC ${PROPWARE_SOURCES})
 install(TARGETS PropWare_${MODEL}

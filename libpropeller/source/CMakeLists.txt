@@ -1,3 +1,4 @@
+include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(cog)
 add_subdirectory(cmm)
 add_subdirectory(lmm)

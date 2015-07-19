@@ -4,7 +4,7 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL cmm)
-include(${PROJECT_SOURCE_DIR}/CMakePropellerSetFlags.cmake)
+set_compile_flags()
 
 add_library(Simple_${MODEL} STATIC ${SIMPLE_OBJECTS})
 install(TARGETS Simple_${MODEL}

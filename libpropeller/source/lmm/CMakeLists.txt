@@ -4,8 +4,8 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 set(MODEL lmm)
+set_compile_flags()
 
-include(${PROJECT_SOURCE_DIR}/CMakePropellerSetFlags.cmake)
 add_library(Libpropeller_${MODEL} STATIC ${LIBPROPELLER_OBJECTS})
 install(TARGETS Libpropeller_${MODEL}
     DESTINATION PropWare/lib

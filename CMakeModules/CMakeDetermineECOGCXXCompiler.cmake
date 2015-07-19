@@ -95,7 +95,7 @@ if (CMAKE_CROSSCOMPILING  AND NOT  _CMAKE_TOOLCHAIN_PREFIX)
 endif ()
 
 # configure all variables set in this file
-configure_file(${PROPWARE_PATH}/CMakeModules/CMakeECOGCXXCompiler.cmake.in
+configure_file(${CMAKE_CURRENT_LIST_DIR}/CMakeECOGCXXCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeECOGCXXCompiler.cmake
   @ONLY
   )

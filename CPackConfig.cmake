@@ -1,12 +1,13 @@
 set(CPACK_GENERATOR
-    ZIP
+#    ZIP
     DEB
-    RPM
-    NSIS)
+#    RPM
+#    NSIS
+)
 
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 set(CPACK_INSTALL_CMAKE_PROJECTS
-    ${PROPWARE_PATH}/bin
+    ${PROJECT_SOURCE_DIR}/bin
     PropWare
     ALL
     /)
@@ -23,7 +24,8 @@ set(CPACK_RESOURCE_FILE_README ${PROJECT_SOURCE_DIR}/README.md)
 
 # Debian Specific
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://david.zemon.name/PropWare")
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_cmake_PACKAGE_DEPENDS "libc6 (>= 2.3.2), libidn11 (>= 1.13), libx11-6, libxext6")
 set(CPACK_DEBIAN_PACKAGE_SECTION devel)
 set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 
