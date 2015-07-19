@@ -34,20 +34,6 @@ set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set(CPACK_NSIS_HELP_LINK "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_URL_INFO_ABOUT "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_CONTACT "David Zemon <david@zemon.name>")
-#set(CPACK_NSIS_MODIFY_PATH ON)
-#set(CPACK_NSIS_EXECUTABLES_DIRECTORY ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/bin)
-#set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"PATH\\\"
-#    Push \\\"A\\\"
-#    Push \\\"HKCU\\\"
-#    Push \\\"$INSTDIR\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\"
-#    Call EnvVarUpdate
-#    Pop  \\\$0" )
-#set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Push \\\"PATH\\\"
-#    Push \\\"R\\\"
-#    Push \\\"HKCU\\\"
-#    Push \\\"$INSTDIR\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\"
-#    Call un.EnvVarUpdate
-#    Pop  \\\$0")
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6, libxext6")
