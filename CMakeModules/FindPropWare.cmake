@@ -104,10 +104,14 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         if (NOT DEFINED PROPWARE_PATH OR NOT EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h")
             find_path(PROPWARE_PATH include/PropWare/PropWare.h
                 PATHS
+                    # If we're working inside the PropWare project...
                     ${CMAKE_CURRENT_LIST_DIR}
-                    ${CMAKE_CURRENT_LIST_DIR}/../.. # This one used for the Examples directory
-                    ${CMAKE_ROOT}/../../../PropWare
-                    ENV PROPWARE_PATH)
+                    ${CMAKE_CURRENT_LIST_DIR}/../.. # This one used for the Examples directory and PropWare/tests
+
+                    # Or outside the PropWare project
+                    $ENV{PROPWARE_PATH} # Check the environment first
+                    ${CMAKE_ROOT}/../../../PropWare # Or finally, go with the installed version next to pwcmake
+            )
         endif ()
 
         find_file(CMAKE_TOOLCHAIN_FILE PropellerToolchain.cmake
