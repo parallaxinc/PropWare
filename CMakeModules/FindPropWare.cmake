@@ -118,6 +118,12 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         set(PropWare_INCLUDE_DIR ${PROPWARE_PATH}/include)
 
         # PropWare libs
+        if (NOT DEFINED CMAKE_FIND_LIBRARY_PREFIXES)
+            set(CMAKE_FIND_LIBRARY_PREFIXES lib)
+        endif ()
+        if (NOT DEFINED CMAKE_FIND_LIBRARY_SUFFIXES)
+            set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+        endif ()
         find_library(PropWare_PropWare_CMM_LIBRARY              PropWare_cmm
             PATHS ${PROPWARE_PATH}/lib)
         find_library(PropWare_PropWare_LMM_LIBRARY              PropWare_lmm
