@@ -1,7 +1,7 @@
 set(CPACK_GENERATOR
-#    ZIP
-#    DEB
-#    RPM
+    ZIP
+    DEB
+    RPM
     NSIS
 )
 
