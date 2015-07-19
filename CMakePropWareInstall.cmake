@@ -61,9 +61,9 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
 install(DIRECTORY CMakeModules/
     DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
     COMPONENT cmake)
-#install(DIRECTORY CMakeModules/
-#    DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
-#    COMPONENT win_cmake)
+install(DIRECTORY CMakeModules/
+    DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    COMPONENT win_cmake)
 
 install(DIRECTORY
         ${PROJECT_SOURCE_DIR}/PropWare

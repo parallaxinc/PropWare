@@ -444,7 +444,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         FOUND_VAR PropWare_FOUND
         REQUIRED_VARS
             PROPWARE_PATH
-            PropWare_DAT_SYMBOL_CONVERTER
             PropWare_INCLUDE_DIR
             PropWare_PropWare_CMM_LIBRARY
             PropWare_PropWare_LMM_LIBRARY
