@@ -65,13 +65,35 @@ install(DIRECTORY CMakeModules/
     DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
     COMPONENT win_cmake)
 
+# PropWare & libpropeller includes
 install(DIRECTORY
         ${PROJECT_SOURCE_DIR}/PropWare
-        ${PROJECT_SOURCE_DIR}/simple
         ${PROJECT_SOURCE_DIR}/libpropeller
     DESTINATION PropWare/include
     COMPONENT propware
-    FILES_MATCHING PATTERN *.h)
+    FILES_MATCHING PATTERN *.h
+    PATTERN cog EXCLUDE
+    PATTERN cmm EXCLUDE
+    PATTERN lmm EXCLUDE
+    PATTERN xmmc EXCLUDE
+    PATTERN xmm-single EXCLUDE
+    PATTERN xmm-split EXCLUDE
+    PATTERN PropWare/tests/bin EXCLUDE
+    PATTERN libpropeller/source EXCLUDE
+    PATTERN libpropeller/compile_tools EXCLUDE
+    PATTERN libpropeller/unity_tools/asmsrc EXCLUDE)
+# Simple includes
+install(DIRECTORY
+        ${PROJECT_SOURCE_DIR}/simple/
+    DESTINATION PropWare/include
+    COMPONENT propware
+    FILES_MATCHING PATTERN *.h
+    PATTERN cog EXCLUDE
+    PATTERN cmm EXCLUDE
+    PATTERN lmm EXCLUDE
+    PATTERN xmmc EXCLUDE
+    PATTERN xmm-single EXCLUDE
+    PATTERN xmm-split EXCLUDE)
 install(FILES
         ${PROJECT_SOURCE_DIR}/version.txt
     DESTINATION PropWare

@@ -82,7 +82,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     if (DEFINED PROPWARE_MAIN_PACKAGE)
         set(PROPWARE_PATH ${CMAKE_CURRENT_LIST_DIR}/..)
         set(CMAKE_TOOLCHAIN_FILE                        ${PROPWARE_PATH}/CMakeModules/PropellerToolchain.cmake)
-        set(PropWare_INCLUDE_DIR                        ${PROPWARE_PATH})
+        set(PropWare_INCLUDE_DIR                        ${PROPWARE_PATH} ${PROPWARE_PATH}/simple)
         set(PropWare_PropWare_CMM_LIBRARY               PropWare_cmm)
         set(PropWare_PropWare_LMM_LIBRARY               PropWare_lmm)
         set(PropWare_PropWare_XMMC_LIBRARY              PropWare_xmmc)
@@ -254,9 +254,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
         macro (set_compile_flags)
 
-            # TODO: Only include these if requested
             include_directories(${PropWare_INCLUDE_DIR})
-            include_directories(${PropWare_INCLUDE_DIR}/simple)
 
             # Handle user options
             if (32_BIT_DOUBLES)
