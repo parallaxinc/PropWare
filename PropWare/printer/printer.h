@@ -39,7 +39,9 @@ namespace PropWare {
 #define S_ISINF(x) (x != 0.0 && x + x == x)
 #endif  /* !defined(S_ISINF) */
 
+#ifndef isdigit
 #define isdigit(x) ('0' <= x && x <= '9')
+#endif
 
 /**
  * @brief   Container class that has formatting methods for human-readable output. This class can be constructed and
@@ -149,7 +151,7 @@ class Printer {
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
          */
-        void put_int (int32_t x, const uint8_t radix = 10, uint16_t width = 0,
+        void put_int (int x, const uint8_t radix = 10, uint16_t width = 0,
                       const char fillChar = DEFAULT_FILL_CHAR) const {
             if (0 > x)
                 this->put_char('-');
@@ -166,7 +168,7 @@ class Printer {
          * @param[in]   fillChar    Character to print to the left of the number
          *                          if the number's width is less than `width`
          */
-        void put_uint (uint32_t x, const uint8_t radix = 10, uint16_t width = 0,
+        void put_uint (unsigned int x, const uint8_t radix = 10, uint16_t width = 0,
                        const char fillChar = DEFAULT_FILL_CHAR) const {
             char    buf[sizeof(x) * 8]; // Max size would be a single character for each bit - aka, bytes * 8
             uint8_t i = 0;
@@ -174,7 +176,7 @@ class Printer {
             // Create a character array in reverse order, starting with the
             // tens digit and working toward the largest digit
             do {
-                const uint8_t digit = x % radix;
+                const unsigned int digit = x % radix;
                 buf[i] = digit > 9 ? digit + 'A' - 10 : digit + '0';
                 x /= radix;
                 ++i;
@@ -187,7 +189,7 @@ class Printer {
             }
 
             // Reverse the character array
-            for (uint8_t j = 0; j < i; ++j)
+            for (unsigned int j = 0; j < i; ++j)
                 this->put_char(buf[i - j - 1]);
         }
 
@@ -409,7 +411,7 @@ class Printer {
 
                         format.width = 0;
                         while (c && isdigit(c)) {
-                            format.width = 10 * format.width + (c - '0');
+                            format.width = (uint16_t) (10 * format.width + (c - '0'));
                             c = *(++s);
                         }
 
@@ -417,8 +419,7 @@ class Printer {
                             format.precision = 0;
                             c = *(++s);
                             while (c && isdigit(c)) {
-                                format.precision = 10 * format.precision
-                                        + (c - '0');
+                                format.precision = (uint16_t) (10 * format.precision + (c - '0'));
                                 c = *(++s);
                             }
                         }
@@ -428,13 +429,13 @@ class Printer {
                         switch (c) {
                             case 'i':
                             case 'd':
-                                this->print((int32_t) first, format);
+                                this->print((int) first, format);
                                 break;
                             case 'X':
                                 format.radix = 16;
                                 // No "break;" after 'X' - let it flow into 'u'
                             case 'u':
-                                this->print((uint32_t) first, format);
+                                this->print((unsigned int) first, format);
                                 break;
                             case 'f':
                             case 's':
@@ -462,7 +463,7 @@ class Printer {
         /**
          * @overload
          */
-        void printf (const char *fmt) const {
+        void printf (const char fmt[]) const {
             this->puts(fmt);
         }
 
@@ -519,7 +520,7 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param[in]   format      Format of the integer
          */
-        void print (const uint32_t x, const Format format = DEFAULT_FORMAT) const {
+        void print (const unsigned int x, const Format format = DEFAULT_FORMAT) const {
             this->put_uint(x, format.radix, format.width, format.fillChar);
         }
 
@@ -529,7 +530,7 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param[in]   format      Format of the integer
          */
-        void print (const int32_t x, const Format format = DEFAULT_FORMAT) const {
+        void print (const int x, const Format format = DEFAULT_FORMAT) const {
             this->put_int(x, format.radix, format.width, format.fillChar);
         }
 

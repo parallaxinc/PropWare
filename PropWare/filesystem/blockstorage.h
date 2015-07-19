@@ -31,26 +31,38 @@
 namespace PropWare {
 class BlockStorage {
     public:
-        struct Buffer {
-            /**  Buffer data */
-            uint8_t      *buf;
+        struct MetaData {
+            /** Human-readable name */
+            const char   *name;
             /** Buffer ID - determine who owns the current information */
             int          id;
-            /** Store the current cluster's starting sector number */
-            uint32_t     curTier2StartAddr;
             /** Store the current sector offset from the beginning of the cluster */
             unsigned int curTier1Offset;
+            /** Store the current cluster's starting sector number */
+            uint32_t     curTier2Addr;
             /** Store the current allocation unit */
-            uint32_t     curTier3;
+            uint32_t     curTier2;
             /** Look-ahead at the next FAT entry */
-            uint32_t     nextTier3;
+            uint32_t     nextTier2;
             /** When set, the currently loaded sector has been modified since it was read from the SD card */
             bool         mod;
+
+            MetaData () {
+                this->name = "";
+            }
+        };
+
+        struct Buffer {
+            uint8_t  *buf;
+            MetaData *meta;
         };
 
     public:
         static void print_block (const Printer &printer, const Buffer &buffer, const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
+            if (!Utility::empty(buffer.meta->name)) {
+                printer.printf("Name = %s\n", buffer.meta->name);
+            }
             print_block(printer, buffer.buf, words, wordsPerLine);
         }
 
@@ -96,6 +108,10 @@ class BlockStorage {
             return this->read_data_block(address, buffer->buf);
         }
 
+        ErrorCode reload_buffer (const BlockStorage::Buffer *buffer) const {
+            return this->read_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer);
+        }
+
         virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const = 0;
 
         ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
@@ -103,15 +119,16 @@ class BlockStorage {
         }
 
         /**
-         * @brief       Flush the contents of a buffer
+         * @brief       Flush the contents of a buffer and mark as unmodified
          *
          * @param[in]   buffer  Buffer to be written to the SD card - written only it was modified
          */
         ErrorCode flush (Buffer *buffer) const {
             PropWare::ErrorCode err;
-            if (buffer->mod) {
-                check_errors(this->write_data_block(buffer->curTier2StartAddr + buffer->curTier1Offset, buffer->buf));
-                buffer->mod = false;
+            if (buffer->meta && buffer->meta->mod) {
+                check_errors(this->write_data_block(
+                        buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer->buf));
+                buffer->meta->mod = false;
             }
             return 0;
         }

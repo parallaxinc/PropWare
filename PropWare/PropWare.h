@@ -30,9 +30,16 @@
 #else
 
 #include <propeller.h>
+
+#if (defined __cplusplus && __cplusplus >= 201103L)
 #include <cstdint>
 #include <cstdlib>
 #include <cctype>
+#else
+#include <stdint.h>
+#include <stdlib.h>
+#include <ctype.h>
+#endif
 
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller

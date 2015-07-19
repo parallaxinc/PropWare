@@ -37,16 +37,7 @@
 
 using namespace PropWare;
 
-FatFS *testable;
-
-const Pin::Mask MOSI = Pin::P0;
-const Pin::Mask MISO = Pin::P1;
-const Pin::Mask SCLK = Pin::P2;
-const Pin::Mask CS   = Pin::P4;
-
-BlockStorage *getDriver () {
-    return new SD(SPI::get_instance(), MOSI, MISO, SCLK, CS);
-}
+static FatFS *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
@@ -58,7 +49,7 @@ void error_checker (const ErrorCode err) {
 }
 
 SETUP {
-    testable = new FatFS(getDriver());
+    testable = new FatFS(new SD());
 }
 
 TEARDOWN {
@@ -128,6 +119,12 @@ TEST(Mount_withParameter4) {
 
     err = testable->mount(4);
     ASSERT_EQ_MSG(FatFS::UNSUPPORTED_FILESYSTEM, err);
+
+    tearDown();
+}
+
+TEST(ClearChain) {
+    // TODO: Write test (and don't forget to invoke it in main)
 
     tearDown();
 }

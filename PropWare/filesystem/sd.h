@@ -33,6 +33,9 @@
 #include <PropWare/pin.h>
 #include <PropWare/printer/printer.h>
 
+extern int _cfg_sdspi_config1;
+extern int _cfg_sdspi_config2;
+
 namespace PropWare {
 
 class SD: public BlockStorage {
@@ -60,14 +63,29 @@ class SD: public BlockStorage {
         } ErrorCode;
 
     public:
+        SD (SPI *spi = SPI::get_instance()) {
+            Pin::Mask pins[4];
+            unpack_sd_pins((uint32_t *) pins);
+
+            this->m_mosi = pins[0];
+            this->m_miso = pins[1];
+            this->m_sclk = pins[2];
+
+            // Set CS for output and initialize high
+            this->m_cs.set_mask(pins[3]);
+            this->m_cs.set_dir(Pin::OUT);
+            this->m_cs.set();
+
+            this->m_spi = spi;
+        }
+
         /**
          * @brief       Construct an SD object with the given SPI parameters
          */
-        SD (SPI *spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs) {
-            this->m_mosi = mosi;
-            this->m_miso = miso;
-            this->m_sclk = sclk;
-
+        SD (SPI *spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs)
+                : m_mosi(mosi),
+                  m_miso(miso),
+                  m_sclk(sclk) {
             // Set CS for output and initialize high
             this->m_cs.set_mask(cs);
             this->m_cs.set_dir(Pin::OUT);
@@ -229,38 +247,6 @@ class SD: public BlockStorage {
             buf[offset + 1] = value >> 8;
             buf[offset] = value;
         }
-
-#ifdef SD_OPTION_FILE_WRITE
-        /**
-         * @brief       Write a byte-reversed 16-bit variable (SD cards store
-         *              bytes little-endian therefore we must reverse them to
-         *              use multi-byte variables)
-         *
-         * @param[out]  buf[]   Address to store the first byte of data
-         * @param[in]   dat     Normal, 16-bit variable to be written to RAM in
-         *                      reverse endian
-         */
-        void write_rev_dat16 (uint8_t buf[], const uint16_t dat) {
-            buf[1] = (uint8_t) (dat >> 8);
-            buf[0] = (uint8_t) dat;
-        }
-
-        /**
-         * @brief       Write a byte-reversed 32-bit variable (SD cards store
-         *              bytes little-endian therefore we must reverse them to
-         *              use multi-byte variables)
-         *
-         * @param[out]  buf[]   Address to store the first byte of data
-         * @param[in]   dat     Normal, 32-bit variable to be written to RAM in
-         *                      reverse endian
-         */
-        void write_rev_dat32 (uint8_t buf[], const uint32_t dat) {
-            buf[3] = (uint8_t) (dat >> 24);
-            buf[2] = (uint8_t) (dat >> 16);
-            buf[1] = (uint8_t) (dat >> 8);
-            buf[0] = (uint8_t) dat;
-        }
-#endif
 
     private:
         /***********************
@@ -628,6 +614,25 @@ class SD: public BlockStorage {
             if (BIT_7 & this->m_firstByteResponse)
                 printer.puts("\t7: Something is really screwed up. This "
                               "should always be 0.\n");
+        }
+
+    private:
+        static void unpack_sd_pins (uint32_t pins[]) {
+            __asm__ volatile (
+                    "       brw #skipVars          \n\t"
+                    "       .compress off          \n"
+                    "__cfg_sdspi_config1           \n\t"
+                    "       nop                    \n"
+                    "__cfg_sdspi_config2           \n\t"
+                    "       nop                    \n\t"
+                    "       .compress default      \n"
+                    "skipVars:                     \n\t"
+            );
+
+            pins[0] = (uint32_t) (1 << ((_cfg_sdspi_config1 >> 24) & BYTE_0)); // MOSI
+            pins[1] = (uint32_t) (1 << ((_cfg_sdspi_config1 >> 16) & BYTE_0)); // MISO
+            pins[2] = (uint32_t) (1 << ((_cfg_sdspi_config1 >> 8) & BYTE_0)); // SCLK
+            pins[3] = (uint32_t) (1 << ((_cfg_sdspi_config2 >> 24) & BYTE_0)); // CS
         }
 
     private:

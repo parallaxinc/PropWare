@@ -212,6 +212,10 @@ class Utility {
             return __builtin_propeller_rev(x, bits);
         }
 
+        static bool empty (const char string[]) {
+            return '\0' == string[0];
+        }
+
 private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as

@@ -26,9 +26,9 @@
 #include "PropWareTests.h"
 #include <PropWare/queue.h>
 
-const size_t SIZE = 8;
-int array[SIZE];
-PropWare::Queue<int> *testable;
+static const size_t SIZE = 8;
+static int array[SIZE];
+static PropWare::Queue<int> *testable;
 
 SETUP {
     testable = new PropWare::Queue<int>(array, SIZE);

@@ -31,7 +31,7 @@
 
 using namespace PropWare;
 
-StringBuilder *testable;
+static StringBuilder *testable;
 
 void setUp() {
     testable = new StringBuilder();

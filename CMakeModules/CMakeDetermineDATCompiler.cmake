@@ -37,7 +37,7 @@ include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 set(CMAKE_DAT_COMPILER_NAMES cc)
 
 # configure variables set in this file for fast reload later on
-configure_file(${PROPWARE_PATH}/CMakeModules/CMakeDATCompiler.cmake.in
+configure_file(${CMAKE_CURRENT_LIST_DIR}/CMakeDATCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeDATCompiler.cmake
   @ONLY
   )

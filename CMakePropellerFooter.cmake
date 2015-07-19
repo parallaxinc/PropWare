@@ -1,2 +1,0 @@
-message(WARNING "CMakePropellerFooter.cmake usage is deprecated. Please replace `add_executable` with `create_simple_executable` and remove the inclusion of CMakePropellerFooter.cmake")
-create_top_project(${PROJECT_NAME})

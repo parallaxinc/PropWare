@@ -29,11 +29,11 @@
 #include <PropWare/pin.h>
 #include "PropWareTests.h"
 
-PropWare::Pin             *testable;
-PropWare::Pin             *helper;
-const uint8_t             TEST_PIN_NUM = 12;
-const PropWare::Pin::Mask TEST_MASK    = PropWare::Pin::P12;
-const PropWare::Pin::Mask CHECK_MASK   = PropWare::Pin::P13;
+static PropWare::Pin             *testable;
+static PropWare::Pin             *helper;
+static const uint8_t             TEST_PIN_NUM = 12;
+static const PropWare::Pin::Mask TEST_MASK    = PropWare::Pin::P12;
+static const PropWare::Pin::Mask CHECK_MASK   = PropWare::Pin::P13;
 
 void setUp(const PropWare::Pin::Dir dir = PropWare::Pin::OUT) {
     testable = new PropWare::Pin(TEST_MASK, dir);

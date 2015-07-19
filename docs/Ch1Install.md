@@ -1,56 +1,39 @@
 Chapter 1: Installation
 =======================
 
-[>> Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)
+[>> Chapter 2: CMake and Make Tutorial][1]
 
 Microsoft Windows
 -----------------
-1. Download [PropWare](https://github.com/DavidZemon/PropWare) to your computer. You may use
-   [git](http://msysgit.github.io/) to download the [source code](https://github.com/DavidZemon/PropWare) or
-   you may download a [binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/PropWare_current.zip).
-2. Extract the contents to a directory without any spaces. For instance, `C:\Users\David\%PropWare` would be an excellent
-   choice. However, `C:\Documents and Settings\David` would be an awful choice. For Windows XP users, I am sorry. You
-   may need to use a path such as `C:\%PropWare`.
-3. Download Python 2.7 or later. At the time of this writing,
-   [Python 3.4.1](https://www.python.org/ftp/python/3.4.1/python-3.4.1.msi) is the latest Windows revision. Refer to the
-   python.org [downloads page](https://www.python.org/downloads/windows/) for the complete list of downloads.
-4. Run the Python installation file or extract its contents to your desired directory. When selecting which components
-   to install, ensure you have `Add python.exe to Path` set to install to disk.
-   ![Python installation window](python_install.png)
-5. Run `INSTALL.py`:
-   * Open the %PropWare root directory in your file browser
-   * Open the `util` directory within %PropWare
-   * While holding `shift`, right-click on in the file browser window (not on a file) and choose `Open command window
-    here`
-    ![Right-click menu to open command window](open_cmd_window.png)
-   * Type `INSTALL.py` and press enter. You might see some questions pop up - just answer them as your heart desires. 
-     Since I'm still very new to this, _please_ [let me know](mailto:david@zemon.name) if there is anything confusing
-     about my wording.
-6. You're all done! If any errors were reported, please [let me know](mailto:david@zemon.name) or 
-   [post in the forums](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
-   so that I may help you through it or fix a bug in the installation.
+1. Download [PropWare for Windows][2].
+2. Execute the installer - make sure the installation path has no parentheses! In other words, _do not_ install PropWare
+   into `C:\Program Files (x86)\...` - GCC won't like this one bit.
+3. Add CMake's bin (located in `<install dir>\PWCMake\bin`) folder to your PATH. Excellent instructions for editing 
+   PATH exist [here][3]. If the PATH variable already exists, add to it with a `;` separating the existing contents 
+   and your new value. For instance, if you installed %PropWare to `C:\%PropWare` and PATH currently contains 
+   `C:\propgcc\bin`, the new value would be `C:\%PropWare\PWCMake\bin;C:\propgcc\bin`.
 
-Linux
------
-Most, if not all, Linux distributions ship with a version of Python, so don't worry about that. Simply download
-[PropWare](https://github.com/DavidZemon/PropWare) in any way that you like
-([source code](https://github.com/DavidZemon/PropWare) is recommended, but a
-[binary distribution](http://david.zemon.name/downloads/PropWare_Binaries/) will work just fine) and execute the
-INSTALL.py script. If you downloaded PropWare to `/home/david/PropWare`, you would open a terminal and type:
+Linux - Debian/Ubuntu/Mint/etc
+------------------------------
+1. Download both `.deb` files - one for the [PropWare headers and libraries][4], the other for [CMake][5].
+2. Use `dpkg` to install both files. I use a single command to install both at once: `sudo dpkg -i PropWare*.deb`.
 
-    cd /home/david/PropWare/util
-    python INSTALL.py
-
-You might see some questions pop up - just answer them as your heart desires. Since I'm still very new to this, _please_
-[let me know](mailto:david@zemon.name) if there is anything confusing about my wording.
-
-When you're all done, exit the terminal. If you opted to set root environment variables, you'll need to reboot your 
-computer before %PropWare is usable.
+Linux - RedHat/Fedora/CentOS/etc
+--------------------------------
+1. Download both `.rpm` files - one for the [PropWare headers and libraries][6], the other for [CMake][7].
+2. Use `rpm` to install both files. I use a single command to install both at once: `sudo rpm -i PropWare*.rpm`.
 
 Mac OSX
 -------
-I have _no_ idea what will happen on a Mac. I don't own a Mac. If you are reading this and you have a Mac, I'd greatly
-appreciate you [getting in contact with me](mailto:david@zemon.name) to help me iron out any existing bugs in the 
-installation script. You don't have to have any prerequisite knowledge to help - I just need something to test on.
+CMake supports multiple packaging systems for Mac, but I am unfamiliar with which one to use and have no way to 
+test. Please let me know if you would like to help me package PropWare for Mac OSX.
 
-[>> Chapter 2: CMake and Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)
+[>> Chapter 2: CMake and Make Tutorial][5]
+
+[1]: http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html
+[2]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.exe?guest=1
+[3]: http://www.computerhope.com/issues/ch000549.htm
+[4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.deb?guest=1
+[5]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-cmake.deb?guest=1
+[6]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.rpm?guest=1
+[7]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-cmake.rpm?guest=1
