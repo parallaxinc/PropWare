@@ -3,7 +3,7 @@
 # in this file.
 
 if (CPACK_GENERATOR MATCHES "ZIP")
-    set(CPACK_COMPONENTS_ALL propware win_cmake cmake)
+    set(CPACK_COMPONENTS_ALL propware win_cmake cmake osx_cmake)
 elseif (CPACK_GENERATOR MATCHES "NSIS")
     set(CPACK_COMPONENTS_ALL propware win_cmake)
 else ()
