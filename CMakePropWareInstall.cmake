@@ -101,3 +101,11 @@ install(FILES
         ${PROJECT_SOURCE_DIR}/version.txt
     DESTINATION PropWare
     COMPONENT propware)
+
+# Examples
+install(DIRECTORY Examples
+    DESTINATION PropWare
+    COMPONENT examples
+    PATTERN bin EXCLUDE
+    PATTERN Examples/CMakeLists.txt EXCLUDE
+    PATTERN *~ EXCLUDE)

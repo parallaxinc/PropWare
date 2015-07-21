@@ -40,8 +40,6 @@ set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6
 set(CPACK_RPM_PACKAGE_PROVIDES "cmake")
 
 # Components
-set(CPACK_RPM_COMPONENT_INSTALL ON)
-set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_COMPONENT_PROPWARE_DISPLAY_NAME  "Headers/Libraries")
 set(CPACK_COMPONENT_PROPWARE_DESCRIPTION   "Headers and static libraries for PropWare, Simple and libpropeller")
