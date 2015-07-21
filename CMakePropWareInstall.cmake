@@ -59,11 +59,14 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
     COMPONENT win_cmake)
 
 install(DIRECTORY CMakeModules/
-    DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
     COMPONENT cmake)
 install(DIRECTORY CMakeModules/
-    DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-3.2/Modules
+    DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
     COMPONENT win_cmake)
+install(DIRECTORY CMakeModules/
+    DESTINATION ${CUSTOM_OSX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
+    COMPONENT osx_cmake)
 
 # PropWare & libpropeller includes
 install(DIRECTORY
@@ -98,3 +101,11 @@ install(FILES
         ${PROJECT_SOURCE_DIR}/version.txt
     DESTINATION PropWare
     COMPONENT propware)
+
+# Examples
+install(DIRECTORY Examples
+    DESTINATION PropWare
+    COMPONENT examples
+    PATTERN bin EXCLUDE
+    PATTERN Examples/CMakeLists.txt EXCLUDE
+    PATTERN *~ EXCLUDE)

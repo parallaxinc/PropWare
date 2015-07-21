@@ -15,25 +15,61 @@ Microsoft Windows
 
 Linux - Debian/Ubuntu/Mint/etc
 ------------------------------
-1. Download both `.deb` files - one for the [PropWare headers and libraries][4], the other for [CMake][5].
-2. Use `dpkg` to install both files. I use a single command to install both at once: `sudo dpkg -i PropWare*.deb`.
+1. Download the [`deb` package file][4].
+2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.0.0-Generic.deb`.
 
 Linux - RedHat/Fedora/CentOS/etc
 --------------------------------
-1. Download both `.rpm` files - one for the [PropWare headers and libraries][6], the other for [CMake][7].
-2. Use `rpm` to install both files. I use a single command to install both at once: `sudo rpm -i PropWare*.rpm`.
+1. Download the [`rpm` package file][5].
+2. Use `rpm` to install the file with: `sudo rpm -i PropWare-2.0.0-Generic.rpm`.
 
 Mac OSX
 -------
-CMake supports multiple packaging systems for Mac, but I am unfamiliar with which one to use and have no way to 
-test. Please let me know if you would like to help me package PropWare for Mac OSX.
+I am unable to produce easy installation packages for Mac. My apologies. Please execute the following lines at the 
+command line to install PropWare on your Mac:
 
-[>> Chapter 2: CMake and Make Tutorial][5]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-examples.zip?guest=1 -Oexamples.zip
+unzip cmake.zip
+unzip prowpare.zip
+unzip examples.zip
+sudo mv OSXCMake /usr/local
+sudo mv PropWare /usr/local
+sudo ln -s /usr/local/OSXCMake/bin/cmake /usr/local/bin/cmake
+sudo ln -s /usr/local/OSXCMake/bin/ccmake /usr/local/bin/ccmake
+sudo ln -s /usr/local/OSXCMake/bin/cpack /usr/local/bin/cpack
+sudo ln -s /usr/local/OSXCMake/bin/cmake-gui /usr/local/bin/cmake-gui
+sudo ln -s /usr/local/OSXCMake/bin/ctest /usr/local/bin/ctest
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To upgrade:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-examples.zip?guest=1 -Oexamples.zip
+unzip cmake.zip
+unzip prowpare.zip
+unzip examples.zip
+sudo mv /usr/local/OSXCMake /usr/local/OSXCMake.bak
+sudo mv /usr/local/PropWare /usr/local/PropWare.bak
+sudo mv OSXCMake /usr/local
+sudo mv PropWare /usr/local
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once you have confirmed that the new installation works as expected, remove the old one with the following two lines.
+NOTE: A command that starts with `sudo rm -rf` has the potential to be _very_ dangerous! I assume no responsibility 
+if you corrupt your system. Be careful.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
+sudo rm -rf /usr/local/OSXCMake.bak
+sudo rm -rf /usr/local/PropWare.bak
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[>> Chapter 2: CMake and Make Tutorial][1]
 
 [1]: http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html
 [2]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.exe?guest=1
 [3]: http://www.computerhope.com/issues/ch000549.htm
-[4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.deb?guest=1
-[5]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-cmake.deb?guest=1
-[6]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.rpm?guest=1
-[7]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-cmake.rpm?guest=1
+[4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.deb?guest=1
+[5]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.rpm?guest=1
