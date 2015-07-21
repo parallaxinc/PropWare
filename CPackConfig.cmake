@@ -34,6 +34,8 @@ set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 set(CPACK_NSIS_HELP_LINK "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_URL_INFO_ABOUT "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_CONTACT "David Zemon <david@zemon.name>")
+set(CPACK_NSIS_INSTALL_ROOT C:)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY PropWare)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6, libxext6")
