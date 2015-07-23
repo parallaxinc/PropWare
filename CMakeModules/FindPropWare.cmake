@@ -361,23 +361,23 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
             # Add target for debugging (load to RAM and start GDB)
             add_custom_target(gdb
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} ${name}.elf
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
+                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
+                    DEPENDS ${name})
 
             add_custom_target(test-
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -t -q
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -q
+                    DEPENDS ${name})
 
             # Add target for run (load to RAM and start terminal)
             add_custom_target(debug
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -t
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
+                    DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -e
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
+                    DEPENDS ${name})
 
         endmacro()
 
@@ -385,23 +385,23 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
             # Add target for debugging (load to RAM and start GDB)
             add_custom_target(gdb-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} ${name}.elf
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
+                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
+                    DEPENDS ${name})
 
             add_custom_target(test-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -t -q
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -q
+                    DEPENDS ${name})
 
             # Add target for run (load to RAM and start terminal)
             add_custom_target(debug-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -t
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
+                    DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} ${name}.elf -r -e
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name})
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
+                    DEPENDS ${name})
 
         endmacro()
 
