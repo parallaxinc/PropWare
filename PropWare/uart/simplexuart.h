@@ -32,7 +32,7 @@ namespace PropWare {
 /**
  * @brief   An easy-to-use class for simplex (transmit only) UART communication
  */
-class SimplexUART: public AbstractSimplexUART {
+class SimplexUART : public AbstractSimplexUART {
     public:
         /**
          * @brief   No-arg constructors are helpful when avoiding dynamic

@@ -42,7 +42,7 @@ namespace PropWare {
  * return until after the RX pin is low and all data, parity (if applicable) and
  * stop bits have been read.
  */
-class FullDuplexUART: public AbstractDuplexUART {
+class FullDuplexUART : public AbstractDuplexUART {
     public:
         /**
          * @see PropWare::AbstractDuplexUART::AbstractDuplexUART()

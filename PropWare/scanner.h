@@ -29,7 +29,6 @@
 #include <PropWare/scancapable.h>
 #include <PropWare/comparator.h>
 #include <PropWare/printer/printer.h>
-#include <PropWare/uart/halfduplexuart.h>
 
 extern "C" {
 extern const char *_scanf_getl (const char *str, int *dst, int base, unsigned width, int isSigned);
@@ -107,33 +106,33 @@ class Scanner {
                 else
                     *(buf++) = ch;
             }
-            *buf = 0;
+            *buf      = 0;
 
             return NO_ERROR;
         }
 
-        const Scanner& operator>> (char &c) {
+        const Scanner &operator>> (char &c) {
             this->get(c);
             return *this;
         }
 
-        const Scanner& operator>> (uint32_t &x) {
+        const Scanner &operator>> (uint32_t &x) {
             get(x);
             return *this;
         }
 
-        const Scanner& operator>> (int32_t &x) {
+        const Scanner &operator>> (int32_t &x) {
             get(x);
             return *this;
         }
 
-        const Scanner& operator>> (float &f) {
+        const Scanner &operator>> (float &f) {
             return *this;
         }
 
         const ErrorCode get (char &c) {
             ErrorCode err;
-            char userInput[2];
+            char      userInput[2];
             check_errors(this->gets(userInput, sizeof(userInput)));
             if ('\0' == c)
                 return BAD_INPUT;
@@ -143,9 +142,9 @@ class Scanner {
             }
         }
 
-        const ErrorCode get(uint32_t &x) {
-            ErrorCode  err;
-            char userInput[32];
+        const ErrorCode get (uint32_t &x) {
+            ErrorCode err;
+            char      userInput[32];
             check_errors(this->gets(userInput, sizeof(userInput)));
             if (0 == _scanf_getl(userInput, (int *) &x, 10, 11, false))
                 return BAD_INPUT;
@@ -153,9 +152,9 @@ class Scanner {
                 return NO_ERROR;
         }
 
-        const ErrorCode get(int32_t &x) {
-            ErrorCode  err;
-            char userInput[32];
+        const ErrorCode get (int32_t &x) {
+            ErrorCode err;
+            char      userInput[32];
             check_errors(this->gets(userInput, sizeof(userInput)));
             if (0 == _scanf_getl(userInput, &x, 10, 11, false))
                 return BAD_INPUT;
@@ -163,9 +162,9 @@ class Scanner {
                 return NO_ERROR;
         }
 
-        const ErrorCode get(float &f) {
+        const ErrorCode get (float &f) {
             ErrorCode err;
-            char userInput[32];
+            char      userInput[32];
             check_errors(this->gets(userInput, sizeof(userInput)));
             if (0 == _scanf_getf(userInput, &f))
                 return BAD_INPUT;
@@ -208,7 +207,7 @@ class Scanner {
         template<typename T>
         void input_prompt (const char prompt[], const char failureResponse[], T *userInput,
                            const Comparator<T> &comparator) {
-            const T original = *userInput;
+            const T   original = *userInput;
             ErrorCode err;
             do {
                 this->m_printer->puts(prompt);
@@ -222,8 +221,8 @@ class Scanner {
         }
 
     private:
-        ScanCapable *m_scanCapable;
-        const Printer     *m_printer;
+        ScanCapable   *m_scanCapable;
+        const Printer *m_printer;
 };
 
 }

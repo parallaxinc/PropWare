@@ -40,14 +40,14 @@ extern uint32_t _SeeedTftStartCog (void *arg);
  */
 class SeeedTFTFast : public PropWare::SeeedTFT {
     public:
-        SeeedTFTFast() : PropWare::SeeedTFT() {
+        SeeedTFTFast () : PropWare::SeeedTFT() {
         };
 
         virtual void start (const PropWare::Pin::Mask lsbDataPin,
-                const PropWare::Port::Mask csMask,
-                const PropWare::Port::Mask rdMask,
-                const PropWare::Port::Mask wrMask,
-                const PropWare::Port::Mask rsMask) {
+                            const PropWare::Port::Mask csMask,
+                            const PropWare::Port::Mask rdMask,
+                            const PropWare::Port::Mask wrMask,
+                            const PropWare::Port::Mask rsMask) {
             this->m_cog = _SeeedTftStartCog(
                     (void *) &mailbox);
 
@@ -59,7 +59,7 @@ class SeeedTFTFast : public PropWare::SeeedTFT {
         }
 
         virtual void drawVerticalLine (const uint16_t posX, const uint16_t posY,
-                uint16_t length, const uint16_t color) const {
+                                       uint16_t length, const uint16_t color) const {
             this->setXY(posX, posY);
             this->setOrientation(PropWare::SeeedTFT::VERTICAL);
 
@@ -70,8 +70,8 @@ class SeeedTFTFast : public PropWare::SeeedTFT {
         }
 
         virtual void drawHorizontalLine (const uint16_t posX,
-                const uint16_t posY, uint16_t length,
-                const uint16_t color) const {
+                                         const uint16_t posY, uint16_t length,
+                                         const uint16_t color) const {
             this->setXY(posX, posY);
             this->setOrientation(PropWare::SeeedTFT::HORIZONTAL);
 
@@ -87,11 +87,11 @@ class SeeedTFTFast : public PropWare::SeeedTFT {
         }
 
         virtual void sendData (const uint16_t data) const {
-            PropWare::SeeedTFTFast::mailbox =(data << 8) + SEND_DATA;
+            PropWare::SeeedTFTFast::mailbox = (data << 8) + SEND_DATA;
         }
 
-        virtual void sendMultiData(const uint16_t data,
-                const size_t len) const {
+        virtual void sendMultiData (const uint16_t data,
+                                    const size_t len) const {
             if (1 < len)
                 PropWare::SeeedTFTFast::mailbox = ((len - 1) << 8) + REPEAT;
             this->sendData(data);
@@ -108,5 +108,5 @@ class SeeedTFTFast : public PropWare::SeeedTFT {
         int8_t m_cog;
 
         static atomic_t mailbox;
-    };
+};
 }

@@ -78,7 +78,7 @@ class SynchronousPrinter {
         bool refreshLock () {
             if (this->has_lock()) {
                 // Wait for any other cogs using the lock to return
-                while(lockset(this->m_lock));
+                while (lockset(this->m_lock));
                 lockclr(this->m_lock);
                 lockret(this->m_lock);
             }
@@ -94,8 +94,8 @@ class SynchronousPrinter {
          * @return  Instance of the printer. The invoked instance of SynchronousPrinter will remain locked until
          *          SynchronousPrinter::return_printer() is called
          */
-        const Printer* borrow_printer () {
-            while(lockset(this->m_lock));
+        const Printer *borrow_printer () {
+            while (lockset(this->m_lock));
             this->m_borrowed = true;
             return this->m_printer;
         }
@@ -117,13 +117,13 @@ class SynchronousPrinter {
          */
         template<typename T>
         void print (const T var) const {
-            while(lockset(this->m_lock));
+            while (lockset(this->m_lock));
             this->m_printer->print(var);
             lockclr(this->m_lock);
         }
 
         void println (const char string[]) const {
-            while(lockset(this->m_lock));
+            while (lockset(this->m_lock));
             this->m_printer->println(string);
             lockclr(this->m_lock);
         }
@@ -131,8 +131,8 @@ class SynchronousPrinter {
         /**
          * @see PropWare::Printer::printf(const char fmt[])
          */
-        void printf(const char fmt[]) const {
-            while(lockset(this->m_lock));
+        void printf (const char fmt[]) const {
+            while (lockset(this->m_lock));
             this->m_printer->puts(fmt);
             lockclr(this->m_lock);
         }
@@ -142,7 +142,7 @@ class SynchronousPrinter {
          */
         template<typename T, typename... Targs>
         void printf (const char fmt[], const T first, const Targs... remaining) const {
-            while(lockset(this->m_lock));
+            while (lockset(this->m_lock));
             this->m_printer->printf(fmt, first, remaining...);
             lockclr(this->m_lock);
         }

@@ -33,7 +33,7 @@ using namespace PropWare;
 
 static StringBuilder *testable;
 
-void setUp() {
+void setUp () {
     testable = new StringBuilder();
 }
 
@@ -136,7 +136,7 @@ TEST(PutChar_HugeString) {
     const unsigned int originalStringAddr = (unsigned int) testable->to_string();
 
     const int STRING_SIZE = 0x1000 - 1;
-    for (int i = 0; i < STRING_SIZE; ++i)
+    for (int  i           = 0; i < STRING_SIZE; ++i)
         testable->put_char('a');
 
     ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable->to_string());
@@ -180,7 +180,7 @@ TEST(Clear_HugeString) {
     setUp();
 
     const int STRING_SIZE = 0x1000 - 1;
-    for (int i = 0; i < STRING_SIZE; ++i)
+    for (int  i           = 0; i < STRING_SIZE; ++i)
         testable->put_char('a');
 
     testable->clear();

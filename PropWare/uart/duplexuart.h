@@ -32,7 +32,7 @@ namespace PropWare {
 /**
  * @brief    Interface for all duplex UART devices
  */
-class DuplexUART: public virtual UART {
+class DuplexUART : public virtual UART {
     public:
         /**
          * @brief       Set the pin mask for RX pin

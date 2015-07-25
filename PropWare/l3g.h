@@ -94,7 +94,7 @@ class L3G {
          * @param[in]   *spi    Constructed SPI module
          */
         L3G (SPI *spi) {
-            this->m_spi = spi;
+            this->m_spi           = spi;
             this->m_alwaysSetMode = false;
         }
 

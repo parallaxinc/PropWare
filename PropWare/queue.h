@@ -66,7 +66,7 @@ class Queue {
          * @return      In order to allow chained calls to `PropWare::CircularQueue::enqueue`, the buffer isntance is
          *              returned
          */
-        Queue & enqueue (const T &value) {
+        Queue &enqueue (const T &value) {
             // Move the head pointer
             if (this->is_empty())
                 this->m_head = 0;
@@ -98,7 +98,7 @@ class Queue {
         /**
          * @see PropWare::CircularQueue::enqueue(const T &value)
          */
-        Queue & insert (const T &value) {
+        Queue &insert (const T &value) {
             return this->enqueue(value);
         }
 
@@ -127,7 +127,7 @@ class Queue {
 
                 return *retVal;
             } else
-                return * (T *) NULL;
+                return *(T *) NULL;
         }
 
         /**
@@ -152,18 +152,18 @@ class Queue {
          *
          * @return      Whether or not the value is valid
          */
-        bool check(const T &value) const {
+        bool check (const T &value) const {
             const bool valid = &value == NULL;
             return valid;
         }
 
     private:
-        T *m_array;
+        T            *m_array;
         const size_t m_arrayLength;
 
         volatile size_t m_size;
-        volatile int m_head;
-        volatile int m_tail;
+        volatile int    m_head;
+        volatile int    m_tail;
 };
 
 }

@@ -32,7 +32,7 @@ namespace PropWare {
 
 class FileReader : virtual public File, virtual public ScanCapable {
     public:
-        virtual ~FileReader () {}
+        virtual ~FileReader () { }
 
         PropWare::ErrorCode flush () {
             return NO_ERROR;
@@ -41,7 +41,7 @@ class FileReader : virtual public File, virtual public ScanCapable {
         virtual PropWare::ErrorCode safe_get_char (char &c) = 0;
 
         char get_char () {
-            char c;
+            char                      c;
             const PropWare::ErrorCode err = this->safe_get_char(c);
             if (err) {
                 this->m_error = err;
@@ -84,6 +84,7 @@ class FileReader : virtual public File, virtual public ScanCapable {
         }
 
     protected:
+
         FileReader (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
                     const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger) {

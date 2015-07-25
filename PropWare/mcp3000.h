@@ -77,9 +77,9 @@ class MCP3000 {
          * @param[in]   partNumber  Determine bit-width of the ADC channels
          */
         MCP3000 (SPI *spi, MCP3000::PartNumber partNumber) {
-            this->m_spi = spi;
+            this->m_spi           = spi;
             this->m_alwaysSetMode = 0;
-            this->m_dataWidth = partNumber;
+            this->m_dataWidth     = partNumber;
         }
 
         /**
@@ -132,7 +132,7 @@ class MCP3000 {
          */
         PropWare::ErrorCode read (const MCP3000::Channel channel, uint16_t *dat) {
             PropWare::ErrorCode err;
-            int8_t options;
+            int8_t              options;
 
             options = START | SINGLE_ENDED | channel;
 
@@ -164,7 +164,7 @@ class MCP3000 {
          */
         PropWare::ErrorCode read_diff (const MCP3000::ChannelDiff channels, uint16_t *dat) {
             PropWare::ErrorCode err;
-            int8_t options;
+            int8_t              options;
 
             options = START | DIFFERENTIAL | channels;
 

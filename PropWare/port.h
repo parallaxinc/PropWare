@@ -30,8 +30,7 @@
 namespace PropWare {
 
 /**
- * @brief   Flexible port that can have any pin enabled or disabled. Pins are
- *          independent of each other.
+ * @brief   Flexible port that can have any pin enabled or disabled. Pins are independent of each other.
  */
 class Port {
     public:
@@ -88,14 +87,13 @@ class Port {
          *
          * @note        Return value is 0-indexed
          *
-         * @param[in]   mask    Value with only a single bit set high
-         *                      representing Propeller pin (i.e.: 0x80 would
-         *                      be pin 7)
+         * @param[in]   mask    Value with only a single bit set high representing Propeller pin (i.e.: 0x80 would be
+         *                      pin 7)
          *
          * @return      Return the pin number of pin
          */
         static uint8_t convert (Port::Mask mask) {
-            uint8_t retVal = 0;
+            uint8_t  retVal  = 0;
             uint32_t maskInt = mask;
 
             while (maskInt >>= 1)
@@ -121,8 +119,7 @@ class Port {
                 return (PropWare::Port::Mask) (mask << pinNum);
         }
 
-        static void flash_port (const uint32_t pinMask, uint32_t value,
-                const uint32_t iterations = 10) {
+        static void flash_port (const uint32_t pinMask, uint32_t value, const uint32_t iterations = 10) {
             const Port port(pinMask, Port::OUT);
 
             for (uint32_t i = 0; i < iterations; ++i) {
@@ -134,33 +131,20 @@ class Port {
         }
 
     public:
-        /**
-         * @brief   No-arg constructor; Useful for using a Port as an instance
-         *          in another class where you do not want to instantiate it
-         *          in the constructor
-         */
         Port () {
             this->m_mask = PropWare::Port::NULL_PIN;
         }
 
         /**
-         * @brief       Initialize a port with a pre-configured port mask
-         *
-         * @param[in]   portMask    Each bit set high represents a Pin on the
-         *                          port
+         * @param[in]   portMask    Each bit set high represents a Pin on the port
          */
         Port (const uint32_t portMask) {
             this->m_mask = portMask;
         }
 
         /**
-         * @brief       Initialize a port with a pre-configured port mask and
-         *              direction
-         *
-         * @param[in]   portMask    Each bit set high represents a Pin on the
-         *                          port
-         * @param[in]   direction   One of PropWare::Port::OUT or
-         *                          PropWare::Port::IN
+         * @param[in]   portMask    Each bit set high represents a Pin on the port
+         * @param[in]   direction   One of PropWare::Port::OUT or PropWare::Port::IN
          */
         Port (const uint32_t portMask, const PropWare::Port::Dir direction) {
             this->m_mask = portMask;
@@ -197,8 +181,7 @@ class Port {
         /**
          * @brief       Set port as either input or output
          *
-         * @param[in]   direction   I/O direction to set selected pins; must be
-         *                          one of PropWare::Port::IN or
+         * @param[in]   direction   I/O direction to set selected pins; must be one of PropWare::Port::IN or
          *                          PropWare::Port::OUT
          */
         void set_dir (const PropWare::Port::Dir direction) const {
@@ -281,12 +264,10 @@ class Port {
         }
 
         /**
-         * @brief       Allow easy writing to a port w/o destroying data
-         *              elsewhere in the port; No shift is performed to align
-         *              data with the desired output pins
+         * @brief       Allow easy writing to a port w/o destroying data elsewhere in the port; No shift is performed
+         *              to align data with the desired output pins
          *
-         * @param[in]   value   value to be bit-masked and then written to the
-         *                      port
+         * @param[in]   value   value to be bit-masked and then written to the port
          */
         void write_fast (const uint32_t value) const {
             OUTA = ((OUTA & ~(this->m_mask)) | (value & this->m_mask));
@@ -310,11 +291,10 @@ class Port {
  *          the Propeller. All pins are consecutive, which allows for some
  *          simple shortcuts in reading, writing, and initialization
  */
-class SimplePort: public Port {
+class SimplePort : public Port {
     public:
-        static void flash_port (const Port::Mask firstPin,
-                const uint8_t portWidth, const uint32_t value,
-                const uint16_t iterations = 10) {
+        static void flash_port (const Port::Mask firstPin, const uint8_t portWidth, const uint32_t value,
+                                const uint16_t iterations = 10) {
             const SimplePort port(firstPin, portWidth, Port::OUT);
 
             const uint32_t shiftVal = value << port.m_firstPinNum;
@@ -326,6 +306,7 @@ class SimplePort: public Port {
                 waitcnt(75 * MILLISECOND + CNT);
             }
         }
+
     public:
         /**
          * @brief   @see PropWare::Port::Port()
@@ -346,15 +327,13 @@ class SimplePort: public Port {
         }
 
         /**
-         * @brief       Initialize a port and configures its bit-mask and
-         *              direction
+         * @brief       Initialize a port and configures its bit-mask and direction
          *
          * @param[in]   firstPin    Least significant pin in the data port mask
          * @param[in]   portWidth   The number of pins in the data port
          * @param[in]   direction   Determine input or output for the port
          */
-        SimplePort (const PropWare::Port::Mask firstPin, uint8_t portWidth,
-                const PropWare::Port::Dir direction) {
+        SimplePort (const PropWare::Port::Mask firstPin, uint8_t portWidth, const PropWare::Port::Dir direction) {
             this->set_mask(firstPin, portWidth);
             this->set_dir(direction);
         }
@@ -366,7 +345,7 @@ class SimplePort: public Port {
          * @param[in]   portWidth   The number of pins in the data port
          */
         void set_mask (const PropWare::Port::Mask firstPin, uint8_t portWidth) {
-            this->m_mask = firstPin;
+            this->m_mask        = firstPin;
             this->m_firstPinNum = PropWare::Port::convert(firstPin);
 
             // For every pin in the port...
@@ -376,13 +355,11 @@ class SimplePort: public Port {
         }
 
         /**
-         * @brief       Allow easy writing to a port w/o destroying data
-         *              elsewhere in the port; A shift is performed before
-         *              writing to align the LSB of the input parameter with the
-         *              least significant pin in the data port
+         * @brief       Allow easy writing to a port w/o destroying data elsewhere in the port; A shift is performed
+         *              before writing to align the LSB of the input parameter with the least significant pin in the
+         *              data port
          *
-         * @param[in]   value   value to be bit-masked and then written to the
-         *                      port
+         * @param[in]   value   value to be bit-masked and then written to the port
          */
         void write (uint32_t value) const {
             this->Port::write_fast(value << this->m_firstPinNum);
@@ -393,8 +370,7 @@ class SimplePort: public Port {
          *
          * @pre     Port direction must be set to input
          *
-         * @return  No manipulation of the return value is necessary (such as
-         *          shifting to the right or masking)
+         * @return  No manipulation of the return value is necessary (such as shifting to the right or masking)
          */
         uint32_t read () const {
             return this->Port::read_fast() >> this->m_firstPinNum;

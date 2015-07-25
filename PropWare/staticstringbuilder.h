@@ -40,16 +40,16 @@ class StaticStringBuilder : public PrintCapable {
 
         void put_char (const char c) {
             this->m_string[this->m_size++] = c;
-            this->m_string[this->m_size] = '\0';
+            this->m_string[this->m_size]   = '\0';
         }
 
         void puts (const char string[]) {
             for (const char *s = string; *s; ++s)
                 this->m_string[this->m_size++] = *s;
-            this->m_string[this->m_size] = '\0';
+            this->m_string[this->m_size]       = '\0';
         }
 
-        const char * to_string () const {
+        const char *to_string () const {
             return this->m_string;
         }
 
@@ -59,7 +59,7 @@ class StaticStringBuilder : public PrintCapable {
 
         void clear () {
             this->m_string[0] = '\0';
-            this->m_size   = 0;
+            this->m_size = 0;
         }
 
     private:

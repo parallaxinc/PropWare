@@ -73,80 +73,80 @@ TEST(CheckAssertFalse_ExpectFailure) {
 }
 
 TEST(CheckAssertEq) {
-    int x = 3;
-    int y = 4;
+    int x        = 3;
+    int y        = 4;
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_EQ(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertEq_ExpectFailure) {
-    int x = 3;
-    int y = 42; // Oops! That'd be a typo wouldn't it? :)
+    int x        = 3;
+    int y        = 42; // Oops! That'd be a typo wouldn't it? :)
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_EQ(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertEqMsg) {
-    int x = 3;
-    int y = 4;
+    int x        = 3;
+    int y        = 4;
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_EQ_MSG(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertEqMsg_ExpectFailure) {
-    int x = 3;
-    int y = 42; // Oops! That'd be a typo wouldn't it? :)
+    int x        = 3;
+    int y        = 42; // Oops! That'd be a typo wouldn't it? :)
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_EQ_MSG(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertNeq) {
-    int x = 3;
-    int y = 42; // Oops! That'd be a typo wouldn't it? :)
+    int x        = 3;
+    int y        = 42; // Oops! That'd be a typo wouldn't it? :)
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_NEQ(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertNeq_ExpectFailure) {
-    int x = 3;
-    int y = 4;
+    int x        = 3;
+    int y        = 4;
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_NEQ(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertNeqMsg) {
-    int x = 3;
-    int y = 42; // Oops! That'd be a typo wouldn't it? :)
+    int x        = 3;
+    int y        = 42; // Oops! That'd be a typo wouldn't it? :)
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_NEQ_MSG(expected, actual);
 
     return true;
 }
 
 TEST(CheckAssertNeqMsg_ExpectFailure) {
-    int x = 3;
-    int y = 4;
+    int x        = 3;
+    int y        = 4;
     int expected = 7;
-    int actual = x + y;
+    int actual   = x + y;
     ASSERT_NEQ_MSG(expected, actual);
 
     return true;
@@ -176,7 +176,7 @@ TEST(CheckAssertNull_Neg1_ExpectFailure) {
 TEST(CheckAssertNotNull) {
     ASSERT_NOT_NULL(1);
 
-    int y = 4;
+    int y  = 4;
     int *p = &y;
     ASSERT_NOT_NULL(p);
 

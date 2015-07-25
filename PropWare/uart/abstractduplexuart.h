@@ -31,9 +31,9 @@
 
 namespace PropWare {
 
-class AbstractDuplexUART: public virtual DuplexUART,
-                          public virtual ScanCapable,
-                          public AbstractSimplexUART {
+class AbstractDuplexUART : public virtual DuplexUART,
+                           public virtual ScanCapable,
+                           public AbstractSimplexUART {
     public:
         /**
          * @see PropWare::UART::set_rx_mask
@@ -97,7 +97,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
-                *length = INT32_MAX;
+                *length     = INT32_MAX;
             int32_t wordCnt = 0;
 
             // Check if the total receivable bits can fit within a byte
@@ -112,9 +112,8 @@ class AbstractDuplexUART: public virtual DuplexUART,
                         if (0 != this->check_parity((uint32_t) buffer[i]))
                             return UART::PARITY_ERROR;
             }
-            // If total receivable bits does not fit within a byte, shift in
-            // one word at a time (this offers no speed improvement - it is
-            // only here for user convenience)
+            // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
+            // improvement - it is only here for user convenience)
             else {
                 uint32_t temp;
 
@@ -122,7 +121,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
                     if (-1 == (temp = this->receive()))
                         return UART::PARITY_ERROR;
 
-                    *buffer = temp;
+                    *buffer = (char) temp;
                     ++buffer;
                     ++wordCnt;
                 } while (temp != delim && wordCnt < *length);
@@ -137,7 +136,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
          * @see PropWare::ScanCapable::get_char
          */
         char get_char () {
-            return this->receive();
+            return (char) this->receive();
         }
 
         /**
@@ -221,7 +220,7 @@ class AbstractDuplexUART: public virtual DuplexUART,
          */
         uint32_t shift_in_data (uint_fast8_t bits, const uint32_t bitCycles, const register uint32_t rxMask,
                                 const uint32_t msbMask) const {
-            volatile uint32_t data = 0;
+            volatile uint32_t data       = 0;
             volatile uint32_t waitCycles = bitCycles;
 
 #ifndef DOXYGEN_IGNORE
@@ -249,14 +248,14 @@ class AbstractDuplexUART: public virtual DuplexUART,
                     "       jmp __LMM_RET                                                   \n\t"
                     "ShiftInDataEnd:                                                        \n\t"
                     "       .compress default                                               \n\t"
-                    :// Outputs
-                    [_data] "+r"(data),
-                    [_waitCycles] "+r" (waitCycles),
-                    [_bits] "+r" (bits)
-                    :// Inputs
-                    [_rxMask] "r"(rxMask),
-                    [_msbMask] "r"(msbMask),
-                    [_bitCycles] "r" (bitCycles));
+            :// Outputs
+            [_data] "+r"(data),
+            [_waitCycles] "+r"(waitCycles),
+            [_bits] "+r"(bits)
+            :// Inputs
+            [_rxMask] "r"(rxMask),
+            [_msbMask] "r"(msbMask),
+            [_bitCycles] "r"(bitCycles));
 #endif
 
             return data;
@@ -327,20 +326,20 @@ class AbstractDuplexUART: public virtual DuplexUART,
                     "       jmp __LMM_RET                                                               \n\t"
                     "ShiftInArrayDataEnd:                                                               \n\t"
                     "       .compress default                                                           \n\t"
-                    :// Outputs
-                    [_bitIdx] "+r" (bitIdx),
-                    [_waitCycles] "+r" (waitCycles),
-                    [_data] "+r" (data),
-                    [_bufAdr] "+r" (bufferAddr),
-                    [_wordCnt] "+r" (wordCnt)
-                    :// Inputs
-                    [_rxMask] "r" (this->m_rx.get_mask()),
-                    [_bits] "r" (this->m_receivableBits),
-                    [_bitCycles] "r" (this->m_bitCycles),
-                    [_initWaitCycles] "r" (initWaitCycles),
-                    [_msbMask] "r" (this->m_msbMask),
-                    [_delim] "r" (delimiter),
-                    [_maxLength] "r" (maxLength));
+            :// Outputs
+            [_bitIdx] "+r"(bitIdx),
+            [_waitCycles] "+r"(waitCycles),
+            [_data] "+r"(data),
+            [_bufAdr] "+r"(bufferAddr),
+            [_wordCnt] "+r"(wordCnt)
+            :// Inputs
+            [_rxMask] "r"(this->m_rx.get_mask()),
+            [_bits] "r"(this->m_receivableBits),
+            [_bitCycles] "r"(this->m_bitCycles),
+            [_initWaitCycles] "r"(initWaitCycles),
+            [_msbMask] "r"(this->m_msbMask),
+            [_delim] "r"(delimiter),
+            [_maxLength] "r"(maxLength));
 #endif
 
             return wordCnt;
@@ -362,10 +361,10 @@ class AbstractDuplexUART: public virtual DuplexUART,
             evenParityResult = 0;
             __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                     "muxc %[_parityResult], %[_parityMask]"
-                    : [_parityResult] "+r" (evenParityResult)
-                    : [_data] "r" (rxVal),
-                    [_dataMask] "r" (wideDataMask),
-                    [_parityMask] "r" (wideParityMask));
+            : [_parityResult] "+r"(evenParityResult)
+            : [_data] "r"(rxVal),
+            [_dataMask] "r"(wideDataMask),
+            [_parityMask] "r"(wideParityMask));
 
             if (UART::ODD_PARITY == this->m_parity) {
                 if (evenParityResult != (rxVal & this->m_parityMask))

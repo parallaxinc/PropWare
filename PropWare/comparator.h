@@ -29,18 +29,18 @@ namespace PropWare {
 
 template<typename T>
 class Comparator {
-public:
-    virtual bool valid (const T *lhs) const = 0;
+    public:
+        virtual bool valid (const T *lhs) const = 0;
 };
 
 class NonNegativeIntegerComparator : public Comparator<int> {
-public:
-    NonNegativeIntegerComparator () {
-    }
+    public:
+        NonNegativeIntegerComparator () {
+        }
 
-    bool valid (const int *lhs) const {
-        return 0 <= *lhs;
-    }
+        bool valid (const int *lhs) const {
+            return 0 <= *lhs;
+        }
 };
 
 }

@@ -100,7 +100,7 @@ class BlockStorage {
         }
 
     public:
-        virtual ErrorCode start() const = 0;
+        virtual ErrorCode start () const = 0;
 
         virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) const = 0;
 

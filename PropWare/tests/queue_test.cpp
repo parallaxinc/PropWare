@@ -26,8 +26,8 @@
 #include "PropWareTests.h"
 #include <PropWare/queue.h>
 
-static const size_t SIZE = 8;
-static int array[SIZE];
+static const size_t         SIZE = 8;
+static int                  array[SIZE];
 static PropWare::Queue<int> *testable;
 
 SETUP {
@@ -104,7 +104,7 @@ TEST(Peek_doesNotRemoveElement) {
 }
 
 TEST(enqueue_twoElements) {
-    const int first = 42;
+    const int first  = 42;
     const int second = 13;
     setUp();
 
@@ -139,7 +139,7 @@ TEST(Deque_singleElement) {
 TEST(Deque_twoElements) {
     setUp();
 
-    const int first = 42;
+    const int first  = 42;
     const int second = 13;
 
     testable->enqueue(first);
@@ -178,7 +178,7 @@ TEST(ManyElements) {
 
     // Insert many elements
     const size_t TEST_SIZE = SIZE * 2 + 1;
-    for (int i = 0; i < TEST_SIZE; ++i) {
+    for (int     i         = 0; i < TEST_SIZE; ++i) {
         testable->enqueue(i);
         if (SIZE > i) {
             ASSERT_EQ_MSG(i + 1, testable->size());
@@ -190,7 +190,7 @@ TEST(ManyElements) {
 
     // Dequeue many elements
     const size_t DEQUEUE_LOOP_START = TEST_SIZE - SIZE;
-    for (int i = DEQUEUE_LOOP_START; i < TEST_SIZE; ++i) {
+    for (int     i                  = DEQUEUE_LOOP_START; i < TEST_SIZE; ++i) {
         ASSERT_EQ_MSG(i, testable->dequeue());
     }
 
