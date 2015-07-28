@@ -101,12 +101,18 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         set(PropWare_Simple_XMM-SPLIT_LIBRARY           Simple_xmm-split)
         set(PropWare_Simple_XMM-SINGLE_LIBRARY          Simple_xmm-single)
     else ()
-        if (NOT DEFINED PROPWARE_PATH OR NOT EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h")
-            find_path(PROPWARE_PATH include/PropWare/PropWare.h
+        if (NOT DEFINED PROPWARE_PATH
+            OR NOT EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h"
+            OR NOT EXISTS "${PROPWARE_PATH}/CMakePropWareInstall.cmake")
+
+            find_path(PROPWARE_PATH
+                NAMES
+                    ./CMakePropWareInstall.cmake  # We're either looking for PropWare's root source folder
+                    include/PropWare/PropWare.h   # ... or we're looking for the key PropWare header in a system folder
                 PATHS
                     # If we're working inside the PropWare project...
-                    ${CMAKE_CURRENT_LIST_DIR}
-                    ${CMAKE_CURRENT_LIST_DIR}/../.. # This one used for the Examples directory and PropWare/tests
+                    ${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../.. # This one used for the Examples directory and PropWare/tests
 
                     # Or outside the PropWare project
                     $ENV{PROPWARE_PATH} # Check the environment first
@@ -119,51 +125,50 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                 ${PROPWARE_PATH}/CMakeModules
                 ${CMAKE_ROOT}/Modules)
 
-        set(PropWare_INCLUDE_DIR ${PROPWARE_PATH}/include)
+        # Include directory
+        if (EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h")
+            set(PropWare_INCLUDE_DIR ${PROPWARE_PATH}/include)
+        else ()
+            set(PropWare_INCLUDE_DIR ${PROPWARE_PATH})
+        endif ()
 
-        # PropWare libs
+        # Libraries
         if (NOT DEFINED CMAKE_FIND_LIBRARY_PREFIXES)
             set(CMAKE_FIND_LIBRARY_PREFIXES lib)
         endif ()
         if (NOT DEFINED CMAKE_FIND_LIBRARY_SUFFIXES)
             set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
         endif ()
-        find_library(PropWare_PropWare_CMM_LIBRARY              PropWare_cmm
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_PropWare_LMM_LIBRARY              PropWare_lmm
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_PropWare_XMMC_LIBRARY             PropWare_xmmc
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_PropWare_XMM-SPLIT_LIBRARY        PropWare_xmm-split
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_PropWare_XMM-SINGLE_LIBRARY       PropWare_xmm-single
-            PATHS ${PROPWARE_PATH}/lib)
-        # libpropeller libs
-        find_library(PropWare_libpropeller_COG_LIBRARY          Libpropeller_cog
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_libpropeller_CMM_LIBRARY          Libpropeller_cmm
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_libpropeller_LMM_LIBRARY          Libpropeller_lmm
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_libpropeller_XMMC_LIBRARY         Libpropeller_xmmc
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_libpropeller_XMM-SPLIT_LIBRARY    Libpropeller_xmm-split
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_libpropeller_XMM-SINGLE_LIBRARY   Libpropeller_xmm-single
-            PATHS ${PROPWARE_PATH}/lib)
-        # Simple libs
-        find_library(PropWare_Simple_COG_LIBRARY                Simple_cog
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_Simple_CMM_LIBRARY                Simple_cmm
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_Simple_LMM_LIBRARY                Simple_lmm
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_Simple_XMMC_LIBRARY               Simple_xmmc
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_Simple_XMM-SPLIT_LIBRARY          Simple_xmm-split
-            PATHS ${PROPWARE_PATH}/lib)
-        find_library(PropWare_Simple_XMM-SINGLE_LIBRARY         Simple_xmm-single
-            PATHS ${PROPWARE_PATH}/lib)
+
+        foreach(memoryModel cmm lmm xmmc xmm-single xmm-split)
+            string(TOUPPER ${memoryModel} UPPER_MEM_MODEL)
+
+            find_library(PropWare_PropWare_${UPPER_MEM_MODEL}_LIBRARY  PropWare_${memoryModel}
+                PATHS
+                    ${PROPWARE_PATH}/lib
+                    ${PROPWARE_PATH}/bin/PropWare/${memoryModel}
+                    ${PROPWARE_PATH}/PropWare/${memoryModel})
+            find_library(PropWare_libpropeller_${UPPER_MEM_MODEL}_LIBRARY  Libpropeller_${memoryModel}
+                PATHS
+                    ${PROPWARE_PATH}/lib
+                    ${PROPWARE_PATH}/bin/libpropeller/source/${memoryModel}
+                    ${PROPWARE_PATH}/libpropeller/source/${memoryModel})
+            find_library(PropWare_Simple_${UPPER_MEM_MODEL}_LIBRARY  Simple_${memoryModel}
+                PATHS
+                    ${PROPWARE_PATH}/lib
+                    ${PROPWARE_PATH}/bin/simple/${memoryModel}
+                    ${PROPWARE_PATH}/simple/${memoryModel})
+        endforeach()
+        find_library(PropWare_libpropeller_COG_LIBRARY  Libpropeller_cog
+            PATHS
+                ${PROPWARE_PATH}/lib
+                ${PROPWARE_PATH}/bin/libpropeller/source/cog
+                ${PROPWARE_PATH}/libpropeller/source/cog)
+        find_library(PropWare_Simple_COG_LIBRARY  Simple_cog
+            PATHS
+                ${PROPWARE_PATH}/lib
+                ${PROPWARE_PATH}/bin/simple/cog
+                ${PROPWARE_PATH}/simple/cog)
     endif ()
 
     if (NOT "${PROPWARE_PATH}" STREQUAL "PROPWARE_PATH-NOTFOUND")
