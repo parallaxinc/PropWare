@@ -15,6 +15,7 @@ set(PROPWARE_SOURCES
     ../l3g
     ../max6675
     ../mcp3000
+    ../motor/stepper
     ../pin
     ../port
     ../printcapable
