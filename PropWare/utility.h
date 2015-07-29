@@ -216,6 +216,21 @@ class Utility {
             return '\0' == string[0];
         }
 
+        /**
+         * @brief       Determine the size of an array
+         *
+         * As recommended by cplusplus.com in the FAQ:
+         * http://www.cplusplus.com/faq/sequences/arrays/sizeof-array/#cpp
+         *
+         * @param[in]   array   Statically defined array (no malloc/new allowed)
+         *
+         * @return      Number of elements in the array
+         */
+        template <typename T, size_t N>
+        static inline size_t size_of_array (const T(&array)[N]) {
+            return N;
+        }
+
     private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
