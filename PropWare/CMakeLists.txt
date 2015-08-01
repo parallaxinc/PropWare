@@ -47,6 +47,7 @@ set(PROPWARE_SOURCES
 add_subdirectory(tests)
 
 include_directories(${PROJECT_SOURCE_DIR})
+add_subdirectory(cog)
 add_subdirectory(cmm)
 add_subdirectory(lmm)
 add_subdirectory(xmmc)
