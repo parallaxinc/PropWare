@@ -25,16 +25,15 @@
 
 #include <PropWare/pin.h>
 
-void start();
+void start ();
 
 int main () {
     start();
-    const unsigned int led = 1 << 16;
-    DIRA |= led;
+    PropWare::Pin led(PropWare::Port::P16, PropWare::Port::OUT);
 
     while (1) {
-        OUTA ^= led;
-        waitcnt(CLKFREQ / 10 + CNT);
+        led.toggle();
+        waitcnt(MILLISECOND * 100 + CNT);
     }
 }
 

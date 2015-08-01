@@ -23,14 +23,13 @@
  * SOFTWARE.
  */
 
-#include "propeller.h"
+#include <PropWare/pin.h>
 
 _NAKED int main () {
-    const unsigned int led = 1 << 23;
-    DIRA |= led;
+    PropWare::Pin led(PropWare::Port::P23, PropWare::Port::OUT);
 
     while (1) {
-        OUTA ^= led;
-        waitcnt(CLKFREQ / 10 + CNT);
+        led.toggle();
+        waitcnt(MILLISECOND * 100 + CNT);
     }
 }
