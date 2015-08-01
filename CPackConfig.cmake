@@ -36,6 +36,12 @@ set(CPACK_NSIS_URL_INFO_ABOUT "http://david.zemon.name/PropWare")
 set(CPACK_NSIS_CONTACT "David Zemon <david@zemon.name>")
 set(CPACK_NSIS_INSTALL_ROOT C:)
 set(CPACK_PACKAGE_INSTALL_DIRECTORY PropWare)
+set(CPACK_PACKAGE_EXECUTABLES
+    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake" CMake
+    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI"
+    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\ctest" CTest
+    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cpack" CPack)
+set(CPACK_NSIS_MODIFY_PATH ON)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6, libxext6")
@@ -47,6 +53,8 @@ set(CPACK_COMPONENT_PROPWARE_DISPLAY_NAME  "Headers/Libraries")
 set(CPACK_COMPONENT_PROPWARE_DESCRIPTION   "Headers and static libraries for PropWare, Simple and libpropeller")
 set(CPACK_COMPONENT_CMAKE_DISPLAY_NAME     "CMake")
 set(CPACK_COMPONENT_CMAKE_DESCRIPTION      "Complete CMake installation with additional files for easy Propeller development")
+set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME  "Examples")
+set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION   "Examples projects for each of PropWare, Simple and libpropeller using the PropWare build system")
 set(CPACK_COMPONENT_WIN_CMAKE_DISPLAY_NAME ${CPACK_COMPONENT_CMAKE_DISPLAY_NAME})
 set(CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION  ${CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION})
 
