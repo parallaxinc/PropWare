@@ -1,7 +1,7 @@
 /**
- * @file        simplexuart.h
+ * @file    WS2812_Demo.cpp
  *
- * @author      David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,35 +23,28 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <PropWare/ws2812.h>
 
-#include <PropWare/uart/abstractsimplexuart.h>
+const PropWare::Pin::Mask LED_TX_PIN_MASK = PropWare::Pin::P27;
 
-namespace PropWare {
+int main () {
+    const PropWare::WS2812 led(LED_TX_PIN_MASK, PropWare::WS2812::GRB);
 
-/**
- * @brief   An easy-to-use class for simplex (transmit only) UART communication
- */
-class SimplexUART : public AbstractSimplexUART {
-    public:
-        /**
-         * @brief   No-arg constructors are helpful when avoiding dynamic
-         *          allocation
-         */
-        SimplexUART () :
-                AbstractSimplexUART() {
+    const int delay = 40 * MILLISECOND;
+    while (1) {
+        unsigned int i;
+
+        // Go bright
+        for (i = 0; i < 0x101010; i += 0x010101) {
+            led.send(i);
+            waitcnt(delay + CNT);
         }
 
-        /**
-         * @brief       Construct a UART instance capable of simplex serial
-         *              communications
-         *
-         * @param[in]   tx  Bit mask used for the TX (transmit) pin
-         */
-        SimplexUART (const Port::Mask tx) :
-                AbstractSimplexUART() {
-            this->set_tx_mask(tx);
+        // Go dim
+        for (; i; i -= 0x010101) {
+            led.send(i);
+            waitcnt(delay + CNT);
         }
-};
-
+    }
 }
+

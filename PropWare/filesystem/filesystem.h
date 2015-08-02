@@ -31,7 +31,7 @@
 namespace PropWare {
 
 class Filesystem {
-    friend class File;
+        friend class File;
 
     public:
         // TODO: Sort these out properly between FS errors and file errors
@@ -65,7 +65,7 @@ class Filesystem {
          */
         virtual PropWare::ErrorCode unmount () = 0;
 
-        const BlockStorage * get_driver () const {
+        const BlockStorage *get_driver () const {
             return this->m_driver;
         }
 
@@ -93,13 +93,14 @@ class Filesystem {
         }
 
     protected:
+
         Filesystem (const BlockStorage *driver, const Printer *logger = &pwOut)
                 : m_logger(logger),
                   m_driver(driver),
                   m_sectorSize(driver->get_sector_size()),
                   m_mounted(false),
                   m_nextFileId(0) {
-            this->m_buf.buf = NULL;
+            this->m_buf.buf  = NULL;
             this->m_buf.meta = &m_dirMeta;
         }
 
@@ -109,7 +110,7 @@ class Filesystem {
             return this->m_nextFileId++;
         }
 
-        BlockStorage::Buffer * get_buffer () {
+        BlockStorage::Buffer *get_buffer () {
             return &this->m_buf;
         }
 
@@ -118,10 +119,10 @@ class Filesystem {
         }
 
     protected:
-        const Printer       *m_logger;
-        const BlockStorage  *m_driver;
-        const uint16_t      m_sectorSize;
-        uint8_t             m_tier1sPerTier2Shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
+        const Printer      *m_logger;
+        const BlockStorage *m_driver;
+        const uint16_t     m_sectorSize;
+        uint8_t            m_tier1sPerTier2Shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
 
         bool                   m_mounted;
         BlockStorage::Buffer   m_buf;

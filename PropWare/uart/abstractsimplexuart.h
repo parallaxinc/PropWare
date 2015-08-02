@@ -191,15 +191,15 @@ class AbstractSimplexUART : public virtual UART {
             if (UART::EVEN_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                         "muxc %[_data], %[_parityMask]"
-                        : [_data] "+r" (wideData)
-                        : [_dataMask] "r" (this->m_dataMask),
-                        [_parityMask] "r" (this->m_parityMask));
+                : [_data] "+r"(wideData)
+                : [_dataMask] "r"(this->m_dataMask),
+                [_parityMask] "r"(this->m_parityMask));
             } else if (UART::ODD_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                         "muxnc %[_data], %[_parityMask]"
-                        : [_data] "+r" (wideData)
-                        : [_dataMask] "r" (this->m_dataMask),
-                        [_parityMask] "r" (this->m_parityMask));
+                : [_data] "+r"(wideData)
+                : [_dataMask] "r"(this->m_dataMask),
+                [_parityMask] "r"(this->m_parityMask));
             }
 
             // Add stop bits
@@ -208,16 +208,15 @@ class AbstractSimplexUART : public virtual UART {
             // Add start bit
             wideData <<= 1;
 
-            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles,
-                    this->m_tx.get_mask());
+            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles, this->m_tx.get_mask());
         }
 
         /**
          * @see PropWare::UART::send_array
          */
         HUBTEXT virtual void send_array (const char array[], uint32_t words) const {
-            char *arrayPtr = (char *) array;
-            uint32_t data = 0, waitCycles = 0, bits = 0;
+            char     *arrayPtr = (char *) array;
+            uint32_t data      = 0, waitCycles = 0, bits = 0;
 
             // Set pin as output
             this->m_tx.set();
@@ -255,15 +254,15 @@ class AbstractSimplexUART : public virtual UART {
                             "        jmp __LMM_RET                                                             \n\t"
                             "SendArrayEnd%=:                                                                   \n\t"
                             "        .compress default                                                         \n\t"
-                            : [_data] "+r"(data),
-                            [_waitCycles] "+r"(waitCycles),
-                            [_arrayPtr] "+r" (arrayPtr),
-                            [_bits] "+r" (bits),
-                            [_words] "+r" (words)
-                            : [_mask] "r"(this->m_tx.get_mask()),
-                            [_bitCycles] "r"(this->m_bitCycles),
-                            [_totalBits] "r" (this->m_totalBits),
-                            [_stopBitMask] "r" (this->m_stopBitMask));
+                    : [_data] "+r"(data),
+                    [_waitCycles] "+r"(waitCycles),
+                    [_arrayPtr] "+r"(arrayPtr),
+                    [_bits] "+r"(bits),
+                    [_words] "+r"(words)
+                    : [_mask] "r"(this->m_tx.get_mask()),
+                    [_bitCycles] "r"(this->m_bitCycles),
+                    [_totalBits] "r"(this->m_totalBits),
+                    [_stopBitMask] "r"(this->m_stopBitMask));
                     break;
                 case UART::ODD_PARITY:
                     __asm__ volatile (
@@ -298,17 +297,17 @@ class AbstractSimplexUART : public virtual UART {
                             "        jmp __LMM_RET                                                             \n\t"
                             "SendArrayEnd%=:                                                                   \n\t"
                             "        .compress default                                                         \n\t"
-                            : [_data] "+r"(data),
-                            [_waitCycles] "+r"(waitCycles),
-                            [_arrayPtr] "+r" (arrayPtr),
-                            [_bits] "+r" (bits),
-                            [_words] "+r" (words)
-                            : [_mask] "r"(this->m_tx.get_mask()),
-                            [_bitCycles] "r"(this->m_bitCycles),
-                            [_totalBits] "r" (this->m_totalBits),
-                            [_stopBitMask] "r" (this->m_stopBitMask),
-                            [_dataMask] "r" (this->m_dataMask),
-                            [_parityMask] "r" (this->m_parityMask));
+                    : [_data] "+r"(data),
+                    [_waitCycles] "+r"(waitCycles),
+                    [_arrayPtr] "+r"(arrayPtr),
+                    [_bits] "+r"(bits),
+                    [_words] "+r"(words)
+                    : [_mask] "r"(this->m_tx.get_mask()),
+                    [_bitCycles] "r"(this->m_bitCycles),
+                    [_totalBits] "r"(this->m_totalBits),
+                    [_stopBitMask] "r"(this->m_stopBitMask),
+                    [_dataMask] "r"(this->m_dataMask),
+                    [_parityMask] "r"(this->m_parityMask));
                     break;
                 case UART::EVEN_PARITY:
                     __asm__ volatile (
@@ -343,17 +342,17 @@ class AbstractSimplexUART : public virtual UART {
                             "        jmp __LMM_RET                                                             \n\t"
                             "SendArrayEnd%=:                                                                   \n\t"
                             "        .compress default                                                         \n\t"
-                            : [_data] "+r"(data),
-                            [_waitCycles] "+r"(waitCycles),
-                            [_arrayPtr] "+r" (arrayPtr),
-                            [_bits] "+r" (bits),
-                            [_words] "+r" (words)
-                            : [_mask] "r"(this->m_tx.get_mask()),
-                            [_bitCycles] "r"(this->m_bitCycles),
-                            [_totalBits] "r" (this->m_totalBits),
-                            [_stopBitMask] "r" (this->m_stopBitMask),
-                            [_dataMask] "r" (this->m_dataMask),
-                            [_parityMask] "r" (this->m_parityMask));
+                    : [_data] "+r"(data),
+                    [_waitCycles] "+r"(waitCycles),
+                    [_arrayPtr] "+r"(arrayPtr),
+                    [_bits] "+r"(bits),
+                    [_words] "+r"(words)
+                    : [_mask] "r"(this->m_tx.get_mask()),
+                    [_bitCycles] "r"(this->m_bitCycles),
+                    [_totalBits] "r"(this->m_totalBits),
+                    [_stopBitMask] "r"(this->m_stopBitMask),
+                    [_dataMask] "r"(this->m_dataMask),
+                    [_parityMask] "r"(this->m_parityMask));
                     break;
             }
 #endif
@@ -396,7 +395,7 @@ class AbstractSimplexUART : public virtual UART {
         void set_stop_bit_mask () {
             // Create the mask to the far right
             this->m_stopBitMask = 1;
-            for (uint8_t i = 0; i < this->m_stopBitWidth - 1; ++i)
+            for (uint8_t i      = 0; i < this->m_stopBitWidth - 1; ++i)
                 this->m_stopBitMask |= this->m_stopBitMask << 1;
 
             // Shift the mask into position (taking into account the current
@@ -456,11 +455,11 @@ class AbstractSimplexUART : public virtual UART {
                     "        jmp __LMM_RET                                                     \n\t"
                     "ShiftOutDataEnd:                                                          \n\t"
                     "        .compress default                                                 \n\t"
-                    : [_data] "+r"(data),
-                    [_waitCycles] "+r"(waitCycles),
-                    [_bits] "+r" (bits)
-                    : [_mask] "r"(txMask),
-                    [_bitCycles] "r"(bitCycles));
+            : [_data] "+r"(data),
+            [_waitCycles] "+r"(waitCycles),
+            [_bits] "+r"(bits)
+            : [_mask] "r"(txMask),
+            [_bitCycles] "r"(bitCycles));
 #endif
         }
 

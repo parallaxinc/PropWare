@@ -12,9 +12,12 @@ set(PROPWARE_SOURCES
     ../filesystem/filewriter
     ../filesystem/sd
     ../hd44780
+    ../i2c
+    ../i2cbase
     ../l3g
     ../max6675
     ../mcp3000
+    ../motor/stepper
     ../pin
     ../port
     ../printcapable
@@ -40,11 +43,13 @@ set(PROPWARE_SOURCES
     ../uart/simplexuart
     ../uart/sharedsimplexuart
     ../uart/uart
-    ../utility)
+    ../utility
+    ../ws2812)
 
 add_subdirectory(tests)
 
 include_directories(${PROJECT_SOURCE_DIR})
+add_subdirectory(cog)
 add_subdirectory(cmm)
 add_subdirectory(lmm)
 add_subdirectory(xmmc)

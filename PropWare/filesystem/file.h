@@ -38,13 +38,13 @@ class File {
             /** End of file */          EOF_ERROR,
             /** Invalid file name */    INVALID_FILENAME,
             /** Final error code */     END_ERROR = EOF_ERROR
-        } ErrorCode;
+        }    ErrorCode;
 
         typedef enum {
             /** beginning of the stream */       BEG,
             /** current position in the stream */CUR,
             /** end of the stream */             END
-        } SeekDir;
+        }    SeekDir;
 
         static const unsigned int MAX_FILENAME_LENGTH = 32;
 
@@ -52,7 +52,7 @@ class File {
         /**
          * Destructor
          */
-        virtual ~File () {}
+        virtual ~File () { }
 
         /**
          * @brief       Open the file
@@ -85,6 +85,7 @@ class File {
         }
 
     protected:
+
         /**
          * Files can only be created by their respective Filesystems
          */
@@ -204,7 +205,7 @@ class File {
 
         int32_t m_length;
         /** When the length of a file is changed, this variable will be set, otherwise cleared */
-        bool    m_mod;
+        bool m_mod;
         int32_t m_ptr;
 
         PropWare::ErrorCode m_error;

@@ -36,13 +36,13 @@ class FatFile : virtual public File {
 
         // File/directory values
         static const uint8_t FILE_ENTRY_LENGTH     = 32;  // An entry in a directory uses 32 bytes
-        static const uint8_t DELETED_FILE_MARK     = 0xE5;  // Marks that a file has been deleted here, continue to the next entry
+        static const uint8_t DELETED_FILE_MARK     = 0xE5;  // The file at this entry has been deleted
         static const uint8_t FILE_NAME_LEN         = 8;  // 8 characters in the standard file name
         static const uint8_t FILE_EXTENSION_LEN    = 3;  // 3 character file name extension
         static const uint8_t FILENAME_STR_LEN      = FILE_NAME_LEN + FILE_EXTENSION_LEN + 2;
         static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
         static const uint8_t FILE_START_CLSTR_LOW  = 0x1A;  // Starting cluster number
-        static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High word (16-bits) of the starting cluster number (FAT32 only)
+        static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High 16-bits of the starting cluster number (FAT32 only)
 
         // File attributes (definitions with trailing underscore represent character for a cleared attribute flag)
         static const uint8_t READ_ONLY         = BIT_0;
@@ -65,7 +65,7 @@ class FatFile : virtual public File {
         static const char    ARCHIVE_CHAR_     = '.';
 
     public:
-        const char * get_name () const {
+        const char *get_name () const {
             return this->m_name;
         }
 
@@ -81,6 +81,7 @@ class FatFile : virtual public File {
         }
 
     protected:
+
         FatFile (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   m_fs(&fs) {
@@ -115,7 +116,7 @@ class FatFile : virtual public File {
          */
         PropWare::ErrorCode find (const char *filename, uint16_t *fileEntryOffset) const {
             PropWare::ErrorCode err;
-            char readEntryName[FILENAME_STR_LEN];
+            char                readEntryName[FILENAME_STR_LEN];
 
             *fileEntryOffset = 0;
 
@@ -186,10 +187,10 @@ class FatFile : virtual public File {
                                                              this->m_buf->buf);
 
             // Claim this buffer as our own
-            this->m_contentMeta.id = this->m_id;
+            this->m_contentMeta.id             = this->m_id;
             this->m_contentMeta.curTier1Offset = 0;
-            this->m_contentMeta.curTier2 = this->firstTier2;
-            this->m_contentMeta.curTier2Addr = this->m_fs->compute_tier1_from_tier2(this->firstTier2);
+            this->m_contentMeta.curTier2       = this->firstTier2;
+            this->m_contentMeta.curTier2Addr   = this->m_fs->compute_tier1_from_tier2(this->firstTier2);
             check_errors(this->m_fs->get_fat_value(this->m_contentMeta.curTier2, &(this->m_contentMeta.nextTier2)));
 
             // Finally, read the first sector
@@ -314,7 +315,7 @@ class FatFile : virtual public File {
                 // Current cluster is not EOC, read the next one
                 check_errors(this->m_fs->get_fat_value(buf->meta->curTier2, &(buf->meta->nextTier2)));
             }
-            buf->meta->curTier2Addr = this->m_fs->compute_tier1_from_tier2(buf->meta->curTier2);
+            buf->meta->curTier2Addr   = this->m_fs->compute_tier1_from_tier2(buf->meta->curTier2);
             buf->meta->curTier1Offset = 0;
 
             return this->m_fs->get_driver()->read_data_block(buf->meta->curTier2Addr, buf->buf);
@@ -322,9 +323,9 @@ class FatFile : virtual public File {
 
         const bool buffer_holds_directory_start () const {
             const bool bufferIsDirectory = &this->m_fs->m_dirMeta == this->m_buf->meta;
-            const bool tier1AtStart = 0 == this->m_fs->m_dirMeta.curTier1Offset;
-            const bool tier2AtStart = this->m_fs->compute_tier1_from_tier2(this->m_fs->m_dir_firstCluster) ==
-                                      this->m_fs->m_dirMeta.curTier2Addr;
+            const bool tier1AtStart      = 0 == this->m_fs->m_dirMeta.curTier1Offset;
+            const bool tier2AtStart      = this->m_fs->compute_tier1_from_tier2(this->m_fs->m_dir_firstCluster) ==
+                    this->m_fs->m_dirMeta.curTier2Addr;
 
             return bufferIsDirectory && tier1AtStart && tier2AtStart;
         }
@@ -337,9 +338,9 @@ class FatFile : virtual public File {
                 BlockStorage::MetaData *dirMeta = &this->m_fs->m_dirMeta;
 
                 // Reset metadata to beginning of directory
-                dirMeta->curTier2Addr = this->m_fs->compute_tier1_from_tier2(this->m_fs->m_dir_firstCluster);
-                dirMeta->curTier1Offset    = 0;
-                dirMeta->curTier2 = this->m_fs->m_dir_firstCluster;
+                dirMeta->curTier2Addr   = this->m_fs->compute_tier1_from_tier2(this->m_fs->m_dir_firstCluster);
+                dirMeta->curTier1Offset = 0;
+                dirMeta->curTier2       = this->m_fs->m_dir_firstCluster;
                 check_errors(this->m_fs->get_fat_value(this->m_fsBufMeta->curTier2, &this->m_fsBufMeta->nextTier2));
 
                 this->m_buf->meta = dirMeta;
@@ -359,8 +360,8 @@ class FatFile : virtual public File {
          */
         PropWare::ErrorCode load_sector_from_offset (const uint32_t requiredSector) {
             PropWare::ErrorCode err;
-            const uint8_t tier1sPerTier2 = this->m_fs->m_tier1sPerTier2Shift;
-            unsigned int requiredCluster = requiredSector >> tier1sPerTier2;
+            const uint8_t       tier1sPerTier2  = this->m_fs->m_tier1sPerTier2Shift;
+            unsigned int        requiredCluster = requiredSector >> tier1sPerTier2;
 
             check_errors(this->m_driver->flush(this->m_buf));
 
@@ -381,7 +382,7 @@ class FatFile : virtual public File {
                 // Desired cluster is an earlier cluster than the currently
                 // loaded one - this requires starting from the beginning and
                 // working forward
-                this->m_curTier2 = 0;
+                this->m_curTier2            = 0;
                 this->m_buf->meta->curTier2 = this->firstTier2;
                 check_errors(this->m_fs->get_fat_value(this->m_buf->meta->curTier2, &(this->m_buf->meta->nextTier2)));
                 while (requiredCluster--) {
@@ -409,7 +410,7 @@ class FatFile : virtual public File {
             // Determine if the currently loaded sector is what we need
             const uint32_t requiredSector = (uint32_t) this->m_ptr >> this->m_driver->get_sector_size_shift();
 
-            bool wrongData = false;
+            bool                wrongData = false;
             if (this->m_buf->meta != &this->m_contentMeta) {
                 check_errors(this->m_driver->flush(this->m_buf));
                 this->m_buf->meta = &this->m_contentMeta;
@@ -510,17 +511,17 @@ class FatFile : virtual public File {
         }
 
     protected:
-        FatFS                  *m_fs;
+        FatFS    *m_fs;
         /** File's starting cluster */
         uint32_t firstTier2;
         /** like curTier1Offset, but does not reset upon loading a new cluster */
-        uint32_t               m_curTier1;
+        uint32_t m_curTier1;
         /** like curTier1, but for clusters */
-        uint32_t               m_curTier2;
+        uint32_t m_curTier2;
         /** Which sector of the storage device contains this file's meta-data */
-        uint32_t               m_dirTier1Addr;
+        uint32_t m_dirTier1Addr;
         /** Address within the sector of this file's entry */
-        uint16_t               fileEntryOffset;
-    };
+        uint16_t fileEntryOffset;
+};
 
 }

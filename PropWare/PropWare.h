@@ -91,7 +91,7 @@ typedef enum {
     BIT_29 = 0x20000000,
     BIT_30 = 0x40000000,
     BIT_31 = 0x80000000
-} Bit;
+}               Bit;
 
 typedef enum {
     NIBBLE_0 = 0xf,
@@ -102,19 +102,19 @@ typedef enum {
     NIBBLE_5 = 0xf00000,
     NIBBLE_6 = 0xf000000,
     NIBBLE_7 = 0xf0000000
-} Nibble;
+}               Nibble;
 
 typedef enum {
     BYTE_0 = 0xff,
     BYTE_1 = 0xff00,
     BYTE_2 = 0xff0000,
     BYTE_3 = 0xff000000
-} Byte;
+}               Byte;
 
 typedef enum {
     WORD_0 = 0xffff,
     WORD_1 = 0xffff0000
-} Word;
+}               Word;
 
 }
 

@@ -44,7 +44,7 @@ class UART : public virtual PrintCapable {
             /** No parity */  NO_PARITY,
             /** Even parity */EVEN_PARITY,
             /** Odd parity */ ODD_PARITY
-        } Parity;
+        }                    Parity;
 
         /** Number of allocated error codes for UART */
 #define UART_ERRORS_LIMIT            16
@@ -63,7 +63,7 @@ class UART : public virtual PrintCapable {
             /** The requested stop bit width is not between 1 and 14 (inclusive) */INVALID_STOP_BIT_WIDTH,
             /** Null pointer was passed as an argument */                          NULL_POINTER,
             /** Last error code used by PropWare::UART */                          END_ERROR     = UART::NULL_POINTER
-        } ErrorCode;
+        }                    ErrorCode;
 
     public:
         static const uint8_t      DEFAULT_DATA_WIDTH     = 8;

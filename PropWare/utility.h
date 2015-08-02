@@ -188,13 +188,13 @@ class Utility {
          * @return      Result of log function
          */
         static int rom_log (int x) {
-            int exp;
+            int            exp;
             unsigned short *ptr;
 
             if (!x) return 0;
 
             for (exp = 31; x > 0; exp--) x <<= 1;
-            ptr = (unsigned short *)((((unsigned int)x) >> 19) + 0xb000);
+            ptr = (unsigned short *) ((((unsigned int) x) >> 19) + 0xb000);
             return (exp << 16) | *ptr;
         }
 
@@ -216,12 +216,27 @@ class Utility {
             return '\0' == string[0];
         }
 
-private:
+        /**
+         * @brief       Determine the size of an array
+         *
+         * As recommended by cplusplus.com in the FAQ:
+         * http://www.cplusplus.com/faq/sequences/arrays/sizeof-array/#cpp
+         *
+         * @param[in]   array   Statically defined array (no malloc/new allowed)
+         *
+         * @return      Number of elements in the array
+         */
+        template <typename T, size_t N>
+        static inline size_t size_of_array (const T(&array)[N]) {
+            return N;
+        }
+
+    private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
          *          `uint8_t bits = PropWare::Utility::count_bits(0x03);`
          */
-        Utility() {}
+        Utility () { }
 };
 
 }

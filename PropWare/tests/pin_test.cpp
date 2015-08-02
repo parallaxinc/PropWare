@@ -35,7 +35,7 @@ static const uint8_t             TEST_PIN_NUM = 12;
 static const PropWare::Pin::Mask TEST_MASK    = PropWare::Pin::P12;
 static const PropWare::Pin::Mask CHECK_MASK   = PropWare::Pin::P13;
 
-void setUp(const PropWare::Pin::Dir dir = PropWare::Pin::OUT) {
+void setUp (const PropWare::Pin::Dir dir = PropWare::Pin::OUT) {
     testable = new PropWare::Pin(TEST_MASK, dir);
 
     if (PropWare::Pin::OUT == dir)

@@ -38,7 +38,7 @@ extern int _cfg_sdspi_config2;
 
 namespace PropWare {
 
-class SD: public BlockStorage {
+class SD : public BlockStorage {
     public:
         static const uint16_t SECTOR_SIZE       = 512;
         static const uint8_t  SECTOR_SIZE_SHIFT = 9;
@@ -60,7 +60,7 @@ class SD: public BlockStorage {
             /** SD Error 5 */         INVALID_DAT_START_ID,
             /** SD Error 6 */         CMD8_FAILURE,
             /** Last SD error code */ END_ERROR   = CMD8_FAILURE
-        } ErrorCode;
+        }                     ErrorCode;
 
     public:
         SD (SPI *spi = SPI::get_instance()) {
@@ -146,25 +146,25 @@ class SD: public BlockStorage {
 
             switch (err) {
                 case INVALID_CMD:
-                    printer <<  "SD Error " << relativeError << ": Invalid command\n";
+                    printer << "SD Error " << relativeError << ": Invalid command\n";
                     break;
                 case READ_TIMEOUT:
-                    printer <<  "SD Error " << relativeError << ": Timed out during read\n";
+                    printer << "SD Error " << relativeError << ": Timed out during read\n";
                     break;
                 case INVALID_NUM_BYTES:
-                    printer <<  "SD Error " << relativeError << ": Invalid number of bytes\n";
+                    printer << "SD Error " << relativeError << ": Invalid number of bytes\n";
                     break;
                 case INVALID_RESPONSE:
-                    printer <<  "SD Error " << relativeError << ": Invalid first-byte response\n";
+                    printer << "SD Error " << relativeError << ": Invalid first-byte response\n";
                     printer << "\tReceived: " << this->m_firstByteResponse << '\n';
                     this->first_byte_expansion(printer);
                     break;
                 case INVALID_INIT:
-                    printer <<  "SD Error " << relativeError << ": Invalid response during initialization\n";
+                    printer << "SD Error " << relativeError << ": Invalid response during initialization\n";
                     printer << "\tResponse: " << this->m_firstByteResponse << '\n';
                     break;
                 case INVALID_DAT_START_ID:
-                    printer <<  "SD Error " << relativeError << ": Invalid data-start ID\n";
+                    printer << "SD Error " << relativeError << ": Invalid data-start ID\n";
                     printer << "\tReceived: " << this->m_firstByteResponse << '\n';
                     break;
                 default:
@@ -238,17 +238,18 @@ class SD: public BlockStorage {
 
         void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const {
             buf[offset + 1] = value >> 8;
-            buf[offset] = value;
+            buf[offset]     = value;
         }
 
         void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const {
-            buf[offset + 3] = value >> 24;
-            buf[offset + 2] = value >> 16;
-            buf[offset + 1] = value >> 8;
-            buf[offset] = value;
+            buf[offset + 3] = (uint8_t) (value >> 24);
+            buf[offset + 2] = (uint8_t) (value >> 16);
+            buf[offset + 1] = (uint8_t) (value >> 8);
+            buf[offset]     = (uint8_t) value;
         }
 
     private:
+
         /***********************
          *** Private Methods ***
          ***********************/
@@ -259,7 +260,7 @@ class SD: public BlockStorage {
 
             // Attempt initialization no more than 10 times
             stageCleared = false;
-            for (i = 0; i < 10 && !stageCleared; ++i) {
+            for (i       = 0; i < 10 && !stageCleared; ++i) {
                 // Initialization loop (reset SD card)
                 for (j = 0; j < 10 && !stageCleared; ++j) {
                     check_errors(this->power_up());
@@ -596,7 +597,7 @@ class SD: public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion(const Printer &printer) const {
+        void first_byte_expansion (const Printer &printer) const {
             if (BIT_0 & this->m_firstByteResponse)
                 printer.puts("\t0: Idle\n");
             if (BIT_1 & this->m_firstByteResponse)
@@ -612,14 +613,14 @@ class SD: public BlockStorage {
             if (BIT_6 & this->m_firstByteResponse)
                 printer.puts("\t6: Parameter error\n");
             if (BIT_7 & this->m_firstByteResponse)
-                printer.puts("\t7: Something is really screwed up. This "
-                              "should always be 0.\n");
+                printer.puts("\t7: Something is really screwed up. This should always be 0.\n");
         }
 
     private:
+
         static void unpack_sd_pins (uint32_t pins[]) {
             __asm__ volatile (
-                    "       brw #skipVars          \n\t"
+            "       brw #skipVars          \n\t"
                     "       .compress off          \n"
                     "__cfg_sdspi_config1           \n\t"
                     "       nop                    \n"
@@ -657,7 +658,7 @@ class SD: public BlockStorage {
         static const uint8_t CMD_RD_BLOCK       = 0x40 + 17;  // Request data block
         static const uint8_t CMD_WR_BLOCK       = 0x40 + 24;  // Write data block
         static const uint8_t CMD_WR_OP          = 0x40 + 41;  // Send operating conditions for SDC
-        static const uint8_t CMD_APP            = 0x40 + 55;  // Inform card that following instruction is application specific
+        static const uint8_t CMD_APP            = 0x40 + 55;  // Inform card that following instruction is app specific
         static const uint8_t CMD_READ_OCR       = 0x40 + 58;  // Request "Operating Conditions Register" contents
 
         // SD Arguments

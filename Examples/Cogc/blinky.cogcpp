@@ -1,7 +1,7 @@
 /**
- * @file        simplexuart.h
+ * @file    blinky.cogc
  *
- * @author      David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,35 +23,13 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <PropWare/pin.h>
 
-#include <PropWare/uart/abstractsimplexuart.h>
+_NAKED int main () {
+    PropWare::Pin led(PropWare::Port::P23, PropWare::Port::OUT);
 
-namespace PropWare {
-
-/**
- * @brief   An easy-to-use class for simplex (transmit only) UART communication
- */
-class SimplexUART : public AbstractSimplexUART {
-    public:
-        /**
-         * @brief   No-arg constructors are helpful when avoiding dynamic
-         *          allocation
-         */
-        SimplexUART () :
-                AbstractSimplexUART() {
-        }
-
-        /**
-         * @brief       Construct a UART instance capable of simplex serial
-         *              communications
-         *
-         * @param[in]   tx  Bit mask used for the TX (transmit) pin
-         */
-        SimplexUART (const Port::Mask tx) :
-                AbstractSimplexUART() {
-            this->set_tx_mask(tx);
-        }
-};
-
+    while (1) {
+        led.toggle();
+        waitcnt(MILLISECOND * 100 + CNT);
+    }
 }

@@ -41,7 +41,7 @@ class MAX6675 {
          * @param[in]   *spi    Constructed SPI module
          */
         MAX6675 (SPI *spi) {
-            this->m_spi = spi;
+            this->m_spi           = spi;
             this->m_alwaysSetMode = 0;
         }
 
@@ -135,7 +135,7 @@ class MAX6675 {
          */
         PropWare::ErrorCode read_float (float *dat) {
             PropWare::ErrorCode err;
-            uint16_t temp;
+            uint16_t            temp;
 
             check_errors(this->read(&temp));
 

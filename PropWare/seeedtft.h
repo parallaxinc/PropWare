@@ -75,10 +75,10 @@ class SeeedTFT {
         };
 
         virtual void start (const PropWare::Pin::Mask lsbDataPin,
-                const PropWare::Port::Mask csMask,
-                const PropWare::Port::Mask rdMask,
-                const PropWare::Port::Mask wrMask,
-                const PropWare::Port::Mask rsMask) {
+                            const PropWare::Port::Mask csMask,
+                            const PropWare::Port::Mask rdMask,
+                            const PropWare::Port::Mask wrMask,
+                            const PropWare::Port::Mask rsMask) {
             this->m_cs.set_mask(csMask);
             this->m_rd.set_mask(rdMask);
             this->m_wr.set_mask(wrMask);
@@ -96,17 +96,17 @@ class SeeedTFT {
             waitcnt(100 * MILLISECOND + CNT);
 
             this->sendCommandSeq((uint8_t *) this->init_seq_cmd1,
-                    (uint16_t *) this->init_seq_dat1);
+                                 (uint16_t *) this->init_seq_dat1);
 
             waitcnt(100 * MILLISECOND + CNT);
 
             this->sendCommandSeq((uint8_t *) this->init_seq_cmd2,
-                    (uint16_t *) this->init_seq_dat2);
+                                 (uint16_t *) this->init_seq_dat2);
 
             waitcnt(100 * MILLISECOND + CNT);
 
             this->sendCommandSeq((uint8_t *) this->init_seq_cmd3,
-                    (uint16_t *) this->init_seq_dat3);
+                                 (uint16_t *) this->init_seq_dat3);
 
             waitcnt(100 * MILLISECOND + CNT);
 
@@ -123,9 +123,9 @@ class SeeedTFT {
         }
 
         virtual void paintScreenBlack () const {
-            const uint32_t totalPixels = PropWare::SeeedTFT::MAX_X *
+            const uint32_t    totalPixels = PropWare::SeeedTFT::MAX_X *
                     PropWare::SeeedTFT::MAX_Y;
-            for (unsigned int pixel = 0; pixel < totalPixels; ++pixel)
+            for (unsigned int pixel       = 0; pixel < totalPixels; ++pixel)
                 this->sendData(PropWare::SeeedTFT::BLACK);
         }
 
@@ -156,7 +156,7 @@ class SeeedTFT {
         }
 
         virtual void drawVerticalLine (const uint16_t posX, const uint16_t posY,
-                uint16_t length, const uint16_t color) const {
+                                       uint16_t length, const uint16_t color) const {
             this->setXY(posX, posY);
             this->setOrientation(PropWare::SeeedTFT::VERTICAL);
             if (length + posY > MAX_Y) {
@@ -169,19 +169,19 @@ class SeeedTFT {
         }
 
         virtual void drawHorizontalLine (const uint16_t posX,
-                const uint16_t posY, uint16_t length,
-                const uint16_t color) const {
+                                         const uint16_t posY, uint16_t length,
+                                         const uint16_t color) const {
             this->setXY(posX, posY);
             this->setOrientation(PropWare::SeeedTFT::HORIZONTAL);
             if (length + posX > MAX_X)
-                length = MAX_X - posX;
+                length      = MAX_X - posX;
             for (uint16_t i = 0; i < length; i++)
                 sendData(color);
         }
 
         virtual void drawRectangle (const uint16_t posX, const uint16_t posY,
-                const uint16_t length, const uint16_t width,
-                const uint16_t color) const {
+                                    const uint16_t length, const uint16_t width,
+                                    const uint16_t color) const {
             this->drawHorizontalLine(posX, posY, length, color);
             this->drawHorizontalLine(posX, posY + width, length, color);
 
@@ -190,7 +190,7 @@ class SeeedTFT {
         }
 
         void fillRectangle (uint16_t posX, uint16_t posY, uint16_t length,
-                uint16_t width, uint16_t color) const {
+                            uint16_t width, uint16_t color) const {
             for (unsigned int i = 0; i < width; i++)
                 switch (this->m_displayDirection) {
                     case LEFT_TO_RIGHT:
@@ -211,7 +211,7 @@ class SeeedTFT {
         }
 
         void drawChar (char ascii, uint16_t poX, uint16_t poY, uint16_t size,
-                const uint16_t fgColor) const {
+                       const uint16_t fgColor) const {
 
             setXY(poX, poY);
 
@@ -222,29 +222,29 @@ class SeeedTFT {
                 ascii -= 0x20;
 
             for (uint8_t i = 0; i < 8; i++) {
-                uint8_t temp = PropWare::SeeedTFT::SIMPLE_FONT[(uint8_t) ascii][i];
-                for (uint8_t j = 0; j < 8; j++) {
+                uint8_t      temp = PropWare::SeeedTFT::SIMPLE_FONT[(uint8_t) ascii][i];
+                for (uint8_t j    = 0; j < 8; j++) {
                     if ((temp >> j) & PropWare::BIT_0)
                         switch (this->m_displayDirection) {
                             case LEFT_TO_RIGHT:
                                 this->fillRectangle(poX + i * size,
-                                        poY + j * size, size, size,
-                                        fgColor);
+                                                    poY + j * size, size, size,
+                                                    fgColor);
                                 break;
                             case DOWN_TO_UP:
                                 this->fillRectangle(poX + j * size,
-                                        poY - i * size, size, size,
-                                        fgColor);
+                                                    poY - i * size, size, size,
+                                                    fgColor);
                                 break;
                             case RIGHT_TO_LEFT:
                                 this->fillRectangle(poX - i * size,
-                                        poY - j * size, size, size,
-                                        fgColor);
+                                                    poY - j * size, size, size,
+                                                    fgColor);
                                 break;
                             case UP_TO_DOWN:
                                 this->fillRectangle(poX - j * size,
-                                        poY + i * size, size, size,
-                                        fgColor);
+                                                    poY + i * size, size, size,
+                                                    fgColor);
                                 break;
                             default:
                                 break;
@@ -254,7 +254,7 @@ class SeeedTFT {
         }
 
         void drawString (char *string, uint16_t posX, uint16_t posY,
-                uint16_t size, const uint16_t fgColor) const {
+                         uint16_t size, const uint16_t fgColor) const {
             while (*string) {
                 for (uint8_t i = 0; i < 8; i++)
                     this->drawChar(*string, posX, posY, size, fgColor);

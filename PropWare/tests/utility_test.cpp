@@ -92,7 +92,7 @@ TEST(CountBits) {
 }
 
 TEST(ToLower) {
-    char actual[] = "HelWorl da12 dad%";
+    char actual[]   = "HelWorl da12 dad%";
     char expected[] = "helworl da12 dad%";
 
     Utility::to_lower(actual);
@@ -111,7 +111,7 @@ TEST(ToLower_DoesNotFailOnEmpty) {
 }
 
 TEST(ToUpper) {
-    char actual[] = "HelWorl da12 dad%";
+    char actual[]   = "HelWorl da12 dad%";
     char expected[] = "HELWORL DA12 DAD%";
 
     Utility::to_upper(actual);

@@ -88,10 +88,10 @@ class SD {
         /** Number of characters printed to the terminal before a line break */
         static const uint8_t LINE_SIZE = 16;
 
-        static const uint16_t SECTOR_SIZE = 512;
-        static const uint8_t SECTOR_SIZE_SHIFT = 9;
+        static const uint16_t SECTOR_SIZE       = 512;
+        static const uint8_t  SECTOR_SIZE_SHIFT = 9;
         /** Default frequency to run the SPI module */
-        static const uint32_t DEFAULT_SPI_FREQ = 900000;
+        static const uint32_t DEFAULT_SPI_FREQ  = 900000;
 
         // Signal that the contents of a buffer are a directory
         static const int8_t FOLDER_ID = -1;
@@ -107,33 +107,33 @@ class SD {
             /**
              * Read only; Read pointer starts at first character
              */
-            FILE_MODE_R,
+                    FILE_MODE_R,
 #ifdef SD_OPTION_FILE_WRITE
             /**
              * Read+ (read + write); Read and write pointers both start at first
              * character
              */
-            FILE_MODE_R_PLUS,
+                    FILE_MODE_R_PLUS,
             /**
              * Append (write only); Write pointer starts at last character + 1
              */
-            FILE_MODE_A,
+                    FILE_MODE_A,
             /**
              * Append+ (read + write); Write pointer starts at last character
              * + 1, read pointer starts at first character
              */
-            FILE_MODE_A_PLUS,
+                    FILE_MODE_A_PLUS,
 #endif
-        } FileMode;
+        }                   FileMode;
 
         /**
          * File Positions
          */
         typedef enum {
-            /** Beginning of the file */SEEK_SET,
+            /** Beginning of the file */       SEEK_SET,
             /** Current position in the file */SEEK_CUR,
-            /** End of the file */SEEK_END
-        } FilePos;
+            /** End of the file */             SEEK_END
+        }                   FilePos;
 
         /**
          * Error codes - preceded by SPI
@@ -160,7 +160,7 @@ class SD {
             /** SD Error 20 */        CMD8_FAILURE,
             /** End system errors */  END_SYS_ERROR       = SD::CMD8_FAILURE,
             /** Last SD error code */ END_ERROR           = SD::END_SYS_ERROR
-        } ErrorCode;
+        }                   ErrorCode;
 
         /**
          * SD file object
@@ -171,35 +171,35 @@ class SD {
          */
         class File {
             public:
-                SD::Buffer *buf;
+                SD::Buffer   *buf;
                 /** determine if the buffer is owned by this file */
-                uint8_t id;  //
-                uint32_t wPtr;
-                uint32_t rPtr;
+                uint8_t      id;  //
+                uint32_t     wPtr;
+                uint32_t     rPtr;
                 SD::FileMode mode;
-                uint32_t length;
+                uint32_t     length;
                 /** Maximum number of sectors currently allocated to a file */
-                uint32_t maxSectors;
+                uint32_t     maxSectors;
                 /**
                  * When the length of a file is changed, this variable will be
                  * set, otherwise cleared
                  */
-                bool mod;
+                bool         mod;
                 /** File's starting allocation unit */
-                uint32_t firstAllocUnit;
+                uint32_t     firstAllocUnit;
                 /**
                  * like curSectorOffset, but does not reset upon loading a new
                  * cluster
                  */
-                uint32_t curSector;
+                uint32_t     curSector;
                 /** like curSector, but for allocation units */
-                uint32_t curCluster;
+                uint32_t     curCluster;
                 /**
                  * Which sector of the SD card contains this file's meta-data
                  */
-                uint32_t dirSectorAddr;
+                uint32_t     dirSectorAddr;
                 /** Address within the sector of this file's entry */
-                uint16_t fileEntryOffset;
+                uint16_t     fileEntryOffset;
         };
 
     public:
@@ -207,8 +207,8 @@ class SD {
          * @brief       Construct an SD object; Set two simple member variables
          */
         SD (SPI *spi) {
-            this->m_spi = spi;
-            this->m_fileID = 0;
+            this->m_spi     = spi;
+            this->m_fileID  = 0;
             this->m_mounted = false;
 #ifdef SD_OPTION_FILE_WRITE
             this->m_fatMod = false;
@@ -221,7 +221,7 @@ class SD {
          *
          * @return  Returns the system SD::Buffer
          */
-        SD::Buffer* get_global_buffer () {
+        SD::Buffer *get_global_buffer () {
             return &(this->m_buf);
         }
 
@@ -244,11 +244,11 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode start (const Port::Mask mosi,
-                const Port::Mask miso,
-                const Port::Mask sclk, const Port::Mask cs,
-                const int32_t freq = SD::DEFAULT_SPI_FREQ) {
+                                   const Port::Mask miso,
+                                   const Port::Mask sclk, const Port::Mask cs,
+                                   const int32_t freq = SD::DEFAULT_SPI_FREQ) {
             PropWare::ErrorCode err;
-            uint8_t response[16];
+            uint8_t             response[16];
 
             // Set CS for output and initialize high
             this->m_cs.set_mask(cs);
@@ -257,7 +257,7 @@ class SD {
 
             // Start SPI module
             if ((err = this->m_spi->start(mosi, miso, sclk, SD::SPI_INIT_FREQ,
-                    SD::SPI_MODE, SD::SPI_BITMODE)))
+                                          SD::SPI_MODE, SD::SPI_BITMODE)))
                 return err;
 
             // Try and get the card up and responding to commands first
@@ -302,10 +302,9 @@ class SD {
                 return 0;
 
             // If the directory buffer was modified, write it
-            if (this->m_buf.mod)
-                check_errors(this->write_data_block(
-                        this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset,
-                        this->m_buf.buf));
+            if (this->m_buf.mod) check_errors(this->write_data_block(
+                    this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset,
+                    this->m_buf.buf));
 
             // If the FAT sector was modified, write it
             if (this->m_fatMod) {
@@ -335,7 +334,7 @@ class SD {
          */
         PropWare::ErrorCode chdir (const char *d) {
             PropWare::ErrorCode err;
-            uint16_t fileEntryOffset = 0;
+            uint16_t            fileEntryOffset = 0;
 
             this->m_buf.id = SD::FOLDER_ID;
 
@@ -359,9 +358,10 @@ class SD {
 #endif
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("%s found at offset 0x%04X from address 0x%08X" CRLF,
-                         d, fileEntryOffset,
-                         this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset);
+            pwOut.printf("%s found at offset 0x%04X from address 0x%08X"
+            CRLF,
+                    d, fileEntryOffset,
+                    this->m_buf.curClusterStartAddr + this->m_buf.curSectorOffset);
 #endif
 
             // File entry was found successfully, load it into the buffer and
@@ -381,22 +381,26 @@ class SD {
                 this->m_buf.curAllocUnit &= 0x0FFFFFFF;
             }
             this->get_fat_value(this->m_buf.curAllocUnit,
-                    &(this->m_buf.nextAllocUnit));
+                                &(this->m_buf.nextAllocUnit));
             if (0 == this->m_buf.curAllocUnit) {
-                this->m_buf.curAllocUnit = (uint32_t) -1;
+                this->m_buf.curAllocUnit   = (uint32_t) -1;
                 this->m_dir_firstAllocUnit = this->m_rootAllocUnit;
             } else
                 this->m_dir_firstAllocUnit = this->m_buf.curAllocUnit;
-            this->m_buf.curSectorOffset = 0;
+            this->m_buf.curSectorOffset    = 0;
             this->read_data_block(this->m_buf.curClusterStartAddr,
-                    this->m_buf.buf);
+                                  this->m_buf.buf);
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Opening directory from..." CRLF);
-            pwOut.printf("\tAllocation unit 0x%08X" CRLF, this->m_buf.curAllocUnit);
-            pwOut.printf("\tCluster starting address 0x%08X" CRLF,
+            pwOut.printf("Opening directory from..."
+            CRLF);
+            pwOut.printf("\tAllocation unit 0x%08X"
+            CRLF, this->m_buf.curAllocUnit);
+            pwOut.printf("\tCluster starting address 0x%08X"
+            CRLF,
                     this->m_buf.curClusterStartAddr);
-            pwOut.printf("\tSector offset 0x%04x" CRLF, this->m_buf.curSectorOffset);
+            pwOut.printf("\tSector offset 0x%04x"
+            CRLF, this->m_buf.curSectorOffset);
 #ifdef SD_OPTION_VERBOSE_BLOCKS
             pwOut.printf("And the first directory sector looks like...." CRLF);
             this->print_hex_block(this->m_buf.buf, SD::SECTOR_SIZE);
@@ -438,18 +442,19 @@ class SD {
          *              SD::
          */
         PropWare::ErrorCode fopen (const char *name, SD::File *f,
-                const SD::FileMode mode) {
+                                   const SD::FileMode mode) {
             PropWare::ErrorCode err;
-            uint16_t fileEntryOffset = 0;
+            uint16_t            fileEntryOffset = 0;
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Attempting to open %s" CRLF, name);
+            pwOut.printf("Attempting to open %s"
+            CRLF, name);
 #endif
 
             if (NULL == f->buf)
                 return SD::FILE_WITHOUT_BUFFER;
 
-            f->id = this->m_fileID++;
+            f->id   = this->m_fileID++;
             f->rPtr = 0;
             f->wPtr = 0;
 #ifndef SD_OPTION_FILE_WRITE
@@ -457,7 +462,7 @@ class SD {
             return SD::INVALID_FILE_MODE;
 #endif
             f->mode = mode;
-            f->mod = false;
+            f->mod  = false;
 
             // Attempt to find the file
             if ((err = this->find(name, &fileEntryOffset))) {
@@ -467,12 +472,13 @@ class SD {
                     // And return a FILE_NOT_FOUND error if using read only mode
                     if (SD::FILE_MODE_R == mode)
                         return SD::FILENAME_NOT_FOUND;
-                    // Or create the file for any other mode
+                        // Or create the file for any other mode
                     else {
                         // File wasn't found and the cluster is full; add another
                         // to the directory
 #ifdef SD_OPTION_VERBOSE
-                        pwOut.printf("Directory cluster was full, adding another..." CRLF);
+                        pwOut.printf("Directory cluster was full, adding another..."
+                        CRLF);
 #endif
                         check_errors(this->extend_fat(&this->m_buf));
                         check_errors(this->load_next_sector(&this->m_buf));
@@ -482,7 +488,8 @@ class SD {
                     // File wasn't found, but there is still room in this
                     // cluster (or a new cluster was just added)
 #ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("Creating a new directory entry..." CRLF);
+                    pwOut.printf("Creating a new directory entry..."
+                    CRLF);
 #endif
                     check_errors(this->create_file(name, &fileEntryOffset));
                 } else
@@ -500,10 +507,10 @@ class SD {
 
             // Passed the file-not-directory test, load it into the buffer and
             // update status variables
-            f->buf->id = f->id;
-            f->curSector = 0;
+            f->buf->id                  = f->id;
+            f->curSector                = 0;
             if (SD::FAT_16 == this->m_filesystem)
-                f->buf->curAllocUnit = this->read_rev_dat16(
+                f->buf->curAllocUnit    = this->read_rev_dat16(
                         &(this->m_buf.buf[fileEntryOffset
                                 + SD::FILE_START_CLSTR_LOW]));
             else {
@@ -517,23 +524,23 @@ class SD {
                 // Clear the highest 4 bits - they are always reserved
                 f->buf->curAllocUnit &= 0x0FFFFFFF;
             }
-            f->firstAllocUnit = f->buf->curAllocUnit;
-            f->curCluster = 0;
+            f->firstAllocUnit           = f->buf->curAllocUnit;
+            f->curCluster               = 0;
             f->buf->curClusterStartAddr = this->find_sector_from_alloc(
                     f->buf->curAllocUnit);
-            f->dirSectorAddr = this->m_buf.curClusterStartAddr
+            f->dirSectorAddr            = this->m_buf.curClusterStartAddr
                     + this->m_buf.curSectorOffset;
-            f->fileEntryOffset = fileEntryOffset;
+            f->fileEntryOffset          = fileEntryOffset;
             check_errors(
                     this->get_fat_value(f->buf->curAllocUnit,
-                            &(f->buf->nextAllocUnit)));
+                                        &(f->buf->nextAllocUnit)));
             f->buf->curSectorOffset = 0;
-            f->length = this->read_rev_dat32(
+            f->length               = this->read_rev_dat32(
                     &(this->m_buf.buf[fileEntryOffset + SD::FILE_LEN_OFFSET]));
 #ifdef SD_OPTION_FILE_WRITE
             // Determine the number of sectors currently allocated to this file;
             // useful in the case that the file needs to be extended
-            f->maxSectors = f->length >> BlockStorage::SECTOR_SIZE_SHIFT;
+            f->maxSectors     = f->length >> BlockStorage::SECTOR_SIZE_SHIFT;
             if (!(f->maxSectors))
                 f->maxSectors = (uint32_t) (1 << this->m_sectorsPerCluster_shift);
             while (f->maxSectors % (1 << this->m_sectorsPerCluster_shift))
@@ -542,17 +549,24 @@ class SD {
 #endif
             check_errors(
                     this->read_data_block(f->buf->curClusterStartAddr,
-                            f->buf->buf));
+                                          f->buf->buf));
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Opening file from..." CRLF);
-            pwOut.printf("\tAllocation unit 0x%08X" CRLF, f->buf->curAllocUnit);
-            pwOut.printf("\tNext allocation unit 0x%08X" CRLF, f->buf->nextAllocUnit);
-            pwOut.printf("\tCluster starting address 0x%08X" CRLF,
+            pwOut.printf("Opening file from..."
+            CRLF);
+            pwOut.printf("\tAllocation unit 0x%08X"
+            CRLF, f->buf->curAllocUnit);
+            pwOut.printf("\tNext allocation unit 0x%08X"
+            CRLF, f->buf->nextAllocUnit);
+            pwOut.printf("\tCluster starting address 0x%08X"
+            CRLF,
                     f->buf->curClusterStartAddr);
-            pwOut.printf("\tSector offset 0x%04x" CRLF, f->buf->curSectorOffset);
-            pwOut.printf("\tFile length 0x%08X" CRLF, f->length);
-            pwOut.printf("\tMax sectors 0x%08X" CRLF, f->maxSectors);
+            pwOut.printf("\tSector offset 0x%04x"
+            CRLF, f->buf->curSectorOffset);
+            pwOut.printf("\tFile length 0x%08X"
+            CRLF, f->length);
+            pwOut.printf("\tMax sectors 0x%08X"
+            CRLF, f->maxSectors);
 #ifdef SD_OPTION_VERBOSE_BLOCKS
             pwOut.printf("And the first file sector looks like...." CRLF);
             this->print_hex_block(f->buf->buf, SD::SECTOR_SIZE);
@@ -564,6 +578,7 @@ class SD {
         }
 
 #ifdef SD_OPTION_FILE_WRITE
+
         /**
          * @brief       Close a given file
          *
@@ -575,7 +590,8 @@ class SD {
             PropWare::ErrorCode err;
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Closing file..." CRLF);
+            pwOut.printf("Closing file..."
+            CRLF);
 #endif
             // If the currently loaded sector has been modified, save the
             // changes
@@ -587,11 +603,14 @@ class SD {
                                 f->buf->buf));;
                 f->buf->mod = false;
 #ifdef SD_OPTION_VERBOSE
-                pwOut.printf("Modified sector in file has been saved..." CRLF);
-                pwOut.printf("\tDestination address: 0x%08X / %u" CRLF,
+                pwOut.printf("Modified sector in file has been saved..."
+                CRLF);
+                pwOut.printf("\tDestination address: 0x%08X / %u"
+                CRLF,
                         f->buf->curClusterStartAddr + f->buf->curSectorOffset,
                         f->buf->curClusterStartAddr + f->buf->curSectorOffset);
-                pwOut.printf("\tFile first sector address: 0x%08X / %u" CRLF,
+                pwOut.printf("\tFile first sector address: 0x%08X / %u"
+                CRLF,
                         this->find_sector_from_alloc(f->firstAllocUnit),
                         this->find_sector_from_alloc(f->firstAllocUnit));
 #endif
@@ -599,13 +618,16 @@ class SD {
 
             // If we modified the length of the file...
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Closing file and \"f->mod\" value is %u" CRLF, f->mod);
-            pwOut.printf("File length is: 0x%08X / %u" CRLF, f->length, f->length);
+            pwOut.printf("Closing file and \"f->mod\" value is %u"
+            CRLF, f->mod);
+            pwOut.printf("File length is: 0x%08X / %u"
+            CRLF, f->length, f->length);
 #endif
             if (f->mod) {
 #ifdef SD_OPTION_VERBOSE
                 pwOut.printf("File length has been modified - write it to the "
-                        "directory" CRLF);
+                                     "directory"
+                CRLF);
 #endif
                 // Then check if the directory sector is still loaded...
                 if ((this->m_buf.curClusterStartAddr
@@ -614,14 +636,14 @@ class SD {
                     if (this->m_buf.mod)
                         // And if it's been modified since the last read, save
                         // it...
-                        check_errors(
-                                this->write_data_block(
-                                        this->m_buf.curClusterStartAddr
-                                                + this->m_buf.curSectorOffset,
-                                        this->m_buf.buf));
+                    check_errors(
+                            this->write_data_block(
+                                    this->m_buf.curClusterStartAddr
+                                            + this->m_buf.curSectorOffset,
+                                    this->m_buf.buf));
                     check_errors(
                             this->read_data_block(f->dirSectorAddr,
-                                    this->m_buf.buf));
+                                                  this->m_buf.buf));
                 }
                 // Finally, edit the length of the file
                 this->write_rev_dat32(
@@ -649,23 +671,25 @@ class SD {
         PropWare::ErrorCode fputc (const char c, SD::File *f) {
             PropWare::ErrorCode err;
             // Determines byte-offset within a sector
-            uint16_t sectorPtr = (uint16_t) (f->wPtr % SD::SECTOR_SIZE);
+            uint16_t            sectorPtr    = (uint16_t) (f->wPtr % SD::SECTOR_SIZE);
             // Determine the needed file sector
-            uint32_t sectorOffset = (f->wPtr >> BlockStorage::SECTOR_SIZE_SHIFT);
+            uint32_t            sectorOffset = (f->wPtr >> BlockStorage::SECTOR_SIZE_SHIFT);
 
             // Determine if the correct sector is loaded
-            if (f->buf->id != f->id)
-                check_errors(this->reload_buf(f));
+            if (f->buf->id != f->id) check_errors(this->reload_buf(f));
 
             // Even the the buffer was just reloaded, this snippet needs to be
             // called in order to extend the FAT if needed
             if (sectorOffset != f->curSector) {
                 // Incorrect sector loaded
 #ifdef SD_OPTION_VERBOSE
-                pwOut.printf("Need new sector:" CRLF);
-                pwOut.printf("\tMax available sectors: 0x%08X / %u" CRLF, f->maxSectors,
+                pwOut.printf("Need new sector:"
+                CRLF);
+                pwOut.printf("\tMax available sectors: 0x%08X / %u"
+                CRLF, f->maxSectors,
                         f->maxSectors);
-                pwOut.printf("\tDesired file sector: 0x%08X / %u" CRLF, sectorOffset,
+                pwOut.printf("\tDesired file sector: 0x%08X / %u"
+                CRLF, sectorOffset,
                         sectorOffset);
 #endif
 
@@ -677,7 +701,8 @@ class SD {
                 }
 
 #ifdef SD_OPTION_VERBOSE
-                pwOut.printf("Loading new file sector at file-offset: 0x%08X / %u" CRLF,
+                pwOut.printf("Loading new file sector at file-offset: 0x%08X / %u"
+                CRLF,
                         sectorOffset, sectorOffset);
 #endif
                 // SDLoadSectorFromOffset() will ensure that, if the current
@@ -715,6 +740,7 @@ class SD {
 
             return 0;
         }
+
 #endif
 
         /**
@@ -733,7 +759,7 @@ class SD {
          * @return      Returns the character pointed to by the m_rPtr pointer
          */
         char fgetc (SD::File *f) {
-            char c;
+            char     c;
             uint16_t ptr = (uint16_t) (f->rPtr % SD::SECTOR_SIZE);
 
             // Determine if the currently loaded sector is what we need
@@ -744,7 +770,8 @@ class SD {
                 this->reload_buf(f);
             else if (sectorOffset != f->curSector) {
 #ifdef SD_OPTION_VERBOSE
-                pwOut.printf("File sector offset: 0x%08X / %u" CRLF, sectorOffset,
+                pwOut.printf("File sector offset: 0x%08X / %u"
+                CRLF, sectorOffset,
                         sectorOffset);
 #endif
                 this->load_sector_from_offset(f, sectorOffset);
@@ -770,7 +797,7 @@ class SD {
          *
          * @return      Returns character memory location of character array
          */
-        char * fgets (char s[], uint32_t size, SD::File *f) {
+        char *fgets (char s[], uint32_t size, SD::File *f) {
             /**
              * Code taken from fgets.c in the propgcc source, originally written
              * by Eric R. Smith and (slightly) modified to fit this SD driver
@@ -787,7 +814,7 @@ class SD {
                 if ('\n' == c)
                     break;
             }
-            s[count] = 0;
+            s[count]       = 0;
             return (0 < count) ? s : NULL;
         }
 
@@ -820,7 +847,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode fseekr (SD::File *f, const int32_t offset,
-                const uint8_t origin) {
+                                    const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
                     f->rPtr = (uint32_t) offset;
@@ -853,7 +880,7 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode fseekw (SD::File *f, const int32_t offset,
-                const uint8_t origin) {
+                                    const uint8_t origin) {
             switch (origin) {
                 case SEEK_SET:
                     f->wPtr = (uint32_t) offset;
@@ -901,6 +928,7 @@ class SD {
         }
 
 #if (defined SD_OPTION_VERBOSE || defined SD_OPTION_VERBOSE_BLOCKS)
+
         /**
          * @brief       Print a block of data in hex format to the screen in
          *              SD_LINE_SIZE-byte lines
@@ -912,33 +940,35 @@ class SD {
             uint8_t i, j;
             uint8_t *s;
 
-            pwOut.printf("Printing %u bytes..." CRLF, bytes);
+            pwOut.printf("Printing %u bytes..."
+            CRLF, bytes);
             pwOut.printf("Offset\t");
             for (i = 0; i < SD::LINE_SIZE; ++i)
-            pwOut.printf("0x%X  ", i);
+                pwOut.printf("0x%X  ", i);
             pwOut.put_char('\n');
 
             if (bytes % SD::LINE_SIZE)
-            bytes = bytes / SD::LINE_SIZE + 1;
+                bytes = bytes / SD::LINE_SIZE + 1;
             else
-            bytes /= SD::LINE_SIZE;
+                bytes /= SD::LINE_SIZE;
 
             for (i = 0; i < bytes; ++i) {
                 s = dat + SD::LINE_SIZE * i;
                 pwOut.printf("0x%04x:\t", SD::LINE_SIZE * i);
                 for (j = 0; j < SD::LINE_SIZE; ++j)
-                pwOut.printf("0x%02X ", s[j]);
+                    pwOut.printf("0x%02X ", s[j]);
                 pwOut.printf(" - ");
                 for (j = 0; j < SD::LINE_SIZE; ++j) {
                     if ((' ' <= s[j]) && (s[j] <= '~'))
-                    pwOut.put_char(s[j]);
+                        pwOut.put_char(s[j]);
                     else
-                    pwOut.put_char('.');
+                        pwOut.put_char('.');
                 }
 
                 pwOut.put_char('\n');
             }
         }
+
 #endif
 
         /**
@@ -948,7 +978,8 @@ class SD {
          */
         void print_error_str (const Printer *printer,
                               const SD::ErrorCode err) const {
-            const char str[] = "SD Error %u: %s" CRLF;
+            const char str[] = "SD Error %u: %s"
+            CRLF;
             const uint8_t relativeError = err - SD::BEG_ERROR;
 
             switch (err) {
@@ -965,26 +996,28 @@ class SD {
                 case SD::INVALID_RESPONSE:
 #ifdef SD_OPTION_VERBOSE
                     pwOut.printf("SD Error %u: %s0x%02X\nThe following bits are "
-                            "set:" CRLF, relativeError,
+                                         "set:"
+                    CRLF, relativeError,
                             "Invalid first-byte response\n\tReceived: ",
                             this->m_firstByteResponse);
 #else
-                    printer->printf("SD Error %u: %s%u" CRLF, relativeError,
-                            "Invalid first-byte response\n\tReceived: ",
-                            this->m_firstByteResponse);
+                printer->printf("SD Error %u: %s%u" CRLF, relativeError,
+                        "Invalid first-byte response\n\tReceived: ",
+                        this->m_firstByteResponse);
 #endif
                     this->first_byte_expansion();
                     break;
                 case SD::INVALID_INIT:
 #ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("SD Error %u: %s\n\tResponse: 0x%02X" CRLF,
+                    pwOut.printf("SD Error %u: %s\n\tResponse: 0x%02X"
+                    CRLF,
                             relativeError,
                             "Invalid response during initialization",
                             this->m_firstByteResponse);
 #else
-                    printer->printf("SD Error %u: %s\n\tResponse: %u" CRLF, relativeError,
-                            "Invalid response during initialization",
-                            this->m_firstByteResponse);
+                printer->printf("SD Error %u: %s\n\tResponse: %u" CRLF, relativeError,
+                        "Invalid response during initialization",
+                        this->m_firstByteResponse);
 #endif
                     break;
                 case SD::INVALID_FILESYSTEM:
@@ -993,13 +1026,14 @@ class SD {
                     break;
                 case SD::INVALID_DAT_STRT_ID:
 #ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("SD Error %u: %s0x%02X" CRLF, relativeError,
+                    pwOut.printf("SD Error %u: %s0x%02X"
+                    CRLF, relativeError,
                             "Invalid data-start ID\n\tReceived: ",
                             this->m_firstByteResponse);
 #else
-                    printer->printf("SD Error %u: %s%u" CRLF, relativeError,
-                            "Invalid data-start ID\n\tReceived: ",
-                            this->m_firstByteResponse);
+                printer->printf("SD Error %u: %s%u" CRLF, relativeError,
+                        "Invalid data-start ID\n\tReceived: ",
+                        this->m_firstByteResponse);
 #endif
                     break;
                 case SD::FILENAME_NOT_FOUND:
@@ -1016,40 +1050,40 @@ class SD {
                     break;
                 case SD::ENTRY_NOT_FILE:
                     printer->printf(str, relativeError,
-                            "Requested file entry is not a file");
+                                    "Requested file entry is not a file");
                     break;
                 case SD::INVALID_FILENAME:
                     printer->printf(str, relativeError,
-                            "Invalid filename - please use 8.3 format");
+                                    "Invalid filename - please use 8.3 format");
                     break;
                 case SD::INVALID_FAT_APPEND:
                     printer->printf(str, relativeError,
-                            "FAT entry append was attempted unnecessarily");
+                                    "FAT entry append was attempted unnecessarily");
                     break;
                 case SD::FILE_ALREADY_EXISTS:
                     printer->printf(str, relativeError,
-                            "Attempting to create an already existing file");
+                                    "Attempting to create an already existing file");
                     break;
                 case SD::INVALID_FILE_MODE:
                     printer->printf(str, relativeError, "Invalid file mode");
                     break;
                 case SD::TOO_MANY_FATS:
                     printer->printf(str, relativeError,
-                            "This driver is only capable of writing files on "
-                                    "FAT partitions with two (2) copies of the "
-                                    "FAT");
+                                    "This driver is only capable of writing files on "
+                                            "FAT partitions with two (2) copies of the "
+                                            "FAT");
                     break;
                 case SD::FILE_WITHOUT_BUFFER:
                     printer->printf(str, relativeError,
-                            "SDfopen() was passed a file struct with "
-                                    "an uninitialized buffer");
+                                    "SDfopen() was passed a file struct with "
+                                            "an uninitialized buffer");
                     break;
                 case SD::CMD8_FAILURE:
                     printer->printf(str, relativeError,
-                            "CMD8 never received a proper response; This is "
-                                    "most likely to occur when the SD card "
-                                    "does not support the 3.3V I/O used by "
-                                    "the Propeller");
+                                    "CMD8 never received a proper response; This is "
+                                            "most likely to occur when the SD card "
+                                            "does not support the 3.3V I/O used by "
+                                            "the Propeller");
                     break;
                 case SD::READING_PAST_EOC:
                     printer->printf(str, relativeError, "Reading past the"
@@ -1065,23 +1099,23 @@ class SD {
         }
 
 
-
     public:
         /***********************
          *** Private Methods ***
          ***********************/
         inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response[]) {
             PropWare::ErrorCode err;
-            uint8_t i, j;
-            bool stageCleared;
+            uint8_t             i, j;
+            bool                stageCleared;
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Starting SD card..." CRLF);
+            pwOut.printf("Starting SD card..."
+            CRLF);
 #endif
 
             // Attempt initialization no more than 10 times
             stageCleared = false;
-            for (i = 0; i < 10 && !stageCleared; ++i) {
+            for (i       = 0; i < 10 && !stageCleared; ++i) {
                 // Initialization loop (reset SD card)
                 for (j = 0; j < 10 && !stageCleared; ++j) {
                     check_errors(this->power_up());
@@ -1111,7 +1145,7 @@ class SD {
         }
 
         inline PropWare::ErrorCode power_up () {
-            uint8_t i;
+            uint8_t             i;
             PropWare::ErrorCode err;
 
             waitcnt(CLKFREQ / 10 + CNT);
@@ -1124,7 +1158,7 @@ class SD {
             // Be very super 100% sure that all clocks have finished ticking
             // before setting chip select low
             check_errors(this->m_spi->wait());
-            waitcnt(10*MILLISECOND + CNT);
+            waitcnt(10 * MILLISECOND + CNT);
 
             // Chip select goes low for the duration of this function
             this->m_cs.clear();
@@ -1145,7 +1179,8 @@ class SD {
                 *isIdle = true;
 #ifdef SD_OPTION_VERBOSE
             else
-            pwOut.printf("Failed attempt at CMD0: 0x%02X" CRLF,
+                pwOut.printf("Failed attempt at CMD0: 0x%02X"
+            CRLF,
                     this->m_firstByteResponse);
 #endif
 
@@ -1153,17 +1188,18 @@ class SD {
         }
 
         inline PropWare::ErrorCode verify_v2_0 (uint8_t response[],
-                bool *stageCleared) {
+                                                bool *stageCleared) {
             PropWare::ErrorCode err;
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("SD card in idle state. Now sending CMD8..." CRLF);
+            pwOut.printf("SD card in idle state. Now sending CMD8..."
+            CRLF);
 #endif
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
             check_errors(
                     this->send_command(SD::CMD_INTERFACE_COND, SD::ARG_CMD8,
-                            SD::CRC_CMD8));
+                                       SD::CRC_CMD8));
             check_errors(this->get_response(SD::RESPONSE_LEN_R7, response));
             if (SD::RESPONSE_IDLE == this->m_firstByteResponse)
                 *stageCleared = true;
@@ -1171,7 +1207,8 @@ class SD {
             // Print an error message after every failure
 #ifdef SD_OPTION_VERBOSE
             if (!stageCleared)
-            pwOut.printf("Failed attempt at CMD8: 0x%02X, 0x%02X, 0x%02X;" CRLF,
+                pwOut.printf("Failed attempt at CMD8: 0x%02X, 0x%02X, 0x%02X;"
+            CRLF,
                     this->m_firstByteResponse, response[2], response[3]);
 #endif
 
@@ -1180,9 +1217,9 @@ class SD {
 
         inline PropWare::ErrorCode activate (uint8_t response[]) {
             PropWare::ErrorCode err;
-            uint32_t timeout;
-            uint32_t longWiggleRoom = 3 * MILLISECOND;
-            bool stageCleared = false;
+            uint32_t            timeout;
+            uint32_t            longWiggleRoom = 3 * MILLISECOND;
+            bool                stageCleared   = false;
 
             // Attempt to send active
             timeout = SD::SEND_ACTIVE_TIMEOUT + CNT;  //
@@ -1209,7 +1246,8 @@ class SD {
 
 #ifdef SD_OPTION_VERBOSE
             // We did it!
-            pwOut.printf("Activated!" CRLF);
+            pwOut.printf("Activated!"
+            CRLF);
 #endif
 
             return 0;
@@ -1220,7 +1258,8 @@ class SD {
 
             // Initialization nearly complete, increase clock
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Increasing clock to full speed" CRLF);
+            pwOut.printf("Increasing clock to full speed"
+            CRLF);
 #endif
             if (-1 == freq || 0 == freq) {
                 check_errors(this->m_spi->set_clock(SD::DEFAULT_SPI_FREQ));
@@ -1232,35 +1271,42 @@ class SD {
         }
 
 #if (defined SD_OPTION_VERBOSE)
+
         PropWare::ErrorCode print_init_debug_blocks (uint8_t response[]) {
             PropWare::ErrorCode err;
 
             // Request operating conditions register and ensure response begins
             // with R1
             check_errors(this->send_command(SD::CMD_READ_OCR, 0,
-                            SD::CRC_OTHER));
+                                            SD::CRC_OTHER));
             check_errors(this->get_response(SD::RESPONSE_LEN_R3, response));
-            pwOut.printf("Operating Conditions Register (OCR)..." CRLF);
+            pwOut.printf("Operating Conditions Register (OCR)..."
+            CRLF);
             this->print_hex_block(response, SD::RESPONSE_LEN_R3);
 
             // If debugging requested, print to the screen CSD and CID registers
             // from SD card
-            pwOut.printf("Requesting CSD..." CRLF);
+            pwOut.printf("Requesting CSD..."
+            CRLF);
             check_errors(this->send_command(SD::CMD_RD_CSD, 0, SD::CRC_OTHER));
             check_errors(this->read_block(16, response));
-            pwOut.printf("CSD Contents:" CRLF);
+            pwOut.printf("CSD Contents:"
+            CRLF);
             this->print_hex_block(response, 16);
             pwOut.put_char('\n');
 
-            pwOut.printf("Requesting CID..." CRLF);
+            pwOut.printf("Requesting CID..."
+            CRLF);
             check_errors(this->send_command(SD::CMD_RD_CID, 0, SD::CRC_OTHER));
             check_errors(this->read_block(16, response));
-            pwOut.printf("CID Contents:" CRLF);
+            pwOut.printf("CID Contents:"
+            CRLF);
             this->print_hex_block(response, 16);
             pwOut.put_char('\n');
 
             return 0;
         }
+
 #endif
 
         /**
@@ -1274,7 +1320,7 @@ class SD {
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode send_command (const uint8_t cmd, const uint32_t arg,
-                const uint8_t crc) {
+                                          const uint8_t crc) {
             PropWare::ErrorCode err;
 
             // Send out the command
@@ -1294,21 +1340,21 @@ class SD {
          * @brief       receive response and data from SD card over SPI
          *
          * @param[in]   numBytes    Number of bytes to receive
-         * @param[out]  *dat        Location in memory with enough space to 
+         * @param[out]  *dat        Location in memory with enough space to
          *                          store `bytes` bytes of data
          *
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t *dat) {
             PropWare::ErrorCode err;
-            uint32_t timeout;
+            uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = SD::RESPONSE_TIMEOUT + CNT;
             do {
                 check_errors(
                         this->m_spi->shift_in(8, &this->m_firstByteResponse,
-                                sizeof(this->m_firstByteResponse)));
+                                              sizeof(this->m_firstByteResponse)));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
@@ -1350,7 +1396,7 @@ class SD {
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode read_block (uint16_t bytes, uint8_t *dat) {
-            uint8_t i, err, checksum;
+            uint8_t  i, err, checksum;
             uint32_t timeout;
 
             // Read first byte - the R1 response
@@ -1358,7 +1404,7 @@ class SD {
             do {
                 check_errors(
                         this->m_spi->shift_in(8, &this->m_firstByteResponse,
-                                sizeof(this->m_firstByteResponse)));
+                                              sizeof(this->m_firstByteResponse)));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
@@ -1397,7 +1443,7 @@ class SD {
                                         sizeof(*dat)));
 #else
                         check_errors(this->m_spi->shift_in(8, dat++,
-                                        sizeof(*dat)));
+                                                           sizeof(*dat)));
 #endif
                     }
 
@@ -1407,7 +1453,7 @@ class SD {
                         do {
                             check_errors(
                                     this->m_spi->shift_in(8, &checksum,
-                                            sizeof(checksum)));
+                                                          sizeof(checksum)));
 
                             // Check for timeout
                             if ((timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
@@ -1438,14 +1484,14 @@ class SD {
          */
         PropWare::ErrorCode write_block (uint16_t bytes, uint8_t *dat) {
             PropWare::ErrorCode err;
-            uint32_t timeout;
+            uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = SD::RESPONSE_TIMEOUT + CNT;
             do {
                 check_errors(
                         this->m_spi->shift_in(8, &this->m_firstByteResponse,
-                                sizeof(this->m_firstByteResponse)));
+                                              sizeof(this->m_firstByteResponse)));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
@@ -1475,7 +1521,7 @@ class SD {
                 do {
                     check_errors(
                             this->m_spi->shift_in(8, &this->m_firstByteResponse,
-                                    sizeof(this->m_firstByteResponse)));
+                                                  sizeof(this->m_firstByteResponse)));
 
                     // Check for timeout
                     if (abs(timeout - CNT) < SD::SINGLE_BYTE_WIGGLE_ROOM)
@@ -1505,15 +1551,16 @@ class SD {
         PropWare::ErrorCode read_data_block (uint32_t address, uint8_t *buf) {
 
             PropWare::ErrorCode err;
-            uint8_t temp = 0;
+            uint8_t             temp = 0;
 
             // Wait until the SD card is no longer busy
             while (!temp)
                 this->m_spi->shift_in(8, &temp, sizeof(temp));
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Reading block at sector address: 0x%08X / %u" CRLF,
-                         address, address);
+            pwOut.printf("Reading block at sector address: 0x%08X / %u"
+            CRLF,
+                    address, address);
 #endif
 
             /**
@@ -1521,7 +1568,7 @@ class SD {
              * thrown, chip select is set high again before returning the error
              */
             this->m_cs.clear();
-            err = this->send_command(SD::CMD_RD_BLOCK, address, SD::CRC_OTHER);
+            err     = this->send_command(SD::CMD_RD_BLOCK, address, SD::CRC_OTHER);
             if (!err)
                 err = this->read_block(SD::SECTOR_SIZE, buf);
             this->m_cs.set();
@@ -1539,20 +1586,21 @@ class SD {
          */
         PropWare::ErrorCode write_data_block (uint32_t address, uint8_t *dat) {
             PropWare::ErrorCode err;
-            uint8_t temp = 0;
+            uint8_t             temp = 0;
 
             // Wait until the SD card is no longer busy
             while (!temp)
                 this->m_spi->shift_in(8, &temp, 1);
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Writing block at address: 0x%08X / %u" CRLF, address, address);
+            pwOut.printf("Writing block at address: 0x%08X / %u"
+            CRLF, address, address);
 #endif
 
             this->m_cs.clear();
             check_errors(
                     this->send_command(SD::CMD_WR_BLOCK, address,
-                            SD::CRC_OTHER));
+                                       SD::CRC_OTHER));
 
             check_errors(this->write_block(SD::SECTOR_SIZE, dat));
             this->m_cs.set();
@@ -1595,6 +1643,7 @@ class SD {
         }
 
 #ifdef SD_OPTION_FILE_WRITE
+
         /**
          * @brief       Write a byte-reversed 16-bit variable (SD cards store
          *              bytes little-endian therefore we must reverse them to
@@ -1624,6 +1673,7 @@ class SD {
             buf[1] = (uint8_t) (dat >> 8);
             buf[0] = (uint8_t) dat;
         }
+
 #endif
 
         /**
@@ -1697,14 +1747,14 @@ class SD {
                 // directory?
                 if (this->m_rootDirSectors == (buf->curSectorOffset))
                     return SD::EOC_END;
-                // Root dir of FAT16; Not last sector
+                    // Root dir of FAT16; Not last sector
                 else
                     // Any error from reading the data block will be returned to
                     // calling function
                     return this->read_data_block(++(buf->curSectorOffset),
-                            buf->buf);
+                                                 buf->buf);
             }
-            // We are looking at a generic data cluster.
+                // We are looking at a generic data cluster.
             else {
                 // Generic data cluster; Have we reached the end of the cluster?
                 if (((1 << this->m_sectorsPerCluster_shift) - 1)
@@ -1718,8 +1768,8 @@ class SD {
                             ++(buf->curSectorOffset) + buf->curClusterStartAddr,
                             buf->buf);
                 }
-                // End of generic data cluster; Look through the FAT to find the
-                // next cluster
+                    // End of generic data cluster; Look through the FAT to find the
+                    // next cluster
                 else
                     return this->inc_cluster(buf);
             }
@@ -1745,9 +1795,9 @@ class SD {
          *
          */
         PropWare::ErrorCode load_sector_from_offset (SD::File *f,
-                const uint32_t offset) {
+                                                     const uint32_t offset) {
             PropWare::ErrorCode err;
-            uint32_t clusterOffset = offset >> this->m_sectorsPerCluster_shift;
+            uint32_t            clusterOffset = offset >> this->m_sectorsPerCluster_shift;
 
 #ifdef SD_OPTION_FILE_WRITE
             // If the buffer has been modified, write it before loading the next
@@ -1764,7 +1814,8 @@ class SD {
             if (f->curCluster < clusterOffset) {
 #ifdef SD_OPTION_VERBOSE
                 pwOut.printf("Need to fast-forward through the FAT to find the "
-                        "cluster" CRLF);
+                                     "cluster"
+                CRLF);
 #endif
                 // Desired cluster comes after the currently loaded one - this
                 // is easy and requires continuing to look forward through the
@@ -1775,14 +1826,15 @@ class SD {
                     f->buf->curAllocUnit = f->buf->nextAllocUnit;
                     check_errors(
                             this->get_fat_value(f->buf->curAllocUnit,
-                                    &(f->buf->nextAllocUnit)));
+                                                &(f->buf->nextAllocUnit)));
                 }
                 f->buf->curClusterStartAddr = this->find_sector_from_alloc(
                         f->buf->curAllocUnit);
             } else if (f->curCluster > clusterOffset) {
 #ifdef SD_OPTION_VERBOSE
                 pwOut.printf("Need to backtrack through the FAT to find the "
-                        "cluster" CRLF);
+                                     "cluster"
+                CRLF);
 #endif
                 // Desired cluster is an earlier cluster than the currently
                 // loaded one - this requires starting from the beginning and
@@ -1790,14 +1842,14 @@ class SD {
                 f->buf->curAllocUnit = f->firstAllocUnit;
                 check_errors(
                         this->get_fat_value(f->buf->curAllocUnit,
-                                &(f->buf->nextAllocUnit)));
+                                            &(f->buf->nextAllocUnit)));
                 f->curCluster = 0;
                 while (clusterOffset--) {
                     ++(f->curCluster);
                     f->buf->curAllocUnit = f->buf->nextAllocUnit;
                     check_errors(
                             this->get_fat_value(f->buf->curAllocUnit,
-                                    &(f->buf->nextAllocUnit)));
+                                                &(f->buf->nextAllocUnit)));
                 }
                 f->buf->curClusterStartAddr = this->find_sector_from_alloc(
                         f->buf->curAllocUnit);
@@ -1806,7 +1858,7 @@ class SD {
             // Followed by finding the correct sector
             f->buf->curSectorOffset = (uint8_t) (offset
                     % (1 << this->m_sectorsPerCluster_shift));
-            f->curSector = offset;
+            f->curSector            = offset;
             this->read_data_block(
                     f->buf->curClusterStartAddr + f->buf->curSectorOffset,
                     f->buf->buf);
@@ -1852,20 +1904,24 @@ class SD {
             if (!(((uint32_t) SD::EOC_BEG) <= buf->curAllocUnit
                     && ((uint32_t) SD::EOC_END) <= buf->curAllocUnit))
                 // Current allocation unit is not EOC, read the next one
-                check_errors(
-                        this->get_fat_value(buf->curAllocUnit,
-                                &(buf->nextAllocUnit)));
+            check_errors(
+                    this->get_fat_value(buf->curAllocUnit,
+                                        &(buf->nextAllocUnit)));
             buf->curClusterStartAddr = this->find_sector_from_alloc(
                     buf->curAllocUnit);
-            buf->curSectorOffset = 0;
+            buf->curSectorOffset     = 0;
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Incrementing the cluster. New parameters are:" CRLF);
-            pwOut.printf("\tCurrent allocation unit: 0x%08X / %u" CRLF,
+            pwOut.printf("Incrementing the cluster. New parameters are:"
+            CRLF);
+            pwOut.printf("\tCurrent allocation unit: 0x%08X / %u"
+            CRLF,
                     buf->curAllocUnit, buf->curAllocUnit);
-            pwOut.printf("\tNext allocation unit: 0x%08X / %u" CRLF, buf->nextAllocUnit,
+            pwOut.printf("\tNext allocation unit: 0x%08X / %u"
+            CRLF, buf->nextAllocUnit,
                     buf->nextAllocUnit);
-            pwOut.printf("\tCurrent cluster starting address: 0x%08X / %u" CRLF,
+            pwOut.printf("\tCurrent cluster starting address: 0x%08X / %u"
+            CRLF,
                     buf->curClusterStartAddr, buf->curClusterStartAddr);
 #endif
 
@@ -1912,7 +1968,7 @@ class SD {
             if (' ' != buf[SD::FILE_NAME_LEN]) {
                 filename[j++] = '.';
                 for (i = SD::FILE_NAME_LEN;
-                        i < SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN; ++i) {
+                     i < SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN; ++i) {
                     if (' ' != buf[i])
                         filename[j++] = buf[i];
                 }
@@ -1940,9 +1996,9 @@ class SD {
          *              file-not-found marker)
          */
         PropWare::ErrorCode find (const char *filename,
-                uint16_t *fileEntryOffset) {
+                                  uint16_t *fileEntryOffset) {
             PropWare::ErrorCode err;
-            char readEntryName[SD::FILENAME_STR_LEN];
+            char                readEntryName[SD::FILENAME_STR_LEN];
 
 #ifdef SD_OPTION_FILE_WRITE
             // Save the current buffer
@@ -1965,18 +2021,19 @@ class SD {
                             != this->m_buf.curClusterStartAddr)) {
 #ifdef SD_OPTION_VERBOSE
                 pwOut.printf("'find' requires a backtrack to beginning of "
-                        "cluster" CRLF);
+                                     "cluster"
+                CRLF);
 #endif
                 this->m_buf.curClusterStartAddr = this->find_sector_from_alloc(
                         this->m_dir_firstAllocUnit);
-                this->m_buf.curSectorOffset = 0;
-                this->m_buf.curAllocUnit = this->m_dir_firstAllocUnit;
+                this->m_buf.curSectorOffset     = 0;
+                this->m_buf.curAllocUnit        = this->m_dir_firstAllocUnit;
                 check_errors(
                         this->get_fat_value(this->m_buf.curAllocUnit,
-                                &this->m_buf.nextAllocUnit));
+                                            &this->m_buf.nextAllocUnit));
                 check_errors(
                         this->read_data_block(this->m_buf.curClusterStartAddr,
-                                this->m_buf.buf));
+                                              this->m_buf.buf));
             }
             this->m_buf.id = SD::FOLDER_ID;
 
@@ -1988,7 +2045,7 @@ class SD {
                 // Check if file is valid, retrieve the name if it is
                 if (SD::DELETED_FILE_MARK != this->m_buf.buf[*fileEntryOffset]) {
                     this->get_filename(&(this->m_buf.buf[*fileEntryOffset]),
-                            readEntryName);
+                                       readEntryName);
                     if (!strcmp(filename, readEntryName))
                         // File names match, return 0 to indicate a successful
                         // search
@@ -2040,13 +2097,13 @@ class SD {
             // Set current values to show that the first sector of the file is
             // loaded. SDLoadSectorFromOffset() loads the sector unconditionally
             // before returning so we do not need to load the sector here
-            f->buf->curAllocUnit = f->firstAllocUnit;
+            f->buf->curAllocUnit        = f->firstAllocUnit;
             f->buf->curClusterStartAddr = this->find_sector_from_alloc(
                     f->firstAllocUnit);
-            f->buf->curSectorOffset = 0;
+            f->buf->curSectorOffset     = 0;
             check_errors(
                     this->get_fat_value(f->firstAllocUnit,
-                            &(f->buf->nextAllocUnit)));
+                                        &(f->buf->nextAllocUnit)));
 
             // Proceed with loading the sector
             check_errors(this->load_sector_from_offset(f, f->curSector));
@@ -2056,6 +2113,7 @@ class SD {
         }
 
 #ifdef SD_OPTION_FILE_WRITE
+
         /**
          * @brief       Find the first empty allocation unit in the FAT
          *
@@ -2074,7 +2132,7 @@ class SD {
          * @return      Returns the number of the first unused allocation unit
          */
         uint32_t find_empty_space (const uint8_t restore) {
-            uint16_t allocOffset = 0;
+            uint16_t allocOffset   = 0;
             uint32_t fatSectorAddr = this->m_curFatSector + this->m_fatStart;
             uint32_t retVal;
             // NOTE: this->m_curFatSector is not modified until end of function
@@ -2108,29 +2166,31 @@ class SD {
                         if (this->m_fatMod) {
 #ifdef SD_OPTION_VERBOSE
                             pwOut.printf("FAT sector has been modified; saving "
-                                    "now... ");
+                                                 "now... ");
 #endif
                             this->write_data_block(this->m_curFatSector,
-                                    this->m_fat);
+                                                   this->m_fat);
                             this->write_data_block(
                                     this->m_curFatSector + this->m_fatSize,
                                     this->m_fat);
 #ifdef SD_OPTION_VERBOSE
-                            pwOut.printf("done!" CRLF);
+                            pwOut.printf("done!"
+                            CRLF);
 #endif
                             this->m_fatMod = false;
                         }
                         // Read the next fat sector
 #ifdef SD_OPTION_VERBOSE
                         pwOut.printf("SDFindEmptySpace() is reading in sector "
-                                "address: 0x%08X / %u" CRLF, fatSectorAddr + 1,
+                                             "address: 0x%08X / %u"
+                        CRLF, fatSectorAddr + 1,
                                 fatSectorAddr + 1);
 #endif
                         this->read_data_block(++fatSectorAddr, this->m_fat);
                     }
                 }
                 this->write_rev_dat16(this->m_fat + allocOffset,
-                        (uint16_t) SD::EOC_END);
+                                      (uint16_t) SD::EOC_END);
                 this->m_fatMod = true;
             } else /* Implied: "if (SD::FAT_32 == this->m_filesystem)" */{
                 // In FAT32, the first 7 usable clusters seem to be
@@ -2152,7 +2212,8 @@ class SD {
                         allocOffset += SD::FAT_32;
 
 #ifdef SD_OPTION_VERBOSE
-                    pwOut.printf("Broke while loop... why? Offset = 0x%04x / %u" CRLF,
+                    pwOut.printf("Broke while loop... why? Offset = 0x%04x / %u"
+                    CRLF,
                             allocOffset, allocOffset);
 #endif
                     // If we reached the end of a sector...
@@ -2160,7 +2221,7 @@ class SD {
                         if (this->m_fatMod) {
 #ifdef SD_OPTION_VERBOSE
                             pwOut.printf("FAT sector has been modified; saving "
-                                    "now... ");
+                                                 "now... ");
 #endif
                             this->write_data_block(
                                     this->m_curFatSector + this->m_fatStart,
@@ -2169,14 +2230,16 @@ class SD {
                                     this->m_curFatSector + this->m_fatStart
                                             + this->m_fatSize, this->m_fat);
 #ifdef SD_OPTION_VERBOSE
-                            pwOut.printf("done!" CRLF);
+                            pwOut.printf("done!"
+                            CRLF);
 #endif
                             this->m_fatMod = false;
                         }
                         // Read the next fat sector
 #ifdef SD_OPTION_VERBOSE
                         pwOut.printf("SDFindEmptySpace() is reading in sector "
-                                "address: 0x%08X / %u" CRLF, fatSectorAddr + 1,
+                                             "address: 0x%08X / %u"
+                        CRLF, fatSectorAddr + 1,
                                 fatSectorAddr + 1);
 #endif
                         this->read_data_block(++fatSectorAddr, this->m_fat);
@@ -2184,16 +2247,17 @@ class SD {
                     }
                 }
                 this->write_rev_dat32(&(this->m_fat[allocOffset]),
-                        ((uint32_t) SD::EOC_END) & 0x0fffffff);
+                                      ((uint32_t) SD::EOC_END) & 0x0fffffff);
                 this->m_fatMod = true;
             }
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Available space found: 0x%08X / %u" CRLF,
+            pwOut.printf("Available space found: 0x%08X / %u"
+            CRLF,
                     (this->m_curFatSector << this->m_entriesPerFatSector_Shift)
-                    + allocOffset / this->m_filesystem,
+                            + allocOffset / this->m_filesystem,
                     (this->m_curFatSector << this->m_entriesPerFatSector_Shift)
-                    + allocOffset / this->m_filesystem);
+                            + allocOffset / this->m_filesystem);
 #endif
 
             // If we loaded a new fat sector (and then modified it directly
@@ -2202,10 +2266,10 @@ class SD {
                     && this->m_fatMod) {
                 this->write_data_block(fatSectorAddr, this->m_fat);
                 this->write_data_block(fatSectorAddr + this->m_fatSize,
-                        this->m_fat);
+                                       this->m_fat);
                 this->m_fatMod = false;
                 this->read_data_block(this->m_curFatSector + this->m_fatStart,
-                        this->m_fat);
+                                      this->m_fat);
             } else
                 this->m_curFatSector = fatSectorAddr - this->m_fatStart;
 
@@ -2225,9 +2289,10 @@ class SD {
          */
         PropWare::ErrorCode extend_fat (SD::Buffer *buf) {
             PropWare::ErrorCode err;
-            uint32_t newAllocUnit;
+            uint32_t            newAllocUnit;
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Extending file or directory now..." CRLF);
+            pwOut.printf("Extending file or directory now..."
+            CRLF);
 #endif
 
             // Do we need to load a different sector of the FAT or is the
@@ -2237,11 +2302,13 @@ class SD {
                     != this->m_curFatSector) {
 
 #ifdef SD_OPTION_VERBOSE
-                pwOut.printf("Need new FAT sector. Loading: 0x%08X / %u" CRLF,
+                pwOut.printf("Need new FAT sector. Loading: 0x%08X / %u"
+                CRLF,
                         buf->curAllocUnit >> this->m_entriesPerFatSector_Shift,
                         buf->curAllocUnit >> this->m_entriesPerFatSector_Shift);
                 pwOut.printf("... because the current allocation unit is: "
-                        "0x%08X / %u" CRLF,
+                                     "0x%08X / %u"
+                CRLF,
                         buf->curAllocUnit, buf->curAllocUnit);
 #endif
                 // Need new sector, save the old one...
@@ -2267,10 +2334,10 @@ class SD {
             // reached the end of its cluster chain
             uint16_t entriesPerFatSector = (uint16_t) (1
                     << this->m_entriesPerFatSector_Shift);
-            uint16_t allocUnitOffset = (uint16_t)
+            uint16_t allocUnitOffset     = (uint16_t)
                     (buf->curAllocUnit % entriesPerFatSector);
-            uint16_t fatPointerAddress = allocUnitOffset * this->m_filesystem;
-            uint32_t nxtSctr = this->read_rev_dat32(
+            uint16_t fatPointerAddress   = allocUnitOffset * this->m_filesystem;
+            uint32_t nxtSctr             = this->read_rev_dat32(
                     &(this->m_fat[fatPointerAddress]));
             if ((uint32_t) SD::EOC_BEG <= nxtSctr)
                 return SD::INVALID_FAT_APPEND;
@@ -2300,7 +2367,7 @@ class SD {
                                 * this->m_filesystem]), newAllocUnit);
             }
             buf->nextAllocUnit = newAllocUnit;
-            this->m_fatMod = true;  // And mark the buffer as modified
+            this->m_fatMod     = true;  // And mark the buffer as modified
 
 #if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
             pwOut.printf("After modification, the FAT now looks like..." CRLF);
@@ -2321,18 +2388,19 @@ class SD {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode create_file (const char *name,
-                const uint16_t *fileEntryOffset) {
-            uint8_t i, j;
+                                         const uint16_t *fileEntryOffset) {
+            uint8_t  i, j;
             // *name is only checked for uppercase
-            char uppercaseName[SD::FILENAME_STR_LEN];
+            char     uppercaseName[SD::FILENAME_STR_LEN];
             uint32_t allocUnit;
 
 #ifdef SD_OPTION_VERBOSE
-            pwOut.printf("Creating new file: %s" CRLF, name);
+            pwOut.printf("Creating new file: %s"
+            CRLF, name);
 #endif
 
             // Parameter checking...
-            if (SD::FILENAME_STR_LEN < strlen(name))
+            if (SD::FILENAME_STR_LEN< strlen(name))
                 return SD::INVALID_FILENAME;
 
             // Convert the name to uppercase
@@ -2367,11 +2435,11 @@ class SD {
                     for (; j < SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN; ++j)
                         this->m_buf.buf[*fileEntryOffset + j] = ' ';
                 }
-                // If it wasn't a period or null terminator, throw an error
+                    // If it wasn't a period or null terminator, throw an error
                 else
                     return SD::INVALID_FILENAME;
             }
-            // No extension, pad with spaces
+                // No extension, pad with spaces
             else
                 for (; i < (SD::FILE_NAME_LEN + SD::FILE_EXTENSION_LEN); ++i)
                     this->m_buf.buf[*fileEntryOffset + i] = ' ';
@@ -2386,7 +2454,7 @@ class SD {
 
 #ifdef SD_OPTION_VERBOSE
             SD::print_file_entry(&(this->m_buf.buf[*fileEntryOffset]),
-                    uppercaseName);
+                                 uppercaseName);
 #endif
 
 #if (defined SD_OPTION_VERBOSE_BLOCKS && defined SD_OPTION_VERBOSE)
@@ -2422,9 +2490,11 @@ class SD {
 
             return 0;
         }
+
 #endif
 
 #if (defined SD_OPTION_SHELL || defined SD_OPTION_VERBOSE)
+
         /**
          * @brief       Print the attributes and name of a file entry
          *
@@ -2479,6 +2549,7 @@ class SD {
             else
                 pwOut.put_char(SD::ARCHIVE_CHAR_);
         }
+
 #endif
 
         /**
@@ -2487,22 +2558,30 @@ class SD {
          */
         void first_byte_expansion () const {
             if (BIT_0 & this->m_firstByteResponse)
-                pwOut.puts("\t0: Idle" CRLF);
+                pwOut.puts("\t0: Idle"
+            CRLF);
             if (BIT_1 & this->m_firstByteResponse)
-                pwOut.puts("\t1: Erase reset" CRLF);
+                pwOut.puts("\t1: Erase reset"
+            CRLF);
             if (BIT_2 & this->m_firstByteResponse)
-                pwOut.puts("\t2: Illegal command" CRLF);
+                pwOut.puts("\t2: Illegal command"
+            CRLF);
             if (BIT_3 & this->m_firstByteResponse)
-                pwOut.puts("\t3: Communication CRC error" CRLF);
+                pwOut.puts("\t3: Communication CRC error"
+            CRLF);
             if (BIT_4 & this->m_firstByteResponse)
-                pwOut.puts("\t4: Erase sequence error" CRLF);
+                pwOut.puts("\t4: Erase sequence error"
+            CRLF);
             if (BIT_5 & this->m_firstByteResponse)
-                pwOut.puts("\t5: Address error" CRLF);
+                pwOut.puts("\t5: Address error"
+            CRLF);
             if (BIT_6 & this->m_firstByteResponse)
-                pwOut.puts("\t6: Parameter error" CRLF);
+                pwOut.puts("\t6: Parameter error"
+            CRLF);
             if (BIT_7 & this->m_firstByteResponse)
                 pwOut.puts("\t7: Something is really screwed up. This should "
-                        "always be 0." CRLF);
+                                   "always be 0."
+            CRLF);
         }
 
     public:
@@ -2527,7 +2606,8 @@ class SD {
         static const uint8_t CMD_RD_BLOCK       = 0x40 + 17;  // Request data block
         static const uint8_t CMD_WR_BLOCK       = 0x40 + 24;  // Write data block
         static const uint8_t CMD_WR_OP          = 0x40 + 41;  // Send operating conditions for SDC
-        static const uint8_t CMD_APP            = 0x40 + 55;  // Inform card that following instruction is application specific
+        static const uint8_t CMD_APP            =
+                                     0x40 + 55;  // Inform card that following instruction is application specific
         static const uint8_t CMD_READ_OCR       = 0x40 + 58;  // Request "Operating Conditions Register" contents
 
         // SD Arguments
@@ -2576,23 +2656,26 @@ class SD {
 
         // FAT file/directory values
         static const uint8_t FILE_ENTRY_LENGTH = 32;  // An entry in a directory uses 32 bytes
-        static const uint8_t DELETED_FILE_MARK = 0xE5;  // Marks that a file has been deleted here, continue to the next entry
-    #define SD_FILE_NAME_LEN        8
+        static const uint8_t DELETED_FILE_MARK =
+                                     0xE5;  // Marks that a file has been deleted here, continue to the next entry
+#define SD_FILE_NAME_LEN        8
         static const uint8_t FILE_NAME_LEN = SD_FILE_NAME_LEN;  // 8 characters in the standard file name
-    #define SD_FILE_EXTENSION_LEN   3
+#define SD_FILE_EXTENSION_LEN   3
         static const uint8_t FILE_EXTENSION_LEN = SD_FILE_EXTENSION_LEN;  // 3 character file name extension
-    #define SD_FILENAME_STR_LEN     SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2
+#define SD_FILENAME_STR_LEN     SD_FILE_NAME_LEN + SD_FILE_EXTENSION_LEN + 2
         static const uint8_t FILENAME_STR_LEN      = SD_FILENAME_STR_LEN;
         static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
         static const uint8_t FILE_START_CLSTR_LOW  = 0x1A;  // Starting cluster number
-        static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High word (16-bits) of the starting cluster number (FAT32 only)
+        static const uint8_t FILE_START_CLSTR_HIGH =
+                                     0x14;  // High word (16-bits) of the starting cluster number (FAT32 only)
         static const uint8_t FILE_LEN_OFFSET       = 0x1C;  // Length of a file in bytes
         static const int8_t  FREE_CLUSTER          = 0;  // Cluster is unused
         static const int8_t  RESERVED_CLUSTER      = 1;
         static const int8_t  RSVD_CLSTR_VAL_BEG    = -15;  // First reserved cluster value
         static const int8_t  RSVD_CLSTR_VAL_END    = -9;  // Last reserved cluster value
         static const int8_t  BAD_CLUSTER           = -8;  // Cluster is corrupt
-        static const int32_t EOC_BEG               = -7;  // First marker for end-of-chain (end of file entry within FAT)
+        static const int32_t EOC_BEG               =
+                                     -7;  // First marker for end-of-chain (end of file entry within FAT)
         static const int32_t EOC_END               = -1;  // Last marker for end-of-chain
 
         // FAT file attributes (definitions with trailing underscore represent character for a cleared attribute flag)
@@ -2632,8 +2715,8 @@ class SD {
 
         // FAT file system variables
 #ifdef SD_OPTION_FILE_WRITE
-        bool       m_fatMod;  // Has the currently loaded FAT sector been modified
-        uint32_t   m_fatSize;
+        bool     m_fatMod;  // Has the currently loaded FAT sector been modified
+        uint32_t m_fatSize;
 #endif
 
         uint32_t m_dir_firstAllocUnit;  // Store the current directory's starting allocation unit

@@ -109,8 +109,8 @@ class SPI : public PrintCapable,
             /**
              * Start the enumeration where Mode left off; this ensures no overlap
              */
-            LSB_FIRST = MODE_3 + 1,
-            MSB_FIRST
+                    LSB_FIRST = MODE_3 + 1,
+                    MSB_FIRST
         } BitMode;
 
         /**
@@ -148,6 +148,7 @@ class SPI : public PrintCapable,
 #else
     public:
 #endif
+
         /**
          * @brief   Create a new instance of SPI which will, upon calling start(), start a new assembly cog.
          *          Creating multiple instances of PropWare::SPI allows the user to have multiple, independent SPI
@@ -163,7 +164,7 @@ class SPI : public PrintCapable,
          *
          * @return  Address of an SPI module
          */
-        static SPI* get_instance () {
+        static SPI *get_instance () {
             // TODO: Add a lock to make this thread-safe
             static SPI instance;
             return &instance;
@@ -184,7 +185,7 @@ class SPI : public PrintCapable,
         PropWare::ErrorCode start (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk,
                                    const int32_t frequency, const Mode mode, const BitMode bitmode) {
             PropWare::ErrorCode err;
-            const char str[] = "start";
+            const char          str[] = "start";
 
 #ifdef SPI_OPTION_DEBUG_PARAMS
             // Check clock frequency
@@ -199,7 +200,7 @@ class SPI : public PrintCapable,
                 // Set the mailbox to 0 (anything other than -1) so that we know
                 // when the SPI cog has started
                 this->m_mailbox = 0;
-                this->m_cog = PropWare::_SPIStartCog((void *) &this->m_mailbox);
+                this->m_cog     = PropWare::_SPIStartCog((void *) &this->m_mailbox);
                 if (!this->is_running())
                     return COG_NOT_STARTED;
 
@@ -234,7 +235,7 @@ class SPI : public PrintCapable,
                 return NO_ERROR;
 
             cogstop(this->m_cog);
-            this->m_cog = -1;
+            this->m_cog     = -1;
             this->m_mailbox = -1;
 
             return NO_ERROR;
@@ -274,7 +275,7 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode set_mode (const Mode mode) {
             PropWare::ErrorCode err;
-            char str[] = "set_mode";
+            char                str[] = "set_mode";
 
             if (!this->is_running())
                 return MODULE_NOT_RUNNING;
@@ -298,7 +299,7 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode set_bit_mode (const BitMode bitmode) {
             PropWare::ErrorCode err;
-            char str[] = "set_bit_mode";
+            char                str[] = "set_bit_mode";
 
             if (!this->is_running())
                 return MODULE_NOT_RUNNING;
@@ -325,7 +326,7 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode set_clock (const int32_t frequency) {
             PropWare::ErrorCode err;
-            char str[] = "set_clock";
+            char                str[] = "set_clock";
 
             if (!this->is_running())
                 return MODULE_NOT_RUNNING;
@@ -355,7 +356,7 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode get_clock (int32_t *frequency) {
             PropWare::ErrorCode err;
-            char str[] = "get_clock";
+            char                str[] = "get_clock";
 
 #ifdef SPI_OPTION_DEBUG_PARAMS
             // Check for errors
@@ -390,7 +391,7 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode shift_out (uint8_t bits, uint32_t value) {
             PropWare::ErrorCode err;
-            char str[] = "shift_out";
+            char                str[] = "shift_out";
 
 #ifdef SPI_OPTION_DEBUG_PARAMS
             // Check for errors
@@ -427,7 +428,7 @@ class SPI : public PrintCapable,
         template<typename T>
         PropWare::ErrorCode shift_in (const uint8_t bits, T *data) {
             PropWare::ErrorCode err;
-            const char str[] = "shift_in";
+            const char          str[] = "shift_in";
 
             // Check for errors
 #ifdef SPI_OPTION_DEBUG_PARAMS
@@ -545,8 +546,8 @@ class SPI : public PrintCapable,
          * @param[in]   err         Error number used to determine error string
          */
         void print_error_str (const Printer *printer, const ErrorCode err) const {
-            const char str[] = "SPI Error ";
-            const int relativeErr = err - BEG_ERROR;
+            const char str[]       = "SPI Error ";
+            const int  relativeErr = err - BEG_ERROR;
 
             switch (err) {
                 case INVALID_PIN:
@@ -605,7 +606,7 @@ class SPI : public PrintCapable,
             SET_BITMODE,
             SET_FREQ,
             GET_FREQ
-        } FunctionConstant;
+        }                     FunctionConstant;
 
         static const uint8_t BITS_OFFSET = 8;
 
@@ -662,6 +663,6 @@ class SPI : public PrintCapable,
         volatile atomic_t m_mailbox;
         int8_t            m_cog;
         char              m_errorInMethod[16];
-    };
+};
 
 }

@@ -63,7 +63,7 @@ class StringBuilder : public PrintCapable {
             }
         }
 
-        const char * to_string () const {
+        const char *to_string () const {
             return this->m_string;
         }
 
@@ -78,8 +78,8 @@ class StringBuilder : public PrintCapable {
                     free(this->m_string);
                 this->m_string = (char *) malloc(DEFAULT_SPACE_ALLOCATED);
                 this->m_string[0] = '\0';
-                this->m_size   = 0;
-                this->m_space  = DEFAULT_SPACE_ALLOCATED;
+                this->m_size  = 0;
+                this->m_space = DEFAULT_SPACE_ALLOCATED;
             }
         }
 
@@ -105,7 +105,7 @@ class StringBuilder : public PrintCapable {
     private:
         uint16_t m_space;
         uint16_t m_size;
-        char *m_string;
+        char     *m_string;
 };
 
 }

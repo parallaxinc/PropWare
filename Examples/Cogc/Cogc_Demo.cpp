@@ -1,7 +1,7 @@
 /**
- * @file        simplexuart.h
+ * @file    Cogc_Demo.cpp
  *
- * @author      David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,35 +23,25 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include <PropWare/pin.h>
 
-#include <PropWare/uart/abstractsimplexuart.h>
+void start ();
 
-namespace PropWare {
+int main () {
+    start();
+    PropWare::Pin led(PropWare::Port::P16, PropWare::Port::OUT);
 
-/**
- * @brief   An easy-to-use class for simplex (transmit only) UART communication
+    while (1) {
+        led.toggle();
+        waitcnt(MILLISECOND * 100 + CNT);
+    }
+}
+
+/*
+ * function to start up a new cog running the toggle
+ * code (which we've placed in the toggle_fw.cog section)
  */
-class SimplexUART : public AbstractSimplexUART {
-    public:
-        /**
-         * @brief   No-arg constructors are helpful when avoiding dynamic
-         *          allocation
-         */
-        SimplexUART () :
-                AbstractSimplexUART() {
-        }
-
-        /**
-         * @brief       Construct a UART instance capable of simplex serial
-         *              communications
-         *
-         * @param[in]   tx  Bit mask used for the TX (transmit) pin
-         */
-        SimplexUART (const Port::Mask tx) :
-                AbstractSimplexUART() {
-            this->set_tx_mask(tx);
-        }
-};
-
+void start () {
+    extern unsigned int _load_start_blinky_cog[];
+    cognew(_load_start_blinky_cog, NULL);
 }

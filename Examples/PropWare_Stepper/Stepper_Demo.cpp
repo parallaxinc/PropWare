@@ -1,7 +1,7 @@
 /**
- * @file        simplexuart.h
+ * @file    Stepper_Demo.cpp
  *
- * @author      David Zemon
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,35 +23,16 @@
  * SOFTWARE.
  */
 
-#pragma once
+// Includes
+#include <PropWare/PropWare.h>
+#include <PropWare/motor/stepper.h>
 
-#include <PropWare/uart/abstractsimplexuart.h>
+int main () {
+    PropWare::Stepper stepper(PropWare::Port::P1, PropWare::Port::P2, PropWare::Port::P3, PropWare::Port::P4);
 
-namespace PropWare {
+    stepper.step_forward(10); // Step forward 10 steps
+    stepper.step_reverse(15); // Step back 15 steps
+    stepper.step_forward(5, PropWare::Stepper::DEFAULT_DELAY / 2); // Step forward 5 steps, but do it twice as fast
 
-/**
- * @brief   An easy-to-use class for simplex (transmit only) UART communication
- */
-class SimplexUART : public AbstractSimplexUART {
-    public:
-        /**
-         * @brief   No-arg constructors are helpful when avoiding dynamic
-         *          allocation
-         */
-        SimplexUART () :
-                AbstractSimplexUART() {
-        }
-
-        /**
-         * @brief       Construct a UART instance capable of simplex serial
-         *              communications
-         *
-         * @param[in]   tx  Bit mask used for the TX (transmit) pin
-         */
-        SimplexUART (const Port::Mask tx) :
-                AbstractSimplexUART() {
-            this->set_tx_mask(tx);
-        }
-};
-
+    return 0;
 }

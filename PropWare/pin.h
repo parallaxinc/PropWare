@@ -33,19 +33,13 @@ namespace PropWare {
 /**
  * @brief   Utility class to handle general purpose I/O pins
  */
-class Pin: public PropWare::Port {
+class Pin : public PropWare::Port {
     public:
-        static void flash_pin (const Pin::Mask pinMask,
-                const uint32_t iterations = 10) {
+        static void flash_pin (const Pin::Mask pinMask, const uint32_t iterations = 10) {
             Port::flash_port(pinMask, pinMask, iterations);
         }
 
     public:
-        /**
-         * @brief   Public no-arg constructor - useful when you want a member
-         *          variable in a class but don't want to require the pin be
-         *          passed into the constructor
-         */
         Pin () :
                 Port() {
         }
@@ -60,14 +54,10 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @brief       Create a Pin variable
-         *
          * @param[in]   mask        Bit-mask of pin; One of PropWare::Pin::Mask
-         * @param[in]   direction   Direction to initialize pin; One of
-         *                          PropWare::Pin::Dir
+         * @param[in]   direction   Direction to initialize pin; One of PropWare::Pin::Dir
          */
-        Pin (const PropWare::Port::Mask mask,
-                const PropWare::Port::Dir direction) :
+        Pin (const PropWare::Port::Mask mask, const PropWare::Port::Dir direction) :
                 PropWare::Port(mask, direction) {
         }
 
@@ -79,8 +69,7 @@ class Pin: public PropWare::Port {
         }
 
         /**
-         * @brief       Set a Pin's mask based on the pin number (an integer,
-         *              0 through 31
+         * @brief       Set a Pin's mask based on the pin number (an integer, 0 through 31)
          *
          * @param[in]   pinNum  An integer 0-31 representing GPIO pins P0-P31
          */
@@ -88,7 +77,7 @@ class Pin: public PropWare::Port {
             if (31 <= pinNum)
                 this->m_mask = Pin::NULL_PIN;
             else
-                this->m_mask = 1 << pinNum;
+                this->m_mask = (uint32_t) (1 << pinNum);
         }
 
         /**
@@ -117,9 +106,8 @@ class Pin: public PropWare::Port {
         /**
          * @brief   Hold cog execution until an input pin goes high
          *
-         * @pre     Pin must be configured as input; You will have very sad and
-         *          undesirable results if your pin is an output at the time
-         *          of calling this function
+         * @pre     Pin must be configured as input; You will have very sad and undesirable results if your pin is an
+         *          output at the time of calling this function
          */
         void wait_until_high () const {
             waitpeq(this->m_mask, this->m_mask);
@@ -128,9 +116,8 @@ class Pin: public PropWare::Port {
         /**
          * @brief   Hold cog execution until an input pin goes low
          *
-         * @pre     Pin must be configured as input; You will have very sad and
-         *          undesirable results if your pin is an output at the time
-         *          of calling this function
+         * @pre     Pin must be configured as input; You will have very sad and undesirable results if your pin is an
+         *          output at the time of calling this function
          */
         void wait_until_low () const {
             waitpeq(0, this->m_mask);
@@ -139,23 +126,19 @@ class Pin: public PropWare::Port {
         /**
          * @brief   Hold cog execution until an input pin toggles
          *
-         * @pre     Pin must be configured as input; You will have very sad and
-         *          undesirable results if your pin is an output at the time
-         *          of calling this function
+         * @pre     Pin must be configured as input; You will have very sad and undesirable results if your pin is an
+         *          output at the time of calling this function
          */
         void wait_until_toggle () const {
             waitpne(this->read_fast(), this->m_mask);
         }
 
         /**
-         * @brief       Allow easy switch-press detection of any pin; Includes
-         *              de-bounce protection
+         * @brief       Allow easy switch-press detection of any pin; Includes de-bounce protection
          *
-         * @param[in]   debounceDelayInMillis   Set the de-bounce delay in units
-         *                                      of milliseconds
+         * @param[in]   debounceDelayInMillis   Set the de-bounce delay in units of milliseconds
          *
-         * @return      Returns 1 or 0 depending on whether the switch was
-         *              pressed
+         * @return      Returns 1 or 0 depending on whether the switch was pressed
          */
         bool is_switch_low (const uint16_t debounceDelayInMillis = 3) const {
             this->set_dir(PropWare::Pin::IN);  // Set the pin as input
@@ -174,14 +157,13 @@ class Pin: public PropWare::Port {
          * @brief   Copy one pin object into another; Only copies pin mask, not
          *          I/O direction
          */
-        PropWare::Pin* operator= (const PropWare::Pin &rhs) {
+        PropWare::Pin *operator= (const PropWare::Pin &rhs) {
             this->m_mask = rhs.m_mask;
             return this;
         }
 
         /**
-         * @brief   Compare the pin mask of two pin objects. Does not compare
-         *          I/O direction
+         * @brief   Compare the pin mask of two pin objects. Does not compare I/O direction
          */
         bool operator== (const PropWare::Pin &rhs) {
             return this->m_mask == rhs.m_mask;

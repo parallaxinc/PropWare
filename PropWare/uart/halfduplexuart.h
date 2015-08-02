@@ -35,7 +35,7 @@ namespace PropWare {
  * It is important to note that, just like PropWare::FullDuplexUART, receiving
  * data is an indefinitely blocking call
  */
-class HalfDuplexUART: public AbstractDuplexUART {
+class HalfDuplexUART : public AbstractDuplexUART {
     public:
         /**
          * @see PropWare::SimplexUART::SimplexUART()

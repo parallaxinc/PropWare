@@ -213,7 +213,7 @@ TEST(SafePutChar_singleChar) {
     reader.close();
 
     testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
-    err = testable->remove();
+    err      = testable->remove();
     error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->remove()
     err = testable->flush();
