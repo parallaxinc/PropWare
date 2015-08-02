@@ -12,6 +12,8 @@ set(PROPWARE_SOURCES
     ../filesystem/filewriter
     ../filesystem/sd
     ../hd44780
+    ../i2c
+    ../i2cbase
     ../l3g
     ../max6675
     ../mcp3000
