@@ -74,6 +74,9 @@ class I2CBase {
 
             this->m_scl.set();
             this->m_sda.set();
+#ifndef __PROPELLER_CMM_
+            __asm__ volatile("nop");
+#endif
             this->m_sda.toggle();
             this->m_scl.toggle();
         }
