@@ -51,8 +51,7 @@ class HD44780 : public PrintCapable {
         } Bitmode;
 
         /**
-         * @brief   Supported LCD dimensions; Used for determining cursor
-         *          placement
+         * @brief   Supported LCD dimensions; Used for determining cursor placement
          *
          * @note    There are two variations of 16x1 character LCDs; if you're
          *          unsure which version you have, try 16x1_1 first, it is more
@@ -67,7 +66,6 @@ class HD44780 : public PrintCapable {
             /** 16x1 mode 1 */DIM_16x1_1,
             /** 16x1 mode 2 */DIM_16x1_2,
             /** 16x2 */       DIM_16x2,
-            /** 16x4 */       DIM_16x4,
             /** 20x1 */       DIM_20x1,
             /** 20x2 */       DIM_20x2,
             /** 20x4 */       DIM_20x4,
@@ -283,8 +281,7 @@ class HD44780 : public PrintCapable {
 
             // Handle weird special case where a single row LCD is split across
             // multiple DDRAM lines (i.e., 16x1 type 1)
-            if (this->m_memMap.ddramCharRowBreak
-                    > this->m_memMap.ddramLineEnd) {
+            if (this->m_memMap.ddramCharRowBreak > this->m_memMap.ddramLineEnd) {
                 ddramLine = col / this->m_memMap.ddramLineEnd;
                 if (ddramLine)
                     addr  = 0x40;
@@ -466,12 +463,6 @@ class HD44780 : public PrintCapable {
                     this->m_memMap.charColumns       = 16;
                     this->m_memMap.ddramCharRowBreak = 16;
                     this->m_memMap.ddramLineEnd      = 16;
-                    break;
-                case PropWare::HD44780::DIM_16x4:
-                    this->m_memMap.charRows          = 4;
-                    this->m_memMap.charColumns       = 16;
-                    this->m_memMap.ddramCharRowBreak = 16;
-                    this->m_memMap.ddramLineEnd      = 32;
                     break;
                 case PropWare::HD44780::DIM_20x1:
                     this->m_memMap.charRows          = 1;
