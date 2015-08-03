@@ -23,6 +23,9 @@
  * SOFTWARE.
  */
 
+
+#ifndef __PROPELLER_COG__
 #include <PropWare/i2c.h>
 
 PropWare::I2C pwI2c;
+#endif
