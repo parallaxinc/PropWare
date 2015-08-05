@@ -62,13 +62,11 @@ class HD44780 : public PrintCapable {
         typedef enum {
             /** 8x1 */        DIM_8x1,
             /** 8x2 */        DIM_8x2,
-            /** 8x4 */        DIM_8x4,
             /** 16x1 mode 1 */DIM_16x1_1,
             /** 16x1 mode 2 */DIM_16x1_2,
             /** 16x2 */       DIM_16x2,
             /** 20x1 */       DIM_20x1,
             /** 20x2 */       DIM_20x2,
-            /** 20x4 */       DIM_20x4,
             /** 24x1 */       DIM_24x1,
             /** 24x2 */       DIM_24x2,
             /** 40x1 */       DIM_40x1,
