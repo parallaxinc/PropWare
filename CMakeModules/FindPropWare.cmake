@@ -165,6 +165,10 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     if (NOT "${PROPWARE_PATH}" STREQUAL "PROPWARE_PATH-NOTFOUND")
         find_file(PropWare_DAT_SYMBOL_CONVERTER datSymbolConverter.py
             PATHS ${PROPWARE_PATH}/util)
+        find_file(PROPWARE_RUN_OBJCOPY CMakeRunObjcopy.cmake
+            PATHS
+                ${PROPWARE_PATH}/CMakeModules
+                ${CMAKE_ROOT}/Modules)
 
         set(PropWare_LIBRARIES
             # Built-ins
