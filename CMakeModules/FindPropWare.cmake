@@ -369,10 +369,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
                     DEPENDS ${name})
 
-            add_custom_target(test-
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -q
-                    DEPENDS ${name})
-
             # Add target for run (load to RAM and start terminal)
             add_custom_target(debug
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
@@ -391,10 +387,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             add_custom_target(gdb-${name}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
                     ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
-                    DEPENDS ${name})
-
-            add_custom_target(test-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -q
                     DEPENDS ${name})
 
             # Add target for run (load to RAM and start terminal)
@@ -444,6 +436,17 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         endmacro()
     endif ()
 
+    enable_testing()
+    add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+    macro(create_test target sources)
+        create_executable(${target} ${sources})
+        add_test(NAME ${target}
+            COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
+        add_dependencies(test-all ${target})
+        add_custom_target(test-${target}
+            COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
+            DEPENDS ${target})
+    endmacro()
 
     include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(PropWare
