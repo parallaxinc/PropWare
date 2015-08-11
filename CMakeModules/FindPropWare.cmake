@@ -438,8 +438,8 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
     enable_testing()
     add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
-    macro(create_test target sources)
-        create_executable(${target} ${sources})
+    macro(create_test target src1)
+        create_executable(${target} ${src1} ${ARGN})
         add_test(NAME ${target}
             COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
         add_dependencies(test-all ${target})
