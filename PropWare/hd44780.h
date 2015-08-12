@@ -51,8 +51,7 @@ class HD44780 : public PrintCapable {
         } Bitmode;
 
         /**
-         * @brief   Supported LCD dimensions; Used for determining cursor
-         *          placement
+         * @brief   Supported LCD dimensions; Used for determining cursor placement
          *
          * @note    There are two variations of 16x1 character LCDs; if you're
          *          unsure which version you have, try 16x1_1 first, it is more
@@ -63,14 +62,14 @@ class HD44780 : public PrintCapable {
         typedef enum {
             /** 8x1 */        DIM_8x1,
             /** 8x2 */        DIM_8x2,
-            /** 8x4 */        DIM_8x4,
+            /** 8x2 */        DIM_8x4,
             /** 16x1 mode 1 */DIM_16x1_1,
             /** 16x1 mode 2 */DIM_16x1_2,
             /** 16x2 */       DIM_16x2,
-            /** 16x4 */       DIM_16x4,
+            /** 16x2 */       DIM_16x4,
             /** 20x1 */       DIM_20x1,
             /** 20x2 */       DIM_20x2,
-            /** 20x4 */       DIM_20x4,
+            /** 20x2 */       DIM_20x4,
             /** 24x1 */       DIM_24x1,
             /** 24x2 */       DIM_24x2,
             /** 40x1 */       DIM_40x1,
@@ -160,7 +159,7 @@ class HD44780 : public PrintCapable {
          * @{
          */
         static const uint8_t FUNC_8BIT_MODE  = BIT_4;  // 0 = 4-bit mode
-        static const uint8_t FUNC_2LINE_MODE = BIT_3;  // 0 = 1-line mode
+        static const uint8_t FUNC_2LINE_MODE = BIT_3;  // 0 = "1-line" mode - use 2-line mode for 2- and 4-line displays
         static const uint8_t FUNC_5x10_CHAR  = BIT_2;  // 0 = 5x8 dot mode
         /**@}*/
 
@@ -240,8 +239,7 @@ class HD44780 : public PrintCapable {
             arg = PropWare::HD44780::FUNCTION_SET;
             if (PropWare::HD44780::BM_8 == bitmode)
                 arg |= PropWare::HD44780::FUNC_8BIT_MODE;
-            if (0 != dimensions % 3)
-                arg |= PropWare::HD44780::FUNC_2LINE_MODE;
+            arg |= PropWare::HD44780::FUNC_2LINE_MODE;
             this->cmd(arg);
 
             // Turn off display shift (set cursor shift) and leave default of
@@ -283,8 +281,7 @@ class HD44780 : public PrintCapable {
 
             // Handle weird special case where a single row LCD is split across
             // multiple DDRAM lines (i.e., 16x1 type 1)
-            if (this->m_memMap.ddramCharRowBreak
-                    > this->m_memMap.ddramLineEnd) {
+            if (this->m_memMap.ddramCharRowBreak > this->m_memMap.ddramLineEnd) {
                 ddramLine = col / this->m_memMap.ddramLineEnd;
                 if (ddramLine)
                     addr  = 0x40;
@@ -487,9 +484,9 @@ class HD44780 : public PrintCapable {
                     break;
                 case PropWare::HD44780::DIM_20x4:
                     this->m_memMap.charRows          = 4;
-                    this->m_memMap.charColumns       = 8;
-                    this->m_memMap.ddramCharRowBreak = 8;
-                    this->m_memMap.ddramLineEnd      = 20;
+                    this->m_memMap.charColumns       = 20;
+                    this->m_memMap.ddramCharRowBreak = 20;
+                    this->m_memMap.ddramLineEnd      = 40;
                     break;
                 case PropWare::HD44780::DIM_24x1:
                     this->m_memMap.charRows          = 1;
@@ -514,8 +511,6 @@ class HD44780 : public PrintCapable {
                     this->m_memMap.charColumns       = 40;
                     this->m_memMap.ddramCharRowBreak = 40;
                     this->m_memMap.ddramLineEnd      = 40;
-                    break;
-                default:
                     break;
             }
         }

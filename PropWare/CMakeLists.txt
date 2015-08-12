@@ -18,6 +18,7 @@ set(PROPWARE_SOURCES
     ../max6675
     ../mcp3000
     ../motor/stepper
+    ../pcf8591
     ../pin
     ../port
     ../printcapable
