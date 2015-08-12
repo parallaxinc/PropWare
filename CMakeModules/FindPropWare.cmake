@@ -375,6 +375,11 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
+            add_custom_target(run-ram
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
+                    DEPENDS ${name})
+
+            # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
                     DEPENDS ${name})
@@ -395,8 +400,13 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
+            add_custom_target(run-ram-${name}
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
+                    DEPENDS ${name})
+
+            # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
                     DEPENDS ${name})
 
         endmacro()
