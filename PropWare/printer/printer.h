@@ -134,7 +134,7 @@ class Printer {
          *
          * @returns     True when cooked mode is on
          */
-        bool get_cooked () {
+        bool get_cooked () const {
             return this->m_cooked;
         }
 
