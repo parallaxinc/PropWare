@@ -84,6 +84,10 @@ class AbstractSimplexUART : public virtual UART {
          * @see PropWare::UART::set_tx_mask
          */
         void set_tx_mask (const Port::Mask tx) {
+            // Reset the old pin
+            this->m_tx.set_dir(Port::IN);
+            this->m_tx.clear();
+
             this->m_tx.set_mask(tx);
             this->m_tx.set();
             this->m_tx.set_dir(Port::OUT);
