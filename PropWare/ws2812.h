@@ -208,6 +208,10 @@ class WS2812 {
             return color;
         }
 
+        Type get_type () const {
+            return this->m_type;
+        }
+
     private:
         Pin        m_pin;
         const Type m_type;
