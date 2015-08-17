@@ -94,9 +94,9 @@ class AbstractDuplexUART : public virtual DuplexUART,
         }
 
         /**
-         * @see PropWare::UART::receive_array
+         * @see PropWare::UART::get_line
          */
-        HUBTEXT ErrorCode receive_array (char buffer[], int32_t *length, const uint32_t delim = '\n') const {
+        HUBTEXT ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
@@ -108,7 +108,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                 // Set RX as input
                 __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
 
-                *length = this->shift_in_byte_array((uint32_t) buffer, *length, delim);
+                *length = this->shift_in_byte_array((uint32_t) buffer, *length, delimiter);
 
                 if (NO_PARITY != this->m_parity)
                     for (int32_t i = 0; i < *length; --i)
@@ -127,7 +127,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                     *buffer = (char) temp;
                     ++buffer;
                     ++wordCnt;
-                } while (temp != delim && wordCnt < *length);
+                } while (temp != delimiter && wordCnt < *length);
 
                 *length = wordCnt;
             }
@@ -155,7 +155,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             const int32_t originalBufferSize = *bufferSize;
 
             PropWare::ErrorCode err;
-            check_errors(this->receive_array(string, bufferSize));
+            check_errors(this->get_line(string, bufferSize));
 
             // Replace delimiter with null-terminator IFF we found one
             if (*bufferSize != originalBufferSize || '\n' == string[originalBufferSize])
