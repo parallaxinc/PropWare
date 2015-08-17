@@ -184,7 +184,7 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::send
          */
-        HUBTEXT virtual void send (uint16_t originalData) const {
+        virtual void send (uint16_t originalData) const {
             uint32_t wideData = originalData;
 
             // Set pin as output
@@ -218,7 +218,7 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::send_array
          */
-        HUBTEXT virtual void send_array (const char array[], uint32_t words) const {
+        virtual void send_array (const char array[], uint32_t words) const {
             char     *arrayPtr = (char *) array;
             uint32_t data      = 0, waitCycles = 0, bits = 0;
 

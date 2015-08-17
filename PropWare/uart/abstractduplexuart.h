@@ -78,7 +78,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
         /**
          * @see PropWare::UART::receive
          */
-        HUBTEXT uint32_t receive () const {
+        uint32_t receive () const {
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
 
@@ -96,7 +96,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
         /**
          * @see PropWare::UART::get_line
          */
-        HUBTEXT ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const {
+        ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
@@ -130,6 +130,36 @@ class AbstractDuplexUART : public virtual DuplexUART,
                 } while (temp != delimiter && wordCnt < *length);
 
                 *length = wordCnt;
+            }
+
+            return NO_ERROR;
+        }
+
+        /**
+         * @see PropWare::UART::receive_array
+         */
+        ErrorCode receive_array (uint8_t *buffer, uint32_t length) const {
+            // Check if the total receivable bits can fit within a byte
+            if (8 >= this->m_receivableBits) {
+                // Set RX as input
+                __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
+
+                this->shift_in_byte_array(buffer, length);
+
+                if (NO_PARITY != this->m_parity)
+                    for (uint32_t i = 0; i < length; --i)
+                        if (0 != this->check_parity((uint32_t) buffer[i]))
+                            return UART::PARITY_ERROR;
+            }
+                // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
+                // improvement - it is only here for user convenience)
+            else {
+                uint32_t temp;
+                for (uint32_t i = 0; i < length; ++i) {
+                    if (-1 == (temp = this->receive()))
+                        return UART::PARITY_ERROR;
+                    buffer[i] = (char) temp;
+                }
             }
 
             return NO_ERROR;
@@ -172,10 +202,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
             this->set_parity(UART::DEFAULT_PARITY);
             this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
             this->set_baud_rate(*UART::DEFAULT_BAUD);
-            this->set_tx_mask(
-                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_TX));
-            this->set_rx_mask(
-                    (Port::Mask const) (1 << *UART::PARALLAX_STANDARD_RX));
+            this->set_tx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_TX));
+            this->set_rx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_RX));
         }
 
         /**
@@ -281,10 +309,10 @@ class AbstractDuplexUART : public virtual DuplexUART,
 #ifndef DOXYGEN_IGNORE
             // Initialize variables
             __asm__ volatile (
-                    "        fcache #(ShiftInArrayDataEnd - ShiftInArrayDataStart)                      \n\t"
+                    "        fcache #(ShiftInStringEnd - ShiftInStringStart)                            \n\t"
                     "        .compress off                                                              \n\t"
 
-                    "ShiftInArrayDataStart:                                                             \n\t"
+                    "ShiftInStringStart:                                                                \n\t"
                     "outerLoop%=:                                                                       \n\t"
                     // Initialize the index variable
                     "       mov %[_bitIdx], %[_bits]                                                    \n\t"
@@ -301,7 +329,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                     "       shr %[_data], #1                                                            \n\t"
                     "       test %[_rxMask], ina wz                                                     \n\t"
                     "       muxnz %[_data], %[_msbMask]                                                 \n\t"
-                    "       djnz %[_bitIdx], #__LMM_FCACHE_START+(innerLoop%= - ShiftInArrayDataStart)  \n\t"
+                    "       djnz %[_bitIdx], #__LMM_FCACHE_START+(innerLoop%= - ShiftInStringStart)     \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       wrbyte %[_data], %[_bufAdr]                                                 \n\t"
@@ -324,10 +352,10 @@ class AbstractDuplexUART : public virtual DuplexUART,
 
                     // Finally, loop to the beginning if the delimiter is not equal to our most recent word and
                     // the buffer is not about to overflow
-                    "if_nz_and_c jmp #__LMM_FCACHE_START+(outerLoop%= - ShiftInArrayDataStart)          \n\t"
+                    "if_nz_and_c jmp #__LMM_FCACHE_START+(outerLoop%= - ShiftInStringStart)             \n\t"
 
                     "       jmp __LMM_RET                                                               \n\t"
-                    "ShiftInArrayDataEnd:                                                               \n\t"
+                    "ShiftInStringEnd:                                                                  \n\t"
                     "       .compress default                                                           \n\t"
             :// Outputs
             [_bitIdx] "+r"(bitIdx),
@@ -349,6 +377,79 @@ class AbstractDuplexUART : public virtual DuplexUART,
         }
 
         /**
+         * @brief       Shift in an array of data (FCache function)
+         *
+         * @param[in]   bufferAddr
+         * @param[in]   length
+         */
+        void shift_in_byte_array (uint8_t *buffer, unsigned int length) const {
+            uint32_t initWaitCycles = (this->m_bitCycles >> 1) + this->m_bitCycles;
+
+#ifndef DOXYGEN_IGNORE
+#define ASMVAR(name) "__LMM_FCACHE_START+("  #name "%= - ShiftInArrayDataStart)"
+
+            // Initialize variables
+            __asm__ volatile (
+                    "        fcache #(ShiftInArrayDataEnd - ShiftInArrayDataStart)                              \n\t"
+                    "        .compress off                                                                      \n\t"
+                    "ShiftInArrayDataStart:                                                                     \n\t"
+                    "       jmp #__LMM_FCACHE_START+(outerLoop%= - ShiftInArrayDataStart)                       \n\t"
+
+                    // Temporary variables
+                    "bitIdx%=:                                                                                  \n\t"
+                    "       nop                                                                                 \n\t"
+                    "waitCycles%=:                                                                              \n\t"
+                    "       nop                                                                                 \n\t"
+                    "data%=:                                                                                    \n\t"
+                    "       nop                                                                                 \n\t"
+                    "       mov " ASMVAR(data) ", #0                                                            \n\t"
+
+                    "outerLoop%=:                                                                               \n\t"
+                    // Initialize the index variable
+                    "       mov " ASMVAR(bitIdx) ", %[_bits]                                                    \n\t"
+                    // Re-initialize the timer
+                    "       mov " ASMVAR(waitCycles) ", %[_initWaitCycles]                                      \n\t"
+                    // Wait for the start bit
+                    "       waitpne %[_rxMask], %[_rxMask]                                                      \n\t"
+                    // Begin the timer
+                    "       add " ASMVAR(waitCycles) ", CNT                                                     \n\t"
+
+                    "innerLoop%=:                                                                               \n\t"
+                    // Wait for the next bit
+                    "       waitcnt " ASMVAR(waitCycles) ", %[_bitCycles]                                       \n\t"
+                    "       shr " ASMVAR(data) ", #1                                                            \n\t"
+                    "       test %[_rxMask], ina wz                                                             \n\t"
+                    "       muxnz " ASMVAR(data) ", %[_msbMask]                                                 \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #__LMM_FCACHE_START+(innerLoop%= - ShiftInArrayDataStart)  \n\t"
+
+                    // Write the word back to the buffer in HUB memory
+                    "       wrbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
+
+                    // Clear the data register
+                    "       mov " ASMVAR(data) ", #0                                                            \n\t"
+                    // Increment the buffer address
+                    "       add %[_bufAdr], #1                                                                  \n\t"
+
+                    // Wait for the stop bits and the loop back
+                    "       waitpeq %[_rxMask], %[_rxMask]                                                      \n\t"
+                    "       djnz %[_length], #__LMM_FCACHE_START+(outerLoop%= - ShiftInArrayDataStart)          \n\t"
+
+                    "       jmp __LMM_RET                                                                       \n\t"
+                    "ShiftInArrayDataEnd:                                                                       \n\t"
+                    "       .compress default                                                                   \n\t"
+            :// Outputs
+            [_bufAdr] "+r"(buffer),
+            [_length] "+r"(length)
+            :// Inputs
+            [_rxMask] "r"(this->m_rx.get_mask()),
+            [_bits] "r"(this->m_receivableBits),
+            [_bitCycles] "r"(this->m_bitCycles),
+            [_initWaitCycles] "r"(initWaitCycles),
+            [_msbMask] "r"(this->m_msbMask));
+#endif
+        }
+
+        /**
          * @brief       Check parity for a received value
          *
          * @param[in]   rxVal   Received value with parity bit exactly as
@@ -356,7 +457,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
          *
          * @return      0 for proper parity; -1 for parity error
          */
-        HUBTEXT ErrorCode check_parity (uint32_t rxVal) const {
+        ErrorCode check_parity (uint32_t rxVal) const {
             uint32_t evenParityResult;
             uint32_t wideParityMask = this->m_parityMask;
             uint32_t wideDataMask   = this->m_dataMask;
