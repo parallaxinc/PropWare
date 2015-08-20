@@ -40,6 +40,7 @@ class PCF8591 {
             CHANNEL_1,
             CHANNEL_2,
             CHANNEL_3,
+            CHANNELS
         }                    ADCChannel;
 
         typedef enum {
