@@ -50,9 +50,10 @@ Useful links
 * %PropWare Links
   * [Home](http://david.zemon.name/PropWare)
   * [Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)
+  * [Forum thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
   * [Issue Tracker](https://github.com/DavidZemon/PropWare/issues)
   * [Source code](https://github.com/DavidZemon/PropWare)
-  * [Forum thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
+  * [Build Server](http://david.zemon.name:8111/project.html?projectId=PropWare&tab=projectOverview&guest=1)
 * [Parallax forums](http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller)
 * [JetBrains CLion](http://www.jetbrains.com/clion/): Full-featured, cross-platform C/C++ IDE
 * PropGCC: GCC compiler for Parallax Propeller
