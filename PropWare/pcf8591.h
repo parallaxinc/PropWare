@@ -34,6 +34,7 @@ class PCF8591 {
     public:
         static const uint8_t DEFAULT_DEVICE_ADDRESS = 0x90;
         static const uint8_t DAC_ENABLE             = BIT_6;
+        static const uint8_t CHANNEL_BITS           = BIT_1 | BIT_0;
 
         typedef enum {
             CHANNEL_0,
@@ -70,8 +71,8 @@ class PCF8591 {
             this->set_channel(channel);
             this->set_auto_increment(false);
             uint8_t buffer[2];
-            this->m_i2c->get(this->m_deviceAddress, buffer, 2);
-            return buffer[1];
+            this->m_i2c->get(this->m_deviceAddress, buffer, sizeof(buffer));
+            return buffer[sizeof(buffer) - 1];
         }
 
         bool read_next (uint8_t *data) const {
@@ -83,7 +84,7 @@ class PCF8591 {
         }
 
         bool set_channel (const ADCChannel channel) {
-            this->m_currentProgram &= ~0x03;
+            this->m_currentProgram &= ~CHANNEL_BITS;
             this->m_currentProgram |= channel;
             return this->program();
         }
