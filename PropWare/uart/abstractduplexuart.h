@@ -39,9 +39,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
          * @see PropWare::UART::set_rx_mask
          */
         void set_rx_mask (const Port::Mask rx) {
-            // Reset old pin
-            this->m_rx.clear();
-
             this->m_rx.set_mask(rx);
             this->m_rx.set_dir(Port::IN);
         }
