@@ -76,7 +76,7 @@ TEST(ShiftOut_LsbFirst) {
 
 int main () {
     CS.set();
-    START(SPITest);
+    START(SPITest_MUST_USE_LOGIC_ANALYZER);
 
     RUN_TEST(ShiftOut_MsbFirst);
     RUN_TEST(ShiftOut_LsbFirst);
