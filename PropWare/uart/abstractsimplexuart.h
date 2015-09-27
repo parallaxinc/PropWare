@@ -444,20 +444,20 @@ class AbstractSimplexUART : public virtual UART {
 #ifndef DOXYGEN_IGNORE
             volatile uint32_t waitCycles = bitCycles;
             __asm__ volatile (
-                    "        fcache #(ShiftOutDataEnd - ShiftOutDataStart)                     \n\t"
+                    "        fcache #(ShiftOutDataEnd%= - ShiftOutDataStart%=)                 \n\t"
                     "        .compress off                                                     \n\t"
 
-                    "ShiftOutDataStart:                                                        \n\t"
+                    "ShiftOutDataStart%=:                                                      \n\t"
                     "        add %[_waitCycles], CNT                                           \n\t"
 
                     "loop%=:                                                                   \n\t"
                     "        waitcnt %[_waitCycles], %[_bitCycles]                             \n\t"
                     "        shr %[_data],#1 wc                                                \n\t"
                     "        muxc outa, %[_mask]                                               \n\t"
-                    "        djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftOutDataStart)   \n\t"
+                    "        djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftOutDataStart%=) \n\t"
 
                     "        jmp __LMM_RET                                                     \n\t"
-                    "ShiftOutDataEnd:                                                          \n\t"
+                    "ShiftOutDataEnd%=:                                                        \n\t"
                     "        .compress default                                                 \n\t"
             : [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
