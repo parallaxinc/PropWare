@@ -55,5 +55,4 @@ ExternalProject_Add(OSXCMake
     INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR> ${CMAKE_BINARY_DIR}/${CUSTOM_OSX_CMAKE_INSTALL_DIR})
 
 include(./CMakePropWareInstall.cmake)
-include(./CPackConfig.cmake)
-include(CPack)
+include(./CMakeCPack.cmake)
