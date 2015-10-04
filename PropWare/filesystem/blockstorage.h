@@ -100,21 +100,21 @@ class BlockStorage {
         }
 
     public:
-        virtual ErrorCode start () const = 0;
+        virtual ErrorCode start () = 0;
 
-        virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) const = 0;
+        virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) = 0;
 
-        ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
+        ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
             return this->read_data_block(address, buffer->buf);
         }
 
-        ErrorCode reload_buffer (const BlockStorage::Buffer *buffer) const {
+        ErrorCode reload_buffer (const BlockStorage::Buffer *buffer) {
             return this->read_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer);
         }
 
-        virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const = 0;
+        virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) = 0;
 
-        ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
+        ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) {
             return this->write_data_block(address, buffer->buf);
         }
 
@@ -123,11 +123,11 @@ class BlockStorage {
          *
          * @param[in]   buffer  Buffer to be written to the SD card - written only it was modified
          */
-        ErrorCode flush (Buffer *buffer) const {
+        ErrorCode flush (Buffer *buffer) {
             PropWare::ErrorCode err;
             if (buffer->meta && buffer->meta->mod) {
-                check_errors(this->write_data_block(
-                        buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer->buf));
+                check_errors(this->write_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset,
+                                                    buffer->buf));
                 buffer->meta->mod = false;
             }
             return 0;

@@ -40,12 +40,6 @@ namespace PropWare {
 
 class SD : public BlockStorage {
     public:
-        static const uint16_t SECTOR_SIZE       = 512;
-        static const uint8_t  SECTOR_SIZE_SHIFT = 9;
-        /** Default frequency to run the SPI module */
-        static const uint32_t FULL_SPEED_SPI    = 900000;
-
-    public:
         /**
          * Error codes - preceded by SPI
          */
@@ -60,38 +54,37 @@ class SD : public BlockStorage {
             /** SD Error 5 */         INVALID_DAT_START_ID,
             /** SD Error 6 */         CMD8_FAILURE,
             /** Last SD error code */ END_ERROR   = CMD8_FAILURE
-        }                     ErrorCode;
+        } ErrorCode;
 
     public:
-        SD (SPI *spi = SPI::get_instance()) {
+        SD (SPI *spi = SPI::get_instance())
+                : m_spi(spi) {
             Pin::Mask pins[4];
             unpack_sd_pins((uint32_t *) pins);
 
-            this->m_mosi = pins[0];
-            this->m_miso = pins[1];
-            this->m_sclk = pins[2];
+            this->m_spi->set_mosi(pins[0]);
+            this->m_spi->set_miso(pins[1]);
+            this->m_spi->set_sclk(pins[2]);
 
             // Set CS for output and initialize high
             this->m_cs.set_mask(pins[3]);
             this->m_cs.set_dir(Pin::OUT);
             this->m_cs.set();
-
-            this->m_spi = spi;
         }
 
         /**
          * @brief       Construct an SD object with the given SPI parameters
          */
         SD (SPI *spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs)
-                : m_mosi(mosi),
-                  m_miso(miso),
-                  m_sclk(sclk) {
+                : m_spi(spi) {
+            this->m_spi->set_mosi(mosi);
+            this->m_spi->set_miso(miso);
+            this->m_spi->set_sclk(sclk);
+
             // Set CS for output and initialize high
             this->m_cs.set_mask(cs);
             this->m_cs.set_dir(Pin::OUT);
             this->m_cs.set();
-
-            this->m_spi = spi;
         }
 
         /**
@@ -103,14 +96,13 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start () const {
+        PropWare::ErrorCode start () {
             PropWare::ErrorCode err;
             uint8_t             response[16];
 
-            // Start SPI module
-            if ((err = this->m_spi->start(this->m_mosi, this->m_miso, this->m_sclk, SPI_INIT_FREQ, SPI_MODE,
-                                          SPI_BITMODE)))
-                return err;
+            this->m_spi->set_clock(SPI_INIT_FREQ);
+            this->m_spi->set_mode(SPI_MODE);
+            this->m_spi->set_bit_mode(SPI_BITMODE);
 
             // Try and get the card up and responding to commands first
             check_errors(this->reset_and_verify_v2_0(response));
@@ -119,8 +111,7 @@ class SD : public BlockStorage {
 
             check_errors(this->increase_throttle());
 
-            // We're finally done initializing everything. Set chip select high
-            // again to release the SPI port
+            // We're finally done initializing everything. Set chip select high again to release the SPI port
             this->m_cs.set();
 
             // Initialization complete
@@ -141,7 +132,7 @@ class SD : public BlockStorage {
          * @param[in]   printer     Printer used for logging the message
          * @param[in]   err         Error number used to determine error string
          */
-        void print_error_str (const Printer &printer, const ErrorCode err) const {
+        void print_error_str (const Printer &printer, const ErrorCode err)  {
             const uint8_t relativeError = err - BEG_ERROR;
 
             switch (err) {
@@ -182,7 +173,7 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) const {
+        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[])  {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
 
@@ -211,7 +202,7 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const {
+        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[])  {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
 
@@ -253,7 +244,7 @@ class SD : public BlockStorage {
         /***********************
          *** Private Methods ***
          ***********************/
-        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response[]) const {
+        inline PropWare::ErrorCode reset_and_verify_v2_0 (uint8_t response[])  {
             PropWare::ErrorCode err;
             uint8_t             i, j;
             bool                stageCleared;
@@ -263,8 +254,10 @@ class SD : public BlockStorage {
             for (i       = 0; i < 10 && !stageCleared; ++i) {
                 // Initialization loop (reset SD card)
                 for (j = 0; j < 10 && !stageCleared; ++j) {
+                    this->m_cs.set();
                     check_errors(this->power_up());
-
+                    // Chip select goes low for the duration of initization
+                    this->m_cs.clear();
                     check_errors(this->reset(response, stageCleared));
                 }
 
@@ -290,7 +283,7 @@ class SD : public BlockStorage {
         /**
          * @brief   Send numerous clocks to the card to allow it to perform internal initialization
          */
-        inline PropWare::ErrorCode power_up () const {
+        inline PropWare::ErrorCode power_up ()  {
             uint8_t             i;
             PropWare::ErrorCode err;
 
@@ -299,20 +292,12 @@ class SD : public BlockStorage {
             // Send at least 72 clock cycles to enable the SD card
             this->m_cs.set();
             for (i = 0; i < 128; ++i)
-                check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
-
-            // Be very super 100% sure that all clocks have finished ticking
-            // before setting chip select low
-            check_errors(this->m_spi->wait());
-            waitcnt(10 * MILLISECOND + CNT);
-
-            // Chip select goes low for the duration of this function
-            this->m_cs.clear();
+                check_errors(this->m_spi->shift_out(24, (uint32_t) -1));
 
             return NO_ERROR;
         }
 
-        inline PropWare::ErrorCode reset (uint8_t response[], bool &isIdle) const {
+        inline PropWare::ErrorCode reset (uint8_t response[], bool &isIdle)  {
             PropWare::ErrorCode err;
 
             // Send SD into idle state, retrieve a response and ensure it is the
@@ -327,7 +312,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared) const {
+        inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared)  {
             PropWare::ErrorCode err;
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
@@ -339,7 +324,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        inline PropWare::ErrorCode activate (uint8_t response[]) const {
+        inline PropWare::ErrorCode activate (uint8_t response[])  {
             PropWare::ErrorCode err;
             uint32_t            timeout;
             uint32_t            longWiggleRoom = 3 * MILLISECOND;
@@ -373,7 +358,7 @@ class SD : public BlockStorage {
         /**
          * @brief   Initialization nearly complete, increase clock speed
          */
-        inline PropWare::ErrorCode increase_throttle () const {
+        inline PropWare::ErrorCode increase_throttle ()  {
             return this->m_spi->set_clock(FULL_SPEED_SPI);
         }
 
@@ -387,7 +372,7 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode send_command (const uint8_t cmd, const uint32_t arg, const uint8_t crc) const {
+        PropWare::ErrorCode send_command (const uint8_t cmd, const uint32_t arg, const uint8_t crc)  {
             PropWare::ErrorCode err;
 
             // Send out the command
@@ -413,14 +398,14 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t *dat) const {
+        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t *dat) {
             PropWare::ErrorCode err;
             uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, (uint8_t *) &this->m_firstByteResponse));
+                check_errors(this->m_spi->shift_in(8, &this->m_firstByteResponse));
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -428,6 +413,7 @@ class SD : public BlockStorage {
 
                 // wait for transmission end
             } while (0xff == this->m_firstByteResponse);
+
 
             // First byte in a response should always be either IDLE or ACTIVE.
             // If this one wasn't, throw an error. If it was, decrement the
@@ -461,7 +447,7 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[]) const {
+        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[])  {
             uint8_t  i, err, checksum;
             uint32_t timeout;
 
@@ -501,7 +487,7 @@ class SD : public BlockStorage {
                     }
 #else
                     while (bytes--) {
-                        check_errors(this->m_spi->shift_in_fast(8, dat++));
+                        check_errors(this->m_spi->shift_in(8, dat++));
                     }
 #endif
                     // Read two more bytes for checksum - throw away data
@@ -537,7 +523,7 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) const {
+        PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[])  {
             PropWare::ErrorCode err;
             uint32_t            timeout;
 
@@ -562,7 +548,7 @@ class SD : public BlockStorage {
 
                 // Send all bytes
                 while (bytes--) {
-                    check_errors(this->m_spi->shift_out_fast(8, *(dat++)));
+                    check_errors(this->m_spi->shift_out(8, *(dat++)));
                 }
 
                 // Receive and digest response token
@@ -597,7 +583,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion (const Printer &printer) const {
+        void first_byte_expansion (const Printer &printer)  {
             if (BIT_0 & this->m_firstByteResponse)
                 printer.puts("\t0: Idle\n");
             if (BIT_1 & this->m_firstByteResponse)
@@ -641,9 +627,15 @@ class SD : public BlockStorage {
          *** Private Constants ***
          *************************/
         // SPI config
-        static const uint32_t     SPI_INIT_FREQ = 200000;  // Run SD initialization at 200 kHz
-        static const SPI::Mode    SPI_MODE      = SPI::MODE_0;
-        static const SPI::BitMode SPI_BITMODE   = SPI::MSB_FIRST;
+        static const uint16_t SECTOR_SIZE       = 512;
+        static const uint8_t  SECTOR_SIZE_SHIFT = 9;
+
+        /** Run SD initialization at 200 kHz */
+        static const uint32_t     SPI_INIT_FREQ  = 200000;
+        /** Default frequency to run the SPI module */
+        static const uint32_t     FULL_SPEED_SPI = 900000;
+        static const SPI::Mode    SPI_MODE       = SPI::MODE_0;
+        static const SPI::BitMode SPI_BITMODE    = SPI::MSB_FIRST;
 
         // Misc. SD Definitions
         static const uint32_t RESPONSE_TIMEOUT;  // Wait 0.1 seconds for a response before timing out
@@ -692,10 +684,6 @@ class SD : public BlockStorage {
          *******************************/
         SPI *m_spi;
         Pin m_cs;  // Chip select pin
-
-        Pin::Mask m_mosi;
-        Pin::Mask m_miso;
-        Pin::Mask m_sclk;
 
         // First byte response receives special treatment to allow for verbose debugging
         uint8_t m_firstByteResponse;
