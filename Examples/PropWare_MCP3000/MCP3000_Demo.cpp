@@ -27,13 +27,6 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/mcp3000.h>
 
-/**
-* @brief       Report errors to the Debug LEDs for user interpretation
-*
-* @param[in]   err     Error value
-*/
-void error (const PropWare::SPI *spi, const PropWare::ErrorCode err);
-
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
 const PropWare::MCP3000::PartNumber PART_NUMBER = PropWare::MCP3000::MCP300x;
 const PropWare::MCP3000::Channel    CHANNEL     = PropWare::MCP3000::CHANNEL_1;
@@ -49,14 +42,13 @@ const PropWare::Port::Mask CS   = PropWare::Port::P3;
 
 // Main function
 int main () {
-    const uint16_t      DIVISOR = 1024 / 8;
-    PropWare::ErrorCode err;
-    uint16_t            data;
-    uint32_t            loopCounter;
-    uint8_t             scaledValue, i;
-    uint32_t            ledOutput;
-    PropWare::SPI       spi(MOSI, MISO, SCLK);
-    PropWare::MCP3000   adc(&spi, CS, PART_NUMBER);
+    const uint16_t    DIVISOR = 1024 / 8;
+    uint16_t          data = 0;
+    uint32_t          loopCounter;
+    uint8_t           scaledValue, i;
+    uint32_t          ledOutput;
+    PropWare::SPI     spi(MOSI, MISO, SCLK);
+    PropWare::MCP3000 adc(&spi, CS, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
@@ -76,8 +68,7 @@ int main () {
         // Loop over the LED output very quickly, until we are within 1
         // millisecond of total period
         while (abs(loopCounter - CNT) > MILLISECOND) {
-            if ((err = adc.read(CHANNEL, &data)))
-                error(&spi, err);
+            data = adc.read(CHANNEL);
 
             // Turn on LEDs proportional to the analog value
             scaledValue = (uint8_t) ((data + DIVISOR / 2 - 1) / DIVISOR);
@@ -88,21 +79,5 @@ int main () {
         }
 
         pwOut.printf("Channel %d is reading: %d\n", CHANNEL, data);
-    }
-}
-
-void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
-
-    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR)
-        spi->print_error_str(&pwOut, (PropWare::SPI::ErrorCode const) err);
-    else
-        pwOut.printf("Unknown error: %u", err);
-
-    while (1) {
-        debugLEDs.write((uint32_t) err);
-        waitcnt(150 * MILLISECOND + CNT);
-        debugLEDs.write(0);
-        waitcnt(150 * MILLISECOND + CNT);
     }
 }

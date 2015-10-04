@@ -108,12 +108,10 @@ class L3G {
          *
          * @return       Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const PropWare::Port::Mask mosi, const PropWare::Port::Mask miso,
+        void start (const PropWare::Port::Mask mosi, const PropWare::Port::Mask miso,
                                    const PropWare::Port::Mask sclk, const PropWare::Port::Mask cs) {
-            PropWare::ErrorCode err;
-
-            check_errors(this->m_spi->set_mode(PropWare::L3G::SPI_MODE));
-            check_errors(this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE));
+            this->m_spi->set_mode(PropWare::L3G::SPI_MODE);
+            this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE);
 
             this->m_cs.set_mask(cs);
             this->m_cs.set_dir(PropWare::Pin::OUT);
@@ -121,10 +119,8 @@ class L3G {
 
             // NOTE L3G has high- and low-pass filters. Should they be enabled?
             // (Page 31)
-            check_errors(this->write8(PropWare::L3G::CTRL_REG1, NIBBLE_0));
-            check_errors(this->write8(PropWare::L3G::CTRL_REG4, BIT_7));
-
-            return 0;
+            this->write8(PropWare::L3G::CTRL_REG1, NIBBLE_0);
+            this->write8(PropWare::L3G::CTRL_REG4, BIT_7);
         }
 
         /**
@@ -146,8 +142,8 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const PropWare::L3G::Axis axis, int16_t *val) const {
-            return this->read16(PropWare::L3G::OUT_X_L + (axis << 1), val);
+        int16_t read (const PropWare::L3G::Axis axis) const {
+            return this->read16(PropWare::L3G::OUT_X_L + (axis << 1));
         }
 
         /**
@@ -157,8 +153,8 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_x (int16_t *val) const {
-            return this->read16(PropWare::L3G::OUT_X_L, val);
+        int16_t read_x () const {
+            return this->read16(PropWare::L3G::OUT_X_L);
         }
 
         /**
@@ -168,8 +164,8 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_y (int16_t *val) const {
-            return this->read16(PropWare::L3G::OUT_Y_L, val);
+        int16_t read_y (int16_t *val) const {
+            return this->read16(PropWare::L3G::OUT_Y_L);
         }
 
         /**
@@ -179,8 +175,8 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_z (int16_t *val) const {
-            return this->read16(PropWare::L3G::OUT_Z_L, val);
+        int16_t read_z (int16_t *val) const {
+            return this->read16(PropWare::L3G::OUT_Z_L);
         }
 
         /**
@@ -191,32 +187,30 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_all (int16_t *val) const {
-            PropWare::ErrorCode err;
+        void read_all (int16_t *val) const {
             uint8_t             i;
 
             uint8_t addr = PropWare::L3G::OUT_X_L;
             addr |= BIT_7;  // Set RW bit (
             addr |= BIT_6;  // Enable address auto-increment
 
-            check_errors(this->maybe_set_spi_mode());
+            this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::X])));
-            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Y])));
-            check_errors(this->m_spi->shift_in(16, &(val[PropWare::L3G::Z])));
+            this->m_spi->shift_out(8, addr);
+            val[PropWare::L3G::X] = (int16_t) this->m_spi->shift_in(16);
+            val[PropWare::L3G::Y] = (int16_t) this->m_spi->shift_in(16);
+            val[PropWare::L3G::Z] = (int16_t) this->m_spi->shift_in(16);
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary
             // 8-bit variable
+            uint32_t temp;
             for (i = 0; i < 3; ++i) {
-                err = (ErrorCode) (val[i] >> 8);
+                temp = (uint32_t) (val[i] >> 8);
                 val[i] <<= 8;
-                val[i] |= err;
+                val[i] |= temp;
             }
-
-            return 0;
         }
 
         /**
@@ -226,19 +220,16 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode set_dps (const PropWare::L3G::DPSMode dpsMode) {
-            PropWare::ErrorCode err;
+        void set_dps (const PropWare::L3G::DPSMode dpsMode) {
             uint8_t             oldValue;
 
             this->m_dpsMode = dpsMode;
-            check_errors(this->maybe_set_spi_mode());
+            this->maybe_set_spi_mode();
 
-            check_errors(this->read8(PropWare::L3G::CTRL_REG4, (int8_t *) &oldValue));
+            oldValue = this->read8(PropWare::L3G::CTRL_REG4);
             oldValue &= ~(BIT_5 | BIT_4);
             oldValue |= dpsMode;
-            check_errors(this->write8(PropWare::L3G::CTRL_REG4, oldValue));
-
-            return 0;
+            this->write8(PropWare::L3G::CTRL_REG4, oldValue);
         }
 
         /**
@@ -304,8 +295,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write8 (uint8_t addr, const uint8_t dat) const {
-            PropWare::ErrorCode err;
+        void write8 (uint8_t addr, const uint8_t dat) const {
             uint16_t            outputValue;
 
             addr &= ~BIT_7;  // Clear the RW bit (write mode)
@@ -313,13 +303,11 @@ class L3G {
             outputValue = ((uint16_t) addr) << 8;
             outputValue |= dat;
 
-            check_errors(this->maybe_set_spi_mode());
+            this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(16, outputValue));
+            this->m_spi->shift_out(16, outputValue);
             this->m_cs.set();
-
-            return err;
         }
 
         /**
@@ -330,8 +318,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode write16 (uint8_t addr, const uint16_t dat) const {
-            PropWare::ErrorCode err;
+        void write16 (uint8_t addr, const uint16_t dat) const {
             uint16_t            outputValue;
 
             addr &= ~BIT_7;  // Clear the RW bit (write mode)
@@ -341,13 +328,11 @@ class L3G {
             outputValue |= ((uint16_t) ((uint8_t) dat)) << 8;
             outputValue |= (uint8_t) (dat >> 8);
 
-            check_errors(this->maybe_set_spi_mode());
+            this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(24, outputValue));
+            this->m_spi->shift_out(24, outputValue);
             this->m_cs.set();
-
-            return 0;
         }
 
         /**
@@ -358,20 +343,20 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read8 (uint8_t addr, int8_t *dat) const {
-            PropWare::ErrorCode err;
+        uint8_t read8 (uint8_t addr) const {
+            uint8_t dat;
 
             addr |= BIT_7;  // Set RW bit (
             addr |= BIT_6;  // Enable address auto-increment
 
-            check_errors(this->maybe_set_spi_mode());
+            this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(this->m_spi->shift_in(8, dat));
+            this->m_spi->shift_out(8, addr);
+            dat = (int8_t) this->m_spi->shift_in(8);
             this->m_cs.set();
 
-            return 0;
+            return dat;
         }
 
         /**
@@ -382,26 +367,26 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read16 (uint8_t addr, int16_t *dat) const {
-            PropWare::ErrorCode err;
+        int16_t read16 (uint8_t addr) const {
+            uint32_t dat;
+
 
             addr |= BIT_7;  // Set RW bit (
             addr |= BIT_6;  // Enable address auto-increment
 
-            check_errors(this->maybe_set_spi_mode());
+            this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(8, addr));
-            check_errors(this->m_spi->shift_in(16, dat));
+            this->m_spi->shift_out(8, addr);
+            dat = (int16_t) this->m_spi->shift_in(16);
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary
             // 8-bit variable
-            err = (ErrorCode) (*dat >> 8);
-            *dat <<= 8;
-            *dat |= err;
-
-            return 0;
+            int temp;
+            temp = dat >> 8;
+            dat <<= 8;
+            return (int16_t) (dat | temp);
         }
 
         /**
@@ -409,15 +394,11 @@ class L3G {
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode maybe_set_spi_mode () const {
-            PropWare::ErrorCode err;
-
+        void maybe_set_spi_mode () const {
             if (this->m_alwaysSetMode) {
-                check_errors(this->m_spi->set_mode(L3G::SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(L3G::SPI_BITMODE));
+                this->m_spi->set_mode(L3G::SPI_MODE);
+                this->m_spi->set_bit_mode(L3G::SPI_BITMODE);
             }
-
-            return 0;
         }
 
     private:

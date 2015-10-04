@@ -85,7 +85,7 @@ int main () {
             in = (char) 0xff;              // Reset input variable
             while (in != *s) {
                 cs.clear();
-                spi->shift_in(8, &in);  // Read in a value from the SPI device
+                in = (char) spi->shift_in(8);  // Read in a value from the SPI device
                 cs.set();
             }
 

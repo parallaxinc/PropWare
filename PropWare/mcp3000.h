@@ -112,9 +112,9 @@ class MCP3000 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (const MCP3000::Channel channel, uint16_t *dat) {
-            PropWare::ErrorCode err;
-            int8_t              options;
+        uint16_t read (const MCP3000::Channel channel) {
+            int8_t   options;
+            uint16_t dat;
 
             options = START | SINGLE_ENDED | channel;
 
@@ -122,16 +122,16 @@ class MCP3000 {
             options <<= 2;
 
             if (this->m_alwaysSetMode) {
-                check_errors(this->m_spi->set_mode(MCP3000::SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE));
+                this->m_spi->set_mode(MCP3000::SPI_MODE);
+                this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE);
             }
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(OPTION_WIDTH, (uint32_t) options));
-            check_errors(this->m_spi->shift_in(this->m_dataWidth, dat));
+            this->m_spi->shift_out(OPTION_WIDTH, (uint32_t) options);
+            dat = (uint16_t) this->m_spi->shift_in(this->m_dataWidth);
             this->m_cs.set();
 
-            return 0;
+            return dat;
         }
 
         /**
@@ -144,9 +144,9 @@ class MCP3000 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_diff (const MCP3000::ChannelDiff channels, uint16_t *dat) {
-            PropWare::ErrorCode err;
-            int8_t              options;
+        uint16_t read_diff (const MCP3000::ChannelDiff channels) {
+            int8_t   options;
+            uint16_t dat;
 
             options = START | DIFFERENTIAL | channels;
 
@@ -154,21 +154,21 @@ class MCP3000 {
             options <<= 2;
 
             if (this->m_alwaysSetMode) {
-                check_errors(this->m_spi->set_mode(SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(SPI_BITMODE));
+                this->m_spi->set_mode(SPI_MODE);
+                this->m_spi->set_bit_mode(SPI_BITMODE);
             }
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(OPTION_WIDTH, (uint32_t) options));
-            check_errors(this->m_spi->shift_in(this->m_dataWidth, dat));
+            this->m_spi->shift_out(OPTION_WIDTH, (uint32_t) options);
+            dat = (uint16_t) this->m_spi->shift_in(this->m_dataWidth);
             this->m_cs.set();
 
-            return 0;
+            return dat;
         }
 
     private:
-        static const SPI::Mode    SPI_MODE         = SPI::MODE_2;
-        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
+        static const SPI::Mode    SPI_MODE    = SPI::MODE_2;
+        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
 
         static const uint8_t START        = BIT_4;
         static const uint8_t SINGLE_ENDED = BIT_3;

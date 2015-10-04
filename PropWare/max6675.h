@@ -55,10 +55,7 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk,
-                                   const Port::Mask cs) {
-            PropWare::ErrorCode err;
-
+        void start (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs) {
             this->m_spi->set_mosi(mosi);
             this->m_spi->set_miso(miso);
             this->m_spi->set_sclk(sclk);
@@ -69,8 +66,6 @@ class MAX6675 {
             this->m_cs.set_mask(cs);
             this->m_cs.set_dir(PropWare::Pin::OUT);
             this->m_cs.set();
-
-            return 0;
         }
 
         /**
@@ -94,20 +89,19 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read (uint16_t *dat) {
-            PropWare::ErrorCode err;
+        uint16_t read () {
+            uint16_t dat;
 
             if (this->m_alwaysSetMode) {
-                check_errors(this->m_spi->set_mode(SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(SPI_BITMODE));
+                this->m_spi->set_mode(SPI_MODE);
+                this->m_spi->set_bit_mode(SPI_BITMODE);
             }
 
-            *dat = 0;
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_in(MAX6675::BIT_WIDTH, dat));
+            dat = (uint16_t) this->m_spi->shift_in(MAX6675::BIT_WIDTH);
             this->m_cs.set();
 
-            return 0;
+            return dat;
         }
 
         /**
@@ -117,13 +111,11 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_whole (uint16_t *dat) {
-            PropWare::ErrorCode err;
+        uint16_t read_whole () {
+            uint16_t dat;
 
-            check_errors(this->read(dat));
-            *dat >>= 2;
-
-            return 0;
+            dat = this->read();
+            return dat >> 2;
         }
 
         /**
@@ -133,16 +125,14 @@ class MAX6675 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode read_float (float *dat) {
-            PropWare::ErrorCode err;
+        float read_float () {
             uint16_t            temp;
 
-            check_errors(this->read(&temp));
+            temp = this->read();
 
-            *dat = temp >> 2;
-            *dat += ((float) (temp & (BIT_1 | BIT_0))) / 4;
-
-            return 0;
+            float dat;
+            dat = temp >> 2;
+            return dat + ((float) (temp & (BIT_1 | BIT_0))) / 4;
         }
 
     private:

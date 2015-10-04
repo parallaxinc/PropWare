@@ -30,18 +30,6 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/scancapable.h>
 
-/**
- * @name   SPI Extra Code Options
- * @{
- */
-/**
- * Parameter checking within each function call. I recommend you leave this option enabled unless speed is critical
- * <p>
- * DEFAULT: On
- */
-#define SPI_OPTION_DEBUG_PARAMS
-/** @} */
-
 namespace PropWare {
 
 /**
@@ -54,9 +42,6 @@ namespace PropWare {
  */
 class SPI : public PrintCapable,
             public ScanCapable {
-    public:
-        static const int32_t DEFAULT_FREQUENCY = 100000;
-
     public:
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
@@ -100,27 +85,17 @@ class SPI : public PrintCapable,
          * Error codes - Proceeded by nothing
          */
         typedef enum {
-            /** No error */           NO_ERROR    = 0,
-            /** First SPI error */    BEG_ERROR,
-            /** SPI Error  0 */       INVALID_PIN = BEG_ERROR,
-            /** SPI Error  1 */       INVALID_CLOCK_INIT,
-            /** SPI Error  2 */       INVALID_MODE,
-            /** SPI Error  3 */       INVALID_PIN_MASK,
-            /** SPI Error  4 */       TOO_MANY_BITS,
-            /** SPI Error  5 */       TIMEOUT,
-            /** SPI Error  6 */       TIMEOUT_RD,
-            /** SPI Error  7 */       EXCESSIVE_PAR_SZ,
-            /** SPI Error  8 */       COG_NOT_STARTED,
-            /** SPI Error  9 */       MODULE_NOT_RUNNING,
-            /** SPI Error 10 */       INVALID_FREQ,
-            /** SPI Error 11 */       INVALID_BYTE_SIZE,
-            /** SPI Error 12 */       ADDR_MISALIGN,
-            /** SPI Error 13 */       INVALID_BITMODE,
-            /** Last SPI error code */END_ERROR   = INVALID_BITMODE
+            /** No error */           NO_ERROR     = 0,
+            /** First SPI error */    BEG_ERROR    = 1,
+            /** SPI Error 1 */        INVALID_FREQ = BEG_ERROR,
+            /** Last SPI error code */END_ERROR    = INVALID_FREQ
         } ErrorCode;
 
     public:
-        static SPI* get_instance () {
+        static const int32_t DEFAULT_FREQUENCY = 100000;
+
+    public:
+        static SPI *get_instance () {
             static SPI defaultInstance;
             return &defaultInstance;
         }
@@ -162,15 +137,13 @@ class SPI : public PrintCapable,
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        PropWare::ErrorCode set_mode (const Mode mode) {
+        void set_mode (const Mode mode) {
             this->m_mode = mode;
 
             if (0x02 & mode)
                 this->m_sclk.set();
             else
                 this->m_sclk.clear();
-
-            return NO_ERROR;
         }
 
         /**
@@ -181,9 +154,8 @@ class SPI : public PrintCapable,
          *
          * @return      Can return non-zero in the case of a timeout
          */
-        PropWare::ErrorCode set_bit_mode (const BitMode bitmode) {
+        void set_bit_mode (const BitMode bitmode) {
             this->m_bitmode = bitmode;
-            return NO_ERROR;
         }
 
         /**
@@ -196,10 +168,8 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode set_clock (const int32_t frequency) {
             static const int32_t MAX_CLOCK = CLKFREQ / 80;
-#ifdef SPI_OPTION_DEBUG_PARAMS
             if (MAX_CLOCK <= frequency || 0 > frequency)
                 return INVALID_FREQ;
-#endif
             this->m_clkDelay = (CLKFREQ / frequency) >> 1;
             return NO_ERROR;
         }
@@ -227,7 +197,7 @@ class SPI : public PrintCapable,
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode shift_out (uint8_t bits, uint32_t value) const {
+        void shift_out (uint8_t bits, uint32_t value) const {
             switch (this->m_bitmode) {
                 case MSB_FIRST:
                     this->shift_out_msb_first(bits, value);
@@ -236,32 +206,26 @@ class SPI : public PrintCapable,
                     this->shift_out_lsb_first(bits, value);
                     break;
             }
-            return NO_ERROR;
         }
 
-        template<class T>
-        PropWare::ErrorCode shift_in (const unsigned int bits, T *data) const {
+        uint32_t shift_in (const unsigned int bits) const {
             const bool clockPhase = this->m_mode & 0x01;
             if (clockPhase) {
                 switch (this->m_bitmode) {
                     case MSB_FIRST:
-                        this->shift_in_msb_phs1(bits, data);
-                        break;
+                        return this->shift_in_msb_phs1(bits);
                     case LSB_FIRST:
-                        this->shift_in_lsb_phs1(bits, data);
-                        break;
+                        return this->shift_in_lsb_phs1(bits);
                 }
             } else {
                 switch (this->m_bitmode) {
                     case MSB_FIRST:
-                        this->shift_in_msb_phs0(bits, data);
-                        break;
+                        return this->shift_in_msb_phs0(bits);
                     case LSB_FIRST:
-                        this->shift_in_lsb_phs0(bits, data);
-                        break;
+                        return this->shift_in_lsb_phs0(bits);
                 }
             }
-            return NO_ERROR;
+            return (uint32_t) -1;
         }
 
         void put_char (const char c) {
@@ -290,36 +254,8 @@ class SPI : public PrintCapable,
             const int  relativeErr = err - BEG_ERROR;
 
             switch (err) {
-                case INVALID_PIN:
-                    *printer << str << relativeErr << ": Invalid pin\n";
-                    break;
-                case INVALID_MODE:
-                    *printer << str << relativeErr << ": Invalid mode\n";
-                    break;
-                case INVALID_PIN_MASK:
-                    *printer << str << relativeErr << ": Invalid pin mask\n";
-                    break;
-                case TOO_MANY_BITS:
-                    *printer << str << relativeErr << ": Incapable of handling so many bits in an argument\n";
-                    break;
-                case TIMEOUT:
-                    *printer << str << relativeErr << ": Timed out during parameter passing\n";
-                    *printer << "\tCalling function was " << this->m_errorInMethod << "()\n";
-                    break;
-                case TIMEOUT_RD:
-                    *printer << str << relativeErr << ": Timed out during parameter read";
-                    break;
-                case COG_NOT_STARTED:
-                    *printer << str << relativeErr << ": SPI's GAS cog was not started";
-                    break;
-                case MODULE_NOT_RUNNING:
-                    *printer << str << relativeErr << ": SPI GAS cog not running";
-                    break;
                 case INVALID_FREQ:
                     *printer << str << relativeErr << ": Frequency set too high";
-                    break;
-                case ADDR_MISALIGN:
-                    *printer << str << relativeErr << ": Passed in address is miss aligned";
                     break;
                 default:
                     // Is the error an SPI error?
@@ -405,8 +341,7 @@ class SPI : public PrintCapable,
 #pragma GCC diagnostic pop
         }
 
-        template<class T>
-        PropWare::ErrorCode shift_in_msb_phs0 (unsigned int bits, T *data) const {
+        uint32_t shift_in_msb_phs0 (unsigned int bits) const {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
@@ -440,12 +375,10 @@ class SPI : public PrintCapable,
             [_clkDelay] "r"(this->m_clkDelay)
             );
 #pragma GCC diagnostic pop
-            *data = (T) tempData;
-            return NO_ERROR;
+            return tempData;
         }
 
-        template<class T>
-        PropWare::ErrorCode shift_in_lsb_phs0 (const unsigned int bits, T *data) const {
+        uint32_t shift_in_lsb_phs0 (const unsigned int bits) const {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
@@ -480,12 +413,10 @@ class SPI : public PrintCapable,
             [_clkDelay] "r"(this->m_clkDelay)
             );
 #pragma GCC diagnostic pop
-            *data = (T) (tempData >> (32 - bits));
-            return NO_ERROR;
+            return tempData;
         }
 
-        template<class T>
-        PropWare::ErrorCode shift_in_msb_phs1 (unsigned int bits, T *data) const {
+        uint32_t shift_in_msb_phs1 (unsigned int bits) const {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
@@ -519,18 +450,16 @@ class SPI : public PrintCapable,
             [_clkDelay] "r"(this->m_clkDelay)
             );
 #pragma GCC diagnostic pop
-            *data = (T) tempData;
-            return NO_ERROR;
+            return tempData;
         }
 
-        template<class T>
-        PropWare::ErrorCode shift_in_lsb_phs1 (unsigned int bits, T *data) const {
+        uint32_t shift_in_lsb_phs1 (unsigned int bits) const {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-                    "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
                     "        .compress off                                                                  \n\t"
 
                     "SpiReadMsbPhs0Start%=:                                                                 \n\t"
@@ -558,11 +487,11 @@ class SPI : public PrintCapable,
             [_clkDelay] "r"(this->m_clkDelay)
             );
 #pragma GCC diagnostic pop
-            *data = (T) (tempData >> (32 - bits));
-            return NO_ERROR;
+            return tempData;
         }
 
     private:
+
         static void reset_pin_mask (Pin &pin, const Port::Mask mask) {
             pin.set_dir_in();
             pin.set_mask(mask);
@@ -577,8 +506,6 @@ class SPI : public PrintCapable,
         unsigned int  m_clkDelay;
         Mode          m_mode;
         BitMode       m_bitmode;
-
-        char m_errorInMethod[16];
 };
 
 }

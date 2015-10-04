@@ -182,16 +182,15 @@ class SD : public BlockStorage {
 
             // Wait until the SD card is no longer busy
             while (!temp)
-                this->m_spi->shift_in(8, &temp);
+                temp = (uint8_t) this->m_spi->shift_in(8);
 
             /**
              * Special error handling is needed to ensure that, if an error is thrown, chip select is set high again
              * before returning the error
              */
             this->m_cs.clear();
-            err     = this->send_command(CMD_RD_BLOCK, address, CRC_OTHER);
-            if (!err)
-                err = this->read_block(SECTOR_SIZE, buf);
+            this->send_command(CMD_RD_BLOCK, address, CRC_OTHER);
+            err = this->read_block(SECTOR_SIZE, buf);
             this->m_cs.set();
 
             return err;
@@ -211,10 +210,10 @@ class SD : public BlockStorage {
 
             // Wait until the SD card is no longer busy
             while (!temp)
-                this->m_spi->shift_in(8, &temp);
+                temp = (uint8_t) this->m_spi->shift_in(8);
 
             this->m_cs.clear();
-            check_errors(this->send_command(CMD_WR_BLOCK, address, CRC_OTHER));
+            this->send_command(CMD_WR_BLOCK, address, CRC_OTHER);
 
             check_errors(this->write_block(SECTOR_SIZE, dat));
             this->m_cs.set();
@@ -258,10 +257,10 @@ class SD : public BlockStorage {
                 // Initialization loop (reset SD card)
                 for (j = 0; j < 10 && !stageCleared; ++j) {
                     this->m_cs.set();
-                    check_errors(this->power_up());
+                    this->power_up();
                     // Chip select goes low for the duration of initization
                     this->m_cs.clear();
-                    check_errors(this->reset(response, stageCleared));
+                    this->reset(response, stageCleared);
                 }
 
                 // If we couldn't go idle after 10 tries, give up
@@ -286,34 +285,27 @@ class SD : public BlockStorage {
         /**
          * @brief   Send numerous clocks to the card to allow it to perform internal initialization
          */
-        inline PropWare::ErrorCode power_up () const {
+        inline void power_up () const {
             uint8_t             i;
-            PropWare::ErrorCode err;
-
             waitcnt(CLKFREQ / 10 + CNT);
 
             // Send at least 72 clock cycles to enable the SD card
             this->m_cs.set();
             for (i = 0; i < 128; ++i)
-                check_errors(this->m_spi->shift_out(24, (uint32_t) -1));
-
-            return NO_ERROR;
+                this->m_spi->shift_out(24, (uint32_t) -1);
         }
 
-        inline PropWare::ErrorCode reset (uint8_t response[], bool &isIdle) const {
-            PropWare::ErrorCode err;
+        inline void reset (uint8_t response[], bool &isIdle) const {
             uint8_t firstByte;
 
             // Send SD into idle state, retrieve a response and ensure it is the
             // "idle" response
-            check_errors(this->send_command(CMD_IDLE, 0, CRC_IDLE));
+            this->send_command(CMD_IDLE, 0, CRC_IDLE);
             this->get_response(RESPONSE_LEN_R1, firstByte, response);
 
             // Check if idle
             if (RESPONSE_IDLE == firstByte)
                 isIdle = true;
-
-            return NO_ERROR;
         }
 
         inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared) const {
@@ -321,7 +313,7 @@ class SD : public BlockStorage {
             uint8_t firstByte;
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
-            check_errors(this->send_command(CMD_INTERFACE_COND, ARG_CMD8, CRC_CMD8));
+            this->send_command(CMD_INTERFACE_COND, ARG_CMD8, CRC_CMD8);
             check_errors(this->get_response(RESPONSE_LEN_R7, firstByte, response));
             if (RESPONSE_IDLE == firstByte)
                 *stageCleared = true;
@@ -340,11 +332,11 @@ class SD : public BlockStorage {
             timeout = SEND_ACTIVE_TIMEOUT + CNT;  //
             do {
                 // Send the application-specific pre-command
-                check_errors(this->send_command(CMD_APP, 0, CRC_ACMD_PREP));
+                this->send_command(CMD_APP, 0, CRC_ACMD_PREP);
                 check_errors(this->get_response(RESPONSE_LEN_R1, firstByte, response));
 
                 // Request that the SD card go active!
-                check_errors(this->send_command(CMD_WR_OP, BIT_30, 0));
+                this->send_command(CMD_WR_OP, BIT_30, 0);
                 check_errors(this->get_response(RESPONSE_LEN_R1, firstByte, response));
 
                 // If the card ACKed with the active state, we're all good!
@@ -378,20 +370,16 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 for success, else error code
          */
-        PropWare::ErrorCode send_command (const uint8_t cmd, const uint32_t arg, const uint8_t crc) const {
-            PropWare::ErrorCode err;
-
+        void send_command (const uint8_t cmd, const uint32_t arg, const uint8_t crc) const {
             // Send out the command
-            check_errors(this->m_spi->shift_out(8, cmd));
+            this->m_spi->shift_out(8, cmd);
 
             // Send argument
-            check_errors(this->m_spi->shift_out(16, (arg >> 16)));
-            check_errors(this->m_spi->shift_out(16, arg & WORD_0));
+            this->m_spi->shift_out(16, (arg >> 16));
+            this->m_spi->shift_out(16, arg & WORD_0);
 
             // Send sixth byte - CRC
-            check_errors(this->m_spi->shift_out(8, crc));
-
-            return NO_ERROR;
+            this->m_spi->shift_out(8, crc);
         }
 
         /**
@@ -406,13 +394,12 @@ class SD : public BlockStorage {
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t &firstByte, uint8_t *dat) const {
-            PropWare::ErrorCode err;
             uint32_t            timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &firstByte));
+                firstByte = (uint8_t) this->m_spi->shift_in(8);
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -430,7 +417,7 @@ class SD : public BlockStorage {
 
                 // Read remaining bytes
                 while (numBytes--)
-                    check_errors(this->m_spi->shift_in(8, dat++));
+                    *dat++ = (uint8_t) this->m_spi->shift_in(8);
             } else {
                 _sd_firstByteResponse = firstByte;
                 return INVALID_RESPONSE;
@@ -438,10 +425,10 @@ class SD : public BlockStorage {
 
             // Responses should always be followed up by outputting 8 clocks
             // with MOSI high
-            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
-            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
-            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
-            check_errors(this->m_spi->shift_out(16, (uint32_t) -1));
+            this->m_spi->shift_out(16, (uint32_t) -1);
+            this->m_spi->shift_out(16, (uint32_t) -1);
+            this->m_spi->shift_out(16, (uint32_t) -1);
+            this->m_spi->shift_out(16, (uint32_t) -1);
 
             return NO_ERROR;
         }
@@ -457,14 +444,14 @@ class SD : public BlockStorage {
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[]) const {
-            uint8_t  i, err, checksum;
+            uint8_t  checksum;
             uint32_t timeout;
             uint8_t  firstByte;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &firstByte));
+                firstByte = (uint8_t) this->m_spi->shift_in(8);
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -478,14 +465,14 @@ class SD : public BlockStorage {
                 // Ignore blank data again
                 timeout = RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(this->m_spi->shift_in(8, dat));
+                    dat[0] = (uint8_t) this->m_spi->shift_in(8);
 
                     // Check for timeout
                     if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
                         return READ_TIMEOUT;
 
                     // wait for transmission end
-                } while (DATA_START_ID != *dat);
+                } while (DATA_START_ID != dat[0]);
 
                 // Check for the data start identifier and continue reading data
                 if (DATA_START_ID == *dat) {
@@ -497,13 +484,13 @@ class SD : public BlockStorage {
                     }
 #else
                     while (bytes--) {
-                        check_errors(this->m_spi->shift_in(8, dat++));
+                        *dat++ = (uint8_t) this->m_spi->shift_in(8);
                     }
 #endif
                     // Continue reading bytes until you get something that isn't 0xff - it should be the checksum.
                     timeout = RESPONSE_TIMEOUT + CNT;
                     do {
-                        check_errors(this->m_spi->shift_in(8, &checksum));
+                        checksum = (uint8_t) this->m_spi->shift_in(8);
 
                         // Check for timeout
                         if ((timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -514,7 +501,7 @@ class SD : public BlockStorage {
 
                     // The checksum is actually 2 bytes, not 1, so sending a total of 16 high bits takes care of the
                     // second checksum byte as well as an extra byte for good measure
-                    check_errors(this->m_spi->shift_out(16, 0xffff));
+                    this->m_spi->shift_out(16, 0xffff);
                 } else {
                     return INVALID_DAT_START_ID;
                 }
@@ -533,14 +520,13 @@ class SD : public BlockStorage {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) const {
-            PropWare::ErrorCode err;
             uint32_t            timeout;
             uint8_t             firstByte;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &firstByte));
+                firstByte = (uint8_t) this->m_spi->shift_in(8);
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -554,17 +540,17 @@ class SD : public BlockStorage {
                 // Received "active" response
 
                 // Send data Start ID
-                check_errors(this->m_spi->shift_out(8, DATA_START_ID));
+                this->m_spi->shift_out(8, DATA_START_ID);
 
                 // Send all bytes
                 while (bytes--) {
-                    check_errors(this->m_spi->shift_out(8, *(dat++)));
+                    this->m_spi->shift_out(8, *(dat++));
                 }
 
                 // Receive and digest response token
                 timeout = RESPONSE_TIMEOUT + CNT;
                 do {
-                    check_errors(this->m_spi->shift_in(8, &firstByte));
+                    firstByte = (uint8_t) this->m_spi->shift_in(8);
 
                     // Check for timeout
                     if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
@@ -581,7 +567,7 @@ class SD : public BlockStorage {
             char temp;
             timeout = RESPONSE_TIMEOUT + CNT;
             do {
-                check_errors(this->m_spi->shift_in(8, &temp));
+                temp = (char) this->m_spi->shift_in(8);
 
                 // Check for timeout
                 if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
