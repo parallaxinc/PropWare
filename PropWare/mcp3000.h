@@ -73,41 +73,23 @@ class MCP3000 {
         /**
          * @brief       Construction requires an instance of the SPI module; the SPI module does not need to be started
          *
-         * @param[in]   *spi        Constructed SPI module
-         * @param[in]   partNumber  Determine bit-width of the ADC channels
+         * @param[in]   *spi                Constructed SPI module
+         * @param[in]   partNumber          Determine bit-width of the ADC channels
+         * @param[in]   alwaysSetSPIMode    Should every invocation of `read` or `read_diff` set the SPI mode. Setting
+         *                                  to true is only necessary when multiple devices are connected to the same
+         *                                  SPI bus and use different SPI modes
          */
-        MCP3000 (SPI *spi, MCP3000::PartNumber partNumber) {
-            this->m_spi           = spi;
-            this->m_alwaysSetMode = 0;
-            this->m_dataWidth     = partNumber;
-        }
-
-        /**
-         * @brief       Initialize communication with an MCP3000 device
-         *
-         * @param[in]   mosi    PinNum mask for MOSI
-         * @param[in]   miso    PinNum mask for MISO
-         * @param[in]   sclk    PinNum mask for SCLK
-         * @param[in]   cs      PinNum mask for CS
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode start (const PropWare::Pin::Mask mosi, const PropWare::Pin::Mask miso,
-                                   const PropWare::Pin::Mask sclk, const PropWare::Pin::Mask cs) {
-            PropWare::ErrorCode err;
+        MCP3000 (SPI *spi, const PropWare::Pin::Mask cs, MCP3000::PartNumber partNumber,
+                 const bool alwaysSetSPIMode = false)
+                : m_spi(spi),
+                  m_alwaysSetMode(alwaysSetSPIMode),
+                  m_dataWidth(partNumber) {
+            this->m_spi->set_mode(SPI_MODE);
+            this->m_spi->set_bit_mode(SPI_BITMODE);
 
             this->m_cs.set_mask(cs);
-            this->m_cs.set_dir(PropWare::Pin::OUT);
             this->m_cs.set();
-
-            if (!this->m_spi->is_running()) {
-                check_errors(this->m_spi->start(mosi, miso, sclk, SPI_DEFAULT_FREQ, SPI_MODE, SPI_BITMODE));
-            } else {
-                check_errors(this->m_spi->set_mode(SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(SPI_BITMODE));
-            }
-
-            return 0;
+            this->m_cs.set_dir(PropWare::Pin::OUT);
         }
 
         /**
@@ -145,7 +127,7 @@ class MCP3000 {
             }
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(OPTN_WIDTH, (uint32_t) options));
+            check_errors(this->m_spi->shift_out(OPTION_WIDTH, (uint32_t) options));
             check_errors(this->m_spi->shift_in(this->m_dataWidth, dat));
             this->m_cs.set();
 
@@ -177,7 +159,7 @@ class MCP3000 {
             }
 
             this->m_cs.clear();
-            check_errors(this->m_spi->shift_out(OPTN_WIDTH, (uint32_t) options));
+            check_errors(this->m_spi->shift_out(OPTION_WIDTH, (uint32_t) options));
             check_errors(this->m_spi->shift_in(this->m_dataWidth, dat));
             this->m_cs.set();
 
@@ -185,14 +167,13 @@ class MCP3000 {
         }
 
     private:
-        static const uint32_t     SPI_DEFAULT_FREQ = 100000;
         static const SPI::Mode    SPI_MODE         = SPI::MODE_2;
         static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
 
         static const uint8_t START        = BIT_4;
         static const uint8_t SINGLE_ENDED = BIT_3;
         static const uint8_t DIFFERENTIAL = 0;
-        static const uint8_t OPTN_WIDTH   = 7;
+        static const uint8_t OPTION_WIDTH = 7;
 
     private:
         SPI           *m_spi;

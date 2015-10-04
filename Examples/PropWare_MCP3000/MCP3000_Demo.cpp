@@ -39,14 +39,13 @@ const PropWare::MCP3000::PartNumber PART_NUMBER = PropWare::MCP3000::MCP300x;
 const PropWare::MCP3000::Channel    CHANNEL     = PropWare::MCP3000::CHANNEL_1;
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask          MOSI        = PropWare::Port::P0;
+const PropWare::Port::Mask MOSI = PropWare::Port::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask          MISO        = PropWare::Port::P1;
+const PropWare::Port::Mask MISO = PropWare::Port::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask          SCLK        = PropWare::Port::P2;
+const PropWare::Port::Mask SCLK = PropWare::Port::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask          CS          = PropWare::Port::P3;
-const uint32_t                      FREQ        = 100000;
+const PropWare::Port::Mask CS   = PropWare::Port::P3;
 
 // Main function
 int main () {
@@ -56,17 +55,11 @@ int main () {
     uint32_t            loopCounter;
     uint8_t             scaledValue, i;
     uint32_t            ledOutput;
-    PropWare::SPI       *spi    = PropWare::SPI::get_instance();
-    PropWare::MCP3000   adc(spi, PART_NUMBER);
+    PropWare::SPI       spi(MOSI, MISO, SCLK);
+    PropWare::MCP3000   adc(&spi, CS, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
-
-    if ((err = adc.start(MOSI, MISO, SCLK, CS)))
-        error(spi, err);
-
-    // Retrieve the SPI module and manually set the clock frequency
-    spi->set_clock(FREQ);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
@@ -75,7 +68,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    pwOut.printf("Welcome to the MCP3000 demo!\n");
+    pwOut << "Welcome to the MCP3000 demo!\n";
 
     while (1) {
         loopCounter = SECOND / 2 + CNT;
@@ -84,12 +77,12 @@ int main () {
         // millisecond of total period
         while (abs(loopCounter - CNT) > MILLISECOND) {
             if ((err = adc.read(CHANNEL, &data)))
-                error(spi, err);
+                error(&spi, err);
 
             // Turn on LEDs proportional to the analog value
             scaledValue = (uint8_t) ((data + DIVISOR / 2 - 1) / DIVISOR);
-            ledOutput = 0;
-            for (i = 0; i < scaledValue; ++i)
+            ledOutput   = 0;
+            for (i      = 0; i < scaledValue; ++i)
                 ledOutput = (ledOutput << 1) | 1;
             scale.write(ledOutput);
         }
@@ -108,8 +101,8 @@ void error (const PropWare::SPI *spi, const PropWare::ErrorCode err) {
 
     while (1) {
         debugLEDs.write((uint32_t) err);
-        waitcnt(150*MILLISECOND + CNT);
+        waitcnt(150 * MILLISECOND + CNT);
         debugLEDs.write(0);
-        waitcnt(150*MILLISECOND + CNT);
+        waitcnt(150 * MILLISECOND + CNT);
     }
 }

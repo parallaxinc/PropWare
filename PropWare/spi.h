@@ -55,6 +55,9 @@ namespace PropWare {
 class SPI : public PrintCapable,
             public ScanCapable {
     public:
+        static const int32_t DEFAULT_FREQUENCY = 100000;
+
+    public:
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
@@ -117,34 +120,39 @@ class SPI : public PrintCapable,
         } ErrorCode;
 
     public:
-        /**
-         * @brief   Create a new instance of SPI which will, upon calling start(), start a new assembly cog.
-         *          Creating multiple instances of PropWare::SPI allows the user to have multiple, independent SPI
-         *          modules for simultaneous communication
-         */
-        SPI (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk,
-             const int32_t frequency, const Mode mode, const BitMode bitmode)
-                : m_mode(mode),
-                  m_bitmode(bitmode) {
-            this->m_mosi.set_mask(mosi);
-            this->m_miso.set_mask(miso);
-            this->m_sclk.set_mask(sclk);
+        static SPI* get_instance () {
+            static SPI defaultInstance;
+            return &defaultInstance;
+        }
 
-            this->m_mosi.clear();
-            this->m_miso.clear();
-            this->m_sclk.clear();
-
-            this->m_mosi.set_dir_out();
-            this->m_miso.set_dir_in();
-            this->m_sclk.set_dir_out();
-
+    public:
+        SPI (const Port::Mask mosi = PropWare::Port::NULL_PIN, const Port::Mask miso = PropWare::Port::NULL_PIN,
+             const Port::Mask sclk = PropWare::Port::NULL_PIN, const int32_t frequency = DEFAULT_FREQUENCY,
+             const Mode mode = MODE_0, const BitMode bitmode = MSB_FIRST)
+                : m_bitmode(bitmode) {
+            this->set_mosi(mosi);
+            this->set_miso(miso);
+            this->set_sclk(sclk);
             this->set_clock(frequency);
         }
 
         ~SPI () {
             this->m_mosi.set_dir_in();
-            this->m_miso.set_dir_in();
             this->m_sclk.set_dir_in();
+        }
+
+        void set_mosi (const Port::Mask mask) {
+            reset_pin_mask(this->m_mosi, mask);
+        }
+
+        void set_miso (const Port::Mask mask) {
+            reset_pin_mask(this->m_miso, mask);
+            this->m_miso.set_dir_in();
+        }
+
+        void set_sclk (const Port::Mask mask) {
+            reset_pin_mask(this->m_sclk, mask);
+            this->set_mode(this->m_mode);
         }
 
         /**
@@ -156,6 +164,12 @@ class SPI : public PrintCapable,
          */
         PropWare::ErrorCode set_mode (const Mode mode) {
             this->m_mode = mode;
+
+            if (0x02 & mode)
+                this->m_sclk.set();
+            else
+                this->m_sclk.clear();
+
             return NO_ERROR;
         }
 
@@ -181,7 +195,7 @@ class SPI : public PrintCapable,
          * @return      Returns 0 upon success, otherwise error code
          */
         PropWare::ErrorCode set_clock (const int32_t frequency) {
-            static const unsigned int MAX_CLOCK = CLKFREQ / 80;
+            static const int32_t MAX_CLOCK = CLKFREQ / 80;
 #ifdef SPI_OPTION_DEBUG_PARAMS
             if (MAX_CLOCK <= frequency || 0 > frequency)
                 return INVALID_FREQ;
@@ -222,30 +236,28 @@ class SPI : public PrintCapable,
                     this->shift_out_lsb_first(bits, value);
                     break;
             }
-
-            this->m_mosi.clear();
             return NO_ERROR;
         }
 
         template<class T>
-        PropWare::ErrorCode shift_in (const uint8_t bits, T *data) const {
+        PropWare::ErrorCode shift_in (const unsigned int bits, T *data) const {
             const bool clockPhase = this->m_mode & 0x01;
             if (clockPhase) {
-                switch (this->m_bitmode) {
-                    case MSB_FIRST:
-                        this->shift_in_msb_phs0(bits, data);
-                        break;
-                    case LSB_FIRST:
-                        this->shift_in_lsb_phs0(bits, data);
-                        break;
-                }
-            } else {
                 switch (this->m_bitmode) {
                     case MSB_FIRST:
                         this->shift_in_msb_phs1(bits, data);
                         break;
                     case LSB_FIRST:
                         this->shift_in_lsb_phs1(bits, data);
+                        break;
+                }
+            } else {
+                switch (this->m_bitmode) {
+                    case MSB_FIRST:
+                        this->shift_in_msb_phs0(bits, data);
+                        break;
+                    case LSB_FIRST:
+                        this->shift_in_lsb_phs0(bits, data);
                         break;
                 }
             }
@@ -321,14 +333,16 @@ class SPI : public PrintCapable,
     protected:
 
         void shift_out_msb_first (uint32_t bits, uint32_t data) const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             __asm__ volatile (
-                    "       fcache #(SpiSendMsbFirstEnd%= - SpiSendMsbFirstStart%=)                     \n\t"
+            "       fcache #(SpiSendMsbFirstEnd%= - SpiSendMsbFirstStart%=)                             \n\t"
                     "       .compress off                                                               \n\t"
                     "SpiSendMsbFirstStart%=:                                                            \n\t"
 
                     "       ror %[_data], %[_bitCount]                                                  \n\t"
-                    "       mov %[_clock], %[_clkDelay]                                                          \n\t"
+                    "       mov %[_clock], %[_clkDelay]                                                 \n\t"
                     "       add %[_clock], CNT                                                          \n\t"
 
                     "loop%=:                                                                            \n\t"
@@ -340,6 +354,7 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                          \n\t"
                     "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendMsbFirstStart%=)    \n\t"
 
+                    "       or OUTA, %[_mosi]                                                           \n\t"
                     "       jmp __LMM_RET                                                               \n\t"
                     "SpiSendMsbFirstEnd%=:                                                              \n\t"
                     "       .compress default                                                           \n\t"
@@ -350,31 +365,35 @@ class SPI : public PrintCapable,
             [_sclk] "r"(this->m_sclk.get_mask()),
             [_clkDelay] "r"(this->m_clkDelay)
             );
+#pragma GCC diagnostic pop
         }
 
         void shift_out_lsb_first (uint32_t bits, uint32_t data) const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             __asm__ volatile (
-                    "        fcache #(SpiSendLsbFirstEnd%= - SpiSendLsbFirstStart%=)                        \n\t"
+            "        fcache #(SpiSendLsbFirstEnd%= - SpiSendLsbFirstStart%=)                            \n\t"
                     "        .compress off                                                              \n\t"
 
-                    "SpiSendLsbFirstStart%=:                                                              \n\t"
+                    "SpiSendLsbFirstStart%=:                                                            \n\t"
                     // Local variable declaration
-                    "       mov %[_clock], CNT                                                            \n\t"
-                    "       add %[_clock], %[_clkDelay]                                                   \n\t"
+                    "       mov %[_clock], CNT                                                          \n\t"
+                    "       add %[_clock], %[_clkDelay]                                                 \n\t"
 
                     "loop%=:                                                                            \n\t"
                     "       ror %[_data], #1 wc                 '' move LSB into carry                  \n\t"
                     "       muxc OUTA, %[_mosi]                                                         \n\t"
-                    "       waitcnt %[_clock], %[_clkDelay]                                               \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                             \n\t"
                     "       xor OUTA, %[_sclk]                                                          \n\t"
-                    "       waitcnt %[_clock], %[_clkDelay]                                               \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                             \n\t"
                     "       xor OUTA, %[_sclk]                                                          \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendLsbFirstStart%=)      \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendLsbFirstStart%=)    \n\t"
 
+                    "       or OUTA, %[_mosi]                                                           \n\t"
                     "       jmp __LMM_RET                                                               \n\t"
 
-                    "SpiSendLsbFirstEnd%=:                                                                \n\t"
+                    "SpiSendLsbFirstEnd%=:                                                              \n\t"
                     "       .compress default                                                           \n\t"
             : [_bitCount] "+r"(bits),
             [_data] "+r"(data),
@@ -383,8 +402,173 @@ class SPI : public PrintCapable,
             [_sclk] "r"(this->m_sclk.get_mask()),
             [_clkDelay] "r"(this->m_clkDelay)
             );
+#pragma GCC diagnostic pop
         }
 
+        template<class T>
+        PropWare::ErrorCode shift_in_msb_phs0 (unsigned int bits, T *data) const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+            unsigned int clock;
+            unsigned int tempData;
+            __asm__ volatile (
+            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+                    "        .compress off                                                                  \n\t"
+
+                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
+                    "       mov %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       add %[_clock], CNT                                                              \n\t"
+
+                    "loop%=:                                                                                \n\t"
+                    "       test %[_miso], ina wc                                                           \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       rcl %[_data], #1                                                                    \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+
+                    "       jmp __LMM_RET                                                                   \n\t"
+                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "       .compress default                                                               \n\t"
+            : [_bitCount] "+r"(bits),
+            [_clock] "+r"(clock),
+            [_data] "+r"(tempData)
+            :[_miso] "r"(this->m_miso.get_mask()),
+            [_sclk] "r"(this->m_sclk.get_mask()),
+            [_clkDelay] "r"(this->m_clkDelay)
+            );
+#pragma GCC diagnostic pop
+            *data = (T) tempData;
+            return NO_ERROR;
+        }
+
+        template<class T>
+        PropWare::ErrorCode shift_in_lsb_phs0 (const unsigned int bits, T *data) const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+            unsigned int clock;
+            unsigned int tempData;
+            unsigned int modifiableBits = bits;
+            __asm__ volatile (
+            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+                    "        .compress off                                                                  \n\t"
+
+                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
+                    "       mov %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       add %[_clock], CNT                                                              \n\t"
+
+                    "loop%=:                                                                                \n\t"
+                    "       test %[_miso], ina wc                                                           \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       rcr %[_data], #1                                                                    \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+
+                    "       jmp __LMM_RET                                                                   \n\t"
+                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "       .compress default                                                               \n\t"
+            : [_bitCount] "+r"(modifiableBits),
+            [_clock] "+r"(clock),
+            [_data] "+r"(tempData)
+            :[_miso] "r"(this->m_miso.get_mask()),
+            [_sclk] "r"(this->m_sclk.get_mask()),
+            [_clkDelay] "r"(this->m_clkDelay)
+            );
+#pragma GCC diagnostic pop
+            *data = (T) (tempData >> (32 - bits));
+            return NO_ERROR;
+        }
+
+        template<class T>
+        PropWare::ErrorCode shift_in_msb_phs1 (unsigned int bits, T *data) const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+            unsigned int clock;
+            unsigned int tempData;
+            __asm__ volatile (
+            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+                    "        .compress off                                                                  \n\t"
+
+                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
+                    "       mov %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       add %[_clock], CNT                                                              \n\t"
+
+                    "loop%=:                                                                                \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
+                    "       test %[_miso], ina wc                                                           \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
+                    "       rcl %[_data], #1                                                                \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+
+                    "       jmp __LMM_RET                                                                   \n\t"
+                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "       .compress default                                                               \n\t"
+            : [_bitCount] "+r"(bits),
+            [_clock] "+r"(clock),
+            [_data] "+r"(tempData)
+            :[_miso] "r"(this->m_miso.get_mask()),
+            [_sclk] "r"(this->m_sclk.get_mask()),
+            [_clkDelay] "r"(this->m_clkDelay)
+            );
+#pragma GCC diagnostic pop
+            *data = (T) tempData;
+            return NO_ERROR;
+        }
+
+        template<class T>
+        PropWare::ErrorCode shift_in_lsb_phs1 (unsigned int bits, T *data) const {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+            unsigned int clock;
+            unsigned int tempData;
+            __asm__ volatile (
+                    "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+                    "        .compress off                                                                  \n\t"
+
+                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
+                    "       mov %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       add %[_clock], CNT                                                              \n\t"
+
+                    "loop%=:                                                                                \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
+                    "       test %[_miso], ina wc                                                           \n\t"
+                    "       xor outa, %[_sclk]                                                              \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
+                    "       rcr %[_data], #1                                                                \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+
+                    "       jmp __LMM_RET                                                                   \n\t"
+                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "       .compress default                                                               \n\t"
+            : [_bitCount] "+r"(bits),
+            [_clock] "+r"(clock),
+            [_data] "+r"(tempData)
+            :[_miso] "r"(this->m_miso.get_mask()),
+            [_sclk] "r"(this->m_sclk.get_mask()),
+            [_clkDelay] "r"(this->m_clkDelay)
+            );
+#pragma GCC diagnostic pop
+            *data = (T) (tempData >> (32 - bits));
+            return NO_ERROR;
+        }
+
+    private:
+        static void reset_pin_mask (Pin &pin, const Port::Mask mask) {
+            pin.set_dir_in();
+            pin.set_mask(mask);
+            pin.set();
+            pin.set_dir_out();
+        }
 
     protected:
         PropWare::Pin m_mosi;
