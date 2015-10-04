@@ -23,6 +23,10 @@
  * SOFTWARE.
  */
 
+namespace PropWare {
+unsigned char _sd_firstByteResponse;
+}
+
 extern "C" {
 
 void __cxa_pure_virtual () {
