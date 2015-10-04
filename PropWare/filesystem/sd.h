@@ -500,22 +500,21 @@ class SD : public BlockStorage {
                         check_errors(this->m_spi->shift_in(8, dat++));
                     }
 #endif
-                    // Read two more bytes for checksum - throw away data
-                    for (i = 0; i < 2; ++i) {
-                        timeout = RESPONSE_TIMEOUT + CNT;
-                        do {
-                            check_errors(this->m_spi->shift_in(8, &checksum));
+                    // Continue reading bytes until you get something that isn't 0xff - it should be the checksum.
+                    timeout = RESPONSE_TIMEOUT + CNT;
+                    do {
+                        check_errors(this->m_spi->shift_in(8, &checksum));
 
-                            // Check for timeout
-                            if ((timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                                return READ_TIMEOUT;
+                        // Check for timeout
+                        if ((timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
+                            return READ_TIMEOUT;
 
-                            // wait for transmission end
-                        } while (0xff == checksum);
-                    }
+                        // wait for transmission end
+                    } while (0xff == checksum);
 
-                    // Send final 0xff
-                    check_errors(this->m_spi->shift_out(8, 0xff));
+                    // The checksum is actually 2 bytes, not 1, so sending a total of 16 high bits takes care of the
+                    // second checksum byte as well as an extra byte for good measure
+                    check_errors(this->m_spi->shift_out(16, 0xffff));
                 } else {
                     return INVALID_DAT_START_ID;
                 }
