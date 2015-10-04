@@ -228,6 +228,60 @@ class SPI : public PrintCapable,
             return (uint32_t) -1;
         }
 
+        /**
+         * @brief       Receive an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB
+         *              first
+         *
+         * @param[out]  *data           Address to store data
+         * @param[in]   numberOfBytes   Number of bytes to receive
+         */
+        void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#define ASMVAR(name) "__LMM_FCACHE_START+("  #name "%= - SpiBlockReadStart%=)"
+            __asm__ volatile (
+            "        fcache #(SpiBlockReadEnd%= - SpiBlockReadStart%=)                                          \n\t"
+                    "        .compress off                                                                      \n\t"
+
+                    "SpiBlockReadStart%=:                                                                       \n\t"
+                    "       jmp #__LMM_FCACHE_START+(outerLoop%= - SpiBlockReadStart%=)                         \n\t"
+
+                    // Temporary variables
+                    "bitIdx%=:                                                                                  \n\t"
+                    "       nop                                                                                 \n\t"
+                    "data%=:                                                                                    \n\t"
+                    "       nop                                                                                 \n\t"
+
+
+                    "outerLoop%=:                                                                               \n\t"
+                    "       mov " ASMVAR(data) ", #0                                                            \n\t"
+                    "       mov " ASMVAR(bitIdx) ", #8                                                          \n\t"
+
+                    "loop%=:                                                                                    \n\t"
+                    "       test %[_miso], ina wc                                                               \n\t"
+                    "       xor outa, %[_sclk]                                                                  \n\t"
+                    "       rcl " ASMVAR(data) ", #1                                                            \n\t"
+                    "       xor outa, %[_sclk]                                                                  \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #__LMM_FCACHE_START+(loop%= - SpiBlockReadStart%=)         \n\t"
+
+                    // Write the word back to the buffer in HUB memory
+                    "       wrbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
+                    "       add %[_bufAdr], #1                                                                  \n\t"
+
+                    "       djnz %[_numberOfBytes], #__LMM_FCACHE_START+(outerLoop%= - SpiBlockReadStart%=)     \n\t"
+
+                    "       jmp __LMM_RET                                                                       \n\t"
+                    "SpiBlockReadEnd%=:                                                                         \n\t"
+                    "       .compress default                                                                   \n\t"
+            : [_bufAdr] "+r"(buffer),
+            [_numberOfBytes] "+r"(numberOfBytes)
+            :[_miso] "r"(this->m_miso.get_mask()),
+            [_sclk] "r"(this->m_sclk.get_mask())
+            );
+#undef ASMVAR
+#pragma GCC diagnostic pop
+        }
+
         void put_char (const char c) {
             this->shift_out(8, (uint32_t) c);
         }
@@ -347,7 +401,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                                  \n\t"
                     "        .compress off                                                                  \n\t"
 
                     "SpiReadMsbPhs0Start%=:                                                                 \n\t"
@@ -359,8 +413,8 @@ class SPI : public PrintCapable,
                     "       test %[_miso], ina wc                                                           \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       xor outa, %[_sclk]                                                              \n\t"
-                    "       rcl %[_data], #1                                                                    \n\t"
-                    "       waitcnt %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       rcl %[_data], #1                                                                \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       xor outa, %[_sclk]                                                              \n\t"
                     "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
 
@@ -385,10 +439,10 @@ class SPI : public PrintCapable,
             unsigned int tempData;
             unsigned int modifiableBits = bits;
             __asm__ volatile (
-            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+            "        fcache #(SpiReadLsbPhs0End%= - SpiReadLsbPhs0Start%=)                                  \n\t"
                     "        .compress off                                                                  \n\t"
 
-                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "SpiReadLsbPhs0Start%=:                                                                 \n\t"
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -397,13 +451,13 @@ class SPI : public PrintCapable,
                     "       test %[_miso], ina wc                                                           \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       xor outa, %[_sclk]                                                              \n\t"
-                    "       rcr %[_data], #1                                                                    \n\t"
-                    "       waitcnt %[_clock], %[_clkDelay]                                                     \n\t"
+                    "       rcr %[_data], #1                                                                \n\t"
+                    "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       xor outa, %[_sclk]                                                              \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadLsbPhs0Start%=)         \n\t"
 
                     "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "SpiReadLsbPhs0End%=:                                                                   \n\t"
                     "       .compress default                                                               \n\t"
             : [_bitCount] "+r"(modifiableBits),
             [_clock] "+r"(clock),
@@ -422,10 +476,10 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+            "        fcache #(SpiReadMsbPhs1End%= - SpiReadMsbPhs1Start%=)                                  \n\t"
                     "        .compress off                                                                  \n\t"
 
-                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "SpiReadMsbPhs1Start%=:                                                                 \n\t"
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -437,10 +491,10 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                              \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       rcl %[_data], #1                                                                \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs1Start%=)         \n\t"
 
                     "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "SpiReadMsbPhs1End%=:                                                                   \n\t"
                     "       .compress default                                                               \n\t"
             : [_bitCount] "+r"(bits),
             [_clock] "+r"(clock),
@@ -459,10 +513,10 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                          \n\t"
+            "        fcache #(SpiReadLsbPhs1End%= - SpiReadLsbPhs1Start%=)                                  \n\t"
                     "        .compress off                                                                  \n\t"
 
-                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    "SpiReadLsbPhs1Start%=:                                                                 \n\t"
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -474,10 +528,10 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                              \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       rcr %[_data], #1                                                                \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
+                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadLsbPhs1Start%=)         \n\t"
 
                     "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
+                    "SpiReadLsbPhs1End%=:                                                                   \n\t"
                     "       .compress default                                                               \n\t"
             : [_bitCount] "+r"(bits),
             [_clock] "+r"(clock),

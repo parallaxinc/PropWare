@@ -443,6 +443,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             [_bitCycles] "r"(this->m_bitCycles),
             [_initWaitCycles] "r"(initWaitCycles),
             [_msbMask] "r"(this->m_msbMask));
+#undef ASMVAR
 #endif
         }
 

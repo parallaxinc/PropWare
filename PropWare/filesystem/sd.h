@@ -477,16 +477,13 @@ class SD : public BlockStorage {
                 // Check for the data start identifier and continue reading data
                 if (DATA_START_ID == *dat) {
                     // Read in requested data bytes
-#if (defined SPI_FAST_SECTOR)
-                    if (SECTOR_SIZE == bytes) {
-                        this->m_spi->shift_in_sector(dat, 1);
-                        bytes = 0;
-                    }
-#else
-                    while (bytes--) {
-                        *dat++ = (uint8_t) this->m_spi->shift_in(8);
-                    }
-#endif
+                    if (SECTOR_SIZE == bytes)
+                        this->m_spi->shift_in_block_mode0_msb_first_fast(dat, SECTOR_SIZE);
+                    else
+                        while (bytes--) {
+                            *dat++ = (uint8_t) this->m_spi->shift_in(8);
+                        }
+
                     // Continue reading bytes until you get something that isn't 0xff - it should be the checksum.
                     timeout = RESPONSE_TIMEOUT + CNT;
                     do {
