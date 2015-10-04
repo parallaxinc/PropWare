@@ -57,7 +57,12 @@ int main () {
 
     // Initialize SPI module, giving it pin masks for the physical pins,
     // frequency for the clock, mode of SPI, and bitmode
-    spi->start(MOSI, MISO, SCLK, FREQ, MODE, BITMODE);
+    spi->set_mosi(MOSI);
+    spi->set_miso(MISO);
+    spi->set_sclk(SCLK);
+    spi->set_clock(FREQ);
+    spi->set_mode(MODE);
+    spi->set_bit_mode(BITMODE);
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
@@ -74,9 +79,6 @@ int main () {
             cs.clear();  // Enable the SPI slave attached to CS
             spi->shift_out(8, (uint32_t) *s);  // Output the next character of the string
 
-            // Be sure to wait until the SPI communication has FINISHED before
-            // proceeding to set chip select high
-            spi->wait();
             cs.set();
 
             waitcnt(CLKFREQ/100 + CNT);

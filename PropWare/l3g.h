@@ -112,14 +112,8 @@ class L3G {
                                    const PropWare::Port::Mask sclk, const PropWare::Port::Mask cs) {
             PropWare::ErrorCode err;
 
-            // Ensure SPI module started
-            if (this->m_spi->is_running()) {
-                check_errors(this->m_spi->set_mode(PropWare::L3G::SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE));
-            } else {
-                check_errors(this->m_spi->start(mosi, miso, sclk, PropWare::L3G::SPI_DEFAULT_FREQ,
-                                                PropWare::L3G::SPI_MODE, PropWare::L3G::SPI_BITMODE));
-            }
+            check_errors(this->m_spi->set_mode(PropWare::L3G::SPI_MODE));
+            check_errors(this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE));
 
             this->m_cs.set_mask(cs);
             this->m_cs.set_dir(PropWare::Pin::OUT);
@@ -323,7 +317,6 @@ class L3G {
 
             this->m_cs.clear();
             check_errors(this->m_spi->shift_out(16, outputValue));
-            check_errors(this->m_spi->wait());
             this->m_cs.set();
 
             return err;
@@ -352,7 +345,6 @@ class L3G {
 
             this->m_cs.clear();
             check_errors(this->m_spi->shift_out(24, outputValue));
-            check_errors(this->m_spi->wait());
             this->m_cs.set();
 
             return 0;

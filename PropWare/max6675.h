@@ -59,12 +59,12 @@ class MAX6675 {
                                    const Port::Mask cs) {
             PropWare::ErrorCode err;
 
-            if (!this->m_spi->is_running()) {
-                check_errors(this->m_spi->start(mosi, miso, sclk, SPI_DEFAULT_FREQ, SPI_MODE, SPI_BITMODE));
-            } else {
-                check_errors(this->m_spi->set_mode(SPI_MODE));
-                check_errors(this->m_spi->set_bit_mode(SPI_BITMODE));
-            }
+            this->m_spi->set_mosi(mosi);
+            this->m_spi->set_miso(miso);
+            this->m_spi->set_sclk(sclk);
+            this->m_spi->set_clock(SPI_DEFAULT_FREQ);
+            this->m_spi->set_mode(SPI_MODE);
+            this->m_spi->set_bit_mode(SPI_BITMODE);
 
             this->m_cs.set_mask(cs);
             this->m_cs.set_dir(PropWare::Pin::OUT);
