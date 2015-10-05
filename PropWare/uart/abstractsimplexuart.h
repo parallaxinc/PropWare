@@ -84,6 +84,10 @@ class AbstractSimplexUART : public virtual UART {
          * @see PropWare::UART::set_tx_mask
          */
         void set_tx_mask (const Port::Mask tx) {
+            // Reset the old pin
+            this->m_tx.set_dir(Port::IN);
+            this->m_tx.clear();
+
             this->m_tx.set_mask(tx);
             this->m_tx.set();
             this->m_tx.set_dir(Port::OUT);
@@ -180,7 +184,7 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::send
          */
-        HUBTEXT virtual void send (uint16_t originalData) const {
+        virtual void send (uint16_t originalData) const {
             uint32_t wideData = originalData;
 
             // Set pin as output
@@ -214,7 +218,7 @@ class AbstractSimplexUART : public virtual UART {
         /**
          * @see PropWare::UART::send_array
          */
-        HUBTEXT virtual void send_array (const char array[], uint32_t words) const {
+        virtual void send_array (const char array[], uint32_t words) const {
             char     *arrayPtr = (char *) array;
             uint32_t data      = 0, waitCycles = 0, bits = 0;
 
@@ -440,20 +444,20 @@ class AbstractSimplexUART : public virtual UART {
 #ifndef DOXYGEN_IGNORE
             volatile uint32_t waitCycles = bitCycles;
             __asm__ volatile (
-                    "        fcache #(ShiftOutDataEnd - ShiftOutDataStart)                     \n\t"
+                    "        fcache #(ShiftOutDataEnd%= - ShiftOutDataStart%=)                 \n\t"
                     "        .compress off                                                     \n\t"
 
-                    "ShiftOutDataStart:                                                        \n\t"
+                    "ShiftOutDataStart%=:                                                      \n\t"
                     "        add %[_waitCycles], CNT                                           \n\t"
 
                     "loop%=:                                                                   \n\t"
                     "        waitcnt %[_waitCycles], %[_bitCycles]                             \n\t"
                     "        shr %[_data],#1 wc                                                \n\t"
                     "        muxc outa, %[_mask]                                               \n\t"
-                    "        djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftOutDataStart)   \n\t"
+                    "        djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftOutDataStart%=) \n\t"
 
                     "        jmp __LMM_RET                                                     \n\t"
-                    "ShiftOutDataEnd:                                                          \n\t"
+                    "ShiftOutDataEnd%=:                                                        \n\t"
                     "        .compress default                                                 \n\t"
             : [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),

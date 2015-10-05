@@ -33,7 +33,6 @@ set(PROPWARE_SOURCES
     ../seeedtftfast
     ../seeedtftfast_as.S
     ../spi
-    ../spi_as.S
     ../stringbuilder
     ../staticstringbuilder
     ../uart/abstractduplexuart

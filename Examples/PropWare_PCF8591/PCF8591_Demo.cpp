@@ -34,10 +34,10 @@ int main () {
 
     if (pingSuccess) {
         uint8_t value = pcf8591.read_channel(PropWare::PCF8591::CHANNEL_0);
-        while (pingSuccess) {
-            pwOut << "Read: " << value << '\n';
+        while (1) {
+            pwOut << "PCF: " << value << '\n';
             waitcnt(250 * MILLISECOND + CNT);
-            pingSuccess = pcf8591.read_next(&value);
+            value = pcf8591.read_channel(PropWare::PCF8591::CHANNEL_0);
         }
     }
 

@@ -35,16 +35,36 @@
 
 using namespace PropWare;
 
-static SD *testable;
+SD *testable;
 
 void sd_error_checker (const ErrorCode err) {
     if (err)
         testable->print_error_str(pwOut, (SD::ErrorCode) err);
 }
 
-TEARDOWN { }
+SETUP {
+    testable = new SD();
+};
+
+TEARDOWN {
+    delete testable;
+}
+
+TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
+    setUp();
+
+    ASSERT_EQ_MSG(SPI::get_instance(), testable->m_spi);
+    ASSERT_EQ_MSG(Port::P2, testable->m_spi->m_mosi.get_mask());
+    ASSERT_EQ_MSG(Port::P1, testable->m_spi->m_sclk.get_mask());
+    ASSERT_EQ_MSG(Port::P0, testable->m_spi->m_miso.get_mask());
+    ASSERT_EQ_MSG(Port::P3, testable->m_cs.get_mask());
+
+    tearDown();
+}
 
 TEST(Start) {
+    setUp();
+
     ErrorCode err = testable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
@@ -53,6 +73,8 @@ TEST(Start) {
 }
 
 TEST(ReadDataBlock) {
+    setUp();
+
     uint8_t buffer[SD::SECTOR_SIZE];
 
     ErrorCode err = testable->start();
@@ -79,6 +101,8 @@ TEST(ReadDataBlock) {
 }
 
 TEST(WriteDataBlock) {
+    setUp();
+
     uint8_t       originalBlock[SD::SECTOR_SIZE];
     uint8_t       moddedBlock[SD::SECTOR_SIZE];
     const uint8_t *myData     = 0;
@@ -128,8 +152,7 @@ TEST(WriteDataBlock) {
 int main () {
     START(SDTest);
 
-    testable = new SD();
-
+    RUN_TEST(DefaultConstructor_RELIES_ON_DNA_BOARD);
     RUN_TEST(Start);
     RUN_TEST(ReadDataBlock);
     RUN_TEST(WriteDataBlock);

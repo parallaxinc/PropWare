@@ -45,10 +45,7 @@ const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
 const PropWare::HD44780::Dimensions DIMENSIONS     =
                                             PropWare::HD44780::DIM_16x2;
 
-void error (const PropWare::ErrorCode err);
-
 int main () {
-    PropWare::ErrorCode err;
     uint16_t data;
     uint32_t loopCounter;
 
@@ -57,9 +54,7 @@ int main () {
     PropWare::SPI *spi = PropWare::SPI::get_instance();
     PropWare::MAX6675 thermo(spi);
 
-    if ((err = thermo.start(MOSI, MISO, SCLK, CS)))
-        error(err);
-
+    thermo.start(MOSI, MISO, SCLK, CS);
     lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
 
     // Though this functional call is not necessary (default value is 0), I
@@ -74,26 +69,11 @@ int main () {
     while (1) {
         loopCounter = CLKFREQ / 2 + CNT;
 
-        if ((err = thermo.read(&data)))
-            error(err);
+        data = thermo.read();
 
         lcd.clear();
         lcdPrinter.printf("Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
 
         waitcnt(loopCounter);
-    }
-
-    return 0;
-}
-
-void error (const PropWare::ErrorCode err) {
-    // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
-
-    while (1) {
-        debugLEDs.write(err);
-        waitcnt(CLKFREQ/5 + CNT);
-        debugLEDs.write(0);
-        waitcnt(CLKFREQ/5 + CNT);
     }
 }

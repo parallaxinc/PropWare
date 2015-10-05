@@ -87,7 +87,7 @@ class Pin : public PropWare::Port {
             return (PropWare::Port::Mask) this->m_mask;
         }
 
-        void write (const bool value) {
+        void write (const bool value) const {
             if (value)
                 this->set();
             else

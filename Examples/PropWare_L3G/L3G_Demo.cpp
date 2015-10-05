@@ -43,15 +43,12 @@ void error (const PropWare::ErrorCode err);
 
 // Main function
 int main () {
-    PropWare::ErrorCode err;
-    int16_t                     gyroVals[3];
-    PropWare::SPI               *spi = PropWare::SPI::get_instance();
-    PropWare::L3G               gyro(spi);
+    int16_t       gyroValues[3];
+    PropWare::SPI *spi = PropWare::SPI::get_instance();
+    PropWare::L3G gyro(spi);
 
-    if ((err = gyro.start(MOSI, MISO, SCLK, CS)))
-        error(err);
-    if ((err = gyro.set_dps(PropWare::L3G::DPS_500)))
-        error(err);
+    gyro.start(MOSI, MISO, SCLK, CS);
+    gyro.set_dps(PropWare::L3G::DPS_500);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
@@ -61,19 +58,16 @@ int main () {
     gyro.always_set_spi_mode(1);
 
     while (1) {
-        if ((err = gyro.read_all(gyroVals)))
-            error(err);
-//        print("Gyro vals DPS... X: %2.3f\tY: %2.3f\tZ: %2.3f\n",
-//              gyro.convert_to_dps(gyroVals[PropWare::L3G::X]),
-//              gyro.convert_to_dps(gyroVals[PropWare::L3G::Y]),
-//              gyro.convert_to_dps(gyroVals[PropWare::L3G::Z]));
+        gyro.read_all(gyroValues);
+        //pwOut << "Gyro vals DPS... X: " << gyro.convert_to_dps(gyroValues[PropWare::L3G::X])
+        //        << "\tY: " << gyro.convert_to_dps(gyroValues[PropWare::L3G::Y])
+        //        << "\tZ: " << gyro.convert_to_dps(gyroValues[PropWare::L3G::Z]) << '\n';
 
-        pwOut.printf("Gyro vals... X: %d\tY: %d\tZ: %d\n",
-              gyroVals[PropWare::L3G::X],
-              gyroVals[PropWare::L3G::Y],
-              gyroVals[PropWare::L3G::Z]);
+        pwOut << "Gyro vals DPS... X: " << gyroValues[PropWare::L3G::X]
+                << "\tY: " << gyroValues[PropWare::L3G::Y]
+                << "\tZ: " << gyroValues[PropWare::L3G::Z] << '\n';
 
-//        waitcnt(50*MILLISECOND + CNT);
+        waitcnt(50*MILLISECOND + CNT);
     }
 
     return 0;

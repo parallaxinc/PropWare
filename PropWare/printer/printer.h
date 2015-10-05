@@ -123,6 +123,22 @@ class Printer {
         }
 
         /**
+         * @brief       Determine if the printer is configured for cooked mode or not
+         *
+         * Cooked mode prefixes all instances of the newline character (`\n`) with a carriage return (`\r`). This is
+         * required by many serial programs and is the default for PropGCC's serial routines. The default status for
+         * a Printer is also on. This can, however, have adverse affects if you are trying to use a printer to send
+         * raw data between two devices rather than human-readable data.
+         *
+         * Read more on [WikiPedia](http://en.wikipedia.org/wiki/Cooked_mode) about cooked mode_
+         *
+         * @returns     True when cooked mode is on
+         */
+        bool get_cooked () const {
+            return this->m_cooked;
+        }
+
+        /**
          * @see PropWare::PrintCapable::put_char
          */
         void put_char (const char c) const {

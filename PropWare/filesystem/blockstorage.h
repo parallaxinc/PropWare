@@ -126,8 +126,8 @@ class BlockStorage {
         ErrorCode flush (Buffer *buffer) const {
             PropWare::ErrorCode err;
             if (buffer->meta && buffer->meta->mod) {
-                check_errors(this->write_data_block(
-                        buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer->buf));
+                check_errors(this->write_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset,
+                                                    buffer->buf));
                 buffer->meta->mod = false;
             }
             return 0;

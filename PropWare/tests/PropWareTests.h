@@ -128,16 +128,16 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
-        pwOut << "#\tExpected: `" << expected << "`; Acutal: `" << actual << "`\n"; \
-        pwOut << "#\t\t`ASSERT_EQ_MSG(" << #expected << ", " << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
+        pwOut << "Expected: `" << expected << "`; Acutal: `" << actual << "`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NEQ_MSG(lhs, rhs) \
     if ((lhs) == (rhs)) { \
-        pwOut << "#\tExpected mismatch. Got: `" << lhs << "` == `" << rhs << "`\n"; \
-        pwOut << "#\t\t`ASSERT_NEQ_MSG(" << #lhs << ", " << #rhs << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
+        pwOut << "Expected mismatch. Got: `" << lhs << "` == `" << rhs << "`\n"; \
         _tearDown(); \
         return false; \
     }

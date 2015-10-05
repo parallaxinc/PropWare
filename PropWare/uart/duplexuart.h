@@ -73,14 +73,32 @@ class DuplexUART : public virtual UART {
          *
          * @pre         RX pin mask must be set
          *
-         * @param[out]  buffer[]    Address to begin storing data words
+         * @param[out]  *buffer     Address to begin storing data words
          * @param[in]   *length     Pointer to max number of words to receive; If value is 0, INT32_MAX will be used.
          *                          Null-pointer will result in PropWare::UART::NULL_POINTER error code
-         * @param[in]   delim       Delimiting character used to determine when reading should stop
+         * @param[in]   delimiter   Delimiting character used to determine when reading should stop
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        virtual ErrorCode receive_array (char buffer[], int32_t *length, const uint32_t delim = '\n') const = 0;
+        virtual ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const = 0;
+
+        /**
+         * @brief       Receive an array of data words
+         *
+         * Cog execution will be blocked by this call and there is no timeout; Execution will not resume until all data
+         * words have been received
+         *
+         * Current configuration must be data width + parity width <= 8 bits. If receivable bits is greater than 8, an
+         * error will be thrown without any regard for the data being sent to the Propeller
+         *
+         * @pre         RX pin mask must be set
+         *
+         * @param[out]  *buffer     Address to begin storing data words
+         * @param[in]   length      Number of words to receive
+         *
+         * @return      Returns 0 upon success, error code otherwise
+         */
+        virtual ErrorCode receive_array (uint8_t *buffer, uint32_t length) const = 0;
 };
 
 }
