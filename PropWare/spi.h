@@ -268,6 +268,7 @@ class SPI : public PrintCapable,
 
                     "       djnz %[_numberOfBytes], #__LMM_FCACHE_START+(outerLoop%= - SpiBlockWriteStart%=)    \n\t"
 
+                    "       or outa, %[_mosi]                                                                   \n\t"
                     "       jmp __LMM_RET                                                                       \n\t"
                     "SpiBlockWriteEnd%=:                                                                        \n\t"
                     "       .compress default                                                                   \n\t"
@@ -395,7 +396,7 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                          \n\t"
                     "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendMsbFirstStart%=)    \n\t"
 
-                    "       or OUTA, %[_mosi]                                                           \n\t"
+                    "       or outa, %[_mosi]                                                           \n\t"
                     "       jmp __LMM_RET                                                               \n\t"
                     "SpiSendMsbFirstEnd%=:                                                              \n\t"
                     "       .compress default                                                           \n\t"
@@ -431,7 +432,7 @@ class SPI : public PrintCapable,
                     "       xor OUTA, %[_sclk]                                                          \n\t"
                     "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendLsbFirstStart%=)    \n\t"
 
-                    "       or OUTA, %[_mosi]                                                           \n\t"
+                    "       or outa, %[_mosi]                                                           \n\t"
                     "       jmp __LMM_RET                                                               \n\t"
 
                     "SpiSendLsbFirstEnd%=:                                                              \n\t"

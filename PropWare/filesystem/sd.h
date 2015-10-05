@@ -576,11 +576,6 @@ class SD : public BlockStorage {
                 // wait for transmission end
             } while (0xff != temp);
 
-            // What the heck do I need this for? Sometimes the SD card spews out an extra few bytes during the third
-            // repetition of this loop. I don't know why :'(
-            for (unsigned int i = 0; i < 3; ++i)
-                this->m_spi->shift_out(24, (uint32_t) -1);
-
             return NO_ERROR;
         }
 
