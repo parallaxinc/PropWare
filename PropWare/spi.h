@@ -235,6 +235,57 @@ class SPI : public PrintCapable,
          * @param[out]  *data           Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
+        void shift_out_block_msb_first_fast (const uint8_t buffer[], size_t numberOfBytes) {
+#define ASMVAR(name) "__LMM_FCACHE_START+("  #name "%= - SpiBlockWriteStart%=)"
+            __asm__ volatile (
+                    "        fcache #(SpiBlockWriteEnd%= - SpiBlockWriteStart%=)                                \n\t"
+                    "        .compress off                                                                      \n\t"
+
+                    "SpiBlockWriteStart%=:                                                                      \n\t"
+                    "       jmp #__LMM_FCACHE_START+(outerLoop%= - SpiBlockWriteStart%=)                        \n\t"
+
+                    // Temporary variables
+                    "bitIdx%=:                                                                                  \n\t"
+                    "       nop                                                                                 \n\t"
+                    "data%=:                                                                                    \n\t"
+                    "       nop                                                                                 \n\t"
+
+
+                    "outerLoop%=:                                                                               \n\t"
+                    "       rdbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
+                    "       mov " ASMVAR(bitIdx) ", #8                                                          \n\t"
+                    "       ror " ASMVAR(data) ", " ASMVAR(bitIdx) "                                            \n\t"
+
+                    "loop%=:                                                                                    \n\t"
+                    "       rol " ASMVAR(data) ", #1 wc                                                         \n\t"
+                    "       muxc outa, %[_mosi]                                                                 \n\t"
+                    "       xor outa, %[_sclk]                                                                  \n\t"
+                    "       xor outa, %[_sclk]                                                                  \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #__LMM_FCACHE_START+(loop%= - SpiBlockWriteStart%=)        \n\t"
+
+                    // Write the word back to the buffer in HUB memory
+                    "       add %[_bufAdr], #1                                                                  \n\t"
+
+                    "       djnz %[_numberOfBytes], #__LMM_FCACHE_START+(outerLoop%= - SpiBlockWriteStart%=)    \n\t"
+
+                    "       jmp __LMM_RET                                                                       \n\t"
+                    "SpiBlockWriteEnd%=:                                                                        \n\t"
+                    "       .compress default                                                                   \n\t"
+            : [_bufAdr] "+r"(buffer),
+            [_numberOfBytes] "+r"(numberOfBytes)
+            :[_mosi] "r"(this->m_mosi.get_mask()),
+            [_sclk] "r"(this->m_sclk.get_mask())
+            );
+#undef ASMVAR
+        }
+
+        /**
+         * @brief       Receive an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB
+         *              first
+         *
+         * @param[out]  *data           Address to store data
+         * @param[in]   numberOfBytes   Number of bytes to receive
+         */
         void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wuninitialized"

@@ -74,12 +74,26 @@ TEST(ShiftOut_LsbFirst) {
     tearDown();
 }
 
+TEST(ShiftOutBlock) {
+    const int BUFFER_SIZE = 16;
+    setUp();
+
+    uint8_t      buffer[BUFFER_SIZE];
+    for (uint8_t i        = 0; i < BUFFER_SIZE; ++i)
+        buffer[i] = i;
+
+    testable->shift_out_block_msb_first_fast(buffer, sizeof(buffer));
+
+    tearDown();
+}
+
 int main () {
     CS.set();
     START(SPITest_MUST_USE_LOGIC_ANALYZER);
 
     RUN_TEST(ShiftOut_MsbFirst);
     RUN_TEST(ShiftOut_LsbFirst);
+    RUN_TEST(ShiftOutBlock);
 
     COMPLETE();
 }

@@ -291,7 +291,7 @@ class SD : public BlockStorage {
 
             // Send at least 72 clock cycles to enable the SD card
             this->m_cs.set();
-            for (i = 0; i < 128; ++i)
+            for (i = 0; i < 32; ++i)
                 this->m_spi->shift_out(24, (uint32_t) -1);
         }
 
@@ -540,9 +540,12 @@ class SD : public BlockStorage {
                 this->m_spi->shift_out(8, DATA_START_ID);
 
                 // Send all bytes
-                while (bytes--) {
-                    this->m_spi->shift_out(8, *(dat++));
-                }
+                if (SECTOR_SIZE == bytes)
+                    this->m_spi->shift_out_block_msb_first_fast(dat, SECTOR_SIZE);
+                else
+                    while (bytes--) {
+                        this->m_spi->shift_out(8, *(dat++));
+                    }
 
                 // Receive and digest response token
                 timeout = RESPONSE_TIMEOUT + CNT;
@@ -572,6 +575,11 @@ class SD : public BlockStorage {
 
                 // wait for transmission end
             } while (0xff != temp);
+
+            // What the heck do I need this for? Sometimes the SD card spews out an extra few bytes during the third
+            // repetition of this loop. I don't know why :'(
+            for (unsigned int i = 0; i < 3; ++i)
+                this->m_spi->shift_out(24, (uint32_t) -1);
 
             return NO_ERROR;
         }
