@@ -6,8 +6,8 @@ Chapter 1: Installation
 Microsoft Windows
 -----------------
 1. Download [PropWare for Windows][2].
-2. Execute the installer - make sure the installation path has no parentheses! In other words, _do not_ install PropWare
-   into `C:\Program Files (x86)\...` - GCC won't like this one bit.
+2. Execute the installer - make sure the installation path has no parentheses! In other words, _do not_ install 
+   %PropWare into `C:\Program Files (x86)\...` - GCC won't like this one bit.
 3. Add CMake's bin (located in `<install dir>\PWCMake\bin`) folder to your PATH. Excellent instructions for editing 
    PATH exist [here][3]. If the PATH variable already exists, add to it with a `;` separating the existing contents 
    and your new value. For instance, if you installed %PropWare to `C:\%PropWare` and PATH currently contains 
@@ -26,7 +26,7 @@ Linux - RedHat/Fedora/CentOS/etc
 Mac OSX
 -------
 I am unable to produce easy installation packages for Mac. My apologies. Please execute the following lines at the 
-command line to install PropWare on your Mac:
+command line to install %PropWare on your Mac:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
 wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
