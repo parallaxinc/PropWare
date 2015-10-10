@@ -17,9 +17,6 @@ set (CMAKE_DAT_FLAGS "" CACHE STRING
 
 set(CMAKE_INCLUDE_FLAG_DAT ${CMAKE_INCLUDE_FLAG_C})
 
-# Why the _heck_ does this need to be here? I hate you, CMake.
-file(TO_CMAKE_PATH "${PROPGCC_PREFIX}/bin" GCC_PATH)
-set(CMAKE_OBJCOPY ${GCC_PATH}/propeller-elf-objcopy${GCC_SUFFIX})
 include(CMakeCommonLanguageInclude)
 
 set(CMAKE_DAT_ARCHIVE_CREATE ${CMAKE_C_ARCHIVE_CREATE})
