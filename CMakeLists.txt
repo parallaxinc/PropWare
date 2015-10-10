@@ -1,15 +1,12 @@
 cmake_minimum_required (VERSION 3.0.0)
 
-set(PROPWARE_MAIN_PACKAGE 1)
+set(PROPWARE_MAIN_PACKAGE TRUE)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/version.txt VERSION)
 string(STRIP ${VERSION} VERSION)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/CMakeModules)
 find_package(PropWare ${VERSION} REQUIRED)
-
-# Do some initial configuration that would normally be handled via FindPropWare.cmake
-set(CMAKE_BUILD_TYPE None)
 
 # Set the project, version number and all languages used
 project(PropWare
@@ -30,8 +27,8 @@ endif ()
 
 include(ExternalProject)
 set(CMAKE_MAJOR_VERSION 3)
-set(CMAKE_MINOR_VERSION 2)
-set(CMAKE_PATCH_VERSION 3)
+set(CMAKE_MINOR_VERSION 3)
+set(CMAKE_PATCH_VERSION 2)
 set(CUSTOM_LINUX_CMAKE_INSTALL_DIR pwcmake)
 set(CUSTOM_WIN32_CMAKE_INSTALL_DIR PWCMake)
 set(CUSTOM_OSX_CMAKE_INSTALL_DIR   OSXCMake)

@@ -2,48 +2,52 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR Propeller)
 
 if (NOT DEFINED GCC_PATH)
-    file(TO_CMAKE_PATH "/opt/parallax/bin" DEFAULT_LINUX_PATH_1)
-    file(TO_CMAKE_PATH "C:\\Program Files\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_1)
-    file(TO_CMAKE_PATH "C:\\Program Files (x86)\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_2)
-    file(TO_CMAKE_PATH "C:\\PropGCC\\bin" DEFAULT_WINDOWS_PATH_3)
-
+    # Give priority to explicit defnitions
     find_path(GCC_PATH
-        NAMES
-            propeller-elf-gcc
-            propeller-elf-gcc.exe
         PATHS
-            "$ENV{PROPGCC_PREFIX}/bin"
-            "${PROPGCC_PREFIX}/bin"
             "$ENV{GCC_PATH}"
-            "${DEFAULT_LINUX_PATH_1}"
-            "${DEFAULT_WINDOWS_PATH_1}"
-            "${DEFAULT_WINDOWS_PATH_2}"
-            "${DEFAULT_WINDOWS_PATH_3}")
+            "${PROPGCC_PREFIX}/bin"
+            "$ENV{PROPGCC_PREFIX}/bin"
+        ENV
+            PATH)
+
+    file(TO_CMAKE_PATH "/opt/parallax/bin" DEFAULT_LINUX_PATH_1)
+    file(TO_CMAKE_PATH "C:\\PropGCC\\bin" DEFAULT_WINDOWS_PATH_1)
+    file(TO_CMAKE_PATH "C:\\Program Files\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_2)
+    file(TO_CMAKE_PATH "C:\\Program Files (x86)\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_3)
+
+    if (NOT GCC_PATH)
+        find_path(GCC_PATH
+            NAMES
+                propeller-elf-gcc
+                propeller-elf-gcc.exe
+            PATHS
+                "${DEFAULT_LINUX_PATH_1}"
+                "${DEFAULT_WINDOWS_PATH_1}"
+                "${DEFAULT_WINDOWS_PATH_2}"
+                "${DEFAULT_WINDOWS_PATH_3}")
+    endif ()
 endif ()
 
 # specify the cross compiler
 find_program(CMAKE_C_COMPILER propeller-elf-gcc
-    PATHS "${GCC_PATH}" ENV PATH)
-if (NOT CMAKE_C_COMPILER)
-    message(FATAL_ERROR "Can't find PropGCC")
-endif ()
-
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_CXX_COMPILER propeller-elf-gcc
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_ASM_COMPILER propeller-elf-gcc
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_RANLIB propeller-elf-ranlib
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_OBJCOPY propeller-elf-objcopy
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_OBJDUMP propeller-elf-objdump
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_AR propeller-elf-ar
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_ELF_LOADER propeller-load
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 find_program(CMAKE_GDB propeller-elf-gdb
-    PATHS "${GCC_PATH}" ENV PATH)
+    PATHS "${GCC_PATH}")
 
 set(CMAKE_COGC_COMPILER "${CMAKE_C_COMPILER}")
 set(CMAKE_COGCXX_COMPILER "${CMAKE_CXX_COMPILER}")
