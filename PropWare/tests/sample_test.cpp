@@ -32,8 +32,12 @@ TEST(CheckEmpty) {
     return true;
 }
 
-TEST(CheckFail) {
+TEST(CheckFail_SimpleMessage) {
     FAIL("This test was supposed to fail :)");
+}
+
+TEST(CheckFail_ComplexMessage) {
+    FAIL("This test was supposed to fail. Sample: '%s'", "Hello, World!");
 }
 
 TEST(CheckAssert) {
@@ -200,7 +204,8 @@ int main () {
     START(SampleTest);
 
     RUN_TEST(CheckEmpty);
-    EXPECT_FAIL(CheckFail);
+    EXPECT_FAIL(CheckFail_SimpleMessage);
+    EXPECT_FAIL(CheckFail_ComplexMessage);
     RUN_TEST(CheckAssert);
     EXPECT_FAIL(CheckAssert_ExpectFailure);
     RUN_TEST(CheckAssertTrue);

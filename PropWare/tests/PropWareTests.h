@@ -73,7 +73,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define EXPECT_FAIL(testName) \
     _runPropWareUnitTest(testName, #testName, false, &failures)
 
-#define FAIL(message) \
+#define FAIL(...) \
+    MESSAGE(__VA_ARGS__) \
     _tearDown(); \
     return false
 
