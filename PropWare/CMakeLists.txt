@@ -29,9 +29,6 @@ set(PROPWARE_SOURCES
     ../runnable
     ../scancapable
     ../scanner
-    ../seeedtft
-    ../seeedtftfast
-    ../seeedtftfast_as.S
     ../spi
     ../stringbuilder
     ../staticstringbuilder
