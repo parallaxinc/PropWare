@@ -104,7 +104,7 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_buf, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) g_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
-    ASSERT_EQ_MSG(false, testable->m_mod);
+    ASSERT_EQ_MSG(false, testable->m_fileMetadataModified);
 
     tearDown();
 }
@@ -226,6 +226,125 @@ TEST(SafePutChar_singleChar) {
     tearDown();
 }
 
+TEST(SafePutChar_MultiLine) {
+    PropWare::ErrorCode err;
+    setUp();
+
+    const char testString[] = "Sample text line\n";
+    ASSERT_EQ_MSG(0, testable->get_length());
+    for (unsigned int i = 0; i < sizeof(testString); ++i) {
+        err = testable->safe_put_char(testString[i]);
+        error_checker(err);
+        ASSERT_EQ_MSG(0, err);
+    }
+
+    ASSERT_EQ_MSG(sizeof(testString), testable->get_length());
+    err = testable->close();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
+
+    {
+        const BlockStorage   *driver = testable->m_driver;
+        BlockStorage::Buffer *buffer = testable->m_buf;
+        delete testable;
+        g_fs->flush_fat();
+
+        clear_buffer(driver, buffer);
+    }
+
+    FatFileReader reader(*g_fs, NEW_FILE_NAME);
+    ASSERT_EQ_MSG(0, reader.open());
+    ASSERT_EQ_MSG(sizeof(testString), reader.get_length());
+    for (unsigned int i = 0; i < sizeof(testString); ++i)
+        ASSERT_EQ_MSG(testString[i], reader.get_char());
+    reader.close();
+
+    testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
+    err      = testable->remove();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->remove()
+    err = testable->flush();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->flush()
+
+    clear_buffer(testable);
+    ASSERT_FALSE(testable->exists());
+
+    tearDown();
+}
+
+TEST(CopyFile) {
+    PropWare::ErrorCode err;
+    setUp();
+
+    uint8_t                rawBuffer[SD::SECTOR_SIZE];
+    BlockStorage::MetaData bufferMeta;
+    BlockStorage::Buffer   readBuffer = {rawBuffer, &bufferMeta};
+    FatFileReader          reader(*g_fs, EXISTING_FILE, &readBuffer);
+    ASSERT_EQ_MSG(0, reader.open());
+
+    MESSAGE("Files opened...");
+    while (!reader.eof()) {
+        err = testable->safe_put_char(reader.get_char());
+        error_checker(err);
+        ASSERT_EQ_MSG(0, err);
+    }
+    MESSAGE("File copied...");
+
+    err = testable->close();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
+
+    MESSAGE("Writer closed...")
+
+    {
+        const BlockStorage   *driver = testable->m_driver;
+        BlockStorage::Buffer *buffer = testable->m_buf;
+        delete testable;
+        ASSERT_EQ_MSG(0, g_fs->flush_fat());
+
+        clear_buffer(driver, buffer);
+    }
+
+    MESSAGE("Writer deleted...")
+
+    // Reset reader
+    ASSERT_EQ_MSG(0, reader.seek(0, File::BEG));
+
+    FatFileReader fileWriterChecker(*g_fs, NEW_FILE_NAME);
+    ASSERT_EQ_MSG(0, fileWriterChecker.open());
+    ASSERT_EQ_MSG(reader.get_length(), fileWriterChecker.get_length());
+
+    MESSAGE("Readers opened...")
+
+    while (!fileWriterChecker.eof()) {
+        char c;
+        ASSERT_EQ_MSG(0, fileWriterChecker.safe_get_char(c));
+
+        char expectedChar = reader.get_char();
+        if (expectedChar != c) {
+            FAIL("Failure on char %d", reader.tell() - 1);
+        }
+    }
+
+    MESSAGE("File content confirmed! Cleaning up...")
+
+    fileWriterChecker.close();
+
+    testable = new FatFileWriter(*g_fs, NEW_FILE_NAME);
+    err      = testable->remove();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->remove()
+    err = testable->flush();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err); // testable->flush()
+
+    clear_buffer(testable);
+    ASSERT_FALSE(testable->exists());
+
+    tearDown();
+}
+
 int main () {
     PropWare::ErrorCode err;
 
@@ -244,9 +363,12 @@ int main () {
     RUN_TEST(OpenClose_ExistingFile);
     RUN_TEST(OpenCloseDelete_NonExistingFile);
     RUN_TEST(SafePutChar_singleChar);
+    RUN_TEST(SafePutChar_MultiLine);
+    RUN_TEST(CopyFile);
 
-    delete g_fs->get_driver();
+    const BlockStorage *driver = g_fs->get_driver();
     delete g_fs;
+    delete driver;
 
     COMPLETE();
 }

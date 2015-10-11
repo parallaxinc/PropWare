@@ -81,8 +81,7 @@ class FatFS : public Filesystem {
          * @brief   Destructor. Unmounts the filesystem and flushes all buffers
          */
         ~FatFS () {
-            if (this->m_mounted)
-                this->unmount();
+            this->unmount();
 
             if (NULL != this->m_buf.buf)
                 free(this->m_buf.buf);
@@ -476,7 +475,7 @@ class FatFS : public Filesystem {
          * @brief   Enlarge the current directory
          */
         PropWare::ErrorCode extend_current_directory () {
-            return this->extend_fat(&this->m_buf);
+            return this->extend_fat(this->m_buf.meta);
         }
 
         /**
@@ -486,39 +485,39 @@ class FatFS : public Filesystem {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode extend_fat (BlockStorage::Buffer *buf) {
+        PropWare::ErrorCode extend_fat (BlockStorage::MetaData *bufferMetadata) {
             PropWare::ErrorCode err;
             uint32_t            newAllocUnit;
 
             // Do we need to load a different sector of the FAT or is the correct one currently loaded? (Correct means
             // the sector currently containing the EOC marker)
-            if ((buf->meta->curTier2 >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
+            if ((bufferMetadata->curTier2 >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
                 this->flush_fat();
-                this->m_curFatSector = buf->meta->curTier2 >> this->m_entriesPerFatSector_Shift;
+                this->m_curFatSector = bufferMetadata->curTier2 >> this->m_entriesPerFatSector_Shift;
                 check_errors(this->m_driver->read_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat));
             }
 
             // This function should only be called when a file or directory has
             // reached the end of its cluster chain
             uint16_t entriesPerFatSector = (uint16_t) (1 << this->m_entriesPerFatSector_Shift);
-            uint16_t allocUnitOffset     = (uint16_t) (buf->meta->curTier2 % entriesPerFatSector);
+            uint16_t allocUnitOffset     = (uint16_t) (bufferMetadata->curTier2 % entriesPerFatSector);
             uint16_t fatPointerAddress   = allocUnitOffset * this->m_filesystem;
             uint32_t nextSector          = this->m_driver->get_long(fatPointerAddress, this->m_fat);
-            if (this->is_eoc(nextSector))
+            if (!this->is_eoc(nextSector))
                 return INVALID_FAT_APPEND;
 
             // Find where the next cluster of the file should be stored...
             newAllocUnit = this->find_empty_space(1);
 
             // Now that we know the allocation unit, write it to the FAT buffer
-            const uint16_t sectorOffset = (uint16_t) ((buf->meta->curTier2 %
+            const uint16_t sectorOffset = (uint16_t) ((bufferMetadata->curTier2 %
                     (1 << this->m_entriesPerFatSector_Shift)) * this->m_filesystem);
             if (FAT_16 == this->m_filesystem)
                 this->m_driver->write_short(sectorOffset, this->m_fat, (uint16_t) newAllocUnit);
             else
                 this->m_driver->write_long(sectorOffset, this->m_fat, newAllocUnit);
-            buf->meta->nextTier2 = newAllocUnit;
-            this->m_fatMod       = true;  // And mark the buffer as modified
+            bufferMetadata->nextTier2 = newAllocUnit;
+            this->m_fatMod            = true;  // And mark the buffer as modified
 
             return 0;
         }
@@ -642,7 +641,7 @@ class FatFS : public Filesystem {
             return NO_ERROR;
         }
 
-        void print_status (const bool printBlocks = false, const uint8_t blockLineLength = 16) {
+        void print_status (const bool printBlocks = false) const {
             this->m_logger->println("######################################################");
             this->m_logger->printf("# FAT Filesystem Status - PropWare::FatFS@0x%08X #\n", (unsigned int) this);
             // DRIVER
@@ -710,7 +709,7 @@ class FatFS : public Filesystem {
             if (printBlocks) {
                 this->m_logger->println("\tFAT Buffer");
                 this->m_logger->println("\t----------");
-                BlockStorage::print_block(*this->m_logger, this->m_fat, this->m_sectorSize, blockLineLength);
+                BlockStorage::print_block(*this->m_logger, this->m_fat, this->m_sectorSize);
                 this->m_logger->println();
             }
 
@@ -728,7 +727,7 @@ class FatFS : public Filesystem {
                 this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", bufMeta->curTier2, bufMeta->curTier2);
                 this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", bufMeta->nextTier2, bufMeta->nextTier2);
                 if (printBlocks)
-                    BlockStorage::print_block(*this->m_logger, this->m_buf, this->m_sectorSize, blockLineLength);
+                    BlockStorage::print_block(*this->m_logger, this->m_buf, this->m_sectorSize);
             }
             this->m_logger->println();
         }
