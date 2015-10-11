@@ -4,6 +4,9 @@ set(CMAKE_SYSTEM_PROCESSOR Propeller)
 if (NOT DEFINED GCC_PATH)
     # Give priority to explicit defnitions
     find_path(GCC_PATH
+        NAMES
+            propeller-elf-gcc
+            propeller-elf-gcc.exe
         PATHS
             "$ENV{GCC_PATH}"
             "${PROPGCC_PREFIX}/bin"
