@@ -100,7 +100,6 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) &g_fs->m_dirMeta, (unsigned int) testable->m_fsBufMeta);
     ASSERT_EQ_MSG((unsigned int) g_fs, (unsigned int) testable->m_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
-    ASSERT_EQ_MSG(false, testable->m_mod);
 
     tearDown();
 }

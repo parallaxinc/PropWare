@@ -59,12 +59,14 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 }
             }
 
-            return this->open_existing_file(fileEntryOffset);
+            check_errors(this->open_existing_file(fileEntryOffset));
+            this->m_open = true;
+            return NO_ERROR;
         }
 
         /**
          * @brief   Mark a file as delete and free its clusters in the FAT. File content will not be cleared unless
-         *          overwritten by another file
+         *          overwritten by another file. File does not have to be opened prior to deleting
          */
         PropWare::ErrorCode remove () {
             PropWare::ErrorCode err;
@@ -89,7 +91,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
             check_errors(this->m_fs->clear_chain(this->firstTier2));
 
-            this->m_mod = false; // This guy is for file length, not the directory entry or FAT
+            this->m_fileMetadataModified = false; // This guy is for file length, not the directory entry or FAT
 
             return NO_ERROR;
         }
@@ -97,11 +99,13 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         PropWare::ErrorCode flush () {
             PropWare::ErrorCode err;
 
-            // If the currently loaded sector has been modified, save the changes
-            check_errors(this->m_driver->flush(this->m_buf));
+            // Flush the file contents
+            if (this->m_buf->meta == &this->m_contentMeta) {
+                check_errors(this->m_driver->flush(this->m_buf));
+            }
 
-            // If we modified the length of the file...
-            if (this->m_mod) {
+            // If we modified any metadata for the file...
+            if (this->m_fileMetadataModified) {
                 this->load_directory_sector();
 
                 // Finally, edit the length of the file
@@ -110,7 +114,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                                            (const uint32_t) this->m_length);
 
                 check_errors(this->m_driver->flush(this->m_buf));
-                this->m_mod = false;
+                this->m_fileMetadataModified = false;
             }
 
             return NO_ERROR;
@@ -119,29 +123,54 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         PropWare::ErrorCode safe_put_char (const char c) {
             PropWare::ErrorCode err;
 
-            check_errors(this->load_sector_under_ptr());
+            if (this->m_open) {
+                if (this->need_to_extend_fat()) {
+                    check_errors(this->m_fs->extend_fat(&this->m_contentMeta));
+                }
 
-            // Get the character
-            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_fs->get_driver()->get_sector_size());
-            this->m_buf->buf[bufferOffset] = (uint8_t) c;
-            this->m_buf->meta->mod = true;
+                check_errors(this->load_sector_under_ptr());
 
-            // If we extended the file, be sure to increment the length counter and make a note that the length changed
-            if (this->m_length == this->m_ptr) {
-                ++(this->m_length);
-                this->m_mod = true;
+                // Get the character
+                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
+                this->m_buf->buf[bufferOffset] = (uint8_t) c;
+                this->m_buf->meta->mod = true;
+
+                // If we extended the file, be sure to increment the length counter and make a note that the length changed
+                if (this->m_length == this->m_ptr) {
+                    ++this->m_length;
+                    this->m_fileMetadataModified = true;
+                }
+
+                // Finally done. Increment the pointer
+                ++this->m_ptr;
+
+                return NO_ERROR;
+            } else {
+                return FILE_NOT_OPEN;
             }
+        }
 
-            // Finally done. Increment the pointer
-            ++(this->m_ptr);
-
-            return NO_ERROR;
+        void print_status (const bool printBlocks = false) const {
+            this->File::print_status("FatFileWriter", printBlocks);
+            this->FatFile::print_status(printBlocks, false);
+            this->FileWriter::print_status(printBlocks, false);
         }
 
     protected:
-
         static inline bool not_period_or_end (const char c) {
             return '.' != c && c;
+        }
+
+        bool need_to_extend_fat () {
+            const uint8_t  sectorsPerCluster = this->m_fs->m_tier1sPerTier2Shift;
+
+            const uint32_t requiredSector    = (uint32_t) this->m_ptr >> this->m_driver->get_sector_size_shift();
+            unsigned int   requiredCluster   = requiredSector >> sectorsPerCluster;
+
+            if (this->m_curTier2 < requiredCluster)
+                return this->m_fs->is_eoc(this->m_contentMeta.nextTier2);
+            else
+                return false;
         }
 
     protected:

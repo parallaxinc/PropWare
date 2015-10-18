@@ -16,8 +16,9 @@ if (NOT DEFINED GCC_PATH)
 
     file(TO_CMAKE_PATH "/opt/parallax/bin" DEFAULT_LINUX_PATH_1)
     file(TO_CMAKE_PATH "C:\\PropGCC\\bin" DEFAULT_WINDOWS_PATH_1)
-    file(TO_CMAKE_PATH "C:\\Program Files\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_2)
-    file(TO_CMAKE_PATH "C:\\Program Files (x86)\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_3)
+    file(TO_CMAKE_PATH "C:\\parallax\\bin" DEFAULT_WINDOWS_PATH_2)
+    file(TO_CMAKE_PATH "C:\\Program Files\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_3)
+    file(TO_CMAKE_PATH "C:\\Program Files (x86)\\SimpleIDE\\propeller-gcc\\bin" DEFAULT_WINDOWS_PATH_4)
 
     if (NOT GCC_PATH)
         find_path(GCC_PATH
@@ -28,7 +29,8 @@ if (NOT DEFINED GCC_PATH)
                 "${DEFAULT_LINUX_PATH_1}"
                 "${DEFAULT_WINDOWS_PATH_1}"
                 "${DEFAULT_WINDOWS_PATH_2}"
-                "${DEFAULT_WINDOWS_PATH_3}")
+                "${DEFAULT_WINDOWS_PATH_3}"
+                "${DEFAULT_WINDOWS_PATH_4}")
     endif ()
 endif ()
 

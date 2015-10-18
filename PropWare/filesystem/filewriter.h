@@ -35,7 +35,7 @@ class FileWriter : virtual public File, public PrintCapable {
         FileWriter (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
                     const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
-                  m_ptr(0) {
+                  m_fileMetadataModified(false) {
         }
 
         virtual PropWare::ErrorCode safe_put_char (const char c) = 0;
@@ -48,7 +48,7 @@ class FileWriter : virtual public File, public PrintCapable {
             PropWare::ErrorCode err;
 
             char *s = (char *) string;
-            while (*s) {
+            while (*s++) {
                 check_errors(this->safe_put_char(*s));
             }
 
@@ -71,8 +71,18 @@ class FileWriter : virtual public File, public PrintCapable {
             return this->File::seek(this->m_ptr, pos, way);
         }
 
+        void print_status (const bool printBlocks = false, const bool printParentStatus = true) const {
+            if (printParentStatus)
+                this->File::print_status("FileWriter", printBlocks);
+
+            this->m_logger->println("FileWriter-specific");
+            this->m_logger->println("-------------------");
+            this->m_logger->printf("\tModified: %s\n", Utility::to_string(this->m_fileMetadataModified));
+        }
+
     protected:
-        int32_t m_ptr;
+        /** When the length of a file is changed, this variable will be set, otherwise cleared */
+        bool m_fileMetadataModified;
 };
 
 }

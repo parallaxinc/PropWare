@@ -37,7 +37,8 @@ class File {
             /** First error code */     BEG_ERROR = Filesystem::BEG_ERROR + 1,
             /** End of file */          EOF_ERROR,
             /** Invalid file name */    INVALID_FILENAME,
-            /** Final error code */     END_ERROR = EOF_ERROR
+            /** File not opened */      FILE_NOT_OPEN,
+            /** Final error code */     END_ERROR = FILE_NOT_OPEN
         }    ErrorCode;
 
         typedef enum {
@@ -67,7 +68,10 @@ class File {
          * @return      0 upon success, error code otherwise
          */
         virtual PropWare::ErrorCode close () {
-            return this->flush();
+            const PropWare::ErrorCode err = this->flush();
+            if (!err)
+                this->m_open = false;
+            return err;
         }
 
         /**
@@ -93,11 +97,10 @@ class File {
                 : m_logger(&logger),
                   m_driver(fs.get_driver()),
                   m_fsBufMeta(&fs.m_dirMeta),
-                  m_id(fs.next_file_id()),
                   m_length(-1),
-                  m_mod(false),
                   m_ptr(0),
-                  m_error(NO_ERROR) {
+                  m_error(NO_ERROR),
+                  m_open(false) {
             if (NULL == buffer)
                 this->m_buf = &fs.m_buf;
             else
@@ -160,8 +163,6 @@ class File {
             this->m_logger->printf("\tLogger: 0x%08X\n", (unsigned int) this->m_logger);
             this->m_logger->printf("\tDriver: 0x%08X\n", (unsigned int) this->m_driver);
             this->m_logger->printf("\tBuffer: 0x%08X\n", (unsigned int) this->m_buf);
-            this->m_logger->printf("\tModified: %s\n", Utility::to_string(this->m_mod));
-            this->m_logger->printf("\tFile ID: %u\n", this->m_id);
             this->m_logger->printf("\tLength: 0x%08X/%d\n", this->m_length, this->m_length);
 
             if (NULL != this->m_buf) {
@@ -199,16 +200,12 @@ class File {
         BlockStorage::MetaData m_dirEntryMeta;
         /** Filesystem's buffer metadata (used to determine the current directory when opening the file) */
         BlockStorage::MetaData *m_fsBufMeta;
-        /** determine if the buffer is owned by this file */
-        // TODO: Remove this - the ID is redundant now that we have a MetaData struct and name field within it
-        int                    m_id;
 
         int32_t m_length;
-        /** When the length of a file is changed, this variable will be set, otherwise cleared */
-        bool m_mod;
         int32_t m_ptr;
 
         PropWare::ErrorCode m_error;
+        bool m_open;
 };
 
 }
