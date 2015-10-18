@@ -59,7 +59,9 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 }
             }
 
-            return this->open_existing_file(fileEntryOffset);
+            check_errors(this->open_existing_file(fileEntryOffset));
+            this->m_open = true;
+            return NO_ERROR;
         }
 
         /**
@@ -121,27 +123,31 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         PropWare::ErrorCode safe_put_char (const char c) {
             PropWare::ErrorCode err;
 
-            if (this->need_to_extend_fat()) {
-                check_errors(this->m_fs->extend_fat(&this->m_contentMeta));
+            if (this->m_open) {
+                if (this->need_to_extend_fat()) {
+                    check_errors(this->m_fs->extend_fat(&this->m_contentMeta));
+                }
+
+                check_errors(this->load_sector_under_ptr());
+
+                // Get the character
+                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
+                this->m_buf->buf[bufferOffset] = (uint8_t) c;
+                this->m_buf->meta->mod = true;
+
+                // If we extended the file, be sure to increment the length counter and make a note that the length changed
+                if (this->m_length == this->m_ptr) {
+                    ++this->m_length;
+                    this->m_fileMetadataModified = true;
+                }
+
+                // Finally done. Increment the pointer
+                ++this->m_ptr;
+
+                return NO_ERROR;
+            } else {
+                return FILE_NOT_OPEN;
             }
-
-            check_errors(this->load_sector_under_ptr());
-
-            // Get the character
-            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
-            this->m_buf->buf[bufferOffset] = (uint8_t) c;
-            this->m_buf->meta->mod = true;
-
-            // If we extended the file, be sure to increment the length counter and make a note that the length changed
-            if (this->m_length == this->m_ptr) {
-                ++this->m_length;
-                this->m_fileMetadataModified = true;
-            }
-
-            // Finally done. Increment the pointer
-            ++this->m_ptr;
-
-            return NO_ERROR;
         }
 
         void print_status (const bool printBlocks = false) const {

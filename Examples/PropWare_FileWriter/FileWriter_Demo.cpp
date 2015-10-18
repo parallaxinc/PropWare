@@ -50,12 +50,17 @@ int main () {
     ErrorCode err;
     const SD driver;
     FatFS    filesystem(&driver);
+    SD::Buffer writeBuffer;
+    SD::MetaData writeMetaData;
+    writeBuffer.buf = (uint8_t *) malloc(driver.get_sector_size());
+    writeBuffer.meta = &writeMetaData;
 
     error_checker(filesystem.mount());
 
     FatFileReader reader(filesystem, "fat_test.txt");
+    reader.open();
 
-    FatFileWriter writer(filesystem, "new2.txt");
+    FatFileWriter writer(filesystem, "new2.txt", &writeBuffer);
     if (writer.exists()) {
         pwOut << "File already exists: " << writer.get_name() << '\n';
         pwOut << "Deleting now\n";
@@ -65,11 +70,8 @@ int main () {
 
     error_checker(writer.open());
 
-    while (!reader.eof()) {
-        char c;
-        error_checker(reader.safe_get_char(c))
-        error_checker(writer.safe_put_char(c));
-    }
+    while (!reader.eof())
+        writer.put_char(reader.get_char());
 
     writer.close();
     filesystem.unmount();

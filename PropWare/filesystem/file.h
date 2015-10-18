@@ -37,7 +37,8 @@ class File {
             /** First error code */     BEG_ERROR = Filesystem::BEG_ERROR + 1,
             /** End of file */          EOF_ERROR,
             /** Invalid file name */    INVALID_FILENAME,
-            /** Final error code */     END_ERROR = EOF_ERROR
+            /** File not opened */      FILE_NOT_OPEN,
+            /** Final error code */     END_ERROR = FILE_NOT_OPEN
         }    ErrorCode;
 
         typedef enum {
@@ -67,7 +68,10 @@ class File {
          * @return      0 upon success, error code otherwise
          */
         virtual PropWare::ErrorCode close () {
-            return this->flush();
+            const PropWare::ErrorCode err = this->flush();
+            if (!err)
+                this->m_open = false;
+            return err;
         }
 
         /**
@@ -95,7 +99,8 @@ class File {
                   m_fsBufMeta(&fs.m_dirMeta),
                   m_length(-1),
                   m_ptr(0),
-                  m_error(NO_ERROR) {
+                  m_error(NO_ERROR),
+                  m_open(false) {
             if (NULL == buffer)
                 this->m_buf = &fs.m_buf;
             else
@@ -200,6 +205,7 @@ class File {
         int32_t m_ptr;
 
         PropWare::ErrorCode m_error;
+        bool m_open;
 };
 
 }

@@ -48,22 +48,28 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
                 return FatFS::EOC_END == err ? Filesystem::FILENAME_NOT_FOUND : err;
 
             // `name` was found successfully
-            return this->open_existing_file(fileEntryOffset);
+            check_errors(this->open_existing_file(fileEntryOffset));
+            this->m_open = true;
+            return NO_ERROR;
         }
 
         PropWare::ErrorCode safe_get_char (char &c) {
             PropWare::ErrorCode err;
 
-            check_errors(this->load_sector_under_ptr());
+            if (this->m_open) {
+                check_errors(this->load_sector_under_ptr());
 
-            // Get the character
-            const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
-            c = this->m_buf->buf[bufferOffset];
+                // Get the character
+                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
+                c = this->m_buf->buf[bufferOffset];
 
-            // Finally done. Increment the pointer
-            ++(this->m_ptr);
+                // Finally done. Increment the pointer
+                ++(this->m_ptr);
 
-            return NO_ERROR;
+                return NO_ERROR;
+            } else {
+                return FILE_NOT_OPEN;
+            }
         }
 };
 
