@@ -5,7 +5,7 @@ Make a copy of a file.
 
 Two versions of the program exist - one that uses the PropWare namespace and another that uses the Simple library and
 C standard library. Program size is reported by `propeller-load`, so it is only a rough estimate. The test file was 
-25.9 kB.
+25.9 kB. Time includes mounting and file open/close actions.
 
 PropWare
 --------
