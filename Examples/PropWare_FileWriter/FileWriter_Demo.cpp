@@ -23,67 +23,70 @@
  * SOFTWARE.
  */
 
-#include <PropWare/PropWare.h>
 #include <PropWare/printer/printer.h>
 
 #define TEST_PROPWARE
-
 //#define TEST_SIMPLE
 
 #if (defined TEST_PROPWARE)
-
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilewriter.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
-
+using namespace PropWare;
 #elif (defined TEST_SIMPLE)
 #include <simple/simpletools.h>
 #endif
 
-using namespace PropWare;
+void run_test();
 
-#define error_checker(x) err = x; if (err) {pwOut << __FILE__ << ':' << __LINE__ << " Error: " << err << '\n'; return 1;}
+int main() {
+    volatile unsigned int startTime = CNT;
+    run_test();
+    volatile unsigned int runtime = PropWare::Utility::measure_time_interval(startTime);
+    pwOut << "All done! " << runtime / 1000 << "ms\n";
 
-int main () {
+    return 0;
+}
+
 #ifdef TEST_PROPWARE
-    ErrorCode err;
-    const SD driver;
-    FatFS    filesystem(&driver);
-    SD::Buffer writeBuffer;
+void run_test() {
+    const SD  driver;
+    FatFS     filesystem(&driver);
+
+    SD::Buffer   writeBuffer;
     SD::MetaData writeMetaData;
-    writeBuffer.buf = (uint8_t *) malloc(driver.get_sector_size());
+    uint8_t bufferData[driver.get_sector_size()];
+    writeBuffer.buf  = bufferData;
     writeBuffer.meta = &writeMetaData;
 
-    error_checker(filesystem.mount());
+    filesystem.mount();
 
     FatFileReader reader(filesystem, "fat_test.txt");
-    reader.open();
-
     FatFileWriter writer(filesystem, "new2.txt", &writeBuffer);
-    if (writer.exists()) {
-        pwOut << "File already exists: " << writer.get_name() << '\n';
-        pwOut << "Deleting now\n";
-        error_checker(writer.remove());
-        error_checker(writer.flush());
-    }
 
-    error_checker(writer.open());
+    reader.open();
+    writer.open();
 
     while (!reader.eof())
         writer.put_char(reader.get_char());
 
     writer.close();
+    reader.close();
     filesystem.unmount();
-#elif (defined TEST_SIMPLE)
+}
+#else
+void run_test() {
     sd_mount(0, 1, 2, 3);
 
-    FILE *f = fopen("fat_test.txt", "r");
+    FILE *reader = fopen("fat_test.txt", "r");
+    FILE *writer = fopen("new2.txt", "w");
 
-    while (!feof(f))
-        pwOut << (char) fgetc(f);
-#endif
+    int c;
+    while (EOF != (c = fgetc(reader)))
+        fputc((char) c, writer);
 
-    pwOut << "All done!\n";
-    return 0;
+    fclose(reader);
+    fclose(writer);
 }
+#endif
