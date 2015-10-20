@@ -10,17 +10,17 @@ C standard library. Program size is reported by `propeller-load`, so it is only 
 PropWare
 --------
 
-CMM Size: 17,328 bytes
+CMM Size: 17,328 bytes<br>
 CMM Time: 14.276 seconds
 
-LMM Size: 29,028 bytes
+LMM Size: 29,028 bytes<br>
 LMM Time: 3.978 seconds
 
 Simple + C Standard Library
 ---------------------------
 
-CMM Size: 15,308 bytes
+CMM Size: 15,308 bytes<br>
 CMM Time: 39.088 seconds
 
-LMM Size: 25,352 bytes
+LMM Size: 25,352 bytes<br>
 LMM Time: 36.401 seconds
