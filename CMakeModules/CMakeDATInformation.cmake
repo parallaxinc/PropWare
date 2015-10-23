@@ -23,10 +23,9 @@ set(CMAKE_DAT_ARCHIVE_CREATE ${CMAKE_C_ARCHIVE_CREATE})
 set(CMAKE_DAT_ARCHIVE_APPEND ${CMAKE_C_ARCHIVE_APPEND})
 set(CMAKE_DAT_ARCHIVE_FINISH ${CMAKE_C_ARCHIVE_FINISH})
 
-# TODO: Can get_filename_component be used to replace the python script?
-#       http://www.cmake.org/cmake/help/v3.0/command/get_filename_component.html
 set(CMAKE_DAT_COMPILE_OBJECT
-"${PropWare_DAT_SYMBOL_CONVERTER} -i <SOURCE> -o <OBJECT> --objcopy=\"${CMAKE_OBJCOPY}\" -v\$(VERBOSE)")
+"${CMAKE_COMMAND} -DOBJCOPY=\"${CMAKE_OBJCOPY}\" -DSOURCE=<SOURCE> -DOUTPUT=<OBJECT> -DVERBOSE=$(VERBOSE) -P ${PropWare_DAT_SYMBOL_CONVERTER}"
+)
 
 mark_as_advanced(
     CMAKE_DAT_COMPILER
