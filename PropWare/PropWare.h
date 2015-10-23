@@ -56,7 +56,7 @@ namespace PropWare {
 #define MILLISECOND         ((uint32_t) (CLKFREQ / 1000))
 #define MICROSECOND         ((uint32_t) (MILLISECOND / 1000))
 
-typedef int16_t ErrorCode;
+typedef int ErrorCode;
 
 typedef enum {
     BIT_0  = 0x1,

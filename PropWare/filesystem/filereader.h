@@ -45,7 +45,7 @@ class FileReader : virtual public File, virtual public ScanCapable {
             const PropWare::ErrorCode err = this->safe_get_char(c);
             if (err) {
                 this->m_error = err;
-                return '\0';
+                return -1;
             } else
                 return c;
         }
