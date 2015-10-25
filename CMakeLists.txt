@@ -11,7 +11,7 @@ find_package(PropWare ${VERSION} REQUIRED)
 # Set the project, version number and all languages used
 project(PropWare
     VERSION ${VERSION}
-    LANGUAGES C CXX ASM COGC COGCXX ECOGC ECOGCXX DAT)
+    LANGUAGES C CXX ASM COGC COGCXX ECOGC ECOGCXX DAT SPIN2DAT)
 
 add_subdirectory(simple)
 add_subdirectory(libpropeller)
@@ -27,7 +27,7 @@ endif ()
 
 include(ExternalProject)
 include(./DownloadCMakeBinaries.cmake)
-include(DownloadSpin2cpp.cmake)
+include(./DownloadSpin2cpp.cmake)
 
 include(./CMakePropWareInstall.cmake)
 include(./CMakeCPack.cmake)

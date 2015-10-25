@@ -167,10 +167,16 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             PATHS
                 ${PROPWARE_PATH}/CMakeModules
                 ${CMAKE_ROOT}/Modules)
+        find_file(PropWare_SPIN2DAT_SYMBOL_CONVERTER CMakeSpin2DatSymbolConverter.cmake
+            PATHS
+                ${PROPWARE_PATH}/CMakeModules
+                ${CMAKE_ROOT}/Modules)
         find_file(PROPWARE_RUN_OBJCOPY CMakeRunObjcopy.cmake
             PATHS
                 ${PROPWARE_PATH}/CMakeModules
                 ${CMAKE_ROOT}/Modules)
+        find_program(SPIN2CPP_COMMAND spin2cpp
+            ${PROPWARE_PATH})
 
         set(PropWare_LIBRARIES
             # Built-ins
