@@ -231,6 +231,16 @@ class Utility {
             return N;
         }
 
+        /**
+         * @brief   Perform hard reboot
+         *
+         * Also known as reset or power down/up, this will restart the entire chip as if power was just applied. Note
+         * that this will reboot __all 8 cogs__, not just one.
+         */
+        static inline void reboot () {
+            __builtin_propeller_clkset(0x80);
+        }
+
     private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as

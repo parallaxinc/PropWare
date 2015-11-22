@@ -41,6 +41,7 @@ set(PROPWARE_SOURCES
     ../uart/sharedsimplexuart
     ../uart/uart
     ../utility
+    ../watchdog
     ../ws2812)
 
 add_subdirectory(tests)
