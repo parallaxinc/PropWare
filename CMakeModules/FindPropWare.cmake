@@ -382,6 +382,11 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
                     DEPENDS ${name})
 
+            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
+            add_custom_target(debug-eeprom
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
+
             # Add target for run (load to RAM, do not start terminal)
             add_custom_target(run-ram
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
@@ -406,6 +411,11 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             add_custom_target(debug-${name}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
                     DEPENDS ${name})
+
+            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
+            add_custom_target(debug-eeprom-${name}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
 
             # Add target for run (load to RAM, do not start terminal)
             add_custom_target(run-ram-${name}
