@@ -24,6 +24,10 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/synchronousprinter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/synchronousprinter.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/ws2812.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/video/vgatext.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/video/vgatext.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/video/vga.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/video/vga_driver.S
     ${CMAKE_CURRENT_LIST_DIR}/memory/blockstorage.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/eeprom.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/sd.h
