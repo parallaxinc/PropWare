@@ -47,6 +47,8 @@ set(PROPWARE_SOURCES
 add_subdirectory(tests)
 
 include_directories(${PROJECT_SOURCE_DIR})
+set(COMMON_FLAGS "-Os")
+
 add_subdirectory(cog)
 add_subdirectory(cmm)
 add_subdirectory(lmm)

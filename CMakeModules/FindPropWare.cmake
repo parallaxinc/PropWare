@@ -266,10 +266,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         endfunction ()
 
         macro (set_compile_flags)
-            if (NOT DEFINED MODEL)
-                message(FATAL_ERROR "MODEL is not defined. You must define MODEL as one of cog, cmm, lmm, xmmc, xmm-single or xmm-split")
-            endif ()
-
             include_directories(${PropWare_INCLUDE_DIR})
 
             # Handle user options
