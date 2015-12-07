@@ -45,7 +45,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             // Attempt to find the file
             if ((err = this->find(this->get_name(), &fileEntryOffset)))
                 // Find returned an error; ensure it was EOC...
-                return FatFS::EOC_END == err ? Filesystem::FILENAME_NOT_FOUND : err;
+                return FatFS::EOC_END == err ? FatFile::FILENAME_NOT_FOUND : err;
 
             // `name` was found successfully
             check_errors(this->open_existing_file(fileEntryOffset));

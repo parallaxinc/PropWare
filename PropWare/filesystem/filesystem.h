@@ -37,14 +37,10 @@ class Filesystem {
         // TODO: Sort these out properly between FS errors and file errors
 #define HD44780_MAX_ERROR    64
         typedef enum {
-                                       NO_ERROR            = 0,
-                                       BEG_ERROR           = HD44780_MAX_ERROR + 1,
-            /** Filesystem Error  0 */ FILE_ALREADY_EXISTS = BEG_ERROR,
-            /** Filesystem Error  2 */ ENTRY_NOT_FILE,
-            /** Filesystem Error  3 */ ENTRY_NOT_DIR,
-            /** Filesystem Error  4 */ FILENAME_NOT_FOUND,
-            /** Filesystem Error  5 */ FILESYSTEM_ALREADY_MOUNTED,
-            /** End Filesystem error */END_ERROR           = FILESYSTEM_ALREADY_MOUNTED
+                                       NO_ERROR                   = 0,
+                                       BEG_ERROR                  = HD44780_MAX_ERROR + 1,
+            /** Filesystem Error  0 */ FILESYSTEM_ALREADY_MOUNTED = BEG_ERROR,
+            /** End Filesystem error */END_ERROR                  = FILESYSTEM_ALREADY_MOUNTED
         } ErrorCode;
 
         // Signal that the contents of a buffer are a directory
@@ -72,18 +68,6 @@ class Filesystem {
     public:
         static void print_error_str (const Printer &printer, const ErrorCode err) {
             switch (err) {
-                case FILE_ALREADY_EXISTS:
-                    printer.println("File already exists");
-                    break;
-                case ENTRY_NOT_FILE:
-                    printer.println("Entry is not a file");
-                    break;
-                case ENTRY_NOT_DIR:
-                    printer.println("Entry is not a directory");
-                    break;
-                case FILENAME_NOT_FOUND:
-                    printer.println("Filename was not found");
-                    break;
                 case FILESYSTEM_ALREADY_MOUNTED:
                     printer.println("Filesystem is already mounted");
                     break;

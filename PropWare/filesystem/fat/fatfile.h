@@ -31,53 +31,39 @@
 namespace PropWare {
 
 class FatFile : virtual public File {
-    protected:
-        static const uint8_t FILE_LEN_OFFSET = 0x1C;  // Length of a file in bytes
-
-        // File/directory values
-        static const uint8_t FILE_ENTRY_LENGTH     = 32;  // An entry in a directory uses 32 bytes
-        static const uint8_t DELETED_FILE_MARK     = 0xE5;  // The file at this entry has been deleted
-        static const uint8_t FILE_NAME_LEN         = 8;  // 8 characters in the standard file name
-        static const uint8_t FILE_EXTENSION_LEN    = 3;  // 3 character file name extension
-        static const uint8_t FILENAME_STR_LEN      = FILE_NAME_LEN + FILE_EXTENSION_LEN + 2;
-        static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
-        static const uint8_t FILE_START_CLSTR_LOW  = 0x1A;  // Starting cluster number
-        static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High 16-bits of the starting cluster number (FAT32 only)
-
-        // File attributes (definitions with trailing underscore represent character for a cleared attribute flag)
-        static const uint8_t READ_ONLY         = BIT_0;
-        static const char    READ_ONLY_CHAR    = 'r';
-        static const char    READ_ONLY_CHAR_   = 'w';
-        static const uint8_t HIDDEN_FILE       = BIT_1;
-        static const char    HIDDEN_FILE_CHAR  = 'h';
-        static const char    HIDDEN_FILE_CHAR_ = '.';
-        static const uint8_t SYSTEM_FILE       = BIT_2;
-        static const char    SYSTEM_FILE_CHAR  = 's';
-        static const char    SYSTEM_FILE_CHAR_ = '.';
-        static const uint8_t VOLUME_ID         = BIT_3;
-        static const char    VOLUME_ID_CHAR    = 'v';
-        static const char    VOLUME_ID_CHAR_   = '.';
-        static const uint8_t SUB_DIR           = BIT_4;
-        static const char    SUB_DIR_CHAR      = 'd';
-        static const char    SUB_DIR_CHAR_     = 'f';
-        static const uint8_t ARCHIVE           = BIT_5;
-        static const char    ARCHIVE_CHAR      = 'a';
-        static const char    ARCHIVE_CHAR_     = '.';
+    public:
+        typedef enum {
+                                    NO_ERROR       = 0,
+                                    BEG_ERROR      = Filesystem::END_ERROR + 1,
+            /** FatFile Error  0 */ ENTRY_NOT_FILE = BEG_ERROR,
+            /** FatFile Error  1 */ FILENAME_NOT_FOUND,
+                                    END_ERROR      = FILENAME_NOT_FOUND
+        } ErrorCode;
 
     public:
+        /**
+         * @brief   Determine the name of a file
+         *
+         * @return  Character array containing the file - DO NOT modify the array, it will modify the internals of the
+         *          file instance
+         */
         const char *get_name () const {
             return this->m_name;
         }
 
         /**
-         * @brief   Determine if a file exists (file does not have to be open - opening a file that does not exist
-         *          will create it)
+         * @brief   Determine if a file exists (file does not have to be open)
          */
         bool exists () const {
             uint16_t temp = 0;
             return NO_ERROR == this->find(this->get_name(), &temp);
         }
 
+        /**
+         * @overload
+         *
+         * @param[out]  err     It is possible for an error to occur
+         */
         bool exists (PropWare::ErrorCode &err) const {
             uint16_t temp = 0;
             err = this->find(this->get_name(), &temp);
@@ -151,7 +137,7 @@ class FatFile : virtual public File {
                 }
             }
 
-            return FatFS::FILENAME_NOT_FOUND;
+            return FatFile::FILENAME_NOT_FOUND;
         }
 
         /**
@@ -161,7 +147,7 @@ class FatFile : virtual public File {
             PropWare::ErrorCode err;
 
             if (this->is_directory(fileEntryOffset))
-                return Filesystem::ENTRY_NOT_FILE;
+                return FatFile::ENTRY_NOT_FILE;
 
             // Passed the file-not-directory test. Prepare the buffer for loading the file
             check_errors(this->m_driver->flush(this->m_buf));
@@ -518,6 +504,39 @@ class FatFile : virtual public File {
             this->m_logger->printf("\tFile entry offset: 0x%04X\n", this->fileEntryOffset);
 
         }
+
+    protected:
+        static const uint8_t FILE_LEN_OFFSET = 0x1C;  // Length of a file in bytes
+
+        // File/directory values
+        static const uint8_t FILE_ENTRY_LENGTH     = 32;  // An entry in a directory uses 32 bytes
+        static const uint8_t DELETED_FILE_MARK     = 0xE5;  // The file at this entry has been deleted
+        static const uint8_t FILE_NAME_LEN         = 8;  // 8 characters in the standard file name
+        static const uint8_t FILE_EXTENSION_LEN    = 3;  // 3 character file name extension
+        static const uint8_t FILENAME_STR_LEN      = FILE_NAME_LEN + FILE_EXTENSION_LEN + 2;
+        static const uint8_t FILE_ATTRIBUTE_OFFSET = 0x0B;  // Byte of a file entry to store attribute flags
+        static const uint8_t FILE_START_CLSTR_LOW  = 0x1A;  // Starting cluster number
+        static const uint8_t FILE_START_CLSTR_HIGH = 0x14;  // High 16-bits of the starting cluster number (FAT32 only)
+
+        // File attributes (definitions with trailing underscore represent character for a cleared attribute flag)
+        static const uint8_t READ_ONLY         = BIT_0;
+        static const char    READ_ONLY_CHAR    = 'r';
+        static const char    READ_ONLY_CHAR_   = 'w';
+        static const uint8_t HIDDEN_FILE       = BIT_1;
+        static const char    HIDDEN_FILE_CHAR  = 'h';
+        static const char    HIDDEN_FILE_CHAR_ = '.';
+        static const uint8_t SYSTEM_FILE       = BIT_2;
+        static const char    SYSTEM_FILE_CHAR  = 's';
+        static const char    SYSTEM_FILE_CHAR_ = '.';
+        static const uint8_t VOLUME_ID         = BIT_3;
+        static const char    VOLUME_ID_CHAR    = 'v';
+        static const char    VOLUME_ID_CHAR_   = '.';
+        static const uint8_t SUB_DIR           = BIT_4;
+        static const char    SUB_DIR_CHAR      = 'd';
+        static const char    SUB_DIR_CHAR_     = 'f';
+        static const uint8_t ARCHIVE           = BIT_5;
+        static const char    ARCHIVE_CHAR      = 'a';
+        static const char    ARCHIVE_CHAR_     = '.';
 
     protected:
         FatFS    *m_fs;

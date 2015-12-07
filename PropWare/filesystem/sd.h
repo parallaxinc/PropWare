@@ -25,8 +25,6 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <string.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/filesystem/blockstorage.h>
 #include <PropWare/spi.h>
@@ -41,6 +39,9 @@ namespace PropWare {
 // First byte response receives special treatment to allow for verbose debugging
 extern unsigned char _sd_firstByteResponse;
 
+/**
+ * @brief
+ */
 class SD : public BlockStorage {
     public:
         /**
@@ -71,8 +72,8 @@ class SD : public BlockStorage {
 
             // Set CS for output and initialize high
             this->m_cs.set_mask(pins[3]);
-            this->m_cs.set_dir(Pin::OUT);
             this->m_cs.set();
+            this->m_cs.set_dir_out();
         }
 
         /**
@@ -87,15 +88,11 @@ class SD : public BlockStorage {
             // Set CS for output and initialize high
             this->m_cs.set_mask(cs);
             this->m_cs.set();
-            this->m_cs.set_dir(Pin::OUT);
+            this->m_cs.set_dir_out();
         }
 
         /**
-         * @brief       Initialize SD card communication over SPI for 3.3V
-         *              configuration
-         *
-         * Starts an SPI cog IFF an SPI cog has not already been started; If
-         * one has been started, only the cs will have effect
+         * @brief       Initialize SD card communication over SPI for 3.3V configuration
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -127,6 +124,63 @@ class SD : public BlockStorage {
 
         uint8_t get_sector_size_shift () const {
             return SECTOR_SIZE_SHIFT;
+        }
+
+        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) const {
+            PropWare::ErrorCode err;
+            uint8_t             temp = 0;
+
+            // Wait until the SD card is no longer busy
+            while (!temp)
+                temp = (uint8_t) this->m_spi->shift_in(8);
+
+            /**
+             * Special error handling is needed to ensure that, if an error is thrown, chip select is set high again
+             * before returning the error
+             */
+            this->m_cs.clear();
+            this->send_command(CMD_RD_BLOCK, address, CRC_OTHER);
+            err = this->read_block(SECTOR_SIZE, buf);
+            this->m_cs.set();
+
+            return err;
+        }
+
+        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const {
+            PropWare::ErrorCode err;
+            uint8_t             temp = 0;
+
+            // Wait until the SD card is no longer busy
+            while (!temp)
+                temp = (uint8_t) this->m_spi->shift_in(8);
+
+            this->m_cs.clear();
+            this->send_command(CMD_WR_BLOCK, address, CRC_OTHER);
+
+            check_errors(this->write_block(SECTOR_SIZE, dat));
+            this->m_cs.set();
+
+            return NO_ERROR;
+        }
+
+        uint16_t get_short (const uint16_t offset, const uint8_t buf[]) const {
+            return (buf[offset + 1] << 8) + buf[offset];
+        }
+
+        uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const {
+            return (buf[offset + 3] << 24) + (buf[offset + 2] << 16) + (buf[offset + 1] << 8) + buf[offset];
+        }
+
+        void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const {
+            buf[offset + 1] = value >> 8;
+            buf[offset]     = value;
+        }
+
+        void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const {
+            buf[offset + 3] = (uint8_t) (value >> 24);
+            buf[offset + 2] = (uint8_t) (value >> 16);
+            buf[offset + 1] = (uint8_t) (value >> 8);
+            buf[offset]     = (uint8_t) value;
         }
 
         /**
@@ -164,81 +218,6 @@ class SD : public BlockStorage {
                 default:
                     return;
             }
-        }
-
-        /**
-         * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
-         *
-         * @param[in]   address     Number of bytes to send
-         * @param[out]  buf[]       Location in chip memory to store data block;
-         *                          If NULL is sent, the default internal buffer
-         *                          will be used
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) const {
-            PropWare::ErrorCode err;
-            uint8_t             temp = 0;
-
-            // Wait until the SD card is no longer busy
-            while (!temp)
-                temp = (uint8_t) this->m_spi->shift_in(8);
-
-            /**
-             * Special error handling is needed to ensure that, if an error is thrown, chip select is set high again
-             * before returning the error
-             */
-            this->m_cs.clear();
-            this->send_command(CMD_RD_BLOCK, address, CRC_OTHER);
-            err = this->read_block(SECTOR_SIZE, buf);
-            this->m_cs.set();
-
-            return err;
-        }
-
-        /**
-         * @brief       Write SD_SECTOR_SIZE-byte data block to SD card
-         *
-         * @param[in]   address     Block address to write to SD card
-         * @param[in]   *dat        Location in chip memory to read data block
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const {
-            PropWare::ErrorCode err;
-            uint8_t             temp = 0;
-
-            // Wait until the SD card is no longer busy
-            while (!temp)
-                temp = (uint8_t) this->m_spi->shift_in(8);
-
-            this->m_cs.clear();
-            this->send_command(CMD_WR_BLOCK, address, CRC_OTHER);
-
-            check_errors(this->write_block(SECTOR_SIZE, dat));
-            this->m_cs.set();
-
-            return NO_ERROR;
-        }
-
-        uint16_t get_short (const uint16_t offset, const uint8_t buf[]) const {
-            return (buf[offset + 1] << 8) + buf[offset];
-        }
-
-        uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const {
-            return (buf[offset + 3] << 24) + (buf[offset + 2] << 16) + (buf[offset + 1] << 8) + buf[offset];
-        }
-
-        void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const {
-            buf[offset + 1] = value >> 8;
-            buf[offset]     = value;
-        }
-
-        void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const {
-            buf[offset + 3] = (uint8_t) (value >> 24);
-            buf[offset + 2] = (uint8_t) (value >> 16);
-            buf[offset + 1] = (uint8_t) (value >> 8);
-            buf[offset]     = (uint8_t) value;
         }
 
     private:
@@ -622,7 +601,6 @@ class SD : public BlockStorage {
         /*************************
          *** Private Constants ***
          *************************/
-        // SPI config
         static const uint16_t SECTOR_SIZE       = 512;
         static const uint8_t  SECTOR_SIZE_SHIFT = 9;
 

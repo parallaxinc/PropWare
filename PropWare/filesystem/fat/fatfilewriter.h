@@ -51,7 +51,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 switch (err) {
                     case FatFS::EOC_END:
                         check_errors(this->m_fs->extend_current_directory());
-                    case Filesystem::FILENAME_NOT_FOUND:
+                    case FatFile::FILENAME_NOT_FOUND:
                         check_errors(this->create_new_file(fileEntryOffset));
                         break;
                     default:
@@ -76,7 +76,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 uint16_t fileEntryOffset = 0;
                 if ((err = this->find(this->m_name, &fileEntryOffset))) {
                     if (FatFS::EOC_END == err)
-                        return Filesystem::FILENAME_NOT_FOUND;
+                        return FatFile::FILENAME_NOT_FOUND;
                     else
                         return err;
                 } else {
