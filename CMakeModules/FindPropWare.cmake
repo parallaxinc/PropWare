@@ -54,6 +54,9 @@
 # SOFTWARE.
 #==============================================================================
 
+set(CMAKE_CONFIGURATION_TYPES None
+    CACHE TYPE INTERNAL FORCE)
+
 if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     ###############################
     # Compile options
