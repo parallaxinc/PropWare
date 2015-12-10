@@ -282,8 +282,6 @@ class FatFile : virtual public File {
          * The appropriate global variables will be set according (incremented or set by the FAT) and the first sector
          * of the next cluster will be read into the desired buffer.
          *
-         * @param[out]  *buf    Buffer that the next sector should be loaded into
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode inc_cluster () const {
@@ -368,10 +366,9 @@ class FatFile : virtual public File {
         }
 
         /**
-         * @brief       Load a requested sector into the buffer independent of the current sector or cluster
+         * @brief       Load a sector into the buffer independent of the current sector or cluster
          *
-         * @param[in]   offset              How many sectors past the first one should be skipped (sector number of the
-         *                                  file)
+         * @param[in]   requiredSector      Which sector is needed
          * @param[in]   *bufferMetadata     Currently loaded buffer's metadata
          *
          * @pre         Buffer belonging to `bufferMetadata` must be loaded

@@ -42,7 +42,7 @@ class BlockStorage {
         /**
          * @brief   Metadata for a block of data
          *
-         * @fixme    This struct exists on the generic BlockStorage class, but it contains FAT-specific variables
+         * @todo    [FIXME] This struct exists on the generic BlockStorage class, but it contains FAT-specific variables
          */
         struct MetaData {
             /** Human-readable name */
@@ -214,7 +214,8 @@ class BlockStorage {
         /**
          * @brief       Read a byte from a buffer
          *
-         * @param[in]   offset  Address of the buffer to read
+         * @param[in]   offset  Offset from the beginning of the buffer
+         * @param[in]   *buf    Address of the buffer to read
          *
          * @return      Requested byte in the buffer
          */
@@ -229,7 +230,8 @@ class BlockStorage {
          * implemented to ensure that the returned value is reversed if necessary. The user of this function should not
          * need to worry about reversing bytes
          *
-         * @param[in]   offset  Address of the buffer to read
+         * @param[in]   offset  Where in the buffer should the value be retrieved
+         * @param[in]   buf[]   Address of the buffer to read
          *
          * @return      Requested bytes from the buffer
          */
@@ -242,7 +244,8 @@ class BlockStorage {
          * implemented to ensure that the returned value is reversed if necessary. The user of this function should not
          * need to worry about reversing bytes
          *
-         * @param[in]   offset  Address of the buffer to read
+         * @param[in]   offset  Where in the buffer should the value be retrieved
+         * @param[in]   buf[]   Address of the buffer to read
          *
          * @return      Requested bytes from the buffer
          */

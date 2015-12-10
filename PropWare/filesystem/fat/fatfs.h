@@ -457,7 +457,7 @@ class FatFS : public Filesystem {
          * @brief       Find and return the starting sector's address for a
          *              given allocation unit (note - not cluster)
          *
-         * @param[in]   allocUnit   Allocation unit in FAT filesystem
+         * @param[in]   tier2   Allocation unit in FAT filesystem
          *
          * @return      Returns sector address of the desired allocation unit
          */
@@ -481,7 +481,8 @@ class FatFS : public Filesystem {
         /**
          * @brief       Enlarge a file or directory by one cluster
          *
-         * @param[in]   *buf    Address of the buffer (containing information for a file or directory) to be enlarged
+         * @param[in]   *bufferMetadata     Address of the buffer (containing information for a file or directory) to be
+         *                                  enlarged
          *
          * @return      Returns 0 upon success, error code otherwise
          */

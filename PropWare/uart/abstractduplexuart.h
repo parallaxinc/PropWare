@@ -376,8 +376,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
         /**
          * @brief       Shift in an array of data (FCache function)
          *
-         * @param[in]   bufferAddr
-         * @param[in]   length
+         * @param[out]  *buffer     Buffer where data can be stored
+         * @param[in]   length      Number of bytes that should be read from the port
          */
         void shift_in_byte_array (uint8_t *buffer, unsigned int length) const {
             uint32_t initWaitCycles = (this->m_bitCycles >> 1) + this->m_bitCycles;

@@ -177,8 +177,6 @@ class SPI : public PrintCapable,
         /**
          * @brief       Retrieve the SPI module's clock frequency
          *
-         * @param[out]  *frequency  Frequency, in Hz, that the SPI module is running
-         *
          * @return      Returns 0 upon success, otherwise error code
          */
         int32_t get_clock () const {
@@ -232,7 +230,7 @@ class SPI : public PrintCapable,
          * @brief       Receive an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB
          *              first
          *
-         * @param[out]  *data           Address to store data
+         * @param[out]  buffer[]        Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
         void shift_out_block_msb_first_fast (const uint8_t buffer[], size_t numberOfBytes) {
@@ -284,7 +282,7 @@ class SPI : public PrintCapable,
          * @brief       Receive an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB
          *              first
          *
-         * @param[out]  *data           Address to store data
+         * @param[out]  *buffer         Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
         void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) {

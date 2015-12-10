@@ -74,6 +74,7 @@ class MCP3000 {
          * @brief       Construction requires an instance of the SPI module; the SPI module does not need to be started
          *
          * @param[in]   *spi                Constructed SPI module
+         * @param[in]   cs                  Pin mask used for chip select
          * @param[in]   partNumber          Determine bit-width of the ADC channels
          * @param[in]   alwaysSetSPIMode    Should every invocation of `read` or `read_diff` set the SPI mode. Setting
          *                                  to true is only necessary when multiple devices are connected to the same
@@ -108,8 +109,6 @@ class MCP3000 {
          *
          * @param[in]   channel     One of MCP_CHANNEL_`x`, where `x` is a number 0 through 3 (or 0 through 7 for the
          *                          MCP3008); Selects the channel to be read
-         * @param[out]  *dat        Address that data should be placed into
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
         uint16_t read (const MCP3000::Channel channel) {
@@ -140,7 +139,6 @@ class MCP3000 {
          * @param[in]   channels    One of DIFF_`x`_`y`, where `x` is a number 0 through 3 (or 0 through 7 for the
          *                          MCP3008) and `y` is `x` + (`x` + 1)%2 (See above defined enum or datasheet for
          *                          details)
-         * @param[out]  *dat        Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
          */

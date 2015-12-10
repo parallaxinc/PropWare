@@ -53,7 +53,8 @@ class File {
         /**
          * Destructor
          */
-        virtual ~File () { }
+        virtual ~File () {
+        }
 
         /**
          * @brief       Open the file
