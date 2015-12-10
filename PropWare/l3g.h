@@ -92,9 +92,10 @@ class L3G {
          *
          * @param[in]   *spi    Constructed SPI module
          */
-        L3G (SPI *spi) {
+        L3G (SPI *spi, const PropWare::Port::Mask cs) {
             this->m_spi           = spi;
             this->m_alwaysSetMode = false;
+            this->m_cs.set_mask(cs);
         }
 
         /**
@@ -104,12 +105,11 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        void start (const PropWare::Port::Mask cs) {
+        void start () {
             this->m_spi->set_mode(PropWare::L3G::SPI_MODE);
             this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE);
             this->m_spi->set_clock(PropWare::L3G::SPI_DEFAULT_FREQ);
 
-            this->m_cs.set_mask(cs);
             this->m_cs.set();
             this->m_cs.set_dir(PropWare::Pin::OUT);
 
