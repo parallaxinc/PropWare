@@ -1,5 +1,5 @@
 /**
- * @file        sd.h
+ * @file        PropWare/filesystem/sd.h
  *
  * @author      David Zemon
  *

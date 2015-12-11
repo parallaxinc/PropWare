@@ -1,5 +1,5 @@
 /**
- * @file    utility.h
+ * @file    PropWare/utility.h
  *
  * @author  David Zemon
  *

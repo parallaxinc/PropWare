@@ -1,5 +1,5 @@
 /**
- * @file    i2c.cpp
+ * @file    PropWare/i2c.cpp
  *
  * @author  David Zemon
  *

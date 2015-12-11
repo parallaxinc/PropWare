@@ -1,5 +1,5 @@
 /**
- * @file        filereader.h
+ * @file        PropWare/filesystem/filereader.h
  *
  * @author      David Zemon
  *

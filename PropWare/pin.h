@@ -1,5 +1,5 @@
 /**
- * @file        pin.h
+ * @file        PropWare/pin.h
  *
  * @author      David Zemon
  *

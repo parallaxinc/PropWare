@@ -1,5 +1,5 @@
 /**
- * @file        hd44780.h
+ * @file        PropWare/hd44780.h
  *
  * @author      David Zemon
  * @author      Collin Winans

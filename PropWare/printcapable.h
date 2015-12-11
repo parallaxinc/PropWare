@@ -1,5 +1,5 @@
 /**
- * @file        printer.h
+ * @file        PropWare/printcapable.h
  *
  * @author      David Zemon
  *

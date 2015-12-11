@@ -1,5 +1,5 @@
 /**
- * @file        duplexuart.h
+ * @file        PropWare/uart/duplexuart.h
  *
  * @author      David Zemon
  *

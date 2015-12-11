@@ -1,5 +1,5 @@
 /**
- * @file        watchdog.h
+ * @file        PropWare/watchdog.h
  *
  * @author      David Zemon
  *

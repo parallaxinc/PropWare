@@ -1,5 +1,5 @@
 /**
- * @file    stepper.h
+ * @file    PropWare/motor/stepper.h
  *
  * @author  David Zemon
  *

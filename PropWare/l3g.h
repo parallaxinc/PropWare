@@ -1,5 +1,5 @@
 /**
- * @file    l3g.h
+ * @file    PropWare/l3g.h
  *
  * @author  David Zemon
  * @author  Collin Winans

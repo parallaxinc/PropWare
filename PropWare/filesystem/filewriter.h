@@ -1,5 +1,5 @@
 /**
- * @file        filewriter.h
+ * @file        PropWare/filesystem/filewriter.h
  *
  * @author      David Zemon
  *

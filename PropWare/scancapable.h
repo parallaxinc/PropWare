@@ -1,5 +1,5 @@
 /**
- * @file        scancapable.h
+ * @file        PropWare/scancapable.h
  *
  * @author      David Zemon
  *

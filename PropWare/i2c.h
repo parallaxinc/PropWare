@@ -1,5 +1,5 @@
 /**
- * @file        i2c.h
+ * @file        PropWare/i2c.h
  *
  * @author      SRLM
  * @modified    David Zemon

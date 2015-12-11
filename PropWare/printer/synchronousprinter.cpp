@@ -1,5 +1,5 @@
 /**
- * @file    synchronousprinter.cpp
+ * @file    PropWare/printer/synchronousprinter.cpp
  *
  * @author  David Zemon
  *

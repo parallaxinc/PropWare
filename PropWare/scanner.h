@@ -1,5 +1,5 @@
 /**
- * @file        scanner.h
+ * @file        PropWare/scanner.h
  *
  * @author      David Zemon
  *

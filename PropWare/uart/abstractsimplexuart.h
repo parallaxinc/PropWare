@@ -1,5 +1,5 @@
 /**
- * @file        abstractsimplexuart.h
+ * @file        PropWare/uart/abstractsimplexuart.h
  *
  * @author      David Zemon
  *

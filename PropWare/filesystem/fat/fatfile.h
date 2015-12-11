@@ -1,5 +1,5 @@
 /**
- * @file        fatfile.h
+ * @file        PropWare/filesystem/fat/fatfile.h
  *
  * @author      David Zemon
  *

@@ -1,5 +1,5 @@
 /**
- * @file    pcf8591.h
+ * @file    PropWare/pcf8591.h
  *
  * @author  David Zemon
  *

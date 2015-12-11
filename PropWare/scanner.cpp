@@ -1,5 +1,5 @@
 /**
- * @file    scanner.cpp
+ * @file    PropWare/scanner.cpp
  *
  * @author  David Zemon
  *

@@ -1,5 +1,5 @@
 /**
- * @file        synchronousprinter.h
+ * @file        PropWare/printer/synchronousprinter.h
  *
  * @author      David Zemon
  *

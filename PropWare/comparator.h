@@ -1,5 +1,5 @@
 /**
- * @file    comparator.h
+ * @file    PropWare/comparator.h
  *
  * @author  David Zemon
  *

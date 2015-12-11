@@ -1,5 +1,5 @@
 /**
- * @file    mcp300x.h
+ * @file    PropWare/mcp3000.h
  *
  * @author  David Zemon
  * @author  Collin Winans

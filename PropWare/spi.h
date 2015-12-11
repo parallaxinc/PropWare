@@ -1,5 +1,5 @@
 /**
- * @file        spi.h
+ * @file        PropWare/spi.h
  *
  * @author      David Zemon
  *

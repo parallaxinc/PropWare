@@ -1,5 +1,5 @@
 /**
- * @file    ws2812.h
+ * @file    PropWare/ws2812.h
  *
  * @author  David Zemon
  *

@@ -1,5 +1,5 @@
 /**
- * @file    staticstringbuilder.h
+ * @file    PropWare/staticstringbuilder.h
  *
  * @author  David Zemon
  *

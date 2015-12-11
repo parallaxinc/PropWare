@@ -1,5 +1,5 @@
 /**
- * @file    max6675.h
+ * @file    PropWare/max6675.h
  *
  * @author  David Zemon
  *
