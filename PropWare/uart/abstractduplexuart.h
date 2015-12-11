@@ -27,12 +27,17 @@
 
 #include <PropWare/uart/simplexuart.h>
 #include <PropWare/uart/duplexuart.h>
-#include <PropWare/scancapable.h>
 
 namespace PropWare {
 
+/**
+ * @brief   A base class for any non-buffered UART that is capable of both transmitting and receiving
+ *
+ * @note    Abstract classes should not be used by end users. For unbuffered UART communication, take a look at
+ *          `PropWare::FullDuplexUART` and `PropWare::HalfDuplexUART` for concrete classes, and consider using them with
+ *          the `PropWare::Printer` class
+ */
 class AbstractDuplexUART : public virtual DuplexUART,
-                           public virtual ScanCapable,
                            public AbstractSimplexUART {
     public:
         /**
@@ -160,13 +165,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
             }
 
             return NO_ERROR;
-        }
-
-        /**
-         * @see PropWare::ScanCapable::get_char
-         */
-        char get_char () {
-            return (char) this->receive();
         }
 
         /**
