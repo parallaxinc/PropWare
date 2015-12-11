@@ -40,7 +40,9 @@ namespace PropWare {
 extern unsigned char _sd_firstByteResponse;
 
 /**
- * @brief
+ * @brief   A simple SD driver communicating over the SPI protocol.
+ *
+ * When using PropWare's default SPI class, this allows the entire SPI/SD card/FAT functionality to run in a single cog.
  */
 class SD : public BlockStorage {
     public:
@@ -61,6 +63,16 @@ class SD : public BlockStorage {
         } ErrorCode;
 
     public:
+        /**
+         * @brief   Use the default SPI instance and pins for connecting to the SD card
+         *
+         * If a board configuration file has been predefined in PropGCC (such as `dna.cfg` for the Propeller DNA board),
+         * then an instance of `PropWare::SD` can be constructed without any arguments. This is very convenient for
+         * anyone using a common Propeller board that comes pre-equipped with an SD card adapter.
+         *
+         * @param[in]   *spi    Address of a SPI instance. Its pins, clock frequency and mode will be modified to fit
+         *                      the SD card's needs
+         */
         SD (SPI *spi = SPI::get_instance())
                 : m_spi(spi) {
             Pin::Mask pins[4];
@@ -78,6 +90,13 @@ class SD : public BlockStorage {
 
         /**
          * @brief       Construct an SD object with the given SPI parameters
+         *
+         * @param[in]   *spi    Address of a SPI instance. Its clock frequency and mode will be modified to fit the SD
+         *                      card's needs
+         * @param[in]   mosi    Pin mask for data line leaving the Propeller
+         * @param[in]   miso    Pin mask for data line going in to the Propeller
+         * @param[in]   sclk    Pin mask for clock line
+         * @param[in]   cs      Pin mask for chip select
          */
         SD (SPI *spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs)
                 : m_spi(spi) {

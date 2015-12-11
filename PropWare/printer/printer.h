@@ -77,10 +77,34 @@ class Printer {
     public:
         static const char DEFAULT_FILL_CHAR = ' ';
 
+        /**
+         * @brief   Passed into any of the `Printer::print` methods, this struct controls how aspects of numerical
+         *          printing.
+         */
         struct Format {
+            /**
+             * @brief   Minimum number of characters to be printed.
+             *
+             * If the value to be printed is shorter than this number, the result is padded with the fill char. The
+             * value is not truncated even if the result is larger.
+             */
             uint16_t width;
+            /**
+             * @brief   Number of digits to be printed after the decimal point in a floating point number
+             */
             uint16_t precision;
+            /**
+             * @brief   Base for the number - usually defaults to 10. Useful for switching between binary, hex and
+             *          decimal (or any other base you wish)
+             */
             uint8_t  radix;
+            /**
+             * @brief   Character to be printed when a width is provided that is larger than the number
+             *
+             * If a width of 3 is given but the number "12" is passed in, then a single `fillChar` will precede 12.
+             * This usually ends up looking like "012", but the fill char could be set to a space (or any other
+             * character) such that it prints " 12" instead.
+             */
             char     fillChar;
 
             Format () : width(0),
