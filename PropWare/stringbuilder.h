@@ -31,18 +31,30 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Build a dynamically-sized string in RAM using the `PropWare::Printer` interface
+ */
 class StringBuilder : public PrintCapable {
     public:
-        static const uint16_t DEFAULT_SPACE_ALLOCATED = 16;
+        static const uint16_t DEFAULT_SPACE_ALLOCATED = 64;
 
     public:
+        /**
+         * @brief       Initialize with a given size to start with. Picking the correct size can increase performance.
+         *
+         * @param[in]   initialSize     Number of bytes that should be (dynamically) allocated for the string buffer
+         */
         StringBuilder (const size_t initialSize = DEFAULT_SPACE_ALLOCATED)
-                : m_space(initialSize),
+                : m_minimumSpace(initialSize),
+                  m_currentSpace(initialSize),
                   m_size(0) {
             this->m_string = (char *) malloc(initialSize);
             this->m_string[0] = '\0';
         }
 
+        /**
+         * @brief   Free all memory allocated for the string buffer
+         */
         ~StringBuilder () {
             free(this->m_string);
         }
@@ -63,23 +75,34 @@ class StringBuilder : public PrintCapable {
             }
         }
 
+        /**
+         * @brief   Retrieve the address of the string buffer
+         */
         const char *to_string () const {
             return this->m_string;
         }
 
+        /**
+         * @brief   Determine the length of the string, not including the null terminator
+         */
         uint16_t get_size () const {
             return m_size;
         }
 
+        /**
+         * @brief   Remove all characters from the string and reallocate to the original size (if needed)
+         */
         void clear () {
             if (this->m_size) {
-                if (NULL != this->m_string)
-                    // It shouldn't ever be NULL, but this is an easy way to ensure bugs don't sneak in
-                    free(this->m_string);
-                this->m_string = (char *) malloc(DEFAULT_SPACE_ALLOCATED);
+                if (this->m_minimumSpace != this->m_currentSpace) {
+                    if (NULL != this->m_string)
+                        // It shouldn't ever be NULL, but this is an easy way to ensure bugs don't sneak in
+                        free(this->m_string);
+                    this->m_string       = (char *) malloc(this->m_minimumSpace);
+                    this->m_currentSpace = this->m_minimumSpace;
+                }
                 this->m_string[0] = '\0';
-                this->m_size  = 0;
-                this->m_space = DEFAULT_SPACE_ALLOCATED;
+                this->m_size = 0;
             }
         }
 
@@ -90,22 +113,23 @@ class StringBuilder : public PrintCapable {
         }
 
         void check_buffer_size () {
-            if (m_size + 1 == m_space)
+            if (m_size + 1 == m_currentSpace)
                 this->expand();
         }
 
         void expand () {
-            this->m_space <<= 1;
-            char *temp = (char *) malloc((size_t) this->m_space);
+            this->m_currentSpace <<= 1;
+            char *temp = (char *) malloc((size_t) this->m_currentSpace);
             strcpy(temp, this->m_string);
             free(this->m_string);
             this->m_string = temp;
         }
 
     private:
-        uint16_t m_space;
-        uint16_t m_size;
-        char     *m_string;
+        const uint16_t m_minimumSpace;
+        uint16_t       m_currentSpace;
+        uint16_t       m_size;
+        char           *m_string;
 };
 
 }
