@@ -30,6 +30,9 @@
 
 namespace PropWare {
 
+/**
+ * @brief   A generic interface for all files on the FAT 16/32 filesystem
+ */
 class FatFile : virtual public File {
     public:
         typedef enum {

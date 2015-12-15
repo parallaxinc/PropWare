@@ -30,8 +30,16 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Build a statically-sized string in RAM using the `PropWare::Printer` interface
+ */
 class StaticStringBuilder : public PrintCapable {
     public:
+        /**
+         * @brief       Wrap an already allocated character array with extra functionality
+         *
+         * @param[in]   buffer  Location in memory that can be used for string manipulation
+         */
         StaticStringBuilder (char buffer[])
                 : m_string(buffer),
                   m_size(0) {
@@ -49,14 +57,23 @@ class StaticStringBuilder : public PrintCapable {
             this->m_string[this->m_size]       = '\0';
         }
 
+        /**
+         * @brief   Retrieve the internal string address
+         */
         const char *to_string () const {
             return this->m_string;
         }
 
+        /**
+         * @brief   Determine the number of characters in the string
+         */
         uint16_t get_size () const {
             return this->m_size;
         }
 
+        /**
+         * @brief   Remove all characters from the string
+         */
         void clear () {
             this->m_string[0] = '\0';
             this->m_size = 0;

@@ -27,14 +27,30 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Provide a way for a `PropWare::Scanner` to sanitize user input
+ */
 template<typename T>
 class Comparator {
     public:
+        /**
+         * @brief   Determines if the given argument is valid
+         */
         virtual bool valid (const T *lhs) const = 0;
 };
 
+/**
+ * @brief   Also known as whole numbers, this class will only allow numbers that are zero or greater with no
+ *          fractional part
+ *
+ * Though you are welcome to construct your own instance, a global instance is available for use in the PropWare
+ * namespace: `PropWare::NON_NEGATIVE_COMP`.
+ */
 class NonNegativeIntegerComparator : public Comparator<int> {
     public:
+        /**
+         * @brief   Required default constructor
+         */
         NonNegativeIntegerComparator () {
         }
 

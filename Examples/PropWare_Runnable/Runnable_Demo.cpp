@@ -11,8 +11,10 @@
 
 class TalkingThread : public PropWare::Runnable {
     public:
-        TalkingThread (const uint32_t *stack, const size_t stackSizeInBytes)
-                : Runnable(stack, stackSizeInBytes) {}
+        template<size_t N>
+        TalkingThread (const uint32_t (&stack)[N])
+                : Runnable(stack) {
+        }
 
         void run () {
             while (1) {
@@ -24,9 +26,11 @@ class TalkingThread : public PropWare::Runnable {
 
 class BlinkingThread : public PropWare::Runnable {
     public:
-        BlinkingThread (const uint32_t *stack, const size_t stackSizeInBytes, const PropWare::Pin::Mask mask)
-                : Runnable(stack, stackSizeInBytes),
-                  m_mask(mask) {}
+        template<size_t N>
+        BlinkingThread (const uint32_t (&stack)[N], const PropWare::Pin::Mask mask)
+                : Runnable(stack),
+                  m_mask(mask) {
+        }
 
         void run () {
             const PropWare::Pin pin(this->m_mask, PropWare::Pin::OUT);
@@ -41,10 +45,10 @@ class BlinkingThread : public PropWare::Runnable {
 };
 
 int main (int argc, char *argv[]) {
-    uint32_t     stack[3][32];
-    TalkingThread talkingThread(stack[0], sizeof(stack[0]));
-    BlinkingThread blink16(stack[1], sizeof(stack[1]), PropWare::Pin::P16);
-    BlinkingThread blink17(stack[2], sizeof(stack[2]), PropWare::Pin::P17);
+    uint32_t       stack[3][32];
+    TalkingThread  talkingThread(stack[0]);
+    BlinkingThread blink16(stack[1], PropWare::Pin::P16);
+    BlinkingThread blink17(stack[2], PropWare::Pin::P17);
 
     int8_t cog = PropWare::Runnable::invoke(talkingThread);
     pwSyncOut.printf("Talking thread (0x%08X) started in cog %d\n", (unsigned int) &talkingThread, cog);

@@ -34,21 +34,21 @@ const uint32_t               BAUD_RATE     = 115200;
 const PropWare::Port::Mask   TX_PIN        = PropWare::Port::P12;
 const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
 const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
-uint32_t                     threadStack[256];
 
 class Listener : public PropWare::Runnable {
     public:
-        Listener(uint32_t const *stack, size_t const stackSizeInBytes)
-                : Runnable(stack, stackSizeInBytes) {
+        template<size_t N>
+        Listener (const uint32_t (&stack)[N])
+                : Runnable(stack) {
         }
 
-        void run();
+        void run ();
 
-        void init();
+        void init ();
 
     private:
         PropWare::HalfDuplexUART m_listener;
-        char m_buffer[sizeof(TEST_STRING)];
+        char                     m_buffer[sizeof(TEST_STRING)];
 };
 
 void error (const PropWare::ErrorCode err);
@@ -57,8 +57,9 @@ void error (const PropWare::ErrorCode err);
  * @brief   Write "Hello world!" out via UART protocol and receive an echo
  */
 int main () {
-    Listener listener(threadStack, sizeof(threadStack));
-    PropWare::SimplexUART  speaker(TX_PIN);
+    uint32_t              threadStack[256];
+    Listener              listener(threadStack);
+    PropWare::SimplexUART speaker(TX_PIN);
 
     // Start our new cog and initialize the speaking UART
     speaker.set_baud_rate(BAUD_RATE);
@@ -84,23 +85,23 @@ void error (const PropWare::ErrorCode err) {
     }
 }
 
-void Listener::run() {
+void Listener::run () {
     PropWare::ErrorCode err;
-    int32_t receivedLength;
+    int32_t             receivedLength;
 
     this->init();
     pwSyncOut.printf("Ready to receive!\n");
 
     while (1) {
         receivedLength = sizeof(this->m_buffer);
-        if ((err = this->m_listener.fgets(this->m_buffer, &receivedLength)))
+        if ((err       = this->m_listener.fgets(this->m_buffer, &receivedLength)))
             error(err);
 
         pwSyncOut.printf("Data (%d chars): \"%s\"\n", receivedLength, this->m_buffer);
     }
 }
 
-void Listener::init() {
+void Listener::init () {
     this->m_listener.set_rx_mask(RX_PIN);
     this->m_listener.set_baud_rate(BAUD_RATE);
     this->m_listener.set_parity(PARITY);

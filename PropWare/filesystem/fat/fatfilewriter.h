@@ -30,15 +30,31 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Concrete class for writing or modifying a FAT 16/32 file
+ */
 class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
     public:
+        /**
+         * @brief   Standard constructor
+         *
+         * @param[in]   fs          A mounted FAT 16/32 filesystem
+         * @param[in]   name[]      Character array with the file name
+         * @param[in]   *buffer     If you don't want to use the globally shared buffer, a different buffer address can
+         *                          be provided here
+         * @param[in]   logger      This is only used for printing debug statements. Use of the logger is limited
+         *                          such that all references will be optimized out in normal application code
+         */
         FatFileWriter (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
                   FileWriter(fs, name, buffer, logger) {
         }
 
+        /**
+         * @brief   All content will be saved to the physical device and the file will be safely closed
+         */
         virtual ~FatFileWriter () {
             this->close();
         }

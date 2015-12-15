@@ -30,6 +30,9 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Basic file interface for opening and closing files
+ */
 class File {
     public:
         typedef enum {

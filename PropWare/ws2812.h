@@ -30,14 +30,23 @@
 
 namespace PropWare {
 
+/**
+ * @brief   An easy-to-use, cheap, small, and bright multicolor LED capable of being strung together in a lengthy line
+ */
 class WS2812 {
 
     public:
+        /**
+         * @brief   Support both types of multicolor LEDs, RGB and GRB
+         */
         typedef enum {
                                           RGB,
             /** for WS2812 and WS2812B */ GRB
         } Type;
 
+        /**
+         * @brief   Provide some common color codes
+         */
         typedef enum {
             BLACK      = 0x000000,
             RED        = 0xFF0000,
@@ -61,7 +70,16 @@ class WS2812 {
         } Color;
 
     public:
-        static unsigned int color (const unsigned int red, const unsigned int green, const unsigned int blue) {
+        /**
+         * @brief       Convert RGB values to a color code
+         *
+         * @param[in]   red     Red intensity, from 0-255
+         * @param[in]   green   Green intensity, from 0-255
+         * @param[in]   blue    Blue intensity, from 0-255
+         *
+         * @returns     Color code
+         */
+        static unsigned int to_color (const unsigned int red, const unsigned int green, const unsigned int blue) {
             return ((red) << 16) | ((green) << 8) | (blue);
         }
 
@@ -75,16 +93,33 @@ class WS2812 {
         }
 
     public:
+        /**
+         * @brief   Construct an instance connected to the given output line
+         *
+         * @param[in]   pinMask     Data line connected to the LED(s)
+         * @param[in]   type        Determine if the output values will be RGB or GRB
+         */
         WS2812 (const Pin::Mask pinMask, const Type type) : m_type(type) {
             this->m_pin.set_mask(pinMask);
             this->m_pin.clear();
             this->m_pin.set_dir_out();
         }
 
+        /**
+         * @brief       Send a given color to the first LED in line
+         *
+         * @param[in]   color   Color code to be sent to the LED
+         */
         void send (const unsigned int color) const {
             this->send_array(&color, 1);
         }
 
+        /**
+         * @brief       Send a series of colors to a series of LEDs
+         *
+         * @param[in]   *buffer     Address where the color series starts
+         * @param[in]   length      Number of LEDs to be set
+         */
         void send_array (const unsigned int *buffer, const size_t length) const {
             // Using local variables here saves 50 bytes relative to static class variables and even more compared to
             // local statics. And bonus - no more ws2812.cpp needed, so importing becomes a lot easier
@@ -99,7 +134,7 @@ class WS2812 {
             unsigned int bitCounter = 0;
 
             __asm__ volatile (
-                    "           fcache #(Ws2812End - Ws2812Start)                                                       \n\t"
+                    "           fcache #(Ws2812End - Ws2812Start)                                               \n\t"
                     "           .compress off                                                                   \n\t"
                     "Ws2812Start:                                                                               \n\t"
 
@@ -167,17 +202,17 @@ class WS2812 {
 
             // red range
             if (position < 85)
-                resultingColor = color(255 - position * 3, position * 3, 0);
+                resultingColor = to_color(255 - position * 3, position * 3, 0);
 
                 // green range
             else if (position < 170) {
                 position -= 85;
-                resultingColor = color(0, 255 - position * 3, position * 3);
+                resultingColor = to_color(0, 255 - position * 3, position * 3);
             }
                 // blue range
             else {
                 position -= 170;
-                resultingColor = color(position * 3, 0, 255 - position * 3);
+                resultingColor = to_color(position * 3, 0, 255 - position * 3);
             }
 
             return resultingColor;
@@ -208,6 +243,11 @@ class WS2812 {
             return color;
         }
 
+        /**
+         * @brief       Obtain the currently set RGB/GRB type
+         *
+         * @returns     Currently set color type
+         */
         Type get_type () const {
             return this->m_type;
         }

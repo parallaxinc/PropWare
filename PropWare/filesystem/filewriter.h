@@ -30,6 +30,9 @@
 
 namespace PropWare {
 
+/**
+ * @brief   A write-only file interface
+ */
 class FileWriter : virtual public File, public PrintCapable {
     public:
         FileWriter (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,

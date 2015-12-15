@@ -30,6 +30,9 @@
 
 namespace PropWare {
 
+/**
+ * @brief   A read-only file interface
+ */
 class FileReader : virtual public File, virtual public ScanCapable {
     public:
         virtual ~FileReader () { }

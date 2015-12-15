@@ -30,7 +30,7 @@
 static uint32_t watchDogStack[32];
 
 int main () {
-    PropWare::WatchDog watchDog(watchDogStack, sizeof(watchDogStack) * sizeof(uint32_t), 1 * SECOND);
+    PropWare::WatchDog watchDog(watchDogStack, 1 * SECOND);
     PropWare::Runnable::invoke(watchDog);
 
     for (int i = 0; i < 5; ++i) {

@@ -39,15 +39,15 @@ class WatchDog : public Runnable {
         /**
          * @brief   Constructor
          *
-         * @param[in]   *stack              A small stack for a few variables
-         * @param[in]   stackSizeInBytes    Number of bytes in the allocated stack
+         * @param[in]   stack[]             A small stack for a few variables
          * @param[in]   timeout             Length of time (in clock ticks) before the Propeller should be reset
          * @param[in]   monitorFrequency    Length of time to sleep between each check for the timeout (default
          *                                  value of 128us is recommended)
          */
-        WatchDog (const uint32_t *stack, const size_t stackSizeInBytes, const unsigned int timeout,
+        template<size_t N>
+        WatchDog (const uint32_t (&stack)[N], const unsigned int timeout,
                   const unsigned int monitorFrequency = MICROSECOND << 7)
-                : Runnable(stack, stackSizeInBytes),
+                : Runnable(stack),
                   m_timeout(timeout),
                   m_sleepTime(monitorFrequency) { }
 

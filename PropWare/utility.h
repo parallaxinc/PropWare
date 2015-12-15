@@ -226,7 +226,7 @@ class Utility {
          *
          * @return      Number of elements in the array
          */
-        template <typename T, size_t N>
+        template<typename T, size_t N>
         static inline size_t size_of_array (const T(&array)[N]) {
             return N;
         }
@@ -246,7 +246,8 @@ class Utility {
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
          *          `uint8_t bits = PropWare::Utility::count_bits(0x03);`
          */
-        Utility () { }
+        Utility () {
+        }
 };
 
 }
