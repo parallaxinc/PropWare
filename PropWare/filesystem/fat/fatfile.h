@@ -55,7 +55,9 @@ class FatFile : virtual public File {
         }
 
         /**
-         * @brief   Determine if a file exists (file does not have to be open)
+         * @brief       Determine if a file exists (file does not have to be open)
+         *
+         * @returns     True if the file exists, false otherwise
          */
         bool exists () const {
             uint16_t temp = 0;

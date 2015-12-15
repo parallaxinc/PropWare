@@ -102,9 +102,6 @@ class DuplexUART : public virtual UART,
          */
         virtual ErrorCode receive_array (uint8_t *buffer, uint32_t length) const = 0;
 
-        /**
-         * @see PropWare::ScanCapable::get_char
-         */
         char get_char () {
             return (char) this->receive();
         }

@@ -35,11 +35,21 @@ namespace PropWare {
  */
 class Pin : public PropWare::Port {
     public:
+        /**
+         * @brief       Great for quick debugging to ensure a line of code is executed, this will quickly flash a given
+         *              pin a specific number of times
+         *
+         * @param[in]   pinMask     Pin that should be flashed
+         * @param[in]   iterations  Number of times that the pin should flicker on and back off again
+         */
         static void flash_pin (const Pin::Mask pinMask, const uint32_t iterations = 10) {
-            Port::flash_port(pinMask, pinMask, iterations);
+            Port::flash_port(pinMask, iterations);
         }
 
     public:
+        /**
+         * @brief   Initialize to a NULL pin mask
+         */
         Pin () :
                 Port() {
         }
@@ -80,13 +90,15 @@ class Pin : public PropWare::Port {
                 this->m_mask = (uint32_t) (1 << pinNum);
         }
 
-        /**
-         * @see PropWare::Port::get_mask()
-         */
         PropWare::Port::Mask get_mask () const {
             return (PropWare::Port::Mask) this->m_mask;
         }
 
+        /**
+         * @brief       Set or clear the pin programmatically
+         *
+         * @param[in]   True for a high pin, false for a low pin
+         */
         void write (const bool value) const {
             if (value)
                 this->set();

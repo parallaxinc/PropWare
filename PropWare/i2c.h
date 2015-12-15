@@ -2,7 +2,7 @@
  * @file        PropWare/i2c.h
  *
  * @author      SRLM
- * @modified    David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -60,6 +60,13 @@ namespace PropWare {
  */
 class I2C : public I2CBase {
     public:
+        /**
+         * @brief       Create a basic I2C instance
+         *
+         * @param[in]   scl         Pin mask for the SCL pin (default value uses the EEPROM SCL line)
+         * @param[in]   sda         Pin mask for the SDA pin (default value uses the EEPROM SDA line)
+         * @param[in]   frequency   Frequency to run the bus (default is highest standard I2C frequency of 400 kHz)
+         */
         I2C (const Pin::Mask scl = DEFAULT_SCL_MASK, const Pin::Mask sda = DEFAULT_SDA_MASK,
              const unsigned int frequency = DEFAULT_FREQUENCY) : I2CBase(scl, sda, frequency) {
         }
@@ -292,4 +299,7 @@ class I2C : public I2CBase {
 
 }
 
+/**
+ * @brief   Global I2C instance for easy and shared use by Propeller applications (not thread safe!)
+ */
 extern PropWare::I2C pwI2c;

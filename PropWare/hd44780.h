@@ -305,12 +305,6 @@ class HD44780 : public PrintCapable {
             this->m_curPos->col = col;
         }
 
-        /**
-         * @see PropWare::PrintCapable::puts
-         *
-         * Via a series of calls to HD44780::put_char, prints each character
-         * individually
-         */
         void puts (const char string[]) {
             const char *s = (char *) string;
 
@@ -320,9 +314,6 @@ class HD44780 : public PrintCapable {
             }
         }
 
-        /**
-         * @see PropWare::PrintCapable::put_char
-         */
         void put_char (const char c) {
             // For manual new-line characters...
             if ('\n' == c) {

@@ -91,6 +91,7 @@ class L3G {
          * @brief       Construction requires an instance of the SPI module
          *
          * @param[in]   *spi    Constructed SPI module
+         * @param[in]   cs      Chip select pin mask
          */
         L3G (SPI *spi, const PropWare::Port::Mask cs) {
             this->m_spi           = spi;
@@ -100,10 +101,6 @@ class L3G {
 
         /**
          * @brief       Initialize an L3G module
-         *
-         * @param[in]   cs  Pin mask for chip select
-         *
-         * @return      Returns 0 upon success, error code otherwise
          */
         void start () {
             this->m_spi->set_mode(PropWare::L3G::SPI_MODE);

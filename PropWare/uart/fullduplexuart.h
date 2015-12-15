@@ -52,8 +52,7 @@ class FullDuplexUART : public AbstractDuplexUART {
         }
 
         /**
-         * @see PropWare::AbstractDuplexUART::AbstractDuplexUART(
-         *              const Port::Mask tx, const Port::Mask rx)
+         * @see PropWare::AbstractDuplexUART::AbstractDuplexUART(const Port::Mask tx, const Port::Mask rx)
          */
         FullDuplexUART (const Port::Mask tx, const Port::Mask rx) :
                 AbstractDuplexUART(tx, rx) {

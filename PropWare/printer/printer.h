@@ -163,7 +163,9 @@ class Printer {
         }
 
         /**
-         * @see PropWare::PrintCapable::put_char
+         * @brief       Print a single character
+         *
+         * @param[in]   c   Individual char to be printed
          */
         void put_char (const char c) const {
             if (this->m_cooked && '\n' == c)
@@ -172,7 +174,11 @@ class Printer {
         }
 
         /**
-         * @see PropWare::PrintCapable::puts
+         * @brief       Send a null-terminated character array
+         *
+         * @pre         `string[]` must be terminated with a null terminator
+         *
+         * @param[in]   string[]    Array of data words with the final word being 0 - the null terminator
          */
         void puts (const char string[]) const {
             if (this->m_cooked)
@@ -601,6 +607,10 @@ class Printer {
          * pwOut.printf("Hello, %s! The %dth character of the alphabet is %c.\n", name, i, i + 'A' - 1);
          * pwOut << "Hello, " << name << "! The " << i << "th character of the alphabet is" << (char) i + 'A' - 1 << ".\n";
          * @endcode
+         *
+         * @param[in]   arg     Value to be printed through the terminal
+         *
+         * @returns     The printer instance is returned to allow chaining of the method calls
          */
         template<typename T>
         const Printer &operator<< (const T arg) const {
@@ -615,4 +625,8 @@ class Printer {
 
 }
 
+/**
+ * @brief   Most common use of printing in PropWare applications (not thread safe; see PropWare::pwSyncOut for
+ *          multi-threaded printing)
+ */
 extern const PropWare::Printer pwOut;

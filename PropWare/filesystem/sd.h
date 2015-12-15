@@ -31,12 +31,21 @@
 #include <PropWare/pin.h>
 #include <PropWare/printer/printer.h>
 
+/**
+ * @brief   Value is injected by `propeller-load` if set in the configuration file
+ */
 extern int _cfg_sdspi_config1;
+
+/**
+ * @brief   Value is injected by `propeller-load` if set in the configuration file
+ */
 extern int _cfg_sdspi_config2;
 
 namespace PropWare {
 
-// First byte response receives special treatment to allow for verbose debugging
+/**
+ * @brief   First byte response receives special treatment to allow for verbose debugging (not for public use)
+ */
 extern unsigned char _sd_firstByteResponse;
 
 /**
@@ -208,7 +217,7 @@ class SD : public BlockStorage {
          * @param[in]   printer     Printer used for logging the message
          * @param[in]   err         Error number used to determine error string
          */
-        void print_error_str (const Printer &printer, const ErrorCode err)  {
+        void print_error_str (const Printer &printer, const ErrorCode err) {
             const uint8_t relativeError = err - BEG_ERROR;
 
             switch (err) {
@@ -284,7 +293,7 @@ class SD : public BlockStorage {
          * @brief   Send numerous clocks to the card to allow it to perform internal initialization
          */
         inline void power_up () const {
-            uint8_t             i;
+            uint8_t i;
             waitcnt(CLKFREQ / 10 + CNT);
 
             // Send at least 72 clock cycles to enable the SD card
@@ -308,7 +317,7 @@ class SD : public BlockStorage {
 
         inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared) const {
             PropWare::ErrorCode err;
-            uint8_t firstByte;
+            uint8_t             firstByte;
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
             this->send_command(CMD_INTERFACE_COND, ARG_CMD8, CRC_CMD8);
@@ -392,7 +401,7 @@ class SD : public BlockStorage {
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t &firstByte, uint8_t *dat) const {
-            uint32_t            timeout;
+            uint32_t timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
@@ -515,8 +524,8 @@ class SD : public BlockStorage {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) const {
-            uint32_t            timeout;
-            uint8_t             firstByte;
+            uint32_t timeout;
+            uint8_t  firstByte;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
@@ -577,7 +586,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion (const Printer &printer)  {
+        void first_byte_expansion (const Printer &printer) {
             if (BIT_0 & _sd_firstByteResponse)
                 printer.puts("\t0: Idle\n");
             if (BIT_1 & _sd_firstByteResponse)

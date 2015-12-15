@@ -61,4 +61,7 @@ class NonNegativeIntegerComparator : public Comparator<int> {
 
 }
 
+/**
+ * @brief   Global instance for shared use by PropWare applications
+ */
 extern const PropWare::NonNegativeIntegerComparator NON_NEGATIVE_COMP;

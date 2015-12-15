@@ -155,4 +155,7 @@ class SynchronousPrinter {
 
 }
 
+/**
+ * @brief   Global and shared instance for easy printing to the terminal (thread safe)
+ */
 extern const PropWare::SynchronousPrinter pwSyncOut;

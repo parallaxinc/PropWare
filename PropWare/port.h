@@ -119,11 +119,18 @@ class Port {
                 return (PropWare::Port::Mask) (mask << pinNum);
         }
 
-        static void flash_port (const uint32_t pinMask, uint32_t value, const uint32_t iterations = 10) {
+        /**
+         * @brief       Great for quick debugging to ensure a line of code is executed, this will quickly flash a given
+         *              set of pins a specific number of times
+         *
+         * @param[in]   pinMask     Pins that should be flashed
+         * @param[in]   iterations  Number of times that the pins should flicker on and back off again
+         */
+        static void flash_port (const uint32_t pinMask, const uint32_t iterations = 10) {
             const Port port(pinMask, Port::OUT);
 
             for (uint32_t i = 0; i < iterations; ++i) {
-                port.write_fast(value);
+                port.set();
                 waitcnt(75 * MILLISECOND + CNT);
                 port.clear();
                 waitcnt(75 * MILLISECOND + CNT);
@@ -131,6 +138,9 @@ class Port {
         }
 
     public:
+        /**
+         * @brief   Instantiate a NULL instance
+         */
         Port () {
             this->m_mask = PropWare::Port::NULL_PIN;
         }
@@ -200,10 +210,16 @@ class Port {
                 return PropWare::Port::IN;
         }
 
+        /**
+         * @brief   Set the port for output
+         */
         inline void set_dir_out () const {
             DIRA |= this->m_mask;
         }
 
+        /**
+         * @brief   Set the port for input
+         */
         inline void set_dir_in () const {
             __asm__ volatile ("andn dira, %0" : : "r" (this->m_mask));
         }
@@ -293,14 +309,19 @@ class Port {
  */
 class SimplePort : public Port {
     public:
-        static void flash_port (const Port::Mask firstPin, const uint8_t portWidth, const uint32_t value,
-                                const uint16_t iterations = 10) {
+        /**
+         * @brief       Great for quick debugging to ensure a line of code is executed, this will quickly flash a given
+         *              set of pins a specific number of times
+         *
+         * @param[in]   firstPin    First pin in sequence
+         * @param[in]   portWidth   Number of pins that should be flashed
+         * @param[in]   iterations  Number of times that the pins should flicker on and back off again
+         */
+        static void flash_port (const Port::Mask firstPin, const uint8_t portWidth, const uint16_t iterations = 10) {
             const SimplePort port(firstPin, portWidth, Port::OUT);
 
-            const uint32_t shiftVal = value << port.m_firstPinNum;
-
             for (int i = 0; i < iterations; ++i) {
-                port.write_fast(shiftVal);
+                port.set();
                 waitcnt(75 * MILLISECOND + CNT);
                 port.clear();
                 waitcnt(75 * MILLISECOND + CNT);

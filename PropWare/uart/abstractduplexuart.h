@@ -40,24 +40,15 @@ namespace PropWare {
 class AbstractDuplexUART : public virtual DuplexUART,
                            public AbstractSimplexUART {
     public:
-        /**
-         * @see PropWare::UART::set_rx_mask
-         */
         void set_rx_mask (const Port::Mask rx) {
             this->m_rx.set_mask(rx);
             this->m_rx.set_dir(Port::IN);
         }
 
-        /**
-         * @see PropWare::UART::get_rx_mask
-         */
         Port::Mask get_rx_mask () const {
             return this->m_rx.get_mask();
         }
 
-        /**
-         * @see PropWare::UART::set_data_width
-         */
         virtual ErrorCode set_data_width (const uint8_t dataWidth) {
             ErrorCode err;
             check_errors(AbstractSimplexUART::set_data_width(dataWidth));
@@ -68,18 +59,12 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return NO_ERROR;
         }
 
-        /**
-         * @see PropWare::UART::set_parity
-         */
         virtual void set_parity (const UART::Parity parity) {
             AbstractSimplexUART::set_parity(parity);
             this->set_msb_mask();
             this->set_receivable_bits();
         }
 
-        /**
-         * @see PropWare::UART::receive
-         */
         uint32_t receive () const {
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
@@ -95,9 +80,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return rxVal & wideDataMask;
         }
 
-        /**
-         * @see PropWare::UART::get_line
-         */
         ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
@@ -137,9 +119,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return NO_ERROR;
         }
 
-        /**
-         * @see PropWare::UART::receive_array
-         */
         ErrorCode receive_array (uint8_t *buffer, uint32_t length) const {
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
@@ -175,6 +154,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
          *
          * @param[in]   string[]        Output buffer which should store the data
          * @param[out]  *bufferSize     Address where the new length of the buffer will be written
+         *
+         * @returns     Zero upon success, error code otherwise
          */
         PropWare::ErrorCode fgets (char string[], int32_t *bufferSize) const {
             const int32_t originalBufferSize = *bufferSize;
