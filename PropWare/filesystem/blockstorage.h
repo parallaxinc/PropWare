@@ -154,6 +154,8 @@ class BlockStorage {
          *
          * @param[in]   address     Address of the block on the storage device
          * @param[out]  *buffer     Address of the buffer to store data in
+         *
+         * @return      0 upon success, error code otherwise
          */
         ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
             return this->read_data_block(address, buffer->buf);
@@ -189,6 +191,8 @@ class BlockStorage {
          *
          * @param[in]   address     Block address on the storage device
          * @param[in]   *buffer     Address of the buffer that has data to be written
+         *
+         * @return      0 upon success, error code otherwise
          */
         ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
             return this->write_data_block(address, buffer->buf);

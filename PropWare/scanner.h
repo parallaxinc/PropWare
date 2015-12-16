@@ -111,25 +111,26 @@ class Scanner {
             return NO_ERROR;
         }
 
-        const Scanner &operator>> (char &c) {
+        /**
+         * @brief       Extract formatted input
+         *
+         * @param[in]   &c  Object where the value that the extracted characters represent is stored.
+         *
+         * @returns     The Scanner object (`*this`)
+         */
+        template<typename T>
+        const Scanner &operator>> (T &c) {
             this->get(c);
             return *this;
         }
 
-        const Scanner &operator>> (uint32_t &x) {
-            get(x);
-            return *this;
-        }
-
-        const Scanner &operator>> (int32_t &x) {
-            get(x);
-            return *this;
-        }
-
-        const Scanner &operator>> (float &f) {
-            return *this;
-        }
-
+        /**
+         * @brief       Extract formatted input
+         *
+         * @param[in]   &c  Object where the value that the extracted characters represent is stored.
+         *
+         * @returns     Error code if the input can not be converted to the desired format, 0 otherwise
+         */
         const ErrorCode get (char &c) {
             ErrorCode err;
             char      userInput[2];
@@ -142,6 +143,9 @@ class Scanner {
             }
         }
 
+        /**
+         * @overload
+         */
         const ErrorCode get (uint32_t &x) {
             ErrorCode err;
             char      userInput[32];
@@ -152,6 +156,9 @@ class Scanner {
                 return NO_ERROR;
         }
 
+        /**
+         * @overload
+         */
         const ErrorCode get (int32_t &x) {
             ErrorCode err;
             char      userInput[32];
@@ -162,6 +169,9 @@ class Scanner {
                 return NO_ERROR;
         }
 
+        /**
+         * @overload
+         */
         const ErrorCode get (float &f) {
             ErrorCode err;
             char      userInput[32];
@@ -173,7 +183,17 @@ class Scanner {
         }
 
         /**
-         * @brief
+         * @brief                           Prompt the user for input and store the value only if it is sanitized
+         *
+         * For safe input of strings only, use this method. For example, to request a yes/no answer, use the
+         * YES_NO_COMP shared instance:
+         *
+         * @code
+         * char answer[32]; // A nice big buffer in case the user enters something bad
+         * pwIn.input_prompt("Do you like the Parallax Propeller?\n>>> ", "Please enter yes or no (y/n)\n", answer, 32,
+         *                   YES_NO_COMP);
+         * pwOut << "You said " << answer << "!\n";
+         * @endcode
          *
          * @param[in]   prompt[]            User prompt which will be displayed before each attempt to read the serial
          *                                  bus
@@ -196,7 +216,17 @@ class Scanner {
         }
 
         /**
-         * @brief
+         * @brief                           Prompt the user for input and store the value only if it is sanitized
+         *
+         * For safe input of any value other than strings, use this method. For example, to request any non-negative
+         * number, use the NON_NEGATIVE_COMP shared instance:
+         *
+         * @code
+         * int number;
+         * pwIn.input_prompt("Enter a non-negative number:\n>>> ",
+         *                   "That is either not a number, or it is negative.\n", &number, NON_NEGATIVE_COMP);
+         * pwOut << "You entered " << number << "\n";
+         * @endcode
          *
          * @param[in]   prompt[]            User prompt which will be displayed before each attempt to read the serial
          *                                  bus

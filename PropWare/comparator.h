@@ -25,6 +25,9 @@
 
 #pragma once
 
+#include <cstring>
+#include <PropWare/utility.h>
+
 namespace PropWare {
 
 /**
@@ -59,9 +62,38 @@ class NonNegativeIntegerComparator : public Comparator<int> {
         }
 };
 
+/**
+ * @brief   Determine if the user answered positively or negatively.
+ *
+ * Accepts yes, no, n, and y. Input string is set to lowercase to allow for a case-insensitive comparison.
+ */
+class YesNoComparator : public Comparator<char> {
+    public:
+        /**
+         * @brief   Required default constructor
+         */
+        YesNoComparator () {
+        }
+
+        virtual bool valid (const char *userInput) const {
+            char buffer[16];
+            strcpy(buffer, userInput);
+            Utility::to_lower(buffer);
+            return 0 == strcmp("n", buffer) ||
+                    0 == strcmp("no", buffer) ||
+                    0 == strcmp("y", buffer) ||
+                    0 == strcmp("yes", buffer);
+        }
+};
+
 }
 
 /**
  * @brief   Global instance for shared use by PropWare applications
  */
 extern const PropWare::NonNegativeIntegerComparator NON_NEGATIVE_COMP;
+
+/**
+ * @brief   Global instance for shared use by PropWare applications
+ */
+extern const PropWare::YesNoComparator YES_NO_COMP;

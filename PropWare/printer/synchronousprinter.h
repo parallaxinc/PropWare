@@ -122,6 +122,11 @@ class SynchronousPrinter {
             lockclr(this->m_lock);
         }
 
+        /**
+         * @brief       Print a string along with a newline at the end
+         *
+         * @param[in]   string[]    String to be printed
+         */
         void println (const char string[]) const {
             while (lockset(this->m_lock));
             this->m_printer->println(string);

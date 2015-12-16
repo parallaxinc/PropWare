@@ -95,12 +95,28 @@ class SPI : public PrintCapable,
         static const int32_t DEFAULT_FREQUENCY = 100000;
 
     public:
+        /**
+         * @brief       Best way to use SPI is through here, where you can get a shared instance of the SPI module (not
+         *              thread safe)
+         *
+         * @returns     Address of the shared SPI instance
+         */
         static SPI *get_instance () {
             static SPI defaultInstance;
             return &defaultInstance;
         }
 
     public:
+        /**
+         * @brief       Construct an SPI bus on the given pins with the given settings
+         *
+         * @param[in]   mosi        Pin mask for MOSI
+         * @param[in]   miso        Pin mask for MISO
+         * @param[in]   sclk        Pin mask for SCLK
+         * @param[in]   frequency   Frequency to run the bus, in hertz
+         * @param[in]   mode        Determines clock phase and polarity
+         * @param[in]   bitmode     Determine if the MSB or LSB should be clocked out first
+         */
         SPI (const Port::Mask mosi = PropWare::Port::NULL_PIN, const Port::Mask miso = PropWare::Port::NULL_PIN,
              const Port::Mask sclk = PropWare::Port::NULL_PIN, const int32_t frequency = DEFAULT_FREQUENCY,
              const Mode mode = MODE_0, const BitMode bitmode = MSB_FIRST)
@@ -111,22 +127,34 @@ class SPI : public PrintCapable,
             this->set_clock(frequency);
         }
 
+        /**
+         * @brief   Release the pins to floating inputs
+         */
         ~SPI () {
             this->m_mosi.set_dir_in();
             this->m_sclk.set_dir_in();
         }
 
+        /**
+         * @brief   Release the current MOSI pin as a floating input and set the new one as output
+         */
         void set_mosi (const Port::Mask mask) {
-            reset_pin_mask(this->m_mosi, mask);
+            this->reset_pin_mask(this->m_mosi, mask);
         }
 
+        /**
+         * @brief   Set the new pin as input
+         */
         void set_miso (const Port::Mask mask) {
-            reset_pin_mask(this->m_miso, mask);
+            this->reset_pin_mask(this->m_miso, mask);
             this->m_miso.set_dir_in();
         }
 
+        /**
+         * @brief   Release the current SCLK pin as a floating input and set the new one as output
+         */
         void set_sclk (const Port::Mask mask) {
-            reset_pin_mask(this->m_sclk, mask);
+            this->reset_pin_mask(this->m_sclk, mask);
             this->set_mode(this->m_mode);
         }
 
@@ -206,6 +234,13 @@ class SPI : public PrintCapable,
             }
         }
 
+        /**
+         * @brief       Read a value from the MISO line
+         *
+         * @param[in]   bits    Number of bits to read
+         *
+         * @returns     Value from the data bus
+         */
         uint32_t shift_in (const unsigned int bits) const {
             const bool clockPhase = this->m_mode & 0x01;
             if (clockPhase) {

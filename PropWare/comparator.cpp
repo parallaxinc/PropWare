@@ -26,3 +26,4 @@
 #include <PropWare/comparator.h>
 
 const PropWare::NonNegativeIntegerComparator NON_NEGATIVE_COMP;
+const PropWare::YesNoComparator              YES_NO_COMP;
