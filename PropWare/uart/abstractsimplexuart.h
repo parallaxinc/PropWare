@@ -1,5 +1,5 @@
 /**
- * @file        abstractsimplexuart.h
+ * @file        PropWare/uart/abstractsimplexuart.h
  *
  * @author      David Zemon
  *
@@ -80,9 +80,6 @@ namespace PropWare {
  */
 class AbstractSimplexUART : public virtual UART {
     public:
-        /**
-         * @see PropWare::UART::set_tx_mask
-         */
         void set_tx_mask (const Port::Mask tx) {
             // Reset the old pin
             this->m_tx.set_dir(Port::IN);
@@ -93,16 +90,10 @@ class AbstractSimplexUART : public virtual UART {
             this->m_tx.set_dir(Port::OUT);
         }
 
-        /**
-         * @see PropWare::UART::get_tx_mask
-         */
         Port::Mask get_tx_mask () const {
             return this->m_tx.get_mask();
         }
 
-        /**
-         * @see PropWare::UART::set_data_width
-         */
         virtual ErrorCode set_data_width (const uint8_t dataWidth) {
             if (1 > dataWidth || dataWidth > 16)
                 return UART::INVALID_DATA_WIDTH;
@@ -119,16 +110,10 @@ class AbstractSimplexUART : public virtual UART {
             return UART::NO_ERROR;
         }
 
-        /**
-         * @see PropWare::UART::get_data_width
-         */
         uint8_t get_data_width () const {
             return this->m_dataWidth;
         }
 
-        /**
-         * @see PropWare::UART::set_parity
-         */
         virtual void set_parity (const UART::Parity parity) {
             this->m_parity = parity;
             this->set_parity_mask();
@@ -136,16 +121,10 @@ class AbstractSimplexUART : public virtual UART {
             this->set_total_bits();
         }
 
-        /**
-         * @see PropWare::UART::get_parity
-         */
         UART::Parity get_parity () const {
             return this->m_parity;
         }
 
-        /**
-         * @see PropWare::UART::set_stop_bit_width
-         */
         ErrorCode set_stop_bit_width (const uint8_t stopBitWidth) {
             // Error checking
             if (0 == stopBitWidth || stopBitWidth > 14)
@@ -160,30 +139,18 @@ class AbstractSimplexUART : public virtual UART {
             return NO_ERROR;
         }
 
-        /**
-         * @see PropWare::UART::get_stop_bit_width
-         */
         uint8_t get_stop_bit_width () const {
             return this->m_stopBitWidth;
         }
 
-        /**
-         * @see PropWare::UART::set_baud_rate
-         */
         void set_baud_rate (const int32_t baudRate) {
             this->m_bitCycles = CLKFREQ / baudRate;
         }
 
-        /**
-         * @see PropWare::UART::get_baud_rate
-         */
         int32_t get_baud_rate () const {
             return CLKFREQ / this->m_bitCycles;
         }
 
-        /**
-         * @see PropWare::UART::send
-         */
         virtual void send (uint16_t originalData) const {
             uint32_t wideData = originalData;
 
@@ -215,9 +182,6 @@ class AbstractSimplexUART : public virtual UART {
             this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles, this->m_tx.get_mask());
         }
 
-        /**
-         * @see PropWare::UART::send_array
-         */
         virtual void send_array (const char array[], uint32_t words) const {
             char     *arrayPtr = (char *) array;
             uint32_t data      = 0, waitCycles = 0, bits = 0;
@@ -362,16 +326,10 @@ class AbstractSimplexUART : public virtual UART {
 #endif
         }
 
-        /**
-         * @see PropWare::PrintCapable::put_char
-         */
         void put_char (const char c) {
             this->send((uint16_t) c);
         }
 
-        /**
-         * @see PropWare::PrintCapable::puts
-         */
         void puts (const char string[]) {
             const uint32_t length = strlen(string);
             if (length)

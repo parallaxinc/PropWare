@@ -1,5 +1,5 @@
 /**
- * @file        sd.h
+ * @file        PropWare/filesystem/sd.h
  *
  * @author      David Zemon
  *
@@ -25,22 +25,34 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <string.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/filesystem/blockstorage.h>
 #include <PropWare/spi.h>
 #include <PropWare/pin.h>
 #include <PropWare/printer/printer.h>
 
+/**
+ * @brief   Value is injected by `propeller-load` if set in the configuration file
+ */
 extern int _cfg_sdspi_config1;
+
+/**
+ * @brief   Value is injected by `propeller-load` if set in the configuration file
+ */
 extern int _cfg_sdspi_config2;
 
 namespace PropWare {
 
-// First byte response receives special treatment to allow for verbose debugging
+/**
+ * @brief   First byte response receives special treatment to allow for verbose debugging (not for public use)
+ */
 extern unsigned char _sd_firstByteResponse;
 
+/**
+ * @brief   A simple SD driver communicating over the SPI protocol.
+ *
+ * When using PropWare's default SPI class, this allows the entire SPI/SD card/FAT functionality to run in a single cog.
+ */
 class SD : public BlockStorage {
     public:
         /**
@@ -60,6 +72,16 @@ class SD : public BlockStorage {
         } ErrorCode;
 
     public:
+        /**
+         * @brief   Use the default SPI instance and pins for connecting to the SD card
+         *
+         * If a board configuration file has been predefined in PropGCC (such as `dna.cfg` for the Propeller DNA board),
+         * then an instance of `PropWare::SD` can be constructed without any arguments. This is very convenient for
+         * anyone using a common Propeller board that comes pre-equipped with an SD card adapter.
+         *
+         * @param[in]   *spi    Address of a SPI instance. Its pins, clock frequency and mode will be modified to fit
+         *                      the SD card's needs
+         */
         SD (SPI *spi = SPI::get_instance())
                 : m_spi(spi) {
             Pin::Mask pins[4];
@@ -71,12 +93,19 @@ class SD : public BlockStorage {
 
             // Set CS for output and initialize high
             this->m_cs.set_mask(pins[3]);
-            this->m_cs.set_dir(Pin::OUT);
             this->m_cs.set();
+            this->m_cs.set_dir_out();
         }
 
         /**
          * @brief       Construct an SD object with the given SPI parameters
+         *
+         * @param[in]   *spi    Address of a SPI instance. Its clock frequency and mode will be modified to fit the SD
+         *                      card's needs
+         * @param[in]   mosi    Pin mask for data line leaving the Propeller
+         * @param[in]   miso    Pin mask for data line going in to the Propeller
+         * @param[in]   sclk    Pin mask for clock line
+         * @param[in]   cs      Pin mask for chip select
          */
         SD (SPI *spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs)
                 : m_spi(spi) {
@@ -87,15 +116,11 @@ class SD : public BlockStorage {
             // Set CS for output and initialize high
             this->m_cs.set_mask(cs);
             this->m_cs.set();
-            this->m_cs.set_dir(Pin::OUT);
+            this->m_cs.set_dir_out();
         }
 
         /**
-         * @brief       Initialize SD card communication over SPI for 3.3V
-         *              configuration
-         *
-         * Starts an SPI cog IFF an SPI cog has not already been started; If
-         * one has been started, only the cs will have effect
+         * @brief       Initialize SD card communication over SPI for 3.3V configuration
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -129,53 +154,6 @@ class SD : public BlockStorage {
             return SECTOR_SIZE_SHIFT;
         }
 
-        /**
-         * @brief   Create a human-readable error string
-         *
-         * @param[in]   printer     Printer used for logging the message
-         * @param[in]   err         Error number used to determine error string
-         */
-        void print_error_str (const Printer &printer, const ErrorCode err)  {
-            const uint8_t relativeError = err - BEG_ERROR;
-
-            switch (err) {
-                case INVALID_CMD:
-                    printer << "SD Error " << relativeError << ": Invalid command\n";
-                    break;
-                case READ_TIMEOUT:
-                    printer << "SD Error " << relativeError << ": Timed out during read\n";
-                    break;
-                case INVALID_NUM_BYTES:
-                    printer << "SD Error " << relativeError << ": Invalid number of bytes\n";
-                    break;
-                case INVALID_RESPONSE:
-                    printer << "SD Error " << relativeError << ": Invalid first-byte response\n";
-                    printer << "\tReceived: " << _sd_firstByteResponse << '\n';
-                    this->first_byte_expansion(printer);
-                    break;
-                case INVALID_INIT:
-                    printer << "SD Error " << relativeError << ": Invalid response during initialization\n";
-                    printer << "\tResponse: " << _sd_firstByteResponse << '\n';
-                    break;
-                case INVALID_DAT_START_ID:
-                    printer << "SD Error " << relativeError << ": Invalid data-start ID\n";
-                    printer << "\tReceived: " << _sd_firstByteResponse << '\n';
-                    break;
-                default:
-                    return;
-            }
-        }
-
-        /**
-         * @brief       Read SD_SECTOR_SIZE-byte data block from SD card
-         *
-         * @param[in]   address     Number of bytes to send
-         * @param[out]  buf[]       Location in chip memory to store data block;
-         *                          If NULL is sent, the default internal buffer
-         *                          will be used
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
         PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) const {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
@@ -196,14 +174,6 @@ class SD : public BlockStorage {
             return err;
         }
 
-        /**
-         * @brief       Write SD_SECTOR_SIZE-byte data block to SD card
-         *
-         * @param[in]   address     Block address to write to SD card
-         * @param[in]   *dat        Location in chip memory to read data block
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
         PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const {
             PropWare::ErrorCode err;
             uint8_t             temp = 0;
@@ -239,6 +209,43 @@ class SD : public BlockStorage {
             buf[offset + 2] = (uint8_t) (value >> 16);
             buf[offset + 1] = (uint8_t) (value >> 8);
             buf[offset]     = (uint8_t) value;
+        }
+
+        /**
+         * @brief   Create a human-readable error string
+         *
+         * @param[in]   printer     Printer used for logging the message
+         * @param[in]   err         Error number used to determine error string
+         */
+        void print_error_str (const Printer &printer, const ErrorCode err) {
+            const uint8_t relativeError = err - BEG_ERROR;
+
+            switch (err) {
+                case INVALID_CMD:
+                    printer << "SD Error " << relativeError << ": Invalid command\n";
+                    break;
+                case READ_TIMEOUT:
+                    printer << "SD Error " << relativeError << ": Timed out during read\n";
+                    break;
+                case INVALID_NUM_BYTES:
+                    printer << "SD Error " << relativeError << ": Invalid number of bytes\n";
+                    break;
+                case INVALID_RESPONSE:
+                    printer << "SD Error " << relativeError << ": Invalid first-byte response\n";
+                    printer << "\tReceived: " << _sd_firstByteResponse << '\n';
+                    this->first_byte_expansion(printer);
+                    break;
+                case INVALID_INIT:
+                    printer << "SD Error " << relativeError << ": Invalid response during initialization\n";
+                    printer << "\tResponse: " << _sd_firstByteResponse << '\n';
+                    break;
+                case INVALID_DAT_START_ID:
+                    printer << "SD Error " << relativeError << ": Invalid data-start ID\n";
+                    printer << "\tReceived: " << _sd_firstByteResponse << '\n';
+                    break;
+                default:
+                    return;
+            }
         }
 
     private:
@@ -286,7 +293,7 @@ class SD : public BlockStorage {
          * @brief   Send numerous clocks to the card to allow it to perform internal initialization
          */
         inline void power_up () const {
-            uint8_t             i;
+            uint8_t i;
             waitcnt(CLKFREQ / 10 + CNT);
 
             // Send at least 72 clock cycles to enable the SD card
@@ -310,7 +317,7 @@ class SD : public BlockStorage {
 
         inline PropWare::ErrorCode verify_v2_0 (uint8_t response[], bool *stageCleared) const {
             PropWare::ErrorCode err;
-            uint8_t firstByte;
+            uint8_t             firstByte;
 
             // Inform SD card that the Propeller uses the 2.7-3.6V range;
             this->send_command(CMD_INTERFACE_COND, ARG_CMD8, CRC_CMD8);
@@ -394,7 +401,7 @@ class SD : public BlockStorage {
          * @return      Returns 0 for success, else error code
          */
         PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t &firstByte, uint8_t *dat) const {
-            uint32_t            timeout;
+            uint32_t timeout;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
@@ -517,8 +524,8 @@ class SD : public BlockStorage {
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) const {
-            uint32_t            timeout;
-            uint8_t             firstByte;
+            uint32_t timeout;
+            uint8_t  firstByte;
 
             // Read first byte - the R1 response
             timeout = RESPONSE_TIMEOUT + CNT;
@@ -579,7 +586,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion (const Printer &printer)  {
+        void first_byte_expansion (const Printer &printer) {
             if (BIT_0 & _sd_firstByteResponse)
                 printer.puts("\t0: Idle\n");
             if (BIT_1 & _sd_firstByteResponse)
@@ -622,7 +629,6 @@ class SD : public BlockStorage {
         /*************************
          *** Private Constants ***
          *************************/
-        // SPI config
         static const uint16_t SECTOR_SIZE       = 512;
         static const uint8_t  SECTOR_SIZE_SHIFT = 9;
 

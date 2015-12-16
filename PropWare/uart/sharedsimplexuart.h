@@ -1,5 +1,5 @@
 /**
-* @file        sharedsimplexuart.h
+* @file        PropWare/uart/sharedsimplexuart.h
 *
 * @author      David Zemon
 *

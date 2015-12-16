@@ -1,5 +1,5 @@
 /**
- * @file    comparator.h
+ * @file    PropWare/comparator.h
  *
  * @author  David Zemon
  *
@@ -25,16 +25,35 @@
 
 #pragma once
 
+#include <cstring>
+#include <PropWare/utility.h>
+
 namespace PropWare {
 
+/**
+ * @brief   Provide a way for a `PropWare::Scanner` to sanitize user input
+ */
 template<typename T>
 class Comparator {
     public:
+        /**
+         * @brief   Determines if the given argument is valid
+         */
         virtual bool valid (const T *lhs) const = 0;
 };
 
+/**
+ * @brief   Also known as whole numbers, this class will only allow numbers that are zero or greater with no
+ *          fractional part
+ *
+ * Though you are welcome to construct your own instance, a global instance is available for use in the PropWare
+ * namespace: `PropWare::NON_NEGATIVE_COMP`.
+ */
 class NonNegativeIntegerComparator : public Comparator<int> {
     public:
+        /**
+         * @brief   Required default constructor
+         */
         NonNegativeIntegerComparator () {
         }
 
@@ -43,6 +62,38 @@ class NonNegativeIntegerComparator : public Comparator<int> {
         }
 };
 
+/**
+ * @brief   Determine if the user answered positively or negatively.
+ *
+ * Accepts yes, no, n, and y. Input string is set to lowercase to allow for a case-insensitive comparison.
+ */
+class YesNoComparator : public Comparator<char> {
+    public:
+        /**
+         * @brief   Required default constructor
+         */
+        YesNoComparator () {
+        }
+
+        virtual bool valid (const char *userInput) const {
+            char buffer[16];
+            strcpy(buffer, userInput);
+            Utility::to_lower(buffer);
+            return 0 == strcmp("n", buffer) ||
+                    0 == strcmp("no", buffer) ||
+                    0 == strcmp("y", buffer) ||
+                    0 == strcmp("yes", buffer);
+        }
+};
+
 }
 
+/**
+ * @brief   Global instance for shared use by PropWare applications
+ */
 extern const PropWare::NonNegativeIntegerComparator NON_NEGATIVE_COMP;
+
+/**
+ * @brief   Global instance for shared use by PropWare applications
+ */
+extern const PropWare::YesNoComparator YES_NO_COMP;

@@ -1,5 +1,5 @@
 /**
- * @file        abstractduplexuart.h
+ * @file        PropWare/uart/abstractduplexuart.h
  *
  * @author      David Zemon
  *
@@ -27,32 +27,28 @@
 
 #include <PropWare/uart/simplexuart.h>
 #include <PropWare/uart/duplexuart.h>
-#include <PropWare/scancapable.h>
 
 namespace PropWare {
 
+/**
+ * @brief   A base class for any non-buffered UART that is capable of both transmitting and receiving
+ *
+ * @note    Abstract classes should not be used by end users. For unbuffered UART communication, take a look at
+ *          `PropWare::FullDuplexUART` and `PropWare::HalfDuplexUART` for concrete classes, and consider using them with
+ *          the `PropWare::Printer` class
+ */
 class AbstractDuplexUART : public virtual DuplexUART,
-                           public virtual ScanCapable,
                            public AbstractSimplexUART {
     public:
-        /**
-         * @see PropWare::UART::set_rx_mask
-         */
         void set_rx_mask (const Port::Mask rx) {
             this->m_rx.set_mask(rx);
             this->m_rx.set_dir(Port::IN);
         }
 
-        /**
-         * @see PropWare::UART::get_rx_mask
-         */
         Port::Mask get_rx_mask () const {
             return this->m_rx.get_mask();
         }
 
-        /**
-         * @see PropWare::UART::set_data_width
-         */
         virtual ErrorCode set_data_width (const uint8_t dataWidth) {
             ErrorCode err;
             check_errors(AbstractSimplexUART::set_data_width(dataWidth));
@@ -63,18 +59,12 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return NO_ERROR;
         }
 
-        /**
-         * @see PropWare::UART::set_parity
-         */
         virtual void set_parity (const UART::Parity parity) {
             AbstractSimplexUART::set_parity(parity);
             this->set_msb_mask();
             this->set_receivable_bits();
         }
 
-        /**
-         * @see PropWare::UART::receive
-         */
         uint32_t receive () const {
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
@@ -90,9 +80,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return rxVal & wideDataMask;
         }
 
-        /**
-         * @see PropWare::UART::get_line
-         */
         ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
@@ -132,9 +119,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return NO_ERROR;
         }
 
-        /**
-         * @see PropWare::UART::receive_array
-         */
         ErrorCode receive_array (uint8_t *buffer, uint32_t length) const {
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
@@ -163,13 +147,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
         }
 
         /**
-         * @see PropWare::ScanCapable::get_char
-         */
-        char get_char () {
-            return (char) this->receive();
-        }
-
-        /**
          * @brief   Read words from the bus until a newline character (`\\n`) is received or the buffer is filled
          *
          * If found, the newline character will be replaced with a null-terminator. If the buffer is filled before a
@@ -177,6 +154,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
          *
          * @param[in]   string[]        Output buffer which should store the data
          * @param[out]  *bufferSize     Address where the new length of the buffer will be written
+         *
+         * @returns     Zero upon success, error code otherwise
          */
         PropWare::ErrorCode fgets (char string[], int32_t *bufferSize) const {
             const int32_t originalBufferSize = *bufferSize;
@@ -376,8 +355,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
         /**
          * @brief       Shift in an array of data (FCache function)
          *
-         * @param[in]   bufferAddr
-         * @param[in]   length
+         * @param[out]  *buffer     Buffer where data can be stored
+         * @param[in]   length      Number of bytes that should be read from the port
          */
         void shift_in_byte_array (uint8_t *buffer, unsigned int length) const {
             uint32_t initWaitCycles = (this->m_bitCycles >> 1) + this->m_bitCycles;

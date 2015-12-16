@@ -1,5 +1,5 @@
 /**
- * @file        file.h
+ * @file        PropWare/filesystem/file.h
  *
  * @author      David Zemon
  *
@@ -30,6 +30,9 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Basic file interface for opening and closing files
+ */
 class File {
     public:
         typedef enum {
@@ -53,7 +56,8 @@ class File {
         /**
          * Destructor
          */
-        virtual ~File () { }
+        virtual ~File () {
+        }
 
         /**
          * @brief       Open the file
@@ -88,6 +92,62 @@ class File {
             return this->m_length;
         }
 
+        /**
+         * @brief   Obtain the value of the file position indicator
+         *
+         * @post    The next byte to be read from the file
+         */
+        inline int32_t tell () const {
+            return this->m_ptr;
+        }
+
+        /**
+         * @brief       Sets the position of the next character to be read or written
+         *
+         * @param[in]   offset  Offset value, relative to the `way` parameter
+         * @param[in]   way     Starting position for the movement and direction of movement
+         *
+         * @return      0 upon success, error code otherwise
+         */
+        PropWare::ErrorCode seek (const int32_t offset, const SeekDir way) {
+            int32_t absolute;
+            switch (way) {
+                case BEG:
+                    if (offset > this->m_length || 0 > offset)
+                        return EOF_ERROR;
+                    else {
+                        this->m_ptr = offset;
+                        break;
+                    }
+                case CUR:
+                    absolute = offset + this->m_ptr;
+                    if (0 > offset || offset > this->m_length)
+                        return EOF_ERROR;
+                    else {
+                        this->m_ptr = (uint32_t) absolute;
+                        break;
+                    }
+                case END:
+                    absolute = this->m_length - offset;
+                    if (0 > offset || offset > this->m_length)
+                        return EOF_ERROR;
+                    else {
+                        this->m_ptr = (uint32_t) absolute;
+                        break;
+                    }
+            }
+            return NO_ERROR;
+        }
+
+        /**
+         * @overload
+         *
+         * @param[in]   position    Absolute position to move the file position indicator
+         */
+        PropWare::ErrorCode seek (const int32_t position) {
+            return this->seek(position, SeekDir::BEG);
+        }
+
     protected:
 
         /**
@@ -107,45 +167,6 @@ class File {
                 this->m_buf = buffer;
 
             this->m_contentMeta.name = name;
-        }
-
-        /**
-         * @brief       Move the given pointer to a specified address
-         *
-         * @param[out]  &ptr    Pointer to be moved
-         * @param[in]   pos     Scale that the pointer should be moved
-         * @param[in]   way     Starting position for the movement
-         *
-         * @return      0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode seek (int32_t &ptr, const int32_t pos, const SeekDir way) {
-            int32_t absolute;
-            switch (way) {
-                case BEG:
-                    if (pos > this->m_length || 0 > pos)
-                        return EOF_ERROR;
-                    else {
-                        ptr = pos;
-                        break;
-                    }
-                case CUR:
-                    absolute = pos + ptr;
-                    if (0 > pos || pos > this->m_length)
-                        return EOF_ERROR;
-                    else {
-                        ptr = (uint32_t) absolute;
-                        break;
-                    }
-                case END:
-                    absolute = this->m_length - pos;
-                    if (0 > pos || pos > this->m_length)
-                        return EOF_ERROR;
-                    else {
-                        ptr = (uint32_t) absolute;
-                        break;
-                    }
-            }
-            return NO_ERROR;
         }
 
         /**

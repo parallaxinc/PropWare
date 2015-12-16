@@ -1,5 +1,5 @@
 /**
- * @file        duplexuart.h
+ * @file        PropWare/uart/duplexuart.h
  *
  * @author      David Zemon
  *
@@ -26,13 +26,15 @@
 #pragma once
 
 #include <PropWare/uart/uart.h>
+#include <PropWare/scancapable.h>
 
 namespace PropWare {
 
 /**
  * @brief    Interface for all duplex UART devices
  */
-class DuplexUART : public virtual UART {
+class DuplexUART : public virtual UART,
+                   public virtual ScanCapable {
     public:
         /**
          * @brief       Set the pin mask for RX pin
@@ -99,6 +101,10 @@ class DuplexUART : public virtual UART {
          * @return      Returns 0 upon success, error code otherwise
          */
         virtual ErrorCode receive_array (uint8_t *buffer, uint32_t length) const = 0;
+
+        char get_char () {
+            return (char) this->receive();
+        }
 };
 
 }

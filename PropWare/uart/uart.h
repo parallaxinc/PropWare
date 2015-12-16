@@ -1,5 +1,5 @@
 /**
- * @file        uart.h
+ * @file        PropWare/uart/uart.h
  *
  * @author      David Zemon
  *

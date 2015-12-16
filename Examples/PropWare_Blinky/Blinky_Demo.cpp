@@ -27,11 +27,10 @@
 #include <PropWare/pin.h>
 
 int main () {
-    PropWare::Pin led(PropWare::Pin::P16, PropWare::Pin::OUT);
+    PropWare::Pin led(PropWare::Port::P16, PropWare::Pin::OUT);
 
     while (1) {
         led.toggle();
         waitcnt(CLKFREQ / 4 + CNT);
     }
 }
-

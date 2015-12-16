@@ -1,5 +1,5 @@
 /**
- * @file        synchronousprinter.h
+ * @file        PropWare/printer/synchronousprinter.h
  *
  * @author      David Zemon
  *
@@ -122,6 +122,11 @@ class SynchronousPrinter {
             lockclr(this->m_lock);
         }
 
+        /**
+         * @brief       Print a string along with a newline at the end
+         *
+         * @param[in]   string[]    String to be printed
+         */
         void println (const char string[]) const {
             while (lockset(this->m_lock));
             this->m_printer->println(string);
@@ -155,4 +160,7 @@ class SynchronousPrinter {
 
 }
 
+/**
+ * @brief   Global and shared instance for easy printing to the terminal (thread safe)
+ */
 extern const PropWare::SynchronousPrinter pwSyncOut;

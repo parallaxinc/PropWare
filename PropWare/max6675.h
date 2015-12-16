@@ -1,5 +1,5 @@
 /**
- * @file    max6675.h
+ * @file    PropWare/max6675.h
  *
  * @author  David Zemon
  *
@@ -85,8 +85,6 @@ class MAX6675 {
          * 12-bit data is stored where lower 2 bits are fractional and upper10 bits are the whole number. Value
          * presented in degrees Celsius
          *
-         * @param[out]  *dat    Address where data should be stored
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
         uint16_t read () {
@@ -107,8 +105,6 @@ class MAX6675 {
         /**
          * @brief       Read data and return integer value
          *
-         * @param[out]  *dat    Address where data should be stored
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
         uint16_t read_whole () {
@@ -120,8 +116,6 @@ class MAX6675 {
 
         /**
          * @brief       Read data in floating point form
-         *
-         * @param[out]  *dat    Address where data should be stored
          *
          * @return      Returns 0 upon success, error code otherwise
          */

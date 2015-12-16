@@ -1,5 +1,5 @@
 /**
- * @file        filewriter.h
+ * @file        PropWare/filesystem/filewriter.h
  *
  * @author      David Zemon
  *
@@ -30,6 +30,9 @@
 
 namespace PropWare {
 
+/**
+ * @brief   A write-only file interface
+ */
 class FileWriter : virtual public File, public PrintCapable {
     public:
         FileWriter (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
@@ -38,12 +41,31 @@ class FileWriter : virtual public File, public PrintCapable {
                   m_fileMetadataModified(false) {
         }
 
+        /**
+         * @brief       Write a character to the file
+         *
+         * @param[in]   c   Character that should be written
+         *
+         * @return      0 upon success, error code otherwise
+         */
         virtual PropWare::ErrorCode safe_put_char (const char c) = 0;
 
+        /**
+         * @brief       Write a character to the file
+         *
+         * @param[in]   c   Character that should be written
+         */
         void put_char (const char c) {
             this->safe_put_char(c);
         }
 
+        /**
+         * @brief       Write a character array to the file
+         *
+         * @param[in]   string  Null-terminated character array that should be written
+         *
+         * @return      0 upon success, error code otherwise
+         */
         virtual PropWare::ErrorCode safe_puts (const char string[]) {
             PropWare::ErrorCode err;
 
@@ -55,20 +77,13 @@ class FileWriter : virtual public File, public PrintCapable {
             return NO_ERROR;
         }
 
+        /**
+         * @brief       Write a character array to the file
+         *
+         * @param[in]   string  Null-terminated character array that should be written
+         */
         void puts (const char string[]) {
             this->safe_puts(string);
-        }
-
-        inline bool eof () const {
-            return this->m_length == this->m_ptr;
-        }
-
-        inline int32_t tell () const {
-            return this->m_ptr;
-        }
-
-        inline PropWare::ErrorCode seek (const int32_t pos, const SeekDir way) {
-            return this->File::seek(this->m_ptr, pos, way);
         }
 
         void print_status (const bool printBlocks = false, const bool printParentStatus = true) const {

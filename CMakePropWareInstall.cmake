@@ -68,6 +68,16 @@ install(DIRECTORY CMakeModules/
     DESTINATION ${CUSTOM_OSX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
     COMPONENT osx_cmake)
 
+# Spin2cpp
+install(FILES ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build/spin2cpp
+    DESTINATION bin
+    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
+    COMPONENT linux_spin2cpp)
+install(FILES ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build-win32/spin2cpp.exe
+    DESTINATION .
+    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
+    COMPONENT win_spin2cpp)
+
 # PropWare & libpropeller includes
 install(DIRECTORY
         ${PROJECT_SOURCE_DIR}/PropWare
@@ -85,6 +95,7 @@ install(DIRECTORY
     PATTERN libpropeller/source EXCLUDE
     PATTERN libpropeller/compile_tools EXCLUDE
     PATTERN libpropeller/unity_tools/asmsrc EXCLUDE)
+
 # Simple includes
 install(DIRECTORY
         ${PROJECT_SOURCE_DIR}/simple/
@@ -108,4 +119,5 @@ install(DIRECTORY Examples
     COMPONENT examples
     PATTERN bin EXCLUDE
     PATTERN Examples/CMakeLists.txt EXCLUDE
-    PATTERN *~ EXCLUDE)
+    PATTERN *~ EXCLUDE
+    PATTERN .idea EXCLUDE)

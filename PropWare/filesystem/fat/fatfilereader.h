@@ -1,5 +1,5 @@
 /**
- * @file        fatfilereader.h
+ * @file        PropWare/filesystem/fat/fatfilereader.h
  *
  * @author      David Zemon
  *
@@ -30,8 +30,64 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Read a file on a FAT 16 or FAT 32 storage device
+ *
+ * A file can be echoed to the terminal with a simple program such as
+ *
+ * @code
+ * int main () {
+ *     const SD driver;
+ *     FatFS filesystem(&driver);
+ *     filesystem.mount();
+ *
+ *     FatFileReader reader(filesystem, "fat_test.txt");
+ *     reader.open();
+ *
+ *     while (!reader.eof())
+ *         pwOut << reader.get_char();
+ *
+ *     return 0;
+ * }
+ * @endcode
+ *
+ * It can also be hooked up to the `PropWare::Scanner` class for line-by-line or formatted reading:
+ *
+ * @code
+ * int main () {
+ *     const SD driver;
+ *     FatFS filesystem(&driver);
+ *     filesystem.mount();
+ *
+ *     FatFileReader reader(filesystem, "fat_test.txt");
+ *     reader.open();
+ *
+ *     Scanner fileScanner(&reader);
+ *     char buffer[256];
+ *     while (!reader.eof()) {
+ *         fileScanner.gets(buffer, 256);
+ *         pwOut.println(buffer);
+ *     }
+ *
+ *     return 0;
+ * }
+ * @endcode
+ *
+ */
 class FatFileReader : virtual public FatFile, virtual public FileReader {
     public:
+        /**
+         * @brief       Construct a new file instance
+         *
+         * @param[in]   fs          The filesystem is needed for opening the file
+         * @param[in]   name        Name of the file to open - it must exist in the current working directory (see
+         *                          [issue 55](https://github.com/DavidZemon/PropWare/issues/55) for opening from a
+         *                          relative or absolute path)
+         * @param[in]   *buffer     Address of a dedicated buffer that should be used for this file. If left as the
+         *                          NULL (the default), a shared buffer will be used.
+         * @param[in]   logger      This is only used for printing debug statements. Use of the logger is limited
+         *                          such that all references will be optimized out in normal application code
+         */
         FatFileReader (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
@@ -45,7 +101,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             // Attempt to find the file
             if ((err = this->find(this->get_name(), &fileEntryOffset)))
                 // Find returned an error; ensure it was EOC...
-                return FatFS::EOC_END == err ? Filesystem::FILENAME_NOT_FOUND : err;
+                return FatFS::EOC_END == err ? FatFile::FILENAME_NOT_FOUND : err;
 
             // `name` was found successfully
             check_errors(this->open_existing_file(fileEntryOffset));

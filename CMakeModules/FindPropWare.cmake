@@ -54,6 +54,9 @@
 # SOFTWARE.
 #==============================================================================
 
+set(CMAKE_CONFIGURATION_TYPES None
+    CACHE TYPE INTERNAL FORCE)
+
 if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     ###############################
     # Compile options
@@ -167,10 +170,16 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             PATHS
                 ${PROPWARE_PATH}/CMakeModules
                 ${CMAKE_ROOT}/Modules)
+        find_file(PropWare_SPIN2DAT_SYMBOL_CONVERTER CMakeSpin2DatSymbolConverter.cmake
+            PATHS
+                ${PROPWARE_PATH}/CMakeModules
+                ${CMAKE_ROOT}/Modules)
         find_file(PROPWARE_RUN_OBJCOPY CMakeRunObjcopy.cmake
             PATHS
                 ${PROPWARE_PATH}/CMakeModules
                 ${CMAKE_ROOT}/Modules)
+        find_program(SPIN2CPP_COMMAND spin2cpp
+            ${PROPWARE_PATH})
 
         set(PropWare_LIBRARIES
             # Built-ins
@@ -260,10 +269,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         endfunction ()
 
         macro (set_compile_flags)
-            if (NOT DEFINED MODEL)
-                message(FATAL_ERROR "MODEL is not defined. You must define MODEL as one of cog, cmm, lmm, xmmc, xmm-single or xmm-split")
-            endif ()
-
             include_directories(${PropWare_INCLUDE_DIR})
 
             # Handle user options
@@ -371,12 +376,17 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
                     DEPENDS ${name})
 
-            # Add target for run (load to RAM and start terminal)
+            # Add target for debugging (load to RAM and start terminal)
             add_custom_target(debug
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
                     DEPENDS ${name})
 
-            # Add target for run (load to EEPROM, do not start terminal)
+            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
+            add_custom_target(debug-eeprom
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
+
+            # Add target for run (load to RAM, do not start terminal)
             add_custom_target(run-ram
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
                     DEPENDS ${name})
@@ -401,14 +411,19 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
                     DEPENDS ${name})
 
-            # Add target for run (load to EEPROM, do not start terminal)
+            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
+            add_custom_target(debug-eeprom-${name}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
+
+            # Add target for run (load to RAM, do not start terminal)
             add_custom_target(run-ram-${name}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
                     DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
                     DEPENDS ${name})
 
         endmacro()

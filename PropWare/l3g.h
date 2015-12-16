@@ -1,5 +1,5 @@
 /**
- * @file    l3g.h
+ * @file    PropWare/l3g.h
  *
  * @author  David Zemon
  * @author  Collin Winans
@@ -88,34 +88,27 @@ class L3G {
 
     public:
         /**
-         * @brief       Construction requires an instance of the SPI module;
-         *              the SPI module does not need to be started
+         * @brief       Construction requires an instance of the SPI module
          *
          * @param[in]   *spi    Constructed SPI module
+         * @param[in]   cs      Chip select pin mask
          */
-        L3G (SPI *spi) {
+        L3G (SPI *spi, const PropWare::Port::Mask cs) {
             this->m_spi           = spi;
             this->m_alwaysSetMode = false;
+            this->m_cs.set_mask(cs);
         }
 
         /**
          * @brief       Initialize an L3G module
-         *
-         * @param[in]   mosi        PinNum mask for MOSI
-         * @param[in]   miso        PinNum mask for MISO
-         * @param[in]   sclk        PinNum mask for SCLK
-         * @param[in]   cs          PinNum mask for CS
-         *
-         * @return       Returns 0 upon success, error code otherwise
          */
-        void start (const PropWare::Port::Mask mosi, const PropWare::Port::Mask miso,
-                                   const PropWare::Port::Mask sclk, const PropWare::Port::Mask cs) {
+        void start () {
             this->m_spi->set_mode(PropWare::L3G::SPI_MODE);
             this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE);
+            this->m_spi->set_clock(PropWare::L3G::SPI_DEFAULT_FREQ);
 
-            this->m_cs.set_mask(cs);
-            this->m_cs.set_dir(PropWare::Pin::OUT);
             this->m_cs.set();
+            this->m_cs.set_dir(PropWare::Pin::OUT);
 
             // NOTE L3G has high- and low-pass filters. Should they be enabled?
             // (Page 31)
@@ -138,7 +131,6 @@ class L3G {
          * @brief       Read a specific axis's data
          *
          * @param[in]   axis    Selects the axis to be read
-         * @param[out]  *val    Address that data should be placed into
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -149,8 +141,6 @@ class L3G {
         /**
          * @brief       Read data from the X axis
          *
-         * @param[out]  *val    Address that data should be placed into
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
         int16_t read_x () const {
@@ -160,22 +150,18 @@ class L3G {
         /**
          * @brief       Read data from the Y axis
          *
-         * @param[out]  *val    Address that data should be placed into
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read_y (int16_t *val) const {
+        int16_t read_y () const {
             return this->read16(PropWare::L3G::OUT_Y_L);
         }
 
         /**
          * @brief       Read data from the Z axis
          *
-         * @param[out]  *val    Address that data should be placed into
-         *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read_z (int16_t *val) const {
+        int16_t read_z () const {
             return this->read16(PropWare::L3G::OUT_Z_L);
         }
 
@@ -188,7 +174,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         void read_all (int16_t *val) const {
-            uint8_t             i;
+            uint8_t i;
 
             uint8_t addr = PropWare::L3G::OUT_X_L;
             addr |= BIT_7;  // Set RW bit (
@@ -221,7 +207,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         void set_dps (const PropWare::L3G::DPSMode dpsMode) {
-            uint8_t             oldValue;
+            uint8_t oldValue;
 
             this->m_dpsMode = dpsMode;
             this->maybe_set_spi_mode();
@@ -279,7 +265,7 @@ class L3G {
         }
 
     private:
-        static const uint32_t     SPI_DEFAULT_FREQ = 9000;
+        static const uint32_t     SPI_DEFAULT_FREQ = 100000;
         static const SPI::Mode    SPI_MODE         = SPI::MODE_3;
         static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
 
@@ -296,7 +282,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         void write8 (uint8_t addr, const uint8_t dat) const {
-            uint16_t            outputValue;
+            uint16_t outputValue;
 
             addr &= ~BIT_7;  // Clear the RW bit (write mode)
 
@@ -319,7 +305,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         void write16 (uint8_t addr, const uint16_t dat) const {
-            uint16_t            outputValue;
+            uint16_t outputValue;
 
             addr &= ~BIT_7;  // Clear the RW bit (write mode)
             addr |= BIT_6;  // Enable address auto-increment
@@ -339,7 +325,6 @@ class L3G {
          * @brief       Read one byte from the L3G module
          *
          * @param[in]   addr    Origin register address
-         * @param[out]  *dat    Address where incoming data should be stored
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -363,7 +348,6 @@ class L3G {
          * @brief       Read two bytes from the L3G module
          *
          * @param[in]   addr    Origin register address
-         * @param[out]  *dat    Address where incoming data should be stored
          *
          * @return      Returns 0 upon success, error code otherwise
          */

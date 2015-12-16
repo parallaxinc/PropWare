@@ -1,5 +1,5 @@
 /**
- * @file        queue.h
+ * @file        PropWare/queue.h
  *
  * @author      David Zemon
  *
@@ -36,22 +36,59 @@ namespace PropWare {
 template<typename T>
 class Queue {
     public:
-        Queue (T array[], const size_t arrayLength)
-                : m_array(array), m_arrayLength(arrayLength), m_size(0), m_head(-1), m_tail(-1) {
+        /**
+         * @brief   Construct a queue using the given statically-allocated array
+         *
+         * @param[in]   array   Statically allocated instance of an array, NOT a pointer
+         */
+        template<size_t N>
+        Queue (T (&array)[N])
+                : m_array(array), m_arrayLength(N), m_size(0), m_head(-1), m_tail(-1) {
         }
 
+        /**
+         * @brief   Construct a queue using the given dynamically allocated array (i.e., with `new` or `malloc`)
+         *
+         * This constructor is not recommended unless dynamic allocation is used. When using statically allocated
+         * arrays, use the single-parameter constructor
+         *
+         * @param[in]   *array  Address where the array begins
+         * @param[in]   length  Number of elements allocated for the array
+         */
+        Queue (T *array, const size_t length)
+                : m_array(array), m_arrayLength(length), m_size(0), m_head(-1), m_tail(-1) {
+        }
+
+        /**
+         * @brief       Obtain the number of elements in the queue
+         *
+         * @returns     Number of elements in the queue
+         */
         size_t size () const {
             return this->m_size;
         }
 
+        /**
+         * @brief       Determine if any elements exist
+         *
+         * @return      True if there is one or more elements, false otherwise
+         */
         bool is_empty () const {
             return 0 == this->size();
         }
 
+        /**
+         * @brief       Determine if inserting another element would overwrite data
+         *
+         * @returns     True if the queue can not fit any more data without loosing old data, false otherwise
+         */
         bool is_full () const {
             return this->m_arrayLength == this->size();
         }
 
+        /**
+         * @brief   Remove all data from the queue
+         */
         void clear () {
             this->m_size = 0;
         }
@@ -63,8 +100,7 @@ class Queue {
          *
          * @post        If the buffer is already full, the oldest value will be overwritten with the `value` parameter
          *
-         * @return      In order to allow chained calls to `PropWare::CircularQueue::enqueue`, the buffer isntance is
-         *              returned
+         * @return      In order to allow chained calls to `PropWare::Queue::enqueue`, the Queue instance is returned
          */
         Queue &enqueue (const T &value) {
             // Move the head pointer
@@ -146,7 +182,7 @@ class Queue {
          *
          * If the queue is read (deque or peek) when the size is 0 then a value at address 0 is returned. A better
          * implementation would throw an exception when this occurs, but that isn't feasible on the Propeller. Use
-         * this method to ensure values are valid prior to using them
+         * this method if you want to ensure values are valid prior to using them
          *
          * @param[in]   value   A value returned by PropWare::Queue::peek() or PropWare::Queue::dequeue()
          *

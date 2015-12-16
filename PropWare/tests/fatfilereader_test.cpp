@@ -141,7 +141,7 @@ TEST(OpenClose) {
 
 TEST(Open_NonExistantFile) {
     testable = new FatFileReader(*g_fs, BOGUS_FILE_NAME);
-    ASSERT_EQ_MSG(Filesystem::FILENAME_NOT_FOUND, testable->open());
+    ASSERT_EQ_MSG(FatFile::FILENAME_NOT_FOUND, testable->open());
 
     tearDown();
 }

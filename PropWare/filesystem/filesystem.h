@@ -1,5 +1,5 @@
 /**
- * @file        filesystem.h
+ * @file        PropWare/filesystem/filesystem.h
  *
  * @author      David Zemon
  *
@@ -30,21 +30,22 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Interface for all filesystems, such as FAT 16/32
+ *
+ * It may need significant modifications to work with anything other than FAT 16/32 because those are the only
+ * filesystems I was familiar with at the time that I authored it.
+ */
 class Filesystem {
         friend class File;
 
     public:
-        // TODO: Sort these out properly between FS errors and file errors
 #define HD44780_MAX_ERROR    64
         typedef enum {
-                                       NO_ERROR            = 0,
-                                       BEG_ERROR           = HD44780_MAX_ERROR + 1,
-            /** Filesystem Error  0 */ FILE_ALREADY_EXISTS = BEG_ERROR,
-            /** Filesystem Error  2 */ ENTRY_NOT_FILE,
-            /** Filesystem Error  3 */ ENTRY_NOT_DIR,
-            /** Filesystem Error  4 */ FILENAME_NOT_FOUND,
-            /** Filesystem Error  5 */ FILESYSTEM_ALREADY_MOUNTED,
-            /** End Filesystem error */END_ERROR           = FILESYSTEM_ALREADY_MOUNTED
+                                       NO_ERROR                   = 0,
+                                       BEG_ERROR                  = HD44780_MAX_ERROR + 1,
+            /** Filesystem Error  0 */ FILESYSTEM_ALREADY_MOUNTED = BEG_ERROR,
+            /** End Filesystem error */END_ERROR                  = FILESYSTEM_ALREADY_MOUNTED
         } ErrorCode;
 
         // Signal that the contents of a buffer are a directory
@@ -52,38 +53,29 @@ class Filesystem {
 
     public:
         /**
-         * @brief       Mount a filesystem
+         * @brief       Prepare a filesystem for use; All filesystems must be mounted before files can be listed or
+         *              opened
          *
          * @param[in]   partition   If multiple partitions are supported, the partition number can be specified here
          *
-         * @return  Returns 0 upon success, error code otherwise
+         * @return      Returns 0 upon success, error code otherwise
          */
         virtual PropWare::ErrorCode mount (const uint8_t partition = 0) = 0;
 
         /**
-         * @brief   Unmount the filesystem by flushing all dirty buffers
+         * @brief   Unmounting will ensure that any changes are saved back to the physical device
          */
         virtual PropWare::ErrorCode unmount () = 0;
 
-        const BlockStorage *get_driver () const {
-            return this->m_driver;
-        }
-
     public:
+        /**
+         * @brief       If an error occurs, this method can be used to determine what that error actually means
+         *
+         * @param[in]   printer     Where the error should be printed
+         * @param[in]   err         The error code that was thrown
+         */
         static void print_error_str (const Printer &printer, const ErrorCode err) {
             switch (err) {
-                case FILE_ALREADY_EXISTS:
-                    printer.println("File already exists");
-                    break;
-                case ENTRY_NOT_FILE:
-                    printer.println("Entry is not a file");
-                    break;
-                case ENTRY_NOT_DIR:
-                    printer.println("Entry is not a directory");
-                    break;
-                case FILENAME_NOT_FOUND:
-                    printer.println("Filename was not found");
-                    break;
                 case FILESYSTEM_ALREADY_MOUNTED:
                     printer.println("Filesystem is already mounted");
                     break;
@@ -93,7 +85,6 @@ class Filesystem {
         }
 
     protected:
-
         Filesystem (const BlockStorage *driver, const Printer *logger = &pwOut)
                 : m_logger(logger),
                   m_driver(driver),
@@ -102,6 +93,10 @@ class Filesystem {
                   m_nextFileId(0) {
             this->m_buf.buf  = NULL;
             this->m_buf.meta = &m_dirMeta;
+        }
+
+        const BlockStorage *get_driver () const {
+            return this->m_driver;
         }
 
         virtual uint32_t compute_tier1_from_tier2 (uint32_t tier2) const = 0;

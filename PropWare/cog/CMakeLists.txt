@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.0.0)
 
-set(COMMON_FLAGS "-Os")
 set(MODEL cog)
 set_compile_flags()
 

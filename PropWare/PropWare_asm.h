@@ -1,7 +1,6 @@
 /**
- * @file    PropWare_asm.h
- */
-/**
+ * @file    PropWare/PropWare_asm.h
+ *
  * @brief   Generic definitions for assembly files for the Parallax Propeller
  *
  * @author  David Zemon

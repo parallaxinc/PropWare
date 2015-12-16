@@ -1,5 +1,5 @@
 /**
- * @file    utility.h
+ * @file    PropWare/utility.h
  *
  * @author  David Zemon
  *
@@ -226,9 +226,19 @@ class Utility {
          *
          * @return      Number of elements in the array
          */
-        template <typename T, size_t N>
+        template<typename T, size_t N>
         static inline size_t size_of_array (const T(&array)[N]) {
             return N;
+        }
+
+        /**
+         * @brief   Perform hard reboot
+         *
+         * Also known as reset or power down/up, this will restart the entire chip as if power was just applied. Note
+         * that this will reboot __all 8 cogs__, not just one.
+         */
+        static inline void reboot () {
+            __builtin_propeller_clkset(0x80);
         }
 
     private:
@@ -236,7 +246,8 @@ class Utility {
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
          *          `uint8_t bits = PropWare::Utility::count_bits(0x03);`
          */
-        Utility () { }
+        Utility () {
+        }
 };
 
 }

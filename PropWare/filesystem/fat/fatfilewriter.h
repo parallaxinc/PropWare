@@ -1,5 +1,5 @@
 /**
- * @file        fatfilewriter.h
+ * @file        PropWare/filesystem/fat/fatfilewriter.h
  *
  * @author      David Zemon
  *
@@ -30,15 +30,31 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Concrete class for writing or modifying a FAT 16/32 file
+ */
 class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
     public:
+        /**
+         * @brief   Standard constructor
+         *
+         * @param[in]   fs          A mounted FAT 16/32 filesystem
+         * @param[in]   name[]      Character array with the file name
+         * @param[in]   *buffer     If you don't want to use the globally shared buffer, a different buffer address can
+         *                          be provided here
+         * @param[in]   logger      This is only used for printing debug statements. Use of the logger is limited
+         *                          such that all references will be optimized out in normal application code
+         */
         FatFileWriter (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
                   FileWriter(fs, name, buffer, logger) {
         }
 
+        /**
+         * @brief   All content will be saved to the physical device and the file will be safely closed
+         */
         virtual ~FatFileWriter () {
             this->close();
         }
@@ -51,7 +67,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 switch (err) {
                     case FatFS::EOC_END:
                         check_errors(this->m_fs->extend_current_directory());
-                    case Filesystem::FILENAME_NOT_FOUND:
+                    case FatFile::FILENAME_NOT_FOUND:
                         check_errors(this->create_new_file(fileEntryOffset));
                         break;
                     default:
@@ -76,7 +92,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 uint16_t fileEntryOffset = 0;
                 if ((err = this->find(this->m_name, &fileEntryOffset))) {
                     if (FatFS::EOC_END == err)
-                        return Filesystem::FILENAME_NOT_FOUND;
+                        return FatFile::FILENAME_NOT_FOUND;
                     else
                         return err;
                 } else {

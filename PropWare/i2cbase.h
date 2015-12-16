@@ -1,8 +1,8 @@
 /**
- * @file        i2cbase.h
+ * @file    PropWare/i2cbase.h
  *
- * @author      SRLM
- * @modified    David Zemon
+ * @author  SRLM
+ * @author  David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -41,8 +41,8 @@ namespace PropWare {
  * Requires that the SDA and SCL pins have sufficient pullups. These should be selected based on the capacitance of the
  * devices on the I2C bus, and the expected clock speed (400kHz currently).
  *
- * @author      SRLM
- * @modified    David Zemon
+ * @author  SRLM
+ * @author  David Zemon
  */
 class I2CBase {
     public:

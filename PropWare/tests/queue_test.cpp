@@ -31,7 +31,7 @@ static int                  array[SIZE];
 static PropWare::Queue<int> *testable;
 
 SETUP {
-    testable = new PropWare::Queue<int>(array, SIZE);
+    testable = new PropWare::Queue<int>(array);
 };
 
 TEARDOWN {
@@ -177,8 +177,8 @@ TEST(ManyElements) {
     setUp();
 
     // Insert many elements
-    const size_t TEST_SIZE = SIZE * 2 + 1;
-    for (int     i         = 0; i < TEST_SIZE; ++i) {
+    const size_t      TEST_SIZE = SIZE * 2 + 1;
+    for (unsigned int i         = 0; i < TEST_SIZE; ++i) {
         testable->enqueue(i);
         if (SIZE > i) {
             ASSERT_EQ_MSG(i + 1, testable->size());
@@ -189,8 +189,8 @@ TEST(ManyElements) {
     }
 
     // Dequeue many elements
-    const size_t DEQUEUE_LOOP_START = TEST_SIZE - SIZE;
-    for (int     i                  = DEQUEUE_LOOP_START; i < TEST_SIZE; ++i) {
+    const size_t      DEQUEUE_LOOP_START = TEST_SIZE - SIZE;
+    for (unsigned int i                  = DEQUEUE_LOOP_START; i < TEST_SIZE; ++i) {
         ASSERT_EQ_MSG(i, testable->dequeue());
     }
 

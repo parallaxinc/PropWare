@@ -1,5 +1,5 @@
 /**
- * @file    printer.cpp
+ * @file    PropWare/printer/printer.cpp
  *
  * @author  David Zemon
  *

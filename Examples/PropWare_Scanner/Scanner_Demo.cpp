@@ -30,41 +30,30 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
 
-class YesNoComparator : public PropWare::Comparator<char> {
-    public:
-        YesNoComparator () {}
-
-        virtual bool valid (const char *userInput) const {
-            char buffer[16];
-            strcpy(buffer, userInput);
-            PropWare::Utility::to_lower(buffer);
-            return 0 == strcmp("n", buffer) ||
-                    0 == strcmp("no", buffer) ||
-                    0 == strcmp("y", buffer) ||
-                    0 == strcmp("yes", buffer);
-        }
-};
-const YesNoComparator yesNoComparator;
-
 bool isAnswerNo (char const userInput[]);
+
 void error (const PropWare::ErrorCode err);
 
 int main () {
     // A nice big buffer that can hold up to 63 characters from the user (the
     // 64th is used by the null-terminator)
-    char userInput[64];
-    char name[64];
+    char         userInput[64];
+    char         name[64];
+    unsigned int age;
 
     pwOut.printf("Hello! I'd like to teach you how to use PropWare to read from the terminal!\n");
 
     do {
-        pwOut.printf("First, what's your name?\n>>> ");
+        pwOut << "First, what's your name?\n>>> ";
         pwIn.gets(userInput, sizeof(userInput));
         strcpy(name, userInput);
 
-        pwOut.printf("I received [%s].\n", name);
-        pwIn.input_prompt("Is that right?\n>>> ", "Please enter either 'yes' or 'no' (y/n)\n>>> ",
-                          userInput, sizeof(userInput), yesNoComparator);
+        pwOut << "And how old are you?\n>>> ";
+        pwIn >> age;
+
+        pwOut << "Is your name " << name << " and are you " << age << " years old?\n>>> ";
+        pwIn.input_prompt("", "Please enter either 'yes' or 'no' (y/n)\n>>> ", userInput, sizeof(userInput),
+                          YES_NO_COMP);
     } while (isAnswerNo(userInput));
 
     pwOut.printf("Hello, %s!\n", name);

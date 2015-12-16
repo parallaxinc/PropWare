@@ -45,7 +45,7 @@ TEST(ConstructorDestructor) {
     testable = new StringBuilder();
 
     ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
     ASSERT_EQ_MSG(0, testable->m_size);
     ASSERT_EQ_MSG(0, strlen(testable->to_string()));
 
@@ -60,7 +60,7 @@ TEST(PutChar_one) {
     ASSERT_EQ_MSG(1, testable->get_size());
     ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
     ASSERT_EQ_MSG(testChar, testable->to_string()[0]);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
 
     tearDown();
 }
@@ -75,7 +75,7 @@ TEST(PutChar_two) {
     ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
     ASSERT_EQ_MSG('a', testable->to_string()[0]);
     ASSERT_EQ_MSG('b', testable->to_string()[1]);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
 
     tearDown();
 }
@@ -92,7 +92,7 @@ TEST(PutChar_three) {
     ASSERT_EQ_MSG('a', testable->to_string()[0]);
     ASSERT_EQ_MSG('b', testable->to_string()[1]);
     ASSERT_EQ_MSG('c', testable->to_string()[2]);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
 
     tearDown();
 }
@@ -105,7 +105,7 @@ TEST(PutChar_ExactlyFull_SpaceShouldDouble) {
 
     ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED - 1, testable->get_size());
     ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED << 1, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED << 1, testable->m_currentSpace);
     for (int i = 0; i < StringBuilder::DEFAULT_SPACE_ALLOCATED - 1; ++i)
         ASSERT_EQ_MSG('a' + i, testable->to_string()[i]);
 
@@ -123,7 +123,7 @@ TEST(PutChar_FirstNewAlloc) {
     ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable->to_string());
     ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->get_size());
     ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED * 2, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED * 2, testable->m_currentSpace);
     for (int i = 0; i < StringBuilder::DEFAULT_SPACE_ALLOCATED; ++i)
         ASSERT_EQ_MSG('a' + i, testable->to_string()[i]);
 
@@ -142,7 +142,7 @@ TEST(PutChar_HugeString) {
     ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable->to_string());
     ASSERT_EQ_MSG(STRING_SIZE, testable->get_size());
     ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG((STRING_SIZE + 1) << 1, testable->m_space);
+    ASSERT_EQ_MSG((STRING_SIZE + 1) << 1, testable->m_currentSpace);
     for (int i = 0; i < STRING_SIZE; ++i)
         ASSERT_EQ_MSG('a', testable->to_string()[i]);
 
@@ -155,7 +155,7 @@ TEST(Clear_empty) {
     testable->clear();
 
     ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
     ASSERT_EQ_MSG(0, testable->m_size);
     ASSERT_EQ_MSG(0, strlen(testable->to_string()));
 
@@ -169,7 +169,7 @@ TEST(Clear_OneChar) {
     testable->clear();
 
     ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
     ASSERT_EQ_MSG(0, testable->m_size);
     ASSERT_EQ_MSG(0, strlen(testable->to_string()));
 
@@ -186,7 +186,7 @@ TEST(Clear_HugeString) {
     testable->clear();
 
     ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_space);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
     ASSERT_EQ_MSG(0, testable->m_size);
     ASSERT_EQ_MSG(0, strlen(testable->to_string()));
 
