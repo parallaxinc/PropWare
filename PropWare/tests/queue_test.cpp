@@ -31,7 +31,7 @@ static int                  array[SIZE];
 static PropWare::Queue<int> *testable;
 
 SETUP {
-    testable = new PropWare::Queue<int>(array, SIZE);
+    testable = new PropWare::Queue<int>(array);
 };
 
 TEARDOWN {

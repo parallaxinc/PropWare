@@ -14,7 +14,7 @@ static const size_t ARRAY_SIZE = 4;
 // Main function
 int main () {
     int array[ARRAY_SIZE];
-    PropWare::Queue<int> buffer(array, ARRAY_SIZE);
+    PropWare::Queue<int> buffer(array);
 
     pwOut.printf("Please enter a number at each of the following four prompts:\n");
     for (int i = 0; i < 6; ++i) {
