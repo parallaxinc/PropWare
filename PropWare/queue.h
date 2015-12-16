@@ -100,8 +100,7 @@ class Queue {
          *
          * @post        If the buffer is already full, the oldest value will be overwritten with the `value` parameter
          *
-         * @return      In order to allow chained calls to `PropWare::CircularQueue::enqueue`, the buffer isntance is
-         *              returned
+         * @return      In order to allow chained calls to `PropWare::Queue::enqueue`, the Queue instance is returned
          */
         Queue &enqueue (const T &value) {
             // Move the head pointer
