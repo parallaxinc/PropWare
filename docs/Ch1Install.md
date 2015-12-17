@@ -68,7 +68,7 @@ sudo rm -rf /usr/local/PropWare.bak
 
 [>> Chapter 2: CMake and Make Tutorial][1]
 
-[1]: http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html
+[1]: http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.xhtml
 [2]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.exe?guest=1
 [3]: http://www.computerhope.com/issues/ch000549.htm
 [4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.deb?guest=1

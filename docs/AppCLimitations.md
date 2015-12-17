@@ -1,8 +1,8 @@
 Appendix C: Limitations
 =======================
 
-[<< Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)<br />
-[>> Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_AppDTroubleshooting.html)
+[<< Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)<br />
+[>> Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_AppDTroubleshooting.xhtml)
 
 Spin
 ----
@@ -35,5 +35,5 @@ add_executable(${PROJECT_NAME}
     pst.dat)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[<< Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)<br />
-[>> Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_AppDTroubleshooting.html)
+[<< Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)<br />
+[>> Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_AppDTroubleshooting.xhtml)

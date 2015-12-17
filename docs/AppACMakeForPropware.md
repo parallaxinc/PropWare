@@ -1,8 +1,8 @@
 Appendix A: CMake for PropWare
 ==============================
 
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)
+[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml)<br />
+[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
 Remember that %PropWare uses CMake 3.0.
@@ -34,7 +34,7 @@ create_simple_executable(${PROJECT_NAME} main.cpp)
   but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
   (separated by whitespace).
 * There is LOTS more information about creating CMakeLists.txt files for %PropWare projects in 
-  [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
+  [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml).
 
 Typical Use Case
 ----------------
@@ -186,5 +186,5 @@ and an option will be added. It is believed that these flags will always be desi
 * Linker: None
 * Archiver: `cr`
 
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)
+[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml)<br />
+[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)
