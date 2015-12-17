@@ -92,12 +92,12 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         set(PropWare_PropWare_XMMC_LIBRARY              PropWare_xmmc)
         set(PropWare_PropWare_XMM-SPLIT_LIBRARY         PropWare_xmm-split)
         set(PropWare_PropWare_XMM-SINGLE_LIBRARY        PropWare_xmm-single)
-        set(PropWare_libpropeller_COG_LIBRARY           Libpropeller_cog)
-        set(PropWare_libpropeller_CMM_LIBRARY           Libpropeller_cmm)
-        set(PropWare_libpropeller_LMM_LIBRARY           Libpropeller_lmm)
-        set(PropWare_libpropeller_XMMC_LIBRARY          Libpropeller_xmmc)
-        set(PropWare_libpropeller_XMM-SPLIT_LIBRARY     Libpropeller_xmm-split)
-        set(PropWare_libpropeller_XMM-SINGLE_LIBRARY    Libpropeller_xmm-single)
+        set(PropWare_Libpropeller_COG_LIBRARY           Libpropeller_cog)
+        set(PropWare_Libpropeller_CMM_LIBRARY           Libpropeller_cmm)
+        set(PropWare_Libpropeller_LMM_LIBRARY           Libpropeller_lmm)
+        set(PropWare_Libpropeller_XMMC_LIBRARY          Libpropeller_xmmc)
+        set(PropWare_Libpropeller_XMM-SPLIT_LIBRARY     Libpropeller_xmm-split)
+        set(PropWare_Libpropeller_XMM-SINGLE_LIBRARY    Libpropeller_xmm-single)
         set(PropWare_Simple_COG_LIBRARY                 Simple_cog)
         set(PropWare_Simple_CMM_LIBRARY                 Simple_cmm)
         set(PropWare_Simple_LMM_LIBRARY                 Simple_lmm)
@@ -136,33 +136,44 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             set(PropWare_INCLUDE_DIR ${PROPWARE_PATH})
         endif ()
 
-        # Libraries
-        if (NOT DEFINED CMAKE_FIND_LIBRARY_PREFIXES)
-            set(CMAKE_FIND_LIBRARY_PREFIXES lib)
+        include("${PROPWARE_PATH}/lib/PropWare-targets.cmake")
+        if (PropWare_FIND_COMPONENTS)
+            # If we're using componentized search, only grab the requested libraries
+            foreach (comp ${PropWare_FIND_COMPONENTS})
+                foreach (model cog cmm lmm xmmc xmm-split xmm-single)
+                    string(TOUPPER ${model} upper_model)
+                    if (NOT TARGET ${comp}_${model})
+                        set(PropWare_${comp}_FOUND 0)
+                        if (PropWare_FIND_REQUIRED_${comp})
+                            message(FATAL_ERROR "PropWare's ${comp} component not available due to missing ${comp}_${model}")
+                        endif ()
+                    else ()
+                        set(PropWare_${comp}_FOUND 1)
+                        set(PropWare_${comp}_${upper_model}_LIBRARY ${comp}_${model})
+                    endif ()
+                endforeach ()
+            endforeach ()
+        else ()
+            # If we're not using componentized search, grab them all
+            set(PropWare_PropWare_COG_LIBRARY               PropWare_cog)
+            set(PropWare_PropWare_CMM_LIBRARY               PropWare_cmm)
+            set(PropWare_PropWare_LMM_LIBRARY               PropWare_lmm)
+            set(PropWare_PropWare_XMMC_LIBRARY              PropWare_xmmc)
+            set(PropWare_PropWare_XMM-SPLIT_LIBRARY         PropWare_xmm-split)
+            set(PropWare_PropWare_XMM-SINGLE_LIBRARY        PropWare_xmm-single)
+            set(PropWare_Libpropeller_COG_LIBRARY           Libpropeller_cog)
+            set(PropWare_Libpropeller_CMM_LIBRARY           Libpropeller_cmm)
+            set(PropWare_Libpropeller_LMM_LIBRARY           Libpropeller_lmm)
+            set(PropWare_Libpropeller_XMMC_LIBRARY          Libpropeller_xmmc)
+            set(PropWare_Libpropeller_XMM-SPLIT_LIBRARY     Libpropeller_xmm-split)
+            set(PropWare_Libpropeller_XMM-SINGLE_LIBRARY    Libpropeller_xmm-single)
+            set(PropWare_Simple_COG_LIBRARY                 Simple_cog)
+            set(PropWare_Simple_CMM_LIBRARY                 Simple_cmm)
+            set(PropWare_Simple_LMM_LIBRARY                 Simple_lmm)
+            set(PropWare_Simple_XMMC_LIBRARY                Simple_xmmc)
+            set(PropWare_Simple_XMM-SPLIT_LIBRARY           Simple_xmm-split)
+            set(PropWare_Simple_XMM-SINGLE_LIBRARY          Simple_xmm-single)
         endif ()
-        if (NOT DEFINED CMAKE_FIND_LIBRARY_SUFFIXES)
-            set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-        endif ()
-
-        foreach(memoryModel cog cmm lmm xmmc xmm-single xmm-split)
-            string(TOUPPER ${memoryModel} UPPER_MEM_MODEL)
-
-            find_library(PropWare_PropWare_${UPPER_MEM_MODEL}_LIBRARY  PropWare_${memoryModel}
-                PATHS
-                    ${PROPWARE_PATH}/lib
-                    ${PROPWARE_PATH}/bin/PropWare/${memoryModel}
-                    ${PROPWARE_PATH}/PropWare/${memoryModel})
-            find_library(PropWare_libpropeller_${UPPER_MEM_MODEL}_LIBRARY  Libpropeller_${memoryModel}
-                PATHS
-                    ${PROPWARE_PATH}/lib
-                    ${PROPWARE_PATH}/bin/libpropeller/source/${memoryModel}
-                    ${PROPWARE_PATH}/libpropeller/source/${memoryModel})
-            find_library(PropWare_Simple_${UPPER_MEM_MODEL}_LIBRARY  Simple_${memoryModel}
-                PATHS
-                    ${PROPWARE_PATH}/lib
-                    ${PROPWARE_PATH}/bin/simple/${memoryModel}
-                    ${PROPWARE_PATH}/simple/${memoryModel})
-        endforeach()
     endif ()
 
     if (NOT "${PROPWARE_PATH}" STREQUAL "PROPWARE_PATH-NOTFOUND")
@@ -191,12 +202,12 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             ${PropWare_PropWare_XMMC_LIBRARY}
             ${PropWare_PropWare_XMM-SPLIT_LIBRARY}
             ${PropWare_PropWare_XMM-SINGLE_LIBRARY}
-            ${PropWare_libpropeller_COG_LIBRARY}
-            ${PropWare_libpropeller_CMM_LIBRARY}
-            ${PropWare_libpropeller_LMM_LIBRARY}
-            ${PropWare_libpropeller_XMMC_LIBRARY}
-            ${PropWare_libpropeller_XMM-SPLIT_LIBRARY}
-            ${PropWare_libpropeller_XMM-SINGLE_LIBRARY}
+            ${PropWare_Libpropeller_COG_LIBRARY}
+            ${PropWare_Libpropeller_CMM_LIBRARY}
+            ${PropWare_Libpropeller_LMM_LIBRARY}
+            ${PropWare_Libpropeller_XMMC_LIBRARY}
+            ${PropWare_Libpropeller_XMM-SPLIT_LIBRARY}
+            ${PropWare_Libpropeller_XMM-SINGLE_LIBRARY}
             ${PropWare_Simple_COG_LIBRARY}
             ${PropWare_Simple_CMM_LIBRARY}
             ${PropWare_Simple_LMM_LIBRARY}
@@ -206,27 +217,27 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
         set(PropWare_COG_LIBRARIES
             ${PropWare_PropWare_COG_LIBRARY}
-            ${PropWare_libpropeller_COG_LIBRARY}
+            ${PropWare_Libpropeller_COG_LIBRARY}
             ${PropWare_Simple_COG_LIBRARY})
         set(PropWare_CMM_LIBRARIES
             ${PropWare_PropWare_CMM_LIBRARY}
-            ${PropWare_libpropeller_CMM_LIBRARY}
+            ${PropWare_Libpropeller_CMM_LIBRARY}
             ${PropWare_Simple_CMM_LIBRARY})
         set(PropWare_LMM_LIBRARIES
             ${PropWare_PropWare_LMM_LIBRARY}
-            ${PropWare_libpropeller_LMM_LIBRARY}
+            ${PropWare_Libpropeller_LMM_LIBRARY}
             ${PropWare_Simple_LMM_LIBRARY})
         set(PropWare_XMMC_LIBRARIES
             ${PropWare_PropWare_XMMC_LIBRARY}
-            ${PropWare_libpropeller_XMMC_LIBRARY}
+            ${PropWare_Libpropeller_XMMC_LIBRARY}
             ${PropWare_Simple_XMMC_LIBRARY})
         set(PropWare_XMM-SINGLE_LIBRARIES
             ${PropWare_PropWare_XMM-SINGLE_LIBRARY}
-            ${PropWare_libpropeller_XMM-SINGLE_LIBRARY}
+            ${PropWare_Libpropeller_XMM-SINGLE_LIBRARY}
             ${PropWare_Simple_XMM-SINGLE_LIBRARY})
         set(PropWare_XMM-SPLIT_LIBRARIES
             ${PropWare_PropWare_XMM-SPLIT_LIBRARY}
-            ${PropWare_libpropeller_XMM-SPLIT_LIBRARY}
+            ${PropWare_Libpropeller_XMM-SPLIT_LIBRARY}
             ${PropWare_Simple_XMM-SPLIT_LIBRARY})
 
         file(READ ${PROPWARE_PATH}/version.txt PropWare_VERSION)
@@ -481,24 +492,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         REQUIRED_VARS
             PROPWARE_PATH
             PropWare_INCLUDE_DIR
-            PropWare_PropWare_COG_LIBRARY
-            PropWare_PropWare_CMM_LIBRARY
-            PropWare_PropWare_LMM_LIBRARY
-            PropWare_PropWare_XMMC_LIBRARY
-            PropWare_PropWare_XMM-SPLIT_LIBRARY
-            PropWare_PropWare_XMM-SINGLE_LIBRARY
-            PropWare_libpropeller_COG_LIBRARY
-            PropWare_libpropeller_CMM_LIBRARY
-            PropWare_libpropeller_LMM_LIBRARY
-            PropWare_libpropeller_XMMC_LIBRARY
-            PropWare_libpropeller_XMM-SPLIT_LIBRARY
-            PropWare_libpropeller_XMM-SINGLE_LIBRARY
-            PropWare_Simple_COG_LIBRARY
-            PropWare_Simple_CMM_LIBRARY
-            PropWare_Simple_LMM_LIBRARY
-            PropWare_Simple_XMMC_LIBRARY
-            PropWare_Simple_XMM-SPLIT_LIBRARY
-            PropWare_Simple_XMM-SINGLE_LIBRARY
         VERSION_VAR PropWare_VERSION
     )
 
@@ -521,12 +514,12 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         PropWare_PropWare_XMMC_LIBRARY
         PropWare_PropWare_XMM-SPLIT_LIBRARY
         PropWare_PropWare_XMM-SINGLE_LIBRARY
-        PropWare_libpropeller_COG_LIBRARY
-        PropWare_libpropeller_CMM_LIBRARY
-        PropWare_libpropeller_LMM_LIBRARY
-        PropWare_libpropeller_XMMC_LIBRARY
-        PropWare_libpropeller_XMM-SPLIT_LIBRARY
-        PropWare_libpropeller_XMM-SINGLE_LIBRARY
+        PropWare_Libpropeller_COG_LIBRARY
+        PropWare_Libpropeller_CMM_LIBRARY
+        PropWare_Libpropeller_LMM_LIBRARY
+        PropWare_Libpropeller_XMMC_LIBRARY
+        PropWare_Libpropeller_XMM-SPLIT_LIBRARY
+        PropWare_Libpropeller_XMM-SINGLE_LIBRARY
         PropWare_Simple_COG_LIBRARY
         PropWare_Simple_CMM_LIBRARY
         PropWare_Simple_LMM_LIBRARY

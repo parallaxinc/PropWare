@@ -121,3 +121,7 @@ install(DIRECTORY Examples
     PATTERN Examples/CMakeLists.txt EXCLUDE
     PATTERN *~ EXCLUDE
     PATTERN .idea EXCLUDE)
+
+install(EXPORT PropWare-targets
+    COMPONENT propware
+    DESTINATION PropWare/lib)
