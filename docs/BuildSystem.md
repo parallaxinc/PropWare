@@ -1,8 +1,5 @@
-Appendix A: CMake for PropWare
-==============================
-
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)
+Build System {#BuildSystem}
+============
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
 Remember that %PropWare uses CMake 3.0.
@@ -185,6 +182,3 @@ and an option will be added. It is believed that these flags will always be desi
 * ECOGCXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
 * Linker: None
 * Archiver: `cr`
-
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)
