@@ -26,16 +26,16 @@ the recommended tool for use with %PropWare applications.
 Getting Started
 ---------------
 
-[Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)<br />
-[Chapter 2: CMake & Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.html)<br />
-[Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)<br />
-[Chapter 4: Create a PropWare Project](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
+[Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.xhtml)<br />
+[Chapter 2: CMake & Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.xhtml)<br />
+[Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.xhtml)<br />
+[Chapter 4: Create a PropWare Project](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml)<br />
 
 Appendix
-* [Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)
-* [Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)
-* [Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)
-* [Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_AppDTroubleshooting.html)
+* [Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml)
+* [Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.xhtml)
+* [Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.xhtml)
+* [Appendix D: Troubleshooting](http://david.zemon.name/PropWare/md_docs_AppDTroubleshooting.xhtml)
 
 Developing and Contributing to %PropWare
 ---------------------------------------
@@ -49,7 +49,7 @@ Useful links
 ------------
 * %PropWare Links
   * [Home](http://david.zemon.name/PropWare)
-  * [Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)
+  * [Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.xhtml)
   * [Forum thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
   * [Issue Tracker](https://github.com/DavidZemon/PropWare/issues)
   * [Source code](https://github.com/DavidZemon/PropWare)
