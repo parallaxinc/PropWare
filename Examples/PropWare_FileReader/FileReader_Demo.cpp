@@ -25,25 +25,17 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/printer/printer.h>
-
-// 25,464 bytes loaded via propeller-load
-#define TEST_PROPWARE
-
-// 24,472 bytes loaded via propeller-load
-//#define TEST_SIMPLE
-
-#if (defined TEST_PROPWARE)
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
-#elif (defined TEST_SIMPLE)
-#include <simple/simpletools.h>
-#endif
 
 using namespace PropWare;
 
+/**
+ * @example     FileReader_Demo.cpp
+ * Echo a text file to the terminal
+ */
 int main () {
-#ifdef TEST_PROPWARE
     const SD driver;
     FatFS filesystem(&driver);
     filesystem.mount();
@@ -53,14 +45,6 @@ int main () {
 
     while (!reader.eof())
         pwOut << reader.get_char();
-#elif (defined TEST_SIMPLE)
-    sd_mount(0, 1, 2, 3);
-
-    FILE *f = fopen("fat_test.txt", "r");
-
-    while (!feof(f))
-        pwOut << (char) fgetc(f);
-#endif
 
     return 0;
 }

@@ -57,7 +57,11 @@ int _cfg_txpin    = -1;
 int _cfg_baudrate = -1;
 #endif
 
-// Main function
+/**
+ * @example     Hello_Demo.cpp
+ *
+ * Compare code size between many different serial options available via PropGCC and PropWare
+ */
 int main () {
     uint32_t i = 0;
 

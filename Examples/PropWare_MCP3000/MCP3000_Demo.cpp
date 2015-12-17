@@ -40,7 +40,11 @@ const PropWare::Port::Mask SCLK = PropWare::Port::P2;
 /** Pin number for chip select */
 const PropWare::Port::Mask CS   = PropWare::Port::P3;
 
-// Main function
+/**
+ * @example     MCP3000_Demo.cpp
+ *
+ * Continuously read the ADC value from a channel of the MCP3000 and print it to the terminal.
+ */
 int main () {
     const uint16_t    DIVISOR = 1024 / 8;
     uint16_t          data = 0;

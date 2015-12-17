@@ -1,5 +1,4 @@
 add_subdirectory(Cogc)
-add_subdirectory(Concurrency)
 add_subdirectory(GettingStarted)
 add_subdirectory(Hello)
 add_subdirectory(Libpropeller_Pwm32)

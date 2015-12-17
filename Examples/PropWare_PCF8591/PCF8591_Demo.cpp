@@ -26,6 +26,11 @@
 #include <PropWare/pcf8591.h>
 #include <PropWare/printer/printer.h>
 
+/**
+ * @example     PCF8591_Demo.cpp
+ *
+ * Read an ADC channel from a PCF8591 device
+ */
 int main () {
     PropWare::PCF8591 pcf8591;
 

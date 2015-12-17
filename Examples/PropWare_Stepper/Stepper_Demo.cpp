@@ -27,6 +27,11 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/motor/stepper.h>
 
+/**
+ * @example     Stepper_Demo.cpp
+ *
+ * Move a stepper motor forward and backward at different speeds.
+ */
 int main () {
     PropWare::Stepper stepper(PropWare::Port::P1, PropWare::Port::P2, PropWare::Port::P3, PropWare::Port::P4);
 

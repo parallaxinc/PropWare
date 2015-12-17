@@ -26,6 +26,12 @@ class SimplePrinter : public PropWare::PrintCapable {
         }
 };
 
+/**
+ * @example     Hybrid_Demo.cpp
+ *
+ * Use PropWare's PropWare::Printer interface for easy formatting of text, but use Simple's serial driver. This
+ * combination allows for easy object-oriented programming while still using the Parallax-authored serial driver.
+ */
 int main () {
     SimplePrinter           mySimpleCompatiblePrinter;
     const PropWare::Printer myPrinter(&mySimpleCompatiblePrinter);
@@ -33,7 +39,7 @@ int main () {
     putStr("Hello from the Simple function!\n");
     myPrinter.puts("Hello from PropWare's Printer!\n");
     myPrinter.print("Hello from yet another Printer function!\n");
-    myPrinter.printf("All methods have their own merrits. Choose one that works well for you.\n");
+    myPrinter.printf("All methods have their own merits. Choose one that works well for you.\n");
     myPrinter.println("Printer::println() can be handy if you just want to print a single string");
     myPrinter << "For lovers of C++ streams, you can even use the << operator!\n";
 

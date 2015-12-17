@@ -9,14 +9,14 @@
 #include <PropWare/printer/synchronousprinter.h>
 #include <PropWare/pin.h>
 
-class TalkingThread : public PropWare::Runnable {
+class TalkingThread: public PropWare::Runnable {
     public:
         template<size_t N>
-        TalkingThread (const uint32_t (&stack)[N])
-                : Runnable(stack) {
+        TalkingThread(const uint32_t (&stack)[N])
+            : Runnable(stack) {
         }
 
-        void run () {
+        void run() {
             while (1) {
                 pwSyncOut.printf("Hello from cog %u (0x%08X)! %u\n", cogid(), (unsigned int) this, CNT);
                 waitcnt(250 * MILLISECOND + CNT);
@@ -24,15 +24,15 @@ class TalkingThread : public PropWare::Runnable {
         }
 };
 
-class BlinkingThread : public PropWare::Runnable {
+class BlinkingThread: public PropWare::Runnable {
     public:
         template<size_t N>
-        BlinkingThread (const uint32_t (&stack)[N], const PropWare::Pin::Mask mask)
-                : Runnable(stack),
-                  m_mask(mask) {
+        BlinkingThread(const uint32_t (&stack)[N], const PropWare::Pin::Mask mask)
+            : Runnable(stack),
+              m_mask(mask) {
         }
 
-        void run () {
+        void run() {
             const PropWare::Pin pin(this->m_mask, PropWare::Pin::OUT);
             while (1) {
                 pin.toggle();
@@ -44,7 +44,13 @@ class BlinkingThread : public PropWare::Runnable {
         const PropWare::Pin::Mask m_mask;
 };
 
-int main (int argc, char *argv[]) {
+/**
+ * @example     Runnable_Demo.cpp
+ *
+ * Run code in a total of four cogs. Two of them will simply blink LEDs. The other two demonstrate a thread-safe way to
+ * use a serial terminal simultaneously from two different cogs.
+ */
+int main(int argc, char *argv[]) {
     uint32_t       stack[3][32];
     TalkingThread  talkingThread(stack[0]);
     BlinkingThread blink16(stack[1], PropWare::Pin::P16);

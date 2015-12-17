@@ -24,7 +24,6 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/hd44780.h>
 #include <PropWare/max6675.h>
 
 /** Pin number for MOSI (master out - slave in) */
@@ -37,43 +36,30 @@ const PropWare::Port::Mask SCLK = PropWare::Port::P2;
 const PropWare::Port::Mask CS   = PropWare::Port::P5;
 const uint32_t             FREQ = 10000;
 
-const PropWare::Port::Mask          RS             = PropWare::Port::P16;
-const PropWare::Port::Mask          RW             = PropWare::Port::P17;
-const PropWare::Port::Mask          EN             = PropWare::Port::P18;
-const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
-const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
-const PropWare::HD44780::Dimensions DIMENSIONS     =
-                                            PropWare::HD44780::DIM_16x2;
-
-int main () {
-    uint16_t data;
-    uint32_t loopCounter;
-
-    PropWare::HD44780 lcd;
-    PropWare::Printer lcdPrinter(&lcd);
-    PropWare::SPI *spi = PropWare::SPI::get_instance();
+/**
+ * @example     MAX6675_Demo.cpp
+ *
+ * Read the current temperature and print it to the terminal
+ */
+int main() {
+    PropWare::SPI     *spi = PropWare::SPI::get_instance();
     PropWare::MAX6675 thermo(spi);
 
     thermo.start(MOSI, MISO, SCLK, CS);
-    lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
     // thermo.read* functions will always explicitly set the SPI modes before
-    // each call, or assume that the SPI cog is still running in the proper
+    // each call, or assume that the SPI driver is still running in the proper
     // configuration
     thermo.always_set_spi_mode(1);
 
-    lcd.puts("Welcome to the MAX6675 demo!\n");
+    pwOut << "Welcome to the MAX6675 demo!\n";
 
+    uint16_t data;
     while (1) {
-        loopCounter = CLKFREQ / 2 + CNT;
-
         data = thermo.read();
-
-        lcd.clear();
-        lcdPrinter.printf("Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
-
-        waitcnt(loopCounter);
+        pwOut.printf("Temp: %u.%uC\n", data >> 2, (data & 0x3) * 25);
+        waitcnt(CLKFREQ / 2 + CNT);
     }
 }
