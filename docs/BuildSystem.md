@@ -2,24 +2,17 @@ Build System {#BuildSystem}
 ============
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
-Remember that %PropWare uses CMake 3.0.
+Remember that %PropWare requires CMake 3.0+.
 
 Bare Minimum
 ------------
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
 cmake_minimum_required (VERSION 3.0.0)                                         #
-# Aside from cmake_minimum_required, this must be the first two lines          #
-# of the file                                                                  #
-file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
-include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
-################################################################################
+find_package(PropWare REQUIRED)
 
 project(HelloWorld)
 
-create_simple_executable(${PROJECT_NAME} main.cpp)
+create_simple_executable(HelloWorld main.cpp)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Note the section marked as "Template code." Make sure this piece begins each of your CMakeLists.txt files. It loads 
   the standard Propeller settings for your project.

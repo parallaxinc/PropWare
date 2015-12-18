@@ -5,8 +5,8 @@ Key Features
 ------------
 * More C++ for the Propeller
 * Easy CMake build system
-* Support for Eclipse, [CLion](http://www.jetbrains.com/clion/) and other full-featured IDEs
-* Active development - I'm open to requests for new objects/peripherals
+* Support for [CLion](http://www.jetbrains.com/clion/), Eclipse and other full-featured IDEs
+* Active development
 * MIT license
 
 Getting Started
@@ -26,6 +26,5 @@ Developing and Contributing to %PropWare
 %PropWare is developed by David Zemon.
 
 Code contributions can be made by either 
-[contacting David Zemon](mailto:david@zemon.name) or forking the repository and creating a  
-pull request.
+[contacting David Zemon](mailto:david@zemon.name) or forking the repository and creating a pull request.
 

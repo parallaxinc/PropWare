@@ -1,5 +1,5 @@
-Useful Links {#UsefulLinks}
-============
+Related Links {#RelatedLinks}
+=============
 
 %PropWare
 ---------
