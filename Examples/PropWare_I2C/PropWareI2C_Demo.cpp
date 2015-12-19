@@ -1,5 +1,5 @@
 /**
- * @file    I2C_Demo.cpp
+ * @file    PropWareI2C_Demo.cpp
  *
  * @author  David Zemon
  *
