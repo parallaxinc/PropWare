@@ -7,7 +7,7 @@ Remember that %PropWare requires CMake 3.0+.
 Bare Minimum
 ------------
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-cmake_minimum_required (VERSION 3.0.0)                                         #
+cmake_minimum_required (VERSION 3.0.0)
 find_package(PropWare REQUIRED)
 
 project(HelloWorld)
