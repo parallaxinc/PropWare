@@ -15,6 +15,8 @@ static const size_t ARRAY_SIZE = 4;
  * @example     Queue_Demo.cpp
  *
  * Insert items from the user onto a Queue and then read them back at the terminal
+ *
+ * @include PropWare_Queue/CMakeLists.txt
  */
 int main () {
     int array[ARRAY_SIZE];

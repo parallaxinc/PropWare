@@ -49,6 +49,8 @@ class BlinkingThread: public PropWare::Runnable {
  *
  * Run code in a total of four cogs. Two of them will simply blink LEDs. The other two demonstrate a thread-safe way to
  * use a serial terminal simultaneously from two different cogs.
+ *
+ * @include PropWare_Runnable/CMakeLists.txt
  */
 int main(int argc, char *argv[]) {
     uint32_t       stack[3][32];

@@ -57,6 +57,8 @@ void error (const PropWare::ErrorCode err);
  * @example     DuplexUART_Demo.cpp
  *
  * Write "Hello world!" out via UART protocol and receive an echo
+ *
+ * @include PropWare_DuplexUART/CMakeLists.txt
  */
 int main () {
     uint32_t              threadStack[256];

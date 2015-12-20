@@ -33,6 +33,8 @@ const uint16_t TEST_ADDRESS        = 32 * 1024; // Place the data immediately ab
  * @example     PropWareI2C_Demo.cpp
  *
  * Use an easy I2C class to communicate with an EEPROM chip
+ *
+ * @include PropWare_I2C/CMakeLists.txt
  */
 int main () {
     const PropWare::I2C pwI2C;

@@ -1,10 +1,10 @@
-/*
+/**
  * @file FdSerial_Demo.c
  *
  * @author  David Zemon
  *
  * Please note that FdSerial support requires the inclusion of the file
- * `pst.dat` as a source file for this project. Because the file is no longer
+ * `pst.spin` as a source file for this project. Because the file is no longer
  * included as part of the Simple libraries you must copy it from this project
  * to your own before attempting to compile.
  *
@@ -30,12 +30,22 @@
 
 #include <fdserial.h>
 
+/**
+ * @example     FdSerial_Demo.c
+ *
+ * Print to the terminal using the FullDuplexSerial driver common in the Spin world
+ *
+ * @include     Simple_FdSerial/CMakeLists.txt
+ * @include     Simple_FdSerial/pst.spin
+ */
 int main () {
 
     fdserial *serial = fdserial_open(31, 30, 0, 115200);
 
-    while (1)
+    while (1) {
         dprint(serial, "Hello, world!\n");
+        waitcnt(CLKFREQ / 4 + CNT);
+    }
 
     return 0;
 }

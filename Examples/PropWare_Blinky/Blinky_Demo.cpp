@@ -30,6 +30,8 @@
  * @example     Blinky_Demo.cpp
  *
  * Basic usage of the PropWare::Pin class to blink an LED four times a second
+ *
+ * @include PropWare_Blinky/CMakeLists.txt
  */
 int main () {
     PropWare::Pin led(PropWare::Port::P16, PropWare::Pin::OUT);

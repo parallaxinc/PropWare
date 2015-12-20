@@ -29,6 +29,8 @@
  * @example     PWM32_Demo.cpp
  *
  * Show how to use a PWM32 instance on multiple pins simultaneously
+ *
+ * @include Libpropeller_Pwm32/CMakeLists.txt
  */
 int main() {
     libpropeller::PWM32 pwm;

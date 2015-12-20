@@ -30,6 +30,8 @@
  * @example     PCF8591_Demo.cpp
  *
  * Read an ADC channel from a PCF8591 device
+ *
+ * @include PropWare_PCF8591/CMakeLists.txt
  */
 int main () {
     PropWare::PCF8591 pcf8591;

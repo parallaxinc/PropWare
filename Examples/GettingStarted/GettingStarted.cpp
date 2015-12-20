@@ -25,6 +25,8 @@
  * @example     GettingStarted.cpp
  *
  * Print some text to the terminal. A great place to start with PropWare to ensure your environment is functional!
+ *
+ * @include GettingStarted/CMakeLists.txt
  */
 int main () {
     pwOut << "##############################\n";

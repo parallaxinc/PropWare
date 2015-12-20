@@ -37,6 +37,8 @@ const int32_t DELAY     = 200;
  * @example     SimplexUART_Demo.cpp
  *
  * Write "Hello world!" out via UART protocol
+ *
+ * @include PropWare_SimplexUART/CMakeLists.txt
  */
 int main () {
     PropWare::ErrorCode err;

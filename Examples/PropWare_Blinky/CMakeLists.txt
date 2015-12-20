@@ -4,8 +4,6 @@ find_package(PropWare REQUIRED)
 set(BOARD QUICKSTART)
 set(MODEL cog)
 set(COMMON_FLAGS "-Os")
-set(C_FLAGS )
-set(CXX_FLAGS )
 
 project(Blinky_Demo)
 

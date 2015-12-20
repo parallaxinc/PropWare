@@ -61,6 +61,8 @@ int _cfg_baudrate = -1;
  * @example     Hello_Demo.cpp
  *
  * Compare code size between many different serial options available via PropGCC and PropWare
+ *
+ * @include     Hello/CMakeLists.txt
  */
 int main () {
     uint32_t i = 0;

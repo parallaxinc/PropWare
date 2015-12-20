@@ -7,6 +7,6 @@ set(COMMON_FLAGS "-Os")
 set(C_FLAGS )
 set(CXX_FLAGS )
 
-project(FdSerial_Demo C CXX DAT)
+project(FdSerial_Demo C CXX SPIN2DAT)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME} pst.dat)
+create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME} pst.spin)

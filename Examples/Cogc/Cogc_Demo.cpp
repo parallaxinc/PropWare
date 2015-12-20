@@ -31,6 +31,7 @@
  * Blink two LEDs, one from a "standard" cog invoking instructions from HUB RAM, and another cog invoking instruction
  * natively from COG RAM
  *
+ * @include Cogc/CMakeLists.txt
  * @include blinky.cogcpp
  */
 int main () {

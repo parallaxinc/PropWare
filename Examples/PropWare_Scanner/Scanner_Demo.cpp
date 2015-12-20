@@ -38,6 +38,8 @@ void error (const PropWare::ErrorCode err);
  * @example     Scanner_Demo.cpp
  *
  * Use a Scanner to read user input from the terminal and gather basic data about the user.
+ *
+ * @include PropWare_Scanner/CMakeLists.txt
  */
 int main () {
     // A nice big buffer that can hold up to 63 characters from the user (the

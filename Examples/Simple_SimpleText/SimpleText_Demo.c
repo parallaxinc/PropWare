@@ -1,6 +1,5 @@
-/*
- * @file libsimpletext.h
- * Project and Test harness for library simpletext
+/**
+ * @file SimpleText_Demo.c
  *
  * Copyright (c) 2013, Parallax Inc. MIT license.
  * Written by Steve Denson
@@ -10,6 +9,13 @@
 
 #define MORETESTING
 
+/**
+ * @example   SimpleText_Demo.c
+ *
+ * Project and Test harness for library simpletext
+ *
+ * @include   Simple_SimpleText/CMakeLists.txt
+ */
 int main(void)
 {
     int   n;
@@ -190,7 +196,7 @@ int main(void)
   sprint(buffer, "%s %d %x %f %f\n", sval, ival, xval, fval, fval2);
   writeLine(text, "");
   writeLine(text, buffer);
-  
+
   writeLine(text, "All done.");
   serial_close(text);
 

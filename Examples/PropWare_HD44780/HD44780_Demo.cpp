@@ -41,6 +41,8 @@ const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::DIM_16x2
  * @example     HD44780_Demo.cpp
  *
  * Utilize the PropWare::Printer class to print formatted text to an LCD
+ *
+ * @include PropWare_HD44780/CMakeLists.txt
  */
 int main () {
     // Create and initialize our LCD object

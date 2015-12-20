@@ -4,8 +4,6 @@ find_package(PropWare REQUIRED)
 set(BOARD dna)
 set(MODEL lmm)
 set(COMMON_FLAGS "-Os")
-set(C_FLAGS )
-set(CXX_FLAGS )
 
 project(WatchDog_Demo)
 

@@ -4,13 +4,11 @@ find_package(PropWare REQUIRED)
 set(BOARD QUICKSTART)
 set(MODEL lmm)
 set(COMMON_FLAGS "-Os")
-set(C_FLAGS )
-set(CXX_FLAGS )
 
 set(LINK_TINY ON)
 
-project(Hello_Demo C CXX DAT)
+project(Hello_Demo C CXX SPIN2DAT)
 
 create_simple_executable(${PROJECT_NAME}
     ${PROJECT_NAME}
-    pst.dat)
+    pst.spin)

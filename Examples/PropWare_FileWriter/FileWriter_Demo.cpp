@@ -37,6 +37,8 @@ using namespace PropWare;
  * Create a copy of a text file, character-by-character using a second buffer.
  * The second buffer (`writeBuffer`) does increase the complexity by five lines of code, but it drastically increases
  * the performance as well.
+ *
+ * @include PropWare_FileWriter/CMakeLists.txt
  */
 int main() {
     const SD  driver;

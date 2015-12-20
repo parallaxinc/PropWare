@@ -40,6 +40,8 @@ const uint32_t             FREQ = 10000;
  * @example     MAX6675_Demo.cpp
  *
  * Read the current temperature and print it to the terminal
+ *
+ * @include PropWare_MAX6675/CMakeLists.txt
  */
 int main() {
     PropWare::SPI     *spi = PropWare::SPI::get_instance();

@@ -45,6 +45,8 @@ void error (const PropWare::ErrorCode err);
  * @example     L3G_Demo.cpp
  *
  * Read the gyrometer data and print it to the terminal
+ *
+ * @include PropWare_L3G/CMakeLists.txt
  */
 int main () {
     int16_t       gyroValues[3];

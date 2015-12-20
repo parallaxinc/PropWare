@@ -33,7 +33,10 @@ using namespace PropWare;
 
 /**
  * @example     FileReader_Demo.cpp
+ *
  * Echo a text file to the terminal
+ *
+ * @include PropWare_FileReader/CMakeLists.txt
  */
 int main () {
     const SD driver;

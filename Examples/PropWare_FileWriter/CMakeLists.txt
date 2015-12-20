@@ -4,8 +4,6 @@ find_package(PropWare REQUIRED)
 set(BOARD dna)
 set(MODEL cmm)
 set(COMMON_FLAGS "-Os")
-set(C_FLAGS )
-set(CXX_FLAGS )
 
 project(FileWriter_Demo)
 

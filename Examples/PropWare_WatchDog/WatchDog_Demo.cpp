@@ -34,6 +34,8 @@ static uint32_t watchDogStack[32];
  *
  * Feed the dog a few times to show that the Propeller doesn't reset when fed correctly. Then stop feeding the dog
  * and demonstrate how the Propeller will do a hard reset when the timer runs out
+ *
+ * @include PropWare_WatchDog/CMakeLists.txt
  */
 int main () {
     PropWare::WatchDog watchDog(watchDogStack, 1 * SECOND);

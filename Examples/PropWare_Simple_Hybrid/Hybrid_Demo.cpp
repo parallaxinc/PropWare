@@ -31,6 +31,8 @@ class SimplePrinter : public PropWare::PrintCapable {
  *
  * Use PropWare's PropWare::Printer interface for easy formatting of text, but use Simple's serial driver. This
  * combination allows for easy object-oriented programming while still using the Parallax-authored serial driver.
+ *
+ * @include PropWare_Simple_Hybrid/CMakeLists.txt
  */
 int main () {
     SimplePrinter           mySimpleCompatiblePrinter;
