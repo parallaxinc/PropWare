@@ -1,10 +1,6 @@
 cmake_minimum_required (VERSION 3.0.0)
 find_package(PropWare REQUIRED)
 
-set(BOARD QUICKSTART)
-set(MODEL lmm)
-set(COMMON_FLAGS "-Os")
-
 set(LINK_TINY ON)
 
 project(Hello_Demo C CXX SPIN2DAT)
