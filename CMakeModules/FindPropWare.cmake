@@ -66,6 +66,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     option(WARN_ALL "Turn on all compiler warnings (-Wall)" ON)
     option(AUTO_C_STD "Set C standard to c99 (-std=c99)" ON)
     option(AUTO_CXX_STD "Set C++ standard to gnu++0x (-std=gnu++0x)" ON)
+    option(AUTO_OTPIMIZATION "Set optimization level to \"size\" (-Os)" ON)
 
     # Optimize size option
     option(AUTO_CUT_SECTIONS "Cut out unused code (Compile: -ffunction-sections -fdata-sections; Link: --gc-sections)" ON)
@@ -282,13 +283,20 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         macro (set_compile_flags)
             include_directories(${PropWare_INCLUDE_DIR})
 
+            if (AUTO_OTPIMIZATION)
+                if (${AUTO_OTPIMIZATION_SET})
+                else ()
+                    set(AUTO_OTPIMIZATION_SET 1)
+                    set(COMMON_FLAGS "${COMMON_FLAGS} -Os")
+                endif ()
+            endif ()
+
             # Handle user options
             if (32_BIT_DOUBLES)
                 if (${32_BIT_DOUBLES_SET})
                 else ()
                     set(32_BIT_DOUBLES_SET 1)
-                    set(C_FLAGS "${C_FLAGS} -m32bit-doubles")
-                    set(CXX_FLAGS "${CXX_FLAGS} -m32bit-doubles")
+                    set(COMMON_FLAGS "${COMMON_FLAGS} -m32bit-doubles")
                 endif ()
             endif ()
 
@@ -296,8 +304,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                 if (${WARN_ALL_SET})
                 else ()
                     set(WARN_ALL_SET 1)
-                    set(C_FLAGS "${C_FLAGS} -Wall")
-                    set(CXX_FLAGS "${CXX_FLAGS} -Wall")
+                    set(COMMON_FLAGS "${COMMON_FLAGS} -Wall")
                 endif ()
             endif ()
 
@@ -315,6 +322,16 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                     set(AUTO_CXX_STD_SET 1)
                     set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
                 endif ()
+            endif ()
+
+            # If no model is specified, we must choose a default so that the proper libraries can be linked
+            if (NOT DEFINED MODEL)
+                set(MODEL lmm)
+            endif ()
+
+            # XMM model is retroactively renamed xmm-split
+            if (${MODEL} STREQUAL xmm)
+                set(MODEL xmm-split)
             endif ()
 
             # Linker pruning is broken when used with the cog memory model. See the
@@ -361,16 +378,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             set(CMAKE_COGCXX_FLAGS  "${CMAKE_CXX_FLAGS} ${COMMON_COG_FLAGS} ${COGCXX_FLAGS}")
             set(CMAKE_ECOGC_FLAGS   "${CMAKE_C_FLAGS}   ${COMMON_COG_FLAGS} ${ECOGC_FLAGS}")
             set(CMAKE_ECOGCXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_COG_FLAGS} ${ECOGCXX_FLAGS}")
-
-            # If no model is specified, we must choose a default so that the proper libraries can be linked
-            if (NOT DEFINED MODEL)
-                set(MODEL lmm)
-            endif ()
-
-            # XMM model is retroactively renamed xmm-split
-            if (${MODEL} STREQUAL xmm)
-                set(MODEL xmm-split)
-            endif ()
 
             set(CMAKE_ASM_FLAGS     "${CMAKE_ASM_FLAGS} -m${MODEL}")
             set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS}   -m${MODEL}")

@@ -123,6 +123,17 @@ CMake options allow you to have fine-grain control over what compilation flags a
 want to leave all options set to their default values, but those doing special projects or using conflicting libraries 
 can change the options to suit their needs.
 
+### AUTO_OPTIMIZATION
+\[default: ON\]
+
+Sets the optimization level for size. Equivalent to adding "-Os" to `COMMON_FLAGS`.
+
+### WARN_ALL
+\[default: ON\]
+
+Turns on all warnings from the compiler. Aids in writing clean, error-free code. Equivalent to adding "-Wall" to
+`COMMON_FLAGS`.
+
 ### 32_BIT_DOUBLES
 \[default: ON\]
 
@@ -167,11 +178,11 @@ With all options left at their defaults, the following flags will be used. There
 and an option will be added. It is believed that these flags will always be desired by Propeller users.
 
 * ASM: None
-* C: `-Wall -m32bit-doubles -std=c99`
-* COGC: `-Wall -m32bit-doubles -std=c99 -mcog -xc -r`
-* ECOGC: `-Wall -m32bit-doubles -std=c99 -mcog -xc -r`
-* CXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti`
-* COGCXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
-* ECOGCXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
+* C: `-Wall -Os -m32bit-doubles -std=c99`
+* COGC: `-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r`
+* ECOGC: `-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r`
+* CXX: `-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti`
+* COGCXX: `-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
+* ECOGCXX: `-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
 * Linker: None
 * Archiver: `cr`

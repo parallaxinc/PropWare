@@ -13,7 +13,6 @@ Getting Started
 ---------------
 
 [Chapter 2: CMake & Make Tutorial](http://david.zemon.name/PropWare/md_docs_Ch2CMakeTutorial.xhtml)<br />
-[Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.xhtml)<br />
 [Chapter 4: Create a PropWare Project](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml)<br />
 
 Appendix

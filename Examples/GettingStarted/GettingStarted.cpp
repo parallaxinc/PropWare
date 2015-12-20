@@ -29,16 +29,7 @@
  * @include GettingStarted/CMakeLists.txt
  */
 int main () {
-    pwOut << "##############################\n";
-    pwOut << "### Welcome to PropWare!!! ###\n";
-    pwOut << "##############################\n";
-    pwOut << '\n';
-    pwOut << "Congratulations on getting your first PropWare application running!\n";
-    pwOut << "Now that you know how to compile and debug a program, try \n"
-            << "writing your own \"Hello, world!\" application.\n";
-    pwOut << '\n';
-    pwOut << "Good bye!\n\n";
-
+    pwOut << "Hello, world!";
     return 0;
 }
 
