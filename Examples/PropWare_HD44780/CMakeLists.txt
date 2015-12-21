@@ -3,4 +3,4 @@ find_package(PropWare REQUIRED)
 
 project(HD44780_Demo)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} HD44780_Demo.cpp)

@@ -9,11 +9,10 @@ Key Features
 * Active development
 * MIT license
 
-Uncategorized Documentation
----------------------------
+Misc. Documentation
+-------------------
 
 [CMake & Make Tutorial](@ref CMakeTutorial)<br />
-[Create a PropWare Project](@ref NewProject)<br />
 [C++ Crash Course](@ref CxxCrashCourse)<br />
 [Limitations](@ref Limitations)<br />
 [Troubleshooting](@ref Troubleshooting)

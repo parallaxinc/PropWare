@@ -6,5 +6,5 @@ set(LINK_TINY ON)
 project(Hello_Demo C CXX SPIN2DAT)
 
 create_simple_executable(${PROJECT_NAME}
-    ${PROJECT_NAME}
+    Hello_Demo.cpp
     pst.spin)

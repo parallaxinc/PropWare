@@ -5,4 +5,4 @@ set(BOARD QUICKSTART)
 
 project(MultiCogBlinky_Demo)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} MultiCogBlinky_Demo.cpp)

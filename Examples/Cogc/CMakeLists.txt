@@ -6,5 +6,5 @@ set(MODEL cog)
 project(Cogc_Demo CXX COGCXX)
 
 create_simple_executable(${PROJECT_NAME}
-    Cogc_Demo
+    Cogc_Demo.cpp
     blinky.cogcpp)

@@ -5,4 +5,4 @@ set(BOARD dna)
 
 project(FileReader_Demo)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} FileReader_Demo.cpp)

@@ -3,4 +3,4 @@ find_package(PropWare REQUIRED)
 
 project(Hybrid_Demo)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} Hybrid_Demo.cpp)

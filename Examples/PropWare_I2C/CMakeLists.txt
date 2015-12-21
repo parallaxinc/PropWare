@@ -3,4 +3,4 @@ find_package(PropWare REQUIRED)
 
 project(PropWareI2C_Demo)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} PropWareI2C_Demo.cpp)

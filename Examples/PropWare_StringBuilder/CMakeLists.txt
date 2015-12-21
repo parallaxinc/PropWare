@@ -3,4 +3,4 @@ find_package(PropWare REQUIRED)
 
 project(StringBuilder_Demo)
 
-create_simple_executable(${PROJECT_NAME} ${PROJECT_NAME})
+create_simple_executable(${PROJECT_NAME} StringBuilder_Demo.cpp)
