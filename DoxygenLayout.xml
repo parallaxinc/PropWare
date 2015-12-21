@@ -25,6 +25,7 @@
             <tab type="user" url="@ref BuildSystem" title="Build System"/>
         </tab>
         <tab type="user" url="@ref About" title="About"/>
+        <tab type="user" url="@ref Contribute" title="Contribute"/>
         <tab type="user" url="@ref RelatedLinks" title="Related Links"/>
     </navindex>
 

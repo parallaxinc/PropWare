@@ -1,8 +1,5 @@
-Chapter 2: CMake & Make Tutorial
-================================
-
-[<< Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.xhtml)<br />
-[>> Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.xhtml)
+CMake & Make Tutorial {#CMakeTutorial}
+=====================
 
 What is CMake?
 --------------
@@ -99,6 +96,3 @@ After generating your Makefiles, try adding `VERBOSE=1` to your Make command. Th
 to the terminal before running it - rather than printing only a short summary of what is being done. The output is very 
 verbose and can be cumbersome to read - but it is invaluable when determining what went wrong with your compilation.
 Full command: `make VERBOSE=1`
-
-[<< Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.xhtml)<br />
-[>> Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.xhtml)

@@ -1,7 +1,5 @@
-Appendix D: Troubleshooting FAQ
-===============================
-
-[<< Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.xhtml)<br />
+Troubleshooting FAQ {#Troubleshooting}
+===================
 
 C and C++ are not the simplest languages on the planet, and using them on an embedded system doesn't help. Hopefully
 you'll be able to find answers to some of your problems on this page.
@@ -19,5 +17,3 @@ array), and all other arguments (if they exist) must be one of the following typ
 * `float` or `double`
 * Any pointer type (`int *`, `MyClass *`, etc). Note that `char *` will be treated specially - as a string, not an 
   `uint32_t`
-
-[<< Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.xhtml)<br />
