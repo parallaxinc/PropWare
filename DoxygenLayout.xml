@@ -24,8 +24,14 @@
             <tab type="examples" visible="yes" title="" intro=""/>
             <tab type="user" url="@ref BuildSystem" title="Build System"/>
         </tab>
+        <tab type="usergroup" title="Reference">
+            <tab type="user" url="@ref CMakeTutorial" title="CMake and Make Tutorial"/>
+            <tab type="user" url="@ref CxxCrashCourse" title="C++ Crash Course"/>
+            <tab type="user" url="@ref Limitations" title="Limitations"/>
+            <tab type="user" url="@ref Troubleshooting" title="Troubleshooting"/>
+            <tab type="user" url="@ref Contribute" title="Contribute"/>
+        </tab>
         <tab type="user" url="@ref About" title="About"/>
-        <tab type="user" url="@ref Contribute" title="Contribute"/>
         <tab type="user" url="@ref RelatedLinks" title="Related Links"/>
     </navindex>
 

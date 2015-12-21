@@ -9,10 +9,6 @@ Key Features
 * Active development
 * MIT license
 
-Misc. Documentation
--------------------
-
-[CMake & Make Tutorial](@ref CMakeTutorial)<br />
-[C++ Crash Course](@ref CxxCrashCourse)<br />
-[Limitations](@ref Limitations)<br />
-[Troubleshooting](@ref Troubleshooting)
+Start by installing the software from the [download](@ref Download) page, follow it up with the 
+[Getting Started](@ref GettingStarted) instructions, and then become a pro by familiarizing yourself with the 
+[API documentation](usergroup0.xhtml) and [reference material](usergroup1.xhtml).
