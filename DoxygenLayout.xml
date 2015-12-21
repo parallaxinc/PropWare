@@ -25,6 +25,7 @@
             <tab type="user" url="@ref BuildSystem" title="Build System"/>
         </tab>
         <tab type="usergroup" title="Reference">
+            <tab type="user" url="@ref UsingAnIDE" title="Using an IDE"/>
             <tab type="user" url="@ref CMakeTutorial" title="CMake and Make Tutorial"/>
             <tab type="user" url="@ref CxxCrashCourse" title="C++ Crash Course"/>
             <tab type="user" url="@ref Limitations" title="Limitations"/>
