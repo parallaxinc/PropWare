@@ -1120,7 +1120,6 @@ HTML_FILE_EXTENSION    = .xhtml
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 HTML_HEADER            =
-# docs/header.xhtml
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1131,7 +1130,6 @@ HTML_HEADER            =
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 HTML_FOOTER            =
-# docs/footer.xhtml
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1144,7 +1142,6 @@ HTML_FOOTER            =
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 HTML_STYLESHEET        =
-# docs/customdoxygen.css
 
 # The HTML_EXTRA_STYLESHEET tag can be used to specify additional user-defined
 # cascading style sheets that are included after the standard style sheets
@@ -1241,7 +1238,7 @@ HTML_INDEX_NUM_ENTRIES = 100
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-GENERATE_DOCSET        = YES
+GENERATE_DOCSET        = NO
 
 # This tag determines the name of the docset feed. A documentation feed provides
 # an umbrella under which multiple documentation sets from a single provider
@@ -1407,7 +1404,7 @@ QHG_LOCATION           =
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-GENERATE_ECLIPSEHELP   = YES
+GENERATE_ECLIPSEHELP   = NO
 
 # A unique identifier for the Eclipse help plugin. When installing the plugin
 # the directory name containing the HTML and XML files should also have this
@@ -1631,7 +1628,7 @@ EXTRA_SEARCH_MAPPINGS  =
 # If the GENERATE_LATEX tag is set to YES, doxygen will generate LaTeX output.
 # The default value is: YES.
 
-GENERATE_LATEX         = YES
+GENERATE_LATEX         = NO
 
 # The LATEX_OUTPUT tag is used to specify where the LaTeX docs will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
@@ -1859,7 +1856,7 @@ RTF_SOURCE_CODE        = NO
 # classes and files.
 # The default value is: NO.
 
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 
 # The MAN_OUTPUT tag is used to specify where the man pages will be put. If a
 # relative path is entered the value of OUTPUT_DIRECTORY will be put in front of
@@ -1930,7 +1927,7 @@ XML_PROGRAMLISTING     = YES
 # that can be used to generate PDF.
 # The default value is: NO.
 
-GENERATE_DOCBOOK       = YES
+GENERATE_DOCBOOK       = NO
 
 # The DOCBOOK_OUTPUT tag is used to specify where the Docbook pages will be put.
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be put in
