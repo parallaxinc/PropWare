@@ -10,6 +10,6 @@ use Spin and/or C/C++ within one project. Because there are so many different op
 before these options are available within %PropWare. The first step is to determine how a user selects which method to 
 use. Only when that is finalized can work begin on the implementation. 
 
-Currently, PropWare's only support for Spin is extracting the DAT section of the file into a binary blob which can be
+Currently, %PropWare's only support for Spin is extracting the DAT section of the file into a binary blob which can be
 linked into the executable and invoked in a dedicated cog. This is helpful for extracting assembly drivers from Spin 
 objects like FdSerial or FSRW.

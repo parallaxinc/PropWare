@@ -6,12 +6,12 @@ Ensure %PropWare is installed on your system prior to using an IDE.
 JetBrain's CLion
 ----------------
 
-1. Configure CLion to use PropWare's CMake distribution instead of the version embedded in CLion:
+1. Configure CLion to use %PropWare's CMake distribution instead of the version embedded in CLion:
    1. `File` -> `Settings...`
    2. `Build, Execution, Deployment` -> `Toolchains`
    3. For `CMake Executable`, choose "Use specified:" and then select `/usr/bin/cmake` for Linux or 
-      `C:\PropWare\PWCMake\bin\cmake.exe` for Windows.
-2. Create your [CMakeLists.txt file](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml).
+      `C:\%PropWare\PWCMake\bin\cmake.exe` for Windows.
+2. Create your [CMakeLists.txt file](@ref BuildSystem).
 3. Open CLion and choose `File` -> `Open...`. Navigate to your CMakeLists.txt file and press `Ok`.
 
 Eclipse CDT (and other IDEs)
@@ -19,7 +19,7 @@ Eclipse CDT (and other IDEs)
 
 1. For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse users, find
    `Eclipse IDE for C/C++ Developers` [here](http://www.eclipse.org/downloads/) and download the appropriate package
-2. Create your [CMakeLists.txt file](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml).
+2. Create your [CMakeLists.txt file](@ref BuildSystem).
 3. For any source file that does not yet exist, create an empty file in its place. CMake will throw errors if your
    CMakeLists.txt file references any non-existing source files.
 4. At the terminal, enter your project's directory and type `cmake -G "Eclipse CDT4 - Unix Makefiles" .`. Notice that
