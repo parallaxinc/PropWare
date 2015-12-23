@@ -26,7 +26,13 @@
 #include <PropWare/ws2812.h>
 
 const PropWare::Pin::Mask LED_TX_PIN_MASK = PropWare::Pin::P27;
-
+/**
+ * @example     WS2812_Demo.cpp
+ *
+ * Continuously cycle an RGB LED between bright and dim white
+ *
+ * @include PropWare_WS2812/CMakeLists.txt
+ */
 int main () {
     const PropWare::WS2812 led(LED_TX_PIN_MASK, PropWare::WS2812::GRB);
 

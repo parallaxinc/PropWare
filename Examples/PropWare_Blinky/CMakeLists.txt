@@ -1,11 +1,7 @@
 cmake_minimum_required (VERSION 3.0.0)
 find_package(PropWare REQUIRED)
 
-set(BOARD QUICKSTART)
 set(MODEL cog)
-set(COMMON_FLAGS "-Os")
-set(C_FLAGS )
-set(CXX_FLAGS )
 
 project(Blinky_Demo)
 

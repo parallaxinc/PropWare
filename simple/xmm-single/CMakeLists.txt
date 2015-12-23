@@ -9,4 +9,5 @@ set_compile_flags()
 add_library(Simple_${MODEL} STATIC ${SIMPLE_OBJECTS})
 install(TARGETS Simple_${MODEL}
     DESTINATION PropWare/lib
-    COMPONENT propware)
+    COMPONENT propware
+    EXPORT PropWare-targets)

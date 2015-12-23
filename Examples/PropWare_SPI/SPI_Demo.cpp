@@ -47,7 +47,11 @@ const PropWare::SPI::Mode    MODE    = PropWare::SPI::MODE_0;
 const PropWare::SPI::BitMode BITMODE = PropWare::SPI::MSB_FIRST;
 
 /**
- * @brief   Write "Hello world!" out via SPI protocol and receive an echo
+ * @example     SPI_Demo.cpp
+ *
+ * Write "Hello world!" out via SPI protocol and receive an echo
+ *
+ * @include PropWare_SPI/CMakeLists.txt
  */
 int main () {
     char string[] = "Hello world!\n";  // Create the test string

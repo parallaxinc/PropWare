@@ -24,39 +24,29 @@
  */
 
 #include <PropWare/printer/printer.h>
-
-#define TEST_PROPWARE
-//#define TEST_SIMPLE
-
-#if (defined TEST_PROPWARE)
 #include <PropWare/filesystem/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilewriter.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
+
 using namespace PropWare;
-#elif (defined TEST_SIMPLE)
-#include <simple/simpletools.h>
-#endif
 
-void run_test();
-
+/**
+ * @example     FileWriter_Demo.cpp
+ *
+ * Create a copy of a text file, character-by-character using a second buffer.
+ * The second buffer (`writeBuffer`) does increase the complexity by five lines of code, but it drastically increases
+ * the performance as well.
+ *
+ * @include PropWare_FileWriter/CMakeLists.txt
+ */
 int main() {
-    volatile unsigned int startTime = CNT;
-    run_test();
-    volatile unsigned int runtime = PropWare::Utility::measure_time_interval(startTime);
-    pwOut << "All done! " << runtime / 1000 << "ms\n";
-
-    return 0;
-}
-
-#ifdef TEST_PROPWARE
-void run_test() {
     const SD  driver;
     FatFS     filesystem(&driver);
 
-    SD::Buffer   writeBuffer;
-    SD::MetaData writeMetaData;
-    uint8_t bufferData[driver.get_sector_size()];
+    BlockStorage::Buffer   writeBuffer;
+    BlockStorage::MetaData writeMetaData;
+    uint8_t                bufferData[driver.get_sector_size()];
     writeBuffer.buf  = bufferData;
     writeBuffer.meta = &writeMetaData;
 
@@ -74,19 +64,7 @@ void run_test() {
     writer.close();
     reader.close();
     filesystem.unmount();
+
+    return 0;
 }
-#else
-void run_test() {
-    sd_mount(0, 1, 2, 3);
 
-    FILE *reader = fopen("fat_test.txt", "r");
-    FILE *writer = fopen("new2.txt", "w");
-
-    int c;
-    while (EOF != (c = fgetc(reader)))
-        fputc((char) c, writer);
-
-    fclose(reader);
-    fclose(writer);
-}
-#endif

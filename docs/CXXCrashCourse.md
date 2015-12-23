@@ -1,8 +1,5 @@
-Appendix B: C++ Crash Course
-============================
-
-[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)<br />
-[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)
+C++ Crash Course {#CxxCrashCourse}
+================
 
 For those coming from a background in Parallax's Spin language, your only concern will be syntax: the C-family of 
 languages is wildly different. Don't worry - it's 
@@ -176,6 +173,3 @@ Now that both classes are surrounded by a namespace, our code can use both class
 Including Separate Files
 ------------------------
 Coming soon!
-
-[<< Appendix A: CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html)<br />
-[>> Appendix C: Limitations](http://david.zemon.name/PropWare/md_docs_AppCLimitations.html)

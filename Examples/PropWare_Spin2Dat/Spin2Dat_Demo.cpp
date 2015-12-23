@@ -31,7 +31,14 @@ int _cfg_rxpin    = -1;
 int _cfg_txpin    = -1;
 int _cfg_baudrate = -1;
 
-// Main function
+/**
+ * @example     Spin2Dat_Demo.cpp
+ *
+ * Provide a build system example of extracting the PASM content from a Spin file
+ *
+ * @include     Examples/PropWare_Spin2Dat/CMakeLists.txt
+ * @include     pst.spin
+ */
 int main() {
     fdserial     *serial = fdserial_open(_cfg_rxpin, _cfg_txpin, 0, _cfg_baudrate);
     for (unsigned int i       = 0; true; ++i) {

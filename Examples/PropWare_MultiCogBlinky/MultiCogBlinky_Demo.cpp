@@ -27,6 +27,14 @@ volatile uint32_t wait_time;
 volatile uint32_t startCnt;
 volatile int8_t   syncStart;
 
+/**
+ * @example     MultiCogBlinky_Demo.cpp
+ *
+ * Use PropGCC's native interface to blink an LED from each of the Propeller's 8 cogs. Each cog will be invoking
+ * instructions out of HUB memory, not COG memory.
+ *
+ * @include PropWare_MultiCogBlinky/CMakeLists.txt
+ */
 int main (int argc, char* argv[]) {
     int8_t                              n;
     int8_t                              cog;

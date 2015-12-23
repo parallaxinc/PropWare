@@ -32,6 +32,13 @@ void sampleCountBits ();
 void sampleTimeMeasurement ();
 void sampleFreeMemory ();
 
+/**
+ * @example     Utility_Demo.cpp
+ *
+ * Demonstrate numerous different methods of the PropWare::Utility class
+ *
+ * @include PropWare_Utility/CMakeLists.txt
+ */
 int main () {
     pwOut.println("Hello! Let's explore some of PropWare's utility functions");
 

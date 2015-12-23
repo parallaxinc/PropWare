@@ -20,6 +20,13 @@ volatile uint32_t wait_time = SECOND;
 volatile bool     syncStart = false;
 volatile uint32_t startCnt;
 
+/**
+ * @example     SynchronousPrinter_Demo.cpp
+ *
+ * Demonstrate multiple cogs printing to the same serial terminal simultaneously
+ *
+ * @include PropWare_SynchronousPrinter/CMakeLists.txt
+ */
 int main (int argc, char *argv[]) {
     int8_t   n;
     int8_t   cog;

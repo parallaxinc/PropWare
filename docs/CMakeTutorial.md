@@ -1,8 +1,5 @@
-Chapter 2: CMake & Make Tutorial
-================================
-
-[<< Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)<br />
-[>> Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)
+CMake & Make Tutorial {#CMakeTutorial}
+=====================
 
 What is CMake?
 --------------
@@ -38,7 +35,7 @@ Breakdown:
 
   The second argument is the source directory of your project. This directory must contain a `CMakeLists.txt` file as
   described in step 1 of 
-  [Creating a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html). I prefer to run
+  [Creating a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml). I prefer to run
   "out of source" builds - which means I create a new folder within my project where all of my generated and compiled
   files will end up. Generally, I name this folder `bin`. With this simple case, the complete command to generate the
   Makefiles would be `cmake -G "Unix Makefiles" ..`. The `..` is a cross-platform way of saying "the directory above
@@ -53,13 +50,13 @@ Breakdown:
 CMakeLists.txt
 --------------
 
-As described in [Chapter 4](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html), the CMakeLists.txt file is 
+As described in [Chapter 4](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml), the CMakeLists.txt file is 
 required for all CMake (and therefore %PropWare) applications. The file must be named "CMakeLists.txt" - character for 
 character. 
 
 The contents of the file are simple - many useful tips can be gleaned from both 
-[Creating a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html) and 
-[CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
+[Creating a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml) and 
+[CMake for PropWare](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml).
 
 CMakeCache.txt
 --------------
@@ -99,6 +96,3 @@ After generating your Makefiles, try adding `VERBOSE=1` to your Make command. Th
 to the terminal before running it - rather than printing only a short summary of what is being done. The output is very 
 verbose and can be cumbersome to read - but it is invaluable when determining what went wrong with your compilation.
 Full command: `make VERBOSE=1`
-
-[<< Chapter 1: Installation](http://david.zemon.name/PropWare/md_docs_Ch1Install.html)<br />
-[>> Chapter 3: Run an example project](http://david.zemon.name/PropWare/md_docs_Ch3RunningExampleProjects.html)

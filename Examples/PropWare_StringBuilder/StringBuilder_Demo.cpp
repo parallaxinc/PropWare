@@ -39,6 +39,13 @@ unsigned int run_static_buffered (const int iterations);
 
 unsigned int run_unbuffered (const int iterations);
 
+/**
+ * @example     StringBuilder_Demo.cpp
+ *
+ * Compare the static and dynamic string build classes along with an unbuffered formatted print to the serial terminal.
+ *
+ * @include PropWare_StringBuilder/CMakeLists.txt
+ */
 int main () {
     unsigned int dynamicBuffer, staticBuffer, noBuffer;
 

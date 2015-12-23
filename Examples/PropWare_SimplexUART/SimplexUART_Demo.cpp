@@ -34,7 +34,11 @@ const int32_t BAUD_RATE = 115200;
 const int32_t DELAY     = 200;
 
 /**
- * @brief   Write "Hello world!" out via UART protocol
+ * @example     SimplexUART_Demo.cpp
+ *
+ * Write "Hello world!" out via UART protocol
+ *
+ * @include PropWare_SimplexUART/CMakeLists.txt
  */
 int main () {
     PropWare::ErrorCode err;

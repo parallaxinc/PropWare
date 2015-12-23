@@ -1,28 +1,18 @@
-Appendix A: CMake for PropWare
-==============================
-
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)
+Build System {#BuildSystem}
+============
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
-Remember that %PropWare uses CMake 3.0.
+Remember that %PropWare requires CMake 3.0+.
 
 Bare Minimum
 ------------
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-cmake_minimum_required (VERSION 3.0.0)                                         #
-# Aside from cmake_minimum_required, this must be the first two lines          #
-# of the file                                                                  #
-file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
-include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
-################################################################################
+cmake_minimum_required (VERSION 3.0.0)
+find_package(PropWare REQUIRED)
 
 project(HelloWorld)
 
-create_simple_executable(${PROJECT_NAME} main.cpp)
+create_simple_executable(HelloWorld main.cpp)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * Note the section marked as "Template code." Make sure this piece begins each of your CMakeLists.txt files. It loads 
   the standard Propeller settings for your project.
@@ -34,7 +24,7 @@ create_simple_executable(${PROJECT_NAME} main.cpp)
   but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
   (separated by whitespace).
 * There is LOTS more information about creating CMakeLists.txt files for %PropWare projects in 
-  [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.html).
+  [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml).
 
 Typical Use Case
 ----------------
@@ -133,6 +123,17 @@ CMake options allow you to have fine-grain control over what compilation flags a
 want to leave all options set to their default values, but those doing special projects or using conflicting libraries 
 can change the options to suit their needs.
 
+### AUTO_OPTIMIZATION
+\[default: ON\]
+
+Sets the optimization level for size. Equivalent to adding "-Os" to `COMMON_FLAGS`.
+
+### WARN_ALL
+\[default: ON\]
+
+Turns on all warnings from the compiler. Aids in writing clean, error-free code. Equivalent to adding "-Wall" to
+`COMMON_FLAGS`.
+
 ### 32_BIT_DOUBLES
 \[default: ON\]
 
@@ -177,14 +178,11 @@ With all options left at their defaults, the following flags will be used. There
 and an option will be added. It is believed that these flags will always be desired by Propeller users.
 
 * ASM: None
-* C: `-Wall -m32bit-doubles -std=c99`
-* COGC: `-Wall -m32bit-doubles -std=c99 -mcog -xc -r`
-* ECOGC: `-Wall -m32bit-doubles -std=c99 -mcog -xc -r`
-* CXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti`
-* COGCXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
-* ECOGCXX: `-Wall -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
+* C: `-Wall -Os -m32bit-doubles -std=c99`
+* COGC: `-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r`
+* ECOGC: `-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r`
+* CXX: `-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti`
+* COGCXX: `-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
+* ECOGCXX: `-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++ -r`
 * Linker: None
 * Archiver: `cr`
-
-[<< Chapter 4: Create a PropWare Application](http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.html)<br />
-[>> Appendix B: C++ Crash Course](http://david.zemon.name/PropWare/md_docs_AppBCXXCrashCourse.html)

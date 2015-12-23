@@ -41,7 +41,13 @@ const uint32_t             FREQ = 10000;
 
 void error (const PropWare::ErrorCode err);
 
-// Main function
+/**
+ * @example     L3G_Demo.cpp
+ *
+ * Read the gyrometer data and print it to the terminal
+ *
+ * @include PropWare_L3G/CMakeLists.txt
+ */
 int main () {
     int16_t       gyroValues[3];
     PropWare::SPI *spi = PropWare::SPI::get_instance();
@@ -53,7 +59,7 @@ int main () {
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
     // l3g_read* functions will always explicitly set the SPI modes before
-    // each call, or assume that the SPI cog is still running in the proper
+    // each call, or assume that the SPI driver is still running in the proper
     // configuration
     gyro.always_set_spi_mode(1);
 

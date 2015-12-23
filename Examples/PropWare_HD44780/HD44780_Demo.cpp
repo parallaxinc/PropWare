@@ -37,7 +37,13 @@ const PropWare::Port::Mask          FIRST_DATA_PIN = PropWare::Port::P19;
 const PropWare::HD44780::Bitmode    BITMODE        = PropWare::HD44780::BM_8;
 const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::DIM_16x2;
 
-// Main function
+/**
+ * @example     HD44780_Demo.cpp
+ *
+ * Utilize the PropWare::Printer class to print formatted text to an LCD
+ *
+ * @include PropWare_HD44780/CMakeLists.txt
+ */
 int main () {
     // Create and initialize our LCD object
     PropWare::HD44780 lcd;

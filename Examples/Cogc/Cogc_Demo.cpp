@@ -25,23 +25,22 @@
 
 #include <PropWare/pin.h>
 
-void start ();
-
+/**
+ * @example Cogc_Demo.cpp
+ *
+ * Blink two LEDs, one from a "standard" cog invoking instructions from HUB RAM, and another cog invoking instruction
+ * natively from COG RAM
+ *
+ * @include Cogc/CMakeLists.txt
+ * @include blinky.cogcpp
+ */
 int main () {
-    start();
-    PropWare::Pin led(PropWare::Port::P16, PropWare::Port::OUT);
+    extern unsigned int _load_start_blinky_cog[];
+    cognew(_load_start_blinky_cog, NULL);
 
+    PropWare::Pin led(PropWare::Port::P16, PropWare::Port::OUT);
     while (1) {
         led.toggle();
         waitcnt(MILLISECOND * 100 + CNT);
     }
-}
-
-/*
- * function to start up a new cog running the toggle
- * code (which we've placed in the toggle_fw.cog section)
- */
-void start () {
-    extern unsigned int _load_start_blinky_cog[];
-    cognew(_load_start_blinky_cog, NULL);
 }
