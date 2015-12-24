@@ -22,7 +22,8 @@ while (p == 0)
     if (! handler)
       std::abort();
     handler ();
-    p = (void *) std::malloc (sz);
+    // FIXME: Replace std namespace when GCCv5+ C++ headers are installed
+    p = (void *) ::malloc (sz);
   }
 
 return p;
@@ -38,7 +39,8 @@ void
 operator delete(void* ptr)
 {
 if (ptr)
-  std::free(ptr);
+  // FIXME: Replace std namespace when GCCv5+ C++ headers are installed
+  ::free(ptr);
 }
 
 new_handler

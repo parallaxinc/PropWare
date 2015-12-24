@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <cstring>
+// FIXME: Replace C++ headers when GCCv5+ C++ headers are installed
+#include <string.h>
 #include <PropWare/utility.h>
 
 namespace PropWare {

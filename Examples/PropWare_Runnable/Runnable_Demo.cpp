@@ -4,8 +4,8 @@
  * @author  Modified by David Zemon
  */
 
-#include <PropWare/PropWare.h>
 #include <PropWare/runnable.h>
+#include <PropWare/PropWare.h>
 #include <PropWare/printer/synchronousprinter.h>
 #include <PropWare/pin.h>
 
