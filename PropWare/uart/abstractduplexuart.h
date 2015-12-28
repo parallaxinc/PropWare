@@ -105,7 +105,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                 uint32_t temp;
 
                 do {
-                    if (-1 == (temp = this->receive()))
+                    if (((uint32_t) -1) == (temp = this->receive()))
                         return UART::PARITY_ERROR;
 
                     *buffer = (char) temp;
@@ -137,7 +137,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             else {
                 uint32_t temp;
                 for (uint32_t i = 0; i < length; ++i) {
-                    if (-1 == (temp = this->receive()))
+                    if (((uint32_t) -1) == (temp = this->receive()))
                         return UART::PARITY_ERROR;
                     buffer[i] = (char) temp;
                 }

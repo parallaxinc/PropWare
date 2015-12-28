@@ -31,7 +31,8 @@
 
 #include <propeller.h>
 
-#if (defined __cplusplus && __cplusplus >= 201103L)
+// FIXME: PropGCC GCCv5+ does not contain C++ headers yet; Re-enable when possible
+#if 0 //(defined __cplusplus && __cplusplus >= 201103L)
 #include <cstdint>
 #include <cstdlib>
 #include <cctype>

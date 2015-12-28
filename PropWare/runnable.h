@@ -25,10 +25,10 @@
 
 #pragma once
 
+#include <type_traits>
 #include <cstdint>
 #include <sys/thread.h>
 #include <stdlib.h>
-#include <type_traits>
 
 namespace PropWare {
 
