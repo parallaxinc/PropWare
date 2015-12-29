@@ -1,5 +1,5 @@
 image: docs/images/PropWare_Logo_64.png
-type: tools libraries
+type: tools|libraries
 links:
   Documentation: http://david.zemon.name/PropWare/
   Forum Thread: http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC
