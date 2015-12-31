@@ -75,14 +75,6 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     # Libraries to link
     ###############################
 
-    # TODO: Use "COMPONENT"s to enable/disable certain libraries
-    # Libraries to componentize:
-    #   libpropeller
-    #   Simple
-    #   PropWare
-    #   tiny
-    #   math
-
     if (DEFINED PROPWARE_MAIN_PACKAGE)
         set(PROPWARE_PATH "${CMAKE_CURRENT_LIST_DIR}/..")
         set(CMAKE_TOOLCHAIN_FILE                        "${PROPWARE_PATH}/CMakeModules/PropellerToolchain.cmake")
@@ -284,8 +276,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             include_directories(${PropWare_INCLUDE_DIR})
 
             if (AUTO_OTPIMIZATION)
-                if (${AUTO_OTPIMIZATION_SET})
-                else ()
+                if (NOT AUTO_OTPIMIZATION_SET)
                     set(AUTO_OTPIMIZATION_SET 1)
                     set(COMMON_FLAGS "${COMMON_FLAGS} -Os")
                 endif ()
@@ -293,32 +284,28 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
             # Handle user options
             if (32_BIT_DOUBLES)
-                if (${32_BIT_DOUBLES_SET})
-                else ()
+                if (NOT 32_BIT_DOUBLES_SET)
                     set(32_BIT_DOUBLES_SET 1)
                     set(COMMON_FLAGS "${COMMON_FLAGS} -m32bit-doubles")
                 endif ()
             endif ()
 
             if (WARN_ALL)
-                if (${WARN_ALL_SET})
-                else ()
+                if (NOT WARN_ALL_SET)
                     set(WARN_ALL_SET 1)
                     set(COMMON_FLAGS "${COMMON_FLAGS} -Wall")
                 endif ()
             endif ()
 
             if (AUTO_C_STD)
-                if (${AUTO_C_STD_SET})
-                else ()
+                if (NOT AUTO_C_STD_SET)
                     set(AUTO_C_STD_SET 1)
                     set(C_FLAGS "${C_FLAGS} -std=c99")
                 endif ()
             endif ()
 
             if (AUTO_CXX_STD)
-                if (${AUTO_CXX_STD_SET})
-                else ()
+                if (NOT AUTO_CXX_STD_SET)
                     set(AUTO_CXX_STD_SET 1)
                     set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
                 endif ()
@@ -340,8 +327,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             string(TOLOWER ${MODEL} MODEL_LOWERCASE)
             if (NOT((MODEL_LOWERCASE STREQUAL "cog")))
                 if (AUTO_CUT_SECTIONS)
-                    if (${AUTO_CUT_SECTIONS_SET})
-                    else ()
+                    if (NOT AUTO_CUT_SECTIONS_SET)
                         set(AUTO_CUT_SECTIONS_SET 1)
                         set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
                         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
@@ -351,19 +337,17 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
 
             # Check if a deprecated variable name is set
             if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
-                if (${CFLAGS_CXXFLAGS_SET})
-                else ()
+                if (NOT CFLAGS_CXXFLAGS_SET)
                     set(CFLAGS_CXXFLAGS_SET 1)
                     message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")
-                    set(C_FLAGS ${CFLAGS})
-                    set(CXX_FLAGS ${CXXFLAGS})
+                    set(C_FLAGS "${C_FLAGS} ${CFLAGS}")
+                    set(CXX_FLAGS "${CXX_FLAGS} ${CXXFLAGS}")
                     set(CFLAGS )
                     set(CXXFLAGS )
                 endif ()
             endif()
 
-            if (${COMMON_FLAGS_SET})
-            else ()
+            if (NOT COMMON_FLAGS_SET)
                 set(COMMON_FLAGS_SET 1)
                 set(COMMON_FLAGS "-save-temps ${COMMON_FLAGS}")
                 #set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=main.rawmap ${CMAKE_EXE_LINKER_FLAGS}")
@@ -473,7 +457,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             add_executable(${name} ${src1} ${ARGN})
             set_propware_flags(${name})
 
-            if (NOT PROJECT_NAME STREQUAL "PropWare" AND DEFINED PROPWARE_MAIN_PACKAGE)
+            if (PROPWARE_MAIN_PACKAGE)
                 add_prop_targets_with_name(${name})
             else ()
                 add_prop_targets(${name})
@@ -481,6 +465,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         endmacro()
     endif ()
 
+    # TODO: Add build system documentation for testing
     enable_testing()
     add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
     macro(create_test target src1)

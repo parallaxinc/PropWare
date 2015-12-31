@@ -1,5 +1,3 @@
-include_directories(${PROJECT_SOURCE_DIR})
-
 file(GLOB SIMPLE_OBJECTS
     ${PROJECT_SOURCE_DIR}/simple/*.[!t])
 

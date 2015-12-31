@@ -44,14 +44,11 @@ set(PROPWARE_SOURCES
     ../watchdog
     ../ws2812)
 
-add_subdirectory(tests)
-
-include_directories(${PROJECT_SOURCE_DIR})
-set(COMMON_FLAGS "-Os")
-
 add_subdirectory(cog)
 add_subdirectory(cmm)
 add_subdirectory(lmm)
 add_subdirectory(xmmc)
 add_subdirectory(xmm-single)
 add_subdirectory(xmm-split)
+
+add_subdirectory(tests)

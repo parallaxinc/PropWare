@@ -1,10 +1,7 @@
 cmake_minimum_required (VERSION 3.0.0)
 
-find_package(PropWare REQUIRED)
-
 set(BOARD dna)
 set(MODEL cmm)
-set(COMMON_FLAGS "-Os")
 
 create_test(sample_test             sample_test)
 create_test(pin_test                pin_test)
