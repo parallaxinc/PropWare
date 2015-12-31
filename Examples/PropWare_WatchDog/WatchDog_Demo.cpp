@@ -27,7 +27,7 @@
 #include <PropWare/watchdog.h>
 #include <PropWare/printer/printer.h>
 
-static uint32_t watchDogStack[32];
+static uint32_t watchDogStack[96];
 
 /**
  * @example     WatchDog_Demo.cpp
