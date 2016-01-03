@@ -1,5 +1,5 @@
 file(GLOB SIMPLE_OBJECTS
-    ${PROJECT_SOURCE_DIR}/simple/*.[!t])
+    ${CMAKE_CURRENT_LIST_DIR}/*.[!t]*)
 
 add_subdirectory(cog)
 add_subdirectory(cmm)

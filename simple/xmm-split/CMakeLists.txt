@@ -4,6 +4,7 @@ set(MODEL xmm-split)
 set_compile_flags()
 
 add_library(Simple_${MODEL} STATIC ${SIMPLE_OBJECTS})
+set_linker(Simple_${MODEL})
 install(TARGETS Simple_${MODEL}
     DESTINATION PropWare/lib
     COMPONENT propware
