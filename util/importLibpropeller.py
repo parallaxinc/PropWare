@@ -44,44 +44,6 @@ class ImportLibpropeller:
         # Copy over the new files
         propwareUtils.copytree(self.LIBPROPELLER_PATH + os.sep + "libpropeller", ImportLibpropeller.DESTINATION)
 
-        # Copy all source files into a source directory so we can create the
-        # library
-        self._copy_src_files()
-
-        self._make_obj_list()
-
-    def _copy_src_files(self):
-        # If the source directory doesn't exist yet, create it
-        if not os.path.exists(ImportLibpropeller.DESTINATION_SOURCES):
-            os.mkdir(ImportLibpropeller.DESTINATION_SOURCES)
-
-        for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION):
-            # Skip the root git directory and move into its subdirectories
-            # noinspection PyBroadException
-            try:
-                # noinspection PyUnresolvedReferences
-                libpropeller_dst_root = os.path.samefile(root, ImportLibpropeller.DESTINATION_SOURCES)
-            except Exception:  # This should be NameError... but that wasn't properly catching the exception... :'(
-                libpropeller_dst_root = os.path.normcase(root) == os.path.normcase(
-                    ImportLibpropeller.DESTINATION_SOURCES)
-
-            if not libpropeller_dst_root:
-                for f in files:
-                    if self._is_worthy_file(f, root):
-                        shutil.copy2(root + str(os.sep) + f, ImportLibpropeller.DESTINATION_SOURCES + f)
-                        self.sourceFiles.append(f)
-
-    def _make_obj_list(self):
-        # Sort the list so that the makefile doesn't change every time this is run (the following for-loop doesn't run
-        # in any guaranteed order)
-        self.sourceFiles.sort()
-        with open(ImportLibpropeller.DESTINATION_SOURCES + ImportLibpropeller.SOURCE_OBJECT_LIST, 'w') as f:
-            f.write("set(LIBPROPELLER_OBJECTS")
-            for sourceFile in self.sourceFiles:
-                # DO NOT use os.sep here - CMake requires Unix-like file separators
-                f.write('\n' + ' ' * 8 + '../' + sourceFile)
-            f.write(')')
-
     def _create_and_update_git(self):
         # Ensure git exists in the path
         if not propwareUtils.which("git"):
