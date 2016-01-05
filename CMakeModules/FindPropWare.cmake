@@ -76,7 +76,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
     ###############################
 
     if (DEFINED PROPWARE_MAIN_PACKAGE)
-        set(PROPWARE_PATH "${CMAKE_CURRENT_LIST_DIR}/..")
+        set(PROPWARE_PATH                               "${CMAKE_CURRENT_LIST_DIR}/..")
         set(CMAKE_TOOLCHAIN_FILE                        "${PROPWARE_PATH}/CMakeModules/PropellerToolchain.cmake")
         set(PropWare_INCLUDE_DIR                        "${PROPWARE_PATH}" "${PROPWARE_PATH}/simple")
         set(PropWare_PropWare_COG_LIBRARY               PropWare_cog)
@@ -109,7 +109,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                 PATHS
                     # If we're working inside the PropWare project...
                     ${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../.. # This one used for the Examples directory and PropWare/tests
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../.. # This one used for projects in the Examples directory
 
                     # Or outside the PropWare project
                     $ENV{PROPWARE_PATH} # Check the environment first
@@ -239,7 +239,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
         ##########################################
         # PropWare helper functions & macros
         ##########################################
-        function (set_linker executable)
+        function (set_linker target)
 
             macro (list_contains result request)
               set (${result})
@@ -265,7 +265,7 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
                 endif ()
             endif ()
 
-            SET_TARGET_PROPERTIES(${executable}
+            SET_TARGET_PROPERTIES(${target}
                 PROPERTIES
                 LINKER_LANGUAGE
                 ${linker_language})
@@ -317,14 +317,14 @@ if (PropWare_FOUND STREQUAL "PropWare-NOTFOUND" OR NOT DEFINED PropWare_FOUND)
             endif ()
 
             # XMM model is retroactively renamed xmm-split
-            if (${MODEL} STREQUAL xmm)
+            if ("${MODEL}" STREQUAL xmm)
                 set(MODEL xmm-split)
             endif ()
 
             # Linker pruning is broken when used with the cog memory model. See the
             # following thread for a workaround:
             # http://forums.parallax.com/showthread.php/157878-Simple-blinky-program-and-linker-pruning
-            string(TOLOWER ${MODEL} MODEL_LOWERCASE)
+            string(TOLOWER "${MODEL}" MODEL_LOWERCASE)
             if (NOT((MODEL_LOWERCASE STREQUAL "cog")))
                 if (AUTO_CUT_SECTIONS)
                     if (NOT AUTO_CUT_SECTIONS_SET)
