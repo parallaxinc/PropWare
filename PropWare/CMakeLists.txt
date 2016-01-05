@@ -44,9 +44,9 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/watchdog
     ${CMAKE_CURRENT_LIST_DIR}/ws2812)
 
-add_subdirectory(cog)
-add_subdirectory(cmm)
-add_subdirectory(lmm)
-add_subdirectory(xmmc)
-add_subdirectory(xmm-single)
-add_subdirectory(xmm-split)
+add_subdirectory(models/cog)
+add_subdirectory(models/cmm)
+add_subdirectory(models/lmm)
+add_subdirectory(models/xmmc)
+add_subdirectory(models/xmm-single)
+add_subdirectory(models/xmm-split)
