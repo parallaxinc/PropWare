@@ -17,6 +17,7 @@ add_subdirectory(simple)
 add_subdirectory(libpropeller)
 add_subdirectory(PropWare)
 add_subdirectory(Examples)
+add_subdirectory(test)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)

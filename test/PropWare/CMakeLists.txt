@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.0.0)
-
 set(BOARD dna)
 set(MODEL cmm)
 
@@ -14,3 +12,11 @@ create_test(stringbuilder_test      stringbuilder_test)
 create_test(queue_test              queue_test)
 create_test(utility_test            utility_test)
 create_test(spi_test                spi_test)
+
+set_tests_properties(
+    sample_test
+    pin_test
+    stringbuilder_test
+    queue_test
+    utility_test
+    PROPERTIES LABELS hardware-independent)
