@@ -26,23 +26,22 @@ class ImportLibpropeller:
     SOURCE_OBJECT_LIST = "libpropellerObjects.cmake"
     CLEAN_EXCLUDES = ["cog", "cmm", "lmm", "xmm-split", "xmm-single", "xmmc", "CMakeLists.txt", "libpropeller.cmake"]
     WHITELISTED_SOURCE_FILES = ["numbers.cpp"]
+    LIBPROPELLER_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + "libpropeller" + os.sep
 
     def __init__(self):
         self.sourceFiles = []
-        self.LIBPROPELLER_PATH = ImportLibpropeller.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + \
-                                 "libpropeller" + os.sep
 
     def run(self):
         propwareUtils.check_proper_working_dir()
 
         self._clean()
 
-        propwareUtils.init_downloads_folder(ImportLibpropeller.PROPWARE_ROOT)
+        propwareUtils.init_downloads_folder(self.PROPWARE_ROOT)
 
         self._create_and_update_git()
 
         # Copy over the new files
-        propwareUtils.copytree(self.LIBPROPELLER_PATH + os.sep + "libpropeller", ImportLibpropeller.DESTINATION)
+        propwareUtils.copytree(self.LIBPROPELLER_PATH + os.sep + "libpropeller", self.DESTINATION)
 
     def _create_and_update_git(self):
         # Ensure git exists in the path
@@ -54,7 +53,7 @@ class ImportLibpropeller:
                 # If the git repository doesn't exist, create it
                 if not os.path.exists(self.LIBPROPELLER_PATH):
                     subprocess.check_output("git clone https://github.com/libpropeller/libpropeller.git",
-                                            cwd=ImportLibpropeller.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY,
+                                            cwd=self.PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY,
                                             shell=True)
                 # Otherwise, update the git repository
                 else:
@@ -64,30 +63,23 @@ class ImportLibpropeller:
                 print("Caused by: " + str(e), file=sys.stderr)
                 print(e.output.decode(), file=sys.stderr)
 
-    def _is_worthy_file(self, file_name, path):
-        is_whitelisted = file_name in ImportLibpropeller.WHITELISTED_SOURCE_FILES
-        is_asm = propwareUtils.is_asm_file(file_name)
-        is_new = file_name not in self.sourceFiles
-        is_not_symlink = not propwareUtils.is_symbolic_link_on_windows(path + str(os.sep) + file_name)
-        return (is_whitelisted or is_asm) and is_new and is_not_symlink
-
-    @staticmethod
-    def _clean():
+    @classmethod
+    def _clean(cls):
         """
         Clean the old directory
         """
-        if os.path.exists(ImportLibpropeller.DESTINATION):
-            for entry in os.listdir(ImportLibpropeller.DESTINATION):
-                if ImportLibpropeller.SOURCE_DROPBOX == entry:
-                    for root, dirs, files in os.walk(ImportLibpropeller.DESTINATION + entry):
+        if os.path.exists(cls.DESTINATION):
+            for entry in os.listdir(cls.DESTINATION):
+                if cls.SOURCE_DROPBOX == entry:
+                    for root, dirs, files in os.walk(cls.DESTINATION + entry):
                         for fileName in files:
-                            if fileName not in ImportLibpropeller.CLEAN_EXCLUDES:
+                            if fileName not in cls.CLEAN_EXCLUDES:
                                 os.remove(root + os.sep + fileName)
-                    destroy_me = ImportLibpropeller.DESTINATION + entry + os.sep + "CMakeFiles"
+                    destroy_me = cls.DESTINATION + entry + os.sep + "CMakeFiles"
                     if os.path.exists(destroy_me):
                         shutil.rmtree(destroy_me)
-                elif entry not in ImportLibpropeller.CLEAN_EXCLUDES:
-                    removable = ImportLibpropeller.DESTINATION + entry
+                elif entry not in cls.CLEAN_EXCLUDES:
+                    removable = cls.DESTINATION + entry
                     if os.path.isdir(removable):
                         shutil.rmtree(removable)
                     else:
