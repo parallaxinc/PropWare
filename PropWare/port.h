@@ -126,14 +126,15 @@ class Port {
          * @param[in]   pinMask     Pins that should be flashed
          * @param[in]   iterations  Number of times that the pins should flicker on and back off again
          */
-        static void flash_port (const uint32_t pinMask, const uint32_t iterations = 10) {
+        static void flash_port (const uint32_t pinMask, uint32_t iterations = 10) {
             const Port port(pinMask, Port::OUT);
 
+            const unsigned int delay = MILLISECOND << 7; // MILLISECOND * 64
+            unsigned int timer = delay + CNT;
+            iterations <<= 1;
             for (uint32_t i = 0; i < iterations; ++i) {
-                port.set();
-                waitcnt(75 * MILLISECOND + CNT);
-                port.clear();
-                waitcnt(75 * MILLISECOND + CNT);
+                port.toggle();
+                timer = waitcnt2(timer, delay);
             }
         }
 
@@ -318,14 +319,8 @@ class SimplePort : public Port {
          * @param[in]   iterations  Number of times that the pins should flicker on and back off again
          */
         static void flash_port (const Port::Mask firstPin, const uint8_t portWidth, const uint16_t iterations = 10) {
-            const SimplePort port(firstPin, portWidth, Port::OUT);
-
-            for (int i = 0; i < iterations; ++i) {
-                port.set();
-                waitcnt(75 * MILLISECOND + CNT);
-                port.clear();
-                waitcnt(75 * MILLISECOND + CNT);
-            }
+            const SimplePort port(firstPin, portWidth);
+            Port::flash_port(port.m_mask, iterations);
         }
 
     public:
