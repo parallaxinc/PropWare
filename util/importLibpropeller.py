@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # @file    importLibpropeller.py
 # @author  David Zemon
 #

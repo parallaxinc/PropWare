@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # @file    propwareUtils.py
 # @author  David Zemon
 #
@@ -7,7 +7,6 @@
 """
 @description:
 """
-from __future__ import print_function
 import glob
 import os
 import re

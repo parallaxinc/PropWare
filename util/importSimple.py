@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # @file    importSimple.py
 # @author  David Zemon
 #
