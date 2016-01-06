@@ -1,6 +1,6 @@
 file(GLOB_RECURSE LIBPROPELLER_OBJECTS_WITH_DUPS
-    ${CMAKE_CURRENT_LIST_DIR}/[!u]*/*.S
-    ${CMAKE_CURRENT_LIST_DIR}/[!u]*/*.cpp)
+    ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller/[!u]*/*.S
+    ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller/[!u]*/*.cpp)
 
 # Remove duplicates (CMake's built-in function doesn't recognize the duplicates because they are in different folders)
 foreach (file IN LISTS LIBPROPELLER_OBJECTS_WITH_DUPS)
@@ -11,4 +11,9 @@ foreach (file IN LISTS LIBPROPELLER_OBJECTS_WITH_DUPS)
     endif ()
 endforeach ()
 
-add_subdirectory(source)
+add_subdirectory(cog)
+add_subdirectory(cmm)
+add_subdirectory(lmm)
+add_subdirectory(xmmc)
+add_subdirectory(xmm-single)
+add_subdirectory(xmm-split)

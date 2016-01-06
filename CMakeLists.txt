@@ -19,7 +19,7 @@ project(PropWare
     LANGUAGES C CXX ASM COGC COGCXX ECOGC ECOGCXX DAT SPIN2DAT)
 
 add_subdirectory(simple)
-add_subdirectory(libpropeller)
+add_subdirectory(external_libs)
 add_subdirectory(PropWare)
 add_subdirectory(Examples)
 add_subdirectory(test)
