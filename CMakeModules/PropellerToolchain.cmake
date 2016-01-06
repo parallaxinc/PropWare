@@ -18,8 +18,6 @@ if (NOT DEFINED GCC_PATH)
             ENV PATH
         NO_SYSTEM_ENVIRONMENT_PATH)
 
-    message("Found GCC = ${GCC_PATH}")
-
     file(TO_CMAKE_PATH "/opt/parallax/bin" DEFAULT_LINUX_PATH_1)
     file(TO_CMAKE_PATH "C:\\PropGCC\\bin" DEFAULT_WINDOWS_PATH_1)
     file(TO_CMAKE_PATH "C:\\parallax\\bin" DEFAULT_WINDOWS_PATH_2)
