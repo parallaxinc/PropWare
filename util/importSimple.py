@@ -22,7 +22,7 @@ class ImportSimple:
     LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'Learn' + str(os.sep)
     SIMPLE_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'propsideworkspace' + os.sep
     BLACKLISTED_LIBRARIES = []
-    BLACKLISTED_FILES = ['jm_time.c', 'date_time_epoch.spin', 'colorpal.c', 'colorpal.h']
+    BLACKLISTED_FILES = []
 
     def __init__(self):
         self.libraries = {}
