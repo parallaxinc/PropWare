@@ -21,7 +21,8 @@ class ImportSimple:
     CHEATER_DIR = PROPWARE_ROOT + 'simple' + os.sep
     LEARN_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'Learn' + str(os.sep)
     SIMPLE_PATH = PROPWARE_ROOT + propwareUtils.DOWNLOADS_DIRECTORY + 'propsideworkspace' + os.sep
-    BLACKLISTED_LIBRARIES = ['libbadgetools', 'libdatetime']
+    BLACKLISTED_LIBRARIES = []
+    BLACKLISTED_FILES = ['jm_time.c', 'date_time_epoch.spin', 'colorpal.c', 'colorpal.h']
 
     def __init__(self):
         self.libraries = {}
@@ -84,7 +85,7 @@ class ImportSimple:
         for dir_entry in os.listdir(library_directory):
             # Don't copy the demo files
             if dir_entry not in demo_files:
-                if propwareUtils.is_src_or_hdr_file(dir_entry):
+                if propwareUtils.is_src_or_hdr_file(dir_entry) and dir_entry not in self.BLACKLISTED_FILES:
                     copy2(library_directory + dir_entry, self.CHEATER_DIR)
 
                     # Keep track of all the source files so we can make an object list later
