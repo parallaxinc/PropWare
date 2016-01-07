@@ -2,11 +2,9 @@ file(GLOB_RECURSE LIBPROPELLER_OBJECTS_WITH_DUPS
     ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller/[!u]*/*.S
     ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller/[!u]*/*.cpp)
 
-# Remove duplicates (CMake's built-in function doesn't recognize the duplicates because they are in different folders)
+# Remove symlinks
 foreach (file IN LISTS LIBPROPELLER_OBJECTS_WITH_DUPS)
-    get_filename_component(FILENAME "${file}" NAME)
-    if (NOT (FILENAME IN_LIST FILENAMES))
-        list(APPEND FILENAMES "${FILENAME}")
+    if (NOT IS_SYMLINK ${file})
         list(APPEND LIBPROPELLER_OBJECTS "${file}")
     endif ()
 endforeach ()
