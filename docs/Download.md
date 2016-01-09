@@ -35,11 +35,14 @@ unzip propware.zip
 unzip examples.zip
 sudo mv OSXCMake /usr/local
 sudo mv PropWare /usr/local
-sudo ln -s /usr/local/OSXCMake/bin/cmake /usr/local/bin/cmake
-sudo ln -s /usr/local/OSXCMake/bin/ccmake /usr/local/bin/ccmake
-sudo ln -s /usr/local/OSXCMake/bin/cpack /usr/local/bin/cpack
-sudo ln -s /usr/local/OSXCMake/bin/cmake-gui /usr/local/bin/cmake-gui
-sudo ln -s /usr/local/OSXCMake/bin/ctest /usr/local/bin/ctest
+sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmake /usr/local/bin/cmake
+sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/ccmake /usr/local/bin/ccmake
+sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmake-gui /usr/local/bin/cmake-gui
+sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cpack /usr/local/bin/cpack
+sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/ctest /usr/local/bin/ctest
+
+\# OSX only
+sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmakexbuild /usr/local/bin/cmakexbuild
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To upgrade:
