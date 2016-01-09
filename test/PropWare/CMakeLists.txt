@@ -20,3 +20,7 @@ set_tests_properties(
     queue_test
     utility_test
     PROPERTIES LABELS hardware-independent)
+
+install(FILES PropWareTests.h
+    DESTINATION PropWare/include/PropWare
+    COMPONENT propware)
