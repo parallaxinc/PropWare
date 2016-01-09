@@ -33,14 +33,14 @@ wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSu
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
-sudo mv OSXCMake /usr/local
+sudo mv pwcmake.app /Applications
 sudo mv PropWare /usr/local
-sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmake /usr/local/bin/cmake
-sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/ccmake /usr/local/bin/ccmake
-sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmake-gui /usr/local/bin/cmake-gui
-sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cpack /usr/local/bin/cpack
-sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/ctest /usr/local/bin/ctest
-sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmakexbuild /usr/local/bin/cmakexbuild
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cmake /usr/local/bin/cmake
+sudo ln -s /Applications/pwcmake.app/Contents/bin/ccmake /usr/local/bin/ccmake
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cmake-gui /usr/local/bin/cmake-gui
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cpack /usr/local/bin/cpack
+sudo ln -s /Applications/pwcmake.app/Contents/bin/ctest /usr/local/bin/ctest
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cmakexbuild /usr/local/bin/cmakexbuild
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To upgrade:
@@ -51,9 +51,9 @@ wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSu
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
-sudo mv /usr/local/OSXCMake /usr/local/OSXCMake.bak
+sudo mv /Applications/pwcmake.app /Applications/pwcmake.app.bak
 sudo mv /usr/local/PropWare /usr/local/PropWare.bak
-sudo mv OSXCMake /usr/local
+sudo mv OSXCMake /Applications
 sudo mv PropWare /usr/local
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -61,7 +61,7 @@ Once you have confirmed that the new installation works as expected, remove the 
 NOTE: A command that starts with `sudo rm -rf` has the potential to be _very_ dangerous! I assume no responsibility 
 if you corrupt your system. Be careful.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
-sudo rm -rf /usr/local/OSXCMake.bak
+sudo rm -rf /Applications/pwcmake.app.bak
 sudo rm -rf /usr/local/PropWare.bak
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
