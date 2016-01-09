@@ -1,3 +1,6 @@
 [submodule "libpropeller"]
 	path = libpropeller
 	url = https://github.com/libpropeller/libpropeller.git
+[submodule "propsideworkspace"]
+	path = propsideworkspace
+	url = https://github.com/parallaxinc/propsideworkspace.git

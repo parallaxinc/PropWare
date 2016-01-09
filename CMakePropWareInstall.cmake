@@ -95,18 +95,6 @@ install(DIRECTORY
     PATTERN libpropeller/libpropeller/compile_tools EXCLUDE
     PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
 
-# Simple includes
-install(DIRECTORY
-        ${PROJECT_SOURCE_DIR}/simple/
-    DESTINATION PropWare/include
-    COMPONENT propware
-    FILES_MATCHING PATTERN *.h
-    PATTERN cog EXCLUDE
-    PATTERN cmm EXCLUDE
-    PATTERN lmm EXCLUDE
-    PATTERN xmmc EXCLUDE
-    PATTERN xmm-single EXCLUDE
-    PATTERN xmm-split EXCLUDE)
 install(FILES
         ${PROJECT_SOURCE_DIR}/version.txt
     DESTINATION PropWare
