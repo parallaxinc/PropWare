@@ -40,8 +40,6 @@ sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/ccmake /usr/local/bin/ccma
 sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmake-gui /usr/local/bin/cmake-gui
 sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cpack /usr/local/bin/cpack
 sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/ctest /usr/local/bin/ctest
-
-\# OSX only
 sudo ln -s /usr/local/OSXCMake/CMake.app/Contents/bin/cmakexbuild /usr/local/bin/cmakexbuild
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
