@@ -1,57 +1,52 @@
 set(PROPWARE_SOURCES
-    ../c++allocate.h
-    ../comparator
-    ../filesystem/blockstorage
-    ../filesystem/fat/fatfile
-    ../filesystem/fat/fatfilereader
-    ../filesystem/fat/fatfilewriter
-    ../filesystem/fat/fatfs
-    ../filesystem/file
-    ../filesystem/filereader
-    ../filesystem/filesystem
-    ../filesystem/filewriter
-    ../filesystem/sd
-    ../hd44780
-    ../i2c
-    ../i2cbase
-    ../l3g
-    ../max6675
-    ../mcp3000
-    ../motor/stepper
-    ../pcf8591
-    ../pin
-    ../port
-    ../printcapable
-    ../printer/printer
-    ../printer/synchronousprinter
-    ../PropWare
-    ../queue
-    ../runnable
-    ../scancapable
-    ../scanner
-    ../spi
-    ../stringbuilder
-    ../staticstringbuilder
-    ../uart/abstractduplexuart
-    ../uart/abstractsimplexuart
-    ../uart/duplexuart
-    ../uart/fullduplexuart
-    ../uart/halfduplexuart
-    ../uart/simplexuart
-    ../uart/sharedsimplexuart
-    ../uart/uart
-    ../utility
-    ../watchdog
-    ../ws2812)
+    ${CMAKE_CURRENT_LIST_DIR}/c++allocate.h
+    ${CMAKE_CURRENT_LIST_DIR}/comparator
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/blockstorage
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfile
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilereader
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilewriter
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfs
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/file
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/filereader
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/filesystem
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/filewriter
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/sd
+    ${CMAKE_CURRENT_LIST_DIR}/hd44780
+    ${CMAKE_CURRENT_LIST_DIR}/i2c
+    ${CMAKE_CURRENT_LIST_DIR}/i2cbase
+    ${CMAKE_CURRENT_LIST_DIR}/l3g
+    ${CMAKE_CURRENT_LIST_DIR}/max6675
+    ${CMAKE_CURRENT_LIST_DIR}/mcp3000
+    ${CMAKE_CURRENT_LIST_DIR}/motor/stepper
+    ${CMAKE_CURRENT_LIST_DIR}/pcf8591
+    ${CMAKE_CURRENT_LIST_DIR}/pin
+    ${CMAKE_CURRENT_LIST_DIR}/port
+    ${CMAKE_CURRENT_LIST_DIR}/printcapable
+    ${CMAKE_CURRENT_LIST_DIR}/printer/printer
+    ${CMAKE_CURRENT_LIST_DIR}/printer/synchronousprinter
+    ${CMAKE_CURRENT_LIST_DIR}/PropWare
+    ${CMAKE_CURRENT_LIST_DIR}/queue
+    ${CMAKE_CURRENT_LIST_DIR}/runnable
+    ${CMAKE_CURRENT_LIST_DIR}/scancapable
+    ${CMAKE_CURRENT_LIST_DIR}/scanner
+    ${CMAKE_CURRENT_LIST_DIR}/spi
+    ${CMAKE_CURRENT_LIST_DIR}/stringbuilder
+    ${CMAKE_CURRENT_LIST_DIR}/staticstringbuilder
+    ${CMAKE_CURRENT_LIST_DIR}/uart/abstractduplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/abstractsimplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/duplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/fullduplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/halfduplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/simplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/sharedsimplexuart
+    ${CMAKE_CURRENT_LIST_DIR}/uart/uart
+    ${CMAKE_CURRENT_LIST_DIR}/utility
+    ${CMAKE_CURRENT_LIST_DIR}/watchdog
+    ${CMAKE_CURRENT_LIST_DIR}/ws2812)
 
-add_subdirectory(tests)
-
-include_directories(${PROJECT_SOURCE_DIR})
-set(COMMON_FLAGS "-Os")
-
-add_subdirectory(cog)
-add_subdirectory(cmm)
-add_subdirectory(lmm)
-add_subdirectory(xmmc)
-add_subdirectory(xmm-single)
-add_subdirectory(xmm-split)
+add_subdirectory(models/cog)
+add_subdirectory(models/cmm)
+add_subdirectory(models/lmm)
+add_subdirectory(models/xmmc)
+add_subdirectory(models/xmm-single)
+add_subdirectory(models/xmm-split)

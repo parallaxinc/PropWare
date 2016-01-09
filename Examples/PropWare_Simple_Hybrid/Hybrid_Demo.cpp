@@ -10,7 +10,7 @@
  */
 
 #include <PropWare/printcapable.h>
-#include <simple/simpletext.h>
+#include <simpletext.h>
 #include <PropWare/printer/printer.h>
 
 class SimplePrinter : public PropWare::PrintCapable {

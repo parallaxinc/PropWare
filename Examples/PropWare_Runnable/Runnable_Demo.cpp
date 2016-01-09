@@ -53,7 +53,7 @@ class BlinkingThread: public PropWare::Runnable {
  * @include PropWare_Runnable/CMakeLists.txt
  */
 int main(int argc, char *argv[]) {
-    uint32_t       stack[3][32];
+    uint32_t       stack[3][70];
     TalkingThread  talkingThread(stack[0]);
     BlinkingThread blink16(stack[1], PropWare::Pin::P16);
     BlinkingThread blink17(stack[2], PropWare::Pin::P17);

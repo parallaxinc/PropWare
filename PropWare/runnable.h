@@ -26,8 +26,8 @@
 #pragma once
 
 #include <type_traits>
+#include <propeller.h>
 #include <cstdint>
-#include <sys/thread.h>
 #include <stdlib.h>
 
 namespace PropWare {
@@ -63,11 +63,11 @@ namespace PropWare {
  * };
  *
  * int main (int argc, char *argv[]) {
- *     uint32_t     stack[32];
+ *     uint32_t       stack[64];
  *     BlinkingThread blinkyThread(stack, PropWare::Pin::P16);
  *
  *     int8_t cog = PropWare::Runnable::invoke(blinkyThread);
- *     pwOut.printf("Blink thread (0x%08X) started in cog %d\n", (unsigned int) &blinkyThread, cog);
+ *     pwOut << "Blink thread started in cog " << cog << "\n";
  *     while(1);
  * }
  * @endcode
@@ -82,13 +82,13 @@ class Runnable {
          * @returns     If the cog was successfully started, the new cog ID is returned. Otherwise, -1 is returned
          */
         template<class T>
-        static int8_t invoke (T &runnable) {
+        static int8_t invoke(T &runnable) {
             static_assert(std::is_base_of<Runnable, T>::value,
                           "Only PropWare::Runnable and its children can be invoked");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpmf-conversions"
-            return (int8_t) _start_cog_thread(runnable.get_stack_top(), (void (*) (void *)) &T::run, (void *) &runnable,
-                                              &runnable.m_threadData);
+            return (int8_t) cogstart((void (*)(void *)) &T::run, (void *) &runnable,
+                                     (void *) (runnable.m_stack), runnable.m_stackSizeInBytes);
 #pragma GCC diagnostic pop
         }
 
@@ -96,7 +96,7 @@ class Runnable {
         /**
          * @brief   Invoked in the new cog, this method should be the root of the business logic
          */
-        virtual void run () = 0;
+        virtual void run() = 0;
 
     protected:
         /**
@@ -105,8 +105,8 @@ class Runnable {
          * @param[in]   stack[]     Statically-allocated array which will be used for stack memory by the new cog
          */
         template<size_t N>
-        Runnable (const uint32_t (&stack)[N])
-                : m_stack(stack), m_stackSizeInBytes(N * sizeof(uint32_t)) {
+        Runnable(const uint32_t (&stack)[N])
+            : m_stack(stack), m_stackSizeInBytes(N * sizeof(uint32_t)) {
         }
 
         /**
@@ -125,21 +125,13 @@ class Runnable {
          *                              `uint32_t *myStack = (uint32_t) malloc(16*sizeof(uint32_t));` would have a
          *                              length of 16, not 64.
          */
-        Runnable (const uint32_t *stack, const size_t stackLength)
-                : m_stack(stack), m_stackSizeInBytes(stackLength * sizeof(uint32_t)) {
+        Runnable(const uint32_t *stack, const size_t stackLength)
+            : m_stack(stack), m_stackSizeInBytes(stackLength * sizeof(uint32_t)) {
         }
 
     protected:
         const uint32_t *m_stack;
         size_t         m_stackSizeInBytes;
-
-    private:
-        void *get_stack_top () const {
-            return (void *) (m_stack + (m_stackSizeInBytes >> 2) - 1);
-        }
-
-    private:
-        _thread_state_t m_threadData;
 };
 
 }

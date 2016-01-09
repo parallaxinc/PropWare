@@ -81,7 +81,7 @@ install(FILES ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build-win32/spin2cpp.exe
 # PropWare & libpropeller includes
 install(DIRECTORY
         ${PROJECT_SOURCE_DIR}/PropWare
-        ${PROJECT_SOURCE_DIR}/libpropeller
+        ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller
     DESTINATION PropWare/include
     COMPONENT propware
     FILES_MATCHING PATTERN *.h
@@ -92,22 +92,9 @@ install(DIRECTORY
     PATTERN xmm-single EXCLUDE
     PATTERN xmm-split EXCLUDE
     PATTERN PropWare/tests/bin EXCLUDE
-    PATTERN libpropeller/source EXCLUDE
-    PATTERN libpropeller/compile_tools EXCLUDE
-    PATTERN libpropeller/unity_tools/asmsrc EXCLUDE)
+    PATTERN libpropeller/libpropeller/compile_tools EXCLUDE
+    PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
 
-# Simple includes
-install(DIRECTORY
-        ${PROJECT_SOURCE_DIR}/simple/
-    DESTINATION PropWare/include
-    COMPONENT propware
-    FILES_MATCHING PATTERN *.h
-    PATTERN cog EXCLUDE
-    PATTERN cmm EXCLUDE
-    PATTERN lmm EXCLUDE
-    PATTERN xmmc EXCLUDE
-    PATTERN xmm-single EXCLUDE
-    PATTERN xmm-split EXCLUDE)
 install(FILES
         ${PROJECT_SOURCE_DIR}/version.txt
     DESTINATION PropWare

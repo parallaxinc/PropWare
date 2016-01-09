@@ -31,7 +31,7 @@ wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSu
 wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1 -Opropware.zip
 wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
-unzip prowpare.zip
+unzip propware.zip
 unzip examples.zip
 sudo mv OSXCMake /usr/local
 sudo mv PropWare /usr/local
@@ -48,7 +48,7 @@ wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSu
 wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1 -Opropware.zip
 wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
-unzip prowpare.zip
+unzip propware.zip
 unzip examples.zip
 sudo mv /usr/local/OSXCMake /usr/local/OSXCMake.bak
 sudo mv /usr/local/PropWare /usr/local/PropWare.bak

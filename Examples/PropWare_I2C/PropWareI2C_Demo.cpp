@@ -21,7 +21,7 @@
 
 #include <PropWare/i2c.h>
 #include <PropWare/printer/printer.h>
-#include <simple/simpletools.h>
+#include <simpletools.h>
 
 const uint8_t MAGIC_ARRAY[] = "DCBA0";
 const size_t  ARRAY_SIZE    = sizeof(MAGIC_ARRAY);
