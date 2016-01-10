@@ -4,21 +4,39 @@
  * @author  David Zemon
  */
 
+#include <PropWare/runnable.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/printer/synchronousprinter.h>
 #include <PropWare/port.h>
 #include <PropWare/pin.h>
 
-void run_cog (void *arg);
+const uint16_t     COGS             = 8;
+const uint16_t     STACK_SIZE       = 128;
+const unsigned int DELAY_IN_SECONDS = 2;
+const uint32_t     WAIT_TIME        = DELAY_IN_SECONDS * SECOND;
 
-const uint16_t         COGS       = 8;
-const uint16_t         STACK_SIZE = 128;
-static uint32_t        cog_stack[STACK_SIZE][COGS];
-static _thread_state_t thread_data;
+class SyncedPrinterCog: public PropWare::Runnable {
+    public:
+        template<size_t N>
+        SyncedPrinterCog(const uint32_t (&stack)[N])
+            : Runnable(stack) {
+        }
 
-volatile uint32_t wait_time = SECOND;
-volatile bool     syncStart = false;
-volatile uint32_t startCnt;
+
+        virtual void run() override {
+            const PropWare::Port::Mask pinMaskOfCogId = (PropWare::Port::Mask) (1 << (cogid() + 16));
+            uint32_t                   nextCnt;
+
+            nextCnt = WAIT_TIME + CNT;
+            while (1) {
+                // Visual recognition that the cog is running
+                PropWare::Pin::flash_pin(pinMaskOfCogId, 3);
+
+                pwSyncOut.printf("Hello from cog %d\n", cogid());
+                nextCnt = waitcnt2(nextCnt, WAIT_TIME);
+            }
+        }
+};
 
 /**
  * @example     SynchronousPrinter_Demo.cpp
@@ -27,48 +45,26 @@ volatile uint32_t startCnt;
  *
  * @include PropWare_SynchronousPrinter/CMakeLists.txt
  */
-int main (int argc, char *argv[]) {
-    int8_t   n;
-    int8_t   cog;
-    uint32_t nextCnt;
+int main(int argc, char *argv[]) {
+    const uint32_t   stacks[COGS][STACK_SIZE] = {{0}};
+    SyncedPrinterCog syncedPrinterCogs[]      = {
+        SyncedPrinterCog(stacks[0]),
+        SyncedPrinterCog(stacks[1]),
+        SyncedPrinterCog(stacks[2]),
+        SyncedPrinterCog(stacks[3]),
+        SyncedPrinterCog(stacks[4]),
+        SyncedPrinterCog(stacks[5]),
+        SyncedPrinterCog(stacks[6]),
+        SyncedPrinterCog(stacks[7])
+    };
 
-    // If the comm port was not initialized successfully,
-    // just sit here and complain
+    // If the comm port was not initialized successfully, just sit here and complain
     if (!pwSyncOut.has_lock())
         while (1)
             PropWare::Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
 
-    for (n = 1; n < COGS; n++) {
-        cog = (int8_t) _start_cog_thread(cog_stack[n] + sizeof(cog_stack[n]), run_cog, NULL, &thread_data);
-        pwSyncOut.printf("Toggle COG %d Started\n", cog);
-    }
+    for (uint8_t n = 1; n < COGS; n++)
+        PropWare::Runnable::invoke(syncedPrinterCogs[n]);
 
-    startCnt = CNT;
-    syncStart = true;
-    nextCnt = wait_time + startCnt;
-    while (1) {
-        // Visual recognition that the cog is running
-        PropWare::Pin::flash_pin((PropWare::Port::Mask) (1 << (cogid() + 16)), 3);
-
-        pwSyncOut.printf("Hello from cog %d\n", cogid());
-        nextCnt = waitcnt2(nextCnt, wait_time);
-    }
-    return 0;
-}
-
-void run_cog (void *arg) {
-    uint32_t      nextCnt;
-    const PropWare::Port::Mask pinMaskOfCogId = (PropWare::Port::Mask) (1 << (cogid() + 16));
-
-    // wait for start signal from main cog
-    while (!syncStart);
-
-    nextCnt = wait_time + startCnt;
-    while (1) {
-        // Visual recognition that the cog is running
-        PropWare::Pin::flash_pin(pinMaskOfCogId, 3);
-
-        pwSyncOut.printf("Hello from cog %d\n", cogid());
-        nextCnt = waitcnt2(nextCnt, wait_time);
-    }
+    syncedPrinterCogs[0].run();
 }

@@ -57,6 +57,10 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
     DESTINATION .
     USE_SOURCE_PERMISSIONS
     COMPONENT win_cmake)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_OSX_CMAKE_INSTALL_DIR}/CMake.app/
+    DESTINATION pwcmake.app
+    USE_SOURCE_PERMISSIONS
+    COMPONENT osx_cmake)
 
 install(DIRECTORY CMakeModules/
     DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
@@ -65,7 +69,7 @@ install(DIRECTORY CMakeModules/
     DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
     COMPONENT win_cmake)
 install(DIRECTORY CMakeModules/
-    DESTINATION ${CUSTOM_OSX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
+    DESTINATION pwcmake.app/Contents/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
     COMPONENT osx_cmake)
 
 # Spin2cpp
@@ -85,16 +89,10 @@ install(DIRECTORY
     DESTINATION PropWare/include
     COMPONENT propware
     FILES_MATCHING PATTERN *.h
-    PATTERN cog EXCLUDE
-    PATTERN cmm EXCLUDE
-    PATTERN lmm EXCLUDE
-    PATTERN xmmc EXCLUDE
-    PATTERN xmm-single EXCLUDE
-    PATTERN xmm-split EXCLUDE
-    PATTERN PropWare/tests/bin EXCLUDE
     PATTERN libpropeller/libpropeller/compile_tools EXCLUDE
     PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
 
+# Version file
 install(FILES
         ${PROJECT_SOURCE_DIR}/version.txt
     DESTINATION PropWare
