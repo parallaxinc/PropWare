@@ -13,9 +13,10 @@
 const uint16_t EXTRA_COGS = 7;
 const uint16_t STACK_SIZE = 128;
 
-const uint32_t    wait_time = SECOND;
-volatile bool     syncStart = false;
-volatile uint32_t startCnt;
+const unsigned int DELAY_IN_SECONDS = 2;
+const uint32_t     wait_time        = DELAY_IN_SECONDS * SECOND;
+volatile bool      syncStart        = false;
+volatile uint32_t  startCnt;
 
 class ExtraPrintingCog: public PropWare::Runnable {
     public:
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
     int8_t           cog;
     uint32_t         nextCnt;
     const uint32_t   stacks[EXTRA_COGS][STACK_SIZE] = {{0}};
-    ExtraPrintingCog extraCogs[]                        = {
+    ExtraPrintingCog extraCogs[]                    = {
         ExtraPrintingCog(stacks[0]),
         ExtraPrintingCog(stacks[1]),
         ExtraPrintingCog(stacks[2]),
@@ -65,8 +66,7 @@ int main(int argc, char *argv[]) {
         ExtraPrintingCog(stacks[6])
     };
 
-    // If the comm port was not initialized successfully,
-    // just sit here and complain
+    // If the comm port was not initialized successfully, just sit here and complain
     if (!pwSyncOut.has_lock())
         while (1)
             PropWare::Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
@@ -79,11 +79,13 @@ int main(int argc, char *argv[]) {
     startCnt  = CNT;
     syncStart = true;
     nextCnt   = wait_time + startCnt;
+    uint32_t timer = 0;
     while (1) {
         // Visual recognition that the cog is running
         PropWare::Pin::flash_pin((PropWare::Port::Mask) (1 << (cogid() + 16)), 3);
 
-        pwSyncOut.printf("Hello from cog %d\n", cogid());
+        pwSyncOut.printf("Hello from cog %d ; time = %d s\n", cogid(), timer);
+        timer += DELAY_IN_SECONDS;
         nextCnt = waitcnt2(nextCnt, wait_time);
     }
 }
