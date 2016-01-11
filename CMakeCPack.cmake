@@ -32,12 +32,14 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
 set(CPACK_DEBIAN_PACKAGE_PROVIDES "cmake")
 
 # NSIS Specific
-set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-set(CPACK_NSIS_HELP_LINK "http://david.zemon.name/PropWare")
-set(CPACK_NSIS_URL_INFO_ABOUT "http://david.zemon.name/PropWare")
-set(CPACK_NSIS_CONTACT "David Zemon <david@zemon.name>")
-set(CPACK_NSIS_INSTALL_ROOT C:)
-set(CPACK_PACKAGE_INSTALL_DIRECTORY PropWare)
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL  ON)
+set(CPACK_NSIS_HELP_LINK                        "http://david.zemon.name/PropWare")
+set(CPACK_NSIS_URL_INFO_ABOUT                   "http://david.zemon.name/PropWare")
+set(CPACK_NSIS_CONTACT                          "David Zemon <david@zemon.name>")
+set(CPACK_NSIS_MUI_ICON                         "${PROJECT_SOURCE_DIR}/docs/images/PropWare_Logo.ico")
+set(CPACK_NSIS_MUI_UNIICON                      "${PROJECT_SOURCE_DIR}/docs/images/PropWare_Logo.ico")
+set(CPACK_NSIS_INSTALL_ROOT                     C:)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY             PropWare)
 set(CPACK_PACKAGE_EXECUTABLES
     "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake" CMake
     "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI"
@@ -63,7 +65,7 @@ set(CPACK_COMPONENT_CMAKE_DESCRIPTION               "Complete CMake installation
 set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME           "Examples")
 set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION            "Examples projects for each of PropWare, Simple and libpropeller using the PropWare build system")
 set(CPACK_COMPONENT_WIN_CMAKE_DISPLAY_NAME          "${CPACK_COMPONENT_CMAKE_DISPLAY_NAME}")
-set(CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION           "${CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION}")
+set(CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION           "${CPACK_COMPONENT_CMAKE_DESCRIPTION}")
 set(CPACK_COMPONENT_LINUX_SPIN2CPP_DISPLAY_NAME     "Spin2Cpp")
 set(CPACK_COMPONENT_LINUX_SPIN2CPP_DESCRIPTION      "Compile Spin files for use in C/C++ projects")
 set(CPACK_COMPONENT_WIN_SPIN2CPP_DISPLAY_NAME       "${CPACK_COMPONENT_LINUX_SPIN2CPP_DISPLAY_NAME}")
