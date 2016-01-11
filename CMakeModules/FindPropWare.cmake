@@ -79,28 +79,16 @@ if (NOT PropWare_FOUND)
     # Libraries to link
     ###############################
 
-    if (DEFINED PROPWARE_MAIN_PACKAGE)
+    if (PROPWARE_MAIN_PACKAGE)
         set(PROPWARE_PATH                               "${CMAKE_CURRENT_LIST_DIR}/..")
         set(CMAKE_TOOLCHAIN_FILE                        "${PROPWARE_PATH}/CMakeModules/PropellerToolchain.cmake")
         set(PropWare_INCLUDE_DIR                        "${PROPWARE_PATH}" "${PROPWARE_PATH}/libpropeller")
-        set(PropWare_PropWare_COG_LIBRARY               PropWare_cog)
-        set(PropWare_PropWare_CMM_LIBRARY               PropWare_cmm)
-        set(PropWare_PropWare_LMM_LIBRARY               PropWare_lmm)
-        set(PropWare_PropWare_XMMC_LIBRARY              PropWare_xmmc)
-        set(PropWare_PropWare_XMM-SPLIT_LIBRARY         PropWare_xmm-split)
-        set(PropWare_PropWare_XMM-SINGLE_LIBRARY        PropWare_xmm-single)
-        set(PropWare_Libpropeller_COG_LIBRARY           Libpropeller_cog)
-        set(PropWare_Libpropeller_CMM_LIBRARY           Libpropeller_cmm)
-        set(PropWare_Libpropeller_LMM_LIBRARY           Libpropeller_lmm)
-        set(PropWare_Libpropeller_XMMC_LIBRARY          Libpropeller_xmmc)
-        set(PropWare_Libpropeller_XMM-SPLIT_LIBRARY     Libpropeller_xmm-split)
-        set(PropWare_Libpropeller_XMM-SINGLE_LIBRARY    Libpropeller_xmm-single)
-        set(PropWare_Simple_COG_LIBRARY                 Simple_cog)
-        set(PropWare_Simple_CMM_LIBRARY                 Simple_cmm)
-        set(PropWare_Simple_LMM_LIBRARY                 Simple_lmm)
-        set(PropWare_Simple_XMMC_LIBRARY                Simple_xmmc)
-        set(PropWare_Simple_XMM-SPLIT_LIBRARY           Simple_xmm-split)
-        set(PropWare_Simple_XMM-SINGLE_LIBRARY          Simple_xmm-single)
+        foreach (component PropWare Libpropeller Simple)
+            foreach (model cog cmm lmm xmmc xmm-split xmm-single)
+                string(TOUPPER ${model} upper_model)
+                set(PropWare_${component}_${upper_model}_LIBRARY ${component}_${model})
+            endforeach()
+        endforeach()
     else ()
         if (NOT DEFINED PROPWARE_PATH
             OR NOT EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h"
@@ -111,83 +99,66 @@ if (NOT PropWare_FOUND)
                     ./CMakePropWareInstall.cmake  # We're either looking for PropWare's root source folder
                     include/PropWare/PropWare.h   # ... or we're looking for the key PropWare header in a system folder
                 PATHS
-                    # If we're working inside the PropWare project...
-                    ${CMAKE_CURRENT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../.. # This one used for projects in the Examples directory
-
-                    # Or outside the PropWare project
-                    $ENV{PROPWARE_PATH} # Check the environment first
-                    ${CMAKE_ROOT}/../../../PropWare # Or finally, go with the installed version next to pwcmake
+                    "$ENV{PROPWARE_PATH}" # Check the environment first
+                    "${CMAKE_ROOT}/../../../PropWare" # Or go with the installed version next to pwcmake
             )
         endif ()
 
         find_file(CMAKE_TOOLCHAIN_FILE PropellerToolchain.cmake
             PATHS
-                ${PROPWARE_PATH}/CMakeModules
-                ${CMAKE_ROOT}/Modules)
+                "${PROPWARE_PATH}/CMakeModules"
+                "${CMAKE_ROOT}/Modules")
 
         # Include directory
         if (EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h")
-            set(PropWare_INCLUDE_DIR ${PROPWARE_PATH}/include)
+            set(PropWare_INCLUDE_DIR "${PROPWARE_PATH}/include")
         else ()
-            set(PropWare_INCLUDE_DIR ${PROPWARE_PATH})
+            set(PropWare_INCLUDE_DIR "${PROPWARE_PATH}")
         endif ()
 
         include("${PROPWARE_PATH}/lib/PropWare-targets.cmake")
         if (PropWare_FIND_COMPONENTS)
             # If we're using componentized search, only grab the requested libraries
-            foreach (comp ${PropWare_FIND_COMPONENTS})
+            foreach (component IN LISTS PropWare_FIND_COMPONENTS)
                 foreach (model cog cmm lmm xmmc xmm-split xmm-single)
                     string(TOUPPER ${model} upper_model)
-                    if (NOT TARGET ${comp}_${model})
-                        set(PropWare_${comp}_FOUND 0)
-                        if (PropWare_FIND_REQUIRED_${comp})
-                            message(FATAL_ERROR "PropWare's ${comp} component not available due to missing ${comp}_${model}")
-                        endif ()
+                    if (TARGET ${component}_${model})
+                        set(PropWare_${component}_FOUND 1)
+                        set(PropWare_${component}_${upper_model}_LIBRARY ${component}_${model})
                     else ()
-                        set(PropWare_${comp}_FOUND 1)
-                        set(PropWare_${comp}_${upper_model}_LIBRARY ${comp}_${model})
+                        set(PropWare_${component}_FOUND 0)
+                        if (PropWare_FIND_REQUIRED_${component})
+                            message(FATAL_ERROR "PropWare's ${component} component not available due to missing ${component}_${model}")
+                        endif ()
                     endif ()
                 endforeach ()
             endforeach ()
         else ()
             # If we're not using componentized search, grab them all
-            set(PropWare_PropWare_COG_LIBRARY               PropWare_cog)
-            set(PropWare_PropWare_CMM_LIBRARY               PropWare_cmm)
-            set(PropWare_PropWare_LMM_LIBRARY               PropWare_lmm)
-            set(PropWare_PropWare_XMMC_LIBRARY              PropWare_xmmc)
-            set(PropWare_PropWare_XMM-SPLIT_LIBRARY         PropWare_xmm-split)
-            set(PropWare_PropWare_XMM-SINGLE_LIBRARY        PropWare_xmm-single)
-            set(PropWare_Libpropeller_COG_LIBRARY           Libpropeller_cog)
-            set(PropWare_Libpropeller_CMM_LIBRARY           Libpropeller_cmm)
-            set(PropWare_Libpropeller_LMM_LIBRARY           Libpropeller_lmm)
-            set(PropWare_Libpropeller_XMMC_LIBRARY          Libpropeller_xmmc)
-            set(PropWare_Libpropeller_XMM-SPLIT_LIBRARY     Libpropeller_xmm-split)
-            set(PropWare_Libpropeller_XMM-SINGLE_LIBRARY    Libpropeller_xmm-single)
-            set(PropWare_Simple_COG_LIBRARY                 Simple_cog)
-            set(PropWare_Simple_CMM_LIBRARY                 Simple_cmm)
-            set(PropWare_Simple_LMM_LIBRARY                 Simple_lmm)
-            set(PropWare_Simple_XMMC_LIBRARY                Simple_xmmc)
-            set(PropWare_Simple_XMM-SPLIT_LIBRARY           Simple_xmm-split)
-            set(PropWare_Simple_XMM-SINGLE_LIBRARY          Simple_xmm-single)
+            foreach (component PropWare Libpropeller Simple)
+                foreach (model cog cmm lmm xmmc xmm-split xmm-single)
+                    string(TOUPPER ${model} upper_model)
+                    set(PropWare_${component}_${upper_model}_LIBRARY ${component}_${model})
+                endforeach()
+            endforeach()
         endif ()
     endif ()
 
-    if (NOT "${PROPWARE_PATH}" STREQUAL "PROPWARE_PATH-NOTFOUND")
+    if (PROPWARE_PATH)
         find_file(PropWare_DAT_SYMBOL_CONVERTER CMakeDatSymbolConverter.cmake
             PATHS
-                ${PROPWARE_PATH}/CMakeModules
-                ${CMAKE_ROOT}/Modules)
+                "${PROPWARE_PATH}/CMakeModules"
+                "${CMAKE_ROOT}/Modules")
         find_file(PropWare_SPIN2DAT_SYMBOL_CONVERTER CMakeSpin2DatSymbolConverter.cmake
             PATHS
-                ${PROPWARE_PATH}/CMakeModules
-                ${CMAKE_ROOT}/Modules)
+                "${PROPWARE_PATH}/CMakeModules"
+                "${CMAKE_ROOT}/Modules")
         find_file(PROPWARE_RUN_OBJCOPY CMakeRunObjcopy.cmake
             PATHS
-                ${PROPWARE_PATH}/CMakeModules
-                ${CMAKE_ROOT}/Modules)
+                "${PROPWARE_PATH}/CMakeModules"
+                "${CMAKE_ROOT}/Modules")
         find_program(SPIN2CPP_COMMAND spin2cpp
-            ${PROPWARE_PATH})
+            "${PROPWARE_PATH}")
 
         set(PropWare_LIBRARIES
             # Built-ins
@@ -237,7 +208,7 @@ if (NOT PropWare_FOUND)
             ${PropWare_Libpropeller_XMM-SPLIT_LIBRARY}
             ${PropWare_Simple_XMM-SPLIT_LIBRARY})
 
-        file(READ ${PROPWARE_PATH}/version.txt PropWare_VERSION)
+        file(READ "${PROPWARE_PATH}/version.txt" PropWare_VERSION)
         string(STRIP ${PropWare_VERSION} PropWare_VERSION)
 
         ##########################################
@@ -265,11 +236,11 @@ if (NOT PropWare_FOUND)
                     set(linker_language CXX)
                 else ()
                     message(FATAL_ERROR
-                        "PropWare requires at linking with C or CXX. Please enable at least one of those languages")
+                        "PropWare requires linking with C or CXX. Please enable at least one of those languages")
                 endif ()
             endif ()
 
-            SET_TARGET_PROPERTIES(${target}
+            SET_TARGET_PROPERTIES("${target}"
                 PROPERTIES
                 LINKER_LANGUAGE
                 ${linker_language})
@@ -452,13 +423,13 @@ if (NOT PropWare_FOUND)
         endmacro()
 
         macro (create_executable name src1)
-            add_executable(${name} ${src1} ${ARGN})
+            add_executable(${name} "${src1}" ${ARGN})
             set_propware_flags(${name})
             add_prop_targets_with_name(${name})
         endmacro()
 
         macro (create_simple_executable name src1)
-            add_executable(${name} ${src1} ${ARGN})
+            add_executable(${name} "${src1}" ${ARGN})
             set_propware_flags(${name})
 
             if (PROPWARE_MAIN_PACKAGE)
@@ -473,7 +444,7 @@ if (NOT PropWare_FOUND)
     enable_testing()
     add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
     macro(create_test target src1)
-        create_executable(${target} ${src1} ${ARGN})
+        create_executable(${target} "${src1}" ${ARGN})
         add_test(NAME ${target}
             COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
         add_dependencies(test-all ${target})
