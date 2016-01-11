@@ -23,7 +23,7 @@ class SyncedPrinterCog: public PropWare::Runnable {
         }
 
 
-        virtual void run() override {
+        virtual void run() {
             const PropWare::Port::Mask pinMaskOfCogId = (PropWare::Port::Mask) (1 << (cogid() + 16));
             uint32_t                   nextCnt;
 
