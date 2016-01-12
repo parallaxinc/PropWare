@@ -7,45 +7,47 @@ set(CPACK_GENERATOR
 
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 set(CPACK_INSTALL_CMAKE_PROJECTS
-    ${CMAKE_BINARY_DIR}
-    ${PROJECT_NAME}
+    "${CMAKE_BINARY_DIR}"
+    "${PROJECT_NAME}"
     ALL
-    /)
-set(CPACK_PACKAGE_VENDOR "David Zemon")
-set(CPACK_PACKAGE_CONTACT "David Zemon <david@zemon.name>")
-set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+    /
+)
+set(CPACK_PROJECT_URL                           "http://david.zemon.name/PropWare")
+set(CPACK_PACKAGE_VENDOR                        "David Zemon")
+set(CPACK_PACKAGE_CONTACT                       "David Zemon <david@zemon.name>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY           "C++ objects and CMake build system for Parallax Propeller")
+set(CPACK_RESOURCE_FILE_README                  "${PROJECT_SOURCE_DIR}/README.md")
+set(CPACK_CMAKE_GENERATOR                       "Unix Makefiles")
+set(CPACK_PACKAGE_VERSION_MAJOR                 ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR                 ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH                 ${PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION
     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ objects and CMake build system for Parallax Propeller")
-
-set(CPACK_CMAKE_GENERATOR "Unix Makefiles")
-set(CPACK_RESOURCE_FILE_README ${PROJECT_SOURCE_DIR}/README.md)
 
 # Debian Specific
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://david.zemon.name/PropWare")
-#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_cmake_PACKAGE_DEPENDS "make, libc6 (>= 2.3.2), libidn11 (>= 1.13), libx11-6, libxext6")
-set(CPACK_DEBIAN_PACKAGE_SECTION devel)
-set(CPACK_DEBIAN_PACKAGE_PRIORITY optional)
-set(CPACK_DEBIAN_PACKAGE_PROVIDES "cmake")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE               "${CPACK_PROJECT_URL}")
+#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS              ON)
+set(CPACK_DEBIAN_cmake_PACKAGE_DEPENDS          "make, libc6 (>= 2.3.2), libidn11 (>= 1.13), libx11-6, libxext6")
+set(CPACK_DEBIAN_PACKAGE_SECTION                devel)
+set(CPACK_DEBIAN_PACKAGE_PRIORITY               optional)
+set(CPACK_DEBIAN_PACKAGE_PROVIDES               "cmake")
 
 # NSIS Specific
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL  ON)
-set(CPACK_NSIS_HELP_LINK                        "http://david.zemon.name/PropWare")
-set(CPACK_NSIS_URL_INFO_ABOUT                   "http://david.zemon.name/PropWare")
-set(CPACK_NSIS_CONTACT                          "David Zemon <david@zemon.name>")
+set(CPACK_NSIS_HELP_LINK                        "${CPACK_PROJECT_URL}")
+set(CPACK_NSIS_URL_INFO_ABOUT                   "${CPACK_PROJECT_URL}")
+set(CPACK_NSIS_CONTACT                          "${CPACK_PACKAGE_CONTACT}")
 set(CPACK_NSIS_MUI_ICON                         "${PROJECT_SOURCE_DIR}/docs/images/PropWare_Logo.ico")
 set(CPACK_NSIS_MUI_UNIICON                      "${PROJECT_SOURCE_DIR}/docs/images/PropWare_Logo.ico")
 set(CPACK_NSIS_INSTALL_ROOT                     C:)
-set(CPACK_PACKAGE_INSTALL_DIRECTORY             PropWare)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY             PropWare) # Required because default contains spaces and version number
+set(CPACK_NSIS_EXECUTABLES_DIRECTORY            .)
+set(CPACK_NSIS_MODIFY_PATH                      ON)
 set(CPACK_PACKAGE_EXECUTABLES
-    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake" CMake
-    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI"
-    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\ctest" CTest
-    "..\\\\${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cpack" CPack)
-set(CPACK_NSIS_MODIFY_PATH ON)
+    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake" CMake
+    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI"
+    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\ctest" CTest
+    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cpack" CPack)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6, libxext6")
