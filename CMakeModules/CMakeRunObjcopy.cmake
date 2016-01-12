@@ -24,7 +24,7 @@ string(SUBSTRING ${SHORT_NAME} 1 ${SHORT_NAME_LEN} SHORT_NAME)
 file(RENAME "${FILE}" "${WORKING_DIR}/${SHORT_NAME}")
 
 # Object copy
-if (${VERBOSE})
+if (ENV{VERBOSE})
     message("${OBJCOPY} --localize-text --rename-section .text=${SHORT_NAME} ${SHORT_NAME}")
 endif()
 execute_process(

@@ -7,13 +7,12 @@ cmake_minimum_required(VERSION 3.0)
 # OBJCOPY   GCC's objcopy executable
 # SOURCE    File for objcopy to run over
 # OUTPUT    Output file
-# VERBOSE   If 1, command is echoed
 
 
 get_filename_component(WORKING_DIR "${OUTPUT}" DIRECTORY)
 get_filename_component(WORKING_DIR "${WORKING_DIR}" ABSOLUTE)
 
-if (VERBOSE)
+if (ENV{VERBOSE})
     message("${SPIN2CPP_COMMAND} --dat ${SOURCE}")
 endif ()
 execute_process(
@@ -37,7 +36,7 @@ else ()
     set(DAT_FILE_PATH "${WORKING_DIR}/${DAT_FILE_NAME}")
 
     execute_process(
-        COMMAND ${CMAKE_COMMAND} "-DOBJCOPY=${OBJCOPY}" "-DSOURCE=${DAT_FILE_PATH}" "-DOUTPUT=${OUTPUT}" -DVERBOSE=${VERBOSE} -P "${PropWare_DAT_SYMBOL_CONVERTER}"
+        COMMAND ${CMAKE_COMMAND} "-DOBJCOPY=${OBJCOPY}" "-DSOURCE=${DAT_FILE_PATH}" "-DOUTPUT=${OUTPUT}" -P "${PropWare_DAT_SYMBOL_CONVERTER}"
         RESULT_VARIABLE CMD_PASS
     )
     if (CMD_PASS)

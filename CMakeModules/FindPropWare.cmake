@@ -105,9 +105,9 @@ if (NOT PropWare_FOUND)
         endif ()
 
         find_file(CMAKE_TOOLCHAIN_FILE PropellerToolchain.cmake
-            PATHS
-                "${PROPWARE_PATH}/CMakeModules"
-                "${CMAKE_ROOT}/Modules")
+            PATHS "${CMAKE_ROOT}/Modules")
+        find_program(CMAKE_MAKE_PROGRAM make
+            PATHS "${PROPWARE_PATH}")
 
         # Include directory
         if (EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h")
