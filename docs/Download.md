@@ -60,7 +60,7 @@ unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
 sudo mv pwcmake.app /Applications
-sudo mv PropWare /usr/local
+sudo mv PropWare /Applications
 sudo ln -s /Applications/pwcmake.app/Contents/bin/cmake /usr/local/bin/cmake
 sudo ln -s /Applications/pwcmake.app/Contents/bin/ccmake /usr/local/bin/ccmake
 sudo ln -s /Applications/pwcmake.app/Contents/bin/cmake-gui /usr/local/bin/cmake-gui
@@ -78,9 +78,9 @@ unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
 sudo mv /Applications/pwcmake.app /Applications/pwcmake.app.bak
-sudo mv /usr/local/PropWare /usr/local/PropWare.bak
+sudo mv /Applications/PropWare /Applications/PropWare.bak
 sudo mv OSXCMake /Applications
-sudo mv PropWare /usr/local
+sudo mv PropWare /Applications
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once you have confirmed that the new installation works as expected, remove the old one with the following two lines.
@@ -88,7 +88,7 @@ NOTE: A command that starts with `sudo rm -rf` has the potential to be _very_ da
 if you corrupt your system. Be careful.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
 sudo rm -rf /Applications/pwcmake.app.bak
-sudo rm -rf /usr/local/PropWare.bak
+sudo rm -rf /Applications/PropWare.bak
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [1]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1
