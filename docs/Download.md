@@ -1,6 +1,32 @@
 Download {#Download}
 ========
 
+SimpleIDE (Any Operating System)
+--------------------------------
+
+The following steps explain how to use PropWare's libraries - including PropWare, Simple, and libpropeller - in 
+a SimpleIDE project. Steps 2 and onward must be repeated for every new project in SimpleIDE.
+
+1. Download the [libraries and header files][1]. Extract the contents to a known location on your disk - this 
+   location will be referred to as `<PROPWARE_PATH>` for throughout these steps.
+2. Set SimpleIDE to "Project view":
+   1. Open the "Tools" menu and choose "Properties"
+   2. Open the "General" tab and ensure "View Mode" is checked. Press "OK".
+   3. Open the "Tools" menu and:<br />
+      If the first option is "Set Simple View", then ignore it and press anywhere to exit the menu.<br />
+      If the first option is "Set Project View", then select the first option.
+3. Ensure project source files end with `.cpp` not `.c`.
+4. From the "Project" menu, choose "Add Include Path". Select `<PROPWARE_PATH>/include` and then press the "Open" 
+   button.
+5. From the "Project" menu, choose "Add Library Path". Select `<PROPWARE_PATH>/lib` and then press the "Open" button.
+6. Project Options
+   * "Compiler Type" = `C`  
+7. Compiler
+   * "Enable Pruning" = `True`
+   * "Other Compiler Options" = `-std=gnu++0x -fno-rtti -fno-threadsafe-statics`
+8. Linker
+   * "Other Linker Options" = `-lPropWare -lLibpropeller -lSimple`
+
 Microsoft Windows
 -----------------
 1. Download [PropWare for Windows][2].
@@ -65,6 +91,7 @@ sudo rm -rf /Applications/pwcmake.app.bak
 sudo rm -rf /usr/local/PropWare.bak
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+[1]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1
 [2]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.exe?guest=1
 [3]: http://www.computerhope.com/issues/ch000549.htm
 [4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.deb?guest=1
