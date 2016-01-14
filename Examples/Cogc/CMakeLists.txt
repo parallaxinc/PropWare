@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.3)
 find_package(PropWare 2.0.0 REQUIRED)
 
 set(MODEL cog)

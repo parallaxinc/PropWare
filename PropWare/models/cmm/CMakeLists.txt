@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.0.0)
-
 set(MODEL cmm)
 set_compile_flags()
 
