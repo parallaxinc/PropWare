@@ -34,7 +34,6 @@ set(CPACK_NSIS_MUI_UNIICON                      "${PROJECT_SOURCE_DIR}/docs/imag
 set(CPACK_NSIS_INSTALL_ROOT                     C:)
 set(CPACK_PACKAGE_INSTALL_DIRECTORY             PropWare) # Required because default contains spaces and version number
 set(CPACK_NSIS_EXECUTABLES_DIRECTORY            .)
-set(CPACK_NSIS_MODIFY_PATH                      ON)
 set(CPACK_PACKAGE_EXECUTABLES
     "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake" CMake
     "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI"
