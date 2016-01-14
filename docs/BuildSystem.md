@@ -2,12 +2,12 @@ Build System {#BuildSystem}
 ============
 
 Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
-Remember that %PropWare requires CMake 3.0+.
+Remember that %PropWare requires CMake 3.3+.
 
 Bare Minimum
 ------------
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-cmake_minimum_required (VERSION 3.0.0)
+cmake_minimum_required (VERSION 3.3)
 find_package(PropWare REQUIRED)
 
 project(HelloWorld)
@@ -37,30 +37,19 @@ following files:
 * avionics.S
 * rf_transceiver.ecogc
 
-We're also going to compile all ECOGC files with the `--bogus` flag because... we can.
-
 Our CMakeLists.txt file might look something like this:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-################################################################################
-### Template code. Do not modify                                               #
-                                                                               #
-cmake_minimum_required (VERSION 3.0.0)                                         #
-# Aside from cmake_minimum_required, this must be the first two lines          #
-# of the file                                                                  #
-file(TO_CMAKE_PATH $ENV{PROPWARE_PATH} PROPWARE_PATH)                          #
-include(${PROPWARE_PATH}/CMakePropellerHeader.cmake)                           #
-################################################################################
+cmake_minimum_required (VERSION 3.3)
+find_package(PropWare REQUIRED)
 
 set(BOARD QUICKSTART)
 set(MODEL cmm)
-set(COMMON_FLAGS "-Os")
-set(ECOGC_FLAGS "--bogus")
 
 project(Quadcopter C CXX ASM ECOGC)
 
-create_simple_executable(${PROJECT_NAME} 
-    ${PROJECT_NAME}
-    motor_drivers
+create_simple_executable(Quadcopter 
+    Quadcopter.cpp
+    motor_drivers.c
     avionics.S
     rf_transceiver.ecogc)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,8 +61,7 @@ create_simple_executable(${PROJECT_NAME}
 * MODEL: \[default: `lmm`\] This option should be one of `cog`, `cmm`, `lmm`, `xmm-single`, `xmm-split`, or `xmmc`. Read 
   more about PropGCC's memory models [here](https://code.google.com/p/propgcc/wiki/PropGccInDepth).
 * COMMON_FLAGS: Any options applied to the `COMMON_FLAGS` variable will be applied to assembly, C and C++ files.
-  This includes `cogc`, `ecogc`, `cogcpp`, and `ecogcpp` but not `Spin`. Your optimization level should be set here to 
-  apply across your entire project.
+  This includes `cogc`, `ecogc`, `cogcpp`, and `ecogcpp` but not `Spin`.
 
 ### Project Languages
 CMake will default to enabling only C and C++ in your project. If your project uses more than these two languages, 
@@ -149,27 +137,6 @@ Sets the C standard to C99. Equivalent to adding "-std=c99" to `C_FLAGS`
 \[default: ON\]
 
 Sets the C++ standard to gnu++0x. Equivalent to adding "-std=gnu++0x" to `CXX_FLAGS`.
-
-### LINK_LIBPROPELLER
-\[default: ON\]
-
-Link the target executable with the libpropeller library. 
-
-### LINK_PROPWARE
-\[default: ON\]
-
-Link the target executable with the %PropWare library.
-
-### LINK_SIMPLE
-\[default: ON\]
-
-Link the target executable with the Simple library.
-
-### LINK_TINY
-\[default: OFF\]
-
-Link the target executable with the tiny library. Note: tiny has been deprecated by Parallax in favor of `print` and 
-`printi`.
 
 Default Compile Flags
 ---------------------

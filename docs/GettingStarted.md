@@ -52,7 +52,7 @@ Starting a New Project
    CMake standards. Full details on CMake files in relation to %PropWare are documented under
    [Build System](@ref BuildSystem), but a typical use case with four source code files is provided below.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cmake}
-   cmake_minimum_required (VERSION 3.0.0)
+   cmake_minimum_required (VERSION 3.3)
    find_package(PropWare REQUIRED)
 
    project(Quadcopter C CXX ASM ECOGC)
