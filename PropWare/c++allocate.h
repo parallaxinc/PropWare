@@ -1,7 +1,6 @@
-#ifndef PROPGCC_SRLM_CPLUSPLUS_ALLOC_H_
-#define PROPGCC_SRLM_CPLUSPLUS_ALLOC_H_
+#pragma once
 
-#include <cstdlib>
+#include <stdlib.h>
 #include <new>
 
 using std::new_handler;
@@ -20,7 +19,7 @@ while (p == 0)
   {
     new_handler handler = __new_handler;
     if (! handler)
-      std::abort();
+      ::abort();
     handler ();
     // FIXME: Replace std namespace when GCCv5+ C++ headers are installed
     p = (void *) ::malloc (sz);
@@ -50,5 +49,3 @@ new_handler prev_handler = __new_handler;
 __new_handler = handler;
 return prev_handler;
 }
-
-#endif // PROPGCC_SRLM_CPLUSPLUS_ALLOC_H_
