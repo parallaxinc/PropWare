@@ -24,14 +24,6 @@ set(CPACK_PACKAGE_VERSION_PATCH                 ${PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION
     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
-# Debian Specific
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE               "${CPACK_PROJECT_URL}")
-#set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS              ON)
-set(CPACK_DEBIAN_cmake_PACKAGE_DEPENDS          "make, libc6 (>= 2.3.2), libidn11 (>= 1.13), libx11-6, libxext6")
-set(CPACK_DEBIAN_PACKAGE_SECTION                devel)
-set(CPACK_DEBIAN_PACKAGE_PRIORITY               optional)
-set(CPACK_DEBIAN_PACKAGE_PROVIDES               "cmake")
-
 # NSIS Specific
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL  ON)
 set(CPACK_NSIS_HELP_LINK                        "${CPACK_PROJECT_URL}")
@@ -49,10 +41,19 @@ set(CPACK_PACKAGE_EXECUTABLES
     "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\ctest" CTest
     "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cpack" CPack)
 
+# Debian Specific
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE               "${CPACK_PROJECT_URL}")
+set(CPACK_DEBIAN_PACKAGE_SECTION                devel)
+set(CPACK_DEBIAN_PACKAGE_PRIORITY               optional)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS              ON)
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS             "make")
+set(CPACK_DEBIAN_PACKAGE_REPLACES               "cmake")
+
 # RPM Specific
-set(CPACK_RPM_PACKAGE_REQUIRES "make, libc6 >= 2.3.2, libidn11 >= 1.13, libx11-6, libxext6")
-set(CPACK_RPM_PACKAGE_PROVIDES "cmake")
-set(CPACK_PACKAGE_RELOCATABLE ON)
+set(CPACK_RPM_PACKAGE_URL                       "${CPACK_PROJECT_URL}")
+set(CPACK_RPM_PACKAGE_SUGGESTS                  "make")
+set(CPACK_RPM_PACKAGE_OBSOLETES                 "cmake")
+set(CPACK_PACKAGE_RELOCATABLE                   ON)
 
 # Components
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
