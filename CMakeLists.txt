@@ -1,16 +1,20 @@
-cmake_minimum_required (VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.3)
 
 set(PROPWARE_MAIN_PACKAGE TRUE)
 
 # Get the PropWare version
-file(READ ${CMAKE_CURRENT_LIST_DIR}/version.txt VERSION)
+file(READ "${CMAKE_CURRENT_LIST_DIR}/version.txt" VERSION)
 string(STRIP ${VERSION} VERSION)
 
-# Load special modules
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/CMakeModules)
-find_package(PropWare ${VERSION} REQUIRED)
+if (DEFINED ENV{BUILD_NUMBER} AND NOT DEFINED ENV{PROPWARE_RELEASE})
+    set(VERSION "${VERSION}.$ENV{BUILD_NUMBER}")
+endif ()
 
-# Allow using `if (VAR IN_LIST MY_LIST)`
+# Load special modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
+find_package(PropWare REQUIRED)
+
+# Allow using `if (VAR IN_LIST MY_LIST)`. Requires CMake 3.3
 cmake_policy(SET CMP0057 NEW)
 
 # Set the project, version number and all languages used
@@ -26,8 +30,8 @@ add_subdirectory(test)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     add_custom_target(docs
-        ${DOXYGEN_EXECUTABLE} Doxyfile
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        "${DOXYGEN_EXECUTABLE}" Doxyfile
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endif ()
 
 include(ExternalProject)
