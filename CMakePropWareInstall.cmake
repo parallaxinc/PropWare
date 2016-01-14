@@ -93,8 +93,9 @@ install(DIRECTORY
     PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
 
 # Version file
+file(WRITE "${PROJECT_BINARY_DIR}/version.txt" "${PROJECT_VERSION}")
 install(FILES
-        ${PROJECT_SOURCE_DIR}/version.txt
+        "${PROJECT_BINARY_DIR}/version.txt"
     DESTINATION PropWare
     COMPONENT propware)
 
