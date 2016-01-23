@@ -60,6 +60,8 @@ class Eeprom: public PrintCapable,
               m_deviceAddress(deviceAddress),
               m_autoIncrement(autoIncrement) { }
 
+        virtual ~Eeprom() { }
+
         /**
          * @brief       Check that the EEPROM is responding
          *
@@ -135,6 +137,22 @@ class Eeprom: public PrintCapable,
             while (!this->ping());
 
             return this->m_driver->get(this->m_deviceAddress, address);
+        }
+
+        /**
+         * @brief       Read an array of sequential bytes from EEPROM
+         *
+         * @param[in]   address     Address of the first byte in EEPROM
+         * @param[in]   *buffer     Address in HUB memory to store data
+         * @param[in]   length      Number of bytes to read
+         *
+         * @returns     True if successful, false otherwise
+         */
+        bool get(const uint16_t address, uint8_t *buffer, const size_t length) {
+            // Wait for any current operation to finish
+            while (!this->ping());
+
+            return this->m_driver->get(this->m_deviceAddress, address, buffer, length);
         }
 
         /**
