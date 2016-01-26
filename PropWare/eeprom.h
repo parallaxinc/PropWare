@@ -60,8 +60,6 @@ class Eeprom: public PrintCapable,
               m_deviceAddress(deviceAddress),
               m_autoIncrement(autoIncrement) { }
 
-        virtual ~Eeprom() { }
-
         /**
          * @brief       Check that the EEPROM is responding
          *
