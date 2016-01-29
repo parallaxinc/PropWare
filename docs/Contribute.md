@@ -3,7 +3,7 @@ Contribute to %PropWare {#Contribute}
 
 Code contributions can be made by either [contacting David Zemon](mailto:david@zemon.name) or forking the repository 
 and creating a pull request. If you'd like to help but don't know how, start by perusing the 
-[issue tracker](https://github.com/DavidZemon/PropWare/issues/) and finding something that piques your interest.
+[issue tracker](https://github.com/parallaxinc/PropWare/issues/) and finding something that piques your interest.
 
 Before submitting your pull request, please be sure to read the following guidelines for %PropWare's codebase. 
 
