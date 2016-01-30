@@ -438,6 +438,12 @@ if (NOT PropWare_FOUND)
                 add_prop_targets(${name})
             endif ()
         endmacro()
+
+        macro(create_library name src1)
+            add_library(${name} "${src1}" ${ARGN})
+            set_compile_flags()
+            set_linker(${name})
+        endmacro()
     endif ()
 
     # TODO: Add build system documentation for testing
