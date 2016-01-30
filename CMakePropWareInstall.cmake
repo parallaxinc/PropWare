@@ -63,6 +63,9 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_OSX_CMAKE_INSTALL_DIR}/CMake.app/
     COMPONENT osx_cmake)
 
 install(DIRECTORY CMakeModules/
+    DESTINATION Modules
+    COMPONENT standalone-cmake)
+install(DIRECTORY CMakeModules/
     DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
     COMPONENT cmake)
 install(DIRECTORY CMakeModules/
