@@ -185,13 +185,13 @@ TEST(ManyElements) {
         } else {
             ASSERT_EQ_MSG(SIZE, testable->size());
         }
-        ASSERT_EQ_MSG(i, testable->m_array[testable->m_head]);
+        ASSERT_EQ_MSG((int) i, testable->m_array[testable->m_head]);
     }
 
     // Dequeue many elements
     const size_t      DEQUEUE_LOOP_START = TEST_SIZE - SIZE;
     for (unsigned int i                  = DEQUEUE_LOOP_START; i < TEST_SIZE; ++i) {
-        ASSERT_EQ_MSG(i, testable->dequeue());
+        ASSERT_EQ_MSG((int) i, testable->dequeue());
     }
 
     tearDown();
