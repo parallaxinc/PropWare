@@ -21,6 +21,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/motor/stepper
     ${CMAKE_CURRENT_LIST_DIR}/pcf8591
     ${CMAKE_CURRENT_LIST_DIR}/pin
+    ${CMAKE_CURRENT_LIST_DIR}/ping
     ${CMAKE_CURRENT_LIST_DIR}/port
     ${CMAKE_CURRENT_LIST_DIR}/printcapable
     ${CMAKE_CURRENT_LIST_DIR}/printer/printer
