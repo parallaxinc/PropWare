@@ -25,7 +25,10 @@
 
 #include <PropWare/ws2812.h>
 
-const PropWare::Pin::Mask LED_TX_PIN_MASK = PropWare::Pin::P27;
+const PropWare::Pin::Mask    LED_TX_PIN_MASK = PropWare::Pin::P0;
+const PropWare::WS2812::Type LED_TYPE        = PropWare::WS2812::GRB;
+const unsigned int           MAX_BRIGHTNESS  = 0x0C0C0C;
+
 /**
  * @example     WS2812_Demo.cpp
  *
@@ -33,15 +36,15 @@ const PropWare::Pin::Mask LED_TX_PIN_MASK = PropWare::Pin::P27;
  *
  * @include PropWare_WS2812/CMakeLists.txt
  */
-int main () {
-    const PropWare::WS2812 led(LED_TX_PIN_MASK, PropWare::WS2812::GRB);
+int main() {
+    const PropWare::WS2812 led(LED_TX_PIN_MASK, LED_TYPE);
 
     const int delay = 40 * MILLISECOND;
     while (1) {
         unsigned int i;
 
         // Go bright
-        for (i = 0; i < 0x101010; i += 0x010101) {
+        for (i = 0; i < MAX_BRIGHTNESS; i += 0x010101) {
             led.send(i);
             waitcnt(delay + CNT);
         }
@@ -53,4 +56,3 @@ int main () {
         }
     }
 }
-
