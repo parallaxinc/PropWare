@@ -157,6 +157,10 @@ if (NOT PropWare_FOUND)
             PATHS
                 "${PROPWARE_PATH}/CMakeModules"
                 "${CMAKE_ROOT}/Modules")
+        find_file(ELF_SIZER CMakeElfSizer.cmake
+            PATHS
+                "${PROPWARE_PATH}/CMakeModules"
+                "${CMAKE_ROOT}/Modules")
         find_program(SPIN2CPP_COMMAND spin2cpp
             "${PROPWARE_PATH}")
 
@@ -344,61 +348,31 @@ if (NOT PropWare_FOUND)
 
         endmacro()
 
-        macro (add_prop_targets name)
+        macro (add_prop_targets name target-suffix)
 
             # Add target for debugging (load to RAM and start GDB)
-            add_custom_target(gdb
+            add_custom_target(gdb${target-suffix}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -g &&
                     ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}-exe>
                     DEPENDS ${name})
 
             # Add target for debugging (load to RAM and start terminal)
-            add_custom_target(debug
+            add_custom_target(debug${target-suffix}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t
                     DEPENDS ${name})
 
             # Add target for debugging in EEPROM (load to EEPROM and start terminal)
-            add_custom_target(debug-eeprom
+            add_custom_target(debug-eeprom${target-suffix}
                 ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t -e
                 DEPENDS ${name})
 
             # Add target for run (load to RAM, do not start terminal)
-            add_custom_target(run-ram
+            add_custom_target(run-ram${target-suffix}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r
                     DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
-            add_custom_target(run
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -e
-                    DEPENDS ${name})
-
-        endmacro()
-
-        macro (add_prop_targets_with_name name)
-
-            # Add target for debugging (load to RAM and start GDB)
-            add_custom_target(gdb-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}-exe>
-                    DEPENDS ${name})
-
-            # Add target for run (load to RAM and start terminal)
-            add_custom_target(debug-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t
-                    DEPENDS ${name})
-
-            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
-            add_custom_target(debug-eeprom-${name}
-                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t -e
-                DEPENDS ${name})
-
-            # Add target for run (load to RAM, do not start terminal)
-            add_custom_target(run-ram-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r
-                    DEPENDS ${name})
-
-            # Add target for run (load to EEPROM, do not start terminal)
-            add_custom_target(run-${name}
+            add_custom_target(run${target-suffix}
                     ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -e
                     DEPENDS ${name})
 
@@ -421,33 +395,25 @@ if (NOT PropWare_FOUND)
             endif ()
         endmacro()
 
-        macro (create_executable name src1)
-            add_executable(${name}-exe "${src1}" ${ARGN})
+        macro (_pw_create_executable name suffix src1)
+            add_executable("${name}-exe" "${src1}" ${ARGN})
+            set_property(TARGET "${name}-exe" PROPERTY OUTPUT_NAME "${name}.elf")
             set_propware_flags(${name}-exe)
-            add_prop_targets_with_name(${name})
-            if (ELFSIZER)
-                add_custom_target(${name} ALL
-                    COMMAND "${ELFSIZER}" "--input=$<TARGET_FILE:${name}-exe>" "--objdump=${CMAKE_OBJDUMP}"
-                    DEPENDS ${name}-exe)
-            else ()
-                add_custom_target(${name} ALL
-                    DEPENDS ${name}-exe)
-            endif ()
+            add_prop_targets(${name} "${suffix}")
+            add_custom_target(${name} ALL
+                COMMAND "${CMAKE_COMMAND}" "-DBINARY=$<TARGET_FILE:${name}-exe>" "-DSIZE_EXE=${CMAKE_ELF_SIZE}" -P "${ELF_SIZER}"
+                DEPENDS ${name}-exe)
+        endmacro ()
+
+        macro (create_executable name src1)
+            _pw_create_executable("${name}" "-${name}" "${src1}" ${ARGN})
         endmacro()
 
         macro (create_simple_executable name src1)
-            add_executable(${name}-exe "${src1}" ${ARGN})
-            set_propware_flags(${name}-exe)
-
             if (PROPWARE_MAIN_PACKAGE)
-                add_prop_targets_with_name(${name})
+                _pw_create_executable("${name}" "-${name}" "${src1}" ${ARGN})
             else ()
-                add_prop_targets(${name})
-            endif ()
-            if (ELFSIZER)
-                add_custom_target(${name} ALL
-                    COMMAND "${ELFSIZER}" "--input=$<TARGET_FILE:${name}-exe>" "--objdump=${CMAKE_OBJDUMP}"
-                    DEPENDS ${name}-exe)
+                _pw_create_executable("${name}" "" "${src1}" ${ARGN})
             endif ()
         endmacro()
 

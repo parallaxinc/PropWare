@@ -65,6 +65,9 @@ find_program(CMAKE_ELF_LOADER propeller-load
 find_program(CMAKE_GDB propeller-elf-gdb
     PATHS "${GCC_PATH}"
     NO_SYSTEM_ENVIRONMENT_PATH)
+find_program(CMAKE_ELF_SIZE propeller-elf-size
+    PATHS "${GCC_PATH}"
+    NO_SYSTEM_ENVIRONMENT_PATH)
 
 find_program(ELFSIZER elfsizer
     PATHS "${GCC_PATH}")
