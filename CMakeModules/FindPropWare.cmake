@@ -325,7 +325,6 @@ if (NOT PropWare_FOUND)
             if (NOT COMMON_FLAGS_SET)
                 set(COMMON_FLAGS_SET 1)
                 set(COMMON_FLAGS "-save-temps ${COMMON_FLAGS}")
-                #set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=main.rawmap ${CMAKE_EXE_LINKER_FLAGS}")
             endif ()
 
             # Overwite the old flags
@@ -349,28 +348,28 @@ if (NOT PropWare_FOUND)
 
             # Add target for debugging (load to RAM and start GDB)
             add_custom_target(gdb
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -g &&
+                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}-exe>
                     DEPENDS ${name})
 
             # Add target for debugging (load to RAM and start terminal)
             add_custom_target(debug
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t
                     DEPENDS ${name})
 
             # Add target for debugging in EEPROM (load to EEPROM and start terminal)
             add_custom_target(debug-eeprom
-                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t -e
                 DEPENDS ${name})
 
             # Add target for run (load to RAM, do not start terminal)
             add_custom_target(run-ram
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r
                     DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -e
                     DEPENDS ${name})
 
         endmacro()
@@ -379,37 +378,37 @@ if (NOT PropWare_FOUND)
 
             # Add target for debugging (load to RAM and start GDB)
             add_custom_target(gdb-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -g &&
+                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}-exe>
                     DEPENDS ${name})
 
             # Add target for run (load to RAM and start terminal)
             add_custom_target(debug-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t
                     DEPENDS ${name})
 
             # Add target for debugging in EEPROM (load to EEPROM and start terminal)
             add_custom_target(debug-eeprom-${name}
-                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -t -e
                 DEPENDS ${name})
 
             # Add target for run (load to RAM, do not start terminal)
             add_custom_target(run-ram-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r
                     DEPENDS ${name})
 
             # Add target for run (load to EEPROM, do not start terminal)
             add_custom_target(run-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}-exe> -r -e
                     DEPENDS ${name})
 
         endmacro()
 
-        macro(set_propware_flags projectName)
+        macro(set_propware_flags target)
             set_compile_flags()
             string(TOUPPER ${MODEL} UPPER_MODEL)
-            target_link_libraries(${projectName} ${PropWare_${UPPER_MODEL}_LIBRARIES})
-            set_linker(${projectName})
+            target_link_libraries(${target} ${PropWare_${UPPER_MODEL}_LIBRARIES})
+            set_linker(${target})
 
             if (DEFINED BOARD)
                 set(BOARDFLAG -b${BOARD})
@@ -423,19 +422,32 @@ if (NOT PropWare_FOUND)
         endmacro()
 
         macro (create_executable name src1)
-            add_executable(${name} "${src1}" ${ARGN})
-            set_propware_flags(${name})
+            add_executable(${name}-exe "${src1}" ${ARGN})
+            set_propware_flags(${name}-exe)
             add_prop_targets_with_name(${name})
+            if (ELFSIZER)
+                add_custom_target(${name} ALL
+                    COMMAND "${ELFSIZER}" "--input=$<TARGET_FILE:${name}-exe>" "--objdump=${CMAKE_OBJDUMP}"
+                    DEPENDS ${name}-exe)
+            else ()
+                add_custom_target(${name} ALL
+                    DEPENDS ${name}-exe)
+            endif ()
         endmacro()
 
         macro (create_simple_executable name src1)
-            add_executable(${name} "${src1}" ${ARGN})
-            set_propware_flags(${name})
+            add_executable(${name}-exe "${src1}" ${ARGN})
+            set_propware_flags(${name}-exe)
 
             if (PROPWARE_MAIN_PACKAGE)
                 add_prop_targets_with_name(${name})
             else ()
                 add_prop_targets(${name})
+            endif ()
+            if (ELFSIZER)
+                add_custom_target(${name} ALL
+                    COMMAND "${ELFSIZER}" "--input=$<TARGET_FILE:${name}-exe>" "--objdump=${CMAKE_OBJDUMP}"
+                    DEPENDS ${name}-exe)
             endif ()
         endmacro()
 
@@ -452,7 +464,7 @@ if (NOT PropWare_FOUND)
     macro(create_test target src1)
         create_executable(${target} "${src1}" ${ARGN})
         add_test(NAME ${target}
-            COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
+            COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}-exe> -r -t -q)
         add_dependencies(test-all ${target})
         add_custom_target(test-${target}
             COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
