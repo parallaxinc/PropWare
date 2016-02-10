@@ -32,14 +32,17 @@ set(CMAKE_AR_FLAGS "cr")
 ################################################################################
 ### Compilers
 ################################################################################
+if (CMAKE_VERSION VERSION_EQUAL "3.4.0" OR CMAKE_VERSION VERSION_GREATER "3.4.0")
+    set(INCLUDES "<INCLUDES>")
+endif ()
 set(CMAKE_C_COMPILE_OBJECT
-"<CMAKE_C_COMPILER> <DEFINES> ${CMAKE_C_FLAGS_INIT} <FLAGS> -o <OBJECT> -c <SOURCE>")
+"<CMAKE_C_COMPILER> <DEFINES> ${CMAKE_C_FLAGS_INIT} <FLAGS> ${INCLUDES} -o <OBJECT> -c <SOURCE>")
 
 set(CMAKE_CXX_COMPILE_OBJECT
-"<CMAKE_CXX_COMPILER> <DEFINES> ${CMAKE_CXX_FLAGS_INIT} <FLAGS> -o <OBJECT> -c <SOURCE>")
+"<CMAKE_CXX_COMPILER> <DEFINES> ${CMAKE_CXX_FLAGS_INIT} <FLAGS> ${INCLUDES} -o <OBJECT> -c <SOURCE>")
 
 set(CMAKE_ASM_COMPILE_OBJECT
-"<CMAKE_ASM_COMPILER> <DEFINES> ${CMAKE_ASM_FLAGS_INIT} <FLAGS> -o <OBJECT> -c <SOURCE>")
+"<CMAKE_ASM_COMPILER> <DEFINES> ${CMAKE_ASM_FLAGS_INIT} <FLAGS> ${INCLUDES} -o <OBJECT> -c <SOURCE>")
 
 ################################################################################
 ### Linkers

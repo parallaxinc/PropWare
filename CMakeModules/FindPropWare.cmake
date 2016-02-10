@@ -54,10 +54,6 @@
 # SOFTWARE.
 #==============================================================================
 
-if ("${CMAKE_VERSION}" STREQUAL "3.4.0" OR "${CMAKE_VERSION}" STREQUAL "3.4.1")
-    message(FATAL_ERROR "PropWare is not compatible with CMake 3.4.0 or 3.4.1. Please downgrade to CMake 3.3.2.")
-endif ()
-
 set(CMAKE_CONFIGURATION_TYPES None
     CACHE TYPE INTERNAL FORCE)
 
