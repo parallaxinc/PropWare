@@ -87,8 +87,7 @@ if (NOT PropWare_FOUND)
         endforeach()
     else ()
         if (NOT DEFINED PROPWARE_PATH
-            OR NOT EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h"
-            OR NOT EXISTS "${PROPWARE_PATH}/CMakePropWareInstall.cmake")
+            OR NOT EXISTS "${PROPWARE_PATH}/lib/PropWare-targets.cmake")
 
             find_path(PROPWARE_PATH
                 NAMES
@@ -418,6 +417,50 @@ if (NOT PropWare_FOUND)
             set_compile_flags()
             set_linker(${name})
         endmacro()
+
+        function(spin2cpp source output_var_name)
+            get_filename_component(SOURCE_PATH "${source}" ABSOLUTE)
+
+            # Find output files
+            execute_process(COMMAND "${SPIN2CPP_COMMAND}" --files "${SOURCE_PATH}"
+                OUTPUT_VARIABLE FILES_STRING
+                RESULT_VARIABLE SPIN2CPP_DEPENDS_CODE
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+            if (SPIN2CPP_DEPENDS_CODE)
+                message(FATAL_ERROR "Spin2cpp failed to report dependencies. Exit code ${SPIN2CPP_DEPENDS_CODE}")
+            endif ()
+
+            # Convert output files from newline-separated list to CMake list
+            string(REPLACE "\r" "" OUTPUT_FILE_NAMES "${FILES_STRING}")
+            string(REPLACE "\n" ";" OUTPUT_FILE_NAMES "${OUTPUT_FILE_NAMES}")
+            foreach (file_name IN LISTS OUTPUT_FILE_NAMES)
+                list(APPEND ALL_OUTPUT_FILES "${CMAKE_CURRENT_BINARY_DIR}/${file_name}")
+            endforeach ()
+
+            # Only save new files in the "output list" variable and add to the clean target
+            foreach (file_path IN LISTS ALL_OUTPUT_FILES)
+                list(FIND FILES_GENERATED_IN_DIRECTORY ${file_path} INDEX)
+                if ("-1" STREQUAL INDEX)
+                    list(APPEND FILES_GENERATED_IN_DIRECTORY "${file_path}")
+                    list(APPEND UNIQUE_OUTPUT_FILES "${file_path}")
+                endif ()
+            endforeach ()
+            set(FILES_GENERATED_IN_DIRECTORY ${FILES_GENERATED_IN_DIRECTORY} PARENT_SCOPE)
+            set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${FILES_GENERATED_IN_DIRECTORY}")
+
+            if (UNIQUE_OUTPUT_FILES)
+                if (ARGN)
+                    set(MAIN_FLAG "--main")
+                endif ()
+                add_custom_command(OUTPUT ${UNIQUE_OUTPUT_FILES}
+                    COMMAND "${SPIN2CPP_COMMAND}"
+                    ARGS --gas ${MAIN_FLAG} "${SOURCE_PATH}"
+                    MAIN_DEPENDENCY "${SOURCE_PATH}"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                    COMMENT "Converting ${source} to C++")
+            endif ()
+            set(${output_var_name} ${UNIQUE_OUTPUT_FILES} PARENT_SCOPE)
+        endfunction()
     endif ()
 
     # TODO: Add build system documentation for testing
