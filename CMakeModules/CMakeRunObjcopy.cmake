@@ -7,6 +7,8 @@ cmake_minimum_required(VERSION 3.0)
 
 get_filename_component(WORKING_DIR ${FILE} DIRECTORY)
 get_filename_component(FILE_NAME ${FILE} NAME)
+get_filename_component(MODULES_DIR "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
+set(LOCALIZE_LIST_FILE "${MODULES_DIR}/PropellerCogLocalizeSymbols.txt")
 
 string(REPLACE "." ";" NAME_COMPONENTS ${FILE_NAME})
 list(LENGTH NAME_COMPONENTS NUM_COMPONENTS)
@@ -25,10 +27,10 @@ file(RENAME "${FILE}" "${WORKING_DIR}/${SHORT_NAME}")
 
 # Object copy
 if (ENV{VERBOSE})
-    message("${OBJCOPY} --localize-text --rename-section .text=${SHORT_NAME} ${SHORT_NAME}")
+    message("${OBJCOPY} --localize-text --localize-symbols=${LOCALIZE_LIST_FILE} --rename-section .text=${SHORT_NAME} ${SHORT_NAME}")
 endif()
 execute_process(
-    COMMAND ${OBJCOPY} --localize-text --rename-section .text=${SHORT_NAME} ${SHORT_NAME}
+    COMMAND "${OBJCOPY}" --localize-text "--localize-symbols=${LOCALIZE_LIST_FILE}" --rename-section .text=${SHORT_NAME} ${SHORT_NAME}
     WORKING_DIRECTORY "${WORKING_DIR}"
     RESULT_VARIABLE CMD_PASS)
 if (${RESULT})
