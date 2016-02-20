@@ -1,5 +1,3 @@
-message(STATUS "LOADED: Generic-gcc-Propeller.cmake")
-
 ################################################################################
 ### Set Compile Flags
 ################################################################################
@@ -57,7 +55,8 @@ set(CMAKE_C_ARCHIVE_FINISH
 "<CMAKE_RANLIB> <TARGET>")
 
 set(CMAKE_C_LINK_EXECUTABLE
-"<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> -o<TARGET> <OBJECTS> <LINK_LIBRARIES>")
+"<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> -o<TARGET> <OBJECTS> <LINK_LIBRARIES>"
+"${CMAKE_COMMAND} -DBINARY=<TARGET> -DSIZE_EXE=${CMAKE_ELF_SIZE} -P ${ELF_SIZER}")
 
 mark_as_advanced(
     CMAKE_BUILD_TYPE

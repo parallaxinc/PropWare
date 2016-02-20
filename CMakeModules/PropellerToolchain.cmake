@@ -69,7 +69,7 @@ find_program(CMAKE_ELF_SIZE propeller-elf-size
     PATHS "${GCC_PATH}"
     NO_SYSTEM_ENVIRONMENT_PATH)
 
-find_program(ELFSIZER elfsizer
+find_program(ELF_SIZER elfsizer
     PATHS "${GCC_PATH}")
 
 set(CMAKE_COGC_COMPILER "${CMAKE_C_COMPILER}")
