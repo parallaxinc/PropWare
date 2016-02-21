@@ -1,3 +1,6 @@
+# Turn off warnings for code that I don't own
+set(WARN_ALL OFF)
+
 ####################################################################
 # Find libpropeller sources
 ####################################################################
