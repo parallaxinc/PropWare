@@ -88,7 +88,6 @@ if (NOT PropWare_FOUND)
     else ()
         if (NOT DEFINED PROPWARE_PATH
             OR NOT EXISTS "${PROPWARE_PATH}/lib/PropWare-targets.cmake")
-
             find_path(PROPWARE_PATH
                 NAMES
                     ./CMakePropWareInstall.cmake  # We're either looking for PropWare's root source folder
@@ -214,7 +213,6 @@ if (NOT PropWare_FOUND)
         # PropWare helper functions & macros
         ##########################################
         function (set_linker target)
-
             function (list_contains result request)
               set (${result} FALSE PARENT_SCOPE)
               foreach (listItem ${ARGN})
@@ -243,12 +241,9 @@ if (NOT PropWare_FOUND)
                 PROPERTIES
                 LINKER_LANGUAGE
                 ${linker_language})
-
         endfunction ()
 
         macro (set_compile_flags)
-            include_directories(${PropWare_INCLUDE_DIR})
-
             if (AUTO_OTPIMIZATION)
                 if (NOT AUTO_OTPIMIZATION_SET)
                     set(AUTO_OTPIMIZATION_SET 1)
@@ -340,8 +335,7 @@ if (NOT PropWare_FOUND)
             set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS}   -m${MODEL}")
             set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -m${MODEL}")
             set(CMAKE_DAT_FLAGS     "${MODEL}")
-
-        endmacro()
+        endmacro ()
 
         function (add_prop_targets name target-suffix)
             if (DEFINED BOARD)
@@ -404,6 +398,7 @@ if (NOT PropWare_FOUND)
         macro (_pw_create_executable name suffix src1)
             # Set flags
             set_compile_flags()
+            include_directories(${PropWare_INCLUDE_DIR})
 
             # Create the binary
             add_executable("${name}" "${src1}" ${ARGN})
@@ -432,6 +427,7 @@ if (NOT PropWare_FOUND)
         macro(create_library name src1)
             add_library(${name} "${src1}" ${ARGN})
             set_compile_flags()
+            include_directories(${PropWare_INCLUDE_DIR})
             set_linker(${name})
         endmacro()
 
@@ -478,20 +474,20 @@ if (NOT PropWare_FOUND)
             endif ()
             set(${output_var_name} ${UNIQUE_OUTPUT_FILES} PARENT_SCOPE)
         endfunction()
-    endif ()
 
-    # TODO: Add build system documentation for testing
-    enable_testing()
-    add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
-    macro(create_test target src1)
-        create_executable(${target} "${src1}" ${ARGN})
-        add_test(NAME ${target}
-            COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
-        add_dependencies(test-all ${target})
-        add_custom_target(test-${target}
-            COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
-            DEPENDS ${target})
-    endmacro()
+        # TODO: Add build system documentation for testing
+        enable_testing()
+        add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+        macro(create_test target src1)
+            create_executable(${target} "${src1}" ${ARGN})
+            add_test(NAME ${target}
+                COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
+            add_dependencies(test-all ${target})
+            add_custom_target(test-${target}
+                COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
+                DEPENDS ${target})
+        endmacro()
+    endif ()
 
     include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(PropWare
