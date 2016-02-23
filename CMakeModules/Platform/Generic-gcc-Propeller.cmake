@@ -6,7 +6,7 @@
 set(ASMFLAGS_INIT "")
 set(CFLAGS_INIT "")
 set(CSTANDARD "")
-set(CXXFLAGS_INIT "-fno-threadsafe-statics -fno-rtti")
+set(CXXFLAGS_INIT "")
 
 set(CMAKE_ASM_FLAGS_INIT "${ASMFLAGS_INIT}")
 set(CMAKE_C_FLAGS_INIT "${CFLAGS_INIT}")

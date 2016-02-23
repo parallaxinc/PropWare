@@ -61,15 +61,20 @@ if (NOT PropWare_FOUND)
     ###############################
     # Compile options
     ###############################
-    # Compilation options
+    # General options
     option(32_BIT_DOUBLES "Set all doubles to 32-bits (-m32bit-doubles)" ON)
     option(WARN_ALL "Turn on all compiler warnings (-Wall)" ON)
     option(AUTO_C_STD "Set C standard to c99 (-std=c99)" ON)
     option(AUTO_CXX_STD "Set C++ standard to gnu++0x (-std=gnu++0x)" ON)
-    option(AUTO_OTPIMIZATION "Set optimization level to \"size\" (-Os)" ON)
 
-    # Optimize size option
+    # Size optimizations
+    option(AUTO_OTPIMIZATION "Set optimization level to \"size\" (-Os)" ON)
     option(AUTO_CUT_SECTIONS "Cut out unused code (Compile: -ffunction-sections -fdata-sections; Link: --gc-sections)" ON)
+
+    # Language features
+    option(EXCEPTIONS "Enable exceptions (requires hundreds of kilobytes of RAM) (-fexceptions/-fno-exceptions" OFF)
+    option(RUNTIME_TYPE_INFORMATION "Enable runtime type information (-frtti/-fno-rtti)" OFF)
+    option(THREADSAFE_STATICS "Enable threadsafe statics (-fthreadsafe-statics/-fno-threadsafe-statics)" OFF)
 
     ###############################
     # Libraries to link
@@ -279,6 +284,24 @@ if (NOT PropWare_FOUND)
                     set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
                 endif ()
             endif ()
+
+            # C++ Language features
+            macro (add_language_feature_option option_name feature)
+                if (${option_name})
+                    if (NOT ${option_name}_SET)
+                        set(${option_name}_SET 1)
+                        set(CXX_FLAGS "${CXX_FLAGS} -f${feature}")
+                    endif ()
+                else ()
+                    if (NOT ${option_name}_SET)
+                        set(${option_name}_SET 1)
+                        set(CXX_FLAGS "${CXX_FLAGS} -fno-${feature}")
+                    endif ()
+                endif ()
+            endmacro ()
+            add_language_feature_option(EXCEPTIONS exceptions)
+            add_language_feature_option(RUNTIME_TYPE_INFORMATION rtti)
+            add_language_feature_option(THREADSAFE_STATICS threadsafe-statics)
 
             # If no model is specified, we must choose a default so that the proper libraries can be linked
             if (NOT DEFINED MODEL)
