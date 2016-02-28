@@ -488,6 +488,7 @@ if (NOT PropWare_FOUND)
                 if (ARGN)
                     set(MAIN_FLAG "--main")
                 endif ()
+                include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
                 add_custom_command(OUTPUT ${UNIQUE_OUTPUT_FILES}
                     COMMAND "${SPIN2CPP_COMMAND}"
                     ARGS --gas ${MAIN_FLAG} "${SOURCE_PATH}"
