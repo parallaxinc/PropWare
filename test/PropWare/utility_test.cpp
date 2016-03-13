@@ -169,6 +169,48 @@ TEST(MeasureTimeInterval) {
     tearDown();
 }
 
+TEST(BitRead) {
+    const uint32_t x = BIT_0;
+    ASSERT_TRUE(Utility::bit_read(x, BIT_0));
+    ASSERT_FALSE(Utility::bit_read(x, BIT_1));
+
+    const uint32_t y = BIT_1;
+    ASSERT_FALSE(Utility::bit_read(y, BIT_0));
+    ASSERT_TRUE(Utility::bit_read(y, BIT_1));
+
+    const uint32_t z = BIT_31 | BIT_16;
+    ASSERT_FALSE(Utility::bit_read(z, BIT_0));
+    ASSERT_FALSE(Utility::bit_read(z, BIT_1));
+    ASSERT_TRUE(Utility::bit_read(z, BIT_16));
+    ASSERT_TRUE(Utility::bit_read(z, BIT_31));
+
+    tearDown();
+}
+
+TEST(BitWrite) {
+    uint32_t x = 0;
+    Utility::bit_write(x, BIT_0, true);
+    ASSERT_EQ(BIT_0, x);
+
+    Utility::bit_write(x, BIT_1, true);
+    ASSERT_EQ(BIT_0 | BIT_1, x);
+
+    Utility::bit_write(x, BIT_31, true);
+    ASSERT_EQ(BIT_0 | BIT_1 | BIT_31, x);
+
+
+    Utility::bit_write(x, BIT_0, false);
+    ASSERT_EQ(BIT_1 | BIT_31, x);
+
+    Utility::bit_write(x, BIT_1, false);
+    ASSERT_EQ(BIT_31, x);
+
+    Utility::bit_write(x, BIT_31, false);
+    ASSERT_EQ(0, x);
+
+    tearDown();
+}
+
 int main () {
     START(UtilityTest);
 
@@ -180,6 +222,7 @@ int main () {
     RUN_TEST(ToString);
     RUN_TEST(RomLog);
     RUN_TEST(MeasureTimeInterval);
+    RUN_TEST(BitRead);
 
     COMPLETE();
 }
