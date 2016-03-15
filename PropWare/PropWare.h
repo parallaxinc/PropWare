@@ -57,6 +57,22 @@ namespace PropWare {
 #define MILLISECOND         ((uint32_t) (CLKFREQ / 1000))
 #define MICROSECOND         ((uint32_t) (MILLISECOND / 1000))
 
+#ifdef __PROPELLER_COG__
+#define FC_START(start, end)
+#define FC_END(end)
+#define FC_ADDR(to, start) to
+#else
+#define FC_START(start, end) \
+    "        fcache #(" end " - " start ")\n\t" \
+    "        .compress off\n\t" \
+    start ":\n\t"
+#define FC_END(end) \
+    "        jmp __LMM_RET\n\t" \
+    end ":\n\t" \
+    "        .compress default\n\t"
+#define FC_ADDR(to, start) "__LMM_FCACHE_START+(" to " - " start ")"
+#endif
+
 typedef int ErrorCode;
 
 typedef enum {
