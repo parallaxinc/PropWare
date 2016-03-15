@@ -232,10 +232,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
 
 #ifndef DOXYGEN_IGNORE
             __asm__ volatile (
-                    "        fcache #(ShiftInDataEnd - ShiftInDataStart)                    \n\t"
-                    "        .compress off                                                  \n\t"
-
-                    "ShiftInDataStart:                                                      \n\t"
+                    FC_START("ShiftInDataStart", "ShiftInDataEnd")
                     "       shr %[_waitCycles], #1                                          \n\t"
                     "       add %[_waitCycles], %[_bitCycles]                               \n\t"
                     "       waitpne %[_rxMask], %[_rxMask]                                  \n\t"
@@ -247,14 +244,11 @@ class AbstractDuplexUART : public virtual DuplexUART,
                     "       shr %[_data],# 1                                                \n\t"
                     "       test %[_rxMask],ina wz                                          \n\t"
                     "       muxnz %[_data], %[_msbMask]                                     \n\t"
-                    "       djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftInDataStart)  \n\t"
+                    "       djnz %[_bits], #" FC_ADDR("loop%=", "ShiftInDataStart") "       \n\t"
 
                     // Wait for a stop bit
                     "       waitpeq %[_rxMask], %[_rxMask]                                  \n\t"
-
-                    "       jmp __LMM_RET                                                   \n\t"
-                    "ShiftInDataEnd:                                                        \n\t"
-                    "       .compress default                                               \n\t"
+                    FC_END("ShiftInDataEnd")
             :// Outputs
             [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
@@ -285,10 +279,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
 #ifndef DOXYGEN_IGNORE
             // Initialize variables
             __asm__ volatile (
-                    "        fcache #(ShiftInStringEnd - ShiftInStringStart)                            \n\t"
-                    "        .compress off                                                              \n\t"
-
-                    "ShiftInStringStart:                                                                \n\t"
+                    FC_START("ShiftInStringStart", "ShiftInStringEnd")
                     "outerLoop%=:                                                                       \n\t"
                     // Initialize the index variable
                     "       mov %[_bitIdx], %[_bits]                                                    \n\t"
@@ -305,7 +296,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                     "       shr %[_data], #1                                                            \n\t"
                     "       test %[_rxMask], ina wz                                                     \n\t"
                     "       muxnz %[_data], %[_msbMask]                                                 \n\t"
-                    "       djnz %[_bitIdx], #__LMM_FCACHE_START+(innerLoop%= - ShiftInStringStart)     \n\t"
+                    "       djnz %[_bitIdx], #" FC_ADDR("innerLoop%=", "ShiftInStringStart") "          \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       wrbyte %[_data], %[_bufAdr]                                                 \n\t"
@@ -328,11 +319,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
 
                     // Finally, loop to the beginning if the delimiter is not equal to our most recent word and
                     // the buffer is not about to overflow
-                    "if_nz_and_c jmp #__LMM_FCACHE_START+(outerLoop%= - ShiftInStringStart)             \n\t"
-
-                    "       jmp __LMM_RET                                                               \n\t"
-                    "ShiftInStringEnd:                                                                  \n\t"
-                    "       .compress default                                                           \n\t"
+                    "if_nz_and_c jmp #" FC_ADDR("outerLoop%=", "ShiftInStringStart") "                  \n\t"
+                    FC_END("ShiftInStringEnd")
             :// Outputs
             [_bitIdx] "+r"(bitIdx),
             [_waitCycles] "+r"(waitCycles),
@@ -362,14 +350,11 @@ class AbstractDuplexUART : public virtual DuplexUART,
             uint32_t initWaitCycles = (this->m_bitCycles >> 1) + this->m_bitCycles;
 
 #ifndef DOXYGEN_IGNORE
-#define ASMVAR(name) "__LMM_FCACHE_START+("  #name "%= - ShiftInArrayDataStart)"
-
             // Initialize variables
             __asm__ volatile (
-                    "        fcache #(ShiftInArrayDataEnd - ShiftInArrayDataStart)                              \n\t"
-                    "        .compress off                                                                      \n\t"
-                    "ShiftInArrayDataStart:                                                                     \n\t"
-                    "       jmp #__LMM_FCACHE_START+(outerLoop%= - ShiftInArrayDataStart)                       \n\t"
+#define ASMVAR(name) FC_ADDR(#name "%=", "ShiftInArrayDataStart")
+                    FC_START("ShiftInArrayDataStart", "ShiftInArrayDataEnd")
+                    "       jmp #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart") "                            \n\t"
 
                     // Temporary variables
                     "bitIdx%=:                                                                                  \n\t"
@@ -396,7 +381,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                     "       shr " ASMVAR(data) ", #1                                                            \n\t"
                     "       test %[_rxMask], ina wz                                                             \n\t"
                     "       muxnz " ASMVAR(data) ", %[_msbMask]                                                 \n\t"
-                    "       djnz " ASMVAR(bitIdx) ", #__LMM_FCACHE_START+(innerLoop%= - ShiftInArrayDataStart)  \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("innerLoop%=", "ShiftInArrayDataStart") "       \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       wrbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
@@ -408,11 +393,9 @@ class AbstractDuplexUART : public virtual DuplexUART,
 
                     // Wait for the stop bits and the loop back
                     "       waitpeq %[_rxMask], %[_rxMask]                                                      \n\t"
-                    "       djnz %[_length], #__LMM_FCACHE_START+(outerLoop%= - ShiftInArrayDataStart)          \n\t"
-
-                    "       jmp __LMM_RET                                                                       \n\t"
-                    "ShiftInArrayDataEnd:                                                                       \n\t"
-                    "       .compress default                                                                   \n\t"
+                    "       djnz %[_length], #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart") "               \n\t"
+                    FC_END("ShiftInArrayDataEnd")
+#undef ASMVAR
             :// Outputs
             [_bufAdr] "+r"(buffer),
             [_length] "+r"(length)
@@ -422,7 +405,6 @@ class AbstractDuplexUART : public virtual DuplexUART,
             [_bitCycles] "r"(this->m_bitCycles),
             [_initWaitCycles] "r"(initWaitCycles),
             [_msbMask] "r"(this->m_msbMask));
-#undef ASMVAR
 #endif
         }
 

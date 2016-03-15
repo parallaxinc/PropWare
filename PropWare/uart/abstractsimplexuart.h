@@ -194,34 +194,28 @@ class AbstractSimplexUART : public virtual UART {
             switch (this->m_parity) {
                 case UART::NO_PARITY:
                     __asm__ volatile (
-                            "        fcache #(SendArrayEnd%= - SendArrayStart%=)                               \n\t"
-                            "        .compress off                                                             \n\t"
-
+                            FC_START("SendArrayStart%=", "SendArrayEnd%=")
                             // Prepare next word
-                            "SendArrayStart%=:                                                                 \n\t"
-                            "sendArrayLoop%=:"
-                            "        rdbyte %[_data], %[_arrayPtr]                                             \n\t"
+                            "sendArrayLoop%=:                                                                   \n\t"
+                            "        rdbyte %[_data], %[_arrayPtr]                                              \n\t"
                             // Set start & stop bits
-                            "        or %[_data], %[_stopBitMask]                                              \n\t"
-                            "        shl %[_data], #1                                                          \n\t"
+                            "        or %[_data], %[_stopBitMask]                                               \n\t"
+                            "        shl %[_data], #1                                                           \n\t"
 
                             // Send one word
-                            "        mov %[_bits], %[_totalBits]                                               \n\t"
-                            "        mov %[_waitCycles], %[_bitCycles]                                         \n\t"
-                            "        add %[_waitCycles], CNT                                                   \n\t"
-                            "sendWordLoop%=:                                                                   \n\t"
-                            "        waitcnt %[_waitCycles], %[_bitCycles]                                     \n\t"
-                            "        shr %[_data],#1 wc                                                        \n\t"
-                            "        muxc outa, %[_mask]                                                       \n\t"
-                            "        djnz %[_bits], #__LMM_FCACHE_START+(sendWordLoop%= - SendArrayStart%=)    \n\t"
+                            "        mov %[_bits], %[_totalBits]                                                \n\t"
+                            "        mov %[_waitCycles], %[_bitCycles]                                          \n\t"
+                            "        add %[_waitCycles], CNT                                                    \n\t"
+                            "sendWordLoop%=:                                                                    \n\t"
+                            "        waitcnt %[_waitCycles], %[_bitCycles]                                      \n\t"
+                            "        shr %[_data],#1 wc                                                         \n\t"
+                            "        muxc outa, %[_mask]                                                        \n\t"
+                            "        djnz %[_bits], #" FC_ADDR("sendWordLoop%=", "SendArrayStart%=") "          \n\t"
 
                             // Increment the pointer and loop
-                            "        add %[_arrayPtr], #1                                                      \n\t"
-                            "        djnz %[_words], #__LMM_FCACHE_START+(sendArrayLoop%= - SendArrayStart%=)  \n\t"
-
-                            "        jmp __LMM_RET                                                             \n\t"
-                            "SendArrayEnd%=:                                                                   \n\t"
-                            "        .compress default                                                         \n\t"
+                            "        add %[_arrayPtr], #1                                                       \n\t"
+                            "        djnz %[_words], #" FC_ADDR("sendArrayLoop%=", "SendArrayStart%=") "        \n\t"
+                            FC_END("SendArrayEnd%=")
                     : [_data] "+r"(data),
                     [_waitCycles] "+r"(waitCycles),
                     [_arrayPtr] "+r"(arrayPtr),
@@ -234,37 +228,31 @@ class AbstractSimplexUART : public virtual UART {
                     break;
                 case UART::ODD_PARITY:
                     __asm__ volatile (
-                            "        fcache #(SendArrayEnd%= - SendArrayStart%=)                               \n\t"
-                            "        .compress off                                                             \n\t"
-
+                            FC_START("SendArrayStart%=", "SendArrayEnd%=")
                             // Prepare next word
-                            "SendArrayStart%=:                                                                 \n\t"
                             "sendArrayLoop%=:"
-                            "        rdbyte %[_data], %[_arrayPtr]                                             \n\t"
+                            "        rdbyte %[_data], %[_arrayPtr]                                              \n\t"
                             // Set parity
-                            "        test %[_data], %[_dataMask] wc                                            \n\t"
-                            "        muxnc %[_data], %[_parityMask]                                            \n\t"
+                            "        test %[_data], %[_dataMask] wc                                             \n\t"
+                            "        muxnc %[_data], %[_parityMask]                                             \n\t"
                             // Set start & stop bits
-                            "        or %[_data], %[_stopBitMask]                                              \n\t"
-                            "        shl %[_data], #1                                                          \n\t"
+                            "        or %[_data], %[_stopBitMask]                                               \n\t"
+                            "        shl %[_data], #1                                                           \n\t"
 
                             // Send one word
-                            "        mov %[_bits], %[_totalBits]                                               \n\t"
-                            "        mov %[_waitCycles], %[_bitCycles]                                         \n\t"
-                            "        add %[_waitCycles], CNT                                                   \n\t"
-                            "sendWordLoop%=:                                                                   \n\t"
-                            "        waitcnt %[_waitCycles], %[_bitCycles]                                     \n\t"
-                            "        shr %[_data],#1 wc                                                        \n\t"
-                            "        muxc outa, %[_mask]                                                       \n\t"
-                            "        djnz %[_bits], #__LMM_FCACHE_START+(sendWordLoop%= - SendArrayStart%=)    \n\t"
+                            "        mov %[_bits], %[_totalBits]                                                \n\t"
+                            "        mov %[_waitCycles], %[_bitCycles]                                          \n\t"
+                            "        add %[_waitCycles], CNT                                                    \n\t"
+                            "sendWordLoop%=:                                                                    \n\t"
+                            "        waitcnt %[_waitCycles], %[_bitCycles]                                      \n\t"
+                            "        shr %[_data],#1 wc                                                         \n\t"
+                            "        muxc outa, %[_mask]                                                        \n\t"
+                            "        djnz %[_bits], #" FC_ADDR("sendWordLoop%=", "SendArrayStart%=") "          \n\t"
 
                             // Increment the pointer and loop
-                            "        add %[_arrayPtr], #1                                                      \n\t"
-                            "        djnz %[_words], #__LMM_FCACHE_START+(sendArrayLoop%= - SendArrayStart%=)  \n\t"
-
-                            "        jmp __LMM_RET                                                             \n\t"
-                            "SendArrayEnd%=:                                                                   \n\t"
-                            "        .compress default                                                         \n\t"
+                            "        add %[_arrayPtr], #1                                                       \n\t"
+                            "        djnz %[_words], #" FC_ADDR("sendArrayLoop%=", "SendArrayStart%=") "        \n\t"
+                            FC_END("SendArrayEnd%=")
                     : [_data] "+r"(data),
                     [_waitCycles] "+r"(waitCycles),
                     [_arrayPtr] "+r"(arrayPtr),
@@ -279,37 +267,31 @@ class AbstractSimplexUART : public virtual UART {
                     break;
                 case UART::EVEN_PARITY:
                     __asm__ volatile (
-                            "        fcache #(SendArrayEnd%= - SendArrayStart%=)                               \n\t"
-                            "        .compress off                                                             \n\t"
-
+                            FC_START("SendArrayStart%=", "SendArrayEnd%=")
                             // Prepare next word
-                            "SendArrayStart%=:                                                                 \n\t"
                             "sendArrayLoop%=:"
-                            "        rdbyte %[_data], %[_arrayPtr]                                             \n\t"
+                            "        rdbyte %[_data], %[_arrayPtr]                                              \n\t"
                             // Set parity
-                            "        test %[_data], %[_dataMask] wc                                            \n\t"
-                            "        muxc %[_data], %[_parityMask]                                             \n\t"
+                            "        test %[_data], %[_dataMask] wc                                             \n\t"
+                            "        muxc %[_data], %[_parityMask]                                              \n\t"
                             // Set start & stop bits
-                            "        or %[_data], %[_stopBitMask]                                              \n\t"
-                            "        shl %[_data], #1                                                          \n\t"
+                            "        or %[_data], %[_stopBitMask]                                               \n\t"
+                            "        shl %[_data], #1                                                           \n\t"
 
                             // Send one word
-                            "        mov %[_bits], %[_totalBits]                                               \n\t"
-                            "        mov %[_waitCycles], %[_bitCycles]                                         \n\t"
-                            "        add %[_waitCycles], CNT                                                   \n\t"
-                            "sendWordLoop%=:                                                                   \n\t"
-                            "        waitcnt %[_waitCycles], %[_bitCycles]                                     \n\t"
-                            "        shr %[_data],#1 wc                                                        \n\t"
-                            "        muxc outa, %[_mask]                                                       \n\t"
-                            "        djnz %[_bits], #__LMM_FCACHE_START+(sendWordLoop%= - SendArrayStart%=)    \n\t"
+                            "        mov %[_bits], %[_totalBits]                                                \n\t"
+                            "        mov %[_waitCycles], %[_bitCycles]                                          \n\t"
+                            "        add %[_waitCycles], CNT                                                    \n\t"
+                            "sendWordLoop%=:                                                                    \n\t"
+                            "        waitcnt %[_waitCycles], %[_bitCycles]                                      \n\t"
+                            "        shr %[_data],#1 wc                                                         \n\t"
+                            "        muxc outa, %[_mask]                                                        \n\t"
+                            "        djnz %[_bits], #" FC_ADDR("sendWordLoop%=", "SendArrayStart%=") "          \n\t"
 
                             // Increment the pointer and loop
-                            "        add %[_arrayPtr], #1                                                      \n\t"
-                            "        djnz %[_words], #__LMM_FCACHE_START+(sendArrayLoop%= - SendArrayStart%=)  \n\t"
-
-                            "        jmp __LMM_RET                                                             \n\t"
-                            "SendArrayEnd%=:                                                                   \n\t"
-                            "        .compress default                                                         \n\t"
+                            "        add %[_arrayPtr], #1                                                       \n\t"
+                            "        djnz %[_words], #" FC_ADDR("sendArrayLoop%=", "SendArrayStart%=") "        \n\t"
+                            FC_END("SendArrayEnd%=")
                     : [_data] "+r"(data),
                     [_waitCycles] "+r"(waitCycles),
                     [_arrayPtr] "+r"(arrayPtr),
@@ -402,21 +384,15 @@ class AbstractSimplexUART : public virtual UART {
 #ifndef DOXYGEN_IGNORE
             volatile uint32_t waitCycles = bitCycles;
             __asm__ volatile (
-                    "        fcache #(ShiftOutDataEnd%= - ShiftOutDataStart%=)                 \n\t"
-                    "        .compress off                                                     \n\t"
-
-                    "ShiftOutDataStart%=:                                                      \n\t"
+                    FC_START("ShiftOutDataStart%=", "ShiftOutDataEnd%=")
                     "        add %[_waitCycles], CNT                                           \n\t"
 
                     "loop%=:                                                                   \n\t"
                     "        waitcnt %[_waitCycles], %[_bitCycles]                             \n\t"
                     "        shr %[_data],#1 wc                                                \n\t"
                     "        muxc outa, %[_mask]                                               \n\t"
-                    "        djnz %[_bits], #__LMM_FCACHE_START+(loop%= - ShiftOutDataStart%=) \n\t"
-
-                    "        jmp __LMM_RET                                                     \n\t"
-                    "ShiftOutDataEnd%=:                                                        \n\t"
-                    "        .compress default                                                 \n\t"
+                    "        djnz %[_bits], #" FC_ADDR("loop%=", "ShiftOutDataStart%=") "      \n\t"
+                    FC_END("ShiftOutDataEnd%=")
             : [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
             [_bits] "+r"(bits)

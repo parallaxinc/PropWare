@@ -28,11 +28,6 @@
 
 #include <PropWare/pin.h>
 
-#ifdef __PROPELLER_COG__
-#error PropWare::I2CBase is not functional in the Propeller's COG mode! I'm very sorry!
-// TODO: Why doesn't it work? It should. I put guards in place... but they don't seem to help. O-scope time I think
-#endif
-
 namespace PropWare {
 
 /**
@@ -123,11 +118,7 @@ class I2CBase {
             int temp     = 0;
 
             __asm__ volatile(
-#ifndef __PROPELLER_COG__
-            "         fcache #(PutByteEnd - PutByteStart)\n\t"
-                    "         .compress off                  \n\t"
-                    "PutByteStart: "
-#endif
+                    FC_START("PutByteStart", "PutByteEnd")
                     /* Setup for transmit loop */
                     "         mov %[datamask], #256          \n\t" /* 0x100 */
                     "         mov %[result],   #0            \n\t"
@@ -148,11 +139,7 @@ class I2CBase {
                     "         or      dira,       %[SCLMask]    \n\t" // Set SCL low
 
                     //Return for more bits
-#ifdef __PROPELLER_COG__
-                    "         djnz %[datamask], #PutByteLoop%= nr \n\t"
-#else
-                    "         djnz %[datamask], #__LMM_FCACHE_START+(PutByteLoop%=-PutByteStart) nr \n\t"
-#endif
+                    "         djnz %[datamask], #" FC_ADDR("PutByteLoop%=", "PutByteStart") " nr \n\t"
 
                     // Get ACK
                     "         andn    dira,       %[SDAMask]    \n\t" // Float SDA high (release SDA)
@@ -164,11 +151,8 @@ class I2CBase {
                     "         muxz    %[result],  #1            \n\t" // Set result to equal to Z flag (aka, 1 if ack'd)
                     "         or      dira,       %[SCLMask]    \n\t" // Set scl low
                     "         or      dira,       %[SDAMask]    \n\t" // Set sda low
-#ifndef __PROPELLER_COG__
-                    "         jmp     __LMM_RET                 \n\t"
-                    "PutByteEnd: "
-                    "         .compress default                 \n\t"
-#endif
+
+                    FC_END("PutByteEnd")
             : // Outputs
             [datamask] "=&r"(datamask),
             [result] "=&r"(result),
@@ -195,11 +179,7 @@ class I2CBase {
             int datamask, nextCNT, temp;
 
             __asm__ volatile(
-#ifndef __PROPELLER_COG__
-            "         fcache #(GetByteEnd - GetByteStart)\n\t"
-                    "         .compress off                   \n\t"
-                    "GetByteStart: "
-#endif
+                    FC_START("GetByteStart", "GetByteEnd")
                     // Setup for receive loop
                     "         andn dira,        %[SDAMask]    \n\t"
                     "         mov  %[datamask], #256          \n\t" /* 0x100 */
@@ -223,11 +203,7 @@ class I2CBase {
                     "         or      dira,       %[SCLMask]       \n\t" // Set SCL low
 
                     //Return for more bits
-#ifdef __PROPELLER_COG__
-                    "         djnz %[datamask], #GetByteLoop%= nr    \n\t"
-#else
-                    "         djnz %[datamask], #__LMM_FCACHE_START+(GetByteLoop%=-GetByteStart) nr \n\t"
-#endif
+                    "         djnz %[datamask], #" FC_ADDR("GetByteLoop%=", "GetByteStart") " nr \n\t"
 
                     // Put ACK
 
@@ -240,11 +216,7 @@ class I2CBase {
 
                     "         or   dira, %[SCLMask]       \n\t" // Set scl low
                     "         or   dira, %[SDAMask]       \n\t" // Set sda low
-#ifndef __PROPELLER_COG__
-                    "         jmp  __LMM_RET              \n\t"
-                    "GetByteEnd: "
-                    "         .compress default           \n\t"
-#endif
+                    FC_END("GetByteEnd")
             : // Outputs
             [datamask] "=&r"(datamask),
             [result] "=&r"(result),
