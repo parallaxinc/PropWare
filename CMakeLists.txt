@@ -34,6 +34,11 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endif ()
 
+option(LINUX_PACKAGE "Create complete package for Linux" OFF)
+option(WIN32_PACKAGE "Create complete package for Windows" OFF)
+option(OSX_PACKAGE "Create complete package for Mac OSX" OFF)
+option(PI2_PACKAGE "Create complete package for Raspberry Pi 2" OFF)
+
 include(ExternalProject)
 include(./DownloadCMakeBinaries.cmake)
 include(./DownloadSpin2cpp.cmake)
