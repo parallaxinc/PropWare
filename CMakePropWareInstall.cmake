@@ -33,7 +33,7 @@ macro(InstallSymlink _filepath _sympath)
     endif ()
 endmacro(InstallSymlink)
 
-if (LINUX_PACKAGE)
+if (PACKAGE_LINUX)
     install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_LINUX_CMAKE_INSTALL_DIR}
         DESTINATION .
         USE_SOURCE_PERMISSIONS
@@ -63,7 +63,7 @@ if (LINUX_PACKAGE)
         COMPONENT linux_spin2cpp)
 endif ()
 
-if (WIN32_PACKAGE)
+if (PACKAGE_WIN32)
     install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
         DESTINATION .
         USE_SOURCE_PERMISSIONS
@@ -77,7 +77,7 @@ if (WIN32_PACKAGE)
         COMPONENT win_spin2cpp)
 endif ()
 
-if (OSX_PACKAGE)
+if (PACKAGE_OSX)
     install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_OSX_CMAKE_INSTALL_DIR}/CMake.app/
         DESTINATION pwcmake.app
         USE_SOURCE_PERMISSIONS
@@ -87,7 +87,7 @@ if (OSX_PACKAGE)
         COMPONENT osx_cmake)
 endif ()
 
-if (PI2_PACKAGE)
+if (PACKAGE_PI2)
     set(PI2_CMAKE_VERSION_MAJOR_MINOR "3.5")
     install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_PI2_CMAKE_INSTALL_DIR}
         DESTINATION .
