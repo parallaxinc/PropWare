@@ -1,11 +1,12 @@
 set(MODEL xmmc)
 
-add_library(PropWare_${MODEL} STATIC ${PROPWARE_SOURCES})
-set_compile_flags()
+set(TARGET PropWare_${MODEL})
+add_library(${TARGET} STATIC ${PROPWARE_SOURCES})
+set_compile_flags(${TARGET})
 include_directories(${PROJECT_SOURCE_DIR})
-set_linker(PropWare_${MODEL})
-set_target_properties(PropWare_${MODEL} PROPERTIES OUTPUT_NAME PropWare)
-install(TARGETS PropWare_${MODEL}
+set_linker(${TARGET})
+set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME PropWare)
+install(TARGETS ${TARGET}
     DESTINATION PropWare/lib/${MODEL}
     COMPONENT propware
     EXPORT PropWare-targets)

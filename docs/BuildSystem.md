@@ -136,7 +136,8 @@ Sets the C standard to C99. Equivalent to adding "-std=c99" to `C_FLAGS`
 ### AUTO_CXX_STD
 \[default: ON\]
 
-Sets the C++ standard to gnu++0x. Equivalent to adding "-std=gnu++0x" to `CXX_FLAGS`.
+Sets the C++ standard to the latest available for the compiler. This is `gnu++0x` in GCC 4.6.1 (current PropGCC) and
+`gnu++14` in GCC5 version of PropGCC. Equivalent to adding "-std=<standard>" to `CXX_FLAGS`.
 
 Default Compile Flags
 ---------------------
