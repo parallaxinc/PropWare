@@ -1,10 +1,7 @@
 set(MODEL cmm)
 
 set(TARGET PropWare_${MODEL})
-add_library(${TARGET} STATIC ${PROPWARE_SOURCES})
-set_compile_flags(${TARGET})
-include_directories(${PROJECT_SOURCE_DIR})
-set_linker(${TARGET})
+create_library(${TARGET} ${PROPWARE_SOURCES})
 set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME PropWare)
 install(TARGETS ${TARGET}
     DESTINATION PropWare/lib/${MODEL}
