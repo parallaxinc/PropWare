@@ -57,6 +57,9 @@
 set(CMAKE_CONFIGURATION_TYPES None
     CACHE TYPE INTERNAL FORCE)
 
+# Allow using `if (VAR IN_LIST MY_LIST)`. Requires CMake 3.3
+cmake_policy(SET CMP0057 NEW)
+
 if (NOT PropWare_FOUND)
     ###############################
     # Compile options

@@ -14,9 +14,6 @@ endif ()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 find_package(PropWare REQUIRED)
 
-# Allow using `if (VAR IN_LIST MY_LIST)`. Requires CMake 3.3
-cmake_policy(SET CMP0057 NEW)
-
 # Set the project, version number and all languages used
 project(PropWare
     VERSION ${VERSION}
