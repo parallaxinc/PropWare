@@ -486,15 +486,18 @@ if (NOT PropWare_FOUND)
         # TODO: Add build system documentation for testing
         enable_testing()
         add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
-        macro(create_test target src1)
+        function(create_test target src1)
             create_executable("${target}" "${src1}" ${ARGN})
+            if (DEFINED BOARD)
+                set(BOARDFLAG -b${BOARD})
+            endif()
             add_test(NAME ${target}
                 COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
             add_dependencies(test-all ${target})
             add_custom_target(test-${target}
                 COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
                 DEPENDS ${target})
-        endmacro()
+        endfunction()
     endif ()
 
     include(FindPackageHandleStandardArgs)
