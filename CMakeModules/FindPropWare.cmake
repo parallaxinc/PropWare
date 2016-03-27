@@ -315,7 +315,11 @@ if (NOT PropWare_FOUND)
 
             list(APPEND COMMON_FLAGS -save-temps)
 
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:ASM>:        ${COMMON_FLAGS}    ${ASM_FLAGS}>)
+            get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+            if (ASM IN_LIST ENABLED_LANGUAGES)
+                target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:ASM>:        ${COMMON_FLAGS}    ${ASM_FLAGS}>)
+            endif ()
             target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:C>:          ${COMMON_FLAGS}    ${C_FLAGS}>)
             target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:CXX>:        ${COMMON_FLAGS}    ${CXX_FLAGS}>)
 
