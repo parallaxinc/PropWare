@@ -134,10 +134,7 @@ class WS2812 {
             unsigned int bitCounter = 0;
 
             __asm__ volatile (
-                    "           fcache #(Ws2812End - Ws2812Start)                                               \n\t"
-                    "           .compress off                                                                   \n\t"
-                    "Ws2812Start:                                                                               \n\t"
-
+                    FC_START("Ws2812Start", "Ws2812End")
                     "           add     %[_clock], CNT                                                          \n\t"
                     "           waitcnt %[_clock], #0                                                           \n\t"
 
@@ -147,7 +144,7 @@ class WS2812 {
                     "		add	%[_nextLed], #4                                                         \n\t"
 
                     "fix_colors%=:                                                                              \n\t"
-                    "		tjz	%[_swaprg], #__LMM_FCACHE_START+(shift_out%= - Ws2812Start)             \n\t"
+                    "		tjz	%[_swaprg], #" FC_ADDR("shift_out%=", "Ws2812Start") "                  \n\t"
                     "		mov	%[_t1], %[_colorbits]                                                   \n\t"
                     "		mov	%[_t2], %[_colorbits]                                                   \n\t"
                     "		and	%[_colorbits], #0xff                                                    \n\t"
@@ -172,12 +169,9 @@ class WS2812 {
                     "	if_nc 	waitcnt	%[_clock], %[_longPulse]  ' bit0lo                                      \n\t"
                     "		andn	OUTA, %[_pinMask]                                                       \n\t"
                     "		waitcnt	%[_clock], #0                                                           \n\t"
-                    "		djnz	%[_bitCounter], #__LMM_FCACHE_START+(shift_out.loop%= - Ws2812Start)    \n\t"
-                    "		djnz	%[_nleds], #__LMM_FCACHE_START+(frame_loop%= - Ws2812Start)             \n\t"
-
-                    "           jmp __LMM_RET                                                                   \n\t"
-                    "Ws2812End:                                                                                 \n\t"
-                    "           .compress default                                                               \n\t"
+                    "		djnz	%[_bitCounter], #" FC_ADDR("shift_out.loop%=", "Ws2812Start") "         \n\t"
+                    "		djnz	%[_nleds], #" FC_ADDR("frame_loop%=", "Ws2812Start") "                  \n\t"
+                    FC_END("Ws2812End")
             : [_clock] "+r"(clock),
             [_t1] "+r"(t1),
             [_t2] "+r"(t2),
