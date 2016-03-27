@@ -10,12 +10,12 @@ if (NOT DEFINED GCC_PATH)
     # search mechanism and then manually adding it into the end
     find_path(GCC_PATH
         NAMES
-            propeller-elf-gcc${EXE_SUFFIX}
+        propeller-elf-gcc${EXE_SUFFIX}
         PATHS
-            "$ENV{GCC_PATH}"
-            "${PROPGCC_PREFIX}/bin"
-            "$ENV{PROPGCC_PREFIX}/bin"
-            ENV PATH
+        "$ENV{GCC_PATH}"
+        "${PROPGCC_PREFIX}/bin"
+        "$ENV{PROPGCC_PREFIX}/bin"
+        ENV PATH
         NO_SYSTEM_ENVIRONMENT_PATH)
 
     file(TO_CMAKE_PATH "/opt/parallax/bin" DEFAULT_LINUX_PATH_1)
@@ -27,13 +27,13 @@ if (NOT DEFINED GCC_PATH)
     if (NOT GCC_PATH)
         find_path(GCC_PATH
             NAMES
-                propeller-elf-gcc${EXE_SUFFIX}
+            propeller-elf-gcc${EXE_SUFFIX}
             PATHS
-                "${DEFAULT_LINUX_PATH_1}"
-                "${DEFAULT_WINDOWS_PATH_1}"
-                "${DEFAULT_WINDOWS_PATH_2}"
-                "${DEFAULT_WINDOWS_PATH_3}"
-                "${DEFAULT_WINDOWS_PATH_4}")
+            "${DEFAULT_LINUX_PATH_1}"
+            "${DEFAULT_WINDOWS_PATH_1}"
+            "${DEFAULT_WINDOWS_PATH_2}"
+            "${DEFAULT_WINDOWS_PATH_3}"
+            "${DEFAULT_WINDOWS_PATH_4}")
     endif ()
 endif ()
 
@@ -68,6 +68,8 @@ find_program(CMAKE_GDB propeller-elf-gdb
 find_program(CMAKE_ELF_SIZE propeller-elf-size
     PATHS "${GCC_PATH}"
     NO_SYSTEM_ENVIRONMENT_PATH)
+find_program(CMAKE_SPIN2DAT_COMPILER spin2cpp
+    PATHS "${GCC_PATH}")
 
 find_program(ELF_SIZER elfsizer
     PATHS "${GCC_PATH}")
@@ -77,7 +79,6 @@ set(CMAKE_COGCXX_COMPILER "${CMAKE_CXX_COMPILER}")
 set(CMAKE_ECOGC_COMPILER "${CMAKE_C_COMPILER}")
 set(CMAKE_ECOGCXX_COMPILER "${CMAKE_CXX_COMPILER}")
 set(CMAKE_DAT_COMPILER "${CMAKE_C_COMPILER}")
-set(CMAKE_SPIN2DAT_COMPILER "${SPIN2CPP_COMMAND}")
 
 get_filename_component(GCC_PATH "${CMAKE_C_COMPILER}" DIRECTORY CACHE)
 
