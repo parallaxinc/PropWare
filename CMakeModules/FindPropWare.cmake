@@ -315,23 +315,44 @@ if (NOT PropWare_FOUND)
 
             list(APPEND COMMON_FLAGS -save-temps)
 
-            get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+            get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 
-            if (ASM IN_LIST ENABLED_LANGUAGES)
-                target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:ASM>:        ${COMMON_FLAGS}    ${ASM_FLAGS}>)
+            foreach (language ASM C CXX)
+                if (${language} IN_LIST _languages)
+                    set(flags
+                        ${COMMON_FLAGS}
+                        ${${language}_FLAGS}
+                        -m${MODEL}
+                    )
+                    target_compile_options("${target}" PRIVATE
+                        $<$<COMPILE_LANGUAGE:${language}>:${flags}>
+                    )
+                endif ()
+            endforeach ()
+
+            foreach (topLang C CXX)
+                foreach (subLang COG ECOG)
+                    set(language ${subLang}${topLang})
+                    if (${language} IN_LIST _languages)
+                        set(flags
+                            ${COMMON_FLAGS}
+                            ${${topLang}_FLAGS}
+                            ${COMMON_COG_FLAGS}
+                            ${${language}_FLAGS}
+                        )
+                        target_compile_options("${target}" PRIVATE
+                            $<$<COMPILE_LANGUAGE:${language}>:${flags}>
+                        )
+                    endif ()
+                endforeach ()
+            endforeach ()
+
+            if (DAT IN_LIST _languages)
+                target_compile_options("${target}" PRIVATE
+                    $<$<COMPILE_LANGUAGE:DAT>:${MODEL}>
+                )
             endif ()
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:C>:          ${COMMON_FLAGS}    ${C_FLAGS}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:CXX>:        ${COMMON_FLAGS}    ${CXX_FLAGS}>)
 
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:COGC>:       ${COMMON_FLAGS}    ${C_FLAGS}   ${COMMON_COG_FLAGS} ${COGC_FLAGS}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:COGCXX>:     ${COMMON_FLAGS}    ${CXX_FLAGS} ${COMMON_COG_FLAGS} ${COGCXX_FLAGS}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:ECOGC>:      ${COMMON_FLAGS}    ${C_FLAGS}   ${COMMON_COG_FLAGS} ${ECOGC_FLAGS}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:ECOGCXX>:    ${COMMON_FLAGS}    ${CXX_FLAGS} ${COMMON_COG_FLAGS} ${ECOGCXX_FLAGS}>)
-
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:ASM>:        -m${MODEL}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:C>:          -m${MODEL}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:CXX>:        -m${MODEL}>)
-            target_compile_options("${target}" PUBLIC $<$<COMPILE_LANGUAGE:DAT>:        ${MODEL}>)
             append_linker_flags(${target} -m${MODEL})
         endfunction ()
 
