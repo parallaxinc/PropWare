@@ -11,7 +11,7 @@ if (PACKAGE_LINUX OR PACKAGE_WIN32 OR PACKAGE_PI2)
         list(APPEND MAKES "make CROSS=rpi")
     endif ()
 
-    string(REPLACE ";" " && " BUILD_COMMAND ${MAKES})
+    string(REPLACE ";" " && " BUILD_COMMAND "${MAKES}")
 
     externalproject_add(Spin2Cpp
         PREFIX Spin2Cpp
