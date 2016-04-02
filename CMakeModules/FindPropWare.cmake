@@ -268,11 +268,13 @@ if (NOT PropWare_FOUND)
             endif ()
 
             if (AUTO_C_STD)
-                set_property(TARGET "${target}" PROPERTY C_STANDARD 99)
+                # Cannot use CMake's built-in support for C standard because it will not affect COGC or ECOGC
+                list(APPEND C_FLAGS --std=gnu99)
             endif ()
 
             if (AUTO_CXX_STD)
-                set_property(TARGET "${target}" PROPERTY CXX_STANDARD 14)
+                # Cannot use CMake's built-in support for C++ standard because it will not affect COGCXX or ECOGCXX
+                list(APPEND CXX_FLAGS --std=gnu++0x)
             endif ()
 
             # C++ Language features
