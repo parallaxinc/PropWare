@@ -356,22 +356,21 @@ class FatFS : public Filesystem {
             const uint_fast32_t bootSector      = this->m_initFatInfo.bootSector;
             const uint_fast32_t reservedSectors = this->m_initFatInfo.rsvdSectorCount;
             const uint_fast8_t  numFATs         = this->m_initFatInfo.numFATs;
-            const uint32_t      fatSize         = this->m_initFatInfo.FATSize;
+            this->m_fatSize = this->m_initFatInfo.FATSize;
 
             // Find start of FAT
             this->m_fatStart = bootSector + reservedSectors;
-            this->m_fatSize  = fatSize;
 
             // Find root directory address
+            this->m_firstDataAddr = this->m_fatStart + this->m_fatSize * numFATs;
             switch (this->m_filesystem) {
                 case FAT_16:
-                    this->m_rootAddr      = fatSize * numFATs + this->m_fatStart;
-                    this->m_firstDataAddr = this->m_rootAddr + this->m_rootDirSectors;
+                    this->m_rootAddr = this->m_firstDataAddr;
+                    this->m_firstDataAddr += this->m_rootDirSectors;
                     break;
                 case FAT_32:
-                    this->m_firstDataAddr = bootSector + reservedSectors + fatSize * numFATs;
-                    this->m_rootCluster   = this->m_driver->get_long(ROOT_CLUSTER_ADDR, this->m_buf.buf);
-                    this->m_rootAddr      = this->compute_tier1_from_tier2(this->m_rootCluster);
+                    this->m_rootCluster = this->m_driver->get_long(ROOT_CLUSTER_ADDR, this->m_buf.buf);
+                    this->m_rootAddr    = this->compute_tier1_from_tier2(this->m_rootCluster);
                     break;
             }
         }
@@ -456,8 +455,7 @@ class FatFS : public Filesystem {
          * @return      Returns sector address of the desired cluster
          */
         uint32_t compute_tier1_from_tier2 (uint32_t tier2) const {
-            // TODO: This hardcoded 2 seems... odd. It'd be great to determine if this should really be a
-            tier2 -= 2;
+            tier2 -= 2; // Magical offset, as described in section 6.7 of the MS FAT32 spec
             tier2 <<= this->m_tier1sPerTier2Shift;
             tier2 += this->m_firstDataAddr;
             return tier2;
