@@ -1,5 +1,5 @@
 /**
- * @file    MCP3000_Demo.cpp
+ * @file    MCP3xxx_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -25,11 +25,11 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/printer/printer.h>
-#include <PropWare/mcp3000.h>
+#include <PropWare/mcp3xxx.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
-const PropWare::MCP3000::PartNumber PART_NUMBER = PropWare::MCP3000::MCP300x;
-const PropWare::MCP3000::Channel    CHANNEL     = PropWare::MCP3000::CHANNEL_1;
+const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::MCP300x;
+const PropWare::MCP3xxx::Channel    CHANNEL     = PropWare::MCP3xxx::CHANNEL_1;
 
 /** Pin number for MOSI (master out - slave in) */
 const PropWare::Port::Mask MOSI = PropWare::Port::P0;
@@ -41,11 +41,11 @@ const PropWare::Port::Mask SCLK = PropWare::Port::P2;
 const PropWare::Port::Mask CS   = PropWare::Port::P3;
 
 /**
- * @example     MCP3000_Demo.cpp
+ * @example     MCP3xxx_Demo.cpp
  *
- * Continuously read the ADC value from a channel of the MCP3000 and print it to the terminal.
+ * Continuously read the ADC value from a channel of the MCP3xxx and print it to the terminal.
  *
- * @include PropWare_MCP3000/CMakeLists.txt
+ * @include PropWare_MCP3xxx/CMakeLists.txt
  */
 int main () {
     const uint16_t    DIVISOR = 1024 / 8;
@@ -54,7 +54,7 @@ int main () {
     uint8_t           scaledValue, i;
     uint32_t          ledOutput;
     PropWare::SPI     spi(MOSI, MISO, SCLK);
-    PropWare::MCP3000 adc(&spi, CS, PART_NUMBER);
+    PropWare::MCP3xxx adc(&spi, CS, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
@@ -66,7 +66,7 @@ int main () {
     // configuration
     adc.always_set_spi_mode(0);
 
-    pwOut << "Welcome to the MCP3000 demo!\n";
+    pwOut << "Welcome to the MCP3xxx demo!\n";
 
     while (1) {
         loopCounter = SECOND / 2 + CNT;

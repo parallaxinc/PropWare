@@ -1,5 +1,5 @@
 /**
- * @file    PropWare/mcp3000.h
+ * @file    PropWare/mcp3xxx.h
  *
  * @author  David Zemon
  * @author  Collin Winans
@@ -32,12 +32,21 @@
 namespace PropWare {
 
 /**
- * @brief   MCP3004/MCP3008 ADC driver using SPI communication for the Parallax
- *          Propeller
+ * @brief   MCP3xxx-series ADC driver using SPI communication for the Parallax Propeller. Compatible with the following
+ *          devices:
+ *              - MCP3002
+ *              - MCP3004
+ *              - MCP3008
+ *              - MCP3202
+ *              - MCP3204
+ *              - MCP3208
+ *              - MCP3302
+ *              - MCP3304
+ *              - MCP3308
  *
- * @note    MCP3000 chips uses SPI mode 2 and shifts data MSB first
+ * @note    MCP3xxx chips uses SPI mode 2 and shifts data MSB first
  */
-class MCP3000 {
+class MCP3xxx {
     public:
         /** Single-ended channels */
         typedef enum {
@@ -63,10 +72,11 @@ class MCP3000 {
             /** CH7+, CH6- (MCP3008 only) */DIFF_7_6
         } ChannelDiff;
 
+        /** The part number determines the width of the data transfer */
         typedef enum {
-            /** 10-bit ADC, includes MCP3004 and MCP3008 */MCP300x = 11,
-            /** 12-bit ADC, includes MCP3204 and MCP3208 */MCP320x = 13,
-            /** 13-bit ADC, includes MCP3304 and MCP3308 */MCP330x = 14
+            /** 10-bit ADC, includes MCP3002, MCP3004 and MCP3008 */MCP300x = 11,
+            /** 12-bit ADC, includes MCP3202, MCP3204 and MCP3208 */MCP320x = 13,
+            /** 13-bit ADC, includes MCP3302, MCP3304 and MCP3308 */MCP330x = 14
         } PartNumber;
 
     public:
@@ -80,7 +90,7 @@ class MCP3000 {
          *                                  to true is only necessary when multiple devices are connected to the same
          *                                  SPI bus and use different SPI modes
          */
-        MCP3000 (SPI *spi, const PropWare::Pin::Mask cs, MCP3000::PartNumber partNumber,
+        MCP3xxx (SPI *spi, const PropWare::Pin::Mask cs, MCP3xxx::PartNumber partNumber,
                  const bool alwaysSetSPIMode = false)
                 : m_spi(spi),
                   m_alwaysSetMode(alwaysSetSPIMode),
@@ -111,7 +121,7 @@ class MCP3000 {
          *                          MCP3008); Selects the channel to be read
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint16_t read (const MCP3000::Channel channel) {
+        uint16_t read (const MCP3xxx::Channel channel) {
             int8_t   options;
             uint16_t dat;
 
@@ -121,8 +131,8 @@ class MCP3000 {
             options <<= 2;
 
             if (this->m_alwaysSetMode) {
-                this->m_spi->set_mode(MCP3000::SPI_MODE);
-                this->m_spi->set_bit_mode(MCP3000::SPI_BITMODE);
+                this->m_spi->set_mode(MCP3xxx::SPI_MODE);
+                this->m_spi->set_bit_mode(MCP3xxx::SPI_BITMODE);
             }
 
             this->m_cs.clear();
@@ -142,7 +152,7 @@ class MCP3000 {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint16_t read_diff (const MCP3000::ChannelDiff channels) {
+        uint16_t read_diff (const MCP3xxx::ChannelDiff channels) {
             int8_t   options;
             uint16_t dat;
 

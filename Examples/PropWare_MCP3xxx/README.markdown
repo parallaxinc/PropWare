@@ -1,4 +1,4 @@
-PropGCC MCP3000 Demo
+PropGCC MCP3xxx Demo
 ====================
 
 Analog-to-Digital converter
