@@ -112,6 +112,18 @@ TEST(Mount_withParameter0) {
     tearDown();
 }
 
+TEST(Mount_withParameter1) {
+    setUp();
+
+    ErrorCode err;
+
+    err = testable->mount(1);
+    error_checker(err);
+    ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
+
+    tearDown();
+}
+
 TEST(Mount_withParameter4) {
     setUp();
 
@@ -136,6 +148,7 @@ int main () {
     RUN_TEST(ReadMasterBootRecord);
     RUN_TEST(Mount_defaultParameters);
     RUN_TEST(Mount_withParameter0);
+    RUN_TEST(Mount_withParameter1);
     RUN_TEST(Mount_withParameter4);
 
     COMPLETE();

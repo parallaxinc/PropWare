@@ -326,7 +326,7 @@ class FatFile : virtual public File {
             if (!this->buffer_holds_directory_start()) {
                 PropWare::ErrorCode err;
 
-                this->m_driver->flush(m_buf);
+                this->m_driver->flush(this->m_buf);
                 BlockStorage::MetaData *dirMeta = &this->m_fs->m_dirMeta;
 
                 // Reset metadata to beginning of directory
