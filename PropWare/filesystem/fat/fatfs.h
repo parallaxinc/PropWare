@@ -250,12 +250,9 @@ class FatFS : public Filesystem {
                                                       0x8B, 0x8D, 0x90, 0x92, 0x97, 0x98, 0x9A, 0xAA, 0xB6, 0xBB, 0xBC,
                                                       0xC0, 0xC1, 0xC6, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCE, 0xD0, 0xD1,
                                                       0xD4, 0xD6, 0xDB, 0xDE, 0xE1, 0xE4, 0xE5, 0xEF, 0xF2, 0xFE};
-
-            for (uint8_t i = 0; i < sizeof(PARTITION_IDS); ++i)
-                if (PARTITION_IDS[i] == partitionId) {
+            for (auto id : PARTITION_IDS)
+                if (id == partitionId)
                     return NO_ERROR;
-                }
-
             return UNSUPPORTED_FILESYSTEM;
         }
 
@@ -355,28 +352,28 @@ class FatFS : public Filesystem {
         }
 
         inline void store_root_info () {
-            // Find start of FAT
-            this->m_fatStart = this->m_initFatInfo.bootSector + this->m_initFatInfo.rsvdSectorCount;
+            // Create some variables for legibility's sake
+            const uint_fast32_t bootSector      = this->m_initFatInfo.bootSector;
+            const uint_fast32_t reservedSectors = this->m_initFatInfo.rsvdSectorCount;
+            const uint_fast8_t  numFATs         = this->m_initFatInfo.numFATs;
+            const uint32_t      fatSize         = this->m_initFatInfo.FATSize;
 
-            //    this->m_filesystem = FAT_16;
+            // Find start of FAT
+            this->m_fatStart = bootSector + reservedSectors;
+            this->m_fatSize  = fatSize;
+
             // Find root directory address
             switch (this->m_filesystem) {
                 case FAT_16:
-                    this->m_rootAddr      = this->m_initFatInfo.FATSize * this->m_initFatInfo.numFATs
-                            + this->m_fatStart;
+                    this->m_rootAddr      = fatSize * numFATs + this->m_fatStart;
                     this->m_firstDataAddr = this->m_rootAddr + this->m_rootDirSectors;
                     break;
                 case FAT_32:
-                    this->m_firstDataAddr = this->m_rootAddr = this->m_initFatInfo.bootSector +
-                            this->m_initFatInfo.rsvdSectorCount + this->m_initFatInfo.FATSize
-                            * this->m_initFatInfo.numFATs;
-                    this->m_rootAllocUnit = this->m_driver->get_long(ROOT_CLUSTER_ADDR, this->m_buf.buf);
+                    this->m_firstDataAddr = bootSector + reservedSectors + fatSize * numFATs;
+                    this->m_rootCluster   = this->m_driver->get_long(ROOT_CLUSTER_ADDR, this->m_buf.buf);
+                    this->m_rootAddr      = this->compute_tier1_from_tier2(this->m_rootCluster);
                     break;
             }
-
-            // If files will be writable, the second FAT must also be updated -
-            // the first sector's address is stored here
-            this->m_fatSize = this->m_initFatInfo.FATSize;
         }
 
         inline PropWare::ErrorCode read_fat_and_root_sectors () {
@@ -393,7 +390,7 @@ class FatFS : public Filesystem {
                 this->m_dir_firstCluster   = (uint32_t) -1;
                 this->m_buf.meta->curTier2 = (uint32_t) -1;
             } else {
-                this->m_buf.meta->curTier2 = this->m_dir_firstCluster = this->m_rootAllocUnit;
+                this->m_buf.meta->curTier2 = this->m_dir_firstCluster = this->m_rootCluster;
                 check_errors(this->get_fat_value(this->m_buf.meta->curTier2, &this->m_buf.meta->nextTier2));
             }
             this->m_buf.meta->curTier2Addr   = this->m_rootAddr;
@@ -417,16 +414,15 @@ class FatFS : public Filesystem {
         /**
          * @brief       Read an entry from the FAT
          *
-         * @param[in]   fatEntry    Entry number (allocation unit) to read in
+         * @param[in]   fatEntry    Entry number (cluster) to read in
          *                          the FAT
-         * @param[out]  *value      Address to store the value into (the next
-         *                          allocation unit)
+         * @param[out]  *value      Address to store the value into (the next cluster)
          *
          * @return      Returns 0 upon success, error code otherwise
          */
         PropWare::ErrorCode get_fat_value (const uint32_t fatEntry, uint32_t *value) {
             PropWare::ErrorCode err;
-            uint32_t            firstAvailableAllocUnit;
+            uint32_t            firstAvailableCluster;
 
             // Do we need to load a new fat sector?
             if ((fatEntry >> this->m_entriesPerFatSector_Shift) != this->m_curFatSector) {
@@ -434,18 +430,17 @@ class FatFS : public Filesystem {
                 this->m_curFatSector = fatEntry >> this->m_entriesPerFatSector_Shift;
                 check_errors(this->m_driver->read_data_block(this->m_curFatSector + this->m_fatStart, this->m_fat));
             }
-            firstAvailableAllocUnit = this->m_curFatSector << this->m_entriesPerFatSector_Shift;
+            firstAvailableCluster = this->m_curFatSector << this->m_entriesPerFatSector_Shift;
 
-            // The necessary FAT sector has been loaded and the next allocation
-            // unit is known, proceed with loading the next data sector and
-            // incrementing the cluster variables
+            // The necessary FAT sector has been loaded and the next cluster is known, proceed with loading
+            // the next data sector and incrementing the cluster variables
 
-            // Retrieve the next allocation unit number
+            // Retrieve the next cluster number
             if (FAT_16 == this->m_filesystem) {
-                *value = this->m_driver->get_short((uint16_t) ((fatEntry - firstAvailableAllocUnit) << 1), this->m_fat);
+                *value = this->m_driver->get_short((uint16_t) ((fatEntry - firstAvailableCluster) << 1), this->m_fat);
                 *value &= WORD_0;
             } else if (FAT_32 == this->m_filesystem) {
-                *value = this->m_driver->get_long((uint16_t) ((fatEntry - firstAvailableAllocUnit) << 2), this->m_fat);
+                *value = this->m_driver->get_long((uint16_t) ((fatEntry - firstAvailableCluster) << 2), this->m_fat);
                 // Clear the highest 4 bits - they are always reserved
                 *value &= 0x0FFFFFFF;
             }
@@ -454,18 +449,15 @@ class FatFS : public Filesystem {
         }
 
         /**
-         * @brief       Find and return the starting sector's address for a
-         *              given allocation unit (note - not cluster)
+         * @brief       Find and return the starting sector's address for a given cluster
          *
-         * @param[in]   tier2   Allocation unit in FAT filesystem
+         * @param[in]   tier2   Cluster in FAT filesystem
          *
-         * @return      Returns sector address of the desired allocation unit
+         * @return      Returns sector address of the desired cluster
          */
         uint32_t compute_tier1_from_tier2 (uint32_t tier2) const {
-            if (FatFS::FAT_32 == this->m_filesystem)
-                tier2 -= this->m_rootAllocUnit;
-            else
-                tier2 -= 2;
+            // TODO: This hardcoded 2 seems... odd. It'd be great to determine if this should really be a
+            tier2 -= 2;
             tier2 <<= this->m_tier1sPerTier2Shift;
             tier2 += this->m_firstDataAddr;
             return tier2;
@@ -656,66 +648,65 @@ class FatFS : public Filesystem {
             // FILESYSTEM
             this->m_logger->println("Filesystem Constants");
             this->m_logger->println("====================");
-            if (!this->m_mounted) {
+            if (this->m_mounted) {
+                // FILESYSTEM - FAT Initialization Constants
+                this->m_logger->println("\tInitialization Numbers");
+                this->m_logger->println("\t----------------------------");
+                this->m_logger->printf("\tNumber of FATs: %u\n", this->m_initFatInfo.numFATs);
+                this->m_logger->printf("\tRoot entry count: 0x%08X/%u\n", this->m_initFatInfo.rootEntryCount,
+                                       this->m_initFatInfo.rootEntryCount);
+                this->m_logger->printf("\tRoot dir sectors: 0x%08X/%u\n", this->m_initFatInfo.rootDirSectors,
+                                       this->m_initFatInfo.rootDirSectors);
+                this->m_logger->printf("\tReserved sector count: 0x%08X/%u\n", this->m_initFatInfo.rsvdSectorCount,
+                                       this->m_initFatInfo.rsvdSectorCount);
+                this->m_logger->printf("\tTotal sectors: 0x%08X/%u\n", this->m_initFatInfo.totalSectors,
+                                       this->m_initFatInfo.totalSectors);
+                this->m_logger->printf("\tFAT Start: 0x%08X/%u\n", this->m_fatStart, this->m_fatStart);
+                this->m_logger->printf("\tFAT size: 0x%08X/%u\n", this->m_initFatInfo.FATSize,
+                                       this->m_initFatInfo.FATSize);
+                this->m_logger->printf("\tData sectors: 0x%08X/%u\n", this->m_initFatInfo.dataSectors,
+                                       this->m_initFatInfo.dataSectors);
+                this->m_logger->printf("\tBoot sector: 0x%08X/%u\n", this->m_initFatInfo.bootSector,
+                                       this->m_initFatInfo.bootSector);
+                this->m_logger->printf("\tCluster count: 0x%08X/%u\n", this->m_initFatInfo.clusterCount,
+                                       this->m_initFatInfo.clusterCount);
+                this->m_logger->println();
+
+                // FILESYSTEM - Partition
+                this->m_logger->println("Partition");
+                this->m_logger->println("=========");
+                this->m_logger->printf("\tLabel: %s\n", this->m_label);
+                switch (this->m_filesystem) {
+                    case FAT_32:
+                        this->m_logger->printf("\tFilesystem: FAT 32\n");
+                        break;
+                    case FAT_16:
+                        this->m_logger->printf("\tFilesystem: FAT 16\n");
+                        break;
+                    default:
+                        this->m_logger->printf("\tFilesystem: unknown (%d)\n", this->m_filesystem);
+                }
+                this->m_logger->printf("\tFirst FAT sector: 0x%08X\n", this->m_fatStart);
+                this->m_logger->printf("\tRoot directory alloc. unit: 0x%08X\n", this->m_rootCluster);
+                this->m_logger->printf("\tCalculated root directory sector: 0x%08X\n",
+                                       this->compute_tier1_from_tier2(this->m_rootCluster));
+                this->m_logger->printf("\tRoot directory sector: 0x%08X\n", this->m_rootAddr);
+                this->m_logger->printf("\tRoot directory size (in sectors): %u\n", this->m_rootDirSectors);
+                this->m_logger->printf("\tFirst data sector: 0x%08X\n", this->m_firstDataAddr);
+                this->m_logger->println();
+            } else {
                 this->m_logger->println("\nNot mounted");
-                return;
             }
-
-            // FILESYSTEM - FAT Initialization Constants
-            this->m_logger->println("\tInitialization Numbers");
-            this->m_logger->println("\t----------------------------");
-            this->m_logger->printf("\tNumber of FATs: %u\n", this->m_initFatInfo.numFATs);
-            this->m_logger->printf("\tRoot entry count: 0x%08X/%u\n", this->m_initFatInfo.rootEntryCount,
-                                   this->m_initFatInfo.rootEntryCount);
-            this->m_logger->printf("\tRoot dir sectors: 0x%08X/%u\n", this->m_initFatInfo.rootDirSectors,
-                                   this->m_initFatInfo.rootDirSectors);
-            this->m_logger->printf("\tReserved sector count: 0x%08X/%u\n", this->m_initFatInfo.rsvdSectorCount,
-                                   this->m_initFatInfo.rsvdSectorCount);
-            this->m_logger->printf("\tTotal sectors: 0x%08X/%u\n", this->m_initFatInfo.totalSectors,
-                                   this->m_initFatInfo.totalSectors);
-            this->m_logger->printf("\tFAT Start: 0x%08X/%u\n", this->m_fatStart, this->m_fatStart);
-            this->m_logger->printf("\tFAT size: 0x%08X/%u\n", this->m_initFatInfo.FATSize, this->m_initFatInfo
-                    .FATSize);
-            this->m_logger->printf("\tData sectors: 0x%08X/%u\n", this->m_initFatInfo.dataSectors,
-                                   this->m_initFatInfo.dataSectors);
-            this->m_logger->printf("\tBoot sector: 0x%08X/%u\n", this->m_initFatInfo.bootSector,
-                                   this->m_initFatInfo.bootSector);
-            this->m_logger->printf("\tCluster count: 0x%08X/%u\n", this->m_initFatInfo.clusterCount,
-                                   this->m_initFatInfo.clusterCount);
-            this->m_logger->println();
-
-            // FILESYSTEM - Partition
-            this->m_logger->println("\tPartition");
-            this->m_logger->println("\t=========");
-            this->m_logger->printf("\tLabel: %s\n", this->m_label);
-            switch (this->m_filesystem) {
-                case FAT_32:
-                    this->m_logger->printf("\tFilesystem: FAT 32\n");
-                    break;
-                case FAT_16:
-                    this->m_logger->printf("\tFilesystem: FAT 16\n");
-                    break;
-                default:
-                    this->m_logger->printf("\tFilesystem: unknown (%d)\n", this->m_filesystem);
-            }
-            this->m_logger->printf("\tFirst FAT sector: 0x%08X\n", this->m_fatStart);
-            this->m_logger->printf("\tRoot directory alloc. unit: 0x%08X\n", this->m_rootAllocUnit);
-            this->m_logger->printf("\tCalculated root directory sector: 0x%08X\n",
-                                   this->compute_tier1_from_tier2(this->m_rootAllocUnit));
-            this->m_logger->printf("\tRoot directory sector: 0x%08X\n", this->m_rootAddr);
-            this->m_logger->printf("\tRoot directory size (in sectors): %u\n", this->m_rootDirSectors);
-            this->m_logger->printf("\tFirst data sector: 0x%08X\n", this->m_firstDataAddr);
-            this->m_logger->println();
 
             if (printBlocks) {
-                this->m_logger->println("\tFAT Buffer");
-                this->m_logger->println("\t----------");
+                this->m_logger->println("FAT Buffer");
+                this->m_logger->println("==========");
                 BlockStorage::print_block(*this->m_logger, this->m_fat, this->m_sectorSize);
                 this->m_logger->println();
             }
 
-            this->m_logger->println("\tCommon Buffer");
-            this->m_logger->println("\t=============");
+            this->m_logger->println("Common Buffer");
+            this->m_logger->println("=============");
             if (this->m_buf.buf == NULL)
                 this->m_logger->println("\tEmpty");
             else {
@@ -738,7 +729,7 @@ class FatFS : public Filesystem {
         uint8_t     m_filesystem;  // File system type - one of FAT_16 or FAT_32
         char        m_label[9]; // Filesystem label
         uint32_t    m_fatStart;  // Starting block address of the FAT
-        uint32_t    m_rootAllocUnit;  // Allocation unit of root directory/first data sector (FAT32 only)
+        uint32_t    m_rootCluster;  // Cluster of root directory/first data sector (FAT32 only)
         uint32_t    m_rootAddr;  // Starting block address of the root directory
         uint32_t    m_rootDirSectors;  // Number of sectors for the root directory
         uint32_t    m_firstDataAddr;  // Starting block address of the first data cluster
@@ -748,7 +739,7 @@ class FatFS : public Filesystem {
         bool m_fatMod;
 
         uint32_t m_curFatSector;  // Store the current FAT sector loaded into m_fat
-        uint32_t m_dir_firstCluster;  // Store the current directory's starting allocation unit
+        uint32_t m_dir_firstCluster;  // Store the current directory's starting cluster
 };
 
 }

@@ -100,26 +100,32 @@ class BlockStorage {
          */
         static void print_block (const Printer &printer, const uint8_t data[], const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
-            uint8_t lines = words / wordsPerLine;
+            uint_fast8_t lines = words / wordsPerLine;
             if (words % wordsPerLine)
                 ++lines;
 
             // Printer header row
             printer << "         0 ";
-            for (uint8_t i = 1; i < wordsPerLine; ++i)
+            for (uint_fast8_t i = 1; i < wordsPerLine; ++i) {
+                if (8 == i)
+                    printer.print("  ");
                 printer.printf("%2X ", i);
+            }
             printer << '\n';
 
-            for (uint16_t line = 0; line < lines; ++line) {
-                const uint16_t baseAddress = line * wordsPerLine;
+            for (uint_fast16_t line = 0; line < lines; ++line) {
+                const uint_fast16_t baseAddress = line * wordsPerLine;
                 printer.printf("0x%04X: ", baseAddress);
 
                 // Print hex values
-                for (uint8_t offset = 0; offset < wordsPerLine; ++offset)
+                for (uint_fast8_t offset = 0; offset < wordsPerLine; ++offset) {
+                    if (8 == offset)
+                        printer.print("- ");
                     printer.printf("%02X ", (unsigned int) data[baseAddress + offset]);
+                }
 
                 // Print ASCII values
-                for (uint8_t offset = 0; offset < wordsPerLine; ++offset) {
+                for (uint_fast8_t offset = 0; offset < wordsPerLine; ++offset) {
                     const char nextChar = data[baseAddress + offset];
                     if (32 <= nextChar && nextChar <= 126)
                         printer << nextChar;
