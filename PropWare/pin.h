@@ -164,6 +164,60 @@ class Pin : public PropWare::Port {
             return false;
         }
 
+        /**
+         * @brief   Set to input and measure the time it takes a signal to transition from a start state to the
+         *          opposite state.
+         *
+         * Named rc_time because it is often used to measure a resistor-capacitor circuit's tendency to "decay" to
+         * either ground or 5 V (depending on wiring).  Default time increments are specified in 1 microsecond units.
+         * Unit size can be changed with a call to set_io_dt function.  The pulse will be positive if the I/O pin is
+         * transmitting a low signal before the call.
+         *
+         * @param[in]   state       Starting pin state; `true` for high, `false` for low
+         * @param[in]   timeout     Time to wait (in clock ticks) before canceling the function call
+         *                          [Default = 1/4 second]
+         *
+         * @returns     Time from starting pin (in clock ticks)
+         */
+        int rc_time (const bool state, const int timeout = SECOND / 4) {
+            // Taken from Simple's rc_time(int pin, int state) in rcTime.C
+            /*
+if(iodt == 0)                               // If dt not initialized
+{
+  set_io_dt(CLKFREQ/1000000);               // Set up timed I/O time increment
+  set_io_timeout(CLKFREQ/4);                // Set up timeout
+}
+*/
+            uint32_t ctr = ((8 + ((!state & 1) * 4)) << 26);       // POS detector counter setup
+            ctr += Pin::convert(this->m_mask);                      // Add pin to setup
+            const uint32_t startTime = CNT;                                      // Mark current time
+            if (CTRA == 0) {
+                // If CTRA unused
+                CTRA = ctr;                                         // Configure CTRA
+                FRQA = 1;                                           // FRQA increments PHSA by 1
+                this->set_dir_in();
+                PHSA = 0;                                           // Clear PHSA
+                // Wait for decay or timeout
+                while (state == this->read() && (CNT - startTime <= timeout));
+                CTRA = 0;                                           // Stop the counter module
+                return PHSA;
+            }
+            else if (CTRB == 0) {
+                // If CTRA used, try CTRB
+                CTRB = ctr;                                         // Same procedure as for CTRA
+                FRQB = 1;
+                this->set_dir_in();
+                PHSB = 0;
+                while (state == this->read() && (CNT - startTime <= timeout));
+                CTRB = 0;
+                return PHSB;
+            }
+            else {
+                // If CTRA & CTRB in use
+                return -1;
+            }
+        }
+
     public:
         /**
          * @brief   Copy one pin object into another; Only copies pin mask, not
