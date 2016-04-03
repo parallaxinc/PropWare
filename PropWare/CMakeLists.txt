@@ -1,6 +1,7 @@
 set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/c++allocate.h
     ${CMAKE_CURRENT_LIST_DIR}/comparator
+    ${CMAKE_CURRENT_LIST_DIR}/eeprom
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/blockstorage
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfile
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilereader
@@ -20,6 +21,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/motor/stepper
     ${CMAKE_CURRENT_LIST_DIR}/pcf8591
     ${CMAKE_CURRENT_LIST_DIR}/pin
+    ${CMAKE_CURRENT_LIST_DIR}/ping
     ${CMAKE_CURRENT_LIST_DIR}/port
     ${CMAKE_CURRENT_LIST_DIR}/printcapable
     ${CMAKE_CURRENT_LIST_DIR}/printer/printer

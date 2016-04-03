@@ -41,7 +41,7 @@ class Utility {
          *
          * @return      Number of bits that are non-zero in par
          */
-        static uint8_t count_bits (uint32_t par) {
+        static uint8_t count_bits(uint32_t par) {
             // Brian Kernighan's method for counting set bits in a variable
             uint8_t totalBits = 0;
 
@@ -60,7 +60,7 @@ class Utility {
          *
          * @return      Number of bits that are non-zero in par
          */
-        static uint8_t count_bits (int32_t par) {
+        static uint8_t count_bits(int32_t par) {
             return count_bits((uint32_t) par);
         }
 
@@ -99,14 +99,14 @@ class Utility {
          *
          * @return      Microseconds since start
          */
-        static inline uint32_t measure_time_interval (const register uint32_t start) {
+        static inline uint32_t measure_time_interval(const register uint32_t start) {
             return (CNT - start) / MICROSECOND;
         }
 
         /**
          * @overload
          */
-        static inline uint32_t measure_time_interval (const register int32_t start) {
+        static inline uint32_t measure_time_interval(const register int32_t start) {
             return measure_time_interval((uint32_t) start);
         }
 
@@ -121,7 +121,7 @@ class Utility {
          *
          * @return      Returns the size of the largest free block of memory
          */
-        static size_t get_largest_free_block_size (const uint8_t precision = 32) {
+        static size_t get_largest_free_block_size(const uint8_t precision = 32) {
             size_t largestSuccess  = 0;
             size_t smallestFailure = 32 * 1024;
             size_t nextAttempt     = 32 * 1024;
@@ -142,7 +142,7 @@ class Utility {
 
 
                 nextAttempt = (smallestFailure - largestSuccess) / 2 +
-                        largestSuccess;
+                    largestSuccess;
             } while (precision < (smallestFailure - largestSuccess));
 
             return largestSuccess;
@@ -153,7 +153,7 @@ class Utility {
          *
          * @param[out]  string[]    Characters array to be converted
          */
-        static void to_lower (char string[]) {
+        static void to_lower(char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = tolower(string[i]);
         }
@@ -163,7 +163,7 @@ class Utility {
          *
          * @param[out]  string[]    Characters array to be converted
          */
-        static void to_upper (char string[]) {
+        static void to_upper(char string[]) {
             for (size_t i = 0; i < strlen(string); ++i)
                 string[i] = toupper(string[i]);
         }
@@ -173,7 +173,7 @@ class Utility {
          *
          * @param[in]   b   Boolean to be checked
          */
-        static const char *to_string (const bool b) {
+        static const char *to_string(const bool b) {
             return b ? "true" : "false";
         }
 
@@ -187,7 +187,7 @@ class Utility {
          *
          * @return      Result of log function
          */
-        static int rom_log (int x) {
+        static int rom_log(int x) {
             int            exp;
             unsigned short *ptr;
 
@@ -208,11 +208,11 @@ class Utility {
          *
          * @return      A bitwise flip of some of the bits in `x`
          */
-        inline static unsigned int reverse (unsigned int x, unsigned int bits = 0) {
+        inline static unsigned int reverse(unsigned int x, unsigned int bits = 0) {
             return __builtin_propeller_rev(x, bits);
         }
 
-        static bool empty (const char string[]) {
+        static bool empty(const char string[]) {
             return '\0' == string[0];
         }
 
@@ -227,7 +227,7 @@ class Utility {
          * @return      Number of elements in the array
          */
         template<typename T, size_t N>
-        static inline size_t size_of_array (const T(&array)[N]) {
+        static inline size_t size_of_array(const T(&array)[N]) {
             return N;
         }
 
@@ -237,8 +237,37 @@ class Utility {
          * Also known as reset or power down/up, this will restart the entire chip as if power was just applied. Note
          * that this will reboot __all 8 cogs__, not just one.
          */
-        static inline void reboot () {
+        static inline void reboot() {
             __builtin_propeller_clkset(0x80);
+        }
+
+        static Bit to_bit(const uint_fast8_t bitNumber) {
+            if (32 > bitNumber)
+                return (Bit) (1 << bitNumber);
+            else
+                return NULL_BIT;
+        }
+
+        static bool bit_read(const uint32_t x, const Bit bit) {
+            return 0 != (x & bit);
+        }
+
+        template<typename T>
+        static void bit_write(T &x, const Bit bit, const bool value) {
+            if (value)
+                bit_set(x, bit);
+            else
+                bit_clear(x, bit);
+        }
+
+        template<typename T>
+        static void bit_set(T &x, const Bit bit) {
+            x |= bit;
+        }
+
+        template<typename T>
+        static void bit_clear(T &x, const Bit bit) {
+            x &= ~bit;
         }
 
     private:
@@ -246,7 +275,7 @@ class Utility {
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
          *          `uint8_t bits = PropWare::Utility::count_bits(0x03);`
          */
-        Utility () {
+        Utility() {
         }
 };
 

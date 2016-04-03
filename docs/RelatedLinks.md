@@ -5,8 +5,8 @@ Related Links {#RelatedLinks}
 ---------
 * [Download](@ref Download)
 * [Forum Thread](http://forums.parallax.com/showthread.php/157005-FYI-PropWare-Complete-build-system-and-library-for-PropGCC)
-* [Issue Tracker](https://github.com/DavidZemon/PropWare/issues)
-* [Source code](https://github.com/DavidZemon/PropWare)
+* [Issue Tracker](https://github.com/parallaxinc/PropWare/issues)
+* [Source code](https://github.com/parallaxinc/PropWare)
 * [Build Server](http://david.zemon.name:8111/project.html?projectId=PropWare&tab=projectOverview&guest=1)
   
 Forums
@@ -22,7 +22,7 @@ PropGCC: GCC compiler for Parallax Propeller
   * [Linux][2] 
   * [Mac][3]
   * [Raspberry Pi][4]
-* GCC5
+* GCC6
   * [Windows][5]
   * [Linux][6] 
   * [Raspberry Pi][7]

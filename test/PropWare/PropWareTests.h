@@ -29,6 +29,7 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/c++allocate.h>
 
+#define PROPWARE_TEST
 #define protected public
 #define private   public
 

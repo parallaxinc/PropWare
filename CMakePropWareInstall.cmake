@@ -1,9 +1,5 @@
-install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_LINUX_CMAKE_INSTALL_DIR}
-    DESTINATION .
-    USE_SOURCE_PERMISSIONS
-    COMPONENT cmake)
-if (NOT WIN32)
-    macro(InstallSymlink _filepath _sympath)
+macro(InstallSymlink _filepath _sympath)
+    if (NOT WIN32)
         get_filename_component(_symname ${_sympath} NAME)
 
         # Don't use get_filename_component because it corrupts escape characters
@@ -34,8 +30,14 @@ if (NOT WIN32)
                                     \${_realInstallDir}/${_symname})"
                 ${ARGN})
         endif ()
-    endmacro(InstallSymlink)
+    endif ()
+endmacro(InstallSymlink)
 
+if (PACKAGE_LINUX)
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_LINUX_CMAKE_INSTALL_DIR}
+        DESTINATION .
+        USE_SOURCE_PERMISSIONS
+        COMPONENT cmake)
 
     InstallSymlink(../${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/bin/cmake
         \\\${CMAKE_INSTALL_PREFIX}/bin/cmake
@@ -52,35 +54,76 @@ if (NOT WIN32)
     InstallSymlink(../${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/bin/ctest
         \\\${CMAKE_INSTALL_PREFIX}/bin/ctest
         COMPONENT cmake)
+    install(DIRECTORY CMakeModules/
+        DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
+        COMPONENT cmake)
+
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build/spin2cpp
+        DESTINATION bin
+        COMPONENT linux_spin2cpp)
 endif ()
-install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
-    DESTINATION .
-    USE_SOURCE_PERMISSIONS
-    COMPONENT win_cmake)
-install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_OSX_CMAKE_INSTALL_DIR}/CMake.app/
-    DESTINATION pwcmake.app
-    USE_SOURCE_PERMISSIONS
-    COMPONENT osx_cmake)
+
+if (PACKAGE_WIN32)
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_WIN32_CMAKE_INSTALL_DIR}
+        DESTINATION .
+        USE_SOURCE_PERMISSIONS
+        COMPONENT win_cmake)
+    install(DIRECTORY CMakeModules/
+        DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
+        COMPONENT win_cmake)
+
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build-win32/spin2cpp.exe
+        DESTINATION .
+        COMPONENT win_spin2cpp)
+endif ()
+
+if (PACKAGE_OSX)
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_OSX_CMAKE_INSTALL_DIR}/CMake.app/
+        DESTINATION pwcmake.app
+        USE_SOURCE_PERMISSIONS
+        COMPONENT osx_cmake)
+    install(DIRECTORY CMakeModules/
+        DESTINATION pwcmake.app/Contents/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
+        COMPONENT osx_cmake)
+endif ()
+
+if (PACKAGE_PI2)
+    set(PI2_CMAKE_VERSION_MAJOR_MINOR "3.5")
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/${CUSTOM_PI2_CMAKE_INSTALL_DIR}
+        DESTINATION .
+        USE_SOURCE_PERMISSIONS
+        COMPONENT pi2_cmake)
+    install(DIRECTORY CMakeModules/
+        DESTINATION ${CUSTOM_PI2_CMAKE_INSTALL_DIR}/share/cmake-${PI2_CMAKE_VERSION_MAJOR_MINOR}/Modules
+        COMPONENT pi2_cmake)
+
+    InstallSymlink(../${CUSTOM_PI2_CMAKE_INSTALL_DIR}/bin/cmake
+        \\\${CMAKE_INSTALL_PREFIX}/bin/cmake
+        COMPONENT pi2_cmake)
+    InstallSymlink(../${CUSTOM_PI2_CMAKE_INSTALL_DIR}/bin/ccmake
+        \\\${CMAKE_INSTALL_PREFIX}/bin/ccmake
+        COMPONENT pi2_cmake)
+    InstallSymlink(../${CUSTOM_PI2_CMAKE_INSTALL_DIR}/bin/cmake-gui
+        \\\${CMAKE_INSTALL_PREFIX}/bin/cmake-gui
+        COMPONENT pi2_cmake)
+    InstallSymlink(../${CUSTOM_PI2_CMAKE_INSTALL_DIR}/bin/cpack
+        \\\${CMAKE_INSTALL_PREFIX}/bin/cpack
+        COMPONENT pi2_cmake)
+    InstallSymlink(../${CUSTOM_PI2_CMAKE_INSTALL_DIR}/bin/ctest
+        \\\${CMAKE_INSTALL_PREFIX}/bin/ctest
+        COMPONENT pi2_cmake)
+    install(DIRECTORY CMakeModules/
+        DESTINATION ${CUSTOM_PI2_CMAKE_INSTALL_DIR}/share/cmake-${PI2_CMAKE_VERSION_MAJOR_MINOR}/Modules
+        COMPONENT pi2_cmake)
+
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build-rpi/spin2cpp
+        DESTINATION .
+        COMPONENT rpi_spin2cpp)
+endif ()
 
 install(DIRECTORY CMakeModules/
-    DESTINATION ${CUSTOM_LINUX_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
-    COMPONENT cmake)
-install(DIRECTORY CMakeModules/
-    DESTINATION ${CUSTOM_WIN32_CMAKE_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
-    COMPONENT win_cmake)
-install(DIRECTORY CMakeModules/
-    DESTINATION pwcmake.app/Contents/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules
-    COMPONENT osx_cmake)
-
-# Spin2cpp
-install(FILES ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build/spin2cpp
-    DESTINATION bin
-    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
-    COMPONENT linux_spin2cpp)
-install(FILES ${CMAKE_BINARY_DIR}/Spin2Cpp/src/Spin2Cpp/build-win32/spin2cpp.exe
-    DESTINATION .
-    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
-    COMPONENT win_spin2cpp)
+    DESTINATION Modules
+    COMPONENT standalone-cmake)
 
 # PropWare & libpropeller includes
 install(DIRECTORY

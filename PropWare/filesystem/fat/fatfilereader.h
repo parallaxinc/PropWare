@@ -81,7 +81,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
          *
          * @param[in]   fs          The filesystem is needed for opening the file
          * @param[in]   name        Name of the file to open - it must exist in the current working directory (see
-         *                          [issue 55](https://github.com/DavidZemon/PropWare/issues/55) for opening from a
+         *                          [issue 55](https://github.com/parallaxinc/PropWare/issues/55) for opening from a
          *                          relative or absolute path)
          * @param[in]   *buffer     Address of a dedicated buffer that should be used for this file. If left as the
          *                          NULL (the default), a shared buffer will be used.

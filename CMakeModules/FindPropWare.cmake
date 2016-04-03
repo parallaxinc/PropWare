@@ -54,26 +54,30 @@
 # SOFTWARE.
 #==============================================================================
 
-if ("${CMAKE_VERSION}" STREQUAL "3.4.0" OR "${CMAKE_VERSION}" STREQUAL "3.4.1")
-    message(FATAL_ERROR "PropWare is not compatible with CMake 3.4.0 or 3.4.1. Please downgrade to CMake 3.3.2.")
-endif ()
-
 set(CMAKE_CONFIGURATION_TYPES None
     CACHE TYPE INTERNAL FORCE)
+
+# Allow using `if (VAR IN_LIST MY_LIST)`. Requires CMake 3.3
+cmake_policy(SET CMP0057 NEW)
 
 if (NOT PropWare_FOUND)
     ###############################
     # Compile options
     ###############################
-    # Compilation options
+    # General options
     option(32_BIT_DOUBLES "Set all doubles to 32-bits (-m32bit-doubles)" ON)
     option(WARN_ALL "Turn on all compiler warnings (-Wall)" ON)
-    option(AUTO_C_STD "Set C standard to c99 (-std=c99)" ON)
-    option(AUTO_CXX_STD "Set C++ standard to gnu++0x (-std=gnu++0x)" ON)
-    option(AUTO_OTPIMIZATION "Set optimization level to \"size\" (-Os)" ON)
+    option(AUTO_C_STD "Set C standard to gnu99 (-std=gnu99)" ON)
+    option(AUTO_CXX_STD "Set C++ standard to the latest available by the compiler" ON)
 
-    # Optimize size option
+    # Size optimizations
+    option(AUTO_OTPIMIZATION "Set optimization level to \"size\" (-Os)" ON)
     option(AUTO_CUT_SECTIONS "Cut out unused code (Compile: -ffunction-sections -fdata-sections; Link: --gc-sections)" ON)
+
+    # Language features
+    option(EXCEPTIONS "Enable exceptions (requires hundreds of kilobytes of RAM) (-fexceptions/-fno-exceptions" OFF)
+    option(RUNTIME_TYPE_INFORMATION "Enable runtime type information (-frtti/-fno-rtti)" OFF)
+    option(THREADSAFE_STATICS "Enable threadsafe statics (-fthreadsafe-statics/-fno-threadsafe-statics)" OFF)
 
     ###############################
     # Libraries to link
@@ -91,9 +95,7 @@ if (NOT PropWare_FOUND)
         endforeach()
     else ()
         if (NOT DEFINED PROPWARE_PATH
-            OR NOT EXISTS "${PROPWARE_PATH}/include/PropWare/PropWare.h"
-            OR NOT EXISTS "${PROPWARE_PATH}/CMakePropWareInstall.cmake")
-
+            OR NOT EXISTS "${PROPWARE_PATH}/lib/PropWare-targets.cmake")
             find_path(PROPWARE_PATH
                 NAMES
                     ./CMakePropWareInstall.cmake  # We're either looking for PropWare's root source folder
@@ -149,11 +151,11 @@ if (NOT PropWare_FOUND)
             PATHS
                 "${PROPWARE_PATH}/CMakeModules"
                 "${CMAKE_ROOT}/Modules")
-        find_file(PropWare_SPIN2DAT_SYMBOL_CONVERTER CMakeSpin2DatSymbolConverter.cmake
+        find_file(PROPWARE_RUN_OBJCOPY CMakeRunObjcopy.cmake
             PATHS
                 "${PROPWARE_PATH}/CMakeModules"
                 "${CMAKE_ROOT}/Modules")
-        find_file(PROPWARE_RUN_OBJCOPY CMakeRunObjcopy.cmake
+        find_file(ELF_SIZER CMakeElfSizer.cmake
             PATHS
                 "${PROPWARE_PATH}/CMakeModules"
                 "${CMAKE_ROOT}/Modules")
@@ -215,24 +217,12 @@ if (NOT PropWare_FOUND)
         # PropWare helper functions & macros
         ##########################################
         function (set_linker target)
-
-            macro (list_contains result request)
-              set (${result})
-              foreach (listItem ${ARGN})
-                if (${request} STREQUAL ${listItem})
-                  set (${result} TRUE)
-                endif ()
-              endforeach ()
-            endmacro()
-
             # Set the correct linker language
             get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
-            list_contains(use_c C ${_languages})
-            if (use_c)
+            if (C IN_LIST _languages)
                 set(linker_language C)
             else ()
-                list_contains(use_cxx CXX ${_languages})
-                if (use_cxx)
+                if (CXX IN_LIST _languages)
                     set(linker_language CXX)
                 else ()
                     message(FATAL_ERROR
@@ -244,52 +234,60 @@ if (NOT PropWare_FOUND)
                 PROPERTIES
                 LINKER_LANGUAGE
                 ${linker_language})
-
         endfunction ()
 
-        macro (set_compile_flags)
-            include_directories(${PropWare_INCLUDE_DIR})
+        function (append_linker_flags target)
+            foreach (flag IN LISTS ARGN)
+                set(ALL_LINK_FLAGS ${flag})
+                get_target_property(EXISTING_LINK_FLAGS "${target}" LINK_FLAGS)
+                if (EXISTING_LINK_FLAGS)
+                    set(ALL_LINK_FLAGS "${EXISTING_LINK_FLAGS} ${ALL_LINK_FLAGS}")
+                endif ()
+                set_target_properties("${target}" PROPERTIES LINK_FLAGS "${ALL_LINK_FLAGS}")
+            endforeach ()
+        endfunction ()
+
+        function (set_compile_flags target)
+            # Convert all of the user's flags into a list
+            foreach (variable COMMON_FLAGS COMMON_COG_FLAGS ASM_FLAGS C_FLAGS CXX_FLAGS COGC_FLAGS COGCXX_FLAGS ECOGC_FLAGS ECOGCXX_FLAGS)
+                separate_arguments(${variable} UNIX_COMMAND "${${separate_arguments}}")
+            endforeach ()
+
 
             if (AUTO_OTPIMIZATION)
-                if (NOT AUTO_OTPIMIZATION_SET)
-                    set(AUTO_OTPIMIZATION_SET 1)
-                    set(COMMON_FLAGS "${COMMON_FLAGS} -Os")
-                endif ()
+                list(APPEND COMMON_FLAGS -Os)
             endif ()
 
             # Handle user options
             if (32_BIT_DOUBLES)
-                if (NOT 32_BIT_DOUBLES_SET)
-                    set(32_BIT_DOUBLES_SET 1)
-                    set(COMMON_FLAGS "${COMMON_FLAGS} -m32bit-doubles")
-                endif ()
+                list(APPEND COMMON_FLAGS -m32bit-doubles)
             endif ()
 
             if (WARN_ALL)
-                if (NOT WARN_ALL_SET)
-                    set(WARN_ALL_SET 1)
-                    set(COMMON_FLAGS "${COMMON_FLAGS} -Wall")
-                endif ()
+                list(APPEND COMMON_FLAGS -Wall)
             endif ()
 
             if (AUTO_C_STD)
-                if (NOT AUTO_C_STD_SET)
-                    set(AUTO_C_STD_SET 1)
-                    set(C_FLAGS "${C_FLAGS} -std=c99")
-                endif ()
+                # Cannot use CMake's built-in support for C standard because it will not affect COGC or ECOGC
+                list(APPEND C_FLAGS --std=gnu99)
             endif ()
 
             if (AUTO_CXX_STD)
-                if (NOT AUTO_CXX_STD_SET)
-                    set(AUTO_CXX_STD_SET 1)
-                    set(CXX_FLAGS "${CXX_FLAGS} -std=gnu++0x")
-                endif ()
+                # Cannot use CMake's built-in support for C++ standard because it will not affect COGCXX or ECOGCXX
+                list(APPEND CXX_FLAGS --std=gnu++0x)
             endif ()
 
-            # If no model is specified, we must choose a default so that the proper libraries can be linked
-            if (NOT DEFINED MODEL)
-                set(MODEL lmm)
-            endif ()
+            # C++ Language features
+            macro (add_language_feature_option option_name feature)
+                if (${option_name})
+                    list(APPEND CXX_FLAGS -f${feature})
+                else ()
+                    list(APPEND CXX_FLAGS -fno-${feature})
+                endif ()
+            endmacro ()
+            add_language_feature_option(EXCEPTIONS exceptions)
+            add_language_feature_option(RUNTIME_TYPE_INFORMATION rtti)
+            add_language_feature_option(THREADSAFE_STATICS threadsafe-statics)
 
             # XMM model is retroactively renamed xmm-split
             if ("${MODEL}" STREQUAL xmm)
@@ -302,115 +300,65 @@ if (NOT PropWare_FOUND)
             string(TOLOWER "${MODEL}" MODEL_LOWERCASE)
             if (NOT((MODEL_LOWERCASE STREQUAL "cog")))
                 if (AUTO_CUT_SECTIONS)
-                    if (NOT AUTO_CUT_SECTIONS_SET)
-                        set(AUTO_CUT_SECTIONS_SET 1)
-                        set(COMMON_FLAGS "${COMMON_FLAGS} -ffunction-sections -fdata-sections")
-                        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--gc-sections")
-                    endif ()
+                    list(APPEND COMMON_FLAGS -ffunction-sections)
+                    list(APPEND COMMON_FLAGS -fdata-sections)
+                    append_linker_flags(${target} -Wl,--gc-sections)
                 endif ()
             endif ()
 
             # Check if a deprecated variable name is set
             if (DEFINED CFLAGS OR DEFINED CXXFLAGS)
-                if (NOT CFLAGS_CXXFLAGS_SET)
-                    set(CFLAGS_CXXFLAGS_SET 1)
-                    message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")
-                    set(C_FLAGS "${C_FLAGS} ${CFLAGS}")
-                    set(CXX_FLAGS "${CXX_FLAGS} ${CXXFLAGS}")
-                    set(CFLAGS )
-                    set(CXXFLAGS )
-                endif ()
+                message(WARN ": The variables `CFLAGS` and `CXXFLAGS` have been replaced by `C_FLAGS` and `CXX_FLAGS`.")
+                list(APPEND C_FLAGS ${CFLAGS})
+                list(APPEND CXX_FLAGS ${CXXFLAGS})
+                set(CFLAGS )
+                set(CXXFLAGS )
             endif()
 
-            if (NOT COMMON_FLAGS_SET)
-                set(COMMON_FLAGS_SET 1)
-                set(COMMON_FLAGS "-save-temps ${COMMON_FLAGS}")
-                #set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map=main.rawmap ${CMAKE_EXE_LINKER_FLAGS}")
+            list(APPEND COMMON_FLAGS -save-temps)
+
+            get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+
+            foreach (language ASM C CXX)
+                if (${language} IN_LIST _languages)
+                    set(flags
+                        ${COMMON_FLAGS}
+                        ${${language}_FLAGS}
+                        -m${MODEL}
+                    )
+                    target_compile_options("${target}" PRIVATE
+                        $<$<COMPILE_LANGUAGE:${language}>:${flags}>
+                    )
+                endif ()
+            endforeach ()
+
+            foreach (topLang C CXX)
+                foreach (subLang COG ECOG)
+                    set(language ${subLang}${topLang})
+                    if (${language} IN_LIST _languages)
+                        set(flags
+                            ${COMMON_FLAGS}
+                            ${${topLang}_FLAGS}
+                            ${COMMON_COG_FLAGS}
+                            ${${language}_FLAGS}
+                        )
+                        target_compile_options("${target}" PRIVATE
+                            $<$<COMPILE_LANGUAGE:${language}>:${flags}>
+                        )
+                    endif ()
+                endforeach ()
+            endforeach ()
+
+            if (DAT IN_LIST _languages)
+                target_compile_options("${target}" PRIVATE
+                    $<$<COMPILE_LANGUAGE:DAT>:${MODEL}>
+                )
             endif ()
 
-            # Overwite the old flags
-            set(CMAKE_ASM_FLAGS     "${COMMON_FLAGS}    ${ASM_FLAGS}")
-            set(CMAKE_C_FLAGS       "${COMMON_FLAGS}    ${C_FLAGS}")
-            set(CMAKE_CXX_FLAGS     "${COMMON_FLAGS}    ${CXX_FLAGS}")
+            append_linker_flags(${target} -m${MODEL})
+        endfunction ()
 
-            set(CMAKE_COGC_FLAGS    "${CMAKE_C_FLAGS}   ${COMMON_COG_FLAGS} ${COGC_FLAGS}")
-            set(CMAKE_COGCXX_FLAGS  "${CMAKE_CXX_FLAGS} ${COMMON_COG_FLAGS} ${COGCXX_FLAGS}")
-            set(CMAKE_ECOGC_FLAGS   "${CMAKE_C_FLAGS}   ${COMMON_COG_FLAGS} ${ECOGC_FLAGS}")
-            set(CMAKE_ECOGCXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_COG_FLAGS} ${ECOGCXX_FLAGS}")
-
-            set(CMAKE_ASM_FLAGS     "${CMAKE_ASM_FLAGS} -m${MODEL}")
-            set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS}   -m${MODEL}")
-            set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -m${MODEL}")
-            set(CMAKE_DAT_FLAGS     "${MODEL}")
-
-        endmacro()
-
-        macro (add_prop_targets name)
-
-            # Add target for debugging (load to RAM and start GDB)
-            add_custom_target(gdb
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
-                    DEPENDS ${name})
-
-            # Add target for debugging (load to RAM and start terminal)
-            add_custom_target(debug
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
-                    DEPENDS ${name})
-
-            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
-            add_custom_target(debug-eeprom
-                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
-                DEPENDS ${name})
-
-            # Add target for run (load to RAM, do not start terminal)
-            add_custom_target(run-ram
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
-                    DEPENDS ${name})
-
-            # Add target for run (load to EEPROM, do not start terminal)
-            add_custom_target(run
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
-                    DEPENDS ${name})
-
-        endmacro()
-
-        macro (add_prop_targets_with_name name)
-
-            # Add target for debugging (load to RAM and start GDB)
-            add_custom_target(gdb-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
-                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
-                    DEPENDS ${name})
-
-            # Add target for run (load to RAM and start terminal)
-            add_custom_target(debug-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
-                    DEPENDS ${name})
-
-            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
-            add_custom_target(debug-eeprom-${name}
-                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
-                DEPENDS ${name})
-
-            # Add target for run (load to RAM, do not start terminal)
-            add_custom_target(run-ram-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
-                    DEPENDS ${name})
-
-            # Add target for run (load to EEPROM, do not start terminal)
-            add_custom_target(run-${name}
-                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
-                    DEPENDS ${name})
-
-        endmacro()
-
-        macro(set_propware_flags projectName)
-            set_compile_flags()
-            string(TOUPPER ${MODEL} UPPER_MODEL)
-            target_link_libraries(${projectName} ${PropWare_${UPPER_MODEL}_LIBRARIES})
-            set_linker(${projectName})
-
+        function (add_prop_targets name target-suffix)
             if (DEFINED BOARD)
                 set(BOARDFLAG -b${BOARD})
             endif()
@@ -420,38 +368,160 @@ if (NOT PropWare_FOUND)
             elseif (DEFINED ENV{GDB_BAUD})
                 set(BAUDFLAG -b $ENV{GDB_BAUD})
             endif ()
-        endmacro()
 
-        macro (create_executable name src1)
-            add_executable(${name} "${src1}" ${ARGN})
-            set_propware_flags(${name})
-            add_prop_targets_with_name(${name})
-        endmacro()
+            # Add target for debugging (load to RAM and start GDB)
+            add_custom_target(gdb${target-suffix}
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -g &&
+                    ${CMAKE_GDB} ${BAUDFLAG} $<TARGET_FILE:${name}>
+                    DEPENDS ${name})
 
-        macro (create_simple_executable name src1)
-            add_executable(${name} "${src1}" ${ARGN})
-            set_propware_flags(${name})
+            # Add target for debugging (load to RAM and start terminal)
+            add_custom_target(debug${target-suffix}
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t
+                    DEPENDS ${name})
 
-            if (PROPWARE_MAIN_PACKAGE)
-                add_prop_targets_with_name(${name})
-            else ()
-                add_prop_targets(${name})
+            # Add target for debugging in EEPROM (load to EEPROM and start terminal)
+            add_custom_target(debug-eeprom${target-suffix}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
+
+            # Add target for debugging from an SD card (load to SD card and start terminal)
+            add_custom_target(debug-sd-cache${target-suffix}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} -z $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
+
+            # Add target for debugging from an SD card (load to SD card and start terminal)
+            add_custom_target(debug-sd-loader${target-suffix}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} -l $<TARGET_FILE:${name}> -r -t -e
+                DEPENDS ${name})
+
+            # Add target for run (load to RAM, do not start terminal)
+            add_custom_target(run-ram${target-suffix}
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r
+                    DEPENDS ${name})
+
+            # Add target for run (load to EEPROM, do not start terminal)
+            add_custom_target(run${target-suffix}
+                    ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${name}> -r -e
+                    DEPENDS ${name})
+
+            # Add target for debugging from an SD card (load to SD card and start terminal)
+            add_custom_target(run-sd-cache${target-suffix}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} -z $<TARGET_FILE:${name}> -r -e
+                DEPENDS ${name})
+
+            # Add target for debugging from an SD card (load to SD card and start terminal)
+            add_custom_target(run-sd-loader${target-suffix}
+                ${CMAKE_ELF_LOADER} ${BOARDFLAG} -l $<TARGET_FILE:${name}> -r -e
+                DEPENDS ${name})
+        endfunction ()
+
+        function (_pw_create_executable name suffix src1)
+            # If no model is specified, we must choose a default so that the proper libraries can be linked
+            if (NOT DEFINED MODEL)
+                set(MODEL lmm)
             endif ()
-        endmacro()
-    endif ()
 
-    # TODO: Add build system documentation for testing
-    enable_testing()
-    add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
-    macro(create_test target src1)
-        create_executable(${target} "${src1}" ${ARGN})
-        add_test(NAME ${target}
-            COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
-        add_dependencies(test-all ${target})
-        add_custom_target(test-${target}
-            COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
-            DEPENDS ${target})
-    endmacro()
+            # Create the binary
+            add_executable("${name}" "${src1}" ${ARGN})
+
+            # Set flags
+            set_compile_flags(${name})
+            target_include_directories(${name} PRIVATE ${PropWare_INCLUDE_DIR})
+
+            # Link it with the appropriate static libraries (and use C template for linking)
+            string(TOUPPER ${MODEL} _PW_UPPER_MODEL)
+            target_link_libraries(${name} ${PropWare_${_PW_UPPER_MODEL}_LIBRARIES})
+            set_linker(${name})
+
+            # Create propeller-load targets
+            add_prop_targets(${name} "${suffix}")
+        endfunction ()
+
+        function (create_executable name src1)
+            _pw_create_executable("${name}" "-${name}" "${src1}" ${ARGN})
+        endfunction ()
+
+        function (create_simple_executable name src1)
+            if (PROPWARE_MAIN_PACKAGE)
+                _pw_create_executable("${name}" "-${name}" "${src1}" ${ARGN})
+            else ()
+                _pw_create_executable("${name}" "" "${src1}" ${ARGN})
+            endif ()
+        endfunction ()
+
+        function (create_library name src1)
+            # If no model is specified, we must choose a default so that the proper libraries can be linked
+            if (NOT DEFINED MODEL)
+                set(MODEL lmm)
+            endif ()
+            add_library(${name} STATIC "${src1}" ${ARGN})
+            set_compile_flags(${name})
+            target_include_directories(${name} PRIVATE ${PropWare_INCLUDE_DIR})
+            set_linker(${name})
+        endfunction ()
+
+        function(spin2cpp source output_var_name)
+            get_filename_component(SOURCE_PATH "${source}" ABSOLUTE)
+
+            # Find output files
+            execute_process(COMMAND "${SPIN2CPP_COMMAND}" --files "${SOURCE_PATH}"
+                OUTPUT_VARIABLE FILES_STRING
+                RESULT_VARIABLE SPIN2CPP_DEPENDS_CODE
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+            if (SPIN2CPP_DEPENDS_CODE)
+                message(FATAL_ERROR "Spin2cpp failed to report dependencies. Exit code ${SPIN2CPP_DEPENDS_CODE}")
+            endif ()
+
+            # Convert output files from newline-separated list to CMake list
+            string(REPLACE "\r" "" OUTPUT_FILE_NAMES "${FILES_STRING}")
+            string(REPLACE "\n" ";" OUTPUT_FILE_NAMES "${OUTPUT_FILE_NAMES}")
+            foreach (file_name IN LISTS OUTPUT_FILE_NAMES)
+                list(APPEND ALL_OUTPUT_FILES "${CMAKE_CURRENT_BINARY_DIR}/${file_name}")
+            endforeach ()
+
+            # Only save new files in the "output list" variable and add to the clean target
+            foreach (file_path IN LISTS ALL_OUTPUT_FILES)
+                list(FIND FILES_GENERATED_IN_DIRECTORY ${file_path} INDEX)
+                if ("-1" STREQUAL INDEX)
+                    list(APPEND FILES_GENERATED_IN_DIRECTORY "${file_path}")
+                    list(APPEND UNIQUE_OUTPUT_FILES "${file_path}")
+                endif ()
+            endforeach ()
+            set(FILES_GENERATED_IN_DIRECTORY ${FILES_GENERATED_IN_DIRECTORY} PARENT_SCOPE)
+            set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${FILES_GENERATED_IN_DIRECTORY}")
+
+            if (UNIQUE_OUTPUT_FILES)
+                if (ARGN)
+                    set(MAIN_FLAG "--main")
+                endif ()
+                include_directories(SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+                add_custom_command(OUTPUT ${UNIQUE_OUTPUT_FILES}
+                    COMMAND "${SPIN2CPP_COMMAND}"
+                    ARGS --gas ${MAIN_FLAG} "${SOURCE_PATH}"
+                    MAIN_DEPENDENCY "${SOURCE_PATH}"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                    COMMENT "Converting ${source} to C++")
+            endif ()
+            set(${output_var_name} ${UNIQUE_OUTPUT_FILES} PARENT_SCOPE)
+        endfunction()
+
+        # TODO: Add build system documentation for testing
+        enable_testing()
+        add_custom_target(test-all COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+        function(create_test target src1)
+            create_executable("${target}" "${src1}" ${ARGN})
+            if (DEFINED BOARD)
+                set(BOARDFLAG -b${BOARD})
+            endif()
+            add_test(NAME ${target}
+                COMMAND ${CMAKE_ELF_LOADER} ${BOARDFLAG} $<TARGET_FILE:${target}> -r -t -q)
+            add_dependencies(test-all ${target})
+            add_custom_target(test-${target}
+                COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R ${target}
+                DEPENDS ${target})
+        endfunction()
+    endif ()
 
     include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(PropWare

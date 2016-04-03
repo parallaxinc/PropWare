@@ -38,9 +38,9 @@ using namespace PropWare;
  *
  * @include PropWare_FileReader/CMakeLists.txt
  */
-int main () {
+int main() {
     const SD driver;
-    FatFS filesystem(&driver);
+    FatFS    filesystem(&driver);
     filesystem.mount();
 
     FatFileReader reader(filesystem, "fat_test.txt");

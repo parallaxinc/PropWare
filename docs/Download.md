@@ -36,21 +36,33 @@ Microsoft Windows
    PATH exist [here][3]. For instance, if you installed %PropWare to `C:\%PropWare` and PATH currently contains 
    `C:\propgcc\bin`, the new value would be `C:\%PropWare\PWCMake\bin;C:\propgcc\bin`.
 
-Linux - Debian/Ubuntu/Mint/etc
+Linux (x86-64) - Debian/Ubuntu/Mint/etc
 ------------------------------
 1. Download the [`deb` package file][4].
-2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.0.0-Generic.deb`. If `cmake` is already installed, 
+2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.0.1-Generic.deb`. If `cmake` is already installed, 
    remove it with `sudo dpkg -r cmake`.
 3. `make` is the recommended build tool to use with %PropWare. If it is not already installed, install it with 
    `sudo apt-get install make`.
 
-Linux - RedHat/Fedora/CentOS/etc
+Linux (x86-64) - RedHat/Fedora/CentOS/etc
 --------------------------------
 1. Download the [`rpm` package file][5].
-2. Use `rpm` to install the file with: `sudo rpm -i PropWare-2.0.0-Generic.rpm`. If `cmake` is already installed, 
+2. Use `rpm` to install the file with: `sudo rpm -i PropWare-2.0.1-Generic.rpm`. If `cmake` is already installed, 
    remove it with `sudo rpm -e cmake`.
 3. `make` is the recommended build tool to use with %PropWare. If it is not already installed, install it with 
    `sudo yum install make`.
+
+Linux (ARMv7/Raspbery Pi 2 & 3) - Raspbian/Debian/Ubuntu/etc
+------------------------------------------------------------
+Raspberry Pis and other ARM platforms are not officially supported. I have run some basic and preliminary tests with the
+following packages. The packages must be built manually and will therefore not be updated with the same frequency as
+Windows, Linux x86-64, or Mac OSX packages.
+
+1. Download the [`deb` package file][6].
+2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.1.0-Generic.deb`. If `cmake` is already installed, 
+   remove it with `sudo dpkg -r cmake`.
+3. `make` is the recommended build tool to use with %PropWare. If it is not already installed, install it with 
+   `sudo apt-get install make`.
 
 Mac OSX
 -------
@@ -58,9 +70,9 @@ I am unable to produce easy installation packages for Mac. My apologies. Please 
 command line to install %PropWare on your Mac:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
-wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1 -Opropware.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-examples.zip?guest=1 -Oexamples.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
@@ -76,9 +88,9 @@ sudo ln -s /Applications/pwcmake.app/Contents/bin/cmakexbuild /usr/local/bin/cma
 
 To upgrade:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
-wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1 -Opropware.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-examples.zip?guest=1 -Oexamples.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
@@ -96,8 +108,9 @@ sudo rm -rf /Applications/pwcmake.app.bak
 sudo rm -rf /Applications/PropWare.bak
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[1]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic-propware.zip?guest=1
-[2]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.exe?guest=1
+[1]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic-propware.zip?guest=1
+[2]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic.exe?guest=1
 [3]: http://www.computerhope.com/issues/ch000549.htm
-[4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.deb?guest=1
-[5]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.0-Generic.rpm?guest=1
+[4]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic.deb?guest=1
+[5]: http://david.zemon.name:8111/repository/download/PropWare_Release20/.lastSuccessful/PropWare-2.0.1-Generic.rpm?guest=1
+[6]: http://david.zemon.name/downloads/PropWare-2.1.0-Generic.deb

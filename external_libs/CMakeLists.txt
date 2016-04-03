@@ -1,3 +1,6 @@
+# Turn off warnings for code that I don't own
+set(WARN_ALL OFF)
+
 ####################################################################
 # Find libpropeller sources
 ####################################################################
@@ -40,7 +43,7 @@ set(HEADER_FILE_EXTENSIONS
     *.HPP
     *.Hpp)
 
-macro(subdirlist result curdir)
+function(subdirlist result curdir)
     file(GLOB children RELATIVE "${curdir}" "${curdir}/*")
     set(dirlist "")
     foreach (child IN LISTS children)
@@ -48,17 +51,17 @@ macro(subdirlist result curdir)
             list(APPEND dirlist "${child}")
         endif ()
     endforeach ()
-    set(${result} ${dirlist})
-endmacro()
+    set(${result} ${dirlist} PARENT_SCOPE)
+endfunction()
 
-macro(compute_demo_filenames result library)
+function(compute_demo_filenames result library)
     set(cdf_FILES "")
     get_filename_component(library_name "${library}" NAME)
     foreach (extension ".c" ".h")
         list(APPEND cdf_FILES "${library}/${library_name}${extension}")
     endforeach ()
-    set(${result} ${cdf_FILES})
-endmacro()
+    set(${result} ${cdf_FILES} PARENT_SCOPE)
+endfunction()
 
 # Get most categories
 subdirlist(CATEGORIES "${SIMPLE_ROOT}")

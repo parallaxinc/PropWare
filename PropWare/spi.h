@@ -269,13 +269,10 @@ class SPI : public PrintCapable,
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
         void shift_out_block_msb_first_fast (const uint8_t buffer[], size_t numberOfBytes) {
-#define ASMVAR(name) "__LMM_FCACHE_START+("  #name "%= - SpiBlockWriteStart%=)"
             __asm__ volatile (
-                    "        fcache #(SpiBlockWriteEnd%= - SpiBlockWriteStart%=)                                \n\t"
-                    "        .compress off                                                                      \n\t"
-
-                    "SpiBlockWriteStart%=:                                                                      \n\t"
-                    "       jmp #__LMM_FCACHE_START+(outerLoop%= - SpiBlockWriteStart%=)                        \n\t"
+#define ASMVAR(name) FC_ADDR(#name "%=",  "SpiBlockWriteStart%=")
+                    FC_START("SpiBlockWriteStart%=", "SpiBlockWriteEnd%=")
+                    "       jmp #" FC_ADDR("outerLoop%=", "SpiBlockWriteStart%=") "                             \n\t"
 
                     // Temporary variables
                     "bitIdx%=:                                                                                  \n\t"
@@ -294,23 +291,21 @@ class SPI : public PrintCapable,
                     "       muxc outa, %[_mosi]                                                                 \n\t"
                     "       xor outa, %[_sclk]                                                                  \n\t"
                     "       xor outa, %[_sclk]                                                                  \n\t"
-                    "       djnz " ASMVAR(bitIdx) ", #__LMM_FCACHE_START+(loop%= - SpiBlockWriteStart%=)        \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("loop%=", "SpiBlockWriteStart%=") "             \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       add %[_bufAdr], #1                                                                  \n\t"
 
-                    "       djnz %[_numberOfBytes], #__LMM_FCACHE_START+(outerLoop%= - SpiBlockWriteStart%=)    \n\t"
+                    "       djnz %[_numberOfBytes], #" FC_ADDR("outerLoop%=", "SpiBlockWriteStart%=") "        \n\t"
 
                     "       or outa, %[_mosi]                                                                   \n\t"
-                    "       jmp __LMM_RET                                                                       \n\t"
-                    "SpiBlockWriteEnd%=:                                                                        \n\t"
-                    "       .compress default                                                                   \n\t"
+                    FC_END("SpiBlockWriteEnd%=")
+#undef ASMVAR
             : [_bufAdr] "+r"(buffer),
             [_numberOfBytes] "+r"(numberOfBytes)
             :[_mosi] "r"(this->m_mosi.get_mask()),
             [_sclk] "r"(this->m_sclk.get_mask())
             );
-#undef ASMVAR
         }
 
         /**
@@ -321,15 +316,10 @@ class SPI : public PrintCapable,
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
         void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-#define ASMVAR(name) "__LMM_FCACHE_START+("  #name "%= - SpiBlockReadStart%=)"
             __asm__ volatile (
-            "        fcache #(SpiBlockReadEnd%= - SpiBlockReadStart%=)                                          \n\t"
-                    "        .compress off                                                                      \n\t"
-
-                    "SpiBlockReadStart%=:                                                                       \n\t"
-                    "       jmp #__LMM_FCACHE_START+(outerLoop%= - SpiBlockReadStart%=)                         \n\t"
+#define ASMVAR(name) FC_ADDR(#name "%=", "SpiBlockReadStart%=")
+                    FC_START("SpiBlockReadStart%=", "SpiBlockReadEnd%=")
+                    "       jmp #" FC_ADDR("outerLoop%=", "SpiBlockReadStart%=") "                              \n\t"
 
                     // Temporary variables
                     "bitIdx%=:                                                                                  \n\t"
@@ -347,24 +337,20 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                                  \n\t"
                     "       rcl " ASMVAR(data) ", #1                                                            \n\t"
                     "       xor outa, %[_sclk]                                                                  \n\t"
-                    "       djnz " ASMVAR(bitIdx) ", #__LMM_FCACHE_START+(loop%= - SpiBlockReadStart%=)         \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("loop%=", "SpiBlockReadStart%=") "              \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       wrbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
                     "       add %[_bufAdr], #1                                                                  \n\t"
 
-                    "       djnz %[_numberOfBytes], #__LMM_FCACHE_START+(outerLoop%= - SpiBlockReadStart%=)     \n\t"
-
-                    "       jmp __LMM_RET                                                                       \n\t"
-                    "SpiBlockReadEnd%=:                                                                         \n\t"
-                    "       .compress default                                                                   \n\t"
+                    "       djnz %[_numberOfBytes], #" FC_ADDR("outerLoop%=", "SpiBlockReadStart%=") "          \n\t"
+                    FC_END("SpiBlockReadEnd%=")
             : [_bufAdr] "+r"(buffer),
             [_numberOfBytes] "+r"(numberOfBytes)
             :[_miso] "r"(this->m_miso.get_mask()),
             [_sclk] "r"(this->m_sclk.get_mask())
             );
 #undef ASMVAR
-#pragma GCC diagnostic pop
         }
 
         void put_char (const char c) {
@@ -412,10 +398,7 @@ class SPI : public PrintCapable,
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             __asm__ volatile (
-            "       fcache #(SpiSendMsbFirstEnd%= - SpiSendMsbFirstStart%=)                             \n\t"
-                    "       .compress off                                                               \n\t"
-                    "SpiSendMsbFirstStart%=:                                                            \n\t"
-
+                    FC_START("SpiSendMsbFirstStart%=", "SpiSendMsbFirstEnd%=")
                     "       ror %[_data], %[_bitCount]                                                  \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                 \n\t"
                     "       add %[_clock], CNT                                                          \n\t"
@@ -427,12 +410,10 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                          \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                             \n\t"
                     "       xor outa, %[_sclk]                                                          \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendMsbFirstStart%=)    \n\t"
+                    "       djnz %[_bitCount], #" FC_ADDR("loop%=", "SpiSendMsbFirstStart%=") "         \n\t"
 
                     "       or outa, %[_mosi]                                                           \n\t"
-                    "       jmp __LMM_RET                                                               \n\t"
-                    "SpiSendMsbFirstEnd%=:                                                              \n\t"
-                    "       .compress default                                                           \n\t"
+                    FC_END("SpiSendMsbFirstEnd%=")
             : [_bitCount] "+r"(bits),
             [_data] "+r"(data),
             [_clock] "+r"(clock)
@@ -448,10 +429,7 @@ class SPI : public PrintCapable,
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             __asm__ volatile (
-            "        fcache #(SpiSendLsbFirstEnd%= - SpiSendLsbFirstStart%=)                            \n\t"
-                    "        .compress off                                                              \n\t"
-
-                    "SpiSendLsbFirstStart%=:                                                            \n\t"
+                    FC_START("SpiSendLsbFirstStart%=", "SpiSendLsbFirstEnd%=")
                     // Local variable declaration
                     "       mov %[_clock], CNT                                                          \n\t"
                     "       add %[_clock], %[_clkDelay]                                                 \n\t"
@@ -463,13 +441,10 @@ class SPI : public PrintCapable,
                     "       xor OUTA, %[_sclk]                                                          \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                             \n\t"
                     "       xor OUTA, %[_sclk]                                                          \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiSendLsbFirstStart%=)    \n\t"
+                    "       djnz %[_bitCount], #" FC_ADDR("loop%=", "SpiSendLsbFirstStart%=") "         \n\t"
 
                     "       or outa, %[_mosi]                                                           \n\t"
-                    "       jmp __LMM_RET                                                               \n\t"
-
-                    "SpiSendLsbFirstEnd%=:                                                              \n\t"
-                    "       .compress default                                                           \n\t"
+                    FC_END("SpiSendLsbFirstEnd%=")
             : [_bitCount] "+r"(bits),
             [_data] "+r"(data),
             [_clock] "+r"(clock)
@@ -486,10 +461,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-            "        fcache #(SpiReadMsbPhs0End%= - SpiReadMsbPhs0Start%=)                                  \n\t"
-                    "        .compress off                                                                  \n\t"
-
-                    "SpiReadMsbPhs0Start%=:                                                                 \n\t"
+                    FC_START("SpiReadMsbPhs0Start%=", "SpiReadMsbPhs0End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -501,11 +473,8 @@ class SPI : public PrintCapable,
                     "       rcl %[_data], #1                                                                \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       xor outa, %[_sclk]                                                              \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs0Start%=)         \n\t"
-
-                    "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadMsbPhs0End%=:                                                                   \n\t"
-                    "       .compress default                                                               \n\t"
+                    "       djnz %[_bitCount], #" FC_ADDR("loop%=", "SpiReadMsbPhs0Start%=") "              \n\t"
+                    FC_END("SpiReadMsbPhs0End%=")
             : [_bitCount] "+r"(bits),
             [_clock] "+r"(clock),
             [_data] "+r"(tempData)
@@ -524,10 +493,7 @@ class SPI : public PrintCapable,
             unsigned int tempData;
             unsigned int modifiableBits = bits;
             __asm__ volatile (
-            "        fcache #(SpiReadLsbPhs0End%= - SpiReadLsbPhs0Start%=)                                  \n\t"
-                    "        .compress off                                                                  \n\t"
-
-                    "SpiReadLsbPhs0Start%=:                                                                 \n\t"
+                    FC_START("SpiReadLsbPhs0Start%=", "SpiReadLsbPhs0End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -539,11 +505,8 @@ class SPI : public PrintCapable,
                     "       rcr %[_data], #1                                                                \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       xor outa, %[_sclk]                                                              \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadLsbPhs0Start%=)         \n\t"
-
-                    "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadLsbPhs0End%=:                                                                   \n\t"
-                    "       .compress default                                                               \n\t"
+                    "       djnz %[_bitCount], #" FC_ADDR("loop%=", "SpiReadLsbPhs0Start%=") "              \n\t"
+                    FC_END("SpiReadLsbPhs0End%=")
             : [_bitCount] "+r"(modifiableBits),
             [_clock] "+r"(clock),
             [_data] "+r"(tempData)
@@ -561,10 +524,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-            "        fcache #(SpiReadMsbPhs1End%= - SpiReadMsbPhs1Start%=)                                  \n\t"
-                    "        .compress off                                                                  \n\t"
-
-                    "SpiReadMsbPhs1Start%=:                                                                 \n\t"
+                    FC_START("SpiReadMsbPhs1Start%=", "SpiReadMsbPhs1End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -576,11 +536,8 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                              \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       rcl %[_data], #1                                                                \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadMsbPhs1Start%=)         \n\t"
-
-                    "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadMsbPhs1End%=:                                                                   \n\t"
-                    "       .compress default                                                               \n\t"
+                    "       djnz %[_bitCount], #" FC_ADDR("loop%=", "SpiReadMsbPhs1Start%=") "              \n\t"
+                    FC_END("SpiReadMsbPhs1End%=")
             : [_bitCount] "+r"(bits),
             [_clock] "+r"(clock),
             [_data] "+r"(tempData)
@@ -598,10 +555,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-            "        fcache #(SpiReadLsbPhs1End%= - SpiReadLsbPhs1Start%=)                                  \n\t"
-                    "        .compress off                                                                  \n\t"
-
-                    "SpiReadLsbPhs1Start%=:                                                                 \n\t"
+                    FC_START("SpiReadLsbPhs1Start%=", "SpiReadLsbPhs1End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -613,11 +567,8 @@ class SPI : public PrintCapable,
                     "       xor outa, %[_sclk]                                                              \n\t"
                     "       waitcnt %[_clock], %[_clkDelay]                                                 \n\t"
                     "       rcr %[_data], #1                                                                \n\t"
-                    "       djnz %[_bitCount], #__LMM_FCACHE_START+(loop%= - SpiReadLsbPhs1Start%=)         \n\t"
-
-                    "       jmp __LMM_RET                                                                   \n\t"
-                    "SpiReadLsbPhs1End%=:                                                                   \n\t"
-                    "       .compress default                                                               \n\t"
+                    "       djnz %[_bitCount], #" FC_ADDR("loop%=", "SpiReadLsbPhs1Start%=") "              \n\t"
+                    FC_END("SpiReadLsbPhs1End%=")
             : [_bitCount] "+r"(bits),
             [_clock] "+r"(clock),
             [_data] "+r"(tempData)

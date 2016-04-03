@@ -14,9 +14,6 @@ endif ()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 find_package(PropWare REQUIRED)
 
-# Allow using `if (VAR IN_LIST MY_LIST)`. Requires CMake 3.3
-cmake_policy(SET CMP0057 NEW)
-
 # Set the project, version number and all languages used
 project(PropWare
     VERSION ${VERSION}
@@ -33,6 +30,11 @@ if (DOXYGEN_FOUND)
         "${DOXYGEN_EXECUTABLE}" Doxyfile
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endif ()
+
+option(PACKAGE_LINUX "Create complete package for Linux" OFF)
+option(PACKAGE_WIN32 "Create complete package for Windows" OFF)
+option(PACKAGE_OSX "Create complete package for Mac OSX" OFF)
+option(PACKAGE_PI2 "Create complete package for Raspberry Pi 2" OFF)
 
 include(ExternalProject)
 include(./DownloadCMakeBinaries.cmake)

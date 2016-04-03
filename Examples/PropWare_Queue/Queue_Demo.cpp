@@ -9,7 +9,7 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/scanner.h>
 
-static const size_t ARRAY_SIZE = 4;
+static const size_t ARRAY_SIZE_1 = 4;
 
 /**
  * @example     Queue_Demo.cpp
@@ -19,7 +19,7 @@ static const size_t ARRAY_SIZE = 4;
  * @include PropWare_Queue/CMakeLists.txt
  */
 int main () {
-    int array[ARRAY_SIZE];
+    int array[ARRAY_SIZE_1];
     PropWare::Queue<int> buffer(array);
 
     pwOut.printf("Please enter a number at each of the following six prompts:\n");
@@ -30,7 +30,7 @@ int main () {
         buffer.enqueue(x);
     }
 
-    pwOut << "I received the following (" << ARRAY_SIZE << ") values in this order:\n";
+    pwOut << "I received the following (" << ARRAY_SIZE_1 << ") values in this order:\n";
     while (buffer.size())
         pwOut << "    " << buffer.dequeue() << "\n";
     pwOut << "The Queue instance only had space for four objects, so you'll notice that\n"
