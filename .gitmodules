@@ -4,3 +4,6 @@
 [submodule "propsideworkspace"]
 	path = propsideworkspace
 	url = https://github.com/parallaxinc/propsideworkspace.git
+[submodule "CMakeModules"]
+	path = CMakeModules
+	url = git@github.com:DavidZemon/PropWare-Build.git
