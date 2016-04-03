@@ -71,7 +71,7 @@ class FatFS : public Filesystem {
          *                          wrong. All code using the logger will be optimized out by GCC so long as you only
          *                          call public method
          */
-        FatFS (const BlockStorage *driver, const Printer *logger = &pwOut)
+        FatFS (const BlockStorage &driver, const Printer &logger = pwOut)
                 : Filesystem(driver, logger),
                   m_fat(NULL),
                   m_fatMod(false) {

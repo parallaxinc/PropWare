@@ -43,12 +43,13 @@ using namespace PropWare;
 static const char    FILE_NAME[]       = "fat_test.txt";
 static const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
 static const char    BOGUS_FILE_NAME[] = "bogus.txt";
-static FatFS         g_fs(new SD());
+static SD            g_driver;
+static FatFS         g_fs(g_driver);
 static FatFileReader *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
-        SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
+        SPI::get_instance().print_error_str(pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
         ((SD *) g_fs.m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
     else if (Filesystem::BEG_ERROR <= err && err <= Filesystem::END_ERROR)
@@ -226,8 +227,6 @@ int main () {
     RUN_TEST(SafeGetChar);
     RUN_TEST(Tell);
     RUN_TEST(Seek);
-
-    delete g_fs.get_driver();
 
     COMPLETE();
 }

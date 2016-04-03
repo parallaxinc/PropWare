@@ -91,7 +91,7 @@ unsigned int run_buffered (const int iterations) {
     const volatile unsigned int timerStart = CNT;
 
     StringBuilder string;
-    const Printer stringStream(&string);
+    const Printer stringStream(string);
     for (int i = 0; i < iterations; ++i) {
         stringStream << next_fibonacci();
         if (i != iterations - 1)
@@ -107,7 +107,7 @@ unsigned int run_static_buffered (const int iterations) {
 
     char buffer[4096];
     StaticStringBuilder string(buffer);
-    const Printer stringStream(&string);
+    const Printer stringStream(string);
     for (int i = 0; i < iterations; ++i) {
         stringStream << next_fibonacci();
         if (i != iterations - 1)

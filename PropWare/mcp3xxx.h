@@ -90,9 +90,9 @@ class MCP3xxx {
          *                                  to true is only necessary when multiple devices are connected to the same
          *                                  SPI bus and use different SPI modes
          */
-        MCP3xxx (SPI *spi, const PropWare::Pin::Mask cs, MCP3xxx::PartNumber partNumber,
+        MCP3xxx (SPI &spi, const PropWare::Pin::Mask cs, MCP3xxx::PartNumber partNumber,
                  const bool alwaysSetSPIMode = false)
-                : m_spi(spi),
+                : m_spi(&spi),
                   m_alwaysSetMode(alwaysSetSPIMode),
                   m_dataWidth(partNumber) {
             this->m_spi->set_mode(SPI_MODE);

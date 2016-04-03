@@ -93,9 +93,9 @@ class L3G {
          * @param[in]   *spi    Constructed SPI module
          * @param[in]   cs      Chip select pin mask
          */
-        L3G (SPI *spi, const PropWare::Port::Mask cs) {
-            this->m_spi           = spi;
-            this->m_alwaysSetMode = false;
+        L3G (SPI &spi, const PropWare::Port::Mask cs)
+                : m_spi(&spi),
+                  m_alwaysSetMode(false) {
             this->m_cs.set_mask(cs);
         }
 

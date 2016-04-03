@@ -42,7 +42,7 @@ using namespace PropWare;
  */
 int main() {
     const SD  driver;
-    FatFS     filesystem(&driver);
+    FatFS     filesystem(driver);
 
     BlockStorage::Buffer   writeBuffer;
     BlockStorage::MetaData writeMetaData;

@@ -40,7 +40,7 @@ using namespace PropWare;
  */
 int main() {
     const SD driver;
-    FatFS    filesystem(&driver);
+    FatFS    filesystem(driver);
     filesystem.mount();
 
     FatFileReader reader(filesystem, "fat_test.txt");

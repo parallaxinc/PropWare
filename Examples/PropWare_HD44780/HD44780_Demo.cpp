@@ -50,7 +50,7 @@ int main () {
     lcd.start(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
 
     // Create a printer for easy, formatted writing to the LCD
-    PropWare::Printer lcdPrinter(&lcd);
+    PropWare::Printer lcdPrinter(lcd);
 
     // Print to the LCD (exactly 32 characters so that we fill up both lines)
     lcdPrinter.printf("%u %s%d 0x%07X", 123456789, "Hello!", -12345, 0xabcdef);

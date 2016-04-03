@@ -40,9 +40,9 @@ class MAX6675 {
          *
          * @param[in]   *spi    Constructed SPI module
          */
-        MAX6675 (SPI *spi) {
-            this->m_spi           = spi;
-            this->m_alwaysSetMode = 0;
+        MAX6675 (SPI &spi, const bool alwaysSetMode = false) :
+                m_spi(&spi),
+                m_alwaysSetMode(alwaysSetMode) {
         }
 
         /**
@@ -120,7 +120,7 @@ class MAX6675 {
          * @return      Returns 0 upon success, error code otherwise
          */
         float read_float () {
-            uint16_t            temp;
+            uint16_t temp;
 
             temp = this->read();
 

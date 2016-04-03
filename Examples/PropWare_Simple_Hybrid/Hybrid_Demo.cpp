@@ -36,7 +36,7 @@ class SimplePrinter : public PropWare::PrintCapable {
  */
 int main () {
     SimplePrinter           mySimpleCompatiblePrinter;
-    const PropWare::Printer myPrinter(&mySimpleCompatiblePrinter);
+    const PropWare::Printer myPrinter(mySimpleCompatiblePrinter);
 
     putStr("Hello from the Simple function!\n");
     myPrinter.puts("Hello from PropWare's Printer!\n");

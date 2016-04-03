@@ -53,7 +53,7 @@ TEARDOWN {
 TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
     setUp();
 
-    ASSERT_EQ_MSG(SPI::get_instance(), testable->m_spi);
+    ASSERT_EQ_MSG((unsigned int) &SPI::get_instance(), (unsigned int) testable->m_spi);
     ASSERT_EQ_MSG(Port::P2, testable->m_spi->m_mosi.get_mask());
     ASSERT_EQ_MSG(Port::P1, testable->m_spi->m_sclk.get_mask());
     ASSERT_EQ_MSG(Port::P0, testable->m_spi->m_miso.get_mask());

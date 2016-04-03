@@ -60,8 +60,8 @@ class Scanner {
          * @param   *scanCapable    Object capable of scanning for characters
          * @param   *printer        If non-null, scanned characters will be echoed out this printer
          */
-        Scanner (ScanCapable *scanCapable, const Printer *printer = NULL)
-                : m_scanCapable(scanCapable),
+        Scanner (ScanCapable &scanCapable, const Printer *printer = NULL)
+                : m_scanCapable(&scanCapable),
                   m_printer(printer) {
         }
 

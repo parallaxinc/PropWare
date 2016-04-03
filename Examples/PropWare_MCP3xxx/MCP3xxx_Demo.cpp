@@ -54,7 +54,7 @@ int main () {
     uint8_t           scaledValue, i;
     uint32_t          ledOutput;
     PropWare::SPI     spi(MOSI, MISO, SCLK);
-    PropWare::MCP3xxx adc(&spi, CS, PART_NUMBER);
+    PropWare::MCP3xxx adc(spi, CS, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
     PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);

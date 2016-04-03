@@ -85,10 +85,10 @@ class Filesystem {
         }
 
     protected:
-        Filesystem (const BlockStorage *driver, const Printer *logger = &pwOut)
-                : m_logger(logger),
-                  m_driver(driver),
-                  m_sectorSize(driver->get_sector_size()),
+        Filesystem (const BlockStorage &driver, const Printer &logger = pwOut)
+                : m_logger(&logger),
+                  m_driver(&driver),
+                  m_sectorSize(driver.get_sector_size()),
                   m_mounted(false),
                   m_nextFileId(0) {
             this->m_buf.buf  = NULL;

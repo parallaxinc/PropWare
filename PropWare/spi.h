@@ -101,9 +101,9 @@ class SPI : public PrintCapable,
          *
          * @returns     Address of the shared SPI instance
          */
-        static SPI *get_instance () {
+        static SPI &get_instance () {
             static SPI defaultInstance;
-            return &defaultInstance;
+            return defaultInstance;
         }
 
     public:
@@ -374,20 +374,20 @@ class SPI : public PrintCapable,
          * @param[in]   *printer    Object used for printing error string
          * @param[in]   err         Error number used to determine error string
          */
-        void print_error_str (const Printer *printer, const ErrorCode err) const {
+        void print_error_str (const Printer &printer, const ErrorCode err) const {
             const char str[]       = "SPI Error ";
             const int  relativeErr = err - BEG_ERROR;
 
             switch (err) {
                 case INVALID_FREQ:
-                    *printer << str << relativeErr << ": Frequency set too high";
+                    printer << str << relativeErr << ": Frequency set too high";
                     break;
                 default:
                     // Is the error an SPI error?
                     if (err > BEG_ERROR && err < (BEG_ERROR + END_ERROR))
-                        *printer << "Unknown SPI error " << relativeErr << '\n';
+                        printer << "Unknown SPI error " << relativeErr << '\n';
                     else
-                        *printer << "Unknown error " << err << '\n';
+                        printer << "Unknown error " << err << '\n';
             }
         }
 

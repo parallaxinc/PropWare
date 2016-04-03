@@ -37,11 +37,12 @@
 
 using namespace PropWare;
 
+static SD    g_driver;
 static FatFS *testable;
 
 void error_checker (const ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
-        SPI::get_instance()->print_error_str(&pwOut, (const SPI::ErrorCode) err);
+        SPI::get_instance().print_error_str(pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
         ((SD *) testable->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
@@ -49,13 +50,10 @@ void error_checker (const ErrorCode err) {
 }
 
 SETUP {
-    testable = new FatFS(new SD());
+    testable = new FatFS(g_driver);
 }
 
 TEARDOWN {
-
-
-    delete testable->m_driver;
     delete testable;
 }
 

@@ -125,8 +125,8 @@ class Printer {
          * @param   cooked          True to turn cooked mode on, false to turn it off. See
          *                          PropWare::Printer::set_cooked for more information
          */
-        Printer (PrintCapable *printCapable, const bool cooked = true)
-                : m_printCapable(printCapable),
+        Printer (PrintCapable &printCapable, const bool cooked = true)
+                : m_printCapable(&printCapable),
                   m_cooked(cooked) {
         }
 

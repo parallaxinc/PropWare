@@ -28,7 +28,7 @@
 #include <PropWare/spi.h>
 #include <PropWare/uart/simplexuart.h>
 
-void error (const PropWare::ErrorCode err, const PropWare::SPI *spi);
+void error (const PropWare::ErrorCode err, const PropWare::SPI &spi);
 
 /** Pin number for MOSI (master out - slave in) */
 const PropWare::Port::Mask MOSI = PropWare::Port::P0;
@@ -57,16 +57,16 @@ int main () {
     char string[] = "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     char in;    // Create an input variable to store received values from SPI
-    PropWare::SPI *spi = PropWare::SPI::get_instance();
+    PropWare::SPI spi = PropWare::SPI::get_instance();
 
     // Initialize SPI module, giving it pin masks for the physical pins,
     // frequency for the clock, mode of SPI, and bitmode
-    spi->set_mosi(MOSI);
-    spi->set_miso(MISO);
-    spi->set_sclk(SCLK);
-    spi->set_clock(FREQ);
-    spi->set_mode(MODE);
-    spi->set_bit_mode(BITMODE);
+    spi.set_mosi(MOSI);
+    spi.set_miso(MISO);
+    spi.set_sclk(SCLK);
+    spi.set_clock(FREQ);
+    spi.set_mode(MODE);
+    spi.set_bit_mode(BITMODE);
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
@@ -81,7 +81,7 @@ int main () {
             waitcnt(CLKFREQ/100 + CNT);
 
             cs.clear();  // Enable the SPI slave attached to CS
-            spi->shift_out(8, (uint32_t) *s);  // Output the next character of the string
+            spi.shift_out(8, (uint32_t) *s);  // Output the next character of the string
 
             cs.set();
 
@@ -89,7 +89,7 @@ int main () {
             in = (char) 0xff;              // Reset input variable
             while (in != *s) {
                 cs.clear();
-                in = (char) spi->shift_in(8);  // Read in a value from the SPI device
+                in = (char) spi.shift_in(8);  // Read in a value from the SPI device
                 cs.set();
             }
 
@@ -107,16 +107,16 @@ int main () {
     return 0;
 }
 
-void error (const PropWare::ErrorCode err, const PropWare::SPI *spi) {
+void error (const PropWare::ErrorCode err, const PropWare::SPI &spi) {
     PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
 
     if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
-        spi->print_error_str(&pwOut, (PropWare::SPI::ErrorCode) err);
+        spi.print_error_str(pwOut, (PropWare::SPI::ErrorCode) err);
     } else
         pwOut.printf("Unknown error %u\n", err);
 
     while (1) {
-        debugLEDs.write(err);
+        debugLEDs.write(static_cast<uint32_t>(err));
         waitcnt(100*MILLISECOND);
         debugLEDs.write(0);
         waitcnt(100*MILLISECOND);

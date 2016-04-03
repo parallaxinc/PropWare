@@ -179,7 +179,7 @@ class Pin : public PropWare::Port {
          *
          * @returns     Time from starting pin (in clock ticks)
          */
-        int rc_time (const bool state, const int timeout = SECOND / 4) {
+        int rc_time (const bool state, const uint32_t timeout = SECOND / 4) {
             // Taken from Simple's rc_time(int pin, int state) in rcTime.C
             /*
 if(iodt == 0)                               // If dt not initialized

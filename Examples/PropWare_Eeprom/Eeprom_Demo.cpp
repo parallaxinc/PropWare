@@ -62,8 +62,8 @@ int main() {
         "and PropWare::Scanner objects for reading and writing.\n";
 
 
-    PropWare::Printer eepromPrinter(&eeprom);
-    PropWare::Scanner eepromScanner(&eeprom);
+    PropWare::Printer eepromPrinter(eeprom);
+    PropWare::Scanner eepromScanner(eeprom);
 
     // Reset the EEPROM address
     eeprom.set_memory_address(TEST_ADDRESS);

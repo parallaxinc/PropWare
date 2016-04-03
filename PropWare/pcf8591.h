@@ -68,8 +68,8 @@ class PCF8591 {
          * @param[in]   *i2cBus         HUB memory address (as opposed to I2C address!) of the I2C instance that should
          *                              be used for communication; Usually the default bus will be satisfactory
          */
-        PCF8591 (const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS, const I2C *i2cBus = &pwI2c)
-                : m_i2c(i2cBus),
+        PCF8591 (const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS, const I2C i2cBus = pwI2c)
+                : m_i2c(&i2cBus),
                   m_deviceAddress(deviceAddress),
                   m_currentProgram(0) {
         }

@@ -44,7 +44,7 @@ const uint32_t             FREQ = 10000;
  * @include PropWare_MAX6675/CMakeLists.txt
  */
 int main() {
-    PropWare::SPI     *spi = PropWare::SPI::get_instance();
+    PropWare::SPI     spi = PropWare::SPI::get_instance();
     PropWare::MAX6675 thermo(spi);
 
     thermo.start(MOSI, MISO, SCLK, CS);

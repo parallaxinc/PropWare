@@ -27,5 +27,5 @@
 #include <PropWare/uart/sharedsimplexuart.h>
 
 PropWare::SharedSimplexUART        _g_sharedSimplexUart;
-const PropWare::Printer            _g_printer(&_g_sharedSimplexUart);
-const PropWare::SynchronousPrinter pwSyncOut(&_g_printer);
+const PropWare::Printer            _g_printer(_g_sharedSimplexUart);
+const PropWare::SynchronousPrinter pwSyncOut(_g_printer);

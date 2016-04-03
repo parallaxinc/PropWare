@@ -50,7 +50,7 @@ void error (const PropWare::ErrorCode err);
  */
 int main () {
     int16_t       gyroValues[3];
-    PropWare::SPI *spi = PropWare::SPI::get_instance();
+    PropWare::SPI spi = PropWare::SPI::get_instance();
     PropWare::L3G gyro(spi, CS);
 
     gyro.start();
