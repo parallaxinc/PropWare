@@ -27,8 +27,8 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/gpio/pin.h>
-#include <PropWare/string/printer/printer.h>
-#include <PropWare/string/scanner/scancapable.h>
+#include <PropWare/hmi/output/printer.h>
+#include <PropWare/hmi/input/scancapable.h>
 
 namespace PropWare {
 

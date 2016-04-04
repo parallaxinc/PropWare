@@ -6,7 +6,7 @@
 
 #include <PropWare/utility/runnable.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/string/printer/synchronousprinter.h>
+#include <PropWare/hmi/output/synchronousprinter.h>
 #include <PropWare/gpio/pin.h>
 
 class TalkingThread: public PropWare::Runnable {

@@ -24,7 +24,7 @@
  */
 
 #include <PropWare/sensor/distance/ping.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 
 /**
  * @example     Ping_Demo.cpp

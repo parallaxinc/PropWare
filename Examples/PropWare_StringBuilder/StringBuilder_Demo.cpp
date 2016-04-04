@@ -26,8 +26,8 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/string/stringbuilder.h>
 #include <PropWare/string/staticstringbuilder.h>
-#include <PropWare/string/printer/printer.h>
-#include <PropWare/string/scanner/scanner.h>
+#include <PropWare/hmi/output/printer.h>
+#include <PropWare/hmi/input/scanner.h>
 
 using namespace PropWare;
 

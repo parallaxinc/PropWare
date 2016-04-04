@@ -1,5 +1,5 @@
 /**
- * @file    PropWare/string/printer/printer.cpp
+ * @file    PropWare/string/printer/synchronousprinter.cpp
  *
  * @author  David Zemon
  *
@@ -23,9 +23,9 @@
  * SOFTWARE.
  */
 
-#include <PropWare/string/printer/printer.h>
-#include <PropWare/serial/uart/simplexuart.h>
+#include <PropWare/hmi/output/synchronousprinter.h>
+#include <PropWare/serial/uart/sharedsimplexuart.h>
 
-const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
-PropWare::SimplexUART           _g_simplexUart;
-const PropWare::Printer         pwOut(_g_simplexUart);
+PropWare::SharedSimplexUART        _g_sharedSimplexUart;
+const PropWare::Printer            _g_printer(_g_sharedSimplexUart);
+const PropWare::SynchronousPrinter pwSyncOut(_g_printer);

@@ -26,7 +26,7 @@
 #pragma once
 
 #include <PropWare/filesystem/file.h>
-#include <PropWare/string/scanner/scancapable.h>
+#include <PropWare/hmi/input/scancapable.h>
 
 namespace PropWare {
 

@@ -29,7 +29,7 @@
 #include <PropWare/memory/blockstorage.h>
 #include <PropWare/serial/spi/spi.h>
 #include <PropWare/gpio/pin.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 
 /**
  * @brief   Value is injected by `propeller-load` if set in the configuration file

@@ -1,5 +1,5 @@
 /**
- * @file    PropWare/string/printer/synchronousprinter.cpp
+ * @file    PropWare/string/scanner/scanner.cpp
  *
  * @author  David Zemon
  *
@@ -23,9 +23,8 @@
  * SOFTWARE.
  */
 
-#include <PropWare/string/printer/synchronousprinter.h>
-#include <PropWare/serial/uart/sharedsimplexuart.h>
+#include <PropWare/hmi/input/scanner.h>
+#include <PropWare/serial/uart/halfduplexuart.h>
 
-PropWare::SharedSimplexUART        _g_sharedSimplexUart;
-const PropWare::Printer            _g_printer(_g_sharedSimplexUart);
-const PropWare::SynchronousPrinter pwSyncOut(_g_printer);
+PropWare::HalfDuplexUART _g_halfDuplexUart;
+PropWare::Scanner        pwIn(_g_halfDuplexUart, &pwOut);

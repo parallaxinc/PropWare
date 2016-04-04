@@ -26,7 +26,7 @@
 #pragma once
 
 #include <PropWare/filesystem/file.h>
-#include <PropWare/string/printer/printcapable.h>
+#include <PropWare/hmi/output/printcapable.h>
 
 namespace PropWare {
 

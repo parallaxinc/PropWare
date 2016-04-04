@@ -25,7 +25,7 @@
 
 // Includes
 #include <PropWare/monitor/watchdog.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 
 static uint32_t watchDogStack[96];
 

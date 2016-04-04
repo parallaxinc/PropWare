@@ -26,8 +26,8 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-#include <PropWare/string/scanner/scancapable.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/input/scancapable.h>
+#include <PropWare/hmi/output/printer.h>
 #include <PropWare/utility/comparator.h>
 
 extern "C" {

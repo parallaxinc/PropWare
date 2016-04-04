@@ -9,7 +9,15 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filewriter.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/pin.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/port.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scancapable.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scanner.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scanner.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/hd44780.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/printcapable.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/printer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/printer.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/synchronousprinter.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/synchronousprinter.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/ws2812.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/blockstorage.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/eeprom.h
@@ -26,14 +34,6 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2cbase.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/spi/spi.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uart.cpp # FIXME
-    ${CMAKE_CURRENT_LIST_DIR}/string/printer/printcapable.h
-    ${CMAKE_CURRENT_LIST_DIR}/string/printer/printer.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/string/printer/printer.h
-    ${CMAKE_CURRENT_LIST_DIR}/string/printer/synchronousprinter.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/string/printer/synchronousprinter.h
-    ${CMAKE_CURRENT_LIST_DIR}/string/scanner/scancapable.h
-    ${CMAKE_CURRENT_LIST_DIR}/string/scanner/scanner.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/string/scanner/scanner.h
     ${CMAKE_CURRENT_LIST_DIR}/string/staticstringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/string/stringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.cpp

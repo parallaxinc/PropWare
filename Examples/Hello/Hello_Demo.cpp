@@ -34,7 +34,7 @@
 #include <PropWare/PropWare.h>
 
 #ifdef TEST_PROPWARE
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 #elif defined TEST_SIMPLE
 #include <simpletext.h>
 #elif defined TEST_TINYSTREAM

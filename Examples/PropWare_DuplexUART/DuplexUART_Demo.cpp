@@ -26,7 +26,7 @@
 #include <PropWare/utility/runnable.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/serial/uart/halfduplexuart.h>
-#include <PropWare/string/printer/synchronousprinter.h>
+#include <PropWare/hmi/output/synchronousprinter.h>
 
 // Create the test string - useful when testing with a terminal
 const char                   TEST_STRING[] = "Hello, world!\n";

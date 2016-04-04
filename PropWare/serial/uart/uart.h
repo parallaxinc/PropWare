@@ -31,7 +31,7 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/gpio/pin.h>
 #include <PropWare/gpio/port.h>
-#include <PropWare/string/printer/printcapable.h>
+#include <PropWare/hmi/output/printcapable.h>
 
 namespace PropWare {
 

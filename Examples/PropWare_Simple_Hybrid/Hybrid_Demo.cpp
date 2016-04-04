@@ -9,8 +9,8 @@
  * following:
  */
 
-#include <PropWare/string/printer/printcapable.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printcapable.h>
+#include <PropWare/hmi/output/printer.h>
 #include <simpletext.h>
 
 class SimplePrinter : public PropWare::PrintCapable {

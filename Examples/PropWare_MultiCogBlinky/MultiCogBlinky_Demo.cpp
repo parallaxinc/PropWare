@@ -8,7 +8,7 @@
 // include propeller.h for you
 #include <PropWare/PropWare.h>
 #include <PropWare/gpio/pin.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 
 /**
 * @brief       Toggle thread function gets started in an LMM COG.

@@ -28,7 +28,7 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/c++allocate.h>
 #include <PropWare/utility/utility.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 #include <PropWare/memory/blockstorage.h>
 #include <PropWare/filesystem/filesystem.h>
 

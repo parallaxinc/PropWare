@@ -1,5 +1,5 @@
 /**
- * @file    PropWare/string/scanner/scanner.cpp
+ * @file    PropWare/string/printer/printer.cpp
  *
  * @author  David Zemon
  *
@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-#include <PropWare/string/scanner/scanner.h>
-#include <PropWare/serial/uart/halfduplexuart.h>
+#include <PropWare/hmi/output/printer.h>
+#include <PropWare/serial/uart/simplexuart.h>
 
-PropWare::HalfDuplexUART _g_halfDuplexUart;
-PropWare::Scanner        pwIn(_g_halfDuplexUart, &pwOut);
+const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
+PropWare::SimplexUART           _g_simplexUart;
+const PropWare::Printer         pwOut(_g_simplexUart);

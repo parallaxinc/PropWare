@@ -24,7 +24,7 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/output/hd44780.h>
 
 // Control pins

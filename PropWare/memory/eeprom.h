@@ -22,8 +22,8 @@
 #pragma once
 
 #include <PropWare/serial/i2c/i2c.h>
-#include <PropWare/string/printer/printcapable.h>
-#include <PropWare/string/scanner/scancapable.h>
+#include <PropWare/hmi/output/printcapable.h>
+#include <PropWare/hmi/input/scancapable.h>
 
 namespace PropWare {
 

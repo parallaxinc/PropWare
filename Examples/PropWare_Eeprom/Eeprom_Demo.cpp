@@ -19,9 +19,9 @@
  * IN THE SOFTWARE.
  */
 
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 #include <PropWare/memory/eeprom.h>
-#include <PropWare/string/scanner/scanner.h>
+#include <PropWare/hmi/input/scanner.h>
 
 const uint8_t  MAGIC_ARRAY_1[] = "DCBA0";
 const size_t   ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);

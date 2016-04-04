@@ -19,7 +19,7 @@
  * IN THE SOFTWARE.
  */
 
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 
 /**
  * @example     GettingStarted.cpp

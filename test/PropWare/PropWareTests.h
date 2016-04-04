@@ -26,7 +26,7 @@
 #pragma once
 
 #include <PropWare/c++allocate.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 
 #define PROPWARE_TEST
 #define protected public

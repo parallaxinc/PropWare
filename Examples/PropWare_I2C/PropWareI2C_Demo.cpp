@@ -20,7 +20,7 @@
  */
 
 #include <PropWare/serial/i2c/i2c.h>
-#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/printer.h>
 #include <simpletools.h>
 
 const uint8_t MAGIC_ARRAY_1[] = "DCBA0";
