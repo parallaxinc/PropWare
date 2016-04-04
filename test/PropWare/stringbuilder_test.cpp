@@ -27,7 +27,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/stringbuilder.h>
+#include <PropWare/string/stringbuilder.h>
 
 using namespace PropWare;
 

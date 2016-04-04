@@ -27,7 +27,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/spi.h>
+#include <PropWare/serial/spi/spi.h>
 
 const PropWare::Pin::Mask MOSI_MASK = PropWare::Port::P0;
 const PropWare::Pin::Mask MISO_MASK = PropWare::Port::P1;

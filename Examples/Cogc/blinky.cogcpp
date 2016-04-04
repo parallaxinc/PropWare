@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include <PropWare/pin.h>
+#include <PropWare/gpio/pin.h>
 
 _NAKED int main () {
     PropWare::Pin led(PropWare::Port::P23, PropWare::Port::OUT);

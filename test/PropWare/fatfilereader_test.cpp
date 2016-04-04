@@ -33,10 +33,10 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/filesystem/sd.h>
+#include <PropWare/memory/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
-#include <PropWare/staticstringbuilder.h>
+#include <PropWare/string/staticstringbuilder.h>
 
 using namespace PropWare;
 

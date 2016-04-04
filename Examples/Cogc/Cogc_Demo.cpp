@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include <PropWare/pin.h>
+#include <PropWare/gpio/pin.h>
 
 /**
  * @example Cogc_Demo.cpp

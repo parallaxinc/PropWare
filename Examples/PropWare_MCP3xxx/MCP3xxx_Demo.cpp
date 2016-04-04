@@ -24,8 +24,8 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/mcp3xxx.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/sensor/analog/mcp3xxx.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
 const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::MCP300x;

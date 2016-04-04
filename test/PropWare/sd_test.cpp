@@ -31,7 +31,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/filesystem/sd.h>
+#include <PropWare/memory/sd.h>
 
 using namespace PropWare;
 

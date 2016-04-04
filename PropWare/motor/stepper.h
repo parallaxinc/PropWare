@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/pin.h>
+#include <PropWare/gpio/pin.h>
 
 namespace PropWare {
 

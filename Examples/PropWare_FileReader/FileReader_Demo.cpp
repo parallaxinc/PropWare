@@ -24,8 +24,8 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/filesystem/sd.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/memory/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 

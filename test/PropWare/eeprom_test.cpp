@@ -27,7 +27,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/eeprom.h>
+#include <PropWare/memory/eeprom.h>
 
 using namespace PropWare;
 

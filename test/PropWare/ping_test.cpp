@@ -24,7 +24,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/ping.h>
+#include <PropWare/sensor/distance/ping.h>
 
 unsigned int g_clockTicks;
 

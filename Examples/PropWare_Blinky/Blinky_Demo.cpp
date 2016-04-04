@@ -24,7 +24,7 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/pin.h>
+#include <PropWare/gpio/pin.h>
 
 /**
  * @example     Blinky_Demo.cpp

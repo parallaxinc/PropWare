@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include <PropWare/ws2812.h>
+#include <PropWare/hmi/output/ws2812.h>
 
 const PropWare::Pin::Mask    LED_TX_PIN_MASK = PropWare::Pin::P0;
 const PropWare::WS2812::Type LED_TYPE        = PropWare::WS2812::GRB;

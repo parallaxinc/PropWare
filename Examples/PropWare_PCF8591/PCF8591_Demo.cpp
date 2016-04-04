@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#include <PropWare/pcf8591.h>
-#include <PropWare/printer/printer.h>
+#include <PropWare/sensor/analog/pcf8591.h>
+#include <PropWare/string/printer/printer.h>
 
 /**
  * @example     PCF8591_Demo.cpp

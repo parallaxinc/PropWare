@@ -1,5 +1,5 @@
 /**
- * @file    PropWareEeprom_Demo.cpp
+ * @file    Eeprom_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -19,9 +19,9 @@
  * IN THE SOFTWARE.
  */
 
-#include <PropWare/printer/printer.h>
-#include <PropWare/eeprom.h>
-#include <PropWare/scanner.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/memory/eeprom.h>
+#include <PropWare/string/scanner/scanner.h>
 
 const uint8_t  MAGIC_ARRAY_1[] = "DCBA0";
 const size_t   ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);

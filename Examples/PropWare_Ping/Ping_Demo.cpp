@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#include <PropWare/ping.h>
-#include <PropWare/printer/printer.h>
+#include <PropWare/sensor/distance/ping.h>
+#include <PropWare/string/printer/printer.h>
 
 /**
  * @example     Ping_Demo.cpp

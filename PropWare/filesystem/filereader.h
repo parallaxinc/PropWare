@@ -26,7 +26,7 @@
 #pragma once
 
 #include <PropWare/filesystem/file.h>
-#include <PropWare/scancapable.h>
+#include <PropWare/string/scanner/scancapable.h>
 
 namespace PropWare {
 

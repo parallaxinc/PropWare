@@ -24,7 +24,7 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/max6675.h>
+#include <PropWare/sensor/temperature/max6675.h>
 
 /** Pin number for MOSI (master out - slave in) */
 const PropWare::Port::Mask MOSI = PropWare::Port::P0;

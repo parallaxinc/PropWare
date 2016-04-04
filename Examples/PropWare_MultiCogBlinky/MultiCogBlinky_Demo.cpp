@@ -7,9 +7,8 @@
 // Note the lack of an include for propeller.h; This is because PropWare.h will
 // include propeller.h for you
 #include <PropWare/PropWare.h>
-#include <PropWare/pin.h>
-#include <PropWare/uart/simplexuart.h>
-#include <PropWare/printer/printer.h>
+#include <PropWare/gpio/pin.h>
+#include <PropWare/string/printer/printer.h>
 
 /**
 * @brief       Toggle thread function gets started in an LMM COG.

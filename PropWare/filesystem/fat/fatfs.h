@@ -26,13 +26,11 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-#include <PropWare/utility.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/filesystem/blockstorage.h>
-#include <PropWare/filesystem/filesystem.h>
 #include <PropWare/c++allocate.h>
-
-#include <stdbool.h>
+#include <PropWare/utility/utility.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/memory/blockstorage.h>
+#include <PropWare/filesystem/filesystem.h>
 
 namespace PropWare {
 

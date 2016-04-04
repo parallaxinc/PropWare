@@ -24,8 +24,8 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/hd44780.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/hmi/output/hd44780.h>
 
 // Control pins
 const PropWare::Port::Mask RS = PropWare::Port::P16;

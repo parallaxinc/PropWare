@@ -26,7 +26,7 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-#include <PropWare/filesystem/blockstorage.h>
+#include <PropWare/memory/blockstorage.h>
 
 namespace PropWare {
 

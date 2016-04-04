@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-#include <PropWare/pin.h>
+#include <PropWare/gpio/pin.h>
 #include "PropWareTests.h"
 
 static PropWare::Pin             *testable;

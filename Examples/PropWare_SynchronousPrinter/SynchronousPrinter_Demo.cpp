@@ -4,11 +4,11 @@
  * @author  David Zemon
  */
 
-#include <PropWare/runnable.h>
+#include <PropWare/utility/runnable.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/printer/synchronousprinter.h>
-#include <PropWare/port.h>
-#include <PropWare/pin.h>
+#include <PropWare/string/printer/synchronousprinter.h>
+#include <PropWare/gpio/port.h>
+#include <PropWare/gpio/pin.h>
 
 const uint16_t     COGS             = 8;
 const uint16_t     STACK_SIZE       = 128;

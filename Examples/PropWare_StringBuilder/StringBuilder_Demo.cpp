@@ -24,10 +24,10 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/stringbuilder.h>
-#include <PropWare/staticstringbuilder.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/scanner.h>
+#include <PropWare/string/stringbuilder.h>
+#include <PropWare/string/staticstringbuilder.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/string/scanner/scanner.h>
 
 using namespace PropWare;
 

@@ -25,10 +25,10 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-#include <PropWare/utility.h>
-#include <PropWare/port.h>
-#include <PropWare/printer/printer.h>
-#include <PropWare/scanner.h>
+#include <PropWare/utility/utility.h>
+#include <PropWare/gpio/port.h>
+#include <PropWare/string/printer/printer.h>
+#include <PropWare/string/scanner/scanner.h>
 
 bool isAnswerNo (char const userInput[]);
 

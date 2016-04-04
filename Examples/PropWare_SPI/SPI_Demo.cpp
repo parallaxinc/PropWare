@@ -25,8 +25,7 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-#include <PropWare/spi.h>
-#include <PropWare/uart/simplexuart.h>
+#include <PropWare/serial/spi/spi.h>
 
 void error (const PropWare::ErrorCode err, const PropWare::SPI &spi);
 
@@ -103,8 +102,6 @@ int main () {
         // Signal that the entire string has been sent
         debugLEDs.toggle();
     }
-
-    return 0;
 }
 
 void error (const PropWare::ErrorCode err, const PropWare::SPI &spi) {

@@ -24,7 +24,7 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/queue.h>
+#include <PropWare/utility/queue.h>
 
 static const size_t         SIZE = 8;
 static int                  array[SIZE];
