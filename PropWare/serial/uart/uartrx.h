@@ -44,7 +44,12 @@ class UARTRX : public UART,
         /**
          * @see PropWare::SimplexUART::AbstractSimplexUART()
          */
-        UARTRX () : UART() {
+        UARTRX () {
+            // Can't rely on parent constructor because the setters are virtual
+            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
+            this->set_parity(UART::DEFAULT_PARITY);
+            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
             this->set_rx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_RX));
         }
 
@@ -54,9 +59,12 @@ class UARTRX : public UART,
          * @param[in]   tx  Pin mask for TX (transmit) pin
          * @param[in]   rx  Pin mask for RX (receive) pin
          */
-        UARTRX (const Port::Mask rx) : UART() {
-            // Set rx direction second so that, in the case of half-duplex, the
-            // pin floats high
+        UARTRX (const Port::Mask rx) {
+            // Can't rely on parent constructor because the setters are virtual
+            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
+            this->set_parity(UART::DEFAULT_PARITY);
+            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
             this->set_rx_mask(rx);
         }
 
@@ -68,6 +76,22 @@ class UARTRX : public UART,
 
         Port::Mask get_rx_mask () const {
             return this->m_pin.get_mask();
+        }
+
+        virtual ErrorCode set_data_width (const uint8_t dataWidth) {
+            ErrorCode err;
+            check_errors(UART::set_data_width(dataWidth));
+
+            this->set_msb_mask();
+            this->set_receivable_bits();
+
+            return NO_ERROR;
+        }
+
+        virtual void set_parity (const UART::Parity parity) {
+            UART::set_parity(parity);
+            this->set_msb_mask();
+            this->set_receivable_bits();
         }
 
         uint32_t receive () const {
@@ -209,7 +233,7 @@ class UARTRX : public UART,
 
 #ifndef DOXYGEN_IGNORE
             __asm__ volatile (
-            FC_START("ShiftInDataStart", "ShiftInDataEnd")
+            FC_START("ShiftInDataStart%=", "ShiftInDataEnd%=")
                     "       shr %[_waitCycles], #1                                          \n\t"
                     "       add %[_waitCycles], %[_bitCycles]                               \n\t"
                     "       waitpne %[_rxMask], %[_rxMask]                                  \n\t"
@@ -221,11 +245,11 @@ class UARTRX : public UART,
                     "       shr %[_data],# 1                                                \n\t"
                     "       test %[_rxMask],ina wz                                          \n\t"
                     "       muxnz %[_data], %[_msbMask]                                     \n\t"
-                    "       djnz %[_bits], #" FC_ADDR("loop%=", "ShiftInDataStart") "       \n\t"
+                    "       djnz %[_bits], #" FC_ADDR("loop%=", "ShiftInDataStart%=") "     \n\t"
 
                     // Wait for a stop bit
                     "       waitpeq %[_rxMask], %[_rxMask]                                  \n\t"
-                    FC_END("ShiftInDataEnd")
+                    FC_END("ShiftInDataEnd%=")
             :// Outputs
             [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
@@ -256,7 +280,7 @@ class UARTRX : public UART,
 #ifndef DOXYGEN_IGNORE
             // Initialize variables
             __asm__ volatile (
-            FC_START("ShiftInStringStart", "ShiftInStringEnd")
+            FC_START("ShiftInStringStart%=", "ShiftInStringEnd%=")
                     "outerLoop%=:                                                                       \n\t"
                     // Initialize the index variable
                     "       mov %[_bitIdx], %[_bits]                                                    \n\t"
@@ -273,7 +297,7 @@ class UARTRX : public UART,
                     "       shr %[_data], #1                                                            \n\t"
                     "       test %[_rxMask], ina wz                                                     \n\t"
                     "       muxnz %[_data], %[_msbMask]                                                 \n\t"
-                    "       djnz %[_bitIdx], #" FC_ADDR("innerLoop%=", "ShiftInStringStart") "          \n\t"
+                    "       djnz %[_bitIdx], #" FC_ADDR("innerLoop%=", "ShiftInStringStart%=") "        \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       wrbyte %[_data], %[_bufAdr]                                                 \n\t"
@@ -296,8 +320,8 @@ class UARTRX : public UART,
 
                     // Finally, loop to the beginning if the delimiter is not equal to our most recent word and
                     // the buffer is not about to overflow
-                    "if_nz_and_c jmp #" FC_ADDR("outerLoop%=", "ShiftInStringStart") "                  \n\t"
-                    FC_END("ShiftInStringEnd")
+                    "if_nz_and_c jmp #" FC_ADDR("outerLoop%=", "ShiftInStringStart%=") "                \n\t"
+                    FC_END("ShiftInStringEnd%=")
             :// Outputs
             [_bitIdx] "+r"(bitIdx),
             [_waitCycles] "+r"(waitCycles),
@@ -329,9 +353,9 @@ class UARTRX : public UART,
 #ifndef DOXYGEN_IGNORE
             // Initialize variables
             __asm__ volatile (
-#define ASMVAR(name) FC_ADDR(#name "%=", "ShiftInArrayDataStart")
-            FC_START("ShiftInArrayDataStart", "ShiftInArrayDataEnd")
-                    "       jmp #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart") "                            \n\t"
+#define ASMVAR(name) FC_ADDR(#name "%=", "ShiftInArrayDataStart%=")
+            FC_START("ShiftInArrayDataStart%=", "ShiftInArrayDataEnd%=")
+                    "       jmp #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart%=") "                          \n\t"
 
                     // Temporary variables
                     "bitIdx%=:                                                                                  \n\t"
@@ -358,7 +382,7 @@ class UARTRX : public UART,
                     "       shr " ASMVAR(data) ", #1                                                            \n\t"
                     "       test %[_rxMask], ina wz                                                             \n\t"
                     "       muxnz " ASMVAR(data) ", %[_msbMask]                                                 \n\t"
-                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("innerLoop%=", "ShiftInArrayDataStart") "       \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("innerLoop%=", "ShiftInArrayDataStart%=") "     \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       wrbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
@@ -370,8 +394,8 @@ class UARTRX : public UART,
 
                     // Wait for the stop bits and the loop back
                     "       waitpeq %[_rxMask], %[_rxMask]                                                      \n\t"
-                    "       djnz %[_length], #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart") "               \n\t"
-                    FC_END("ShiftInArrayDataEnd")
+                    "       djnz %[_length], #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart%=") "             \n\t"
+                    FC_END("ShiftInArrayDataEnd%=")
 #undef ASMVAR
             :// Outputs
             [_bufAdr] "+r"(buffer),

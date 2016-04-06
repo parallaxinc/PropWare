@@ -1,5 +1,5 @@
 /**
- * @file    SimplexUART_Demo.cpp
+ * @file    UARTTX_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -38,7 +38,7 @@ const int32_t DELAY     = 200;
  *
  * Write "Hello world!" out via UART protocol
  *
- * @include PropWare_SimplexUART/CMakeLists.txt
+ * @include PropWare_UARTTX/CMakeLists.txt
  */
 int main () {
     PropWare::ErrorCode err;

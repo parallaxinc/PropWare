@@ -48,12 +48,11 @@ int main () {
     char         name[64];
     unsigned int age;
 
-    pwOut.printf("Hello! I'd like to teach you how to use PropWare to read from the terminal!\n");
+    pwOut << "Hello! I'd like to teach you how to use PropWare to read from the terminal!\n";
 
     do {
         pwOut << "First, what's your name?\n>>> ";
-        pwIn.gets(userInput, sizeof(userInput));
-        strcpy(name, userInput);
+        pwIn >> name;
 
         pwOut << "And how old are you?\n>>> ";
         pwIn >> age;
@@ -63,7 +62,7 @@ int main () {
                           YES_NO_COMP);
     } while (isAnswerNo(userInput));
 
-    pwOut.printf("Hello, %s!\n", name);
+    pwOut << "Hello, " << name << "!\n";
     return 0;
 }
 

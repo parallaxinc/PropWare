@@ -143,6 +143,11 @@ class Scanner {
             }
         }
 
+        template<size_t N>
+        const ErrorCode get (char (&buffer)[N]) {
+            return this->gets(buffer, N);
+        }
+
         /**
          * @overload
          */

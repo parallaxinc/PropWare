@@ -117,7 +117,7 @@ class UART {
         static const int *PARALLAX_STANDARD_RX;
 
     public:
-        ErrorCode set_data_width (const uint8_t dataWidth) {
+        virtual ErrorCode set_data_width (const uint8_t dataWidth) {
             if (1 > dataWidth || dataWidth > 16)
                 return UART::INVALID_DATA_WIDTH;
 
@@ -137,7 +137,7 @@ class UART {
             return this->m_dataWidth;
         }
 
-        void set_parity (const UART::Parity parity) {
+        virtual void set_parity (const UART::Parity parity) {
             this->m_parity = parity;
             this->set_parity_mask();
             this->set_stop_bit_mask();
