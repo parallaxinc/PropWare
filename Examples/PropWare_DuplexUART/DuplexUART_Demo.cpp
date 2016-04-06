@@ -25,7 +25,8 @@
 
 #include <PropWare/utility/runnable.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/serial/uart/halfduplexuart.h>
+#include <PropWare/serial/uart/uartrx.h>
+#include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/synchronousprinter.h>
 
 // Create the test string - useful when testing with a terminal
@@ -47,8 +48,8 @@ class Listener : public PropWare::Runnable {
         void init ();
 
     private:
-        PropWare::HalfDuplexUART m_listener;
-        char                     m_buffer[sizeof(TEST_STRING)];
+        PropWare::UARTRX m_listener;
+        char             m_buffer[sizeof(TEST_STRING)];
 };
 
 void error (const PropWare::ErrorCode err);
@@ -61,9 +62,9 @@ void error (const PropWare::ErrorCode err);
  * @include PropWare_DuplexUART/CMakeLists.txt
  */
 int main () {
-    uint32_t              threadStack[256];
-    Listener              listener(threadStack);
-    PropWare::SimplexUART speaker(TX_PIN);
+    uint32_t         threadStack[256];
+    Listener         listener(threadStack);
+    PropWare::UARTTX speaker(TX_PIN);
 
     // Start our new cog and initialize the speaking UART
     speaker.set_baud_rate(BAUD_RATE);

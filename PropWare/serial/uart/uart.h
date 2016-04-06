@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/serial/uart/uart.h
+ * @file        PropWare/serial/uart/abstractsimplexuart.h
  *
  * @author      David Zemon
  *
@@ -25,26 +25,66 @@
 
 #pragma once
 
-#include <sys/thread.h>
-#include <stdlib.h>
-#include <stdarg.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/gpio/pin.h>
-#include <PropWare/gpio/port.h>
-#include <PropWare/hmi/output/printcapable.h>
 
 namespace PropWare {
 
 /**
- * @brief    Interface for all UART devices
+ * @brief   Abstract base class for all unbuffered UART devices
+ *
+ * Configurable with the following options:
+ * <ul><li>Data width: 1-16 bits</li>
+ * <li>Parity: No parity, odd parity, even parity</li>
+ * <li>Stop bits: Any number of stop bits between 1 and 14
+ * </li></ul>
+ *
+ * @note    Total number of bits within start, data, parity, and stop cannot
+ *          exceed 32. For instance, a configuration of 16 data bits, even or
+ *          odd parity, and 2 stop bits would be 1 + 16 + 1 + 2 = 20 (this is
+ *          allowed). A configuration of 16 data bits, no parity, and 16 stop
+ *          bits would be 1 + 16 + 0 + 16 = 33 (not allowed).
+ *
+ * @note    No independent cog is needed for execution and therefore all
+ *          communication methods are blocking (cog execution will not return
+ *          from the method until the relevant data has been received/sent)
+ *
+ * Speed tests:
+@htmlonly
+<ul>
+    <li>All tests performed with XTAL @ 80 MHz</li>
+    <li>Max burst speed:
+        <ul>
+            <li>Send: <b>4,444,444 baud</b></li>
+            <li>Receive: <b>2,750,000 baud</b></li>
+        </ul>
+    </li>
+    <li>Max transmit throughput (average bitrate of puts/send_array w/ 8N1 config): <b>2,680,144 bps</b></li>
+    <li>Transmit delay between words for single- and multi-byte routines
+        <ul>
+            <li>CMM:
+                 <ul>
+                     <li>send: <b>63.0 us</b></li>
+                     <li>puts/send_array: <b>1.0 us</b></li>
+                 </ul>
+            </li>
+            <li>LMM:
+                 <ul>
+                     <li>send: <b>15.6 us</b></li>
+                     <li>puts/send_array: <b>1.0 us</b></li>
+                 </ul>
+            </li>
+        </ul>
+     </li>
+ </ul>
+@endhtmlonly
  */
-class UART : public virtual PrintCapable {
+class UART {
     public:
         typedef enum {
             /** No parity */  NO_PARITY,
             /** Even parity */EVEN_PARITY,
             /** Odd parity */ ODD_PARITY
-        }                    Parity;
+        } Parity;
 
         /** Number of allocated error codes for UART */
 #define UART_ERRORS_LIMIT            16
@@ -63,7 +103,7 @@ class UART : public virtual PrintCapable {
             /** The requested stop bit width is not between 1 and 14 (inclusive) */INVALID_STOP_BIT_WIDTH,
             /** Null pointer was passed as an argument */                          NULL_POINTER,
             /** Last error code used by PropWare::UART */                          END_ERROR     = UART::NULL_POINTER
-        }                    ErrorCode;
+        } ErrorCode;
 
     public:
         static const uint8_t      DEFAULT_DATA_WIDTH     = 8;
@@ -77,117 +117,123 @@ class UART : public virtual PrintCapable {
         static const int *PARALLAX_STANDARD_RX;
 
     public:
+        ErrorCode set_data_width (const uint8_t dataWidth) {
+            if (1 > dataWidth || dataWidth > 16)
+                return UART::INVALID_DATA_WIDTH;
+
+            this->m_dataWidth = dataWidth;
+
+            this->m_dataMask = 0;
+            for (uint8_t i = 0; i < this->m_dataWidth; ++i)
+                this->m_dataMask |= 1 << i;
+
+            this->set_parity_mask();
+            this->set_total_bits();
+
+            return UART::NO_ERROR;
+        }
+
+        uint8_t get_data_width () const {
+            return this->m_dataWidth;
+        }
+
+        void set_parity (const UART::Parity parity) {
+            this->m_parity = parity;
+            this->set_parity_mask();
+            this->set_stop_bit_mask();
+            this->set_total_bits();
+        }
+
+        UART::Parity get_parity () const {
+            return this->m_parity;
+        }
+
+        ErrorCode set_stop_bit_width (const uint8_t stopBitWidth) {
+            // Error checking
+            if (0 == stopBitWidth || stopBitWidth > 14)
+                return UART::INVALID_STOP_BIT_WIDTH;
+
+            this->m_stopBitWidth = stopBitWidth;
+
+            this->set_stop_bit_mask();
+
+            this->set_total_bits();
+
+            return NO_ERROR;
+        }
+
+        uint8_t get_stop_bit_width () const {
+            return this->m_stopBitWidth;
+        }
+
+        void set_baud_rate (const int32_t baudRate) {
+            this->m_bitCycles = CLKFREQ / baudRate;
+        }
+
+        int32_t get_baud_rate () const {
+            return CLKFREQ / this->m_bitCycles;
+        }
+
+    protected:
         /**
-         * @brief       Set the pin mask for TX pin
-         *
-         * @param[in]   tx  Pin mask for the transmit (TX) pin
+         * @brief   Set default values for all configuration parameters; TX mask
+         *          must still be set before it can be used
          */
-        virtual void set_tx_mask (const Port::Mask tx) = 0;
+        UART () {
+            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
+            this->set_parity(UART::DEFAULT_PARITY);
+            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
+            this->set_baud_rate(*UART::DEFAULT_BAUD);
+        }
 
         /**
-         * @brief   Retrieve the currently configured transmit (TX) pin mask
-         *
-         * @return  Pin mask of the transmit (TX) pin
+         * @brief   Create a stop bit mask and adjust it shift it based on the
+         *          current value of parity
          */
-        virtual Port::Mask get_tx_mask () const = 0;
+        void set_stop_bit_mask () {
+            // Create the mask to the far right
+            this->m_stopBitMask = 1;
+            for (uint8_t i      = 0; i < this->m_stopBitWidth - 1; ++i)
+                this->m_stopBitMask |= this->m_stopBitMask << 1;
+
+            // Shift the mask into position (taking into account the current
+            // parity settings)
+            this->m_stopBitMask <<= this->m_dataWidth;
+            if (UART::NO_PARITY != this->m_parity)
+                this->m_stopBitMask <<= 1;
+        }
 
         /**
-         * @brief       Set the number of bits for each word of data
-         *
-         * @param[in]   dataWidth   Typical values are between 5 and 9, but any
-         *                          value between 1 and 16 is valid
-         *
-         * @return      Generally 0; PropWare::UART::INVALID_DATA_WIDTH will be
-         *              returned if dataWidth is not between 1 and 16
+         * @brief   Create the parity mask; Takes into account the width of the
+         *          data
          */
-        virtual ErrorCode set_data_width (const uint8_t dataWidth) = 0;
+        void set_parity_mask () {
+            this->m_parityMask = (uint16_t) (1 << this->m_dataWidth);
+        }
 
         /**
-         * @brief   Retrieve the currently configured data width
+         * @brief       Determine the total number of bits shifted out or in
          *
-         * @return  Returns a numbers between 1 and 16, inclusive
+         * Takes into account the start bit, the width of the data, if there is
+         * a parity bit and the number of stop bits
          */
-        virtual uint8_t get_data_width () const = 0;
+        void set_total_bits () {
+            // Total bits = start + data + parity + stop bits
+            this->m_totalBits = (uint8_t) (1 + this->m_dataWidth
+                    + this->m_stopBitWidth);
+            if (UART::NO_PARITY != this->m_parity)
+                ++this->m_totalBits;
+        }
 
-        /**
-         * @brief       Set the parity configuration
-         *
-         * @param[in]   parity  No parity, even or odd parity can be selected
-         */
-        virtual void set_parity (const UART::Parity parity) = 0;
-
-        /**
-         * @brief   Retrieve the current parity configuration
-         *
-         * @return  Current parity configuration
-         */
-        virtual UART::Parity get_parity () const = 0;
-
-        /**
-         * @brief       Set the number of stop bits used
-         *
-         * @param[in]   stopBitWidth    Typically either 1 or 2, but can be any
-         *                              number between 1 and 14
-         *
-         * @return      Returns 0 upon success; Failure can occur when an
-         *              invalid value is passed into stopBitWidth
-         */
-        virtual ErrorCode set_stop_bit_width (const uint8_t stopBitWidth) = 0;
-
-        /**
-         * @brief   Retrieve the current number of stop bits in use
-         *
-         * @return  Returns a number between 1 and 14 representing the number of
-         *          stop bits
-         */
-        virtual uint8_t get_stop_bit_width () const = 0;
-
-        /**
-         * @brief       Set the baud rate
-         *
-         * @note        Actual baud rate will be approximate due to integer math
-         *
-         * @param[in]   baudRate    A value between 1 and
-         *                          PropWare::UART::MAX_BAUD representing the
-         *                          desired baud rate
-         *
-         * @return      Returns 0 upon success; PropWare::UART::BAUD_TOO_HIGH
-         *              when baudRate is set too high for the Propeller's clock
-         *              frequency
-         */
-        virtual void set_baud_rate (const int32_t baudRate) = 0;
-
-        /**
-         * @brief   Retrieve the current baud rate
-         *
-         * @return  Returns an approximation  of the current baud rate; Value is
-         *          not exact due to integer math
-         */
-        virtual int32_t get_baud_rate () const = 0;
-
-        /**
-         * @brief       Send a word of data out the serial port
-         *
-         * @pre         Note to UART developers, not users: this->m_tx must be
-         *              already configured as output
-         *
-         * @note        The core loop is taken directly from PropGCC's putchar()
-         *              function in tinyio; A big thanks to the PropGCC team for
-         *              the simple and elegant algorithm!
-         *
-         * @param[in]   originalData    Data word to send out the serial port
-         */
-        virtual void send (uint16_t originalData) const = 0;
-
-        /**
-         * @brief       Send an array of 8-bit (or smaller) words
-         *
-         * @pre         `words` must be greater than 0
-         *
-         * @param[in]   array[] Array of data words
-         * @param[in]   words   Number of words to be sent
-         */
-        HUBTEXT virtual void send_array (const char array[], uint32_t words) const = 0;
+    protected:
+        uint8_t      m_dataWidth;
+        uint16_t     m_dataMask;
+        UART::Parity m_parity;
+        uint16_t     m_parityMask;
+        uint8_t      m_stopBitWidth;
+        uint32_t     m_stopBitMask;
+        uint32_t     m_bitCycles;
+        uint8_t      m_totalBits;
 };
 
 }

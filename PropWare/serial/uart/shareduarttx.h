@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/serial/uart/abstractsimplexuart.h>
+#include <PropWare/serial/uart/uarttx.h>
 
 namespace PropWare {
 
@@ -33,14 +33,14 @@ namespace PropWare {
  * @brief   An easy-to-use, thread-safe class for simplex (transmit only) UART
  *          communication
  */
-class SharedSimplexUART : public AbstractSimplexUART {
+class SharedUARTTX : public UARTTX {
     public:
         /**
          * @brief   No-arg constructors are helpful when avoiding dynamic
          *          allocation
          */
-        SharedSimplexUART () :
-                AbstractSimplexUART() {
+        SharedUARTTX () :
+                UARTTX() {
         }
 
         /**
@@ -49,22 +49,37 @@ class SharedSimplexUART : public AbstractSimplexUART {
          *
          * @param[in]   tx  Bit mask used for the TX (transmit) pin
          */
-        SharedSimplexUART (const Port::Mask tx) :
-                AbstractSimplexUART() {
-            this->set_tx_mask(tx);
+        SharedUARTTX (const Port::Mask tx) :
+                UARTTX(tx) {
         }
 
+        virtual void set_tx_mask (const Port::Mask tx) {
+            // Reset the old pin
+            this->m_pin.set_dir_in();
+            this->m_pin.clear();
+
+            this->m_pin.set_mask(tx);
+            this->m_pin.set();
+        }
 
         virtual void send (uint16_t originalData) const {
-            AbstractSimplexUART::send(originalData);
+            // Set pin as output
+            this->m_pin.set();
+            this->m_pin.set_dir_out();
 
-            this->m_tx.set_dir(Port::IN);
+            UARTTX::send(originalData);
+
+            this->m_pin.set_dir_in();
         }
 
         virtual void send_array (char const array[], uint32_t words) const {
-            AbstractSimplexUART::send_array(array, words);
+            // Set pin as output
+            this->m_pin.set();
+            this->m_pin.set_dir_out();
 
-            this->m_tx.set_dir(Port::IN);
+            UARTTX::send_array(array, words);
+
+            this->m_pin.set_dir_in();
         }
 };
 

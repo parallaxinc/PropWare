@@ -25,7 +25,8 @@
 
 #pragma once
 
-#include <PropWare/serial/uart/abstractduplexuart.h>
+#include <PropWare/serial/uart/shareduarttx.h>
+#include <PropWare/serial/uart/uartrx.h>
 
 namespace PropWare {
 
@@ -35,32 +36,15 @@ namespace PropWare {
  * It is important to note that, just like PropWare::FullDuplexUART, receiving
  * data is an indefinitely blocking call
  */
-class HalfDuplexUART : public AbstractDuplexUART {
+class HalfDuplexUART : public SharedUARTTX,
+                       public UARTRX {
     public:
         /**
          * @see PropWare::SimplexUART::SimplexUART()
          */
-        HalfDuplexUART () :
-                AbstractDuplexUART() {
-        }
-
-        /**
-         * @see PropWare::FullDuplexUART::FullDuplexUART()
-         */
-        HalfDuplexUART (const Port::Mask pinMask) :
-                AbstractDuplexUART(pinMask, pinMask) {
-        }
-
-        virtual void send (uint16_t originalData) const {
-            AbstractDuplexUART::send(originalData);
-
-            this->m_tx.set_dir_in();
-        }
-
-        virtual void send_array (char const array[], uint32_t words) const {
-            AbstractDuplexUART::send_array(array, words);
-
-            this->m_tx.set_dir_in();
+        HalfDuplexUART (const Pin::Mask pinMask)
+                : UARTTX(pinMask),
+                  UARTRX(pinMask) {
         }
 };
 

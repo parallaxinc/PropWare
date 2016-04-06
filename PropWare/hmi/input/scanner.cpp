@@ -24,7 +24,7 @@
  */
 
 #include <PropWare/hmi/input/scanner.h>
-#include <PropWare/serial/uart/halfduplexuart.h>
+#include <PropWare/serial/uart/uartrx.h>
 
-PropWare::HalfDuplexUART _g_halfDuplexUart;
-PropWare::Scanner        pwIn(_g_halfDuplexUart, &pwOut);
+PropWare::UARTRX  _g_uartrx;
+PropWare::Scanner pwIn(_g_uartrx, &pwOut);

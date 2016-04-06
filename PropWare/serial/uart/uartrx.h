@@ -25,8 +25,9 @@
 
 #pragma once
 
-#include <PropWare/serial/uart/simplexuart.h>
-#include <PropWare/serial/uart/duplexuart.h>
+#include <PropWare/hmi/input/scancapable.h>
+#include <PropWare/serial/uart/uart.h>
+#include <PropWare/gpio/pin.h>
 
 namespace PropWare {
 
@@ -37,41 +38,43 @@ namespace PropWare {
  *          `PropWare::FullDuplexUART` and `PropWare::HalfDuplexUART` for concrete classes, and consider using them with
  *          the `PropWare::Printer` class
  */
-class AbstractDuplexUART : public virtual DuplexUART,
-                           public AbstractSimplexUART {
+class UARTRX : public UART,
+               public ScanCapable {
     public:
+        /**
+         * @see PropWare::SimplexUART::AbstractSimplexUART()
+         */
+        UARTRX () : UART() {
+            this->set_rx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_RX));
+        }
+
+        /**
+         * @brief       Initialize a UART module with both pin masks
+         *
+         * @param[in]   tx  Pin mask for TX (transmit) pin
+         * @param[in]   rx  Pin mask for RX (receive) pin
+         */
+        UARTRX (const Port::Mask rx) : UART() {
+            // Set rx direction second so that, in the case of half-duplex, the
+            // pin floats high
+            this->set_rx_mask(rx);
+        }
+
         void set_rx_mask (const Port::Mask rx) {
-            this->m_rx.set_mask(rx);
-            this->m_rx.set_dir(Port::IN);
+            this->m_pin.set_mask(rx);
+            this->m_pin.set_dir_in();
+            this->m_pin.set();
         }
 
         Port::Mask get_rx_mask () const {
-            return this->m_rx.get_mask();
-        }
-
-        virtual ErrorCode set_data_width (const uint8_t dataWidth) {
-            ErrorCode err;
-            check_errors(AbstractSimplexUART::set_data_width(dataWidth));
-
-            this->set_msb_mask();
-            this->set_receivable_bits();
-
-            return NO_ERROR;
-        }
-
-        virtual void set_parity (const UART::Parity parity) {
-            AbstractSimplexUART::set_parity(parity);
-            this->set_msb_mask();
-            this->set_receivable_bits();
+            return this->m_pin.get_mask();
         }
 
         uint32_t receive () const {
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
 
-            this->m_rx.set_dir_in();
-
-            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_rx.get_mask(),
+            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
                                         this->m_msbMask);
 
             if (this->m_parity && 0 != this->check_parity(rxVal))
@@ -90,7 +93,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
                 // Set RX as input
-                __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
+                __asm__ volatile ("andn dira, %0" : : "r" (this->m_pin.get_mask()));
 
                 *length = this->shift_in_byte_array((uint32_t) buffer, *length, delimiter);
 
@@ -99,8 +102,8 @@ class AbstractDuplexUART : public virtual DuplexUART,
                         if (0 != this->check_parity((uint32_t) buffer[i]))
                             return UART::PARITY_ERROR;
             }
-            // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
-            // improvement - it is only here for user convenience)
+                // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
+                // improvement - it is only here for user convenience)
             else {
                 uint32_t temp;
 
@@ -123,7 +126,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
                 // Set RX as input
-                __asm__ volatile ("andn dira, %0" : : "r" (this->m_rx.get_mask()));
+                __asm__ volatile ("andn dira, %0" : : "r" (this->m_pin.get_mask()));
 
                 this->shift_in_byte_array(buffer, length);
 
@@ -135,7 +138,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
                 // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
                 // improvement - it is only here for user convenience)
             else {
-                uint32_t temp;
+                uint32_t      temp;
                 for (uint32_t i = 0; i < length; ++i) {
                     if (((uint32_t) -1) == (temp = this->receive()))
                         return UART::PARITY_ERROR;
@@ -169,37 +172,11 @@ class AbstractDuplexUART : public virtual DuplexUART,
             return NO_ERROR;
         }
 
+        virtual char get_char () {
+            return (char) this->receive();
+        }
+
     protected:
-        /**
-         * @see PropWare::SimplexUART::AbstractSimplexUART()
-         */
-        AbstractDuplexUART () {
-            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
-            this->set_parity(UART::DEFAULT_PARITY);
-            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(*UART::DEFAULT_BAUD);
-            this->set_tx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_TX));
-            this->set_rx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_RX));
-        }
-
-        /**
-         * @brief       Initialize a UART module with both pin masks
-         *
-         * @param[in]   tx  Pin mask for TX (transmit) pin
-         * @param[in]   rx  Pin mask for RX (receive) pin
-         */
-        AbstractDuplexUART (const Port::Mask tx, const Port::Mask rx) {
-            this->set_data_width(UART::DEFAULT_DATA_WIDTH);
-            this->set_parity(UART::DEFAULT_PARITY);
-            this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(*UART::DEFAULT_BAUD);
-
-            // Set rx direction second so that, in the case of half-duplex, the
-            // pin floats high
-            this->set_tx_mask(tx);
-            this->set_rx_mask(rx);
-        }
-
         /**
          * @brief   Set a bit-mask for the data word's MSB (assuming LSB is bit
          *          0 - the start bit is not taken into account)
@@ -232,7 +209,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
 
 #ifndef DOXYGEN_IGNORE
             __asm__ volatile (
-                    FC_START("ShiftInDataStart", "ShiftInDataEnd")
+            FC_START("ShiftInDataStart", "ShiftInDataEnd")
                     "       shr %[_waitCycles], #1                                          \n\t"
                     "       add %[_waitCycles], %[_bitCycles]                               \n\t"
                     "       waitpne %[_rxMask], %[_rxMask]                                  \n\t"
@@ -279,7 +256,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
 #ifndef DOXYGEN_IGNORE
             // Initialize variables
             __asm__ volatile (
-                    FC_START("ShiftInStringStart", "ShiftInStringEnd")
+            FC_START("ShiftInStringStart", "ShiftInStringEnd")
                     "outerLoop%=:                                                                       \n\t"
                     // Initialize the index variable
                     "       mov %[_bitIdx], %[_bits]                                                    \n\t"
@@ -328,7 +305,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             [_bufAdr] "+r"(bufferAddr),
             [_wordCnt] "+r"(wordCnt)
             :// Inputs
-            [_rxMask] "r"(this->m_rx.get_mask()),
+            [_rxMask] "r"(this->m_pin.get_mask()),
             [_bits] "r"(this->m_receivableBits),
             [_bitCycles] "r"(this->m_bitCycles),
             [_initWaitCycles] "r"(initWaitCycles),
@@ -353,7 +330,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             // Initialize variables
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=", "ShiftInArrayDataStart")
-                    FC_START("ShiftInArrayDataStart", "ShiftInArrayDataEnd")
+            FC_START("ShiftInArrayDataStart", "ShiftInArrayDataEnd")
                     "       jmp #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart") "                            \n\t"
 
                     // Temporary variables
@@ -400,7 +377,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
             [_bufAdr] "+r"(buffer),
             [_length] "+r"(length)
             :// Inputs
-            [_rxMask] "r"(this->m_rx.get_mask()),
+            [_rxMask] "r"(this->m_pin.get_mask()),
             [_bits] "r"(this->m_receivableBits),
             [_bitCycles] "r"(this->m_bitCycles),
             [_initWaitCycles] "r"(initWaitCycles),
@@ -439,7 +416,7 @@ class AbstractDuplexUART : public virtual DuplexUART,
         }
 
     protected:
-        Pin        m_rx;
+        Pin        m_pin;
         Port::Mask m_msbMask;
         uint8_t    m_receivableBits;
 };
