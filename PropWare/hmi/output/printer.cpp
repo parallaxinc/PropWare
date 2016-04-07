@@ -27,5 +27,8 @@
 #include <PropWare/serial/uart/uarttx.h>
 
 const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
+
+#ifndef __PROPELLER_COG__
 PropWare::UARTTX                _g_uarttx;
 const PropWare::Printer         pwOut(_g_uarttx);
+#endif

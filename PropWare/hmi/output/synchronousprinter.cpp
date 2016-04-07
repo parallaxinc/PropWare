@@ -26,6 +26,8 @@
 #include <PropWare/hmi/output/synchronousprinter.h>
 #include <PropWare/serial/uart/shareduarttx.h>
 
+#ifndef __PROPELLER_COG__
 PropWare::SharedUARTTX             _g_sharedSimplexUart;
 const PropWare::Printer            _g_printer(_g_sharedSimplexUart);
 const PropWare::SynchronousPrinter pwSyncOut(_g_printer);
+#endif

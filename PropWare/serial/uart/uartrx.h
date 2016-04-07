@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/serial/uart/abstractduplexuart.h
+ * @file        PropWare/serial/uart/uartrx.h
  *
  * @author      David Zemon
  *
@@ -31,18 +31,21 @@
 
 namespace PropWare {
 
+#ifdef __PROPELLER_COG__
+#define virtual
+#endif
+
 /**
- * @brief   A base class for any non-buffered UART that is capable of both transmitting and receiving
- *
- * @note    Abstract classes should not be used by end users. For unbuffered UART communication, take a look at
- *          `PropWare::FullDuplexUART` and `PropWare::HalfDuplexUART` for concrete classes, and consider using them with
- *          the `PropWare::Printer` class
+ * @brief   Receive routines for basic UART communication
  */
-class UARTRX : public UART,
-               public ScanCapable {
+class UARTRX : public UART
+#ifndef __PROPELLER_COG__
+        , public ScanCapable
+#endif
+{
     public:
         /**
-         * @see PropWare::SimplexUART::AbstractSimplexUART()
+         * @see PropWare::UART::UART()
          */
         UARTRX () {
             // Can't rely on parent constructor because the setters are virtual
@@ -444,5 +447,9 @@ class UARTRX : public UART,
         Port::Mask m_msbMask;
         uint8_t    m_receivableBits;
 };
+
+#ifdef __PROPELLER_COG__
+#undef virtual
+#endif
 
 }

@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/serial/uart/abstractsimplexuart.h
+ * @file        PropWare/serial/uart/uart.h
  *
  * @author      David Zemon
  *
@@ -28,6 +28,10 @@
 #include <PropWare/PropWare.h>
 
 namespace PropWare {
+
+#ifdef __PROPELLER_COG__
+#define virtual
+#endif
 
 /**
  * @brief   Abstract base class for all unbuffered UART devices
@@ -235,5 +239,9 @@ class UART {
         uint32_t     m_bitCycles;
         uint8_t      m_totalBits;
 };
+
+#ifdef __PROPELLER_COG__
+#undef virtual
+#endif
 
 }

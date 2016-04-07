@@ -262,4 +262,6 @@ class Scanner {
 
 }
 
+#ifndef __PROPELLER_COG__
 extern PropWare::Scanner pwIn;
+#endif

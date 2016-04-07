@@ -26,5 +26,7 @@
 #include <PropWare/hmi/input/scanner.h>
 #include <PropWare/serial/uart/uartrx.h>
 
+#ifndef __PROPELLER_COG__
 PropWare::UARTRX  _g_uartrx;
 PropWare::Scanner pwIn(_g_uartrx, &pwOut);
+#endif
