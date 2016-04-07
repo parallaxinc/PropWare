@@ -33,7 +33,6 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2c.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2cbase.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/spi/spi.h
-    ${CMAKE_CURRENT_LIST_DIR}/serial/uart/halfduplexuart.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/shareduarttx.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uart.h
