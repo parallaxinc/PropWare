@@ -272,6 +272,15 @@ class Utility {
             x &= ~bit;
         }
 
+        /**
+         * @brief   Determine if a number is between two others
+         */
+        static bool between(int x, int a, int b) {
+            if (a <= b)
+                return x >= a && x <= b;
+            return x >= b && x <= a;
+        }
+
     private:
         /**
          * @brief   Static Utility class should never be instantiated. Call methods with code such as
