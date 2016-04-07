@@ -1,5 +1,5 @@
 /**
- * @file    DuplexUART_Demo.cpp
+ * @file    UARTTX_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -25,7 +25,8 @@
 
 #include <PropWare/utility/runnable.h>
 #include <PropWare/PropWare.h>
-#include <PropWare/serial/uart/halfduplexuart.h>
+#include <PropWare/serial/uart/uartrx.h>
+#include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/synchronousprinter.h>
 
 // Create the test string - useful when testing with a terminal
@@ -35,6 +36,8 @@ const PropWare::Port::Mask   TX_PIN        = PropWare::Port::P12;
 const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
 const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
 
+void error (const PropWare::ErrorCode err);
+
 class Listener : public PropWare::Runnable {
     public:
         template<size_t N>
@@ -42,28 +45,49 @@ class Listener : public PropWare::Runnable {
                 : Runnable(stack) {
         }
 
-        void run ();
+        void run () {
+            PropWare::ErrorCode err;
+            int32_t             receivedLength;
 
-        void init ();
+            this->init();
+            pwSyncOut.printf("Ready to receive!\n");
+
+            while (1) {
+                receivedLength = sizeof(this->m_buffer);
+                if ((err       = this->m_listener.fgets(this->m_buffer, &receivedLength)))
+                    error(err);
+
+                pwSyncOut.printf("Data (%d chars): \"%s\"\n", receivedLength, this->m_buffer);
+            }
+        }
+
+        void init () {
+            this->m_listener.set_rx_mask(RX_PIN);
+            this->m_listener.set_baud_rate(BAUD_RATE);
+            this->m_listener.set_parity(PARITY);
+            //memset(m_buffer, 0, sizeof(m_buffer));
+
+            // A very short wait to ensure the main cog has finished printing its "I'm ready" statement before we start
+            // printing ours
+            waitcnt(20 * MILLISECOND + CNT);
+        }
 
     private:
-        PropWare::HalfDuplexUART m_listener;
-        char                     m_buffer[sizeof(TEST_STRING)];
+        PropWare::UARTRX m_listener;
+        char             m_buffer[sizeof(TEST_STRING)];
 };
-
-void error (const PropWare::ErrorCode err);
 
 /**
  * @example     DuplexUART_Demo.cpp
  *
  * Write "Hello world!" out via UART protocol and receive an echo
  *
- * @include PropWare_DuplexUART/CMakeLists.txt
+ * @include PropWare_UARTRX/CMakeLists.txt
  */
 int main () {
-    uint32_t              threadStack[256];
-    Listener              listener(threadStack);
-    PropWare::SimplexUART speaker(TX_PIN);
+    uint32_t         threadStack[256];
+    Listener         listener(threadStack);
+    PropWare::UARTTX speaker(TX_PIN);
 
     // Start our new cog and initialize the speaking UART
     speaker.set_baud_rate(BAUD_RATE);
@@ -87,31 +111,4 @@ void error (const PropWare::ErrorCode err) {
         debugLEDs.write(0);
         waitcnt(100 * MILLISECOND);
     }
-}
-
-void Listener::run () {
-    PropWare::ErrorCode err;
-    int32_t             receivedLength;
-
-    this->init();
-    pwSyncOut.printf("Ready to receive!\n");
-
-    while (1) {
-        receivedLength = sizeof(this->m_buffer);
-        if ((err       = this->m_listener.fgets(this->m_buffer, &receivedLength)))
-            error(err);
-
-        pwSyncOut.printf("Data (%d chars): \"%s\"\n", receivedLength, this->m_buffer);
-    }
-}
-
-void Listener::init () {
-    this->m_listener.set_rx_mask(RX_PIN);
-    this->m_listener.set_baud_rate(BAUD_RATE);
-    this->m_listener.set_parity(PARITY);
-    memset(m_buffer, 0, sizeof(m_buffer));
-
-    // A very short wait to ensure the main cog has finished printing its "I'm ready" statement before we start
-    // printing ours
-    waitcnt(10 * MILLISECOND + CNT);
 }

@@ -1,5 +1,5 @@
 /**
- * @file    SimplexUART_Demo.cpp
+ * @file    UARTTX_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -25,7 +25,7 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-#include <PropWare/serial/uart/simplexuart.h>
+#include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/printer.h>
 
 void error (const PropWare::ErrorCode err);
@@ -38,15 +38,15 @@ const int32_t DELAY     = 200;
  *
  * Write "Hello world!" out via UART protocol
  *
- * @include PropWare_SimplexUART/CMakeLists.txt
+ * @include PropWare_UARTTX/CMakeLists.txt
  */
 int main () {
     PropWare::ErrorCode err;
-    PropWare::SimplexUART uart;
+    PropWare::UARTTX uart;
 
     // Create an easy-to-test number pattern - useful when testing with a logic
     // analyzer
-    char numberPattern[] = {
+    uint8_t numberPattern[] = {
             0x01,
             0x02,
             0x03,
@@ -70,7 +70,7 @@ int main () {
 
     while (1) {
         // Test the number pattern
-        uart.puts(numberPattern);
+        uart.send_array((char *) numberPattern, sizeof(numberPattern));
         waitcnt(DELAY * MILLISECOND + CNT);
 
         // Test a basic string

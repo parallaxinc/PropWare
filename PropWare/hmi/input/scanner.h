@@ -143,6 +143,11 @@ class Scanner {
             }
         }
 
+        template<size_t N>
+        const ErrorCode get (char (&buffer)[N]) {
+            return this->gets(buffer, N);
+        }
+
         /**
          * @overload
          */
@@ -257,4 +262,6 @@ class Scanner {
 
 }
 
+#ifndef __PROPELLER_COG__
 extern PropWare::Scanner pwIn;
+#endif

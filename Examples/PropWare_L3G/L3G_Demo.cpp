@@ -26,7 +26,6 @@
 // Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/sensor/gyroscope/l3g.h>
-#include <PropWare/serial/uart/simplexuart.h>
 
 /** Pin number for MOSI (master out - slave in) */
 const PropWare::Port::Mask MOSI = PropWare::Port::P0;

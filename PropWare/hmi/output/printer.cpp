@@ -24,8 +24,11 @@
  */
 
 #include <PropWare/hmi/output/printer.h>
-#include <PropWare/serial/uart/simplexuart.h>
+#include <PropWare/serial/uart/uarttx.h>
 
 const PropWare::Printer::Format PropWare::Printer::DEFAULT_FORMAT;
-PropWare::SimplexUART           _g_simplexUart;
-const PropWare::Printer         pwOut(_g_simplexUart);
+
+#ifndef __PROPELLER_COG__
+PropWare::UARTTX                _g_uarttx;
+const PropWare::Printer         pwOut(_g_uarttx);
+#endif

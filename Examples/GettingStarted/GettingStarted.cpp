@@ -32,4 +32,3 @@ int main () {
     pwOut << "Hello, world!";
     return 0;
 }
-

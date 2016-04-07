@@ -625,8 +625,10 @@ class Printer {
 
 }
 
+#ifndef __PROPELLER_COG__
 /**
  * @brief   Most common use of printing in PropWare applications (not thread safe; see PropWare::pwSyncOut for
  *          multi-threaded printing)
  */
 extern const PropWare::Printer pwOut;
+#endif
