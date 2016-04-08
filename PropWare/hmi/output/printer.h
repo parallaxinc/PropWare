@@ -75,7 +75,10 @@ namespace PropWare {
  */
 class Printer {
     public:
-        static const char DEFAULT_FILL_CHAR = ' ';
+        static const uint16_t DEFAULT_WIDTH     = 0;
+        static const uint16_t DEFAULT_PRECISION = 6;
+        static const uint8_t  DEFAULT_RADIX     = 10;
+        static const char     DEFAULT_FILL_CHAR = ' ';
 
         /**
          * @brief   Passed into any of the `Printer::print` methods, this struct controls how aspects of numerical
@@ -107,10 +110,12 @@ class Printer {
              */
             char     fillChar;
 
-            Format () : width(0),
-                        precision(6),
-                        radix(10),
-                        fillChar(DEFAULT_FILL_CHAR) {
+            Format (const uint16_t width = DEFAULT_WIDTH, const char fillChar = DEFAULT_FILL_CHAR,
+                    const uint8_t radix = DEFAULT_RADIX, const uint16_t precision = DEFAULT_PRECISION)
+                    : width(width),
+                      precision(precision),
+                      radix(radix),
+                      fillChar(fillChar) {
             }
         };
 
@@ -217,13 +222,64 @@ class Printer {
         void put_uint (unsigned int x, const uint8_t radix = 10, uint16_t width = 0,
                        const char fillChar = DEFAULT_FILL_CHAR) const {
             char    buf[sizeof(x) * 8]; // Max size would be a single character for each bit - aka, bytes * 8
-            uint8_t i = 0;
+            uint_fast8_t i = 0;
 
             // Create a character array in reverse order, starting with the
             // tens digit and working toward the largest digit
             do {
                 const unsigned int digit = x % radix;
-                buf[i] = digit > 9 ? digit + 'A' - 10 : digit + '0';
+                buf[i] = static_cast<char>(digit > 9 ? digit + 'A' - 10 : digit + '0');
+                x /= radix;
+                ++i;
+            } while (x);
+
+            if (width && width > i) {
+                width -= i;
+                while (width--)
+                    this->put_char(fillChar);
+            }
+
+            // Reverse the character array
+            for (unsigned int j = 0; j < i; ++j)
+                this->put_char(buf[i - j - 1]);
+        }
+
+        /**
+         * @brief       Print a signed integer in base 10
+         *
+         * @param[in]   x           Integer to be printed
+         * @param[in]   radix       Radix to print the integer (aka, the base of the number)
+         * @param[in]   width       Minimum number of characters to print
+         * @param[in]   fillChar    Character to print to the left of the number
+         *                          if the number's width is less than `width`
+         */
+        void put_ll (long long x, const uint8_t radix = 10, uint16_t width = 0,
+                     const char fillChar = DEFAULT_FILL_CHAR) const {
+            if (0 > x)
+                this->put_char('-');
+
+            this->put_ull((unsigned long long) llabs(x), radix, width, fillChar);
+        }
+
+        /**
+         * @brief       Print an unsigned integer in base 10
+         *
+         * @param[in]   x           Integer to be printed
+         * @param[in]   radix       Radix to print the integer (aka, the base of the number)
+         * @param[in]   width       Minimum number of characters to print
+         * @param[in]   fillChar    Character to print to the left of the number
+         *                          if the number's width is less than `width`
+         */
+        void put_ull (unsigned long long x, const uint8_t radix = 10, uint16_t width = 0,
+                      const char fillChar = DEFAULT_FILL_CHAR) const {
+            char         buf[sizeof(x) * 8]; // Max size would be a single character for each bit - aka, bytes * 8
+            uint_fast8_t i = 0;
+
+            // Create a character array in reverse order, starting with the
+            // tens digit and working toward the largest digit
+            do {
+                const uint_fast8_t digit = static_cast<uint_fast8_t>(x % radix);
+                buf[i] = static_cast<char>(digit > 9 ? digit + 'A' - 10 : digit + '0');
                 x /= radix;
                 ++i;
             } while (x);
@@ -394,12 +450,13 @@ class Printer {
          *
          * This method supports formatted printing using the following formats:
          *
-         *   - \%i - Signed integer (32-bit max)
-         *   - \%d - Signed integer (32-bit max)
-         *   - \%u - Unsigned integer (32-bit max)
+         *   - \%i - Signed integer (32-bit max, use << for 64-bit)
+         *   - \%d - Signed integer (32-bit max, use << for 64-bit)
+         *   - \%u - Unsigned integer (32-bit max, use << for 64-bit)
          *   - \%s - String
          *   - \%c - Single character
          *   - \%X - Hexadecimal with capital letters
+         *   - \%b - Binary
          *   - \%f - Floating point number
          *   - \%\% - Literal percent sign (\%)
          *
@@ -412,8 +469,8 @@ class Printer {
          *              const int i = 7;
          *              pwOut.printf("The %ith letter is %c\n", i, i + 'A' - 1);
          *              @endcode
-         *              will print `The 7th letter is 71`. Notice that `i` was not cast to a char and printed as `G`.
-         *              Instead, we need to write the above function like so:
+         *              will print `The 7th letter is 71`. Notice that `i` was not cast to a char and therefore did not
+         *              print as `G`. Instead, we need to write the above function like so:
          *              @code
          *              const int i = 7;
          *              pwOut.printf("The %ith letter is %c\n", i, (char) (i + 'A' - 1));
@@ -478,7 +535,8 @@ class Printer {
                                 this->print((int) first, format);
                                 break;
                             case 'X':
-                                format.radix = 16;
+                            case 'b':
+                                format.radix = static_cast<uint8_t>('b' == c ? 2 : 16);
                                 // No "break;" after 'X' - let it flow into 'u'
                             case 'u':
                                 this->print((unsigned int) first, format);
@@ -519,7 +577,7 @@ class Printer {
          * @param[in]   c       Character to be printed
          * @param       format  Unused
          */
-        void print (const char c, const Format format = DEFAULT_FORMAT) const {
+        void print (const char c, const Format &format = DEFAULT_FORMAT) const {
             this->put_char(c);
         }
 
@@ -529,7 +587,7 @@ class Printer {
          * @param[in]   string[]    String to be printed
          * @param       format      Unused
          */
-        void print (const char string[], const Format format = DEFAULT_FORMAT) const {
+        void print (const char string[], const Format &format = DEFAULT_FORMAT) const {
             this->puts(string);
         }
 
@@ -556,7 +614,7 @@ class Printer {
          * @param[in]   b       Boolean to be printed
          * @param       format  Unused
          */
-        void print (const bool b, const Format format = DEFAULT_FORMAT) const {
+        void print (const bool b, const Format &format = DEFAULT_FORMAT) const {
             this->puts(Utility::to_string(b));
         }
 
@@ -566,7 +624,7 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param[in]   format      Format of the integer
          */
-        void print (const unsigned int x, const Format format = DEFAULT_FORMAT) const {
+        void print (const unsigned int x, const Format &format = DEFAULT_FORMAT) const {
             this->put_uint(x, format.radix, format.width, format.fillChar);
         }
 
@@ -576,7 +634,27 @@ class Printer {
          * @param[in]   x           Unsigned value to be printed
          * @param[in]   format      Format of the integer
          */
-        void print (const int x, const Format format = DEFAULT_FORMAT) const {
+        void print (const int x, const Format &format = DEFAULT_FORMAT) const {
+            this->put_int(x, format.radix, format.width, format.fillChar);
+        }
+
+        /**
+         * @brief       Print an unsigned integer with the given format
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param[in]   format      Format of the integer
+         */
+        void print (const unsigned long long x, const Format &format = DEFAULT_FORMAT) const {
+            this->put_uint(x, format.radix, format.width, format.fillChar);
+        }
+
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param[in]   format      Format of the integer
+         */
+        void print (const long long x, const Format &format = DEFAULT_FORMAT) const {
             this->put_int(x, format.radix, format.width, format.fillChar);
         }
 
@@ -586,7 +664,7 @@ class Printer {
          * @param[in]   f           Unsigned value to be printed
          * @param[in]   format      Format of the number
          */
-        void print (const double f, const Format format = DEFAULT_FORMAT) const {
+        void print (const double f, const Format &format = DEFAULT_FORMAT) const {
             this->put_float(f, format.width, format.precision, format.fillChar);
         }
 
@@ -613,14 +691,20 @@ class Printer {
          * @returns     The printer instance is returned to allow chaining of the method calls
          */
         template<typename T>
-        const Printer &operator<< (const T arg) const {
-            this->print(arg);
+        Printer &operator<< (const T arg) {
+            this->print(arg, this->m_format);
+            return *this;
+        }
+
+        Printer &operator<< (const Format arg) {
+            this->m_format = arg;
             return *this;
         }
 
     protected:
         PrintCapable *m_printCapable;
         bool         m_cooked;
+        Format       m_format;
 };
 
 }
@@ -630,5 +714,5 @@ class Printer {
  * @brief   Most common use of printing in PropWare applications (not thread safe; see PropWare::pwSyncOut for
  *          multi-threaded printing)
  */
-extern const PropWare::Printer pwOut;
+extern PropWare::Printer pwOut;
 #endif

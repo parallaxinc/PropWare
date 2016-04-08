@@ -24,6 +24,7 @@
  */
 
 #define TEST_PROPWARE
+//#define TEST_PROPWARE_PRINTF
 //#define TEST_SIMPLE
 //#define TEST_TINYSTREAM
 //#define TEST_TINYIO
@@ -33,9 +34,16 @@
 // Includes
 #include <PropWare/PropWare.h>
 
-#ifdef TEST_PROPWARE
+#if (defined TEST_PROPWARE || defined TEST_PROPWARE_PRINTF)
 #include <PropWare/hmi/output/printer.h>
-#elif defined TEST_SIMPLE
+using namespace PropWare;
+#else
+int _cfg_rxpin    = -1;
+int _cfg_txpin    = -1;
+int _cfg_baudrate = -1;
+#endif
+
+#if defined TEST_SIMPLE
 #include <simpletext.h>
 #elif defined TEST_TINYSTREAM
 #include <tinystream>
@@ -48,13 +56,6 @@ std::stream cout;
 #include <fdserial.h>
 #elif defined TEST_LIBPROPELLER
 #include <libpropeller/serial/serial.h>
-
-#endif
-
-#ifndef TEST_PROPWARE
-int _cfg_rxpin    = -1;
-int _cfg_txpin    = -1;
-int _cfg_baudrate = -1;
 #endif
 
 /**
@@ -76,6 +77,8 @@ int main () {
 
     while (1) {
 #ifdef TEST_PROPWARE
+        pwOut << "Hello, world! " << Printer::Format(3, '0') << i << " 0x" << Printer::Format(2, '0', 16) << i << '\n';
+#elif defined TEST_PROPWARE_PRINTF
         pwOut.printf("Hello, world! %03d 0x%02X\n", i, i);
 #elif defined TEST_SIMPLE
         printi("Hello, world! %03d 0x%02x\n", i, i);
@@ -95,6 +98,4 @@ int main () {
         i++;
         waitcnt(250 * MILLISECOND + CNT);
     }
-
-    return 0;
 }
