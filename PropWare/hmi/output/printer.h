@@ -691,6 +691,34 @@ class Printer {
          * @returns     The printer instance is returned to allow chaining of the method calls
          */
         template<typename T>
+        const Printer &operator<< (const T arg) const {
+            this->print(arg, this->m_format);
+            return *this;
+        }
+
+        /**
+         * @brief   The `<<` operator allows for highly optimized use of the Printer.
+         *
+         * Using the `<<` operator tells GCC _exactly_ what types of arguments are being used at compilation time, and
+         * GCC can therefore include only those functions in the binary. Some similar optimizations can be made with
+         * PropWare::Printer::printf, but not  as many. Unless you need special formatting (such as whitespace
+         * padding or specific widths), your code will be best optimized if you only use this method for printing,
+         * and never PropWare::Printer::printf.
+         *
+         * Converting PropWare::Printer::printf to use the `<<` operator:
+         *
+         * @code
+         * const char name[] = "David";  // My name
+         * const int i = 7;             //
+         * pwOut.printf("Hello, %s! The %dth character of the alphabet is %c.\n", name, i, i + 'A' - 1);
+         * pwOut << "Hello, " << name << "! The " << i << "th character of the alphabet is" << (char) i + 'A' - 1 << ".\n";
+         * @endcode
+         *
+         * @param[in]   arg     Value to be printed through the terminal
+         *
+         * @returns     The printer instance is returned to allow chaining of the method calls
+         */
+        template<typename T>
         Printer &operator<< (const T arg) {
             this->print(arg, this->m_format);
             return *this;
