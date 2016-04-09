@@ -2,10 +2,12 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfile.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilereader.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilewriter.h
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/readonlyfatfs.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfs.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/file.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filereader.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filesystem.h
+    ${CMAKE_CURRENT_LIST_DIR}/filesystem/readonlyfilesystem.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filewriter.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/pin.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/port.h
@@ -20,8 +22,12 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/synchronousprinter.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/ws2812.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/blockstorage.h
+    ${CMAKE_CURRENT_LIST_DIR}/memory/blockstoragereader.h
+    ${CMAKE_CURRENT_LIST_DIR}/memory/blockstoragewriter.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/eeprom.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/sd.h
+    ${CMAKE_CURRENT_LIST_DIR}/memory/sdreader.h
+    ${CMAKE_CURRENT_LIST_DIR}/memory/sdwriter.h
     ${CMAKE_CURRENT_LIST_DIR}/monitor/watchdog.h
     ${CMAKE_CURRENT_LIST_DIR}/motor/stepper.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/analog/mcp3xxx.h

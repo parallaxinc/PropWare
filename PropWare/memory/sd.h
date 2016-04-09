@@ -53,7 +53,7 @@ extern unsigned char _sd_firstByteResponse;
  *
  * When using PropWare's default SPI class, this allows the entire SPI/SD card/FAT functionality to run in a single cog.
  */
-class SD : public BlockStorage {
+class SD : virtual public BlockStorage {
     public:
         /**
          * Error codes - preceded by SPI
@@ -124,7 +124,7 @@ class SD : public BlockStorage {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        PropWare::ErrorCode start () const {
+        virtual PropWare::ErrorCode start () const {
             PropWare::ErrorCode err;
             uint8_t             response[16];
 
@@ -146,69 +146,12 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        uint16_t get_sector_size () const {
+        virtual uint16_t get_sector_size () const {
             return SECTOR_SIZE;
         }
 
-        uint8_t get_sector_size_shift () const {
+        virtual uint8_t get_sector_size_shift () const {
             return SECTOR_SIZE_SHIFT;
-        }
-
-        PropWare::ErrorCode read_data_block (const uint32_t address, uint8_t buf[]) const {
-            PropWare::ErrorCode err;
-            uint8_t             temp = 0;
-
-            // Wait until the SD card is no longer busy
-            while (!temp)
-                temp = (uint8_t) this->m_spi->shift_in(8);
-
-            /**
-             * Special error handling is needed to ensure that, if an error is thrown, chip select is set high again
-             * before returning the error
-             */
-            this->m_cs.clear();
-            this->send_command(CMD_RD_BLOCK, address, CRC_OTHER);
-            err = this->read_block(SECTOR_SIZE, buf);
-            this->m_cs.set();
-
-            return err;
-        }
-
-        PropWare::ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const {
-            PropWare::ErrorCode err;
-            uint8_t             temp = 0;
-
-            // Wait until the SD card is no longer busy
-            while (!temp)
-                temp = (uint8_t) this->m_spi->shift_in(8);
-
-            this->m_cs.clear();
-            this->send_command(CMD_WR_BLOCK, address, CRC_OTHER);
-
-            check_errors(this->write_block(SECTOR_SIZE, dat));
-            this->m_cs.set();
-
-            return NO_ERROR;
-        }
-
-        uint16_t get_short (const uint16_t offset, const uint8_t buf[]) const {
-            return (buf[offset + 1] << 8) + buf[offset];
-        }
-
-        uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const {
-            return (buf[offset + 3] << 24) + (buf[offset + 2] << 16) + (buf[offset + 1] << 8) + buf[offset];
-        }
-
-        void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const {
-            buf[offset + 1] = value >> 8;
-            buf[offset]     = value;
-        }
-
-        void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const {
-            buf[offset + 3] = (uint8_t) (value >> 24);
-            buf[offset + 2] = (uint8_t) (value >> 16);
-            buf[offset + 1] = (uint8_t) (value >> 8);
-            buf[offset]     = (uint8_t) value;
         }
 
         /**
@@ -246,6 +189,80 @@ class SD : public BlockStorage {
                 default:
                     return;
             }
+        }
+
+    protected:
+        /**
+         * @brief       Send a command and argument over SPI to the SD card
+         *
+         * @param[in]   cmd     6-bit value representing the command sent to the
+         *                      SD card
+         * @param[in]   arg     Any argument applicable to the command
+         * @param[in]   crc     CRC for the command and argument
+         *
+         * @return      Returns 0 for success, else error code
+         */
+        void send_command (const uint8_t cmd, const uint32_t arg, const uint8_t crc) const {
+            // Send out the command
+            this->m_spi->shift_out(8, cmd);
+
+            // Send argument
+            this->m_spi->shift_out(16, (arg >> 16));
+            this->m_spi->shift_out(16, arg & WORD_0);
+
+            // Send sixth byte - CRC
+            this->m_spi->shift_out(8, crc);
+        }
+
+        /**
+         * @brief       receive response and data from SD card over SPI
+         *
+         * @param[in]   numBytes    Number of bytes to receive
+         * @param[out]  firstByte   First byte of response (active/idle) stored into this variable
+         * @param[out]  *dat        Location in memory with enough space to store `bytes` bytes of data
+         *
+         * @pre         Chip select must be activated prior to invocation
+         *
+         * @return      Returns 0 for success, else error code
+         */
+        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t &firstByte, uint8_t *dat) const {
+            uint32_t timeout;
+
+            // Read first byte - the R1 response
+            timeout = RESPONSE_TIMEOUT + CNT;
+            do {
+                firstByte = (uint8_t) this->m_spi->shift_in(8);
+
+                // Check for timeout
+                if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
+                    return READ_TIMEOUT;
+
+                // wait for transmission end
+            } while (0xff == firstByte);
+
+
+            // First byte in a response should always be either IDLE or ACTIVE.
+            // If this one wasn't, throw an error. If it was, decrement the
+            // bytes counter and read in all remaining bytes
+            if ((RESPONSE_IDLE == firstByte) || (RESPONSE_ACTIVE == firstByte)) {
+                --numBytes;    // Decrement bytes counter
+
+                // Read remaining bytes
+                while (numBytes--)
+                    *dat++ = (uint8_t) this->m_spi->shift_in(8);
+            } else {
+                _sd_firstByteResponse = firstByte;
+                return INVALID_RESPONSE;
+            }
+
+            // Responses should always be followed up by outputting 8 clocks
+            // with MOSI high
+            this->m_spi->shift_out(16, (uint32_t) -1);
+            this->m_spi->shift_out(16, (uint32_t) -1);
+            this->m_spi->shift_out(16, (uint32_t) -1);
+            this->m_spi->shift_out(16, (uint32_t) -1);
+
+            return NO_ERROR;
         }
 
     private:
@@ -367,225 +384,6 @@ class SD : public BlockStorage {
             return this->m_spi->set_clock(FULL_SPEED_SPI);
         }
 
-        /**
-         * @brief       Send a command and argument over SPI to the SD card
-         *
-         * @param[in]   cmd     6-bit value representing the command sent to the
-         *                      SD card
-         * @param[in]   arg     Any argument applicable to the command
-         * @param[in]   crc     CRC for the command and argument
-         *
-         * @return      Returns 0 for success, else error code
-         */
-        void send_command (const uint8_t cmd, const uint32_t arg, const uint8_t crc) const {
-            // Send out the command
-            this->m_spi->shift_out(8, cmd);
-
-            // Send argument
-            this->m_spi->shift_out(16, (arg >> 16));
-            this->m_spi->shift_out(16, arg & WORD_0);
-
-            // Send sixth byte - CRC
-            this->m_spi->shift_out(8, crc);
-        }
-
-        /**
-         * @brief       receive response and data from SD card over SPI
-         *
-         * @param[in]   numBytes    Number of bytes to receive
-         * @param[out]  firstByte   First byte of response (active/idle) stored into this variable
-         * @param[out]  *dat        Location in memory with enough space to store `bytes` bytes of data
-         *
-         * @pre         Chip select must be activated prior to invocation
-         *
-         * @return      Returns 0 for success, else error code
-         */
-        PropWare::ErrorCode get_response (uint8_t numBytes, uint8_t &firstByte, uint8_t *dat) const {
-            uint32_t timeout;
-
-            // Read first byte - the R1 response
-            timeout = RESPONSE_TIMEOUT + CNT;
-            do {
-                firstByte = (uint8_t) this->m_spi->shift_in(8);
-
-                // Check for timeout
-                if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                    return READ_TIMEOUT;
-
-                // wait for transmission end
-            } while (0xff == firstByte);
-
-
-            // First byte in a response should always be either IDLE or ACTIVE.
-            // If this one wasn't, throw an error. If it was, decrement the
-            // bytes counter and read in all remaining bytes
-            if ((RESPONSE_IDLE == firstByte) || (RESPONSE_ACTIVE == firstByte)) {
-                --numBytes;    // Decrement bytes counter
-
-                // Read remaining bytes
-                while (numBytes--)
-                    *dat++ = (uint8_t) this->m_spi->shift_in(8);
-            } else {
-                _sd_firstByteResponse = firstByte;
-                return INVALID_RESPONSE;
-            }
-
-            // Responses should always be followed up by outputting 8 clocks
-            // with MOSI high
-            this->m_spi->shift_out(16, (uint32_t) -1);
-            this->m_spi->shift_out(16, (uint32_t) -1);
-            this->m_spi->shift_out(16, (uint32_t) -1);
-            this->m_spi->shift_out(16, (uint32_t) -1);
-
-            return NO_ERROR;
-        }
-
-        /**
-         * @brief       Receive data from SD card via SPI
-         *
-         * @param[in]   bytes   Number of bytes to receive
-         * @param[out]  dat[]   Location in memory with enough space to store `bytes` bytes of data
-         *
-         * @pre         Chip select must be activated prior to invocation
-         *
-         * @return      Returns 0 for success, else error code
-         */
-        PropWare::ErrorCode read_block (uint16_t bytes, uint8_t dat[]) const {
-            uint8_t  checksum;
-            uint32_t timeout;
-            uint8_t  firstByte;
-
-            // Read first byte - the R1 response
-            timeout = RESPONSE_TIMEOUT + CNT;
-            do {
-                firstByte = (uint8_t) this->m_spi->shift_in(8);
-
-                // Check for timeout
-                if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                    return READ_TIMEOUT;
-
-                // wait for transmission end
-            } while (0xff == firstByte);
-
-            // Ensure this response is "active"
-            if (RESPONSE_ACTIVE == firstByte) {
-                // Ignore blank data again
-                timeout = RESPONSE_TIMEOUT + CNT;
-                do {
-                    dat[0] = (uint8_t) this->m_spi->shift_in(8);
-
-                    // Check for timeout
-                    if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                        return READ_TIMEOUT;
-
-                    // wait for transmission end
-                } while (DATA_START_ID != dat[0]);
-
-                // Check for the data start identifier and continue reading data
-                if (DATA_START_ID == *dat) {
-                    // Read in requested data bytes
-                    if (SECTOR_SIZE == bytes)
-                        this->m_spi->shift_in_block_mode0_msb_first_fast(dat, SECTOR_SIZE);
-                    else
-                        while (bytes--) {
-                            *dat++ = (uint8_t) this->m_spi->shift_in(8);
-                        }
-
-                    // Continue reading bytes until you get something that isn't 0xff - it should be the checksum.
-                    timeout = RESPONSE_TIMEOUT + CNT;
-                    do {
-                        checksum = (uint8_t) this->m_spi->shift_in(8);
-
-                        // Check for timeout
-                        if ((timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                            return READ_TIMEOUT;
-
-                        // wait for transmission end
-                    } while (0xff == checksum);
-
-                    // The checksum is actually 2 bytes, not 1, so sending a total of 16 high bits takes care of the
-                    // second checksum byte as well as an extra byte for good measure
-                    this->m_spi->shift_out(16, 0xffff);
-                } else {
-                    return INVALID_DAT_START_ID;
-                }
-            } else
-                return INVALID_RESPONSE;
-
-            return NO_ERROR;
-        }
-
-        /**
-         * @brief       Write data to SD card via SPI
-         *
-         * @param[in]   bytes   Block address to read from SD card
-         * @param[in]   *dat    Location in memory where data resides
-         *
-         * @return      Returns 0 upon success, error code otherwise
-         */
-        PropWare::ErrorCode write_block (uint16_t bytes, const uint8_t dat[]) const {
-            uint32_t timeout;
-            uint8_t  firstByte;
-
-            // Read first byte - the R1 response
-            timeout = RESPONSE_TIMEOUT + CNT;
-            do {
-                firstByte = (uint8_t) this->m_spi->shift_in(8);
-
-                // Check for timeout
-                if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                    return READ_TIMEOUT;
-
-                // wait for transmission end
-            } while (0xff == firstByte);
-
-            // Ensure this response is "active"
-            if (RESPONSE_ACTIVE == firstByte) {
-                // Received "active" response
-
-                // Send data Start ID
-                this->m_spi->shift_out(8, DATA_START_ID);
-
-                // Send all bytes
-                if (SECTOR_SIZE == bytes)
-                    this->m_spi->shift_out_block_msb_first_fast(dat, SECTOR_SIZE);
-                else
-                    while (bytes--) {
-                        this->m_spi->shift_out(8, *(dat++));
-                    }
-
-                // Receive and digest response token
-                timeout = RESPONSE_TIMEOUT + CNT;
-                do {
-                    firstByte = (uint8_t) this->m_spi->shift_in(8);
-
-                    // Check for timeout
-                    if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                        return READ_TIMEOUT;
-
-                    // wait for transmission end
-                } while (0xff == firstByte);
-                if (RSPNS_TKN_ACCPT != (firstByte & (uint8_t) RSPNS_TKN_BITS))
-                    return INVALID_RESPONSE;
-            }
-
-            // After sending the data, provide the device with clocks signals until it has finished writing data
-            // internally
-            char temp;
-            timeout = RESPONSE_TIMEOUT + CNT;
-            do {
-                temp = (char) this->m_spi->shift_in(8);
-
-                // Check for timeout
-                if (abs(timeout - CNT) < SINGLE_BYTE_WIGGLE_ROOM)
-                    return READ_TIMEOUT;
-
-                // wait for transmission end
-            } while (0xff != temp);
-
-            return NO_ERROR;
-        }
-
         void first_byte_expansion (const Printer &printer) {
             if (BIT_0 & _sd_firstByteResponse)
                 printer.puts("\t0: Idle\n");
@@ -606,7 +404,6 @@ class SD : public BlockStorage {
         }
 
     private:
-
         static void unpack_sd_pins (uint32_t pins[]) {
             __asm__ volatile (
             "       brw #skipVars          \n\t"
@@ -625,7 +422,7 @@ class SD : public BlockStorage {
             pins[3] = (uint32_t) (1 << ((_cfg_sdspi_config2 >> 24) & BYTE_0)); // CS
         }
 
-    private:
+    protected:
         /*************************
          *** Private Constants ***
          *************************/
@@ -680,7 +477,7 @@ class SD : public BlockStorage {
         static const uint8_t RSPNS_TKN_CRC   = (0x05 << 1) | 1;
         static const uint8_t RSPNS_TKN_WR    = (0x06 << 1) | 1;
 
-    private:
+    protected:
         /*******************************
          *** Private Member Variable ***
          *******************************/

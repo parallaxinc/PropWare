@@ -25,8 +25,8 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/hmi/output/printer.h>
-#include <PropWare/memory/sd.h>
-#include <PropWare/filesystem/fat/fatfs.h>
+#include <PropWare/memory/sdreader.h>
+#include <PropWare/filesystem/fat/readonlyfatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 
 using namespace PropWare;
@@ -38,9 +38,9 @@ using namespace PropWare;
  *
  * @include PropWare_FileReader/CMakeLists.txt
  */
-int main() {
-    const SD driver;
-    FatFS    filesystem(driver);
+int main () {
+    const SDReader driver;
+    ReadOnlyFatFS  filesystem(driver);
     filesystem.mount();
 
     FatFileReader reader(filesystem, "fat_test.txt");

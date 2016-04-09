@@ -24,10 +24,11 @@
  */
 
 #include <PropWare/hmi/output/printer.h>
-#include <PropWare/memory/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilewriter.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
+#include <PropWare/memory/sdreader.h>
+#include <PropWare/memory/sdwriter.h>
 
 using namespace PropWare;
 
@@ -40,13 +41,14 @@ using namespace PropWare;
  *
  * @include PropWare_FileWriter/CMakeLists.txt
  */
-int main() {
-    const SD  driver;
-    FatFS     filesystem(driver);
+int main () {
+    const SDReader readDriver;
+    const SDWriter writeDriver;
+    FatFS          filesystem(readDriver, writeDriver);
 
     BlockStorage::Buffer   writeBuffer;
     BlockStorage::MetaData writeMetaData;
-    uint8_t                bufferData[driver.get_sector_size()];
+    uint8_t                bufferData[readDriver.get_sector_size()];
     writeBuffer.buf  = bufferData;
     writeBuffer.meta = &writeMetaData;
 

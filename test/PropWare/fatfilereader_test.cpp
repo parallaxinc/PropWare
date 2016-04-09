@@ -34,7 +34,7 @@
 
 #include "PropWareTests.h"
 #include <PropWare/memory/sd.h>
-#include <PropWare/filesystem/fat/fatfs.h>
+#include <PropWare/filesystem/fat/readonlyfatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 #include <PropWare/string/staticstringbuilder.h>
 
@@ -62,8 +62,8 @@ void error_checker (const ErrorCode err) {
 
 void clear_buffer (File *file) {
     BlockStorage::Buffer *buffer = file->m_buf;
-    file->m_driver->flush(buffer);
-    for (unsigned int i = 0; i < file->m_driver->get_sector_size(); ++i)
+    file->m_readDriver->flush(buffer);
+    for (unsigned int i = 0; i < file->m_readDriver->get_sector_size(); ++i)
         buffer->buf[i] = 0;
     buffer->meta = NULL;
 }
@@ -95,7 +95,7 @@ TEST(ConstructorDestructor) {
 
     ASSERT_EQ_MSG(0, strcmp(FILE_NAME_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
-    ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_driver);
+    ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_readDriver);
     ASSERT_EQ_MSG((unsigned int) &g_fs.m_buf, (unsigned int) testable->m_buf);
     ASSERT_NEQ_MSG((unsigned int) NULL, (unsigned int) testable->m_buf->buf);
     ASSERT_EQ_MSG((unsigned int) &g_fs.m_dirMeta, (unsigned int) testable->m_fsBufMeta);

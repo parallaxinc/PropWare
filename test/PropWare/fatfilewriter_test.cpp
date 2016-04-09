@@ -34,7 +34,7 @@
 
 #include "PropWareTests.h"
 #include <PropWare/memory/sd.h>
-#include <PropWare/filesystem/fat/fatfs.h>
+#include <PropWare/filesystem/fat/readonlyfatfs.h>
 #include <PropWare/filesystem/fat/fatfilewriter.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 
@@ -70,7 +70,7 @@ void clear_buffer (const BlockStorage *driver, BlockStorage::Buffer *buffer) {
 }
 
 void clear_buffer (File *file) {
-    clear_buffer(file->m_driver, file->m_buf);
+    clear_buffer(file->m_readDriver, file->m_buf);
 }
 
 SETUP {
@@ -101,7 +101,7 @@ TEST(ConstructorDestructor) {
 
     ASSERT_EQ_MSG(0, strcmp(EXISTING_FILE_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
-    ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_driver);
+    ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_readDriver);
     ASSERT_EQ_MSG((unsigned int) &g_fs.m_buf, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) &g_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
@@ -199,7 +199,7 @@ TEST(SafePutChar_singleChar) {
     ASSERT_EQ_MSG(0, err); // testable->close()
 
     {
-        const BlockStorage   *driver = testable->m_driver;
+        const BlockStorage   *driver = testable->m_readDriver;
         BlockStorage::Buffer *buffer = testable->m_buf;
         delete testable;
         g_fs.flush_fat();
@@ -245,7 +245,7 @@ TEST(SafePutChar_MultiLine) {
     ASSERT_EQ_MSG(0, err);
 
     {
-        const BlockStorage   *driver = testable->m_driver;
+        const BlockStorage   *driver = testable->m_readDriver;
         BlockStorage::Buffer *buffer = testable->m_buf;
         delete testable;
         g_fs.flush_fat();
@@ -299,7 +299,7 @@ TEST(CopyFile) {
     MESSAGE("Writer closed...")
 
     {
-        const BlockStorage   *driver = testable->m_driver;
+        const BlockStorage   *driver = testable->m_readDriver;
         BlockStorage::Buffer *buffer = testable->m_buf;
         delete testable;
         ASSERT_EQ_MSG(0, g_fs.flush_fat());

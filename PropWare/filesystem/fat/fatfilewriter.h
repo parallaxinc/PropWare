@@ -27,6 +27,7 @@
 
 #include <PropWare/filesystem/filewriter.h>
 #include <PropWare/filesystem/fat/fatfile.h>
+#include <PropWare/filesystem/fat/fatfs.h>
 
 namespace PropWare {
 
@@ -49,7 +50,8 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         FatFileWriter (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
-                  FileWriter(fs, name, buffer, logger) {
+                  FileWriter(fs, name, buffer, logger),
+                  m_fsw(&fs) {
         }
 
         /**
@@ -66,7 +68,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
             if ((err = this->find(this->get_name(), &fileEntryOffset))) {
                 switch (err) {
                     case FatFS::EOC_END:
-                        check_errors(this->m_fs->extend_current_directory());
+                        check_errors(this->m_fsw->extend_current_directory());
                     case FatFile::FILENAME_NOT_FOUND:
                         check_errors(this->create_new_file(fileEntryOffset));
                         break;
@@ -105,7 +107,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
             this->m_buf->buf[this->fileEntryOffset] = DELETED_FILE_MARK;
             this->m_buf->meta->mod = true;
 
-            check_errors(this->m_fs->clear_chain(this->firstTier2));
+            check_errors(this->m_fsw->clear_chain(this->firstTier2));
 
             this->m_fileMetadataModified = false; // This guy is for file length, not the directory entry or FAT
 
@@ -117,7 +119,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
             // Flush the file contents
             if (this->m_buf->meta == &this->m_contentMeta) {
-                check_errors(this->m_driver->flush(this->m_buf));
+                check_errors(this->m_writeDriver->flush(this->m_buf));
             }
 
             // If we modified any metadata for the file...
@@ -126,10 +128,10 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
                 // Finally, edit the length of the file
                 this->m_buf->meta->mod = true;
-                this->m_driver->write_long(this->fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf,
+                this->m_writeDriver->write_long(this->fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf,
                                            (const uint32_t) this->m_length);
 
-                check_errors(this->m_driver->flush(this->m_buf));
+                check_errors(this->m_writeDriver->flush(this->m_buf));
                 this->m_fileMetadataModified = false;
             }
 
@@ -141,13 +143,13 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
             if (this->m_open) {
                 if (this->need_to_extend_fat()) {
-                    check_errors(this->m_fs->extend_fat(&this->m_contentMeta));
+                    check_errors(this->m_fsw->extend_fat(&this->m_contentMeta));
                 }
 
                 check_errors(this->load_sector_under_ptr());
 
                 // Get the character
-                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
+                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_readDriver->get_sector_size());
                 this->m_buf->buf[bufferOffset] = (uint8_t) c;
                 this->m_buf->meta->mod = true;
 
@@ -173,15 +175,16 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         }
 
     protected:
+
         static inline bool not_period_or_end (const char c) {
             return '.' != c && c;
         }
 
         bool need_to_extend_fat () {
-            const uint8_t  sectorsPerCluster = this->m_fs->m_tier1sPerTier2Shift;
+            const uint8_t sectorsPerCluster = this->m_fs->m_tier1sPerTier2Shift;
 
-            const uint32_t requiredSector    = (uint32_t) this->m_ptr >> this->m_driver->get_sector_size_shift();
-            unsigned int   requiredCluster   = requiredSector >> sectorsPerCluster;
+            const uint32_t requiredSector  = (uint32_t) this->m_ptr >> this->m_readDriver->get_sector_size_shift();
+            unsigned int   requiredCluster = requiredSector >> sectorsPerCluster;
 
             if (this->m_curTier2 < requiredCluster)
                 return this->m_fs->is_eoc(this->m_contentMeta.nextTier2);
@@ -208,7 +211,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
             this->get_fat_location(fileEntryOffset);
 
             /* 4) Write the size of the file (currently 0) */
-            this->m_driver->write_long(fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf, 0);
+            this->m_writeDriver->write_long(fileEntryOffset + FILE_LEN_OFFSET, this->m_buf->buf, 0);
 
             this->m_buf->meta->mod = true;
             return NO_ERROR;
@@ -268,12 +271,15 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         }
 
         inline void get_fat_location (const uint16_t fileEntryOffset) {
-            const uint32_t allocUnit = this->m_fs->find_empty_space(0);
-            this->m_driver->write_short(fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf->buf, (uint16_t) allocUnit);
+            const uint32_t allocUnit = this->m_fsw->find_empty_space(0);
+            this->m_writeDriver->write_short(fileEntryOffset + FILE_START_CLSTR_LOW, this->m_buf->buf, (uint16_t) allocUnit);
             if (FatFS::FAT_32 == this->m_fs->get_fs_type())
-                this->m_driver->write_short(fileEntryOffset + FILE_START_CLSTR_HIGH, this->m_buf->buf,
+                this->m_writeDriver->write_short(fileEntryOffset + FILE_START_CLSTR_HIGH, this->m_buf->buf,
                                             (uint16_t) (allocUnit >> 16));
         }
+
+    private:
+        FatFS *m_fsw;
 };
 
 }

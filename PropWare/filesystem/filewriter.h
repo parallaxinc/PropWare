@@ -26,6 +26,7 @@
 #pragma once
 
 #include <PropWare/filesystem/file.h>
+#include <PropWare/filesystem/filesystem.h>
 #include <PropWare/hmi/output/printcapable.h>
 
 namespace PropWare {
@@ -33,11 +34,13 @@ namespace PropWare {
 /**
  * @brief   A write-only file interface
  */
-class FileWriter : virtual public File, public PrintCapable {
+class FileWriter : virtual public File,
+                   public PrintCapable {
     public:
         FileWriter (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
                     const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
+                  m_writeDriver(fs.get_write_driver()),
                   m_fileMetadataModified(false) {
         }
 
@@ -96,6 +99,7 @@ class FileWriter : virtual public File, public PrintCapable {
         }
 
     protected:
+        const BlockStorageWriter *m_writeDriver;
         /** When the length of a file is changed, this variable will be set, otherwise cleared */
         bool m_fileMetadataModified;
 };

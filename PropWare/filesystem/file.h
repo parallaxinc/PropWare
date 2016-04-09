@@ -26,7 +26,7 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-#include <PropWare/filesystem/filesystem.h>
+#include <PropWare/filesystem/readonlyfilesystem.h>
 
 namespace PropWare {
 
@@ -37,18 +37,18 @@ class File {
     public:
         typedef enum {
             /** Successful completion */NO_ERROR  = 0,
-            /** First error code */     BEG_ERROR = Filesystem::BEG_ERROR + 1,
+            /** First error code */     BEG_ERROR = ReadOnlyFilesystem::BEG_ERROR + 1,
             /** End of file */          EOF_ERROR,
             /** Invalid file name */    INVALID_FILENAME,
             /** File not opened */      FILE_NOT_OPEN,
             /** Final error code */     END_ERROR = FILE_NOT_OPEN
-        }    ErrorCode;
+        } ErrorCode;
 
         typedef enum {
             /** beginning of the stream */       BEG,
             /** current position in the stream */CUR,
             /** end of the stream */             END
-        }    SeekDir;
+        } SeekDir;
 
         static const unsigned int MAX_FILENAME_LENGTH = 32;
 
@@ -153,9 +153,10 @@ class File {
         /**
          * Files can only be created by their respective Filesystems
          */
-        File (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
+        File (ReadOnlyFilesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
+              const Printer &logger = pwOut)
                 : m_logger(&logger),
-                  m_driver(fs.get_driver()),
+                  m_readDriver(fs.get_read_driver()),
                   m_fsBufMeta(&fs.m_dirMeta),
                   m_length(-1),
                   m_ptr(0),
@@ -182,7 +183,7 @@ class File {
             this->m_logger->println("------");
             this->m_logger->printf("\tFile name: %s\n", this->m_name);
             this->m_logger->printf("\tLogger: 0x%08X\n", (unsigned int) this->m_logger);
-            this->m_logger->printf("\tDriver: 0x%08X\n", (unsigned int) this->m_driver);
+            this->m_logger->printf("\tDriver: 0x%08X\n", (unsigned int) this->m_readDriver);
             this->m_logger->printf("\tBuffer: 0x%08X\n", (unsigned int) this->m_buf);
             this->m_logger->printf("\tLength: 0x%08X/%d\n", this->m_length, this->m_length);
 
@@ -211,22 +212,22 @@ class File {
         }
 
     protected:
-        char                   m_name[MAX_FILENAME_LENGTH];
-        const Printer          *m_logger;
-        const BlockStorage     *m_driver;
-        BlockStorage::Buffer   *m_buf;
+        char                     m_name[MAX_FILENAME_LENGTH];
+        const Printer            *m_logger;
+        const BlockStorageReader *m_readDriver;
+        BlockStorage::Buffer     *m_buf;
         /** Metadata for the file's content (location on the storage device) */
-        BlockStorage::MetaData m_contentMeta;
+        BlockStorage::MetaData   m_contentMeta;
         /** Metadata for the file's directory entry */
-        BlockStorage::MetaData m_dirEntryMeta;
+        BlockStorage::MetaData   m_dirEntryMeta;
         /** Filesystem's buffer metadata (used to determine the current directory when opening the file) */
-        BlockStorage::MetaData *m_fsBufMeta;
+        BlockStorage::MetaData   *m_fsBufMeta;
 
         int32_t m_length;
         int32_t m_ptr;
 
         PropWare::ErrorCode m_error;
-        bool m_open;
+        bool                m_open;
 };
 
 }

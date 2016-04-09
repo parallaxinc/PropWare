@@ -73,6 +73,10 @@ class BlockStorage {
             MetaData *meta;
         };
 
+        typedef enum {
+            NO_ERROR = 0
+        } ErrorCode;
+
     public:
         /**
          * @brief   Print the formatted contents of a buffer
@@ -143,160 +147,11 @@ class BlockStorage {
          *
          * @return  0 upon success, error code otherwise
          */
-        virtual ErrorCode start () const = 0;
+        virtual PropWare::ErrorCode start () const = 0;
 
-        /**
-         * @brief   Read a block of data from the device into RAM
-         *
-         * @param[in]   address     Address of the block on the storage device
-         * @param[out]  buf[]       Location in memory to store the block
-         *
-         * @return      0 upon success, error code otherwise
-         */
-        virtual ErrorCode read_data_block (uint32_t address, uint8_t buf[]) const = 0;
-
-        /**
-         * @overload
-         *
-         * @param[in]   address     Address of the block on the storage device
-         * @param[out]  *buffer     Address of the buffer to store data in
-         *
-         * @return      0 upon success, error code otherwise
-         */
-        ErrorCode read_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
-            return this->read_data_block(address, buffer->buf);
+        virtual PropWare::ErrorCode flush (Buffer *buffer) const {
+            return BlockStorage::NO_ERROR;
         }
-
-        /**
-         * @brief       Use a buffer's metadata to determine the address and read data from the storage device into
-         *              memory
-         *
-         * @param[in]   *buffer     Address of a buffer
-         *
-         * @pre         Contents of the buffer will not be written to storage device prior to overwriting, so be sure
-         *              it is flushed before invoking
-         *
-         * @return      0 if successful, error code otherwise
-         */
-        ErrorCode reload_buffer (const BlockStorage::Buffer *buffer) const {
-            return this->read_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset, buffer);
-        }
-
-        /**
-         * @brief       Write data to a storage device
-         *
-         * @param[in]   address     Block address on the storage device
-         * @param[in]   dat         Array of data to be written
-         *
-         * @return      0 upon success, error code otherwise
-         */
-        virtual ErrorCode write_data_block (uint32_t address, const uint8_t dat[]) const = 0;
-
-        /**
-         * @overload
-         *
-         * @param[in]   address     Block address on the storage device
-         * @param[in]   *buffer     Address of the buffer that has data to be written
-         *
-         * @return      0 upon success, error code otherwise
-         */
-        ErrorCode write_data_block (uint32_t address, const BlockStorage::Buffer *buffer) const {
-            return this->write_data_block(address, buffer->buf);
-        }
-
-        /**
-         * @brief       Flush the contents of a buffer and mark as unmodified
-         *
-         * @param[in]   buffer  Buffer to be written to the SD card - written only it was modified
-         *
-         * @return      0 upon success, error code otherwise
-         */
-        ErrorCode flush (Buffer *buffer) const {
-            PropWare::ErrorCode err;
-            if (buffer->meta && buffer->meta->mod) {
-                check_errors(this->write_data_block(buffer->meta->curTier2Addr + buffer->meta->curTier1Offset,
-                                                    buffer->buf));
-                buffer->meta->mod = false;
-            }
-            return 0;
-        }
-
-        /**
-         * @brief       Read a byte from a buffer
-         *
-         * @param[in]   offset  Offset from the beginning of the buffer
-         * @param[in]   *buf    Address of the buffer to read
-         *
-         * @return      Requested byte in the buffer
-         */
-        uint8_t get_byte (const uint16_t offset, const uint8_t *buf) const {
-            return buf[offset];
-        }
-
-        /**
-         * @brief       Read two bytes from a buffer
-         *
-         * Devices such as SD cards use reverse byte order compared with the Propeller - this method should be
-         * implemented to ensure that the returned value is reversed if necessary. The user of this function should not
-         * need to worry about reversing bytes
-         *
-         * @param[in]   offset  Where in the buffer should the value be retrieved
-         * @param[in]   buf[]   Address of the buffer to read
-         *
-         * @return      Requested bytes from the buffer
-         */
-        virtual uint16_t get_short (const uint16_t offset, const uint8_t buf[]) const = 0;
-
-        /**
-         * @brief       Read four bytes from a buffer
-         *
-         * Devices such as SD cards use reverse byte order compared with the Propeller - this method should be
-         * implemented to ensure that the returned value is reversed if necessary. The user of this function should not
-         * need to worry about reversing bytes
-         *
-         * @param[in]   offset  Where in the buffer should the value be retrieved
-         * @param[in]   buf[]   Address of the buffer to read
-         *
-         * @return      Requested bytes from the buffer
-         */
-        virtual uint32_t get_long (const uint16_t offset, const uint8_t buf[]) const = 0;
-
-        /**
-         * @brief       Write a byte to a buffer
-         *
-         * @param[in]   offset  Address of the buffer to modify
-         * @param[in]   buf[]   Buffer to modify
-         * @param[in]   value   Value to be written in the buffer
-         */
-        void write_byte (const uint16_t offset, uint8_t buf[], const uint8_t value) const {
-            buf[offset] = value;
-        }
-
-        /**
-         * @brief       Write two bytes to a buffer
-         *
-         * Devices such as SD cards use reverse byte order compared with the Propeller - this method should be
-         * implemented to ensure that the parameter is reversed if necessary. The user of this function should not
-         * need to worry about reversing bytes
-         *
-         * @param[in]   offset  Address of the buffer to modify
-         * @param[in]   buf[]   Buffer to modify
-         * @param[in]   value   Value to be written in the buffer
-         */
-        virtual void write_short (const uint16_t offset, uint8_t buf[], const uint16_t value) const = 0;
-
-        /**
-         * @brief       Write four bytes to a buffer
-         *
-         * Devices such as SD cards use reverse byte order compared with the Propeller - this method should be
-         * implemented to ensure that the parameter is reversed if necessary. The user of this function should not
-         * need to worry about reversing bytes
-         *
-         * @param[in]   offset  Address of the buffer to modify
-         * @param[in]   buf[]   Buffer to modify
-         * @param[in]   value   Value to be written in the buffer
-         */
-        virtual void write_long (const uint16_t offset, uint8_t buf[], const uint32_t value) const = 0;
 
         /**
          * @brief   Return the size of a sector (also known as a "block") for the given storage device

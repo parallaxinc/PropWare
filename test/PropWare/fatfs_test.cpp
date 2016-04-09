@@ -33,7 +33,7 @@
 
 #include "PropWareTests.h"
 #include <PropWare/memory/sd.h>
-#include <PropWare/filesystem/fat/fatfs.h>
+#include <PropWare/filesystem/fat/readonlyfatfs.h>
 
 using namespace PropWare;
 

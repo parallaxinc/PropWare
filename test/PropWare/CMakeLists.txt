@@ -1,4 +1,4 @@
-set(BOARD dna)
+set(BOARD activityboard)
 set(MODEL cmm)
 
 create_test(sample_test             sample_test)

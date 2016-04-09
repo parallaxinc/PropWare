@@ -31,33 +31,37 @@
  */
 
 #include "PropWareTests.h"
-#include <PropWare/memory/sd.h>
+#include <PropWare/memory/sdreader.h>
+#include <PropWare/memory/sdwriter.h>
 
 using namespace PropWare;
 
-SD *testable;
+SDReader *readerTestable;
+SDWriter *writerTestable;
 
 void sd_error_checker (const ErrorCode err) {
     if (err)
-        testable->print_error_str(pwOut, (SD::ErrorCode) err);
+        readerTestable->print_error_str(pwOut, (SD::ErrorCode) err);
 }
 
 SETUP {
-    testable = new SD();
+    readerTestable = new SDReader();
+    writerTestable = new SDWriter();
 };
 
 TEARDOWN {
-    delete testable;
+    delete readerTestable;
+    delete writerTestable;
 }
 
-TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
+TEST(DefaultConstructor_RELIES_ON_ACTIVITY_BOARD) {
     setUp();
 
-    ASSERT_EQ_MSG((unsigned int) &SPI::get_instance(), (unsigned int) testable->m_spi);
-    ASSERT_EQ_MSG(Port::P2, testable->m_spi->m_mosi.get_mask());
-    ASSERT_EQ_MSG(Port::P1, testable->m_spi->m_sclk.get_mask());
-    ASSERT_EQ_MSG(Port::P0, testable->m_spi->m_miso.get_mask());
-    ASSERT_EQ_MSG(Port::P3, testable->m_cs.get_mask());
+    ASSERT_EQ_MSG((unsigned int) &SPI::get_instance(), (unsigned int) readerTestable->m_spi);
+    ASSERT_EQ_MSG(Port::P24, readerTestable->m_spi->m_mosi.get_mask());
+    ASSERT_EQ_MSG(Port::P23, readerTestable->m_spi->m_sclk.get_mask());
+    ASSERT_EQ_MSG(Port::P22, readerTestable->m_spi->m_miso.get_mask());
+    ASSERT_EQ_MSG(Port::P25, readerTestable->m_cs.get_mask());
 
     tearDown();
 }
@@ -65,7 +69,7 @@ TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
 TEST(Start) {
     setUp();
 
-    ErrorCode err = testable->start();
+    ErrorCode err = readerTestable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
 
@@ -77,7 +81,7 @@ TEST(ReadDataBlock) {
 
     uint8_t buffer[SD::SECTOR_SIZE];
 
-    ErrorCode err = testable->start();
+    ErrorCode err = readerTestable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
@@ -85,7 +89,7 @@ TEST(ReadDataBlock) {
     memset(buffer, 0, sizeof(buffer));
 
     // Read in a block...
-    err = testable->read_data_block(0, buffer);
+    err = readerTestable->read_data_block(0, buffer);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
 
@@ -108,24 +112,24 @@ TEST(WriteDataBlock) {
     const uint8_t *myData     = 0;
     const uint8_t sdBlockAddr = 0;
 
-    ErrorCode err = testable->start();
+    ErrorCode err = readerTestable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
     // Read in a block...
-    err = testable->read_data_block(sdBlockAddr, originalBlock);
+    err = readerTestable->read_data_block(sdBlockAddr, originalBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Original block read in");
 
     // Try writing a random block of memory
-    err = testable->write_data_block(sdBlockAddr, myData);
+    err = writerTestable->write_data_block(sdBlockAddr, myData);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Random block written");
 
     // Read the block back in to a new buffer. Make sure it matches the data written.
-    err = testable->read_data_block(sdBlockAddr, moddedBlock);
+    err = readerTestable->read_data_block(sdBlockAddr, moddedBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Modded block read");
@@ -133,13 +137,13 @@ TEST(WriteDataBlock) {
     MESSAGE("WriteBlock: Modded block equals random block");
 
     // Write the original block back to the SD card
-    err = testable->write_data_block(sdBlockAddr, originalBlock);
+    err = writerTestable->write_data_block(sdBlockAddr, originalBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Original block written back");
 
     // Read the block back in to a new buffer. Make sure it matches the data written.
-    err = testable->read_data_block(sdBlockAddr, moddedBlock);
+    err = readerTestable->read_data_block(sdBlockAddr, moddedBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Modded block read again");
@@ -152,7 +156,7 @@ TEST(WriteDataBlock) {
 int main () {
     START(SDTest);
 
-    RUN_TEST(DefaultConstructor_RELIES_ON_DNA_BOARD);
+    RUN_TEST(DefaultConstructor_RELIES_ON_ACTIVITY_BOARD);
     RUN_TEST(Start);
     RUN_TEST(ReadDataBlock);
     RUN_TEST(WriteDataBlock);

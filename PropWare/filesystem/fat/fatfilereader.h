@@ -74,7 +74,8 @@ namespace PropWare {
  * @endcode
  *
  */
-class FatFileReader : virtual public FatFile, virtual public FileReader {
+class FatFileReader : virtual public FatFile,
+                      virtual public FileReader {
     public:
         /**
          * @brief       Construct a new file instance
@@ -88,7 +89,8 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
          * @param[in]   logger      This is only used for printing debug statements. Use of the logger is limited
          *                          such that all references will be optimized out in normal application code
          */
-        FatFileReader (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
+        FatFileReader (ReadOnlyFatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
+                       const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
                   FileReader(fs, name, buffer, logger) {
@@ -101,7 +103,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             // Attempt to find the file
             if ((err = this->find(this->get_name(), &fileEntryOffset)))
                 // Find returned an error; ensure it was EOC...
-                return FatFS::EOC_END == err ? FatFile::FILENAME_NOT_FOUND : err;
+                return ReadOnlyFatFS::EOC_END == err ? FatFile::FILENAME_NOT_FOUND : err;
 
             // `name` was found successfully
             check_errors(this->open_existing_file(fileEntryOffset));
@@ -116,7 +118,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
                 check_errors(this->load_sector_under_ptr());
 
                 // Get the character
-                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_driver->get_sector_size());
+                const uint16_t bufferOffset = (uint16_t) (this->m_ptr % this->m_readDriver->get_sector_size());
                 c = this->m_buf->buf[bufferOffset];
 
                 // Finally done. Increment the pointer
