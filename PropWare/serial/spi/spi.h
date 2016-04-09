@@ -353,17 +353,17 @@ class SPI : public PrintCapable,
 #undef ASMVAR
         }
 
-        void put_char (const char c) {
+        virtual void put_char (const char c) {
             this->shift_out(8, (uint32_t) c);
         }
 
-        void puts (const char string[]) {
+        virtual void puts (const char string[]) {
             char *sPtr = (char *) string;
             while (sPtr)
                 this->put_char(*sPtr++);
         }
 
-        char get_char () {
+        virtual char get_char () {
             char c = 0;
             return c;
         }
