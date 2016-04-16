@@ -33,6 +33,12 @@ namespace PropWare {
 #define virtual
 #endif
 
+extern "C" {
+extern int _cfg_baudrate;
+extern int _cfg_txpin;
+extern int _cfg_rxpin;
+}
+
 /**
  * @brief   Abstract base class for all unbuffered UART devices
  *
@@ -116,10 +122,6 @@ class UART {
 
         static const int MAX_BAUD = 4413793;
 
-        static const int *DEFAULT_BAUD;
-        static const int *PARALLAX_STANDARD_TX;
-        static const int *PARALLAX_STANDARD_RX;
-
     public:
         virtual ErrorCode set_data_width (const uint8_t dataWidth) {
             if (1 > dataWidth || dataWidth > 16)
@@ -187,7 +189,7 @@ class UART {
             this->set_data_width(UART::DEFAULT_DATA_WIDTH);
             this->set_parity(UART::DEFAULT_PARITY);
             this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(*UART::DEFAULT_BAUD);
+            this->set_baud_rate(_cfg_baudrate);
         }
 
         /**

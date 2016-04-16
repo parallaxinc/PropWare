@@ -1,7 +1,7 @@
 /**
- * @file    PropWare/serial/uart/uart.cpp
+ * @file        Examples/PropWare_BufferedUARTRX/buffereduartrx.cogcpp
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,12 +23,18 @@
  * SOFTWARE.
  */
 
-#include <PropWare/serial/uart/uart.h>
+#include <PropWare/serial/uart/uartrx.h>
+#include <PropWare/utility/charqueue.h>
 
-int _cfg_rxpin    = -1;
-int _cfg_txpin    = -1;
-int _cfg_baudrate = -1;
+using namespace PropWare;
 
-const int *PropWare::UART::DEFAULT_BAUD         = &_cfg_baudrate;
-const int *PropWare::UART::PARALLAX_STANDARD_TX = &_cfg_txpin;
-const int *PropWare::UART::PARALLAX_STANDARD_RX = &_cfg_rxpin;
+_NATIVE int main () {
+    CharQueue *buffer = reinterpret_cast<CharQueue *>(PAR);
+
+    const UARTRX rx(Port::NULL_PIN);
+
+    //while (1) {
+    //    const char c = static_cast<char>(rx.receive());
+    //    buffer->enqueue(c);
+    //}
+}

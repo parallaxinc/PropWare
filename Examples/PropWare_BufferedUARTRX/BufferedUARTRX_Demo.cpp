@@ -1,5 +1,5 @@
 /**
- * @file    PropWare/PropWare.cpp
+ * @file    BufferedUARTTX_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -23,33 +23,31 @@
  * SOFTWARE.
  */
 
-namespace PropWare {
-unsigned char _sd_firstByteResponse;
-}
+#include <PropWare/hmi/output/printer.h>
+#include <PropWare/hmi/input/scanner.h>
+#include <PropWare/utility/charqueue.h>
 
-extern "C" {
+/**
+ * @example     BufferedUARTRX_Demo.cpp
+ *
+ * Write "Hello world!" out via UART protocol and receive an echo
+ *
+ * @include PropWare_UARTRX/CMakeLists.txt
+ */
+int main () {
+    //extern unsigned int _load_start_buffereduartrx_cog[];
+    char buffer[256];
+    //PropWare::CharQueue queue(buffer);
+    //cognew(_load_start_buffereduartrx_ecog, &queue);
 
-int _cfg_rxpin    = -1;
-int _cfg_txpin    = -1;
-int _cfg_baudrate = -1;
+    pwOut << "Hello! I'm going to say some things. I want you to answer them on your keyboard.\n";
+    pwOut << "You won't see anything as you type - but don't worry, I'm catching it all.\n";
+    pwOut << '\n';
+    pwOut << "What's your name?\n";
+    waitcnt(SECOND *2 + CNT);
 
-void __cxa_pure_virtual () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
-
-}
-
-void __gxx_personality_sj0 () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
-}
-
-void *__dso_handle = 0;
-
-int __cxa_atexit (void (*destructor) (void *), void *arg, void *dso) {
-    return 0;
-}
-
+    //PropWare::Scanner scanner(queue);
+    //char input[32];
+    //scanner >> input;
+    //pwOut << "Your name is: " << input << "\n";
 }

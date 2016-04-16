@@ -1,7 +1,7 @@
 /**
- * @file    PropWare/PropWare.cpp
+ * @file        PropWare/utility/queue.h
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,33 +23,40 @@
  * SOFTWARE.
  */
 
+#pragma once
+
+#include <PropWare/utility/queue.h>
+#include <PropWare/hmi/input/scancapable.h>
+#include <PropWare/hmi/output/printcapable.h>
+
 namespace PropWare {
-unsigned char _sd_firstByteResponse;
-}
 
-extern "C" {
+class CharQueue : public Queue<char>,
+                  public ScanCapable,
+                  public PrintCapable {
+    public:
+        template<size_t N>
+        CharQueue (char (&array)[N]) : Queue(array) {
+        }
 
-int _cfg_rxpin    = -1;
-int _cfg_txpin    = -1;
-int _cfg_baudrate = -1;
+        CharQueue (char *array, const size_t length) : Queue(array, length) {
+        }
 
-void __cxa_pure_virtual () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
+        virtual char get_char () {
+            return this->dequeue();
+        }
 
-}
+        virtual void put_char (const char c) {
+            this->enqueue(c);
+        }
 
-void __gxx_personality_sj0 () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
-}
-
-void *__dso_handle = 0;
-
-int __cxa_atexit (void (*destructor) (void *), void *arg, void *dso) {
-    return 0;
-}
+        virtual void puts (const char *string) {
+            char *c = const_cast<char *>(string);
+            while (*c) {
+                this->put_char(*c);
+                c++;
+            }
+        }
+};
 
 }

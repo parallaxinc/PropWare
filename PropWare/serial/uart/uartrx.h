@@ -52,8 +52,8 @@ class UARTRX : public UART
             this->set_data_width(UART::DEFAULT_DATA_WIDTH);
             this->set_parity(UART::DEFAULT_PARITY);
             this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(*UART::DEFAULT_BAUD);
-            this->set_rx_mask((Port::Mask) (1 << *UART::PARALLAX_STANDARD_RX));
+            this->set_baud_rate(_cfg_baudrate);
+            this->set_rx_mask((Port::Mask) (1 << _cfg_rxpin));
         }
 
         /**
@@ -67,7 +67,7 @@ class UARTRX : public UART
             this->set_data_width(UART::DEFAULT_DATA_WIDTH);
             this->set_parity(UART::DEFAULT_PARITY);
             this->set_stop_bit_width(UART::DEFAULT_STOP_BIT_WIDTH);
-            this->set_baud_rate(*UART::DEFAULT_BAUD);
+            this->set_baud_rate(_cfg_baudrate);
             this->set_rx_mask(rx);
         }
 

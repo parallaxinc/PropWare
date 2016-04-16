@@ -78,7 +78,7 @@ class Listener : public PropWare::Runnable {
 };
 
 /**
- * @example     DuplexUART_Demo.cpp
+ * @example     UARTRX_Demo.cpp
  *
  * Write "Hello world!" out via UART protocol and receive an echo
  *

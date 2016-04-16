@@ -43,7 +43,7 @@ class UARTTX : public UART
     public:
         UARTTX ()
                 : UART() {
-            this->set_tx_mask((Port::Mask const) (1 << *UART::PARALLAX_STANDARD_TX));
+            this->set_tx_mask((const Port::Mask) (1 << _cfg_txpin));
         }
 
         UARTTX (const Pin::Mask tx)
@@ -101,8 +101,8 @@ class UARTTX : public UART
                 case UART::NO_PARITY:
                     __asm__ volatile (
                     FC_START("SendArrayStart%=", "SendArrayEnd%=")
-                    // Prepare next word
-                    "sendArrayLoop%=:                                                                   \n\t"
+                            // Prepare next word
+                            "sendArrayLoop%=:                                                                   \n\t"
                             "        rdbyte %[_data], %[_arrayPtr]                                              \n\t"
                             // Set start & stop bits
                             "        or %[_data], %[_stopBitMask]                                               \n\t"
@@ -121,7 +121,7 @@ class UARTTX : public UART
                             // Increment the pointer and loop
                             "        add %[_arrayPtr], #1                                                       \n\t"
                             "        djnz %[_words], #" FC_ADDR("sendArrayLoop%=", "SendArrayStart%=") "        \n\t"
-                    FC_END("SendArrayEnd%=")
+                            FC_END("SendArrayEnd%=")
                     : [_data] "+r"(data),
                     [_waitCycles] "+r"(waitCycles),
                     [_arrayPtr] "+r"(arrayPtr),
@@ -135,8 +135,8 @@ class UARTTX : public UART
                 case UART::ODD_PARITY:
                     __asm__ volatile (
                     FC_START("SendArrayStart%=", "SendArrayEnd%=")
-                    // Prepare next word
-                    "sendArrayLoop%=:"
+                            // Prepare next word
+                            "sendArrayLoop%=:"
                             "        rdbyte %[_data], %[_arrayPtr]                                              \n\t"
                             // Set parity
                             "        test %[_data], %[_dataMask] wc                                             \n\t"
@@ -158,7 +158,7 @@ class UARTTX : public UART
                             // Increment the pointer and loop
                             "        add %[_arrayPtr], #1                                                       \n\t"
                             "        djnz %[_words], #" FC_ADDR("sendArrayLoop%=", "SendArrayStart%=") "        \n\t"
-                    FC_END("SendArrayEnd%=")
+                            FC_END("SendArrayEnd%=")
                     : [_data] "+r"(data),
                     [_waitCycles] "+r"(waitCycles),
                     [_arrayPtr] "+r"(arrayPtr),
@@ -174,8 +174,8 @@ class UARTTX : public UART
                 case UART::EVEN_PARITY:
                     __asm__ volatile (
                     FC_START("SendArrayStart%=", "SendArrayEnd%=")
-                    // Prepare next word
-                    "sendArrayLoop%=:"
+                            // Prepare next word
+                            "sendArrayLoop%=:"
                             "        rdbyte %[_data], %[_arrayPtr]                                              \n\t"
                             // Set parity
                             "        test %[_data], %[_dataMask] wc                                             \n\t"
@@ -197,7 +197,7 @@ class UARTTX : public UART
                             // Increment the pointer and loop
                             "        add %[_arrayPtr], #1                                                       \n\t"
                             "        djnz %[_words], #" FC_ADDR("sendArrayLoop%=", "SendArrayStart%=") "        \n\t"
-                    FC_END("SendArrayEnd%=")
+                            FC_END("SendArrayEnd%=")
                     : [_data] "+r"(data),
                     [_waitCycles] "+r"(waitCycles),
                     [_arrayPtr] "+r"(arrayPtr),
@@ -239,14 +239,14 @@ class UARTTX : public UART
             volatile uint32_t waitCycles = bitCycles;
             __asm__ volatile (
             FC_START("ShiftOutDataStart%=", "ShiftOutDataEnd%=")
-            "        add %[_waitCycles], CNT                                           \n\t"
+                    "        add %[_waitCycles], CNT                                           \n\t"
 
                     "loop%=:                                                                   \n\t"
                     "        waitcnt %[_waitCycles], %[_bitCycles]                             \n\t"
                     "        shr %[_data],#1 wc                                                \n\t"
                     "        muxc outa, %[_mask]                                               \n\t"
                     "        djnz %[_bits], #" FC_ADDR("loop%=", "ShiftOutDataStart%=") "      \n\t"
-            FC_END("ShiftOutDataEnd%=")
+                    FC_END("ShiftOutDataEnd%=")
             : [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
             [_bits] "+r"(bits)

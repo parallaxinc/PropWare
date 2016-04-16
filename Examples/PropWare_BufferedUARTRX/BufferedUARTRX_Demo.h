@@ -1,5 +1,5 @@
 /**
- * @file    PropWare/PropWare.cpp
+ * @file    BufferedUARTTX_Demo.h
  *
  * @author  David Zemon
  *
@@ -23,33 +23,14 @@
  * SOFTWARE.
  */
 
-namespace PropWare {
-unsigned char _sd_firstByteResponse;
-}
+#pragma once
 
-extern "C" {
 
-int _cfg_rxpin    = -1;
-int _cfg_txpin    = -1;
-int _cfg_baudrate = -1;
 
-void __cxa_pure_virtual () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
+#define STACK_SIZE 64
 
-}
+struct MailBox {
+    unsigned int stack[STACK_SIZE];
+    CharQueue *queue;
 
-void __gxx_personality_sj0 () {
-    // TODO: Provide some cool way for the user to enter their own error code
-    while (1) {
-    }
-}
-
-void *__dso_handle = 0;
-
-int __cxa_atexit (void (*destructor) (void *), void *arg, void *dso) {
-    return 0;
-}
-
-}
+};
