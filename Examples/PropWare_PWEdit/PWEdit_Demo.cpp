@@ -30,27 +30,46 @@
 #include <PropWare/hmi/pwedit.h>
 #include <PropWare/serial/uart/uartrx.h>
 
+#include <PropWare/hmi/output/hd44780.h>
+
 using namespace PropWare;
 
-const char FILE_NAME[] = "fat_test.txt";
+const char FILE_NAME[] = "small.txt";
+
+#define error_checker(x) if ((err = (x))) throw_error(err);
+
+void throw_error (const PropWare::ErrorCode err);
 
 int main () {
     PropWare::ErrorCode err;
 
+    HD44780 lcd;
+    lcd.start(Pin::P0, Pin::P8, Pin::P9, Pin::P10, HD44780::BM_8, HD44780::DIM_20x4);
+    Printer lcdPrinter(lcd);
+
     const SD driver;
     FatFS    filesystem(driver);
-    filesystem.mount();
+    error_checker(filesystem.mount());
 
     FatFileReader f(filesystem, FILE_NAME);
     UARTRX        uartrx;
     Scanner       scanner(uartrx);
 
-    PWEdit editor(f, scanner);
-    err = editor.run();
-    if (err) {
-        pwOut << "Error " << err << '\n';
-        return err;
-    }
+    PWEdit editor(f, scanner, pwOut, &lcdPrinter);
+    error_checker(editor.run());
 
     return 0;
+}
+
+void throw_error (const PropWare::ErrorCode err) {
+    pwOut << "Error " << err << '\n';
+
+    const SimplePort leds(Port::P16, 8);
+    leds.set_dir_out();
+    while (1) {
+        leds.clear();
+        waitcnt(100 * MILLISECOND + CNT);
+        leds.write((uint32_t) err);
+        waitcnt(100 * MILLISECOND + CNT);
+    }
 }

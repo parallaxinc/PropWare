@@ -107,7 +107,8 @@ class SD : public BlockStorage {
          * @param[in]   sclk    Pin mask for clock line
          * @param[in]   cs      Pin mask for chip select
          */
-        SD (SPI &spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs)
+        SD (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs,
+            SPI &spi = SPI::get_instance())
                 : m_spi(&spi) {
             this->m_spi->set_mosi(mosi);
             this->m_spi->set_miso(miso);

@@ -33,26 +33,42 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Basic terminal-style text editor
+ *
+ * Capable of running on any `Printer` which supports the following escape sequences:
+ *
+ *   * `CSI n ; m H`: Move the cursor to column `n` and row `m`, where `n` and `m` are 1-indexed.
+ */
 class PWEdit {
     public:
         static const char BACKSPACE = 0x08;
         static const char CURSOR    = '#';
         typedef enum {
-            NO_ERROR,
-            OUT_OF_MEMORY
+                                  NO_ERROR,
+            /** First error */    BEG_ERROR     = 128
         }                 ErrorCode;
 
     public:
-        PWEdit (FileReader &file, Scanner &scanner, const Printer &printer = pwOut)
+        /**
+         * @brief   Constructor
+         *
+         * @param[in]   file        Unopened file to be displayed/edited
+         * @param[in]   scanner     Human input will be read from this scanner. `pwIn` can not be used because it is set
+         *                          for echo mode on, which can not be used in an editor
+         * @param[in]   printer     Where the contents of the editor should be printed
+         */
+        PWEdit (FileReader &file, Scanner &scanner, const Printer &printer = pwOut, Printer *debugger = NULL)
                 : m_file(&file),
                   m_printer(&pwOut),
                   m_scanner(&scanner),
+                  m_debugger(debugger),
                   m_cols(0),
                   m_rows(1) {
         }
 
         ~PWEdit () {
-            for(auto line : this->m_lines)
+            for (auto line : this->m_lines)
                 delete line;
         }
 
@@ -60,6 +76,8 @@ class PWEdit {
             PropWare::ErrorCode err;
 
             this->calibrate();
+            check_errors(this->read_in_file());
+            this->display_file();
 
             return NO_ERROR;
         }
@@ -67,9 +85,9 @@ class PWEdit {
     protected:
         void calibrate () {
             static const char calibrationString[]     = "Calibration...#";
-            const size_t      calibrationStringLength = strlen(calibrationString);
+            const uint8_t     calibrationStringLength = (uint8_t) strlen(calibrationString);
 
-            this->clear();
+            this->clear(false);
             *this->m_printer << calibrationString;
             this->m_cols = calibrationStringLength;
             this->m_rows = 1;
@@ -92,14 +110,15 @@ class PWEdit {
                         if (1 < this->m_rows) {
                             --this->m_rows;
                             *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
-                            this->clear();
+                            this->clear(false);
                             *this->m_printer << calibrationString;
                             *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
 
                             // Handle columns
                             if (calibrationStringLength >= this->m_cols) {
-                                const unsigned int charactersToDelete = calibrationStringLength - this->m_cols + 1;
-                                for (unsigned int  i                  = 0; i < charactersToDelete; ++i) {
+                                const uint8_t     charactersToDelete =
+                                                          (uint8_t) (calibrationStringLength - this->m_cols + 1);
+                                for (unsigned int i                  = 0; i < charactersToDelete; ++i) {
                                     *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
                                 }
                                 *this->m_printer << CURSOR;
@@ -137,21 +156,75 @@ class PWEdit {
                 }
             } while ('\r' != input && '\n' != input && '\0' != input);
             this->clear();
-            *this->m_printer << "Calibrated for a " << this->m_cols << 'x' << this->m_rows << " screen.";
+            *this->m_printer << this->m_cols << 'x' << this->m_rows << " ";
         }
 
-        void clear () {
-            *this->m_printer << "\x1B\x5B\x01;\x01H";
+        PropWare::ErrorCode read_in_file () {
+            PropWare::ErrorCode err;
+
+            *this->m_printer << "Reading file...\n";
+
+            check_errors(this->m_file->open());
+            while (!this->m_file->eof()) {
+                // Read a line
+                StringBuilder *line = new StringBuilder();
+                char          c;
+                do {
+                    check_errors(this->m_file->safe_get_char(c));
+                    if (32 <= c && c <= 127)
+                        // Only accept printable characters
+                        line->put_char(c);
+                } while ('\r' != c && '\n' != c);
+
+                // Munch the \n following a \r
+                if ('\n' == this->m_file->peek()) {
+                    check_errors(this->m_file->safe_get_char(c));
+                }
+
+                this->m_lines.insert(this->m_lines.end(), line);
+
+                this->move_cursor(2, 1);
+                *this->m_printer << "Line: " << this->m_lines.size();
+            }
+            return NO_ERROR;
+        }
+
+        void display_file () const {
+            this->clear();
+            auto lineIterator = this->m_lines.cbegin();
+
+            for (uint8_t row = 1; row <= this->m_rows; ++row) {
+                this->move_cursor(row, 1);
+                for (uint8_t column = 0; column < this->m_cols && column < (*lineIterator)->get_size(); ++column)
+                    *this->m_printer << (*lineIterator)->to_string()[column];
+                ++lineIterator;
+            }
+        }
+
+        void clear (const bool writeSpaces = true) const {
+            if (writeSpaces) {
+                for (uint8_t row = 1; row <= this->m_rows; ++row) {
+                    this->move_cursor(row, 1);
+                    for (uint8_t col = 0; col <= this->m_cols; ++col)
+                        *this->m_printer << ' ';
+                }
+            }
+            this->move_cursor(1, 1);
+        }
+
+        void move_cursor (const uint8_t row, const uint8_t column) const {
+            *this->m_printer << '\x1B' << '\x5B' << row << ';' << column << 'H';
         }
 
     protected:
         FileReader                 *m_file;
         const Printer              *m_printer;
         Scanner                    *m_scanner;
+        Printer                    *m_debugger;
         std::list<StringBuilder *> m_lines;
 
-        unsigned int m_cols;
-        unsigned int m_rows;
+        uint8_t m_cols;
+        uint8_t m_rows;
 };
 
 }
