@@ -42,12 +42,25 @@ namespace PropWare {
  */
 class PWEdit {
     public:
-        static const char BACKSPACE = 0x08;
-        static const char CURSOR    = '#';
         typedef enum {
                                   NO_ERROR,
-            /** First error */    BEG_ERROR     = 128
-        }                 ErrorCode;
+            /** First error */    BEG_ERROR = 128
+        } ErrorCode;
+
+        typedef enum {
+            UP,
+            DOWN,
+            LEFT,
+            RIGHT
+        } Direction;
+
+    public:
+        static const char BELL      = 0x07;
+        static const char BACKSPACE = 0x08;
+        static const char CURSOR    = '#';
+        static const char EXIT_CHAR = 'x';
+
+        static const uint8_t BOTTOM_ROWS_PADDING = 3;
 
     public:
         /**
@@ -63,7 +76,7 @@ class PWEdit {
                   m_printer(&pwOut),
                   m_scanner(&scanner),
                   m_debugger(debugger),
-                  m_cols(0),
+                  m_columns(0),
                   m_rows(1) {
         }
 
@@ -76,10 +89,39 @@ class PWEdit {
             PropWare::ErrorCode err;
 
             this->calibrate();
-            check_errors(this->read_in_file());
-            this->display_file();
+            err = this->read_in_file();
+            if (err) {
+                this->m_file->close();
+                return err;
+            } else {
+                this->display_file();
 
-            return NO_ERROR;
+                char c;
+                do {
+                    c = this->m_scanner->get_char();
+                    switch (c) {
+                        case 'a':
+                        case 'h':
+                            this->move_selection(LEFT);
+                            break;
+                        case 's':
+                        case 'j':
+                            this->move_selection(DOWN);
+                            break;
+                        case 'd':
+                        case 'l':
+                            this->move_selection(RIGHT);
+                            break;
+                        case 'w':
+                        case 'k':
+                            this->move_selection(UP);
+                            break;
+                    }
+                } while (EXIT_CHAR != c);
+                this->m_file->close();
+
+                return NO_ERROR;
+            }
         }
 
     protected:
@@ -89,18 +131,18 @@ class PWEdit {
 
             this->clear(false);
             *this->m_printer << calibrationString;
-            this->m_cols = calibrationStringLength;
-            this->m_rows = 1;
+            this->m_columns = calibrationStringLength;
+            this->m_rows    = 1;
 
             char input;
             do {
-                *this->m_scanner >> input;
+                input = this->m_scanner->get_char();
                 switch (input) {
                     case 'a':
                     case 'h':
                         // Move left
-                        if (1 < this->m_cols) {
-                            --this->m_cols;
+                        if (1 < this->m_columns) {
+                            --this->m_columns;
                             *this->m_printer << BACKSPACE << ' ' << BACKSPACE << BACKSPACE << CURSOR;
                         }
                         break;
@@ -115,15 +157,15 @@ class PWEdit {
                             *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
 
                             // Handle columns
-                            if (calibrationStringLength >= this->m_cols) {
+                            if (calibrationStringLength >= this->m_columns) {
                                 const uint8_t     charactersToDelete =
-                                                          (uint8_t) (calibrationStringLength - this->m_cols + 1);
+                                                          (uint8_t) (calibrationStringLength - this->m_columns + 1);
                                 for (unsigned int i                  = 0; i < charactersToDelete; ++i) {
                                     *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
                                 }
                                 *this->m_printer << CURSOR;
                             } else {
-                                for (unsigned int i = calibrationStringLength; i < this->m_cols; ++i) {
+                                for (unsigned int i = calibrationStringLength; i < this->m_columns; ++i) {
                                     *this->m_printer << ' ';
                                 }
                                 *this->m_printer << CURSOR;
@@ -132,7 +174,7 @@ class PWEdit {
                             // Handle rows
                             for (unsigned int i = 1; i < this->m_rows; ++i) {
                                 *this->m_printer << BACKSPACE << " \n";
-                                for (unsigned int j = 0; j < (this->m_cols - 1); ++j)
+                                for (unsigned int j = 0; j < (this->m_columns - 1); ++j)
                                     *this->m_printer << ' ';
                                 *this->m_printer << CURSOR;
                             }
@@ -143,20 +185,20 @@ class PWEdit {
                         // Move down
                         ++this->m_rows;
                         *this->m_printer << BACKSPACE << " \n";
-                        for (unsigned int i = 0; i < (this->m_cols - 1); ++i)
+                        for (unsigned int i = 0; i < (this->m_columns - 1); ++i)
                             *this->m_printer << ' ';
                         *this->m_printer << CURSOR;
                         break;
                     case 'd':
                     case 'l':
                         // Move right
-                        ++this->m_cols;
+                        ++this->m_columns;
                         *this->m_printer << BACKSPACE << " #";
                         break;
                 }
             } while ('\r' != input && '\n' != input && '\0' != input);
             this->clear();
-            *this->m_printer << this->m_cols << 'x' << this->m_rows << " ";
+            *this->m_printer << this->m_columns << 'x' << this->m_rows << " ";
         }
 
         PropWare::ErrorCode read_in_file () {
@@ -181,7 +223,7 @@ class PWEdit {
                     check_errors(this->m_file->safe_get_char(c));
                 }
 
-                this->m_lines.insert(this->m_lines.end(), line);
+                this->m_lines.push_back(line);
 
                 this->move_cursor(2, 1);
                 *this->m_printer << "Line: " << this->m_lines.size();
@@ -189,23 +231,38 @@ class PWEdit {
             return NO_ERROR;
         }
 
-        void display_file () const {
+        void display_file () {
+            this->display_file_from_line(0);
+
+            this->move_cursor(1, 1);
+            this->m_termRow    = 1;
+            this->m_termColumn = 1;
+            this->m_selectedLineInFile    = this->m_firstLine;
+        }
+
+        void display_file_from_line (const unsigned int lineNumber) {
             this->clear();
             auto lineIterator = this->m_lines.cbegin();
 
+            unsigned int i = lineNumber;
+            while (i--)
+                ++lineIterator;
+
             for (uint8_t row = 1; row <= this->m_rows; ++row) {
                 this->move_cursor(row, 1);
-                for (uint8_t column = 0; column < this->m_cols && column < (*lineIterator)->get_size(); ++column)
+                for (uint8_t column = 0; column < this->m_columns && column < (*lineIterator)->get_size(); ++column)
                     *this->m_printer << (*lineIterator)->to_string()[column];
                 ++lineIterator;
             }
+
+            this->m_firstLine = lineNumber;
         }
 
         void clear (const bool writeSpaces = true) const {
             if (writeSpaces) {
                 for (uint8_t row = 1; row <= this->m_rows; ++row) {
                     this->move_cursor(row, 1);
-                    for (uint8_t col = 0; col <= this->m_cols; ++col)
+                    for (uint8_t col = 0; col <= this->m_columns; ++col)
                         *this->m_printer << ' ';
                 }
             }
@@ -216,6 +273,50 @@ class PWEdit {
             *this->m_printer << '\x1B' << '\x5B' << row << ';' << column << 'H';
         }
 
+        void move_selection (const Direction direction) {
+            switch (direction) {
+                case DOWN:
+                    this->move_down();
+                    break;
+                case UP:
+                    this->move_up();
+                    break;
+                case RIGHT:
+                    this->move_right();
+                    break;
+                case LEFT:
+                    this->move_left();
+                    break;
+            }
+        }
+
+        void move_down () {
+            *this->m_debugger << "Lines:        " << this->m_lines.size() << '\n';
+            *this->m_debugger << "Current line: " << this->m_selectedLineInFile << '\n';
+            if ((this->m_lines.size() - 1) == this->m_selectedLineInFile)
+                *this->m_printer << BELL;
+            else {
+                const unsigned int lastLine = this->m_firstLine + this->m_rows;
+                if (BOTTOM_ROWS_PADDING > (this->m_rows - this->m_termRow)
+                        && this->m_lines.size() > lastLine) {
+                    this->display_file_from_line(++this->m_firstLine);
+                    this->move_cursor(this->m_termRow, this->m_termColumn);
+                } else {
+                    this->move_cursor(++this->m_termRow, this->m_termColumn);
+                }
+                ++this->m_selectedLineInFile;
+            }
+        }
+
+        void move_up () {
+        }
+
+        void move_right () {
+        }
+
+        void move_left () {
+        }
+
     protected:
         FileReader                 *m_file;
         const Printer              *m_printer;
@@ -223,8 +324,23 @@ class PWEdit {
         Printer                    *m_debugger;
         std::list<StringBuilder *> m_lines;
 
-        uint8_t m_cols;
+        /** Total columns on screen */
+        uint8_t m_columns;
+        /** Total rows on screen */
         uint8_t m_rows;
+
+        /** Current cursor row */
+        uint8_t m_termRow;
+        /** Current cursor column */
+        uint8_t m_termColumn;
+
+        /** Current line in file selected */
+        unsigned int m_selectedLineInFile;
+        /** Current column in file selected */
+        unsigned int m_selectedColumnInLine;
+
+        /** First line displayed */
+        unsigned int m_firstLine;
 };
 
 }
