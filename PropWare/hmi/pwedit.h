@@ -122,6 +122,12 @@ class PWEdit {
                         case 'G':
                             this->to_file_end();
                             break;
+                        case '0':
+                            this->to_line_start();
+                            break;
+                        case '$':
+                            this->to_line_end();
+                            break;
                     }
                 } while (EXIT_CHAR != c);
                 this->m_file->close();
@@ -342,12 +348,12 @@ class PWEdit {
         }
 
         void move_right () {
-            if (((*this->m_selectedLine)->get_size() - 1) <= this->m_selectedColumnInLine) {
+            if (this->cursor_at_end()) {
                 *this->m_printer << BELL;
             } else {
-                const unsigned int lastColumnInLine = this->m_firstColumnDisplayed + this->m_columns;
+                const unsigned int lastVisibleColumnOfLine = this->m_firstColumnDisplayed + this->m_columns;
                 if (PADDING > (this->m_columns - this->m_termColumn)
-                        && (*this->m_selectedLine)->get_size() > lastColumnInLine) {
+                        && (*this->m_selectedLine)->get_size() > lastVisibleColumnOfLine) {
                     this->display_file_from(this->m_firstLineDisplayed, ++this->m_firstColumnDisplayed);
                     this->move_cursor(this->m_termRow, this->m_termColumn);
                 } else
@@ -421,14 +427,49 @@ class PWEdit {
                 this->m_firstColumnDisplayed = 0;
                 lastColumn = (uint8_t) (this->m_lines.back()->get_size());
             }
-            this->m_selectedLine         = this->m_lines.cend();
+            this->m_selectedLine = this->m_lines.cend();
             --this->m_selectedLine; // Need to point to the last line, not the "end" which is one after the last
-            this->m_selectedLineNumber = this->m_lines.size() - 1;
+            this->m_selectedLineNumber   = this->m_lines.size() - 1;
             this->m_selectedColumnInLine = (unsigned int) ((*this->m_selectedLine)->get_size() - 1);
-            this->m_termRow            = this->m_rows;
-            this->m_termColumn         = lastColumn;
+            this->m_termRow              = this->m_rows;
+            this->m_termColumn           = lastColumn;
             this->display_file_from(this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
             this->move_cursor(this->m_termRow, this->m_termColumn);
+        }
+
+        void to_line_start () {
+            if (this->m_selectedColumnInLine) {
+                if (this->m_firstColumnDisplayed) {
+                    this->m_firstColumnDisplayed = 0;
+                    this->display_file_from(this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
+                }
+                this->m_termColumn = 1;
+                this->move_cursor(this->m_termRow, this->m_termColumn);
+                this->m_selectedColumnInLine = 0;
+            }
+        }
+
+        void to_line_end () {
+            if (!this->cursor_at_end()) {
+                const unsigned int lastColumnOfLineVisibleOnScreen = this->m_firstColumnDisplayed + this->m_columns;
+                const uint16_t     lineLength                      = (*this->m_selectedLine)->get_size();
+                const bool         lineScrollsPastVisibleColumns   = lineLength > lastColumnOfLineVisibleOnScreen;
+
+                if (lineScrollsPastVisibleColumns) {
+                    this->m_firstColumnDisplayed = lineLength - this->m_columns;
+                    this->m_termColumn           = this->m_columns;
+
+                    this->display_file_from(this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
+                } else {
+                    this->m_termColumn = (uint8_t) (lineLength - this->m_firstColumnDisplayed);
+                }
+                this->move_cursor(this->m_termRow, this->m_termColumn);
+                this->m_selectedColumnInLine = (unsigned int) (lineLength - 1);
+            }
+        }
+
+        bool cursor_at_end () const {
+            return ((*this->m_selectedLine)->get_size() - 1) <= this->m_selectedColumnInLine;
         }
 
     protected:
