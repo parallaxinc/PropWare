@@ -46,9 +46,9 @@ class HD44780 : public PrintCapable {
          * @brief   LCD databus width
          */
         typedef enum {
-            /** 4-bit mode */BM_4 = 4,
-            /** 8-bit mode */BM_8 = 8,
-        } Bitmode;
+            /** 4-bit mode */WIDTH4 = 4,
+            /** 8-bit mode */WIDTH8 = 8,
+        } BusWidth;
 
         /**
          * @brief   Supported LCD dimensions; Used for determining cursor placement
@@ -181,14 +181,14 @@ class HD44780 : public PrintCapable {
          *
          * @param[in]   lsbDataPin  Pin mask for the least significant pin of the data port
          * @param[in]   rs, rw, en  PropWare::Pin::Mask instances for each of the RS, RW, and EN signals
-         * @param[in]   bitmode     Select between HD44780::BM_4 and HD44780::BM_8 modes to determine whether you
+         * @param[in]   bitmode     Select between HD44780::WIDTH4 and HD44780::WIDTH8 modes to determine whether you
          *                          will need 4 data wires or 8 between the Propeller and your LCD device
          * @param[in]   dimensions  Dimensions of your LCD device. Most common is HD44780::DIM_16x2
          *
          * @return      Returns 0 upon success, otherwise error code
          */
         void start (const PropWare::Pin::Mask lsbDataPin, const Pin rs, const Pin rw, const Pin en,
-                    const HD44780::Bitmode bitmode, const HD44780::Dimensions dimensions) {
+                    const HD44780::BusWidth bitmode, const HD44780::Dimensions dimensions) {
             uint8_t arg;
 
             // Wait for a couple years until the LCD has done internal initialization
@@ -214,10 +214,10 @@ class HD44780 : public PrintCapable {
             this->m_bitmode = bitmode;
 
             // Begin init routine:
-            if (HD44780::BM_8 == bitmode)
+            if (HD44780::WIDTH8 == bitmode)
                 arg = 0x30;
             else
-                /* Implied: "if (HD44780::BM_4 == bitmode)" */
+                /* Implied: "if (HD44780::WIDTH4 == bitmode)" */
                 arg = 0x3;
 
             this->m_dataPort.write(arg);
@@ -230,14 +230,14 @@ class HD44780 : public PrintCapable {
             this->clock_pulse();
             waitcnt(10 * MILLISECOND + CNT);
 
-            if (PropWare::HD44780::BM_4 == bitmode) {
+            if (PropWare::HD44780::WIDTH4 == bitmode) {
                 this->m_dataPort.write(0x2);
                 this->clock_pulse();
             }
 
             // Default functions during initialization
             arg = PropWare::HD44780::FUNCTION_SET;
-            if (PropWare::HD44780::BM_8 == bitmode)
+            if (PropWare::HD44780::WIDTH8 == bitmode)
                 arg |= PropWare::HD44780::FUNC_8BIT_MODE;
             arg |= PropWare::HD44780::FUNC_2LINE_MODE;
             this->cmd(arg);
@@ -387,7 +387,7 @@ class HD44780 : public PrintCapable {
             // Clear RW to signal write value
             this->m_rw.clear();
 
-            if (PropWare::HD44780::BM_4 == this->m_bitmode) {
+            if (PropWare::HD44780::WIDTH4 == this->m_bitmode) {
                 // shift out the high nibble
                 this->m_dataPort.write(val >> 4);
                 this->clock_pulse();
@@ -521,7 +521,7 @@ class HD44780 : public PrintCapable {
         Position         *m_curPos;
         Pin              m_rs, m_rw, m_en;
         SimplePort       m_dataPort;
-        HD44780::Bitmode m_bitmode;
+        HD44780::BusWidth m_bitmode;
 };
 
 }
