@@ -60,7 +60,7 @@ class PWEdit {
         static const char CURSOR    = '#';
         static const char EXIT_CHAR = 'x';
 
-        static const uint8_t BOTTOM_ROWS_PADDING = 3;
+        static const uint8_t PADDING = 3;
 
     public:
         /**
@@ -235,13 +235,12 @@ class PWEdit {
             this->display_file_from_line(0);
 
             this->move_cursor(1, 1);
-            this->m_termRow    = 1;
-            this->m_termColumn = 1;
-            this->m_selectedLineInFile    = this->m_firstLine;
+            this->m_termRow            = 1;
+            this->m_termColumn         = 1;
+            this->m_selectedLineInFile = this->m_firstLine;
         }
 
         void display_file_from_line (const unsigned int lineNumber) {
-            this->clear();
             auto lineIterator = this->m_lines.cbegin();
 
             unsigned int i = lineNumber;
@@ -250,8 +249,11 @@ class PWEdit {
 
             for (uint8_t row = 1; row <= this->m_rows; ++row) {
                 this->move_cursor(row, 1);
-                for (uint8_t column = 0; column < this->m_columns && column < (*lineIterator)->get_size(); ++column)
+                uint8_t column;
+                for (column = 0; column < this->m_columns && column < (*lineIterator)->get_size(); ++column)
                     *this->m_printer << (*lineIterator)->to_string()[column];
+                while (column++ < this->m_columns)
+                    *this->m_printer << ' ';
                 ++lineIterator;
             }
 
@@ -291,13 +293,11 @@ class PWEdit {
         }
 
         void move_down () {
-            *this->m_debugger << "Lines:        " << this->m_lines.size() << '\n';
-            *this->m_debugger << "Current line: " << this->m_selectedLineInFile << '\n';
             if ((this->m_lines.size() - 1) == this->m_selectedLineInFile)
                 *this->m_printer << BELL;
             else {
                 const unsigned int lastLine = this->m_firstLine + this->m_rows;
-                if (BOTTOM_ROWS_PADDING > (this->m_rows - this->m_termRow)
+                if (PADDING > (this->m_rows - this->m_termRow)
                         && this->m_lines.size() > lastLine) {
                     this->display_file_from_line(++this->m_firstLine);
                     this->move_cursor(this->m_termRow, this->m_termColumn);
@@ -309,6 +309,17 @@ class PWEdit {
         }
 
         void move_up () {
+            if (!this->m_selectedLineInFile)
+                *this->m_printer << BELL;
+            else {
+                if (PADDING >= this->m_termRow && this->m_firstLine) {
+                    this->display_file_from_line(--this->m_firstLine);
+                    this->move_cursor(this->m_termRow, this->m_termColumn);
+                } else {
+                    this->move_cursor(--this->m_termRow, this->m_termColumn);
+                }
+                --this->m_selectedLineInFile;
+            }
         }
 
         void move_right () {
