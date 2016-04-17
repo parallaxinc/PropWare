@@ -44,7 +44,7 @@ int main () {
     PropWare::ErrorCode err;
 
     HD44780 lcd;
-    lcd.start(Pin::P0, Pin::P8, Pin::P9, Pin::P10, HD44780::BM_8, HD44780::DIM_20x4);
+    lcd.start(Pin::P0, Pin::P8, Pin::P9, Pin::P10, HD44780::WIDTH8, HD44780::DIM_20x4);
     Printer lcdPrinter(lcd);
 
     const SD driver;
