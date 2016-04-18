@@ -95,7 +95,9 @@ class PWEdit {
                 this->m_file->close();
                 return err;
             } else {
-                this->display_file();
+                this->m_firstLineDisplayed   = (unsigned int) -1;
+                this->m_firstColumnDisplayed = (unsigned int) -1;
+                this->to_file_start();
 
                 char c;
                 do {
@@ -248,16 +250,6 @@ class PWEdit {
             return NO_ERROR;
         }
 
-        void display_file () {
-            this->display_file_from(0, 0);
-
-            this->move_cursor(1, 1);
-            this->m_termRow            = 1;
-            this->m_termColumn         = 1;
-            this->m_selectedLineNumber = this->m_firstLineDisplayed;
-            this->m_selectedLine       = this->m_lines.begin();
-        }
-
         void display_file_from (const unsigned int startingLineNumber, const unsigned int startingColumnNumber) {
             auto lineIterator = this->m_lines.cbegin();
 
@@ -283,9 +275,6 @@ class PWEdit {
         }
 
         void clear (const bool writeSpaces = true) const {
-            if (this->m_debugger) {
-                *this->m_debugger << "Clearing. Write WS = " << writeSpaces << '\n';
-            }
             if (writeSpaces) {
                 for (unsigned int row = 1; row <= this->m_rows; ++row) {
                     this->move_cursor(row, 1);
@@ -326,13 +315,19 @@ class PWEdit {
         }
 
         void move_down () {
-            if ((this->m_lines.size() - 1) <= this->m_selectedLineNumber)
-                *this->m_printer << BELL;
-            else {
-                const bool         redrawNecessary = this->trim_column_selection_to_fit(DOWN);
-                const unsigned int lastLineInFile  = this->m_firstLineDisplayed + this->m_rows;
+            if ((this->m_lines.size() - 1) <= this->m_selectedLineNumber) {
+                if (((*this->m_selectedLine)->get_size() - 1) == this->m_selectedColumnInLine)
+                    *this->m_printer << BELL;
+                else
+                    this->to_file_end();
+            } else {
+                const unsigned int startingColumnSelection = this->m_selectedColumnInLine;
+                bool               redrawNecessary         = this->trim_column_selection_to_fit(DOWN);
+                redrawNecessary |= this->expand_column_selection_to_desired(DOWN, startingColumnSelection);
+
+                const unsigned int lastLineDisplayed = this->m_firstLineDisplayed + this->m_rows;
                 if (PADDING > (this->m_rows - this->m_termRow)
-                        && this->m_lines.size() > lastLineInFile) {
+                        && this->m_lines.size() > lastLineDisplayed) {
                     this->display_file_from(++this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
                     this->move_cursor(this->m_termRow, this->m_termColumn);
                 } else {
@@ -346,10 +341,16 @@ class PWEdit {
         }
 
         void move_up () {
-            if (!this->m_selectedLineNumber)
-                *this->m_printer << BELL;
-            else {
-                const bool redrawNecessary = this->trim_column_selection_to_fit(UP);
+            if (!this->m_selectedLineNumber) {
+                if (this->m_selectedColumnInLine)
+                    this->to_file_start();
+                else
+                    *this->m_printer << BELL;
+            } else {
+                const unsigned int startingColumnSelection = this->m_selectedColumnInLine;
+                bool               redrawNecessary         = this->trim_column_selection_to_fit(UP);
+                redrawNecessary |= this->expand_column_selection_to_desired(UP, startingColumnSelection);
+
                 if (PADDING >= this->m_termRow && this->m_firstLineDisplayed) {
                     this->display_file_from(--this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
                     this->move_cursor(this->m_termRow, this->m_termColumn);
@@ -376,6 +377,7 @@ class PWEdit {
                     this->move_cursor(this->m_termRow, ++this->m_termColumn);
                 ++this->m_selectedColumnInLine;
             }
+            this->m_desiredColumnInLine = this->m_selectedColumnInLine;
         }
 
         void move_left () {
@@ -389,6 +391,7 @@ class PWEdit {
                     this->move_cursor(this->m_termRow, --this->m_termColumn);
                 --this->m_selectedColumnInLine;
             }
+            this->m_desiredColumnInLine = this->m_selectedColumnInLine;
         }
 
         bool trim_column_selection_to_fit (const Direction direction) {
@@ -421,19 +424,75 @@ class PWEdit {
             return redrawNecessary;
         }
 
+        bool expand_column_selection_to_desired (const Direction direction, const unsigned int previousColumnSelected) {
+            auto tempIterator = m_selectedLine;
+            switch (direction) {
+                case UP:
+                    --tempIterator;
+                    break;
+                case DOWN:
+                    ++tempIterator;
+                    break;
+                default:
+                    return false;
+            }
+
+            bool               redrawNecessary     = false;
+            const unsigned int lineLength          = (*tempIterator)->get_size();
+            const bool         expansionIsPossible = (lineLength - 1) > previousColumnSelected;
+            if (expansionIsPossible) {
+                if (this->m_debugger) {
+                    this->m_debugger->printf("Len %3u\n", lineLength);
+                    this->m_debugger->printf("Old %3u\n", previousColumnSelected);
+                    this->m_debugger->printf("New %3u\n", this->m_selectedColumnInLine);
+                    this->m_debugger->printf("Des %3u\n", this->m_desiredColumnInLine);
+                }
+
+                const bool expansionIsDesired = this->m_desiredColumnInLine != previousColumnSelected;
+                if (expansionIsDesired) {
+                    if (lineLength >= this->m_desiredColumnInLine)
+                        this->m_selectedColumnInLine = this->m_desiredColumnInLine;
+                    else
+                        this->m_selectedColumnInLine = lineLength - 1;
+
+                    const unsigned int lastColumnDisplayed = this->m_firstColumnDisplayed + this->m_columns;
+                    if (lastColumnDisplayed < this->m_selectedColumnInLine) {
+                        this->m_firstColumnDisplayed = this->m_selectedColumnInLine - this->m_columns;
+                        this->m_termColumn           = this->m_columns;
+                        redrawNecessary = true;
+                    } else
+                        this->m_termColumn = this->m_selectedColumnInLine - this->m_firstColumnDisplayed + 1;
+                }
+            }
+            return redrawNecessary;
+        }
+
         void to_file_start () {
+            const bool redrawNecessary = this->m_firstLineDisplayed || this->m_firstColumnDisplayed;
             this->m_firstLineDisplayed   = 0;
             this->m_firstColumnDisplayed = 0;
             this->m_selectedLineNumber   = 0;
             this->m_selectedLine         = this->m_lines.cbegin();
-            this->m_selectedColumnInLine = 0;
+            this->m_desiredColumnInLine  = this->m_selectedColumnInLine = 0;
             this->m_termRow              = 1;
             this->m_termColumn           = 1;
-            this->display_file_from(0, 0);
+
+            if (redrawNecessary)
+                this->display_file_from(0, 0);
             this->move_cursor(this->m_termRow, this->m_termColumn);
         }
 
         void to_file_end () {
+            const bool lastLineNotShown   = this->m_firstLineDisplayed != (this->m_lines.size() - this->m_rows);
+            const bool lastColumnNotShown = this->m_firstColumnDisplayed > (this->m_lines.back()->get_size() - 1);
+
+            if (this->m_debugger) {
+                this->m_debugger->printf("Last ln: %s\n", Utility::to_string(lastLineNotShown));
+                this->m_debugger->printf("Last cl: %s\n", Utility::to_string(lastColumnNotShown));
+            }
+
+            const bool redrawNecessary = lastLineNotShown || lastColumnNotShown;
+
             this->m_firstLineDisplayed = this->m_lines.size() - this->m_rows;
             unsigned int lastColumn;
             if (this->m_lines.back()->get_size() > this->m_columns) {
@@ -447,9 +506,12 @@ class PWEdit {
             --this->m_selectedLine; // Need to point to the last line, not the "end" which is one after the last
             this->m_selectedLineNumber   = this->m_lines.size() - 1;
             this->m_selectedColumnInLine = (unsigned int) ((*this->m_selectedLine)->get_size() - 1);
+            this->m_desiredColumnInLine  = this->m_selectedColumnInLine;
             this->m_termRow              = this->m_rows;
             this->m_termColumn           = lastColumn;
-            this->display_file_from(this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
+
+            if (redrawNecessary)
+                this->display_file_from(this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
             this->move_cursor(this->m_termRow, this->m_termColumn);
         }
 
@@ -463,6 +525,7 @@ class PWEdit {
                 this->move_cursor(this->m_termRow, this->m_termColumn);
                 this->m_selectedColumnInLine = 0;
             }
+            this->m_desiredColumnInLine = this->m_selectedColumnInLine;
         }
 
         void to_line_end () {
@@ -481,6 +544,7 @@ class PWEdit {
                 this->move_cursor(this->m_termRow, this->m_termColumn);
                 this->m_selectedColumnInLine = (unsigned int) (lineLength - 1);
             }
+            this->m_desiredColumnInLine = this->m_selectedColumnInLine;
         }
 
         bool cursor_at_end () const {
@@ -510,6 +574,13 @@ class PWEdit {
         unsigned int m_selectedLineNumber;
         /** Index of currently selected column in the line (0-indexed) */
         unsigned int m_selectedColumnInLine;
+        /**
+         * Index of the column that the user actually wants. When moving from a long to a short line, this column
+         * may not exist. It is those cases that `m_selectedColumnInLine` may differ from this. The desired column
+         * will remain the larger value, that way `m_selectedColumnInLine` can be restored the next time a longer
+         * line is selected
+         */
+        unsigned int m_desiredColumnInLine;
 
         /** First visible line of the file (0-indexed) */
         unsigned int m_firstLineDisplayed;
