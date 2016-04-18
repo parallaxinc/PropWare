@@ -61,7 +61,7 @@ class PWEdit {
         static const char CURSOR    = '#';
         static const char EXIT_CHAR = 'x';
 
-        static const uint8_t PADDING = 3;
+        static const unsigned int PADDING = 3;
 
     public:
         /**
@@ -141,7 +141,7 @@ class PWEdit {
         void calibrate () {
             this->hide_cursor();
             static const char calibrationString[]     = "Calibration...#";
-            const uint8_t     calibrationStringLength = (uint8_t) strlen(calibrationString);
+            const size_t      calibrationStringLength = strlen(calibrationString);
 
             this->clear(false);
             *this->m_printer << calibrationString;
@@ -177,9 +177,9 @@ class PWEdit {
 
                             // Handle columns
                             if (calibrationStringLength >= this->m_columns) {
-                                const uint8_t     charactersToDelete =
-                                                          (uint8_t) (calibrationStringLength - this->m_columns + 1);
-                                for (unsigned int i                  = 0; i < charactersToDelete; ++i)
+                                const unsigned int charactersToDelete = calibrationStringLength - this->m_columns + 1;
+
+                                for (unsigned int i = 0; i < charactersToDelete; ++i)
                                     *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
                                 *this->m_printer << CURSOR;
                             } else {
@@ -265,11 +265,11 @@ class PWEdit {
             while (i--)
                 ++lineIterator;
 
-            for (uint8_t row = 1; row <= this->m_rows; ++row) {
+            for (unsigned int row = 1; row <= this->m_rows; ++row) {
                 const uint16_t charactersInLine = (*lineIterator)->get_size();
 
                 this->move_cursor(row, 1);
-                uint8_t column;
+                unsigned int column;
                 for (column = 0;
                      column < this->m_columns && (column + startingColumnNumber) < charactersInLine;
                      ++column)
@@ -287,16 +287,16 @@ class PWEdit {
                 *this->m_debugger << "Clearing. Write WS = " << writeSpaces << '\n';
             }
             if (writeSpaces) {
-                for (uint8_t row = 1; row <= this->m_rows; ++row) {
+                for (unsigned int row = 1; row <= this->m_rows; ++row) {
                     this->move_cursor(row, 1);
-                    for (uint8_t col = 0; col <= this->m_columns; ++col)
+                    for (unsigned int col = 0; col <= this->m_columns; ++col)
                         *this->m_printer << ' ';
                 }
             }
             this->move_cursor(1, 1);
         }
 
-        void move_cursor (const uint8_t row, const uint8_t column) const {
+        void move_cursor (const unsigned int row, const unsigned int column) const {
             *this->m_printer << ESCAPE << '[' << row << ';' << column << 'H';
         }
 
@@ -415,7 +415,7 @@ class PWEdit {
                     this->m_termColumn           = 1;
                     redrawNecessary = true;
                 } else
-                    this->m_termColumn = (uint8_t) (this->m_selectedColumnInLine - this->m_firstColumnDisplayed + 1);
+                    this->m_termColumn = this->m_selectedColumnInLine - this->m_firstColumnDisplayed + 1;
             }
 
             return redrawNecessary;
@@ -435,13 +435,13 @@ class PWEdit {
 
         void to_file_end () {
             this->m_firstLineDisplayed = this->m_lines.size() - this->m_rows;
-            uint8_t lastColumn;
+            unsigned int lastColumn;
             if (this->m_lines.back()->get_size() > this->m_columns) {
                 this->m_firstColumnDisplayed = this->m_lines.back()->get_size() - this->m_columns;
-                lastColumn = (uint8_t) (this->m_columns - 1);
+                lastColumn = this->m_columns - 1;
             } else {
                 this->m_firstColumnDisplayed = 0;
-                lastColumn = (uint8_t) (this->m_lines.back()->get_size());
+                lastColumn = this->m_lines.back()->get_size();
             }
             this->m_selectedLine = this->m_lines.cend();
             --this->m_selectedLine; // Need to point to the last line, not the "end" which is one after the last
@@ -476,9 +476,8 @@ class PWEdit {
                     this->m_termColumn           = this->m_columns;
 
                     this->display_file_from(this->m_firstLineDisplayed, this->m_firstColumnDisplayed);
-                } else {
-                    this->m_termColumn = (uint8_t) (lineLength - this->m_firstColumnDisplayed);
-                }
+                } else
+                    this->m_termColumn = lineLength - this->m_firstColumnDisplayed;
                 this->move_cursor(this->m_termRow, this->m_termColumn);
                 this->m_selectedColumnInLine = (unsigned int) (lineLength - 1);
             }
@@ -496,14 +495,14 @@ class PWEdit {
         std::list<StringBuilder *> m_lines;
 
         /** Total columns on screen */
-        uint8_t m_columns;
+        unsigned int m_columns;
         /** Total rows on screen */
-        uint8_t m_rows;
+        unsigned int m_rows;
 
         /** Current cursor row (1-indexed) */
-        uint8_t m_termRow;
+        unsigned int m_termRow;
         /** Current cursor column (1-indexed) */
-        uint8_t m_termColumn;
+        unsigned int m_termColumn;
 
         std::list<StringBuilder *>::const_iterator m_selectedLine;
 
