@@ -36,9 +36,12 @@ namespace PropWare {
 /**
  * @brief   Basic terminal-style text editor
  *
- * Capable of running on any `Printer` which supports the following escape sequences:
+ * Capable of running on any `Printer` which supports the following escape sequences and ASCII characters:
  *
- *   * `CSI n ; m H`: Move the cursor to column `n` and row `m`, where `n` and `m` are 1-indexed.
+ *   - 0x07: Bell (Can be no-op)
+ *   - 0x08: Backspace
+ *   - `\n`: Newline
+ *   - `CSI n ; m H`: Move the cursor to column `n` and row `m`, where `n` and `m` are 1-indexed.
  */
 class PWEdit {
     public:
@@ -55,8 +58,6 @@ class PWEdit {
         } Direction;
 
     public:
-        static const char BELL      = 0x07;
-        static const char BACKSPACE = 0x08;
         static const char CURSOR    = '#';
         static const char EXIT_CHAR = 'x';
 
@@ -73,7 +74,7 @@ class PWEdit {
          */
         PWEdit (FileReader &file, Scanner &scanner, const Printer &printer = pwOut, Printer *debugger = NULL)
                 : m_file(&file),
-                  m_printer(&pwOut),
+                  m_printer(&printer),
                   m_scanner(&scanner),
                   m_debugger(debugger),
                   m_columns(0),
@@ -138,6 +139,7 @@ class PWEdit {
 
     protected:
         void calibrate () {
+            this->hide_cursor();
             static const char calibrationString[]     = "Calibration...#";
             const uint8_t     calibrationStringLength = (uint8_t) strlen(calibrationString);
 
@@ -161,25 +163,28 @@ class PWEdit {
                     case 'w':
                     case 'k':
                         // Move up
+                        if (this->m_debugger) {
+                            *this->m_debugger << "Moving up\n";
+                            *this->m_debugger << "Cur. Rows: " << this->m_rows << '\n';
+                        }
+
                         if (1 < this->m_rows) {
                             --this->m_rows;
-                            *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
+                            *this->m_printer << BACKSPACE << ' ';
                             this->clear(false);
                             *this->m_printer << calibrationString;
-                            *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
+                            *this->m_printer << BACKSPACE << ' ';
 
                             // Handle columns
                             if (calibrationStringLength >= this->m_columns) {
                                 const uint8_t     charactersToDelete =
                                                           (uint8_t) (calibrationStringLength - this->m_columns + 1);
-                                for (unsigned int i                  = 0; i < charactersToDelete; ++i) {
+                                for (unsigned int i                  = 0; i < charactersToDelete; ++i)
                                     *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
-                                }
                                 *this->m_printer << CURSOR;
                             } else {
-                                for (unsigned int i = calibrationStringLength; i < this->m_columns; ++i) {
+                                for (unsigned int i = calibrationStringLength; i < this->m_columns; ++i)
                                     *this->m_printer << ' ';
-                                }
                                 *this->m_printer << CURSOR;
                             }
 
@@ -209,14 +214,14 @@ class PWEdit {
                         break;
                 }
             } while ('\r' != input && '\n' != input && '\0' != input);
+
+            this->show_cursor();
             this->clear();
             *this->m_printer << this->m_columns << 'x' << this->m_rows << " ";
         }
 
         PropWare::ErrorCode read_in_file () {
             PropWare::ErrorCode err;
-
-            *this->m_printer << "Reading file...\n";
 
             check_errors(this->m_file->open());
             while (!this->m_file->eof()) {
@@ -278,6 +283,9 @@ class PWEdit {
         }
 
         void clear (const bool writeSpaces = true) const {
+            if (this->m_debugger) {
+                *this->m_debugger << "Clearing. Write WS = " << writeSpaces << '\n';
+            }
             if (writeSpaces) {
                 for (uint8_t row = 1; row <= this->m_rows; ++row) {
                     this->move_cursor(row, 1);
@@ -289,7 +297,15 @@ class PWEdit {
         }
 
         void move_cursor (const uint8_t row, const uint8_t column) const {
-            *this->m_printer << '\x1B' << '\x5B' << row << ';' << column << 'H';
+            *this->m_printer << ESCAPE << '[' << row << ';' << column << 'H';
+        }
+
+        void hide_cursor () {
+            *this->m_printer << ESCAPE << '[' << "?25l";
+        }
+
+        void show_cursor () {
+            *this->m_printer << ESCAPE << '[' << "?25h";
         }
 
         void move_selection (const Direction direction) {

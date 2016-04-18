@@ -56,6 +56,7 @@ int main () {
     Scanner       scanner(uartrx);
 
     PWEdit editor(f, scanner, pwOut, &lcdPrinter);
+    //PWEdit editor(f, scanner, lcdPrinter, &pwOut);
     error_checker(editor.run());
 
     return 0;

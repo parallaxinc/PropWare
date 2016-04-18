@@ -40,7 +40,7 @@ namespace PropWare {
  *
  * @note        Does not natively support 40x4 or 24x4 character displays
  */
-class HD44780 : public PrintCapable {
+class HD44780: public PrintCapable {
     public:
         /**
          * @brief   LCD databus width
@@ -110,6 +110,8 @@ class HD44780 : public PrintCapable {
             uint8_t ddramLineEnd;
         } MemMap;
 
+        static const uint_fast8_t ESCAPE_SEQUENCE_BUFFER_LENGTH = 32;
+
     public:
         /** Number of spaces inserted for '\\t' */
         static const uint8_t TAB_WIDTH = 4;
@@ -173,9 +175,6 @@ class HD44780 : public PrintCapable {
         /**@}*/
 
     public:
-        /************************
-         *** Public Functions ***
-         ************************/
         /**
          * @brief       Construct an LCD object
          *
@@ -185,15 +184,19 @@ class HD44780 : public PrintCapable {
          * @param[in]   en          Pin mask connected to the `enable` control pin of the LCD driver
          * @param[in]   bitMode     Select between whether the parallel bus is using 4 or 8 pins
          * @param[in]   dimensions  Dimensions of your LCD device. Most common is HD44780::DIM_16x2
+         * @param[in]   showCursor  Determines if the cursor on the display device will be visible
          */
         HD44780 (const Pin::Mask lsbDataPin, const Pin::Mask rs, const Pin::Mask rw, const Pin::Mask en,
-                 const HD44780::BusWidth bitMode, const HD44780::Dimensions dimensions)
-                : m_dataPort(lsbDataPin, static_cast<uint8_t>(bitMode), Port::Dir::OUT),
-                  m_rs(rs, Pin::Dir::OUT),
-                  m_rw(rw, Pin::Dir::OUT),
-                  m_en(en, Pin::Dir::OUT),
-                  m_bitMode(bitMode),
-                  m_dimensions(dimensions) {
+                 const HD44780::BusWidth bitMode, const HD44780::Dimensions dimensions,
+                 const bool showCursor = false)
+            : m_dataPort(lsbDataPin, static_cast<uint8_t>(bitMode), Port::Dir::OUT),
+              m_rs(rs, Pin::Dir::OUT),
+              m_rw(rw, Pin::Dir::OUT),
+              m_en(en, Pin::Dir::OUT),
+              m_bitMode(bitMode),
+              m_dimensions(dimensions),
+              m_inEscapeSequence(false),
+              m_showCursor(showCursor) {
             this->m_curPos.row = 0;
             this->m_curPos.col = 0;
 
@@ -254,14 +257,13 @@ class HD44780 : public PrintCapable {
             arg = PropWare::HD44780::SHIFT;
             this->cmd(arg);
 
-            // Turn the display on; Leave cursor off and not blinking
-            arg = PropWare::HD44780::DISPLAY_CTRL
-                    | PropWare::HD44780::DISPLAY_PWR;
-            this->cmd(arg);
+            if (this->m_showCursor)
+                this->show_cursor();
+            else
+                this->hide_cursor();
 
             // Set cursor to auto-increment upon writing a character
-            arg = PropWare::HD44780::ENTRY_MODE_SET
-                    | PropWare::HD44780::SHIFT_INC;
+            arg = PropWare::HD44780::ENTRY_MODE_SET | PropWare::HD44780::SHIFT_INC;
             this->cmd(arg);
 
             this->clear();
@@ -322,36 +324,86 @@ class HD44780 : public PrintCapable {
         }
 
         void put_char (const char c) {
-            // For manual new-line characters...
-            if ('\n' == c) {
-                this->m_curPos.row++;
-                if (this->m_curPos.row == this->m_memMap.charRows)
-                    this->m_curPos.row = 0;
-                this->m_curPos.col     = 0;
-                this->move(this->m_curPos.row, this->m_curPos.col);
-            } else if ('\t' == c) {
-                do {
-                    this->put_char(' ');
-                } while (this->m_curPos.col % PropWare::HD44780::TAB_WIDTH);
-            } else if ('\r' == c)
-                this->move(this->m_curPos.row, 0);
-                // And for everything else...
+            if (this->m_inEscapeSequence)
+                this->handle_escape_sequence_character(c);
             else {
-                //set RS to data and RW to write
-                this->m_rs.set();
-                this->write((const uint8_t) c);
+                switch (c) {
+                    case ESCAPE:
+                        this->start_escape_sequence();
+                        break;
+                    case NEWLINE:
+                        this->newline();
+                        break;
+                    case TAB:
+                        this->tab();
+                        break;
+                    case CARRIAGE_RETURN:
+                        this->carriage_return();
+                        break;
+                    case BACKSPACE:
+                        this->backspace();
+                        break;
+                    case BELL:
+                        break;
+                    default:
+                        //set RS to data and RW to write
+                        this->m_rs.set();
+                        this->write((const uint8_t) c);
+                        ++this->m_curPos.col;
 
-                // Insert a line wrap if necessary
-                ++this->m_curPos.col;
-                if (this->m_memMap.charColumns == this->m_curPos.col)
-                    this->put_char('\n');
+                        // Insert a line wrap if necessary
+                        if (this->m_memMap.charColumns == this->m_curPos.col)
+                            this->put_char('\n');
 
-                // Handle weird special case where a single row LCD is split
-                // across multiple DDRAM lines (i.e., 16x1 type 1)
-                if (this->m_memMap.ddramCharRowBreak
-                        > this->m_memMap.ddramLineEnd)
-                    this->move(this->m_curPos.row, this->m_curPos.col);
+                        // Handle weird special case where a single row LCD is split
+                        // across multiple DDRAM lines (i.e., 16x1 type 1)
+                        if (this->m_memMap.ddramCharRowBreak > this->m_memMap.ddramLineEnd)
+                            this->move(this->m_curPos.row, this->m_curPos.col);
+                }
             }
+        }
+
+        void newline () {
+            this->m_curPos.row++;
+            if (this->m_curPos.row == this->m_memMap.charRows)
+                this->m_curPos.row = 0;
+            this->m_curPos.col     = 0;
+            this->move(this->m_curPos.row, this->m_curPos.col);
+        }
+
+        void carriage_return () {
+            this->move(this->m_curPos.row, 0);
+        }
+
+        void backspace () {
+            uint8_t nextRow = this->m_curPos.row;
+            uint8_t nextColumn;
+            if (this->m_curPos.col)
+                nextColumn = (uint8_t) (this->m_curPos.col - 1);
+            else {
+                nextColumn = this->m_memMap.charColumns;
+
+                if (this->m_curPos.row)
+                    nextRow = (uint8_t) (this->m_curPos.row - 1);
+                else
+                    nextRow = this->m_memMap.charRows;
+            }
+
+            this->move(nextRow, nextColumn);
+        }
+
+        void tab () {
+            do {
+                this->put_char(' ');
+            } while (this->m_curPos.col % PropWare::HD44780::TAB_WIDTH);
+        }
+
+        void show_cursor () {
+            this->cmd(DISPLAY_CTRL | DISPLAY_PWR | BLINK);
+        }
+
+        void hide_cursor () {
+            this->cmd(DISPLAY_CTRL | DISPLAY_PWR);
         }
 
         /**
@@ -383,9 +435,62 @@ class HD44780 : public PrintCapable {
         }
 
     protected:
-        /***************************
-         *** Protected Functions ***
-         ***************************/
+        void start_escape_sequence () {
+            this->m_inEscapeSequence = true;
+            this->m_escapeSequence[0] = ESCAPE;
+            this->m_escapeSequence[1] = NULL_TERMINATOR;
+        }
+
+        void handle_escape_sequence_character (const char c) {
+            size_t sequenceLength = 0;
+            while (this->m_escapeSequence[sequenceLength])
+                ++sequenceLength;
+
+            if ((ESCAPE_SEQUENCE_BUFFER_LENGTH - 1) > sequenceLength) {
+                this->m_escapeSequence[sequenceLength]     = c;
+                this->m_escapeSequence[sequenceLength + 1] = NULL_TERMINATOR;
+
+                if (1 != sequenceLength && this->final_escape_sequence_character(c)) {
+                    this->m_inEscapeSequence = false;
+                    this->perform_escape_sequence_command(sequenceLength + 1);
+                }
+            } else
+                this->m_inEscapeSequence = false;
+        }
+
+        void perform_escape_sequence_command (const size_t length) {
+            const char command = this->m_escapeSequence[length - 1];
+
+            switch (command) {
+                case 'H':
+                    this->move_via_command_sequence();
+                    break;
+                case 'h':
+                    this->show_cursor();
+                    break;
+                case 'l':
+                    this->hide_cursor();
+                    break;
+            }
+
+            this->m_inEscapeSequence = false;
+        }
+
+        void move_via_command_sequence () {
+            const uint8_t row = (uint8_t) (atoi(&this->m_escapeSequence[2]) - 1);
+
+            // Find start of second number
+            size_t index = 3;
+            while (this->m_escapeSequence[index++] != ';');
+            const uint8_t column = (uint8_t) (atoi(&this->m_escapeSequence[index]) - 1);
+
+            this->move(row, column);
+        }
+
+        static bool final_escape_sequence_character (const char c) {
+            return '@' <= c && c <= '~';
+        }
+
         /**
          * @brief       Write a single byte to the LCD - instruction or data
          *
@@ -529,6 +634,9 @@ class HD44780 : public PrintCapable {
         const BusWidth   m_bitMode;
         const Dimensions m_dimensions;
         Position         m_curPos;
+        bool             m_inEscapeSequence;
+        char             m_escapeSequence[ESCAPE_SEQUENCE_BUFFER_LENGTH];
+        bool             m_showCursor;
 };
 
 }

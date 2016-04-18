@@ -33,14 +33,14 @@ using PropWare::HD44780;
 using PropWare::Printer;
 
 // Control pins
-static const Port::Mask RS = Port::Mask::P16;
-static const Port::Mask RW = Port::Mask::P17;
-static const Port::Mask EN = Port::Mask::P18;
+static const Port::Mask RS = Port::Mask::P8;
+static const Port::Mask RW = Port::Mask::P9;
+static const Port::Mask EN = Port::Mask::P10;
 
 // Data pins
-static const Pin::Mask           FIRST_DATA_PIN = Pin::Mask::P19;
+static const Pin::Mask           FIRST_DATA_PIN = Pin::Mask::P0;
 static const HD44780::BusWidth   BITMODE        = HD44780::BusWidth::WIDTH8;
-static const HD44780::Dimensions DIMENSIONS     = HD44780::Dimensions::DIM_16x2;
+static const HD44780::Dimensions DIMENSIONS     = HD44780::Dimensions::DIM_20x4;
 
 /**
  * @example     HD44780_Demo.cpp
@@ -58,7 +58,7 @@ int main () {
     Printer lcdPrinter(lcd);
 
     // Print to the LCD (exactly 32 characters so that we fill up both lines)
-    lcdPrinter.printf("%u %s%d 0x%07X", 123456789, "Hello!", -12345, 0xabcdef);
+    lcdPrinter.printf("%u %s\n%d 0x%07X", 123456789, "Hello!", -12345, 0xabcdef);
 
     return 0;
 }
