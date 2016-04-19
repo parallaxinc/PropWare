@@ -62,9 +62,12 @@ class File {
         /**
          * @brief       Open the file
          *
+         * @param[in]   offset  Offset from 0 for the starting position of the character pointer
+         * @param[in]   way     Relative starting point for the initial pointer's offset
+         *
          * @return      0 upon success, error code otherwise
          */
-        virtual PropWare::ErrorCode open () = 0;
+        virtual PropWare::ErrorCode open (const int32_t offset, const SeekDir way) = 0;
 
         /**
          * @brief   Close a file - a required step in any workflow that includes opening a file

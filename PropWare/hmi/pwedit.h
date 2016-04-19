@@ -29,6 +29,8 @@
 #include <PropWare/hmi/input/scanner.h>
 #include <PropWare/string/stringbuilder.h>
 #include <PropWare/c++allocate.h>
+#include <PropWare/filesystem/filereader.h>
+#include <PropWare/filesystem/filewriter.h>
 #include <list>
 
 namespace PropWare {
@@ -58,8 +60,15 @@ class PWEdit {
         } Direction;
 
     public:
-        static const char CURSOR    = '#';
-        static const char EXIT_CHAR = 'x';
+        static const char CURSOR        = '#';
+        static const char SAVE_CHAR     = 'w';
+        static const char EXIT_CHAR     = 'q';
+        static const char EXIT_NO_SAVE  = '!';
+        static const char COMMAND_START = ':';
+        static const char TO_LINE_START = '0';
+        static const char TO_LINE_END   = '$';
+        static const char TO_FILE_START = 'g';
+        static const char TO_FILE_END   = 'G';
 
         static const unsigned int PADDING = 3;
 
@@ -67,76 +76,88 @@ class PWEdit {
         /**
          * @brief   Constructor
          *
-         * @param[in]   file        Unopened file to be displayed/edited
+         * @param[in]   inFile      Unopened file to be displayed/edited
+         * @param[in]   outFile     Unopened file used for saving any updated content
          * @param[in]   scanner     Human input will be read from this scanner. `pwIn` can not be used because it is set
          *                          for echo mode on, which can not be used in an editor
          * @param[in]   printer     Where the contents of the editor should be printed
+         * @param[in]   *debugger   Generally unused, but (sparse) debugging output can be displayed on this Printer if
+         *                          provided
          */
-        PWEdit (FileReader &file, Scanner &scanner, const Printer &printer = pwOut, Printer *debugger = NULL)
-                : m_file(&file),
+        PWEdit (FileReader &inFile, FileWriter &outFile, Scanner &scanner, const Printer &printer = pwOut,
+                Printer *debugger = NULL)
+                : m_inFile(&inFile),
+                  m_outFile(&outFile),
                   m_printer(&printer),
                   m_scanner(&scanner),
                   m_debugger(debugger),
                   m_columns(0),
-                  m_rows(1) {
+                  m_rows(1),
+                  m_modified(false) {
         }
 
         ~PWEdit () {
             for (auto line : this->m_lines)
                 delete line;
+
+            if (this->m_inFile->open())
+                this->m_inFile->close();
+            if (this->m_outFile->open())
+                this->m_outFile->close();
         }
 
         PropWare::ErrorCode run () {
             PropWare::ErrorCode err;
 
             this->calibrate();
-            err = this->read_in_file();
-            if (err) {
-                this->m_file->close();
-                return err;
-            } else {
-                this->m_firstLineDisplayed   = (unsigned int) -1;
-                this->m_firstColumnDisplayed = (unsigned int) -1;
-                this->to_file_start();
+            check_errors(this->read_in_file());
+            check_errors(this->m_inFile->close());
 
-                char c;
-                do {
-                    c = this->m_scanner->get_char();
-                    switch (c) {
-                        case 'a':
-                        case 'h':
-                            this->move_selection(LEFT);
-                            break;
-                        case 's':
-                        case 'j':
-                            this->move_selection(DOWN);
-                            break;
-                        case 'd':
-                        case 'l':
-                            this->move_selection(RIGHT);
-                            break;
-                        case 'w':
-                        case 'k':
-                            this->move_selection(UP);
-                            break;
-                        case 'g':
-                            this->to_file_start();
-                            break;
-                        case 'G':
-                            this->to_file_end();
-                            break;
-                        case '0':
-                            this->to_line_start();
-                            break;
-                        case '$':
-                            this->to_line_end();
-                            break;
-                    }
-                } while (EXIT_CHAR != c);
-                this->m_file->close();
+            this->m_firstLineDisplayed   = (unsigned int) -1;
+            this->m_firstColumnDisplayed = (unsigned int) -1;
+            this->to_file_start();
 
-                return NO_ERROR;
-            }
+            bool exit = false;
+            char c;
+            do {
+                c = this->m_scanner->get_char();
+                switch (c) {
+                    case 'a':
+                    case 'h':
+                        this->move_selection(LEFT);
+                        break;
+                    case 's':
+                    case 'j':
+                        this->move_selection(DOWN);
+                        break;
+                    case 'd':
+                    case 'l':
+                        this->move_selection(RIGHT);
+                        break;
+                    case 'w':
+                    case 'k':
+                        this->move_selection(UP);
+                        break;
+                    case TO_FILE_START:
+                        this->to_file_start();
+                        break;
+                    case TO_FILE_END:
+                        this->to_file_end();
+                        break;
+                    case TO_LINE_START:
+                        this->to_line_start();
+                        break;
+                    case TO_LINE_END:
+                        this->to_line_end();
+                        break;
+                    case COMMAND_START:
+                        check_errors(this->command(exit));
+                        break;
+                }
+            } while (!exit);
+
+            this->clear(true);
+            return NO_ERROR;
         }
 
     protected:
@@ -215,7 +236,7 @@ class PWEdit {
                         *this->m_printer << BACKSPACE << " #";
                         break;
                 }
-            } while ('\r' != input && '\n' != input && '\0' != input);
+            } while (not_enter_key(input));
 
             this->show_cursor();
             this->clear();
@@ -225,21 +246,21 @@ class PWEdit {
         PropWare::ErrorCode read_in_file () {
             PropWare::ErrorCode err;
 
-            check_errors(this->m_file->open());
-            while (!this->m_file->eof()) {
+            check_errors(this->m_inFile->open());
+            while (!this->m_inFile->eof()) {
                 // Read a line
                 StringBuilder *line = new StringBuilder();
                 char          c;
                 do {
-                    check_errors(this->m_file->safe_get_char(c));
+                    check_errors(this->m_inFile->safe_get_char(c));
                     if (32 <= c && c <= 127)
                         // Only accept printable characters
                         line->put_char(c);
                 } while ('\r' != c && '\n' != c);
 
                 // Munch the \n following a \r
-                if ('\n' == this->m_file->peek()) {
-                    check_errors(this->m_file->safe_get_char(c));
+                if ('\n' == this->m_inFile->peek()) {
+                    check_errors(this->m_inFile->safe_get_char(c));
                 }
 
                 this->m_lines.push_back(line);
@@ -258,31 +279,38 @@ class PWEdit {
                 ++lineIterator;
 
             for (unsigned int row = 1; row <= this->m_rows; ++row) {
-                const uint16_t charactersInLine = (*lineIterator)->get_size();
-
-                this->move_cursor(row, 1);
-                unsigned int column;
-                for (column = 0;
-                     column < this->m_columns && (column + startingColumnNumber) < charactersInLine;
-                     ++column)
-                    *this->m_printer << (*lineIterator)->to_string()[column + startingColumnNumber];
-                while (column++ < this->m_columns)
-                    *this->m_printer << ' ';
+                this->print_line_at_row(startingColumnNumber, lineIterator, row);
                 ++lineIterator;
             }
 
             this->m_firstLineDisplayed = startingLineNumber;
         }
 
+        void print_line_at_row (const unsigned int startingColumnNumber,
+                                const std::list<PropWare::StringBuilder *>::const_iterator &lineIterator,
+                                unsigned int row) const {
+            const uint16_t charactersInLine = (*lineIterator)->get_size();
+
+            move_cursor(row, 1);
+            unsigned int column;
+            for (column = 0; column < this->m_columns && (column + startingColumnNumber) < charactersInLine; ++column)
+                *this->m_printer << (*lineIterator)->to_string()[column + startingColumnNumber];
+
+            while (column++ < this->m_columns)
+                *this->m_printer << ' ';
+        }
+
         void clear (const bool writeSpaces = true) const {
-            if (writeSpaces) {
-                for (unsigned int row = 1; row <= this->m_rows; ++row) {
-                    this->move_cursor(row, 1);
-                    for (unsigned int col = 0; col <= this->m_columns; ++col)
-                        *this->m_printer << ' ';
-                }
-            }
+            if (writeSpaces)
+                for (unsigned int row = 1; row <= this->m_rows; ++row)
+                    clear_row(row);
             this->move_cursor(1, 1);
+        }
+
+        void clear_row (const unsigned int row) const {
+            move_cursor(row, 1);
+            for (unsigned int col = 0; col <= m_columns; ++col)
+                *m_printer << ' ';
         }
 
         void move_cursor (const unsigned int row, const unsigned int column) const {
@@ -551,8 +579,127 @@ class PWEdit {
             return ((*this->m_selectedLine)->get_size() - 1) <= this->m_selectedColumnInLine;
         }
 
+        PropWare::ErrorCode command (bool &exit) {
+            PropWare::ErrorCode err;
+
+            this->clear_row(this->m_rows);
+            this->move_cursor(this->m_rows, 1);
+            *this->m_printer << COMMAND_START;
+
+            char _buffer[64];
+            this->read_command_input(_buffer);
+
+            // `_buffer` can't be modified - no good for parsing char-by-char
+            char *nextCharacter = _buffer;
+            if (NULL != this->m_debugger)
+                *this->m_debugger << "CMD: " << nextCharacter << '\n';
+
+            if (SAVE_CHAR == nextCharacter[0]) {
+                if (NULL != this->m_debugger)
+                    *this->m_debugger << "Save cmd...\n";
+                check_errors(this->save());
+                ++nextCharacter;
+            }
+
+            if (EXIT_CHAR == nextCharacter[0]) {
+                if (NULL != this->m_debugger)
+                    *this->m_debugger << "Exit cmd...\n";
+
+                if (this->m_modified) {
+                    if (EXIT_NO_SAVE == nextCharacter[1]) {
+                        if (NULL != this->m_debugger)
+                            *this->m_debugger << "Exit (discard)\n";
+                        exit = true;
+                    } else {
+                        if (NULL != this->m_debugger)
+                            *this->m_debugger << "BAD EXIT\n";
+
+                        this->clear_row(this->m_rows);
+                        this->move_cursor(this->m_rows, 1);
+                        *this->m_printer << "UNSAVED CHANGES";
+                        char c;
+                        do {
+                            c = this->m_scanner->get_char();
+                        } while (not_enter_key(c));
+                    }
+                } else {
+                    if (NULL != this->m_debugger)
+                        *this->m_debugger << "Exit (no-mod)\n";
+                    exit = true;
+                }
+            }
+
+            this->rewrite_last_line();
+            this->move_cursor(this->m_termRow, this->m_termColumn);
+            return NO_ERROR;
+        }
+
+        void read_command_input (char _buffer[]) const {
+            char *string = _buffer - 1;
+            do {
+                ++string;
+                string[0] = this->m_scanner->get_char();
+                if (not_enter_key(string[0]))
+                    *this->m_printer << string[0];
+            } while (not_enter_key(string[0]));
+        }
+
+        void rewrite_last_line () const {
+            auto               iterator                = this->m_selectedLine;
+            const unsigned int lastLineNumberDisplayed = this->m_firstLineDisplayed + this->m_rows - 1;
+            for (unsigned int  i                       = this->m_selectedLineNumber; i < lastLineNumberDisplayed; ++i)
+                ++iterator;
+            this->print_line_at_row(this->m_firstColumnDisplayed, iterator, this->m_rows);
+        }
+
     protected:
-        FileReader                 *m_file;
+        // Write-only functions
+
+        /**
+         * @brief   Save the file if it has changed
+         *
+         * @return  Zero upon success, error code otherwise
+         */
+        PropWare::ErrorCode save () {
+            static const char trimmingMessage[] = "Trimming...";
+            static const char savingMessage[]   = "Saving...  ";
+
+            PropWare::ErrorCode err;
+            if (this->m_modified) {
+                if (NULL != this->m_debugger)
+                    *this->m_debugger << "Saving now\n";
+
+                check_errors(this->m_outFile->open(0, File::BEG));
+
+                this->move_cursor(this->m_rows, 1);
+                *this->m_printer << trimmingMessage;
+                check_errors(this->m_outFile->trim());
+
+                this->move_cursor(this->m_rows, 1);
+                *this->m_printer << savingMessage;
+                unsigned int lineNumber = 1;
+                for (auto    line : this->m_lines) {
+                    this->move_cursor(this->m_rows, sizeof(savingMessage + 1));
+                    *this->m_printer << lineNumber++;
+                    check_errors(this->m_outFile->safe_puts(line->to_string()));
+                }
+                check_errors(this->m_outFile->close());
+                this->m_modified = false;
+            } else {
+                if (NULL != this->m_debugger)
+                    *this->m_debugger << "No mod. No Save\n";
+            }
+            return NO_ERROR;
+        }
+
+    protected:
+        static bool not_enter_key (const char c) {
+            return '\r' != c && '\n' != c && '\0' != c;
+        }
+
+    protected:
+        FileReader                 *m_inFile;
+        FileWriter                 *m_outFile;
         const Printer              *m_printer;
         Scanner                    *m_scanner;
         Printer                    *m_debugger;
@@ -586,6 +733,9 @@ class PWEdit {
         unsigned int m_firstLineDisplayed;
         /** First visible column of the line displayed (0-indexed) */
         unsigned int m_firstColumnDisplayed;
+
+        /** Has the file content been modified */
+        bool m_modified;
 };
 
 }

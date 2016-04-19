@@ -35,7 +35,8 @@ extern BlockStorage::Buffer SHARED_BUFFER;
 /**
  * @brief   Concrete class for writing or modifying a FAT 16/32 file
  */
-class FatFileWriter : public virtual FatFile, public virtual FileWriter {
+class FatFileWriter : public virtual FatFile,
+                      public virtual FileWriter {
 
     public:
         /**
@@ -62,7 +63,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
             this->close();
         }
 
-        PropWare::ErrorCode open () {
+        virtual PropWare::ErrorCode open (const int32_t offset = 0, const SeekDir way = END) {
             PropWare::ErrorCode err;
             uint16_t            fileEntryOffset = 0;
 
@@ -80,7 +81,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
 
             check_errors(this->open_existing_file(fileEntryOffset));
             this->m_open = true;
-            return NO_ERROR;
+            return this->seek(offset, way);
         }
 
         /**
@@ -115,7 +116,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
             return NO_ERROR;
         }
 
-        PropWare::ErrorCode flush () {
+        virtual PropWare::ErrorCode flush () {
             PropWare::ErrorCode err;
 
             // Flush the file contents
@@ -139,7 +140,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
             return NO_ERROR;
         }
 
-        PropWare::ErrorCode safe_put_char (const char c) {
+        virtual PropWare::ErrorCode safe_put_char (const char c) {
             PropWare::ErrorCode err;
 
             if (this->m_open) {
@@ -164,9 +165,18 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
                 ++this->m_ptr;
 
                 return NO_ERROR;
-            } else {
+            } else
                 return FILE_NOT_OPEN;
+        }
+
+        virtual PropWare::ErrorCode trim () {
+            PropWare::ErrorCode err;
+            if (this->m_length != this->m_ptr - 1) {
+                check_errors(this->m_fs->trim_chain(this->m_curTier2));
+                this->m_length               = this->m_ptr - 1;
+                this->m_fileMetadataModified = true;
             }
+            return NO_ERROR;
         }
 
         void print_status (const bool printBlocks = false) const {
@@ -181,10 +191,10 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         }
 
         bool need_to_extend_fat () {
-            const uint8_t  sectorsPerCluster = this->m_fs->m_tier1sPerTier2Shift;
+            const uint8_t sectorsPerCluster = this->m_fs->m_tier1sPerTier2Shift;
 
-            const uint32_t requiredSector    = (uint32_t) this->m_ptr >> this->m_driver->get_sector_size_shift();
-            unsigned int   requiredCluster   = requiredSector >> sectorsPerCluster;
+            const uint32_t requiredSector  = (uint32_t) this->m_ptr >> this->m_driver->get_sector_size_shift();
+            unsigned int   requiredCluster = requiredSector >> sectorsPerCluster;
 
             if (this->m_curTier2 < requiredCluster)
                 return this->m_fs->is_eoc(this->m_contentMeta.nextTier2);
@@ -193,7 +203,6 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
         }
 
     protected:
-
         PropWare::ErrorCode create_new_file (const uint16_t fileEntryOffset) {
             PropWare::ErrorCode err;
 

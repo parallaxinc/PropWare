@@ -41,6 +41,8 @@ class FileReader : virtual public File, virtual public ScanCapable {
             return NO_ERROR;
         }
 
+        virtual PropWare::ErrorCode open (const int32_t offset = 0, const SeekDir way = BEG) = 0;
+
         /**
          * @brief       Read a character from the file
          *

@@ -31,6 +31,7 @@
 #include <PropWare/serial/uart/uartrx.h>
 
 #include <PropWare/hmi/output/hd44780.h>
+#include <PropWare/filesystem/fat/fatfilewriter.h>
 
 using namespace PropWare;
 
@@ -51,11 +52,12 @@ int main () {
     FatFS    filesystem(driver);
     error_checker(filesystem.mount());
 
-    FatFileReader f(filesystem, FILE_NAME);
+    FatFileReader reader(filesystem, FILE_NAME);
+    FatFileWriter writer(filesystem, FILE_NAME);
     UARTRX        uartrx;
     Scanner       scanner(uartrx);
 
-    PWEdit editor(f, scanner, pwOut, &lcdPrinter);
+    PWEdit editor(reader, writer, scanner, pwOut, &lcdPrinter);
     //PWEdit editor(f, scanner, lcdPrinter, &pwOut);
     error_checker(editor.run());
 

@@ -97,7 +97,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
                   FileReader(fs, name, buffer, logger) {
         }
 
-        PropWare::ErrorCode open () {
+        PropWare::ErrorCode open (const int32_t offset = 0, const SeekDir way = BEG) {
             PropWare::ErrorCode err;
             uint16_t            fileEntryOffset = 0;
 
@@ -109,7 +109,7 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
             // `name` was found successfully
             check_errors(this->open_existing_file(fileEntryOffset));
             this->m_open = true;
-            return NO_ERROR;
+            return this->seek(offset, way);
         }
 
         PropWare::ErrorCode safe_get_char (char &c) {

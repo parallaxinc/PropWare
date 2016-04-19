@@ -40,6 +40,8 @@ class FileWriter : virtual public File, public PrintCapable {
                   m_fileMetadataModified(false) {
         }
 
+        virtual PropWare::ErrorCode open (const int32_t offset = 0, const SeekDir way = END) = 0;
+
         /**
          * @brief       Write a character to the file
          *
@@ -54,7 +56,7 @@ class FileWriter : virtual public File, public PrintCapable {
          *
          * @param[in]   c   Character that should be written
          */
-        void put_char (const char c) {
+        virtual void put_char (const char c) {
             this->safe_put_char(c);
         }
 
@@ -82,9 +84,17 @@ class FileWriter : virtual public File, public PrintCapable {
          *
          * @param[in]   string  Null-terminated character array that should be written
          */
-        void puts (const char string[]) {
+        virtual void puts (const char string[]) {
             this->safe_puts(string);
         }
+
+        /**
+         * @brief       Trim a file's length such that the current position of the pointer is the last character in
+         *              the file
+         *
+         * @return      Zero upon success, error code otherwise
+         */
+        virtual PropWare::ErrorCode trim () = 0;
 
         void print_status (const bool printBlocks = false, const bool printParentStatus = true) const {
             if (printParentStatus)
