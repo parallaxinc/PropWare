@@ -61,9 +61,10 @@ class StringBuilder : public PrintCapable {
 
         void put_char (const char c) {
             // Don't try and save characters if the buffer doesn't exist
-            if (NULL != this->m_string)
+            if (NULL != this->m_string) {
                 this->insert_char(c);
-            this->m_string[this->m_size] = '\0';
+                this->m_string[this->m_size] = '\0';
+            }
         }
 
         void puts (const char string[]) {
