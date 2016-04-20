@@ -46,10 +46,10 @@ class StringBuilder : public PrintCapable {
          */
         StringBuilder (const size_t initialSize = DEFAULT_SPACE_ALLOCATED)
                 : m_minimumSpace(initialSize),
-                  m_currentSpace(initialSize),
-                  m_size(0) {
+                  m_bufferSize(initialSize),
+                  m_stringSize(0) {
             this->m_string = (char *) malloc(initialSize);
-            this->m_string[0] = '\0';
+            this->m_string[0] = NULL_TERMINATOR;
         }
 
         /**
@@ -63,7 +63,7 @@ class StringBuilder : public PrintCapable {
             // Don't try and save characters if the buffer doesn't exist
             if (NULL != this->m_string) {
                 this->insert_char(c);
-                this->m_string[this->m_size] = '\0';
+                this->m_string[this->m_stringSize] = NULL_TERMINATOR;
             }
         }
 
@@ -72,7 +72,7 @@ class StringBuilder : public PrintCapable {
             if (NULL != this->m_string) {
                 for (const char *s = string; *s; ++s)
                     this->insert_char(*s);
-                this->m_string[this->m_size] = '\0';
+                this->m_string[this->m_stringSize] = NULL_TERMINATOR;
             }
         }
 
@@ -87,40 +87,49 @@ class StringBuilder : public PrintCapable {
          * @brief   Determine the length of the string, not including the null terminator
          */
         uint16_t get_size () const {
-            return m_size;
+            return m_stringSize;
+        }
+
+        /**
+         * @brief   Determine the currently allocated size for the buffer
+         *
+         * @return  Number of bytes allocated for the string
+         */
+        uint16_t get_buffer_size () const {
+            return this->m_bufferSize;
         }
 
         /**
          * @brief   Remove all characters from the string and reallocate to the original size (if needed)
          */
         void clear () {
-            if (this->m_size) {
-                if (this->m_minimumSpace != this->m_currentSpace) {
+            if (this->m_stringSize) {
+                if (this->m_minimumSpace != this->m_bufferSize) {
                     if (NULL != this->m_string)
                         // It shouldn't ever be NULL, but this is an easy way to ensure bugs don't sneak in
                         free(this->m_string);
                     this->m_string       = (char *) malloc(this->m_minimumSpace);
-                    this->m_currentSpace = this->m_minimumSpace;
+                    this->m_bufferSize = this->m_minimumSpace;
                 }
-                this->m_string[0] = '\0';
-                this->m_size = 0;
+                this->m_string[0] = NULL_TERMINATOR;
+                this->m_stringSize = 0;
             }
         }
 
     private:
         void insert_char (const char c) {
-            m_string[m_size++] = c;
+            m_string[m_stringSize++] = c;
             check_buffer_size();
         }
 
         void check_buffer_size () {
-            if (m_size + 1 == m_currentSpace)
+            if (m_stringSize + 1 == m_bufferSize)
                 this->expand();
         }
 
         void expand () {
-            this->m_currentSpace <<= 1;
-            char *temp = (char *) malloc((size_t) this->m_currentSpace);
+            this->m_bufferSize <<= 1;
+            char *temp = (char *) malloc((size_t) this->m_bufferSize);
             strcpy(temp, this->m_string);
             free(this->m_string);
             this->m_string = temp;
@@ -128,8 +137,8 @@ class StringBuilder : public PrintCapable {
 
     private:
         const uint16_t m_minimumSpace;
-        uint16_t       m_currentSpace;
-        uint16_t       m_size;
+        uint16_t       m_bufferSize;
+        uint16_t       m_stringSize;
         char           *m_string;
 };
 
