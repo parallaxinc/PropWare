@@ -145,6 +145,7 @@ typedef enum {
 #define NEWLINE         '\n'
 #define TAB             '\t'
 #define CARRIAGE_RETURN '\r'
+#define DELETE          '\x7f'
 
 }
 

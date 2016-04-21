@@ -299,8 +299,8 @@ class PWEdit {
          * @param[in]   startingCharacterInLine     First column of the line shown on the display
          * @param[in]   lineIterator                Line to be printed
          * @param[in]   row                         Row of the display that the line will overwrite
-         * @param[in]   startingColumnOfDisplay     Position of the display line where printing should start (Used
-         *                                          when a line only needs to be partially re-drawn)
+         * @param[in]   startingColumnOfDisplay     1-indexed Position of the display line where printing should start
+         *                                          (Used when a line only needs to be partially re-drawn)
          */
         void print_line_at_row (const unsigned int startingCharacterInLine,
                                 const std::list<PropWare::StringBuilder *>::const_iterator &lineIterator,
@@ -689,13 +689,19 @@ class PWEdit {
          * @brief   Basic insert mode - type some characters!
          */
         void insert_mode () {
+            bool exit = false;
             char c;
-            while ('~' != (c = this->m_scanner->get_char())) {
+            while (!exit) {
+                c = this->m_scanner->get_char();
                 switch (c) {
                     case BACKSPACE:
+                    case DELETE:
+                        this->backspace_character();
                         break;
                     case ESCAPE:
+                    case '~': // FIXME: Useful while debugging with propeller-load; should be removed before merge
                         //this->read_escape_sequence();
+                        exit = true;
                         break;
                     default:
                         this->insert_character(c);
@@ -707,8 +713,9 @@ class PWEdit {
             this->insert_character_in_line(c);
             if (!this->move_right())
                 this->print_line_at_row(this->m_firstColumnDisplayed, this->m_selectedLine, this->m_termRow,
-                                        this->m_selectedColumnInLine - this->m_firstColumnDisplayed - 1);
+                                        this->m_selectedColumnInLine - this->m_firstColumnDisplayed);
             this->move_cursor(this->m_termRow, this->m_termColumn);
+            this->m_modified = true;
         }
 
         void insert_character_in_line (const char c) {
@@ -728,6 +735,49 @@ class PWEdit {
                 lineReplacement->put_char(currentLineBuffer[i]);
             lineReplacement->put_char(c);
             for (unsigned int i = this->m_selectedColumnInLine; i < (currentLine->get_size() + 1); ++i)
+                lineReplacement->put_char(currentLineBuffer[i]);
+
+            const auto nextLine = this->m_lines.erase(this->m_selectedLine);
+            this->m_selectedLine = this->m_lines.insert(nextLine, lineReplacement);
+            delete currentLine;
+        }
+
+        void backspace_character () {
+            if (this->m_selectedColumnInLine) {
+                this->backspace_character_in_line();
+                const bool displayRedrawn = this->move_left();
+                if (NULL != this->m_debugger) {
+                    this->m_debugger->printf("Redraw:  %s\n", Utility::to_string(displayRedrawn));
+                    this->m_debugger->printf("Sel col: %5u\n", this->m_selectedColumnInLine);
+                    this->m_debugger->printf("1st dis: %5u\n", this->m_firstColumnDisplayed);
+                }
+                if (!displayRedrawn)
+                    this->print_line_at_row(this->m_firstColumnDisplayed, this->m_selectedLine, this->m_termRow,
+                                            this->m_selectedColumnInLine - this->m_firstColumnDisplayed + 1);
+                this->move_cursor(this->m_termRow, this->m_termColumn);
+            } else {
+                // Delete newline
+            }
+            this->m_modified = true;
+        }
+
+        void backspace_character_in_line () {
+            StringBuilder *currentLine       = *this->m_selectedLine;
+            const char    *currentLineBuffer = currentLine->to_string();
+
+            const uint16_t startingStringSize = currentLine->get_size();
+            const uint16_t startingBufferSize = currentLine->get_buffer_size();
+
+            StringBuilder *lineReplacement;
+            if ((startingStringSize - 1) < (startingBufferSize >> 1))
+                // Shrink the line if needed
+                lineReplacement = new StringBuilder(startingBufferSize >> 1);
+            else
+                lineReplacement = new StringBuilder(startingBufferSize);
+
+            for (unsigned int i = 0; i < (this->m_selectedColumnInLine - 1); ++i)
+                lineReplacement->put_char(currentLineBuffer[i]);
+            for (unsigned int i = this->m_selectedColumnInLine; i < currentLine->get_size(); ++i)
                 lineReplacement->put_char(currentLineBuffer[i]);
 
             const auto nextLine = this->m_lines.erase(this->m_selectedLine);
