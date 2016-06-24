@@ -35,6 +35,12 @@ namespace PropWare {
  */
 class Pin : public PropWare::Port {
     public:
+        typedef enum {
+            A,
+            B
+        } Channel;
+
+    public:
         /**
          * @brief       Great for quick debugging to ensure a line of code is executed, this will quickly flash a given
          *              pin a specific number of times
@@ -92,6 +98,14 @@ class Pin : public PropWare::Port {
 
         PropWare::Port::Mask get_mask () const {
             return (PropWare::Port::Mask) this->m_mask;
+        }
+
+        Channel get_channel () const {
+            return this->m_channel;
+        }
+
+        void set_channel (const Channel channel) {
+            this->m_channel = channel;
         }
 
         /**
@@ -218,6 +232,41 @@ if(iodt == 0)                               // If dt not initialized
             }
         }
 
+        /**
+         * @brief   Output a PWM signal on this pin
+         *
+         * Use the Propeller's built-in hardware counters to generate a PWM signal on the pin. This method _does not_
+         * set the pin direction, so be sure to invoke `PropWare::Pin::set_dir_out()` prior to invoking this method.
+         *
+         * @param[in]   frequency   Frequency in Hertz (Hz)
+         */
+        void start_hardware_pwm (const uint32_t frequency) const {
+            this->stop_hardware_pwm();
+
+            const uint32_t frq = static_cast<uint32_t>((UINT32_MAX + 1ULL) * frequency / CLKFREQ);
+            const uint32_t ctr = (4 << 26) | static_cast<uint32_t>(convert(static_cast<Mask>(this->m_mask)));
+            if (A == this->m_channel) {
+                FRQA = frq;
+                PHSA = 0;
+                CTRA = ctr;
+            } else if (B == this->m_channel) {
+                FRQB = frq;
+                PHSB = 0;
+                CTRB = ctr;
+            }
+        }
+
+        /**
+         * @brief   Stop the hardware counter
+         */
+        void stop_hardware_pwm () const {
+            if (A == this->m_channel) {
+                CTRA = 0;
+            } else if (B == this->m_channel) {
+                CTRB = 0;
+            }
+        }
+
     public:
         /**
          * @brief   Copy one pin object into another; Only copies pin mask, not
@@ -257,6 +306,9 @@ if(iodt == 0)                               // If dt not initialized
         uint32_t read_fast () const {
             return this->PropWare::Port::read_fast();
         }
+
+    private:
+        Channel m_channel;
 };
 
 }

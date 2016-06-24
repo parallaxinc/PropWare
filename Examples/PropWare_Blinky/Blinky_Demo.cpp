@@ -34,10 +34,15 @@
  * @include PropWare_Blinky/CMakeLists.txt
  */
 int main () {
-    PropWare::Pin led(PropWare::Port::P16, PropWare::Pin::OUT);
+    // Use the hardware counter module to blink an LED at 4Hz
+    const PropWare::Pin led1(PropWare::Port::P17, PropWare::Pin::OUT);
+    // Notice that this method is non-blocking, because the Propeller's built-in hardware counter does all the hard work
+    led1.start_hardware_pwm(4);
 
+    // We'll toggle this LED in software. This is also know as "bit banging"
+    const PropWare::Pin led2(PropWare::Port::P16, PropWare::Pin::OUT);
     while (1) {
-        led.toggle();
+        led2.toggle();
         waitcnt(CLKFREQ / 4 + CNT);
     }
 }
