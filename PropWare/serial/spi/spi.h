@@ -268,7 +268,7 @@ class SPI : public PrintCapable,
          * @param[out]  buffer[]        Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
-        void shift_out_block_msb_first_fast (const uint8_t buffer[], size_t numberOfBytes) {
+        void shift_out_block_msb_first_fast (const uint8_t buffer[], size_t numberOfBytes) const {
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=",  "SpiBlockWriteStart%=")
                     FC_START("SpiBlockWriteStart%=", "SpiBlockWriteEnd%=")
@@ -315,7 +315,7 @@ class SPI : public PrintCapable,
          * @param[out]  *buffer         Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
-        void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) {
+        void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) const {
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=", "SpiBlockReadStart%=")
                     FC_START("SpiBlockReadStart%=", "SpiBlockReadEnd%=")

@@ -26,26 +26,73 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/serial/can/mcp2515.h>
-#include <PropWare/utility/runnable.h>
 
-const PropWare::Port::Mask MOSI = PropWare::Port::P0;
-const PropWare::Port::Mask MISO = PropWare::Port::P1;
-const PropWare::Port::Mask SCLK = PropWare::Port::P2;
-const PropWare::Port::Mask CS = PropWare::Port::P7;
-const PropWare::Port::Mask CLOCK_MASK = PropWare::Port::P8;
+using namespace PropWare;
+
+const Port::Mask MOSI         = Port::P0;
+const Port::Mask MISO         = Port::P1;
+const Port::Mask SCLK         = Port::P2;
+const Port::Mask CS           = Port::P7;
+const Port::Mask CLOCK_MASK   = Port::P8;
+
+const uint8_t messages[][6] = {
+        "Hello",
+        "David",
+        "Katie"
+};
+
+void handle (const ErrorCode err) {
+    if (err) {
+        pwOut.printf("ERROR!!! %d\n", err);
+        while (1)
+            waitcnt(0);
+    }
+}
+
+void read (MCP2515 &can, const MCP2515::BufferNumber bufferNumber) {
+    if (can.check_receive_buffer(bufferNumber)) {
+        uint8_t buffer[MCP2515::MAX_DATA_BYTES];
+        uint8_t bytesRead;
+        can.read_message(bufferNumber, &bytesRead, buffer);
+        pwOut << "Message: `" << (const char *) buffer << "`\n";
+    } else {
+        pwOut << "No message\n";
+    }
+}
 
 /**
  * @example     MCP2515_Demo.cpp
  *
- * @include PropWare_MCP2515/CMakeLists.txt
+ * @include     PropWare_MCP2515/CMakeLists.txt
  */
 int main () {
-    const PropWare::Pin clock(CLOCK_MASK, PropWare::Pin::OUT);
-    clock.start_hardware_pwm(1000000);
+    // Instantiate the SPI bus and CAN controller instances
+    const SPI spi(MOSI, MISO, SCLK);
+    MCP2515   can(spi, CS);
 
-    const PropWare::SPI spi(MOSI, MISO, SCLK);
-    PropWare::MCP2515 can(spi, CS, &pwOut);
+    // We'll use the Propeller's hardware counters as a clock source for the MCP2515
+    const Pin clock(CLOCK_MASK, Pin::OUT);
+    clock.start_hardware_pwm(8000000);
 
-    const PropWare::ErrorCode error = can.start(PropWare::MCP2515::BAUD_1000KBPS);
-    pwOut << "Error code: " << error << '\n';
+    // Start the MCP2515 running a 1 Mbaud and in "loopback" mode. This means that all messages "sent" will be
+    // immediately looped back into the receive buffers. This is great for testing your configuration while still at
+    // your desk, to ensure that the filters and masks have been correctly configured, along with any other
+    // configuration. Once ready, remove the optional `mode` parameter and connect to your live system.
+    handle(can.start(MCP2515::BAUD_1000KBPS, MCP2515::LOOPBACK));
+
+    // Set up the filters and masks so that only message ID 2 is allowed through
+    handle(can.set_mask(MCP2515::BUFFER_0, WORD_0));
+    handle(can.set_filter(MCP2515::FILTER_0, 2));
+
+    pwOut << "Expected message received:\n";
+    handle(can.send_message(2, 6, messages[0]));
+    read(can, MCP2515::BUFFER_0);
+
+    pwOut << "Message should _not_ be received!\n";
+    handle(can.send_message(3, 6, messages[1]));
+    read(can, MCP2515::BUFFER_0);
+
+    pwOut << "Expected message received:\n";
+    handle(can.send_message(2, 6, messages[2]));
+    read(can, MCP2515::BUFFER_0);
 }
