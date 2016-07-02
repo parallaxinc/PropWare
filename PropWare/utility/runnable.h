@@ -88,7 +88,7 @@ class Runnable {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpmf-conversions"
             return (int8_t) cogstart((void (*)(void *)) &T::run, (void *) &runnable,
-                                     (void *) (runnable.m_stack), runnable.m_stackSizeInBytes);
+                                     (void *) (runnable.m_stackPointer), runnable.m_stackSizeInBytes);
 #pragma GCC diagnostic pop
         }
 
@@ -106,7 +106,7 @@ class Runnable {
          */
         template<size_t N>
         Runnable(const uint32_t (&stack)[N])
-            : m_stack(stack), m_stackSizeInBytes(N * sizeof(uint32_t)) {
+            : m_stackPointer(stack), m_stackSizeInBytes(N * sizeof(uint32_t)) {
         }
 
         /**
@@ -126,11 +126,11 @@ class Runnable {
          *                              length of 16, not 64.
          */
         Runnable(const uint32_t *stack, const size_t stackLength)
-            : m_stack(stack), m_stackSizeInBytes(stackLength * sizeof(uint32_t)) {
+            : m_stackPointer(stack), m_stackSizeInBytes(stackLength * sizeof(uint32_t)) {
         }
 
     protected:
-        const uint32_t *m_stack;
+        const uint32_t *m_stackPointer;
         size_t         m_stackSizeInBytes;
 };
 

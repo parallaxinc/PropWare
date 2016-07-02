@@ -57,7 +57,8 @@ class Pin : public PropWare::Port {
          * @brief   Initialize to a NULL pin mask
          */
         Pin () :
-                Port() {
+                Port(),
+                m_channel(A) {
         }
 
         /**
@@ -66,7 +67,8 @@ class Pin : public PropWare::Port {
          * @param[in]   mask    Bit-mask of pin; One of PropWare::Pin::Mask
          */
         Pin (const PropWare::Port::Mask mask) :
-                PropWare::Port(mask) {
+                PropWare::Port(mask),
+                m_channel(A) {
         }
 
         /**
@@ -74,7 +76,8 @@ class Pin : public PropWare::Port {
          * @param[in]   direction   Direction to initialize pin; One of PropWare::Pin::Dir
          */
         Pin (const PropWare::Port::Mask mask, const PropWare::Port::Dir direction) :
-                PropWare::Port(mask, direction) {
+                PropWare::Port(mask, direction),
+                m_channel(A) {
         }
 
         /**
