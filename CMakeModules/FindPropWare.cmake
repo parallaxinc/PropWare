@@ -71,7 +71,7 @@ if (NOT PropWare_FOUND)
     option(AUTO_CXX_STD "Set C++ standard to the latest available by the compiler" ON)
 
     # Size optimizations
-    option(AUTO_OTPIMIZATION "Set optimization level to \"size\" (-Os)" ON)
+    option(AUTO_OPTIMIZATION "Set optimization level to \"size\" (-Os)" ON)
     option(AUTO_CUT_SECTIONS "Cut out unused code (Compile: -ffunction-sections -fdata-sections; Link: --gc-sections)" ON)
 
     # Language features
@@ -254,7 +254,7 @@ if (NOT PropWare_FOUND)
             endforeach ()
 
 
-            if (AUTO_OTPIMIZATION)
+            if (AUTO_OPTIMIZATION)
                 list(APPEND COMMON_FLAGS -Os)
             endif ()
 
