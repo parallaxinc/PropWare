@@ -129,11 +129,14 @@ install(DIRECTORY CMakeModules/
 install(DIRECTORY
         ${PROJECT_SOURCE_DIR}/PropWare
         ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller
+        ${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/
     DESTINATION PropWare/include
     COMPONENT propware
     FILES_MATCHING PATTERN *.h
     PATTERN libpropeller/libpropeller/compile_tools EXCLUDE
     PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
+
+# libPropelleruino includes
 
 # Version file
 file(WRITE "${PROJECT_BINARY_DIR}/version.txt" "${PROJECT_VERSION}")

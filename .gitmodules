@@ -7,3 +7,6 @@
 [submodule "CMakeModules"]
 	path = CMakeModules
 	url = https://github.com/DavidZemon/PropWare-Build.git
+[submodule "libArduino"]
+	path = libArduino
+	url = https://github.com/DavidZemon/libArduino.git

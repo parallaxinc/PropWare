@@ -3,7 +3,6 @@ set(WARN_ALL OFF)
 
 ####################################################################
 # Find libpropeller sources
-####################################################################
 file(GLOB_RECURSE LIBPROPELLER_OBJECTS_WITH_DUPS
     ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller/[!u]*/*.S
     ${PROJECT_SOURCE_DIR}/libpropeller/libpropeller/[!u]*/*.cpp)
@@ -14,10 +13,29 @@ foreach (file IN LISTS LIBPROPELLER_OBJECTS_WITH_DUPS)
         list(APPEND LIBPROPELLER_OBJECTS "${file}")
     endif ()
 endforeach ()
+####################################################################
+
+####################################################################
+# Find libPropelleruino sources
+file(GLOB LIBPROPELLERUINO_OBJECTS
+    ${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/*.cpp
+    ${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/*.c)
+
+list(REMOVE_ITEM LIBPROPELLERUINO_OBJECTS
+
+    # Remove the two files that contain main functions
+    ${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/main.cpp
+    ${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/Arduino.cpp
+
+    # And ignore Wire.cpp because its include headers are broken (missing file)
+    ${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/Wire.cpp
+)
+
+set(LIBPROPELLERUINO_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino")
+####################################################################
 
 ####################################################################
 # Find Simple sources
-####################################################################
 set(SIMPLE_ROOT "${PROJECT_SOURCE_DIR}/propsideworkspace/Learn/Simple Libraries")
 
 set(SOURCE_FILE_EXTENSIONS
@@ -78,14 +96,14 @@ foreach (category IN LISTS CATEGORIES)
     set(category "${SIMPLE_ROOT}/${category}")
     subdirlist(CATEGORY_LIBRARIES ${category})
     foreach (new_library IN LISTS CATEGORY_LIBRARIES)
-        list(APPEND LIBRARIES "${category}/${new_library}")
+        list(APPEND SIMPLE_LIBRARIES "${category}/${new_library}")
     endforeach ()
 endforeach ()
 
 # Manually add simpletools
-list(APPEND LIBRARIES "${SIMPLE_ROOT}/Utility/libsimpletools/source")
+list(APPEND SIMPLE_LIBRARIES "${SIMPLE_ROOT}/Utility/libsimpletools/source")
 
-foreach (library IN LISTS LIBRARIES)
+foreach (library IN LISTS SIMPLE_LIBRARIES)
     compute_demo_filenames(DEMO_FILES "${library}")
 
     set(GLOB_PATTERNS "")
@@ -115,16 +133,17 @@ endforeach ()
 list(SORT SIMPLE_OBJECTS)
 
 # Add simpletools.h to the list of libraries, which now works as our list of include directories
-list(APPEND LIBRARIES "${SIMPLE_ROOT}/Utility/libsimpletools")
-
-# Ensure the include directories are added for examples and unit tests too. This is done twice because the
-# "PARENT_SCOPE" option _only_ sets the variable in the parent scope (it ignores the current scope)
-set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} ${LIBRARIES})
-set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} PARENT_SCOPE)
+list(APPEND SIMPLE_LIBRARIES "${SIMPLE_ROOT}/Utility/libsimpletools")
 
 install(FILES ${SIMPLE_HEADERS}
     DESTINATION PropWare/include
     COMPONENT propware)
+####################################################################
+
+# Ensure the include directories are added for examples and unit tests too. This is done twice because the
+# "PARENT_SCOPE" option _only_ sets the variable in the parent scope (it ignores the current scope)
+set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} ${SIMPLE_LIBRARIES} "${LIBPROPELLERUINO_INCLUDE_DIR}")
+set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} PARENT_SCOPE)
 
 add_subdirectory(cog)
 add_subdirectory(cmm)
