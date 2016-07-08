@@ -54,12 +54,14 @@ set(CPACK_DEBIAN_PACKAGE_PRIORITY               optional)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS              ON)
 set(CPACK_DEBIAN_PACKAGE_RECOMMENDS             "make")
 set(CPACK_DEBIAN_PACKAGE_REPLACES               "cmake")
+set(CPACK_DEBIAN_FILE_NAME                      DEB-DEFAULT)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_URL                       "${CPACK_PROJECT_URL}")
 set(CPACK_RPM_PACKAGE_SUGGESTS                  "make")
 set(CPACK_RPM_PACKAGE_OBSOLETES                 "cmake")
 set(CPACK_PACKAGE_RELOCATABLE                   ON)
+set(CPACK_RPM_FILE_NAME                         RPM-DEFAULT)
 
 # Components
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)

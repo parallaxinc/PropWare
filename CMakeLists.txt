@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3)
 
 set(PROPWARE_MAIN_PACKAGE TRUE)
+set(CMAKE_ERROR_DEPRECATED TRUE)
 
 # Get the PropWare version
 file(READ "${CMAKE_CURRENT_LIST_DIR}/version.txt" VERSION)
