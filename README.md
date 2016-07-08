@@ -6,6 +6,7 @@ PropWare is a combination of three key pieces:
   * PropWare namespace
   * Parallax's C Simple Library
   * SRLM's libpropeller
+  * libPropelleruino (Arduino port)
 * An easy-to-use and robust build system using [CMake][5]
 * Thorough documentation and tutorials
 
@@ -13,12 +14,12 @@ Key Features
 ------------
 * More C++ for the Propeller
 * Easy [CMake][5] build system
-* Support for [CLion](http://www.jetbrains.com/clion/), Eclipse and other full-featured IDEs
+* Support for [CLion][6], Eclipse and other full-featured IDEs
 * Active development
 * MIT license
 
-Start by installing the software from the [download][1] page, follow it up with the 
-[Getting Started][2] instructions, and then become a pro by familiarizing yourself with the 
+Start by installing the software from the [download][1] page, follow it up with the
+[Getting Started][2] instructions, and then become a pro by familiarizing yourself with the
 [API documentation][3] and [reference material][4].
 
 [1]: http://david.zemon.name/PropWare/Download.xhtml
@@ -26,3 +27,4 @@ Start by installing the software from the [download][1] page, follow it up with 
 [3]: http://david.zemon.name/PropWare/usergroup0.xhtml
 [4]: http://david.zemon.name/PropWare/usergroup1.xhtml
 [5]: https://cmake.org/
+[6]: http://www.jetbrains.com/clion/
