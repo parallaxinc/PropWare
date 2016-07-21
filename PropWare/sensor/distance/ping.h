@@ -34,8 +34,8 @@ namespace PropWare {
  * For 3-pin variants like the Parallax PING))) sensor, use the following template:
  *
  * @code
- * #include <PropWare/ping.h>
- * #include <PropWare/printer/printer.h>
+ * #include <PropWare/sensor/distance/ping.h>
+ * #include <PropWare/hmi/output/printer.h>
  *
  * int main () {
  *     // Propeller pin P01 connected to the signal line of the PING)))
