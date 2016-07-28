@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/pin.h
+ * @file        PropWare/gpio/pin.h
  *
  * @author      David Zemon
  *

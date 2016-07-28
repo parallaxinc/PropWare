@@ -96,8 +96,8 @@ class SPI : public PrintCapable,
 
     public:
         /**
-         * @brief       Best way to use SPI is through here, where you can get a shared instance of the SPI module (not
-         *              thread safe)
+         * @brief       Best way to access an SPI instance is through here, where you can get a shared instance of the
+         *              SPI module (not thread safe)
          *
          * @returns     Address of the shared SPI instance
          */
@@ -262,16 +262,15 @@ class SPI : public PrintCapable,
         }
 
         /**
-         * @brief       Receive an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB
-         *              first
+         * @brief       Send an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB first
          *
-         * @param[out]  buffer[]        Address to store data
-         * @param[in]   numberOfBytes   Number of bytes to receive
+         * @param[in]   buffer[]        Address where data is stored
+         * @param[in]   numberOfBytes   Number of words to send
          */
         void shift_out_block_msb_first_fast (const uint8_t buffer[], size_t numberOfBytes) const {
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=",  "SpiBlockWriteStart%=")
-                    FC_START("SpiBlockWriteStart%=", "SpiBlockWriteEnd%=")
+            FC_START("SpiBlockWriteStart%=", "SpiBlockWriteEnd%=")
                     "       jmp #" FC_ADDR("outerLoop%=", "SpiBlockWriteStart%=") "                             \n\t"
 
                     // Temporary variables
@@ -312,13 +311,13 @@ class SPI : public PrintCapable,
          * @brief       Receive an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB
          *              first
          *
-         * @param[out]  *buffer         Address to store data
+         * @param[out]  buffer          Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
         void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) const {
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=", "SpiBlockReadStart%=")
-                    FC_START("SpiBlockReadStart%=", "SpiBlockReadEnd%=")
+            FC_START("SpiBlockReadStart%=", "SpiBlockReadEnd%=")
                     "       jmp #" FC_ADDR("outerLoop%=", "SpiBlockReadStart%=") "                              \n\t"
 
                     // Temporary variables
@@ -369,9 +368,9 @@ class SPI : public PrintCapable,
         }
 
         /**
-         * @brief       Print through UART an error string followed by entering an infinite loop
+         * @brief       Print an error string through the provided PropWare::Printer interface
          *
-         * @param[in]   *printer    Object used for printing error string
+         * @param[in]   printer     Object used for printing error string
          * @param[in]   err         Error number used to determine error string
          */
         void print_error_str (const Printer &printer, const ErrorCode err) const {
@@ -398,7 +397,7 @@ class SPI : public PrintCapable,
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             __asm__ volatile (
-                    FC_START("SpiSendMsbFirstStart%=", "SpiSendMsbFirstEnd%=")
+            FC_START("SpiSendMsbFirstStart%=", "SpiSendMsbFirstEnd%=")
                     "       ror %[_data], %[_bitCount]                                                  \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                 \n\t"
                     "       add %[_clock], CNT                                                          \n\t"
@@ -429,7 +428,7 @@ class SPI : public PrintCapable,
 #pragma GCC diagnostic ignored "-Wuninitialized"
             unsigned int clock;
             __asm__ volatile (
-                    FC_START("SpiSendLsbFirstStart%=", "SpiSendLsbFirstEnd%=")
+            FC_START("SpiSendLsbFirstStart%=", "SpiSendLsbFirstEnd%=")
                     // Local variable declaration
                     "       mov %[_clock], CNT                                                          \n\t"
                     "       add %[_clock], %[_clkDelay]                                                 \n\t"
@@ -461,7 +460,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-                    FC_START("SpiReadMsbPhs0Start%=", "SpiReadMsbPhs0End%=")
+            FC_START("SpiReadMsbPhs0Start%=", "SpiReadMsbPhs0End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -493,7 +492,7 @@ class SPI : public PrintCapable,
             unsigned int tempData;
             unsigned int modifiableBits = bits;
             __asm__ volatile (
-                    FC_START("SpiReadLsbPhs0Start%=", "SpiReadLsbPhs0End%=")
+            FC_START("SpiReadLsbPhs0Start%=", "SpiReadLsbPhs0End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -524,7 +523,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-                    FC_START("SpiReadMsbPhs1Start%=", "SpiReadMsbPhs1End%=")
+            FC_START("SpiReadMsbPhs1Start%=", "SpiReadMsbPhs1End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
@@ -555,7 +554,7 @@ class SPI : public PrintCapable,
             unsigned int clock;
             unsigned int tempData;
             __asm__ volatile (
-                    FC_START("SpiReadLsbPhs1Start%=", "SpiReadLsbPhs1End%=")
+            FC_START("SpiReadLsbPhs1Start%=", "SpiReadLsbPhs1End%=")
                     "       ror %[_data], %[_bitCount]              '' move MSB into bit 31                 \n\t"
                     "       mov %[_clock], %[_clkDelay]                                                     \n\t"
                     "       add %[_clock], CNT                                                              \n\t"
