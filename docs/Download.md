@@ -39,7 +39,7 @@ Microsoft Windows
 Linux (x86-64) - Debian/Ubuntu/Mint/etc
 ------------------------------
 1. Download the [`deb` package file][4].
-2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.1.1-Generic.deb`. If `cmake` is already installed, 
+2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.1.2-Generic.deb`. If `cmake` is already installed, 
    remove it with `sudo dpkg -r cmake`.
 3. `make` is the recommended build tool to use with %PropWare. If it is not already installed, install it with 
    `sudo apt-get install make`.
@@ -47,7 +47,7 @@ Linux (x86-64) - Debian/Ubuntu/Mint/etc
 Linux (x86-64) - RedHat/Fedora/CentOS/etc
 --------------------------------
 1. Download the [`rpm` package file][5].
-2. Use `rpm` to install the file with: `sudo rpm -i PropWare-2.1.1-Generic.rpm`. If `cmake` is already installed, 
+2. Use `rpm` to install the file with: `sudo rpm -i PropWare-2.1.2-Generic.rpm`. If `cmake` is already installed, 
    remove it with `sudo rpm -e cmake`.
 3. `make` is the recommended build tool to use with %PropWare. If it is not already installed, install it with 
    `sudo yum install make`.
@@ -59,7 +59,7 @@ following packages. The packages must be built manually and will therefore not b
 Windows, Linux x86-64, or Mac OSX packages.
 
 1. Download the [`deb` package file][6].
-2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.1.1-Generic.deb`. If `cmake` is already installed, 
+2. Use `dpkg` to install the file with: `sudo dpkg -i PropWare-2.1.2-Generic.deb`. If `cmake` is already installed, 
    remove it with `sudo dpkg -r cmake`.
 3. `make` is the recommended build tool to use with %PropWare. If it is not already installed, install it with 
    `sudo apt-get install make`.
@@ -70,9 +70,9 @@ I am unable to produce easy installation packages for Mac. My apologies. Please 
 command line to install %PropWare on your Mac:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
-wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-propware.zip?guest=1 -Opropware.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-examples.zip?guest=1 -Oexamples.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
@@ -88,9 +88,9 @@ sudo ln -s /Applications/pwcmake.app/Contents/bin/cmakexbuild /usr/local/bin/cma
 
 To upgrade:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
-wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-propware.zip?guest=1 -Opropware.zip
-wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-examples.zip?guest=1 -Oexamples.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
@@ -108,9 +108,9 @@ sudo rm -rf /Applications/pwcmake.app.bak
 sudo rm -rf /Applications/PropWare.bak
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[1]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic-propware.zip?guest=1
-[2]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic.exe?guest=1
+[1]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic-propware.zip?guest=1
+[2]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic.exe?guest=1
 [3]: http://www.computerhope.com/issues/ch000549.htm
-[4]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic.deb?guest=1
-[5]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.1-Generic.rpm?guest=1
+[4]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic.deb?guest=1
+[5]: http://david.zemon.name:8111/repository/download/PropWare_Master/.lastSuccessful/PropWare-2.1.2-Generic.rpm?guest=1
 [6]: http://david.zemon.name/downloads/PropWare-2.1.0-Generic.deb
