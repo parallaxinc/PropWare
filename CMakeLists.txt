@@ -28,10 +28,16 @@ add_subdirectory(test)
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     set(TEAMCITY_BUILD_ID "$ENV{TEAMCITY_BUILD_ID}")
-    configure_file(${PROJECT_SOURCE_DIR}/docs/Download.md.in
-        ${PROJECT_SOURCE_DIR}/docs/Download.md
+    configure_file("${PROJECT_SOURCE_DIR}/docs/Download.md.in"
+        "${PROJECT_SOURCE_DIR}/docs/Download.md"
         @ONLY)
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_SOURCE_DIR}/docs/Download.md)
+    configure_file("${PROJECT_SOURCE_DIR}/Doxyfile.in"
+        "${PROJECT_SOURCE_DIR}/Doxyfile"
+        @ONLY)
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+        "${PROJECT_SOURCE_DIR}/docs/Download.md"
+        "${PROJECT_SOURCE_DIR}/Doxyfile")
+
     add_custom_target(docs
         "${DOXYGEN_EXECUTABLE}" Doxyfile
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
