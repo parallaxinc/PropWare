@@ -23,6 +23,7 @@ sources.mk
 subdir.mk
 makefile
 Makefile
+Doxyfile
 **.pyc
 **~
 **.swp

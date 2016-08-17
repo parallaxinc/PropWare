@@ -26,6 +26,10 @@ add_subdirectory(test)
 
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
+    configure_file(${PROJECT_SOURCE_DIR}/Doxyfile.in
+        ${PROJECT_SOURCE_DIR}/Doxyfile
+        @ONLY)
+
     add_custom_target(docs
         "${DOXYGEN_EXECUTABLE}" Doxyfile
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
