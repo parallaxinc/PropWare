@@ -23,8 +23,6 @@ create_simple_executable(HelloWorld main.cpp)
   (`${PROJECT_NAME}` is an automatically-created CMake variable which, in this case, would resolve to `HelloWorld`), 
   but it can be what you'd like, so long as there is no whitespace. Next, simply list off each of your source files 
   (separated by whitespace).
-* There is LOTS more information about creating CMakeLists.txt files for %PropWare projects in 
-  [Appendix A](http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml).
 
 Typical Use Case
 ----------------
