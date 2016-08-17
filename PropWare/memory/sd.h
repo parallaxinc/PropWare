@@ -218,7 +218,7 @@ class SD : public BlockStorage {
          * @param[in]   printer     Printer used for logging the message
          * @param[in]   err         Error number used to determine error string
          */
-        void print_error_str (const Printer &printer, const ErrorCode err) {
+        void print_error_str (const Printer &printer, const ErrorCode err) const {
             const uint8_t relativeError = err - BEG_ERROR;
 
             switch (err) {
@@ -587,7 +587,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion (const Printer &printer) {
+        void first_byte_expansion (const Printer &printer) const {
             if (BIT_0 & _sd_firstByteResponse)
                 printer.puts("\t0: Idle\n");
             if (BIT_1 & _sd_firstByteResponse)

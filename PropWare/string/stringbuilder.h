@@ -44,7 +44,7 @@ class StringBuilder : public PrintCapable {
          *
          * @param[in]   initialSize     Number of bytes that should be (dynamically) allocated for the string buffer
          */
-        StringBuilder (const size_t initialSize = DEFAULT_SPACE_ALLOCATED)
+        StringBuilder (const uint16_t initialSize = DEFAULT_SPACE_ALLOCATED)
                 : m_minimumSpace(initialSize),
                   m_bufferSize(initialSize),
                   m_stringSize(0) {
@@ -81,6 +81,23 @@ class StringBuilder : public PrintCapable {
          */
         const char *to_string () const {
             return this->m_string;
+        }
+
+        /**
+         * @brief           Copy a substring into the provided buffer
+         *
+         * @pre             `end` must be greater than or equal to `start`, otherwise result is undefined
+         *
+         * @param buffer    Pre-allocated memory where the substring can be stored
+         * @param start     First character (0-indexed, inclusive) to include
+         * @param end       Last character (0-indexed, exclusive) to include. If greater than string length, then
+         *                  string length will be used.
+         */
+        void substring(char *buffer, const uint_fast16_t start, const uint_fast16_t end) const {
+            const uint_fast16_t &realEnd        = Utility::min(end, static_cast<uint_fast16_t>(this->get_size()));
+            const uint_fast16_t subLength = realEnd - start;
+            memcpy(buffer, this->m_string + start, subLength);
+            buffer[subLength] = '\0';
         }
 
         /**

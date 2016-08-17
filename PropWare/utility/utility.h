@@ -26,6 +26,7 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
+#include <string.h>
 
 namespace PropWare {
 
@@ -63,6 +64,95 @@ class Utility {
         static uint8_t count_bits (int32_t par) {
             return count_bits((uint32_t) par);
         }
+
+        /**
+         * @brief       Convert each alphabetical character in a null-terminated character array to lowercase letters
+         *
+         * @param[out]  string[]    Characters array to be converted
+         */
+        static void to_lower (char string[]) {
+            for (size_t i = 0; i < strlen(string); ++i)
+                string[i] = tolower(string[i]);
+        }
+
+        /**
+         * @brief       Convert each alphabetical character in a null-terminated character array to uppercase letters
+         *
+         * @param[out]  string[]    Characters array to be converted
+         */
+        static void to_upper (char string[]) {
+            for (size_t i = 0; i < strlen(string); ++i)
+                string[i] = toupper(string[i]);
+        }
+
+        /**
+         * @brief       Convert a boolean to the string-literal either `"true"` or `"false"`
+         *
+         * @param[in]   b   Boolean to be checked
+         */
+        static const char *to_string (const bool b) {
+            return b ? "true" : "false";
+        }
+
+        static bool empty (const char string[]) {
+            return '\0' == string[0];
+        }
+
+        /**
+         * @brief       Determine the size of an array
+         *
+         * As recommended by cplusplus.com in the FAQ:
+         * http://www.cplusplus.com/faq/sequences/arrays/sizeof-array/#cpp
+         *
+         * @param[in]   array   Statically defined array (no malloc/new allowed)
+         *
+         * @return      Number of elements in the array
+         */
+        template<typename T, size_t N>
+        static inline size_t size_of_array (const T(&array)[N]) {
+            return N;
+        }
+
+        template<class T>
+        static const T &min (const T &a, const T &b) {
+            return b >= a ? a : b;
+        }
+
+        template<class T>
+        const T &max (const T &a, const T &b) {
+            return b < a ? a : b;
+        }
+
+        static Bit to_bit (const uint_fast8_t bitNumber) {
+            if (32 > bitNumber)
+                return (Bit) (1 << bitNumber);
+            else
+                return NULL_BIT;
+        }
+
+        static bool bit_read (const uint32_t x, const Bit bit) {
+            return 0 != (x & bit);
+        }
+
+        template<typename T>
+        static void bit_write (T &x, const Bit bit, const bool value) {
+            if (value)
+                bit_set(x, bit);
+            else
+                bit_clear(x, bit);
+        }
+
+        template<typename T>
+        static void bit_set (T &x, const Bit bit) {
+            x |= bit;
+        }
+
+        template<typename T>
+        static void bit_clear (T &x, const Bit bit) {
+            x &= ~bit;
+        }
+
+#ifdef __propeller__
 
         /**
          * @brief       Determine the number of microseconds passed since a starting point
@@ -111,6 +201,53 @@ class Utility {
         }
 
         /**
+         * @brief       Compute the mathematical expression log<sub>2</sub>(x). Result is in fixed-point format (16
+         *              digits to the left and right of the decimal point
+         *
+         * Contributed by Dave Hein
+         *
+         * @param[in]   x   Input to log function
+         *
+         * @return      Result of log function
+         */
+        static int rom_log (int x) {
+            int            exp;
+            unsigned short *ptr;
+
+            if (!x)
+                return 0;
+
+            for (exp = 31; x > 0; exp--)
+                x <<= 1;
+            ptr = (unsigned short *) ((((unsigned int) x) >> 19) + 0xb000);
+            return (exp << 16) | *ptr;
+        }
+
+        /**
+         * @brief       Reverse some of the bits in `x`
+         *
+         * See the `rev` assembly instruction
+         *
+         * @param[in]   x       Value to be reversed
+         * @param[in]   bits    The least significant `32-bits` bits will reversed
+         *
+         * @return      A bitwise flip of some of the bits in `x`
+         */
+        inline static unsigned int reverse (unsigned int x, unsigned int bits = 0) {
+            return __builtin_propeller_rev(x, bits);
+        }
+
+        /**
+         * @brief   Perform hard reboot
+         *
+         * Also known as reset or power down/up, this will restart the entire chip as if power was just applied. Note
+         * that this will reboot __all 8 cogs__, not just one.
+         */
+        static inline void reboot () {
+            __builtin_propeller_clkset(0x80);
+        }
+
+        /**
          * @brief       Determine the size of the largest block of free memory
          *
          * `malloc` is used to find free memory. Be aware that the execution time of `malloc` is not predictable and
@@ -148,129 +285,7 @@ class Utility {
             return largestSuccess;
         }
 
-        /**
-         * @brief       Convert each alphabetical character in a null-terminated character array to lowercase letters
-         *
-         * @param[out]  string[]    Characters array to be converted
-         */
-        static void to_lower (char string[]) {
-            for (size_t i = 0; i < strlen(string); ++i)
-                string[i] = tolower(string[i]);
-        }
-
-        /**
-         * @brief       Convert each alphabetical character in a null-terminated character array to uppercase letters
-         *
-         * @param[out]  string[]    Characters array to be converted
-         */
-        static void to_upper (char string[]) {
-            for (size_t i = 0; i < strlen(string); ++i)
-                string[i] = toupper(string[i]);
-        }
-
-        /**
-         * @brief       Convert a boolean to the string-literal either `"true"` or `"false"`
-         *
-         * @param[in]   b   Boolean to be checked
-         */
-        static const char *to_string (const bool b) {
-            return b ? "true" : "false";
-        }
-
-        /**
-         * @brief       Compute the mathematical expression log<sub>2</sub>(x). Result is in fixed-point format (16
-         *              digits to the left and right of the decimal point
-         *
-         * Contributed by Dave Hein
-         *
-         * @param[in]   x   Input to log function
-         *
-         * @return      Result of log function
-         */
-        static int rom_log (int x) {
-            int            exp;
-            unsigned short *ptr;
-
-            if (!x)
-                return 0;
-
-            for (exp = 31; x > 0; exp--)
-                x <<= 1;
-            ptr      = (unsigned short *) ((((unsigned int) x) >> 19) + 0xb000);
-            return (exp << 16) | *ptr;
-        }
-
-        /**
-         * @brief       Reverse some of the bits in `x`
-         *
-         * See the `rev` assembly instruction
-         *
-         * @param[in]   x       Value to be reversed
-         * @param[in]   bits    The least significant `32-bits` bits will reversed
-         *
-         * @return      A bitwise flip of some of the bits in `x`
-         */
-        inline static unsigned int reverse (unsigned int x, unsigned int bits = 0) {
-            return __builtin_propeller_rev(x, bits);
-        }
-
-        static bool empty (const char string[]) {
-            return '\0' == string[0];
-        }
-
-        /**
-         * @brief       Determine the size of an array
-         *
-         * As recommended by cplusplus.com in the FAQ:
-         * http://www.cplusplus.com/faq/sequences/arrays/sizeof-array/#cpp
-         *
-         * @param[in]   array   Statically defined array (no malloc/new allowed)
-         *
-         * @return      Number of elements in the array
-         */
-        template<typename T, size_t N>
-        static inline size_t size_of_array (const T(&array)[N]) {
-            return N;
-        }
-
-        /**
-         * @brief   Perform hard reboot
-         *
-         * Also known as reset or power down/up, this will restart the entire chip as if power was just applied. Note
-         * that this will reboot __all 8 cogs__, not just one.
-         */
-        static inline void reboot () {
-            __builtin_propeller_clkset(0x80);
-        }
-
-        static Bit to_bit (const uint_fast8_t bitNumber) {
-            if (32 > bitNumber)
-                return (Bit) (1 << bitNumber);
-            else
-                return NULL_BIT;
-        }
-
-        static bool bit_read (const uint32_t x, const Bit bit) {
-            return 0 != (x & bit);
-        }
-
-        template<typename T>
-        static void bit_write (T &x, const Bit bit, const bool value) {
-            if (value)
-                bit_set(x, bit);
-            else
-                bit_clear(x, bit);
-        }
-
-        template<typename T>
-        static void bit_set (T &x, const Bit bit) {
-            x |= bit;
-        }
-
-        template<typename T>
-        static void bit_clear (T &x, const Bit bit) {
-            x &= ~bit;
-        }
+#endif
 
     private:
         /**

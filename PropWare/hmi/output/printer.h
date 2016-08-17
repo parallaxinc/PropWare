@@ -532,14 +532,14 @@ class Printer {
                         switch (c) {
                             case 'i':
                             case 'd':
-                                this->print((int) first, format);
+                                this->print((long int) first, format);
                                 break;
                             case 'X':
                             case 'b':
                                 format.radix = static_cast<uint8_t>('b' == c ? 2 : 16);
                                 // No "break;" after 'X' - let it flow into 'u'
                             case 'u':
-                                this->print((unsigned int) first, format);
+                                this->print((long unsigned int) first, format);
                                 break;
                             case 'f':
                             case 's':
@@ -552,9 +552,8 @@ class Printer {
                         }
                         if (0 == sizeof...(remaining))
                             this->puts(s);
-                        else {
+                        else
                             this->printf(s, remaining...);
-                        }
                         return;
                     }
                 } else
@@ -579,6 +578,16 @@ class Printer {
          */
         void print (const char c, const Format &format = DEFAULT_FORMAT) const {
             this->put_char(c);
+        }
+
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   c       Character to be printed
+         * @param       format  Unused
+         */
+        void print (const unsigned char c, const Format &format = DEFAULT_FORMAT) const {
+            this->print((char) c);
         }
 
         /**
@@ -636,6 +645,26 @@ class Printer {
          */
         void print (const int x, const Format &format = DEFAULT_FORMAT) const {
             this->put_int(x, format.radix, format.width, format.fillChar);
+        }
+
+        /**
+         * @brief       Print an unsigned integer with the given format
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param[in]   format      Format of the integer
+         */
+        void print (const long unsigned int x, const Format &format = DEFAULT_FORMAT) const {
+            this->put_ull(x, format.radix, format.width, format.fillChar);
+        }
+
+        /**
+         * @brief       Print a single character
+         *
+         * @param[in]   x           Unsigned value to be printed
+         * @param[in]   format      Format of the integer
+         */
+        void print (const long int x, const Format &format = DEFAULT_FORMAT) const {
+            this->put_ll(x, format.radix, format.width, format.fillChar);
         }
 
         /**

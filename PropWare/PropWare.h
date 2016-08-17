@@ -29,7 +29,9 @@
 #include <PropWare/PropWare_asm.h>
 #else
 
+#ifdef __propeller__
 #include <propeller.h>
+#endif
 
 // FIXME: PropGCC GCCv5+ does not contain C++ headers yet; Re-enable when possible
 #if 0 //(defined __cplusplus && __cplusplus >= 201103L)
@@ -57,6 +59,7 @@ namespace PropWare {
 #define check_errors(x)     if ((err = x)) return err
 #endif
 
+#ifdef __propeller__
 #define SECOND              ((uint32_t) CLKFREQ)
 #define MILLISECOND         ((uint32_t) (CLKFREQ / 1000))
 #define MICROSECOND         ((uint32_t) (MILLISECOND / 1000))
@@ -75,6 +78,7 @@ namespace PropWare {
     end ":\n\t" \
     "        .compress default\n\t"
 #define FC_ADDR(to, start) "__LMM_FCACHE_START+(" to " - " start ")"
+#endif
 #endif
 
 typedef int ErrorCode;

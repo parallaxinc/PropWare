@@ -85,7 +85,7 @@ class PWEdit {
          * @param[in]   scanner     Human input will be read from this scanner. `pwIn` can not be used because it is set
          *                          for echo mode on, which can not be used in an editor
          * @param[in]   printer     Where the contents of the editor should be printed
-         * @param[in]   *debugger   Generally unused, but (sparse) debugging output can be displayed on this Printer if
+         * @param[in]   debugger    Generally unused, but (sparse) debugging output can be displayed on this Printer if
          *                          provided
          */
         PWEdit (FileReader &inFile, FileWriter &outFile, Scanner &scanner, const Printer &printer = pwOut,
@@ -97,7 +97,8 @@ class PWEdit {
                   m_debugger(debugger),
                   m_columns(0),
                   m_rows(1),
-                  m_modified(false) {
+                  m_modified(false),
+                  m_backspaceKey(BACKSPACE) {
         }
 
         ~PWEdit () {
@@ -187,7 +188,8 @@ class PWEdit {
                         // Move left
                         if (1 < this->m_columns) {
                             --this->m_columns;
-                            *this->m_printer << BACKSPACE << ' ' << BACKSPACE << BACKSPACE << CURSOR;
+                            *this->m_printer << this->m_backspaceKey << ' ' << this->m_backspaceKey
+                                             << this->m_backspaceKey << CURSOR;
                         }
                         break;
                     case 'w':
@@ -200,17 +202,17 @@ class PWEdit {
 
                         if (1 < this->m_rows) {
                             --this->m_rows;
-                            *this->m_printer << BACKSPACE << ' ';
+                            *this->m_printer << this->m_backspaceKey << ' ';
                             this->clear(false);
                             *this->m_printer << calibrationString;
-                            *this->m_printer << BACKSPACE << ' ';
+                            *this->m_printer << this->m_backspaceKey << ' ';
 
                             // Handle columns
                             if (calibrationStringLength >= this->m_columns) {
                                 const unsigned int charactersToDelete = calibrationStringLength - this->m_columns + 1;
 
                                 for (unsigned int i = 0; i < charactersToDelete; ++i)
-                                    *this->m_printer << BACKSPACE << ' ' << BACKSPACE;
+                                    *this->m_printer << this->m_backspaceKey << ' ' << this->m_backspaceKey;
                                 *this->m_printer << CURSOR;
                             } else {
                                 for (unsigned int i = calibrationStringLength; i < this->m_columns; ++i)
@@ -220,7 +222,7 @@ class PWEdit {
 
                             // Handle rows
                             for (unsigned int i = 1; i < this->m_rows; ++i) {
-                                *this->m_printer << BACKSPACE << " \n";
+                                *this->m_printer << this->m_backspaceKey << " \n";
                                 for (unsigned int j = 0; j < (this->m_columns - 1); ++j)
                                     *this->m_printer << ' ';
                                 *this->m_printer << CURSOR;
@@ -231,7 +233,7 @@ class PWEdit {
                     case 'j':
                         // Move down
                         ++this->m_rows;
-                        *this->m_printer << BACKSPACE << " \n";
+                        *this->m_printer << this->m_backspaceKey << " \n";
                         for (unsigned int i = 0; i < (this->m_columns - 1); ++i)
                             *this->m_printer << ' ';
                         *this->m_printer << CURSOR;
@@ -240,7 +242,7 @@ class PWEdit {
                     case 'l':
                         // Move right
                         ++this->m_columns;
-                        *this->m_printer << BACKSPACE << " #";
+                        *this->m_printer << this->m_backspaceKey << " #";
                         break;
                 }
             } while (not_enter_key(input));
@@ -266,7 +268,7 @@ class PWEdit {
                 } while ('\r' != c && '\n' != c);
 
                 // Munch the \n following a \r
-                if ('\n' == this->m_inFile->peek()) {
+                if ('\r' == c && '\n' == this->m_inFile->peek()) {
                     check_errors(this->m_inFile->safe_get_char(c));
                 }
 
@@ -329,8 +331,8 @@ class PWEdit {
 
         void clear_row (const unsigned int row) const {
             move_cursor(row, 1);
-            for (unsigned int col = 0; col <= m_columns; ++col)
-                *m_printer << ' ';
+            for (unsigned int col = 0; col <= this->m_columns; ++col)
+                *this->m_printer << ' ';
         }
 
         void move_cursor (const unsigned int row, const unsigned int column) const {
@@ -365,14 +367,16 @@ class PWEdit {
         bool move_down () {
             bool redraw = false;
             if ((this->m_lines.size() - 1) <= this->m_selectedLineNumber) {
+                // We're on the last line
                 if (((*this->m_selectedLine)->get_size() - 1) == this->m_selectedColumnInLine)
                     *this->m_printer << BELL;
                 else
                     this->to_file_end();
             } else {
-                const unsigned int startingColumnSelection = this->m_selectedColumnInLine;
+                // We have at least one line further to traverse
+                const int previousColumnInLineSelected = this->m_selectedColumnInLine;
                 redraw = this->trim_column_selection_to_fit(DOWN);
-                redraw |= this->expand_column_selection_to_desired(DOWN, startingColumnSelection);
+                redraw |= this->expand_column_selection_to_desired(DOWN, previousColumnInLineSelected);
 
                 const unsigned int lastLineDisplayed = this->m_firstLineDisplayed + this->m_rows;
                 if (PADDING > (this->m_rows - this->m_termRow)
@@ -453,7 +457,7 @@ class PWEdit {
         }
 
         bool trim_column_selection_to_fit (const Direction direction) {
-            auto tempIterator = m_selectedLine;
+            auto tempIterator = this->m_selectedLine;
             switch (direction) {
                 case UP:
                     --tempIterator;
@@ -468,13 +472,18 @@ class PWEdit {
             bool               redrawNecessary = false;
             const unsigned int lineLength      = (*tempIterator)->get_size();
 
-            const bool lineShorterThanSelection = lineLength <= this->m_selectedColumnInLine;
+            const bool lineShorterThanSelection = static_cast<int>(lineLength) <= this->m_selectedColumnInLine;
             if (lineShorterThanSelection) {
                 this->m_selectedColumnInLine = lineLength - 1;
-                if (this->m_firstColumnDisplayed > this->m_selectedColumnInLine) {
-                    this->m_firstColumnDisplayed = this->m_selectedColumnInLine;
-                    this->m_termColumn           = 1;
-                    redrawNecessary = true;
+                if (static_cast<int>(this->m_firstColumnDisplayed) > this->m_selectedColumnInLine) {
+                    if (0 > this->m_selectedColumnInLine) {
+                        redrawNecessary = this->m_firstColumnDisplayed == 0;
+                        this->m_firstColumnDisplayed = 0;
+                    } else {
+                        this->m_firstColumnDisplayed = static_cast<unsigned int>(this->m_selectedColumnInLine);
+                        redrawNecessary = true;
+                    }
+                    this->m_termColumn = 1;
                 } else
                     this->m_termColumn = this->m_selectedColumnInLine - this->m_firstColumnDisplayed + 1;
             }
@@ -482,8 +491,8 @@ class PWEdit {
             return redrawNecessary;
         }
 
-        bool expand_column_selection_to_desired (const Direction direction, const unsigned int previousColumnSelected) {
-            auto tempIterator = m_selectedLine;
+        bool expand_column_selection_to_desired (const Direction direction, const int previousColumnSelected) {
+            auto tempIterator = this->m_selectedLine;
             switch (direction) {
                 case UP:
                     --tempIterator;
@@ -495,31 +504,43 @@ class PWEdit {
                     return false;
             }
 
+            char buffer[256];
+            const size_t maxLength     = 20 - 9;
+            (*tempIterator)->substring(buffer, 0, maxLength);
+            const size_t realLength = strlen(buffer);
+            const size_t padding          = maxLength - realLength;
+            *this->m_debugger << "Line = `" << buffer << "`";
+            for (int i = 0; i < padding; ++i)
+                *this->m_debugger << ' ';
+
             bool               redrawNecessary     = false;
             const unsigned int lineLength          = (*tempIterator)->get_size();
             const bool         expansionIsPossible = (lineLength - 1) > previousColumnSelected;
             if (expansionIsPossible) {
                 if (this->m_debugger) {
-                    this->m_debugger->printf("Len %3u\n", lineLength);
-                    this->m_debugger->printf("Old %3u\n", previousColumnSelected);
-                    this->m_debugger->printf("New %3u\n", this->m_selectedColumnInLine);
-                    this->m_debugger->printf("Des %3u\n", this->m_desiredColumnInLine);
+                    this->m_debugger->printf("Old %3d             ", previousColumnSelected);
+                    this->m_debugger->printf("Des %3d             ", this->m_desiredColumnInLine);
+                    this->m_debugger->printf("Len %3u             ", lineLength);
                 }
 
                 const bool expansionIsDesired = this->m_desiredColumnInLine != previousColumnSelected;
                 if (expansionIsDesired) {
-                    if (lineLength >= this->m_desiredColumnInLine)
+                    if (static_cast<int>(lineLength) >= this->m_desiredColumnInLine)
                         this->m_selectedColumnInLine = this->m_desiredColumnInLine;
                     else
                         this->m_selectedColumnInLine = lineLength - 1;
 
                     const unsigned int lastColumnDisplayed = this->m_firstColumnDisplayed + this->m_columns;
-                    if (lastColumnDisplayed < this->m_selectedColumnInLine) {
+                    if (static_cast<int>(lastColumnDisplayed) < this->m_selectedColumnInLine) {
                         this->m_firstColumnDisplayed = this->m_selectedColumnInLine - this->m_columns;
                         this->m_termColumn           = this->m_columns;
                         redrawNecessary = true;
                     } else
                         this->m_termColumn = this->m_selectedColumnInLine - this->m_firstColumnDisplayed + 1;
+                }
+
+                if (this->m_debugger) {
+                    //this->m_debugger->printf("New %3d\n", this->m_selectedColumnInLine);
                 }
             }
             return redrawNecessary;
@@ -731,10 +752,10 @@ class PWEdit {
             else
                 lineReplacement = new StringBuilder(startingBufferSize << 1);
 
-            for (unsigned int i = 0; i < this->m_selectedColumnInLine; ++i)
+            for (int i = 0; i < this->m_selectedColumnInLine; ++i)
                 lineReplacement->put_char(currentLineBuffer[i]);
             lineReplacement->put_char(c);
-            for (unsigned int i = this->m_selectedColumnInLine; i < (currentLine->get_size() + 1); ++i)
+            for (int i = this->m_selectedColumnInLine; i < (currentLine->get_size() + 1); ++i)
                 lineReplacement->put_char(currentLineBuffer[i]);
 
             const auto nextLine = this->m_lines.erase(this->m_selectedLine);
@@ -848,16 +869,16 @@ class PWEdit {
         std::list<StringBuilder *>::iterator m_selectedLine;
 
         /** Index of currently selected line in the file (0-indexed) */
-        unsigned int m_selectedLineNumber;
+        int m_selectedLineNumber;
         /** Index of currently selected column in the line (0-indexed) */
-        unsigned int m_selectedColumnInLine;
+        int m_selectedColumnInLine;
         /**
          * Index of the column that the user actually wants. When moving from a long to a short line, this column
          * may not exist. It is those cases that `m_selectedColumnInLine` may differ from this. The desired column
          * will remain the larger value, that way `m_selectedColumnInLine` can be restored the next time a longer
          * line is selected
          */
-        unsigned int m_desiredColumnInLine;
+        int m_desiredColumnInLine;
 
         /** First visible line of the file (0-indexed) */
         unsigned int m_firstLineDisplayed;
@@ -866,6 +887,9 @@ class PWEdit {
 
         /** Has the file content been modified */
         bool m_modified;
+
+        /** Key to be used for deleting the previous character */
+        char m_backspaceKey;
 };
 
 }
