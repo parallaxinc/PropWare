@@ -34,9 +34,12 @@ if (DOXYGEN_FOUND)
     configure_file("${PROJECT_SOURCE_DIR}/Doxyfile.in"
         "${PROJECT_SOURCE_DIR}/Doxyfile"
         @ONLY)
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+
+    set(GENERATED_FILES_TO_CLEAN
         "${PROJECT_SOURCE_DIR}/docs/Download.md"
         "${PROJECT_SOURCE_DIR}/Doxyfile")
+    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+        "${GENERATED_FILES_TO_CLEAN}")
 
     add_custom_target(docs
         "${DOXYGEN_EXECUTABLE}" Doxyfile
