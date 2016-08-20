@@ -129,7 +129,7 @@ virtual
 
             this->m_echo.set_dir_in();
             waitpeq(this->m_echo.get_mask(), this->m_echo.get_mask());
-            volatile uint32_t start = CNT;
+            const uint32_t start = CNT;
             waitpne(this->m_echo.get_mask(), this->m_echo.get_mask());
             return CNT - start;
         }

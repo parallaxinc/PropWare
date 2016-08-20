@@ -264,6 +264,8 @@ class SPI : public PrintCapable,
         /**
          * @brief       Send an array of data at max transmit speed. Mode is always MODE_0 and data is always MSB first
          *
+         * Clock will run at 4 MHz with a sustained 3.33 Mbps average bitrate over multiple bytes.
+         *
          * @param[in]   buffer[]        Address where data is stored
          * @param[in]   numberOfBytes   Number of words to send
          */
@@ -271,7 +273,7 @@ class SPI : public PrintCapable,
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=",  "SpiBlockWriteStart%=")
             FC_START("SpiBlockWriteStart%=", "SpiBlockWriteEnd%=")
-                    "       jmp #" FC_ADDR("outerLoop%=", "SpiBlockWriteStart%=") "                             \n\t"
+                    "       jmp #" FC_ADDR("loopOverBytes%=", "SpiBlockWriteStart%=") "                         \n\t"
 
                     // Temporary variables
                     "bitIdx%=:                                                                                  \n\t"
@@ -280,22 +282,22 @@ class SPI : public PrintCapable,
                     "       nop                                                                                 \n\t"
 
 
-                    "outerLoop%=:                                                                               \n\t"
+                    "loopOverBytes%=:                                                                           \n\t"
                     "       rdbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
                     "       mov " ASMVAR(bitIdx) ", #8                                                          \n\t"
                     "       ror " ASMVAR(data) ", " ASMVAR(bitIdx) "                                            \n\t"
 
-                    "loop%=:                                                                                    \n\t"
+                    "loopOverBits%=:                                                                            \n\t"
                     "       rol " ASMVAR(data) ", #1 wc                                                         \n\t"
                     "       muxc outa, %[_mosi]                                                                 \n\t"
                     "       xor outa, %[_sclk]                                                                  \n\t"
                     "       xor outa, %[_sclk]                                                                  \n\t"
-                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("loop%=", "SpiBlockWriteStart%=") "             \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("loopOverBits%=", "SpiBlockWriteStart%=") "     \n\t"
 
                     // Write the word back to the buffer in HUB memory
                     "       add %[_bufAdr], #1                                                                  \n\t"
 
-                    "       djnz %[_numberOfBytes], #" FC_ADDR("outerLoop%=", "SpiBlockWriteStart%=") "        \n\t"
+                    "       djnz %[_numberOfBytes], #" FC_ADDR("loopOverBytes%=", "SpiBlockWriteStart%=") "     \n\t"
 
                     "       or outa, %[_mosi]                                                                   \n\t"
                     FC_END("SpiBlockWriteEnd%=")

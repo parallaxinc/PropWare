@@ -42,4 +42,10 @@ void __gxx_personality_sj0 () {
     }
 }
 
+void *__dso_handle = 0;
+
+int __cxa_atexit (void (*destructor) (void *), void *arg, void *dso) {
+    return 0;
+}
+
 }

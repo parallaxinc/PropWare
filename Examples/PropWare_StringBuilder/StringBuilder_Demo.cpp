@@ -88,7 +88,7 @@ int main () {
 }
 
 unsigned int run_buffered (const int iterations) {
-    const volatile unsigned int timerStart = CNT;
+    const unsigned int timerStart = CNT;
 
     StringBuilder string;
     const Printer stringStream(string);
@@ -103,7 +103,7 @@ unsigned int run_buffered (const int iterations) {
 }
 
 unsigned int run_static_buffered (const int iterations) {
-    const volatile unsigned int timerStart = CNT;
+    const unsigned int timerStart = CNT;
 
     char buffer[4096];
     StaticStringBuilder string(buffer);
@@ -119,7 +119,7 @@ unsigned int run_static_buffered (const int iterations) {
 }
 
 unsigned int run_unbuffered (const int iterations) {
-    const volatile unsigned int timerStart = CNT;
+    const unsigned int timerStart = CNT;
     for (int i = 0; i < iterations; ++i) {
         pwOut << next_fibonacci();
         if (i != iterations - 1)
