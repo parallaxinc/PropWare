@@ -42,6 +42,10 @@
 #include <ctype.h>
 #endif
 
+#ifdef __PROPELLER_COG__
+#define PropWare PropWare_cog
+#endif
+
 /**
  * @brief   Generic definitions and functions for the Parallax Propeller
  */

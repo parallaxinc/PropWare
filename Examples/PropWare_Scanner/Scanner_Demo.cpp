@@ -1,5 +1,5 @@
 /**
- * @file    Scanner_Demo.cpp
+ * @file    Examples/PropWare_Scanner/Scanner_Demo.cpp
  *
  * @author  David Zemon
  *

@@ -4,6 +4,7 @@ find_package(PropWare REQUIRED)
 project(BufferedUARTRX_Demo CXX COGCXX)
 
 create_simple_executable(${PROJECT_NAME}
-    BufferedUARTRX_Demo.cpp
+    BufferedUART_Demo.cpp
+    buffereduarttx.cogcpp
     buffereduartrx.cogcpp
 )

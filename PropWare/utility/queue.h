@@ -26,6 +26,12 @@
 #pragma once
 
 #include <cstddef>
+#include <propeller.h>
+
+// Need to include this since PropWare.h is not imported
+#ifdef __PROPELLER_COG__
+#define PropWare PropWare_cog
+#endif
 
 namespace PropWare {
 
@@ -42,8 +48,13 @@ class Queue {
          * @param[in]   array   Statically allocated instance of an array, NOT a pointer
          */
         template<size_t N>
-        Queue (T (&array)[N])
-                : m_array(array), m_arrayLength(N), m_size(0), m_head(-1), m_tail(-1) {
+        Queue (T (&array)[N], const int lockNumber = locknew())
+                : m_array(array),
+                  m_arrayLength(N),
+                  m_lockNumber(lockNumber),
+                  m_size(0),
+                  m_head(-1),
+                  m_tail(-1) {
         }
 
         /**
@@ -52,11 +63,16 @@ class Queue {
          * This constructor is not recommended unless dynamic allocation is used. When using statically allocated
          * arrays, use the single-parameter constructor
          *
-         * @param[in]   *array  Address where the array begins
+         * @param[in]   array   Address where the array begins
          * @param[in]   length  Number of elements allocated for the array
          */
-        Queue (T *array, const size_t length)
-                : m_array(array), m_arrayLength(length), m_size(0), m_head(-1), m_tail(-1) {
+        Queue (T *array, const size_t length, const int lockNumber)
+                : m_array(array),
+                  m_arrayLength(length),
+                  m_lockNumber(locknew()),
+                  m_size(0),
+                  m_head(-1),
+                  m_tail(-1) {
         }
 
         /**
@@ -96,37 +112,50 @@ class Queue {
         /**
          * @brief       Insert an element to the buffer
          *
-         * @param[in]   &value  Value to be inserted at the end of the buffer
+         * @param[in]   value   Value to be inserted at the end of the buffer
          *
          * @post        If the buffer is already full, the oldest value will be overwritten with the `value` parameter
          *
          * @return      In order to allow chained calls to `PropWare::Queue::enqueue`, the Queue instance is returned
          */
         Queue &enqueue (const T &value) {
+            // Lock the state and save off these volatile variables into local memory
+            while (lockset(this->m_lockNumber));
+            int    head        = this->m_head;
+            int    tail        = this->m_tail;
+            size_t size        = this->m_size;
+
             // Move the head pointer
             if (this->is_empty())
-                this->m_head = 0;
+                head = 0;
             else {
-                ++this->m_head;
+                ++head;
                 // If the head has reached the end of the memory block, rollover
-                if (this->m_arrayLength == (unsigned int) this->m_head)
-                    this->m_head = 0;
+                if (this->m_arrayLength == (unsigned int) head)
+                    head = 0;
             }
 
-            this->m_array[this->m_head] = value;
+            this->m_array[head] = value;
 
             // If the buffer was previously empty, assign the tail pointer
             if (this->is_empty())
-                this->m_tail = this->m_head;
+                tail = head;
 
             // If the buffer wasn't full, increment the size
             if (this->size() == this->m_arrayLength) {
                 // Move the tail forward and roll over if necessary
-                ++this->m_tail;
-                if ((unsigned int) this->m_tail == this->m_arrayLength)
-                    this->m_tail = 0;
-            } else
-                ++this->m_size;
+                ++tail;
+                if ((unsigned int) tail == this->m_arrayLength)
+                    tail = 0;
+            } else {
+                ++size;
+            }
+
+            // Unlock the state and upload these variables back to volatile memory
+            this->m_head        = head;
+            this->m_tail        = tail;
+            this->m_size        = size;
+            lockclr(this->m_lockNumber);
 
             return *this;
         }
@@ -146,24 +175,37 @@ class Queue {
          * @return  Oldest value in the buffer
          */
         T dequeue () {
+            // Lock the state and save off these volatile variables into local memory
+            while (lockset(this->m_lockNumber));
+            int    head        = this->m_head;
+            int    tail        = this->m_tail;
+            size_t size        = this->m_size;
+
+            T *retVal;
             if (this->size()) {
-                T *retVal = &this->m_array[this->m_tail];
+                retVal = &this->m_array[tail];
 
-                --this->m_size;
+                --size;
 
-                if (this->size()) {
+                if (size) {
                     // Move the tail forward and roll over if necessary
-                    ++this->m_tail;
-                    if ((unsigned int) this->m_tail == this->m_arrayLength)
-                        this->m_tail = 0;
+                    ++tail;
+                    if ((unsigned int) tail == this->m_arrayLength)
+                        tail = 0;
                 } else {
-                    this->m_tail = -1;
-                    this->m_head = -1;
+                    tail = -1;
+                    head = -1;
                 }
-
-                return *retVal;
             } else
-                return *(T *) NULL;
+                retVal = NULL;
+
+            // Unlock the state and upload these variables back to volatile memory
+            this->m_head        = head;
+            this->m_tail        = tail;
+            this->m_size        = size;
+            lockclr(this->m_lockNumber);
+
+            return *retVal;
         }
 
         /**
@@ -196,6 +238,7 @@ class Queue {
     private:
         T            *m_array;
         const size_t m_arrayLength;
+        const int    m_lockNumber;
 
         volatile size_t m_size;
         volatile int    m_head;

@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/utility/queue.h
+ * @file        PropWare/utility/charqueue.h
  *
  * @author      David Zemon
  *
@@ -31,22 +31,34 @@
 
 namespace PropWare {
 
+/**
+ * @brief   Provide a communication buffer for character data between cogs
+ *
+ * Typically used for buffered UART implementations. Note that the put_char and get_char methods are blocking to
+ * ensure that put_char does not attempt to write to a full buffer and get_char does not attempt to read from an
+ * empty buffer. For this reason, you should be careful about using the enqueue and dequeue methods directly when
+ * using a CharQueue object because they will allow you to write to a full queue and read from an empty one.
+ */
 class CharQueue : public Queue<char>,
                   public ScanCapable,
                   public PrintCapable {
     public:
         template<size_t N>
-        CharQueue (char (&array)[N]) : Queue(array) {
+        CharQueue (char (&array)[N], const int lockNumber = locknew())
+                : Queue(array, lockNumber) {
         }
 
-        CharQueue (char *array, const size_t length) : Queue(array, length) {
+        CharQueue (char *array, const size_t length, const int lockNumber)
+                : Queue(array, length, lockNumber) {
         }
 
         virtual char get_char () {
+            while(this->is_empty());
             return this->dequeue();
         }
 
         virtual void put_char (const char c) {
+            while(this->is_full());
             this->enqueue(c);
         }
 

@@ -1,5 +1,5 @@
 /**
- * @file    BufferedUARTTX_Demo.cpp
+ * @file    BufferedUARTRX_Demo.h
  *
  * @author  David Zemon
  *
@@ -23,31 +23,12 @@
  * SOFTWARE.
  */
 
-#include <PropWare/hmi/output/printer.h>
-#include <PropWare/hmi/input/scanner.h>
+#pragma once
+
 #include <PropWare/utility/charqueue.h>
+#define STACK_SIZE 64
 
-/**
- * @example     BufferedUARTRX_Demo.cpp
- *
- * Write "Hello world!" out via UART protocol and receive an echo
- *
- * @include PropWare_UARTRX/CMakeLists.txt
- */
-int main () {
-    //extern unsigned int _load_start_buffereduartrx_cog[];
-    char buffer[256];
-    //PropWare::CharQueue queue(buffer);
-    //cognew(_load_start_buffereduartrx_ecog, &queue);
-
-    pwOut << "Hello! I'm going to say some things. I want you to answer them on your keyboard.\n";
-    pwOut << "You won't see anything as you type - but don't worry, I'm catching it all.\n";
-    pwOut << '\n';
-    pwOut << "What's your name?\n";
-    waitcnt(SECOND *2 + CNT);
-
-    //PropWare::Scanner scanner(queue);
-    //char input[32];
-    //scanner >> input;
-    //pwOut << "Your name is: " << input << "\n";
-}
+typedef struct {
+    unsigned int        stack[STACK_SIZE];
+    volatile PropWare::CharQueue *queue;
+} BufferedUARTMailbox;

@@ -27,17 +27,17 @@
 
 #include <PropWare/PropWare.h>
 
-namespace PropWare {
-
-#ifdef __PROPELLER_COG__
-#define virtual
-#endif
-
 extern "C" {
 extern int _cfg_baudrate;
 extern int _cfg_txpin;
 extern int _cfg_rxpin;
 }
+
+namespace PropWare {
+
+#ifdef __PROPELLER_COG__
+#define virtual
+#endif
 
 /**
  * @brief   Abstract base class for all unbuffered UART devices

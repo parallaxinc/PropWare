@@ -25,6 +25,11 @@
 
 #pragma once
 
+// Need to include this since PropWare.h is not imported
+#ifdef __PROPELLER_COG__
+#define PropWare PropWare_cog
+#endif
+
 namespace PropWare {
 
 /**

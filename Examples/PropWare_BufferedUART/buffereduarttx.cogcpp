@@ -1,7 +1,7 @@
 /**
- * @file    BufferedUARTTX_Demo.h
+ * @file        Examples/PropWare_BufferedUART/buffereduarttx.cogcpp
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -23,14 +23,17 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include "BufferedUART_Demo.h"
+#include <PropWare/serial/uart/uarttx.h>
 
+_NATIVE int main () {
+    PropWare::CharQueue *buffer = *reinterpret_cast<PropWare::CharQueue **>(PAR);
 
+    const PropWare::UARTTX tx;
 
-#define STACK_SIZE 64
-
-struct MailBox {
-    unsigned int stack[STACK_SIZE];
-    CharQueue *queue;
-
-};
+    while (1) {
+        while (buffer->is_empty());
+        const char c = buffer->dequeue();
+        tx.send(static_cast<uint16_t>(c));
+    }
+}

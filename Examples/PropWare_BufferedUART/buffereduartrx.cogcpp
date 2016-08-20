@@ -1,5 +1,5 @@
 /**
- * @file        Examples/PropWare_BufferedUARTRX/buffereduartrx.cogcpp
+ * @file        Examples/PropWare_BufferedUART/buffereduartrx.cogcpp
  *
  * @author      David Zemon
  *
@@ -23,18 +23,16 @@
  * SOFTWARE.
  */
 
+#include "BufferedUART_Demo.h"
 #include <PropWare/serial/uart/uartrx.h>
-#include <PropWare/utility/charqueue.h>
-
-using namespace PropWare;
 
 _NATIVE int main () {
-    CharQueue *buffer = reinterpret_cast<CharQueue *>(PAR);
+    PropWare::CharQueue *buffer = *reinterpret_cast<PropWare::CharQueue **>(PAR);
 
-    const UARTRX rx(Port::NULL_PIN);
+    const PropWare::UARTRX rx;
 
-    //while (1) {
-    //    const char c = static_cast<char>(rx.receive());
-    //    buffer->enqueue(c);
-    //}
+    while (1) {
+        const char c = static_cast<char>(rx.receive());
+        buffer->enqueue(c);
+    }
 }
