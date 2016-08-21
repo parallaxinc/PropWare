@@ -162,8 +162,6 @@ class SPI : public PrintCapable,
          * @brief       Set the mode of SPI communication
          *
          * @param[in]   mode    Sets the SPI mode to one MODE_0, MODE_1, MODE_2, or MODE_3
-         *
-         * @return      Can return non-zero in the case of a timeout
          */
         void set_mode (const Mode mode) {
             this->m_mode = mode;
@@ -179,8 +177,6 @@ class SPI : public PrintCapable,
          *
          * @param[in]   bitmode     Select one of LSB_FIRST or MSB_FIRST to choose which bit will be shifted
          *                          out first
-         *
-         * @return      Can return non-zero in the case of a timeout
          */
         void set_bit_mode (const BitMode bitmode) {
             this->m_bitmode = bitmode;
