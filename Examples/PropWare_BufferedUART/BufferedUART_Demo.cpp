@@ -1,5 +1,5 @@
 /**
- * @file    BufferedUART_Demo.cpp
+ * @file    Examples/PropWare_BufferedUART/BufferedUART_Demo.cpp
  *
  * @author  David Zemon
  *

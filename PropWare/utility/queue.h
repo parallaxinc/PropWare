@@ -31,6 +31,7 @@
 // Need to include this since PropWare.h is not imported
 #ifdef __PROPELLER_COG__
 #define PropWare PropWare_cog
+#define virtual
 #endif
 
 namespace PropWare {
@@ -53,8 +54,9 @@ class Queue {
                   m_arrayLength(N),
                   m_lockNumber(lockNumber),
                   m_size(0),
-                  m_head(-1),
-                  m_tail(-1) {
+                  m_head(0),
+                  m_tail(0) {
+            lockclr(this->m_lockNumber);
         }
 
         /**
@@ -71,8 +73,14 @@ class Queue {
                   m_arrayLength(length),
                   m_lockNumber(locknew()),
                   m_size(0),
-                  m_head(-1),
-                  m_tail(-1) {
+                  m_head(0),
+                  m_tail(0) {
+            lockclr(this->m_lockNumber);
+        }
+
+        ~Queue () {
+            lockclr(this->m_lockNumber);
+            lockret(this->m_lockNumber);
         }
 
         /**
@@ -118,43 +126,39 @@ class Queue {
          *
          * @return      In order to allow chained calls to `PropWare::Queue::enqueue`, the Queue instance is returned
          */
-        Queue &enqueue (const T &value) {
+        virtual Queue &enqueue (const T &value) {
             // Lock the state and save off these volatile variables into local memory
             while (lockset(this->m_lockNumber));
-            int    head        = this->m_head;
-            int    tail        = this->m_tail;
-            size_t size        = this->m_size;
+            unsigned int head = this->m_head;
+            unsigned int tail = this->m_tail;
+            size_t       size = this->m_size;
 
             // Move the head pointer
-            if (this->is_empty())
-                head = 0;
+            if (0 == size)
+                head = tail = 0;
             else {
                 ++head;
                 // If the head has reached the end of the memory block, rollover
-                if (this->m_arrayLength == (unsigned int) head)
+                if (head == this->m_arrayLength)
                     head = 0;
             }
 
             this->m_array[head] = value;
 
-            // If the buffer was previously empty, assign the tail pointer
-            if (this->is_empty())
-                tail = head;
-
             // If the buffer wasn't full, increment the size
-            if (this->size() == this->m_arrayLength) {
+            if (size == this->m_arrayLength) {
                 // Move the tail forward and roll over if necessary
                 ++tail;
-                if ((unsigned int) tail == this->m_arrayLength)
+                if (tail == this->m_arrayLength)
                     tail = 0;
             } else {
                 ++size;
             }
 
             // Unlock the state and upload these variables back to volatile memory
-            this->m_head        = head;
-            this->m_tail        = tail;
-            this->m_size        = size;
+            this->m_head = head;
+            this->m_tail = tail;
+            this->m_size = size;
             lockclr(this->m_lockNumber);
 
             return *this;
@@ -174,15 +178,15 @@ class Queue {
          *
          * @return  Oldest value in the buffer
          */
-        T dequeue () {
+        virtual T dequeue () {
             // Lock the state and save off these volatile variables into local memory
             while (lockset(this->m_lockNumber));
-            int    head        = this->m_head;
-            int    tail        = this->m_tail;
-            size_t size        = this->m_size;
+            unsigned int head = this->m_head;
+            unsigned int tail = this->m_tail;
+            size_t       size = this->m_size;
 
             T *retVal;
-            if (this->size()) {
+            if (size) {
                 retVal = &this->m_array[tail];
 
                 --size;
@@ -190,19 +194,16 @@ class Queue {
                 if (size) {
                     // Move the tail forward and roll over if necessary
                     ++tail;
-                    if ((unsigned int) tail == this->m_arrayLength)
+                    if (tail == this->m_arrayLength)
                         tail = 0;
-                } else {
-                    tail = -1;
-                    head = -1;
                 }
             } else
                 retVal = NULL;
 
             // Unlock the state and upload these variables back to volatile memory
-            this->m_head        = head;
-            this->m_tail        = tail;
-            this->m_size        = size;
+            this->m_head = head;
+            this->m_tail = tail;
+            this->m_size = size;
             lockclr(this->m_lockNumber);
 
             return *retVal;
@@ -235,14 +236,18 @@ class Queue {
             return valid;
         }
 
-    private:
+    protected:
         T            *m_array;
         const size_t m_arrayLength;
         const int    m_lockNumber;
 
-        volatile size_t m_size;
-        volatile int    m_head;
-        volatile int    m_tail;
+        volatile size_t       m_size;
+        volatile unsigned int m_head;
+        volatile unsigned int m_tail;
 };
 
 }
+
+#ifdef __PROPELLER_COG__
+#undef virtual
+#endif

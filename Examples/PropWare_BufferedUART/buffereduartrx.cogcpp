@@ -33,6 +33,7 @@ _NATIVE int main () {
 
     while (1) {
         const char c = static_cast<char>(rx.receive());
+        while (buffer->is_full());
         buffer->enqueue(c);
     }
 }

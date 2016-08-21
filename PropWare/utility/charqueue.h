@@ -29,6 +29,10 @@
 #include <PropWare/hmi/input/scancapable.h>
 #include <PropWare/hmi/output/printcapable.h>
 
+#ifdef __PROPELLER_COG__
+#define virtual
+#endif
+
 namespace PropWare {
 
 /**
@@ -53,12 +57,12 @@ class CharQueue : public Queue<char>,
         }
 
         virtual char get_char () {
-            while(this->is_empty());
+            while (this->is_empty());
             return this->dequeue();
         }
 
         virtual void put_char (const char c) {
-            while(this->is_full());
+            while (this->is_full());
             this->enqueue(c);
         }
 
@@ -72,3 +76,7 @@ class CharQueue : public Queue<char>,
 };
 
 }
+
+#ifdef __PROPELLER_COG__
+#undef virtual
+#endif

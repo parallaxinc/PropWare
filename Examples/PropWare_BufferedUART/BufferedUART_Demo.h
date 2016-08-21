@@ -1,5 +1,5 @@
 /**
- * @file    BufferedUARTRX_Demo.h
+ * @file    Examples/PropWare_BufferedUART/BufferedUART_Demo.h
  *
  * @author  David Zemon
  *
