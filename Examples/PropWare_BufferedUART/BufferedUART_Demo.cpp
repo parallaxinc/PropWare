@@ -34,16 +34,16 @@ void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueSc
 bool isAnswerNo (char const userInput[]);
 
 /**
- * @example     BufferedUARTRX_Demo.cpp
+ * @example     BufferedUART_Demo.cpp
  *
  * Communicate via independent and buffered UART drivers. Note that this is just an easy way to show buffered UART
  * drivers, not a recommended application. For interaction with a human, the static variables `pwOut` and `pwIn` will
  * be more effecient. Buffered UART drivers are great for interacting with other machines/microcontrollers/sensors/etc.
  *
- * @include Examples/PropWare_UARTRX/CMakeLists.txt
- * @include Examples/PropWare_UARTRX/BufferedUART_Demo.h
- * @include Examples/PropWare_UARTRX/buffereduarttx.cogcpp
- * @include Examples/PropWare_UARTRX/buffereduartrx.cogcpp
+ * @include Examples/PropWare_BufferedUART/CMakeLists.txt
+ * @include Examples/PropWare_BufferedUART/BufferedUART_Demo.h
+ * @include Examples/PropWare_BufferedUART/buffereduarttx.cogcpp
+ * @include Examples/PropWare_BufferedUART/buffereduartrx.cogcpp
  */
 int main () {
     char                transmitBuffer[BUFFER_SIZE];

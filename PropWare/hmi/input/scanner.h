@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/string/scanner/scanner.h
+ * @file        PropWare/hmi/input/scanner.h
  *
  * @author      David Zemon
  *
