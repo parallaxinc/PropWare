@@ -25,16 +25,9 @@
 
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/input/scanner.h>
-#include <PropWare/gpio/pin.h>
 #include "BufferedUART_Demo.h"
 
-static BufferedUARTMailbox transmitMailbox;
-static BufferedUARTMailbox receiveMailbox;
-
 static const size_t BUFFER_SIZE = 256;
-
-static char transmitBuffer[BUFFER_SIZE];
-static char receiveBuffer[BUFFER_SIZE];
 
 void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
 
@@ -53,15 +46,19 @@ bool isAnswerNo (char const userInput[]);
  * @include Examples/PropWare_UARTRX/buffereduartrx.cogcpp
  */
 int main () {
+    char                transmitBuffer[BUFFER_SIZE];
     PropWare::CharQueue transmitQueue(transmitBuffer, BUFFER_SIZE, locknew());
-    extern unsigned int         _load_start_buffereduarttx_cog[];
+    BufferedUARTMailbox transmitMailbox;
     transmitMailbox.queue = &transmitQueue;
+    extern unsigned int _load_start_buffereduarttx_cog[];
     cognew(_load_start_buffereduarttx_cog, &transmitMailbox.queue);
     PropWare::Printer queuePrinter(transmitQueue);
 
+    char                receiveBuffer[BUFFER_SIZE];
     PropWare::CharQueue receiveQueue(receiveBuffer);
-    extern unsigned int _load_start_buffereduartrx_cog[];
+    BufferedUARTMailbox receiveMailbox;
     receiveMailbox.queue = &receiveQueue;
+    extern unsigned int _load_start_buffereduartrx_cog[];
     cognew(_load_start_buffereduartrx_cog, &receiveMailbox.queue);
     PropWare::Scanner queueScanner(receiveQueue, &queuePrinter);
 
