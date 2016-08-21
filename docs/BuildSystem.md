@@ -1,7 +1,7 @@
 Build System {#BuildSystem}
 ============
 
-Be sure to check out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
+Be sure to get_non_blocking out CMake's official documentation at [cmake.org](http://cmake.org/cmake/help/documentation.html).
 Remember that %PropWare requires CMake 3.3+.
 
 Bare Minimum

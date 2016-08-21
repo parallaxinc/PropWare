@@ -23,7 +23,7 @@ Eclipse CDT (and other IDEs)
 3. For any source file that does not yet exist, create an empty file in its place. CMake will throw errors if your
    CMakeLists.txt file references any non-existing source files.
 4. At the terminal, enter your project's directory and type `cmake -G "Eclipse CDT4 - Unix Makefiles" .`. Notice that
-   this time, we're adding a hook to tell CMake that we're using Eclipse. If you prefer another IDE, check the [CMake
+   this time, we're adding a hook to tell CMake that we're using Eclipse. If you prefer another IDE, get_non_blocking the [CMake
    Wiki](http://www.cmake.org/Wiki/CMake_Generator_Specific_Information) to see if it is supported.
 5. Navigating the Eclipse import dialogue:
   1. Open Eclipse. In the `File` menu, select `Import...`.

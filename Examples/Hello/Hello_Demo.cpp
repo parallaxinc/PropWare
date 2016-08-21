@@ -23,7 +23,10 @@
  * SOFTWARE.
  */
 
-#define TEST_PROPWARE
+#define TEST_PROPWARE_UART
+//#define TEST_PROPWARE_UART_PRINTF
+//#define TEST_PROPWARE_FDS
+//#define TEST_PROPWARE_FDS_PRINTF
 //#define TEST_PROPWARE_PRINTF
 //#define TEST_SIMPLE
 //#define TEST_TINYSTREAM
@@ -34,7 +37,8 @@
 // Includes
 #include <PropWare/PropWare.h>
 
-#if (defined TEST_PROPWARE || defined TEST_PROPWARE_PRINTF)
+#if (defined TEST_PROPWARE_UART || defined TEST_PROPWARE_UART_PRINTF || \
+ defined TEST_PROPWARE_FDS || defined TEST_PROPWARE_FDS_PRINTF)
 #include <PropWare/hmi/output/printer.h>
 using namespace PropWare;
 #else
@@ -43,7 +47,9 @@ int _cfg_txpin    = -1;
 int _cfg_baudrate = -1;
 #endif
 
-#if defined TEST_SIMPLE
+#if (defined TEST_PROPWARE_FDS || defined TEST_PROPWARE_FDS_PRINTF)
+#include <PropWare/serial/uart/fullduplexserial.h>
+#elif defined TEST_SIMPLE
 #include <simpletext.h>
 #elif defined TEST_TINYSTREAM
 #include <tinystream>
@@ -68,7 +74,11 @@ std::stream cout;
 int main () {
     uint32_t i = 0;
 
-#ifdef TEST_FDSERIAL
+#if defined TEST_PROPWARE_FDS || defined TEST_PROPWARE_FDS_PRINTF
+    PropWare::FullDuplexSerial serial;
+    serial.start();
+    PropWare::Printer printer(serial);
+#elif defined TEST_FDSERIAL
     fdserial *serial = fdserial_open(_cfg_rxpin, _cfg_txpin, 0, _cfg_baudrate);
 #elif defined TEST_LIBPROPELLER
     libpropeller::Serial serial;
@@ -76,10 +86,14 @@ int main () {
 #endif
 
     while (1) {
-#ifdef TEST_PROPWARE
+#ifdef TEST_PROPWARE_UART
         pwOut << "Hello, world! " << Printer::Format(3, '0') << i << " 0x" << Printer::Format(2, '0', 16) << i << '\n';
-#elif defined TEST_PROPWARE_PRINTF
+#elif defined TEST_PROPWARE_UART_PRINTF
         pwOut.printf("Hello, world! %03d 0x%02X\n", i, i);
+#elif defined TEST_PROPWARE_FDS
+        printer << "Hello, world! " << Printer::Format(3, '0') << i << " 0x" << Printer::Format(2, '0', 16) << i << '\n';
+#elif defined TEST_PROPWARE_FDS_PRINTF
+        printer.printf("Hello, world! %03d 0x%02X\n", i, i);
 #elif defined TEST_SIMPLE
         printi("Hello, world! %03d 0x%02x\n", i, i);
 #elif defined TEST_TINYSTREAM

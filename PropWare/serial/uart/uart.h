@@ -26,12 +26,7 @@
 #pragma once
 
 #include <PropWare/PropWare.h>
-
-extern "C" {
-extern int _cfg_baudrate;
-extern int _cfg_txpin;
-extern int _cfg_rxpin;
-}
+#include <PropWare/serial/uart/uartcommondata.h>
 
 namespace PropWare {
 

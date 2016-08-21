@@ -36,8 +36,11 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/serial/spi/spi.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/shareduarttx.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uart.h
+    ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uartcommondata.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uartrx.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uarttx.h
+    ${CMAKE_CURRENT_LIST_DIR}/serial/uart/fullduplexserial.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/serial/uart/fullduplexserial.h
     ${CMAKE_CURRENT_LIST_DIR}/string/staticstringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/string/stringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/charqueue.h
