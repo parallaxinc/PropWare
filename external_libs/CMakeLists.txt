@@ -36,7 +36,7 @@ set(LIBPROPELLERUINO_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libArduino/libPropelleru
 
 ####################################################################
 # Find Simple sources
-set(SIMPLE_ROOT "${PROJECT_SOURCE_DIR}/propsideworkspace/Learn/Simple Libraries")
+set(SIMPLE_ROOT "${PROJECT_SOURCE_DIR}/Simple-Libraries/Learn/Simple Libraries")
 
 set(SOURCE_FILE_EXTENSIONS
     *.c

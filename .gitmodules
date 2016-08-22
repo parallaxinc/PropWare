@@ -10,3 +10,6 @@
 [submodule "libArduino"]
 	path = libArduino
 	url = https://github.com/DavidZemon/libArduino.git
+[submodule "Simple-Libraries"]
+	path = Simple-Libraries
+	url = https://github.com/parallaxinc/Simple-Libraries

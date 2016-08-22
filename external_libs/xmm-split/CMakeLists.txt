@@ -1,7 +1,7 @@
 set(MODEL xmm-split)
 
 # WAV player need to be optimized for speed, not size
-set_source_files_properties("${PROJECT_SOURCE_DIR}/propsideworkspace/Learn/Simple Libraries/Audio/libwavplayer/wavplayer.c"
+set_source_files_properties("${SIMPLE_ROOT}/Audio/libwavplayer/wavplayer.c"
     PROPERTIES COMPILE_FLAGS "-O3")
 
 create_library(Libpropeller_${MODEL} STATIC ${LIBPROPELLER_OBJECTS})

@@ -136,8 +136,6 @@ install(DIRECTORY
     PATTERN libpropeller/libpropeller/compile_tools EXCLUDE
     PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
 
-# libPropelleruino includes
-
 # Version file
 file(WRITE "${PROJECT_BINARY_DIR}/version.txt" "${PROJECT_VERSION}")
 install(FILES
