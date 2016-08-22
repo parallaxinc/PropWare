@@ -25,6 +25,7 @@
 
 #include <PropWare/PropWare.h>
 #include <PropWare/hmi/output/printer.h>
+#include <PropWare/gpio/simpleport.h>
 #include <PropWare/sensor/analog/mcp3xxx.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */

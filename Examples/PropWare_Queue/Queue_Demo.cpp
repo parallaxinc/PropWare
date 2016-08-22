@@ -5,7 +5,7 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/utility/queue.h>
+#include <PropWare/utility/collection/queue.h>
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/input/scanner.h>
 

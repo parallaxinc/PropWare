@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/monitor/watchdog.h
+ * @file        PropWare/concurrent/watchdog.h
  *
  * @author      David Zemon
  *
@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/utility/runnable.h>
+#include <PropWare/concurrent/runnable.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/utility/utility.h>
 

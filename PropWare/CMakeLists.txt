@@ -1,4 +1,6 @@
 set(PROPWARE_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/concurrent/runnable.h
+    ${CMAKE_CURRENT_LIST_DIR}/concurrent/watchdog.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfile.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilereader.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/fat/fatfilewriter.h
@@ -22,7 +24,6 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/memory/blockstorage.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/eeprom.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/sd.h
-    ${CMAKE_CURRENT_LIST_DIR}/monitor/watchdog.h
     ${CMAKE_CURRENT_LIST_DIR}/motor/stepper.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/analog/mcp3xxx.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/analog/pcf8591.h
@@ -32,7 +33,6 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/serial/can/mcp2515.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2c.cpp
     ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2c.h
-    ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2cbase.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/spi/spi.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/shareduarttx.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uart.h
@@ -43,11 +43,10 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/fullduplexserial.h
     ${CMAKE_CURRENT_LIST_DIR}/string/staticstringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/string/stringbuilder.h
-    ${CMAKE_CURRENT_LIST_DIR}/utility/charqueue.h
+    ${CMAKE_CURRENT_LIST_DIR}/utility/collection/charqueue.h
+    ${CMAKE_CURRENT_LIST_DIR}/utility/collection/queue.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.h
-    ${CMAKE_CURRENT_LIST_DIR}/utility/queue.h
-    ${CMAKE_CURRENT_LIST_DIR}/utility/runnable.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/utility.h
     ${CMAKE_CURRENT_LIST_DIR}/c++allocate.h
     ${CMAKE_CURRENT_LIST_DIR}/PropWare.cpp

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/utility/charqueue.h>
+#include <PropWare/utility/collection/charqueue.h>
 #define STACK_SIZE 64
 
 typedef struct {

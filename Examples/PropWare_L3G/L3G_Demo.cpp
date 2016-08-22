@@ -25,6 +25,7 @@
 
 // Includes
 #include <PropWare/PropWare.h>
+#include <PropWare/gpio/simpleport.h>
 #include <PropWare/sensor/gyroscope/l3g.h>
 
 /** Pin number for MOSI (master out - slave in) */

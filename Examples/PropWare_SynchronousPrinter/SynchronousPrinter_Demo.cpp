@@ -4,10 +4,9 @@
  * @author  David Zemon
  */
 
-#include <PropWare/utility/runnable.h>
+#include <PropWare/concurrent/runnable.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/hmi/output/synchronousprinter.h>
-#include <PropWare/gpio/port.h>
 #include <PropWare/gpio/pin.h>
 
 const uint16_t     COGS             = 8;

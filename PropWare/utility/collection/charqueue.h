@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/utility/charqueue.h
+ * @file        PropWare/utility/collection/charqueue.h
  *
  * @author      David Zemon
  *
@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/utility/queue.h>
+#include <PropWare/utility/collection/queue.h>
 #include <PropWare/hmi/input/scancapable.h>
 #include <PropWare/hmi/output/printcapable.h>
 

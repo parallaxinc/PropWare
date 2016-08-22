@@ -4,7 +4,7 @@
  * @author  Modified by David Zemon
  */
 
-#include <PropWare/utility/runnable.h>
+#include <PropWare/concurrent/runnable.h>
 #include <PropWare/PropWare.h>
 #include <PropWare/hmi/output/synchronousprinter.h>
 #include <PropWare/gpio/pin.h>

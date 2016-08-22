@@ -1,5 +1,5 @@
 /**
- * @file    UARTTX_Demo.cpp
+ * @file    Examples/PropWare_UARTRX/UARTTX_Demo.cpp
  *
  * @author  David Zemon
  *
@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-#include <PropWare/utility/runnable.h>
+#include <PropWare/concurrent/runnable.h>
 #include <PropWare/PropWare.h>
+#include <PropWare/gpio/simpleport.h>
 #include <PropWare/serial/uart/uartrx.h>
 #include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/synchronousprinter.h>

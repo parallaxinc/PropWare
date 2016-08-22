@@ -26,7 +26,7 @@
 // Includes
 #include <PropWare/PropWare.h>
 #include <PropWare/utility/utility.h>
-#include <PropWare/gpio/port.h>
+#include <PropWare/gpio/simpleport.h>
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/input/scanner.h>
 

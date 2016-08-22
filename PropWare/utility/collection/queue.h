@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/utility/queue.h
+ * @file        PropWare/utility/collection/queue.h
  *
  * @author      David Zemon
  *

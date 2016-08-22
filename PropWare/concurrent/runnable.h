@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/utility/runnable.h
+ * @file        PropWare/concurrent/runnable.h
  *
  * @author      David Zemon
  *
@@ -39,9 +39,9 @@ namespace PropWare {
  *
  * @code
  * #include <PropWare/PropWare.h>
- * #include <PropWare/runnable.h>
- * #include <PropWare/pin.h>
- * #include <PropWare/printer/printer.h>
+ * #include <PropWare/concurrent/runnable.h>
+ * #include <PropWare/gpio/pin.h>
+ * #include <PropWare/hmi/output/printer.h>
  *
  * class BlinkingThread : public PropWare::Runnable {
  *     public:
@@ -62,7 +62,7 @@ namespace PropWare {
  *         const PropWare::Pin::Mask m_mask;
  * };
  *
- * int main (int argc, char *argv[]) {
+ * int main () {
  *     uint32_t       stack[64];
  *     BlinkingThread blinkyThread(stack, PropWare::Pin::P16);
  *
@@ -106,7 +106,8 @@ class Runnable {
          */
         template<size_t N>
         Runnable(const uint32_t (&stack)[N])
-            : m_stackPointer(stack), m_stackSizeInBytes(N * sizeof(uint32_t)) {
+            : m_stackPointer(stack),
+              m_stackSizeInBytes(N * sizeof(uint32_t)) {
         }
 
         /**
@@ -120,13 +121,14 @@ class Runnable {
          *
          * @warning     The second parameter requests the length of the stack, not the size in bytes!
          *
-         * @param[in]   *stack          Address where the stack begins
+         * @param[in]   stack           Address where the stack begins
          * @param[in]   stackLength     Number of elements in the stack. For instance, an array initialized as
          *                              `uint32_t *myStack = (uint32_t) malloc(16*sizeof(uint32_t));` would have a
          *                              length of 16, not 64.
          */
         Runnable(const uint32_t *stack, const size_t stackLength)
-            : m_stackPointer(stack), m_stackSizeInBytes(stackLength * sizeof(uint32_t)) {
+            : m_stackPointer(stack),
+              m_stackSizeInBytes(stackLength * sizeof(uint32_t)) {
         }
 
     protected:

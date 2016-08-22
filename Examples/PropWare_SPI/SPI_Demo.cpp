@@ -25,9 +25,8 @@
 
 // Includes
 #include <PropWare/PropWare.h>
+#include <PropWare/gpio/simpleport.h>
 #include <PropWare/serial/spi/spi.h>
-
-void error (const PropWare::ErrorCode err, const PropWare::SPI &spi);
 
 /** Pin number for MOSI (master out - slave in) */
 const PropWare::Port::Mask MOSI = PropWare::Port::P0;
@@ -101,21 +100,5 @@ int main () {
 
         // Signal that the entire string has been sent
         debugLEDs.toggle();
-    }
-}
-
-void error (const PropWare::ErrorCode err, const PropWare::SPI &spi) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
-
-    if (PropWare::SPI::BEG_ERROR <= err && err < PropWare::SPI::END_ERROR) {
-        spi.print_error_str(pwOut, (PropWare::SPI::ErrorCode) err);
-    } else
-        pwOut.printf("Unknown error %u\n", err);
-
-    while (1) {
-        debugLEDs.write(static_cast<uint32_t>(err));
-        waitcnt(100*MILLISECOND);
-        debugLEDs.write(0);
-        waitcnt(100*MILLISECOND);
     }
 }

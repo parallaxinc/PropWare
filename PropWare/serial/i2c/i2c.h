@@ -26,12 +26,15 @@
 
 #pragma once
 
-#include <PropWare/serial/i2c/i2cbase.h>
+#include <PropWare/gpio/pin.h>
 
 namespace PropWare {
 
 /**
  * @brief   Basic I2C driver
+ *
+ * Requires that the SDA and SCL pins have sufficient pullups. These should be selected based on the capacitance of the
+ * devices on the I2C bus, and the expected clock speed (400kHz currently).
  *
  * All "device" fields should be the 7 bit address of the device, with the low bit set to 0 (the 7 addres bits are the
  * upper bits). This applies to both the Put (write) and Get (read) cases.
@@ -58,17 +61,198 @@ namespace PropWare {
  * (the MSb to 1) in order to turn on the auto-increment function (see datasheet for L3GD20 for example). This is not
  * done automatically by this library.
  */
-class I2C : public I2CBase {
+class I2C {
+    public:
+        static const Pin::Mask    DEFAULT_SCL_MASK  = Pin::P28;
+        static const Pin::Mask    DEFAULT_SDA_MASK  = Pin::P29;
+        static const unsigned int DEFAULT_FREQUENCY = 400000;
+
     public:
         /**
          * @brief       Create a basic I2C instance
          *
-         * @param[in]   scl         Pin mask for the SCL pin (default value uses the EEPROM SCL line)
-         * @param[in]   sda         Pin mask for the SDA pin (default value uses the EEPROM SDA line)
+         * @param[in]   sclMask     Pin mask for the SCL pin (default value uses the EEPROM SCL line)
+         * @param[in]   sdaMask     Pin mask for the SDA pin (default value uses the EEPROM SDA line)
          * @param[in]   frequency   Frequency to run the bus (default is highest standard I2C frequency of 400 kHz)
          */
-        I2C (const Pin::Mask scl = DEFAULT_SCL_MASK, const Pin::Mask sda = DEFAULT_SDA_MASK,
-             const unsigned int frequency = DEFAULT_FREQUENCY) : I2CBase(scl, sda, frequency) {
+        I2C (const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK,
+             const unsigned int frequency = DEFAULT_FREQUENCY) {
+            this->m_scl.set_mask(sclMask);
+            this->m_sda.set_mask(sdaMask);
+
+            this->set_frequency(frequency);
+
+            //Set pins to input
+            this->m_scl.set_dir_in();
+            this->m_sda.set_dir_in();
+
+            //Set outputs low
+            this->m_scl.clear();
+            this->m_sda.clear();
+        }
+
+        /**
+         * @brief       Set the bus frequency
+         *
+         * @param[in]   frequency   Frequency in Hz to run the bus
+         */
+        void set_frequency (const unsigned int frequency) {
+            this->m_clockDelay = CLKFREQ / (frequency << 1);
+        }
+
+        /**
+         * @brief   Output a start condition on the I2C bus
+         */
+        void start () const {
+            //Set pins as output
+            this->m_scl.set_dir_out();
+            this->m_sda.set_dir_out();
+
+            this->m_scl.set();
+            this->m_sda.set();
+#ifndef __PROPELLER_CMM_
+            __asm__ volatile("nop");
+#endif
+            this->m_sda.toggle();
+            this->m_scl.toggle();
+        }
+
+        /**
+         * @brief   Output a stop condition on the I2C bus
+         */
+        void stop () const {
+            //Set pins to input
+            this->m_scl.set_dir_in();
+            this->m_sda.set_dir_in();
+        }
+
+        /**
+         * @brief   Output a byte on the I2C bus.
+         *
+         * @param[in]   byte    8 bits to send on the bus
+         *
+         * @return      true if the device acknowledges, false otherwise
+         */
+        bool send_byte (const uint8_t byte) const {
+            int result   = 0;
+            int datamask = 0;
+            int nextCNT  = 0;
+            int temp     = 0;
+
+            __asm__ volatile(
+            FC_START("PutByteStart", "PutByteEnd")
+                    /* Setup for transmit loop */
+                    "         mov %[datamask], #256          \n\t" /* 0x100 */
+                    "         mov %[result],   #0            \n\t"
+                    "         mov %[nextCNT],  cnt           \n\t"
+                    "         add %[nextCNT],  %[clockDelay] \n\t"
+
+                    /* Transmit Loop (8x) */
+                    //Output bit of byte
+                    "PutByteLoop%=: "
+                    "         shr  %[datamask], #1                \n\t" // Set up mask
+                    "         and  %[datamask], %[databyte] wz,nr \n\t" // Move the bit into Z flag
+                    "         muxz dira,        %[SDAMask]        \n\t"
+
+                    //Pulse clock
+                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+                    "         andn    dira,       %[SCLMask]    \n\t" // Set SCL high
+                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+                    "         or      dira,       %[SCLMask]    \n\t" // Set SCL low
+
+                    //Return for more bits
+                    "         djnz %[datamask], #" FC_ADDR("PutByteLoop%=", "PutByteStart") " nr \n\t"
+
+                    // Get ACK
+                    "         andn    dira,       %[SDAMask]    \n\t" // Float SDA high (release SDA)
+                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+                    "         andn    dira,       %[SCLMask]    \n\t" // SCL high (by float)
+                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+                    "         mov     %[temp],    ina           \n\t" //Sample input
+                    "         and     %[SDAMask], %[temp] wz,nr \n\t" // If != 0, ack'd, else nack
+                    "         muxz    %[result],  #1            \n\t" // Set result to equal to Z flag (aka, 1 if ack'd)
+                    "         or      dira,       %[SCLMask]    \n\t" // Set scl low
+                    "         or      dira,       %[SDAMask]    \n\t" // Set sda low
+
+                    FC_END("PutByteEnd")
+            : // Outputs
+            [datamask] "=&r"(datamask),
+            [result] "=&r"(result),
+            [nextCNT] "=&r"(nextCNT),
+            [temp] "=&r"(temp)
+            : // Inputs
+            [SDAMask] "r"(this->m_sda.get_mask()),
+            [SCLMask] "r"(this->m_scl.get_mask()),
+            [databyte] "r"(byte),
+            [clockDelay] "r"(m_clockDelay));
+
+            return (bool) result;
+        }
+
+        /**
+         * @brief       Get a byte from the bus
+         *
+         * @param[in]   acknowledge     true to acknowledge the byte received, false otherwise
+         *
+         * @return      Byte clocked in from the bus
+         */
+        uint8_t read_byte (const bool acknowledge) const {
+            int result = 0;
+            int datamask, nextCNT, temp;
+
+            __asm__ volatile(
+            FC_START("GetByteStart", "GetByteEnd")
+                    // Setup for receive loop
+                    "         andn dira,        %[SDAMask]    \n\t"
+                    "         mov  %[datamask], #256          \n\t" /* 0x100 */
+                    "         mov  %[result],   #0            \n\t"
+                    "         mov  %[nextCNT],  cnt           \n\t"
+                    "         add  %[nextCNT],  %[clockDelay] \n\t"
+
+                    // Recieve Loop (8x)
+                    //Get bit of byte
+                    "GetByteLoop%=: "
+
+                    "         waitcnt %[nextCNT],  %[clockDelay] \n\t"
+                    "         shr     %[datamask], #1            \n\t" // Set up mask
+
+                    //Pulse clock
+                    "         andn    dira,       %[SCLMask]       \n\t" // Set SCL high
+                    "         waitcnt %[nextCNT], %[clockDelay]    \n\t"
+                    "         mov     %[temp],    ina              \n\t" //Sample the input
+                    "         and     %[temp],    %[SDAMask] nr,wz \n\t"
+                    "         muxnz   %[result],  %[datamask]      \n\t"
+                    "         or      dira,       %[SCLMask]       \n\t" // Set SCL low
+
+                    //Return for more bits
+                    "         djnz %[datamask], #" FC_ADDR("GetByteLoop%=", "GetByteStart") " nr \n\t"
+
+                    // Put ACK
+
+                    "         and     %[acknowledge], #1 nr,wz  \n\t" //Output ACK
+
+                    "         muxnz   dira,       %[SDAMask]    \n\t"
+                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+                    "         andn    dira,       %[SCLMask]    \n\t" // SCL high (by float)
+                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+
+                    "         or   dira, %[SCLMask]       \n\t" // Set scl low
+                    "         or   dira, %[SDAMask]       \n\t" // Set sda low
+                    FC_END("GetByteEnd")
+            : // Outputs
+            [datamask] "=&r"(datamask),
+            [result] "=&r"(result),
+            [temp] "=&r"(temp),
+            [nextCNT] "=&r"(nextCNT)
+
+            : // Inputs
+            [SDAMask] "r"(this->m_sda.get_mask()),
+            [SCLMask] "r"(this->m_scl.get_mask()),
+            [acknowledge] "r"(acknowledge),
+            [clockDelay] "r"(m_clockDelay));
+
+            return (uint8_t) result;
+
         }
 
         /**
@@ -295,6 +479,11 @@ class I2C : public I2CBase {
             bool result = this->send_byte((const uint8_t) (address >> 8));
             return result && this->send_byte((const uint8_t) address);
         }
+
+    private:
+        Pin          m_scl;
+        Pin          m_sda;
+        unsigned int m_clockDelay;
 };
 
 }
