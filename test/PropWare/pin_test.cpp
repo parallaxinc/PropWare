@@ -31,17 +31,18 @@
 
 static PropWare::Pin             *testable;
 static PropWare::Pin             *helper;
-static const uint8_t             TEST_PIN_NUM = 12;
-static const PropWare::Pin::Mask TEST_MASK    = PropWare::Pin::P12;
-static const PropWare::Pin::Mask CHECK_MASK   = PropWare::Pin::P13;
+static const uint8_t             TEST_PIN_NUM  = 12;
+static const PropWare::Pin::Mask TEST_MASK     = PropWare::Pin::Mask::P12;
+static const uint32_t            TEST_MASK_INT = static_cast<uint32_t>(TEST_MASK);
+static const PropWare::Pin::Mask CHECK_MASK    = PropWare::Pin::Mask::P13;
 
-void setUp (const PropWare::Pin::Dir dir = PropWare::Pin::OUT) {
+void setUp (const PropWare::Pin::Dir dir = PropWare::Pin::Dir::OUT) {
     testable = new PropWare::Pin(TEST_MASK, dir);
 
-    if (PropWare::Pin::OUT == dir)
-        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::IN);
+    if (PropWare::Pin::Dir::OUT == dir)
+        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::Dir::IN);
     else
-        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::OUT);
+        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::Dir::OUT);
 }
 
 TEARDOWN {
@@ -51,7 +52,7 @@ TEARDOWN {
 TEST(Constructor_ShouldSetNullPin) {
     testable = new PropWare::Pin();
 
-    ASSERT_EQ(PropWare::Pin::NULL_PIN, testable->get_mask());
+    ASSERT_EQ(PropWare::Pin::Mask::NULL_PIN, testable->get_mask());
 
     tearDown();
 }
@@ -65,10 +66,10 @@ TEST(Constructor_ShouldSetMask) {
 }
 
 TEST(Constructor_ShouldSetMaskAndDir) {
-    testable = new PropWare::Pin(TEST_MASK, PropWare::Pin::OUT);
+    testable = new PropWare::Pin(TEST_MASK, PropWare::Pin::Dir::OUT);
 
     ASSERT_EQ(TEST_MASK, testable->get_mask());
-    ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
+    ASSERT_EQ(PropWare::Pin::Dir::OUT, testable->get_dir());
 
     tearDown();
 }
@@ -94,8 +95,8 @@ TEST(SetPinNum) {
 TEST(SetDir) {
     testable = new PropWare::Pin(TEST_MASK);
 
-    testable->set_dir(PropWare::Pin::OUT);
-    ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
+    testable->set_dir(PropWare::Pin::Dir::OUT);
+    ASSERT_EQ(PropWare::Pin::Dir::OUT, testable->get_dir());
 
     tearDown();
 }
@@ -104,7 +105,7 @@ TEST(SetDirOut) {
     testable = new PropWare::Pin(TEST_MASK);
 
     testable->set_dir_out();
-    ASSERT_EQ(PropWare::Pin::OUT, testable->get_dir());
+    ASSERT_EQ(PropWare::Pin::Dir::OUT, testable->get_dir());
 
     tearDown();
 }
@@ -113,7 +114,7 @@ TEST(SetDirIn) {
     testable = new PropWare::Pin(TEST_MASK);
 
     testable->set_dir_in();
-    ASSERT_EQ(PropWare::Pin::IN, testable->get_dir());
+    ASSERT_EQ(PropWare::Pin::Dir::IN, testable->get_dir());
 
     tearDown();
 }
@@ -122,7 +123,7 @@ TEST(Set) {
     setUp();
 
     testable->set();
-    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -131,7 +132,7 @@ TEST(High) {
     setUp();
 
     testable->high();
-    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -140,7 +141,7 @@ TEST(On) {
     setUp();
 
     testable->on();
-    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -149,7 +150,7 @@ TEST(Clear) {
     setUp();
 
     testable->clear();
-    ASSERT_EQ(0, OUTA & TEST_MASK);
+    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -158,7 +159,7 @@ TEST(Low) {
     setUp();
 
     testable->low();
-    ASSERT_EQ(0, OUTA & TEST_MASK);
+    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -167,7 +168,7 @@ TEST(Off) {
     setUp();
 
     testable->off();
-    ASSERT_EQ(0, OUTA & TEST_MASK);
+    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -176,11 +177,11 @@ TEST(Toggle) {
     setUp();
 
     testable->low();
-    ASSERT_EQ(0, OUTA & TEST_MASK);
+    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
     testable->toggle();
-    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
     testable->toggle();
-    ASSERT_EQ(0, OUTA & TEST_MASK);
+    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
@@ -189,17 +190,17 @@ TEST(Write) {
     setUp();
 
     testable->write(true);
-    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
     testable->write(false);
-    ASSERT_EQ(0, OUTA & TEST_MASK);
+    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
     testable->write(42); // Ensure no problems when an arbitrary value is passed
-    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
+    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
 
     tearDown();
 }
 
 TEST(Read) {
-    setUp(PropWare::Pin::IN);
+    setUp(PropWare::Pin::Dir::IN);
 
     helper->set();
     ASSERT_TRUE(testable->read());

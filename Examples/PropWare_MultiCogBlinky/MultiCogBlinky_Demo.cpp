@@ -2,6 +2,25 @@
  * @file    MultiCogBlinky_Demo.cpp
  *
  * @author  Modified by David Zemon
+ *
+ * @copyright
+ * The MIT License (MIT)<br>
+ * <br>Copyright (c) 2013 David Zemon<br>
+ * <br>Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:<br>
+ * <br>The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.<br>
+ * <br>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 // Note the lack of an include for propeller.h; This is because PropWare.h will
@@ -13,7 +32,7 @@
 /**
 * @brief       Toggle thread function gets started in an LMM COG.
 *
-* @param[in]   *arg    pin number to toggle
+* @param[in]   arg     pin number to toggle
 */
 void run_cog(void *arg);
 
@@ -41,14 +60,14 @@ int main(int argc, char *argv[]) {
     PropWare::Pin       pin;
     uint32_t            nextCnt;
     PropWare::Pin::Mask pins[] = {
-        PropWare::Port::P16,
-        PropWare::Port::P17,
-        PropWare::Port::P18,
-        PropWare::Port::P19,
-        PropWare::Port::P20,
-        PropWare::Port::P21,
-        PropWare::Port::P22,
-        PropWare::Port::P23
+        PropWare::Pin::Mask::P16,
+        PropWare::Pin::Mask::P17,
+        PropWare::Pin::Mask::P18,
+        PropWare::Pin::Mask::P19,
+        PropWare::Pin::Mask::P20,
+        PropWare::Pin::Mask::P21,
+        PropWare::Pin::Mask::P22,
+        PropWare::Pin::Mask::P23
     };
 
     wait_time = 50 * MILLISECOND;
@@ -61,7 +80,7 @@ int main(int argc, char *argv[]) {
     }
 
     pin.set_mask(pins[0]);
-    pin.set_dir(PropWare::Pin::OUT);
+    pin.set_dir_out();
 
     startCnt  = CNT;
     syncStart = 1;
@@ -79,7 +98,7 @@ void run_cog(void *arg) {
     uint32_t      nextCnt;
 
     pin.set_mask(*(PropWare::Pin::Mask *) arg);
-    pin.set_dir(PropWare::Pin::OUT);
+    pin.set_dir_out();
 
     // wait for start signal from main cog
     while (syncStart == 0);

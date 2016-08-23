@@ -79,8 +79,8 @@ class SD : public BlockStorage {
          * then an instance of `PropWare::SD` can be constructed without any arguments. This is very convenient for
          * anyone using a common Propeller board that comes pre-equipped with an SD card adapter.
          *
-         * @param[in]   *spi    Address of a SPI instance. Its pins, clock frequency and mode will be modified to fit
-         *                      the SD card's needs
+         * @param[in]   spi     SPI instance. Its pins, clock frequency and mode will be modified to fit the SD
+         * card's needs
          */
         SD (SPI &spi = SPI::get_instance())
                 : m_spi(&spi) {
@@ -394,7 +394,7 @@ class SD : public BlockStorage {
          *
          * @param[in]   numBytes    Number of bytes to receive
          * @param[out]  firstByte   First byte of response (active/idle) stored into this variable
-         * @param[out]  *dat        Location in memory with enough space to store `bytes` bytes of data
+         * @param[out]  dat         Location in memory with enough space to store `bytes` bytes of data
          *
          * @pre         Chip select must be activated prior to invocation
          *
@@ -519,7 +519,7 @@ class SD : public BlockStorage {
          * @brief       Write data to SD card via SPI
          *
          * @param[in]   bytes   Block address to read from SD card
-         * @param[in]   *dat    Location in memory where data resides
+         * @param[in]   dat[]   Location in memory where data resides
          *
          * @return      Returns 0 upon success, error code otherwise
          */
@@ -636,8 +636,8 @@ class SD : public BlockStorage {
         static const uint32_t     SPI_INIT_FREQ  = 200000;
         /** Default frequency to run the SPI module */
         static const uint32_t     FULL_SPEED_SPI = 900000;
-        static const SPI::Mode    SPI_MODE       = SPI::MODE_0;
-        static const SPI::BitMode SPI_BITMODE    = SPI::MSB_FIRST;
+        static const SPI::Mode    SPI_MODE       = SPI::Mode::MODE_0;
+        static const SPI::BitMode SPI_BITMODE    = SPI::BitMode::MSB_FIRST;
 
         // Misc. SD Definitions
         static const uint32_t RESPONSE_TIMEOUT;  // Wait 0.1 seconds for a response before timing out

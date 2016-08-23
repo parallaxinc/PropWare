@@ -46,12 +46,12 @@ class Stepper {
         static const unsigned int DEFAULT_DELAY = 10000;
 
     private:
-        typedef enum {
-            ZERO,
-            ONE,
-            TWO,
-            THREE
-        }                         Step;
+        enum class Step {
+                ZERO,
+                ONE,
+                TWO,
+                THREE
+        };
 
     public:
         /**
@@ -64,7 +64,7 @@ class Stepper {
          * @param[in]   start       What step should the motor start with
          */
         Stepper (const Pin::Mask phase1Mask, const Pin::Mask phase2Mask, const Pin::Mask phase3Mask,
-                 const Pin::Mask phase4Mask, const Step start = ZERO)
+                 const Pin::Mask phase4Mask, const Step start = Step::ZERO)
                 : m_currentStep(start) {
             this->m_phase1.set_mask(phase1Mask);
             this->m_phase2.set_mask(phase2Mask);
@@ -92,7 +92,8 @@ class Stepper {
          */
         void step_forward (unsigned int steps, const unsigned int usDelay = DEFAULT_DELAY) {
             while (steps--) {
-                this->m_currentStep = (Step) ((this->m_currentStep + 1) % 4);
+                const unsigned int stepNumber = static_cast<unsigned int>(this->m_currentStep) + 1;
+                this->m_currentStep = static_cast<Step>(stepNumber % 4);
                 this->set_full_step();
                 waitcnt(usDelay * MICROSECOND);
             }
@@ -106,7 +107,8 @@ class Stepper {
          */
         void step_reverse (unsigned int steps, const unsigned int usDelay = DEFAULT_DELAY) {
             while (steps--) {
-                this->m_currentStep = (Step) ((this->m_currentStep + 3) % 4);
+                const unsigned int stepNumber = static_cast<unsigned int>(this->m_currentStep) + 3;
+                this->m_currentStep = static_cast<Step>(stepNumber % 4);
                 this->set_full_step();
                 waitcnt(usDelay * MILLISECOND);
             }
@@ -118,25 +120,25 @@ class Stepper {
          */
         void set_full_step () {
             switch (this->m_currentStep) {
-                case ZERO:
+                case Step::ZERO:
                     this->m_phase1.set();
                     this->m_phase2.set();
                     this->m_phase3.clear();
                     this->m_phase4.clear();
                     break;
-                case ONE:
+                case Step::ONE:
                     this->m_phase1.clear();
                     this->m_phase2.set();
                     this->m_phase3.set();
                     this->m_phase4.clear();
                     break;
-                case TWO:
+                case Step::TWO:
                     this->m_phase1.clear();
                     this->m_phase2.clear();
                     this->m_phase3.set();
                     this->m_phase4.set();
                     break;
-                case THREE:
+                case Step::THREE:
                     this->m_phase1.set();
                     this->m_phase2.clear();
                     this->m_phase3.clear();

@@ -27,13 +27,13 @@
 #include <PropWare/sensor/temperature/max6675.h>
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask MOSI = PropWare::Port::P0;
+const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask MISO = PropWare::Port::P1;
+const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask SCLK = PropWare::Port::P2;
+const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask CS   = PropWare::Port::P5;
+const PropWare::Port::Mask CS   = PropWare::Port::Mask::P5;
 const uint32_t             FREQ = 10000;
 
 /**
@@ -45,9 +45,7 @@ const uint32_t             FREQ = 10000;
  */
 int main() {
     PropWare::SPI     spi = PropWare::SPI::get_instance();
-    PropWare::MAX6675 thermo(spi);
-
-    thermo.start(MOSI, MISO, SCLK, CS);
+    PropWare::MAX6675 thermo(spi, MOSI, MISO, SCLK, CS);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the

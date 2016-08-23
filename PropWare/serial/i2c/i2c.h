@@ -63,8 +63,8 @@ namespace PropWare {
  */
 class I2C {
     public:
-        static const Pin::Mask    DEFAULT_SCL_MASK  = Pin::P28;
-        static const Pin::Mask    DEFAULT_SDA_MASK  = Pin::P29;
+        static const Pin::Mask    DEFAULT_SCL_MASK  = Pin::Mask::P28;
+        static const Pin::Mask    DEFAULT_SDA_MASK  = Pin::Mask::P29;
         static const unsigned int DEFAULT_FREQUENCY = 400000;
 
     public:
@@ -76,15 +76,10 @@ class I2C {
          * @param[in]   frequency   Frequency to run the bus (default is highest standard I2C frequency of 400 kHz)
          */
         I2C (const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK,
-             const unsigned int frequency = DEFAULT_FREQUENCY) {
-            this->m_scl.set_mask(sclMask);
-            this->m_sda.set_mask(sdaMask);
-
+             const unsigned int frequency = DEFAULT_FREQUENCY)
+                : m_scl(sclMask, Pin::Dir::IN),
+                  m_sda(sdaMask, Pin::Dir::IN) {
             this->set_frequency(frequency);
-
-            //Set pins to input
-            this->m_scl.set_dir_in();
-            this->m_sda.set_dir_in();
 
             //Set outputs low
             this->m_scl.clear();
@@ -481,8 +476,8 @@ class I2C {
         }
 
     private:
-        Pin          m_scl;
-        Pin          m_sda;
+        const Pin    m_scl;
+        const Pin    m_sda;
         unsigned int m_clockDelay;
 };
 

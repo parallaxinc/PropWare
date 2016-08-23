@@ -36,35 +36,42 @@ namespace PropWare {
 class MAX6675 {
     public:
         /**
-         * @brief       Construction requires an instance of the SPI module; the SPI module does not need to be started
-         *
-         * @param[in]   *spi    Constructed SPI module
+         * @param[in]   spi             Constructed SPI module
+         * @param[in]   alwaysSetMode   The SPI modes will always be set before a read or write routine when true
          */
-        MAX6675 (SPI &spi, const bool alwaysSetMode = false) :
-                m_spi(&spi),
-                m_alwaysSetMode(alwaysSetMode) {
+        MAX6675 (SPI &spi = SPI::get_instance(), const bool alwaysSetMode = false)
+                : m_spi(&spi),
+                  m_alwaysSetMode(alwaysSetMode) {
+            if (!alwaysSetMode) {
+                this->m_spi->set_clock(SPI_DEFAULT_FREQ);
+                this->m_spi->set_mode(SPI_MODE);
+                this->m_spi->set_bit_mode(SPI_BITMODE);
+            }
         }
 
         /**
-         * @brief       Initialize communication with an MAX6675 device
-         *
-         * @param[in]   mosi    PinNum mask for MOSI
-         * @param[in]   miso    PinNum mask for MISO
-         * @param[in]   sclk    PinNum mask for SCLK
-         * @param[in]   cs      PinNum mask for CS
-         *
-         * @return      Returns 0 upon success, error code otherwise
+         * @param[in]   spi             Constructed SPI module
+         * @param[in]   mosi            MOSI pin mask
+         * @param[in]   miso            MISO pin mask
+         * @param[in]   sclk            SCLK pin mask
+         * @param[in]   cs              Chip select pin mask
+         * @param[in]   alwaysSetMode   The SPI modes will always be set before a read or write routine when true
          */
-        void start (const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs) {
+        MAX6675 (SPI &spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs,
+                 const bool alwaysSetMode = false)
+                : m_spi(&spi),
+                  m_cs(cs, Pin::Dir::OUT),
+                  m_alwaysSetMode(alwaysSetMode) {
             this->m_spi->set_mosi(mosi);
             this->m_spi->set_miso(miso);
             this->m_spi->set_sclk(sclk);
-            this->m_spi->set_clock(SPI_DEFAULT_FREQ);
-            this->m_spi->set_mode(SPI_MODE);
-            this->m_spi->set_bit_mode(SPI_BITMODE);
 
-            this->m_cs.set_mask(cs);
-            this->m_cs.set_dir(PropWare::Pin::OUT);
+            if (!alwaysSetMode) {
+                this->m_spi->set_clock(SPI_DEFAULT_FREQ);
+                this->m_spi->set_mode(SPI_MODE);
+                this->m_spi->set_bit_mode(SPI_BITMODE);
+            }
+
             this->m_cs.set();
         }
 
@@ -72,8 +79,7 @@ class MAX6675 {
          * @brief       Choose whether to always set the SPI mode and bitmode before reading or writing to the chip;
          *              Useful when multiple devices are connected to the SPI bus
          *
-         * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will always be set before a read or write
-         *                              routine
+         * @param[in]   alwaysSetMode   The SPI modes will always be set before a read or write routine when true
          */
         void always_set_spi_mode (const bool alwaysSetMode) {
             this->m_alwaysSetMode = alwaysSetMode;
@@ -91,6 +97,7 @@ class MAX6675 {
             uint16_t dat;
 
             if (this->m_alwaysSetMode) {
+                this->m_spi->set_clock(SPI_DEFAULT_FREQ);
                 this->m_spi->set_mode(SPI_MODE);
                 this->m_spi->set_bit_mode(SPI_BITMODE);
             }
@@ -130,15 +137,15 @@ class MAX6675 {
         }
 
     private:
-        static const uint32_t     SPI_DEFAULT_FREQ = 1000000;
-        static const SPI::Mode    SPI_MODE         = SPI::MODE_1;
-        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
+        static const uint32_t     SPI_DEFAULT_FREQ = 8000000;
+        static const SPI::Mode    SPI_MODE         = SPI::Mode::MODE_1;
+        static const SPI::BitMode SPI_BITMODE      = SPI::BitMode::MSB_FIRST;
         static const uint8_t      BIT_WIDTH        = 12;
 
     private:
-        SPI  *m_spi;
-        Pin  m_cs;
-        bool m_alwaysSetMode;
+        const Pin m_cs;
+        SPI       *m_spi;
+        bool      m_alwaysSetMode;
 };
 
 }

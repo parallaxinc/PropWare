@@ -40,49 +40,49 @@ class Port {
         /**
          * Bit-mask of GPIO pins
          */
-        typedef enum {
-            /** GPIO pin 0  */                      P0       = BIT_0,
-            /** GPIO pin 1  */                      P1       = BIT_1,
-            /** GPIO pin 2  */                      P2       = BIT_2,
-            /** GPIO pin 3  */                      P3       = BIT_3,
-            /** GPIO pin 4  */                      P4       = BIT_4,
-            /** GPIO pin 5  */                      P5       = BIT_5,
-            /** GPIO pin 6  */                      P6       = BIT_6,
-            /** GPIO pin 7  */                      P7       = BIT_7,
-            /** GPIO pin 8  */                      P8       = BIT_8,
-            /** GPIO pin 9  */                      P9       = BIT_9,
-            /** GPIO pin 10 */                      P10      = BIT_10,
-            /** GPIO pin 11 */                      P11      = BIT_11,
-            /** GPIO pin 12 */                      P12      = BIT_12,
-            /** GPIO pin 13 */                      P13      = BIT_13,
-            /** GPIO pin 14 */                      P14      = BIT_14,
-            /** GPIO pin 15 */                      P15      = BIT_15,
-            /** GPIO pin 16 */                      P16      = BIT_16,
-            /** GPIO pin 17 */                      P17      = BIT_17,
-            /** GPIO pin 18 */                      P18      = BIT_18,
-            /** GPIO pin 19 */                      P19      = BIT_19,
-            /** GPIO pin 20 */                      P20      = BIT_20,
-            /** GPIO pin 21 */                      P21      = BIT_21,
-            /** GPIO pin 22 */                      P22      = BIT_22,
-            /** GPIO pin 23 */                      P23      = BIT_23,
-            /** GPIO pin 24 */                      P24      = BIT_24,
-            /** GPIO pin 25 */                      P25      = BIT_25,
-            /** GPIO pin 26 */                      P26      = BIT_26,
-            /** GPIO pin 27 */                      P27      = BIT_27,
-            /** GPIO pin 28 */                      P28      = BIT_28,
-            /** GPIO pin 29 */                      P29      = BIT_29,
-            /** GPIO pin 30 */                      P30      = BIT_30,
-            /** GPIO pin 31 */                      P31      = BIT_31,
-            /** Null pin; Marks end of Mask array */NULL_PIN = 0
-        } Mask;
+        enum class Mask : uint32_t {
+                /** GPIO pin 0  */                      P0       = BIT_0,
+                /** GPIO pin 1  */                      P1       = BIT_1,
+                /** GPIO pin 2  */                      P2       = BIT_2,
+                /** GPIO pin 3  */                      P3       = BIT_3,
+                /** GPIO pin 4  */                      P4       = BIT_4,
+                /** GPIO pin 5  */                      P5       = BIT_5,
+                /** GPIO pin 6  */                      P6       = BIT_6,
+                /** GPIO pin 7  */                      P7       = BIT_7,
+                /** GPIO pin 8  */                      P8       = BIT_8,
+                /** GPIO pin 9  */                      P9       = BIT_9,
+                /** GPIO pin 10 */                      P10      = BIT_10,
+                /** GPIO pin 11 */                      P11      = BIT_11,
+                /** GPIO pin 12 */                      P12      = BIT_12,
+                /** GPIO pin 13 */                      P13      = BIT_13,
+                /** GPIO pin 14 */                      P14      = BIT_14,
+                /** GPIO pin 15 */                      P15      = BIT_15,
+                /** GPIO pin 16 */                      P16      = BIT_16,
+                /** GPIO pin 17 */                      P17      = BIT_17,
+                /** GPIO pin 18 */                      P18      = BIT_18,
+                /** GPIO pin 19 */                      P19      = BIT_19,
+                /** GPIO pin 20 */                      P20      = BIT_20,
+                /** GPIO pin 21 */                      P21      = BIT_21,
+                /** GPIO pin 22 */                      P22      = BIT_22,
+                /** GPIO pin 23 */                      P23      = BIT_23,
+                /** GPIO pin 24 */                      P24      = BIT_24,
+                /** GPIO pin 25 */                      P25      = BIT_25,
+                /** GPIO pin 26 */                      P26      = BIT_26,
+                /** GPIO pin 27 */                      P27      = BIT_27,
+                /** GPIO pin 28 */                      P28      = BIT_28,
+                /** GPIO pin 29 */                      P29      = BIT_29,
+                /** GPIO pin 30 */                      P30      = BIT_30,
+                /** GPIO pin 31 */                      P31      = BIT_31,
+                /** Null pin; Marks end of Mask array */NULL_PIN = 0
+        };
 
         /**
          * Direction of GPIO pin
          */
-        typedef enum {
-            /** Set pin(s) as input */ IN  = 0,
-            /** Set pin(s) as output */OUT = -1
-        } Dir;
+        enum class Dir {
+                /** Set pin(s) as input */ IN  = 0,
+                /** Set pin(s) as output */OUT = -1
+        };
 
     public:
         /**
@@ -95,9 +95,9 @@ class Port {
          *
          * @return      Return the pin number of pin
          */
-        static uint8_t convert (Port::Mask mask) {
+        static uint8_t convert (Mask mask) {
             uint8_t  retVal  = 0;
-            uint32_t maskInt = mask;
+            uint32_t maskInt = static_cast<uint32_t>(mask);
 
             while (maskInt >>= 1)
                 ++retVal;
@@ -106,7 +106,7 @@ class Port {
         }
 
         /**
-         * @brief       Return a PropWare::Pin::Mask type based on a pin number
+         * @brief       Return a Mask type based on a pin number
          *
          * @note        Value is 0-indexed
          *
@@ -114,12 +114,12 @@ class Port {
          *
          * @return      PinNum represented by a bit-mask
          */
-        static Port::Mask convert (const uint8_t pinNum) {
+        static Mask convert (const uint8_t pinNum) {
             uint32_t mask = 1;
             if (31 > pinNum)
-                return PropWare::Port::NULL_PIN;
+                return Mask::NULL_PIN;
             else
-                return (PropWare::Port::Mask) (mask << pinNum);
+                return (Mask) (mask << pinNum);
         }
 
         /**
@@ -130,10 +130,10 @@ class Port {
          * @param[in]   iterations  Number of times that the pins should flicker on and back off again
          */
         static void flash_port (const uint32_t pinMask, uint32_t iterations = 10) {
-            const Port port(pinMask, Port::OUT);
+            const Port port(pinMask, Dir::OUT);
 
             const unsigned int delay = MILLISECOND << 7; // MILLISECOND * 64
-            unsigned int timer = delay + CNT;
+            unsigned int       timer = delay + CNT;
             iterations <<= 1;
             for (uint32_t i = 0; i < iterations; ++i) {
                 port.toggle();
@@ -146,7 +146,7 @@ class Port {
          * @brief   Instantiate a NULL instance
          */
         Port () {
-            this->m_mask = PropWare::Port::NULL_PIN;
+            this->m_mask = static_cast<uint32_t>(Mask::NULL_PIN);
         }
 
         /**
@@ -199,7 +199,7 @@ class Port {
          *                          PropWare::Port::OUT
          */
         void set_dir (const PropWare::Port::Dir direction) const {
-            DIRA = (DIRA & ~(this->m_mask)) | (this->m_mask & direction);
+            DIRA = (DIRA & ~(this->m_mask)) | (this->m_mask & static_cast<uint32_t>(direction));
         }
 
         /**
@@ -209,9 +209,9 @@ class Port {
          */
         PropWare::Port::Dir get_dir () const {
             if (DIRA & this->m_mask)
-                return PropWare::Port::OUT;
+                return Dir::OUT;
             else
-                return PropWare::Port::IN;
+                return Dir::IN;
         }
 
         /**

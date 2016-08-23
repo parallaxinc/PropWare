@@ -33,9 +33,9 @@
 // Create the test string - useful when testing with a terminal
 const char                   TEST_STRING[] = "Hello, world!\n";
 const uint32_t               BAUD_RATE     = 115200;
-const PropWare::Port::Mask   TX_PIN        = PropWare::Port::P12;
-const PropWare::Port::Mask   RX_PIN        = PropWare::Port::P13;
-const PropWare::UART::Parity PARITY        = PropWare::UART::NO_PARITY;
+const PropWare::Port::Mask   TX_PIN        = PropWare::Port::Mask::P12;
+const PropWare::Port::Mask   RX_PIN        = PropWare::Port::Mask::P13;
+const PropWare::UART::Parity PARITY        = PropWare::UART::Parity::NO_PARITY;
 
 void error (const PropWare::ErrorCode err);
 
@@ -102,7 +102,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
 
     pwSyncOut.printf("Unknown error: %u\n", err);
 

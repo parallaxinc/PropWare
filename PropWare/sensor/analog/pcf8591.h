@@ -34,29 +34,30 @@ namespace PropWare {
  */
 class PCF8591 {
     public:
-        typedef enum {
-            CHANNEL_0,
-            CHANNEL_1,
-            CHANNEL_2,
-            CHANNEL_3,
-            CHANNELS
-        } ADCChannel;
+        enum class ADCChannel {
+                CHANNEL_0,
+                CHANNEL_1,
+                CHANNEL_2,
+                CHANNEL_3,
+                CHANNELS
+        };
 
-        typedef enum {
-            AUTO_INC_OFF,
-            AUTO_INC_ON = 0x04
-        } ADCAutoIncrement;
+        enum class ADCAutoIncrement {
+                AUTO_INC_OFF,
+                AUTO_INC_ON = 0x04
+        };
 
-        typedef enum {
-            AllSingleEnded,
-            ThreeDifferential     = 0x10,
-            SingleAndDifferential = 0x20,
-            TwoDifferential       = 0x30
-        } ReadMode;
+        enum class ReadMode {
+                AllSingleEnded,
+                ThreeDifferential     = 0x10,
+                SingleAndDifferential = 0x20,
+                TwoDifferential       = 0x30
+        };
 
         static const uint8_t DEFAULT_DEVICE_ADDRESS = 0x90;
-        static const uint8_t DAC_ENABLE             = BIT_6;
-        static const uint8_t CHANNEL_BITS           = BIT_1 | BIT_0;
+
+        static const uint8_t DAC_ENABLE   = BIT_6;
+        static const uint8_t CHANNEL_BITS = BIT_1 | BIT_0;
 
     public:
         /**
@@ -64,10 +65,10 @@ class PCF8591 {
          *
          * @param[in]   deviceAddress   The PCF8591 supports variable different device addresses, which can be set here;
          *                              The default address should satisfy most use cases
-         * @param[in]   *i2cBus         HUB memory address (as opposed to I2C address!) of the I2C instance that should
-         *                              be used for communication; Usually the default bus will be satisfactory
+         * @param[in]   i2cBus          I2C instance that should be used for communication; Usually the default bus
+         *                              will be satisfactory
          */
-        PCF8591 (const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS, const I2C i2cBus = pwI2c)
+        PCF8591 (const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS, const I2C &i2cBus = pwI2c)
                 : m_i2c(&i2cBus),
                   m_deviceAddress(deviceAddress),
                   m_currentProgram(0) {
@@ -103,7 +104,7 @@ class PCF8591 {
          * If you need sequential readings from the same channel, this method will more efficiently grab readings after
          * the first versus multiple calls to `PropWare::PCF8591::read_channel`.
          *
-         * @param[out]  *data   Address where the ADC result will be stored
+         * @param[out]  data    Address where the ADC result will be stored
          *
          * @returns     True if successful, false otherwise
          */
@@ -132,7 +133,7 @@ class PCF8591 {
          */
         bool set_channel (const ADCChannel channel) {
             this->m_currentProgram &= ~CHANNEL_BITS;
-            this->m_currentProgram |= channel;
+            this->m_currentProgram |= static_cast<uint8_t>(channel);
             return this->program();
         }
 
@@ -146,9 +147,9 @@ class PCF8591 {
          */
         bool set_auto_increment (const bool autoIncrement) {
             if (autoIncrement)
-                this->m_currentProgram |= AUTO_INC_ON;
+                this->m_currentProgram |= static_cast<uint8_t>(ADCAutoIncrement::AUTO_INC_ON);
             else
-                this->m_currentProgram &= ~AUTO_INC_ON;
+                this->m_currentProgram &= ~static_cast<uint8_t>(ADCAutoIncrement::AUTO_INC_ON);
             return this->program();
         }
 
@@ -161,7 +162,7 @@ class PCF8591 {
          */
         bool set_read_mode (const ReadMode mode) {
             this->m_currentProgram &= ~0x30;
-            this->m_currentProgram |= mode;
+            this->m_currentProgram |= static_cast<uint8_t>(mode);
             return this->program();
         }
 

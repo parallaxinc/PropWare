@@ -33,7 +33,7 @@ class BlinkingThread: public PropWare::Runnable {
         }
 
         void run() {
-            const PropWare::Pin pin(this->m_mask, PropWare::Pin::OUT);
+            const PropWare::Pin pin(this->m_mask, PropWare::Pin::Dir::OUT);
             while (1) {
                 pin.toggle();
                 waitcnt(250 * MILLISECOND + CNT);
@@ -55,8 +55,8 @@ class BlinkingThread: public PropWare::Runnable {
 int main(int argc, char *argv[]) {
     uint32_t       stack[3][70];
     TalkingThread  talkingThread(stack[0]);
-    BlinkingThread blink16(stack[1], PropWare::Pin::P16);
-    BlinkingThread blink17(stack[2], PropWare::Pin::P17);
+    BlinkingThread blink16(stack[1], PropWare::Pin::Mask::P16);
+    BlinkingThread blink17(stack[2], PropWare::Pin::Mask::P17);
 
     int8_t cog = PropWare::Runnable::invoke(talkingThread);
     pwSyncOut.printf("Talking thread (0x%08X) started in cog %d\n", (unsigned int) &talkingThread, cog);

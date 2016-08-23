@@ -56,9 +56,9 @@ class Ping {
          *
          * @param[in]   signalMask  Pin mask for the signal pin of the sensor
          */
-        Ping(const PropWare::Pin::Mask signalMask) {
-            this->m_trigger.set_mask(signalMask);
-            this->m_echo.set_mask(signalMask);
+        Ping (const PropWare::Pin::Mask signalMask)
+                : m_trigger(signalMask),
+                  m_echo(signalMask) {
         };
 
         /**
@@ -67,9 +67,9 @@ class Ping {
          * @param[in]   triggerMask     Pin mask for the trigger pin
          * @param[in]   echoMask        Pin mask for the echo pin
          */
-        Ping(const PropWare::Pin::Mask triggerMask, const PropWare::Pin::Mask echoMask) {
-            this->m_trigger.set_mask(triggerMask);
-            this->m_echo.set_mask(echoMask);
+        Ping (const PropWare::Pin::Mask triggerMask, const PropWare::Pin::Mask echoMask)
+                : m_trigger(triggerMask),
+                  m_echo(echoMask) {
         };
 
         /**
@@ -81,7 +81,7 @@ class Ping {
          *
          * @returns     Millimeters between sensor and object
          */
-        unsigned int get_millimeters() const {
+        unsigned int get_millimeters () const {
             return this->get_microseconds() * 17;
         }
 
@@ -90,7 +90,7 @@ class Ping {
          *
          * @returns     Centimeters between sensor and object. Fractional values are truncated.
          */
-        unsigned int get_centimeters() const {
+        unsigned int get_centimeters () const {
             return this->get_millimeters() / 1000;
         }
 
@@ -99,7 +99,7 @@ class Ping {
          *
          * @returns     Inches between sensor and object. Fractional values are truncated.
          */
-        unsigned int get_inches() const {
+        unsigned int get_inches () const {
             return this->get_microseconds() / 148;
         }
 
@@ -108,7 +108,7 @@ class Ping {
          *
          * @returns     Microseconds for a round trip. Fractional values are truncated.
          */
-        unsigned int get_microseconds() const {
+        unsigned int get_microseconds () const {
             return this->get_clock_ticks() / MICROSECOND;
         }
 
@@ -119,18 +119,21 @@ class Ping {
          * @returns     Clock ticks for a round trip.
          */
 #ifdef PROPWARE_TEST
-virtual
+        virtual
 #endif
-        unsigned int get_clock_ticks() const {
+
+        unsigned int get_clock_ticks () const {
             this->m_trigger.set_dir_out();
             this->m_trigger.set();
             waitcnt(20 * MICROSECOND + CNT); // The spec for the ping sensor is 2us, but 20us is the fastest at CMM mode
             this->m_trigger.clear();
 
             this->m_echo.set_dir_in();
-            waitpeq(this->m_echo.get_mask(), this->m_echo.get_mask());
+            waitpeq(static_cast<uint32_t>(this->m_echo.get_mask()),
+                    static_cast<uint32_t>(this->m_echo.get_mask()));
             const uint32_t start = CNT;
-            waitpne(this->m_echo.get_mask(), this->m_echo.get_mask());
+            waitpne(static_cast<uint32_t>(this->m_echo.get_mask()),
+                    static_cast<uint32_t>(this->m_echo.get_mask()));
             return CNT - start;
         }
 

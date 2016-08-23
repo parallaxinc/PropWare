@@ -29,17 +29,17 @@
 #include <PropWare/sensor/analog/mcp3xxx.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
-const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::MCP300x;
-const PropWare::MCP3xxx::Channel    CHANNEL     = PropWare::MCP3xxx::CHANNEL_1;
+const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::PartNumber::MCP300x;
+const PropWare::MCP3xxx::Channel    CHANNEL     = PropWare::MCP3xxx::Channel::CHANNEL_1;
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask MOSI = PropWare::Port::P0;
+const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask MISO = PropWare::Port::P1;
+const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask SCLK = PropWare::Port::P2;
+const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask CS   = PropWare::Port::P3;
+const PropWare::Port::Mask CS   = PropWare::Port::Mask::P3;
 
 /**
  * @example     MCP3xxx_Demo.cpp
@@ -58,7 +58,7 @@ int main () {
     PropWare::MCP3xxx adc(spi, CS, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
-    PropWare::SimplePort scale(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort scale(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
@@ -85,6 +85,6 @@ int main () {
             scale.write(ledOutput);
         }
 
-        pwOut.printf("Channel %d is reading: %d\n", CHANNEL, data);
+        pwOut.printf("Channel %d is reading: %d\n", static_cast<int>(CHANNEL), data);
     }
 }

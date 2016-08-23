@@ -173,37 +173,46 @@ class MCP2515 {
             MERRF = BIT_7
         } CANINTFBits;
 
-        typedef enum {
-            WRITE       = 0x02,
-            READ        = 0x03,
-            BITMOD      = 0x05,
-            LOAD_TX0    = 0x40,
-            LOAD_TX1    = 0x42,
-            LOAD_TX2    = 0x44,
-            RTS_TX0     = 0x81,
-            RTS_TX1     = 0x82,
-            RTS_TX2     = 0x84,
-            RTS_ALL     = 0x87,
-            READ_RX0    = 0x90,
-            READ_RX1    = 0x94,
-            READ_STATUS = 0xA0,
-            RX_STATUS   = 0xB0,
-            RESET       = 0xC0
-        } SPIInstructionSet;
+        enum class SPIInstructionSet {
+                WRITE       = 0x02,
+                READ        = 0x03,
+                BITMOD      = 0x05,
+                LOAD_TX0    = 0x40,
+                LOAD_TX1    = 0x42,
+                LOAD_TX2    = 0x44,
+                RTS_TX0     = 0x81,
+                RTS_TX1     = 0x82,
+                RTS_TX2     = 0x84,
+                RTS_ALL     = 0x87,
+                READ_RX0    = 0x90,
+                READ_RX1    = 0x94,
+                READ_STATUS = 0xA0,
+                RX_STATUS   = 0xB0,
+                RESET       = 0xC0
+        };
 
-        typedef enum {
-            BUFFER_0,
-            BUFFER_1
-        } BufferNumber;
+        enum class BufferNumber {
+                BUFFER_0,
+                BUFFER_1
+        };
 
-        typedef enum {
-            FILTER_0,
-            FILTER_1,
-            FILTER_2,
-            FILTER_3,
-            FILTER_4,
-            FILTER_5
-        } FilterNumber;
+        enum class FilterNumber {
+                FILTER_0,
+                FILTER_1,
+                FILTER_2,
+                FILTER_3,
+                FILTER_4,
+                FILTER_5
+        };
+
+        enum class Mode {
+                NORMAL     = 0,
+                SLEEP      = BIT_5,
+                LOOPBACK   = BIT_6,
+                LISTENONLY = BIT_6 | BIT_5,
+                CONFIG     = BIT_7,
+                POWERUP    = BIT_7 | BIT_6 | BIT_5
+        };
 
         typedef enum {
             NO_ERROR,
@@ -216,16 +225,7 @@ class MCP2515 {
             ALLTXBUSY
         } ErrorCode;
 
-        typedef enum {
-            NORMAL     = 0,
-            SLEEP      = BIT_5,
-            LOOPBACK   = BIT_6,
-            LISTENONLY = BIT_6 | BIT_5,
-            CONFIG     = BIT_7,
-            POWERUP    = BIT_7 | BIT_6 | BIT_5
-        } Mode;
-
-        static const Mode DEFAULT_MODE = NORMAL;
+        static const Mode DEFAULT_MODE = Mode::NORMAL;
 
         static const uint8_t MODE_MASK = BIT_7 | BIT_6 | BIT_5;
 
@@ -241,21 +241,21 @@ class MCP2515 {
 #define CLKOUT_PS4      0x02
 #define CLKOUT_PS8      0x03
 
-        typedef enum {
-            BAUD_5KBPS,
-            BAUD_10KBPS,
-            BAUD_20KBPS,
-            BAUD_31K25BPS,
-            BAUD_40KBPS,
-            BAUD_50KBPS,
-            BAUD_80KBPS,
-            BAUD_100KBPS,
-            BAUD_125KBPS,
-            BAUD_200KBPS,
-            BAUD_250KBPS,
-            BAUD_500KBPS,
-            BAUD_1000KBPS
-        }                    BaudRate;
+        enum class BaudRate {
+                BAUD_5KBPS,
+                BAUD_10KBPS,
+                BAUD_20KBPS,
+                BAUD_31K25BPS,
+                BAUD_40KBPS,
+                BAUD_50KBPS,
+                BAUD_80KBPS,
+                BAUD_100KBPS,
+                BAUD_125KBPS,
+                BAUD_200KBPS,
+                BAUD_250KBPS,
+                BAUD_500KBPS,
+                BAUD_1000KBPS
+        };
 
         /*
          *   CNF1 Register Values
@@ -345,13 +345,13 @@ class MCP2515 {
     public:
         MCP2515 (const Pin::Mask cs)
                 : m_spi(&SPI::get_instance()),
-                  m_cs(cs, Pin::OUT) {
+                  m_cs(cs, Pin::Dir::OUT) {
             this->m_cs.set();
         }
 
         MCP2515 (const SPI &spi, const Pin::Mask cs)
                 : m_spi(&spi),
-                  m_cs(cs, Pin::OUT) {
+                  m_cs(cs, Pin::Dir::OUT) {
             this->m_cs.set();
         }
 
@@ -369,7 +369,7 @@ class MCP2515 {
 
             this->reset();
 
-            check_errors(this->set_control_mode(CONFIG));
+            check_errors(this->set_control_mode(Mode::CONFIG));
 
             this->set_baud(baudRate);
             this->initialize_buffers();
@@ -401,9 +401,9 @@ class MCP2515 {
                                       const bool extendedID = false) const {
             PropWare::ErrorCode err;
 
-            check_errors(this->set_control_mode(CONFIG));
+            check_errors(this->set_control_mode(Mode::CONFIG));
 
-            if (BUFFER_0 == bufferNumber)
+            if (BufferNumber::BUFFER_0 == bufferNumber)
                 this->write_id(RXM0SIDH, id, extendedID);
             else
                 this->write_id(RXM1SIDH, id, extendedID);
@@ -414,25 +414,25 @@ class MCP2515 {
         PropWare::ErrorCode set_filter (const FilterNumber num,
                                         const uint32_t id, const bool extendedID = false) const {
             PropWare::ErrorCode err;
-            check_errors(this->set_control_mode(CONFIG));
+            check_errors(this->set_control_mode(Mode::CONFIG));
 
             switch (num) {
-                case FILTER_0:
+                case FilterNumber::FILTER_0:
                     this->write_id(RXF0SIDH, id, extendedID);
                     break;
-                case FILTER_1:
+                case FilterNumber::FILTER_1:
                     this->write_id(RXF1SIDH, id, extendedID);
                     break;
-                case FILTER_2:
+                case FilterNumber::FILTER_2:
                     this->write_id(RXF2SIDH, id, extendedID);
                     break;
-                case FILTER_3:
+                case FilterNumber::FILTER_3:
                     this->write_id(RXF3SIDH, id, extendedID);
                     break;
-                case FILTER_4:
+                case FilterNumber::FILTER_4:
                     this->write_id(RXF4SIDH, id, extendedID);
                     break;
-                case FILTER_5:
+                case FilterNumber::FILTER_5:
                     this->write_id(RXF5SIDH, id, extendedID);
                     break;
             }
@@ -506,7 +506,7 @@ class MCP2515 {
          * @return      True when a message is available, false otherwise
          */
         bool check_receive_buffer (const BufferNumber bufferNumber) const {
-            return static_cast<bool>(this->read_status() & (RX0IF + bufferNumber));
+            return static_cast<bool>(this->read_status() & (RX0IF + static_cast<unsigned int>(bufferNumber)));
         }
 
         PropWare::ErrorCode check_error () const {
@@ -525,7 +525,7 @@ class MCP2515 {
     private:
         void reset () const {
             this->m_cs.clear();
-            this->m_spi->shift_out(8, RESET);
+            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::RESET));
             this->m_cs.set();
             waitcnt(10 * MILLISECOND + CNT);
         }
@@ -534,7 +534,7 @@ class MCP2515 {
             uint8_t ret;
 
             this->m_cs.clear();
-            this->m_spi->shift_out(8, READ);
+            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::READ));
             this->m_spi->shift_out(8, address);
             ret = (uint8_t) this->m_spi->shift_in(8);
             this->m_cs.set();
@@ -543,7 +543,8 @@ class MCP2515 {
         }
 
         void read_registers (const uint8_t address, uint8_t *values, const uint8_t n) {
-            const uint32_t combinedBits = static_cast<uint32_t>((READ << 8) | address);
+            const uint32_t tmp          = static_cast<uint32_t>(SPIInstructionSet::READ) << 8;
+            const uint32_t combinedBits = tmp | address;
             this->m_cs.clear();
             this->m_spi->shift_out(16, combinedBits);
             // mcp2515 has auto-increment of address-pointer
@@ -552,14 +553,16 @@ class MCP2515 {
         }
 
         void set_register (const uint8_t address, const uint8_t value) const {
-            const uint32_t combinedBits = static_cast<uint32_t>((WRITE << 16) | (address << 8) | value);
+            const uint32_t tmp          = static_cast<uint32_t>(SPIInstructionSet::WRITE) << 16;
+            const uint32_t combinedBits = static_cast<uint32_t>(tmp | (address << 8) | value);
             this->m_cs.clear();
             this->m_spi->shift_out(24, combinedBits);
             this->m_cs.set();
         }
 
         void set_registers (const uint8_t address, const uint8_t values[], const uint8_t n) const {
-            const uint32_t combinedBits = static_cast<uint32_t>((WRITE << 8) | address);
+            const uint32_t tmp          = static_cast<uint32_t>(SPIInstructionSet::WRITE) << 8;
+            const uint32_t combinedBits = static_cast<uint32_t>(tmp | address);
             this->m_cs.clear();
             this->m_spi->shift_out(16, combinedBits);
             this->m_spi->shift_out_block_msb_first_fast(values, n);
@@ -603,7 +606,7 @@ class MCP2515 {
 
         void modify_register (const uint8_t address, const uint8_t mask, const uint8_t data) const {
             this->m_cs.clear();
-            this->m_spi->shift_out(8, BITMOD);
+            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::BITMOD));
             this->m_spi->shift_out(8, address);
             this->m_spi->shift_out(8, mask);
             this->m_spi->shift_out(8, data);
@@ -612,16 +615,16 @@ class MCP2515 {
 
         uint8_t read_status () const {
             this->m_cs.clear();
-            this->m_spi->shift_out(8, READ_STATUS);
+            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::READ_STATUS));
             const uint8_t i = static_cast<uint8_t>(this->m_spi->shift_in(8));
             this->m_cs.set();
             return i;
         }
 
         PropWare::ErrorCode set_control_mode (const Mode mode) const {
-            this->modify_register(CANCTRL, MODE_MASK, mode);
+            this->modify_register(CANCTRL, MODE_MASK, static_cast<uint8_t>(mode));
 
-            const uint8_t actualMode = this->read_register(CANCTRL) & MODE_MASK;
+            const Mode actualMode = static_cast<Mode>(this->read_register(CANCTRL) & MODE_MASK);
             if (actualMode == mode)
                 return NO_ERROR;
             else
@@ -633,67 +636,67 @@ class MCP2515 {
             uint8_t cnf2 = 0;
             uint8_t cnf3 = 0;
             switch (baudRate) {
-                case BAUD_5KBPS:
+                case BaudRate::BAUD_5KBPS:
                     cnf1 = CNF1_16MHz_5kBPS;
                     cnf2 = CNF2_16MHz_5kBPS;
                     cnf3 = CNF3_16MHz_5kBPS;
                     break;
-                case BAUD_10KBPS:
+                case BaudRate::BAUD_10KBPS:
                     cnf1 = CNF1_16MHz_10kBPS;
                     cnf2 = CNF2_16MHz_10kBPS;
                     cnf3 = CNF3_16MHz_10kBPS;
                     break;
-                case BAUD_20KBPS:
+                case BaudRate::BAUD_20KBPS:
                     cnf1 = CNF1_16MHz_20kBPS;
                     cnf2 = CNF2_16MHz_20kBPS;
                     cnf3 = CNF3_16MHz_20kBPS;
                     break;
-                case BAUD_31K25BPS:
+                case BaudRate::BAUD_31K25BPS:
                     cnf1 = CNF1_16MHz_31k25BPS;
                     cnf2 = CNF2_16MHz_31k25BPS;
                     cnf3 = CNF3_16MHz_31k25BPS;
                     break;
-                case BAUD_40KBPS:
+                case BaudRate::BAUD_40KBPS:
                     cnf1 = CNF1_16MHz_40kBPS;
                     cnf2 = CNF2_16MHz_40kBPS;
                     cnf3 = CNF3_16MHz_40kBPS;
                     break;
-                case BAUD_50KBPS:
+                case BaudRate::BAUD_50KBPS:
                     cnf1 = CNF1_16MHz_50kBPS;
                     cnf2 = CNF2_16MHz_50kBPS;
                     cnf3 = CNF3_16MHz_50kBPS;
                     break;
-                case BAUD_80KBPS:
+                case BaudRate::BAUD_80KBPS:
                     cnf1 = CNF1_16MHz_80kBPS;
                     cnf2 = CNF2_16MHz_80kBPS;
                     cnf3 = CNF3_16MHz_80kBPS;
                     break;
-                case BAUD_100KBPS:
+                case BaudRate::BAUD_100KBPS:
                     cnf1 = CNF1_16MHz_100kBPS;
                     cnf2 = CNF2_16MHz_100kBPS;
                     cnf3 = CNF3_16MHz_100kBPS;
                     break;
-                case BAUD_125KBPS:
+                case BaudRate::BAUD_125KBPS:
                     cnf1 = CNF1_16MHz_125kBPS;
                     cnf2 = CNF2_16MHz_125kBPS;
                     cnf3 = CNF3_16MHz_125kBPS;
                     break;
-                case BAUD_200KBPS:
+                case BaudRate::BAUD_200KBPS:
                     cnf1 = CNF1_16MHz_200kBPS;
                     cnf2 = CNF2_16MHz_200kBPS;
                     cnf3 = CNF3_16MHz_200kBPS;
                     break;
-                case BAUD_250KBPS:
+                case BaudRate::BAUD_250KBPS:
                     cnf1 = CNF1_16MHz_250kBPS;
                     cnf2 = CNF2_16MHz_250kBPS;
                     cnf3 = CNF3_16MHz_250kBPS;
                     break;
-                case BAUD_500KBPS:
+                case BaudRate::BAUD_500KBPS:
                     cnf1 = CNF1_16MHz_500kBPS;
                     cnf2 = CNF2_16MHz_500kBPS;
                     cnf3 = CNF3_16MHz_500kBPS;
                     break;
-                case BAUD_1000KBPS:
+                case BaudRate::BAUD_1000KBPS:
                     cnf1 = CNF1_16MHz_1000kBPS;
                     cnf2 = CNF2_16MHz_1000kBPS;
                     cnf3 = CNF3_16MHz_1000kBPS;
@@ -831,9 +834,9 @@ class MCP2515 {
         PropWare::ErrorCode read_message (const BufferNumber bufferNumber) {
             const uint8_t stat = this->read_status();
 
-            const Bit interruptFlag = (Bit) (RX0IF + bufferNumber);
-            uint8_t bufferAddress = RXB0SIDH;
-            if (BUFFER_1 == bufferNumber)
+            const Bit interruptFlag = (Bit) (RX0IF + static_cast<uint8_t>(bufferNumber));
+            uint8_t   bufferAddress = RXB0SIDH;
+            if (BufferNumber::BUFFER_1 == bufferNumber)
                 bufferAddress += 0x10;
 
             if (Utility::bit_read(stat, interruptFlag)) {

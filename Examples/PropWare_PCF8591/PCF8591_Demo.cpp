@@ -40,11 +40,11 @@ int main () {
     pwOut << "PCF8591 ping = " << pingSuccess << '\n';
 
     if (pingSuccess) {
-        uint8_t value = pcf8591.read_channel(PropWare::PCF8591::CHANNEL_0);
+        uint8_t value = pcf8591.read_channel(PropWare::PCF8591::ADCChannel::CHANNEL_0);
         while (1) {
             pwOut << "PCF: " << value << '\n';
             waitcnt(250 * MILLISECOND + CNT);
-            value = pcf8591.read_channel(PropWare::PCF8591::CHANNEL_0);
+            value = pcf8591.read_channel(PropWare::PCF8591::ADCChannel::CHANNEL_0);
         }
     }
 

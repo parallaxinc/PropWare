@@ -71,7 +71,7 @@ bool isAnswerNo (char const userInput[]) {
 }
 
 void error (const PropWare::ErrorCode err) {
-    const PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Port::OUT);
+    const PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Port::Dir::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

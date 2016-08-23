@@ -53,12 +53,12 @@ class UARTTX : public UART
 
         virtual void set_tx_mask (const Port::Mask tx) {
             // Reset the old pin
-            this->m_pin.set_dir(Port::IN);
+            this->m_pin.set_dir_in();
             this->m_pin.clear();
 
             this->m_pin.set_mask(tx);
             this->m_pin.set();
-            this->m_pin.set_dir(Port::OUT);
+            this->m_pin.set_dir_out();
         }
 
         Port::Mask get_tx_mask () const {
@@ -69,13 +69,13 @@ class UARTTX : public UART
             uint32_t wideData = originalData;
 
             // Add parity bit
-            if (UART::EVEN_PARITY == this->m_parity) {
+            if (Parity::EVEN_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                         "muxc %[_data], %[_parityMask]"
                 : [_data] "+r"(wideData)
                 : [_dataMask] "r"(this->m_dataMask),
                 [_parityMask] "r"(this->m_parityMask));
-            } else if (UART::ODD_PARITY == this->m_parity) {
+            } else if (Parity::ODD_PARITY == this->m_parity) {
                 __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                         "muxnc %[_data], %[_parityMask]"
                 : [_data] "+r"(wideData)
@@ -89,7 +89,8 @@ class UARTTX : public UART
             // Add start bit
             wideData <<= 1;
 
-            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles, this->m_pin.get_mask());
+            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles,
+                                 static_cast<uint32_t>(this->m_pin.get_mask()));
         }
 
         virtual void send_array (const char array[], uint32_t words) const {
@@ -98,7 +99,7 @@ class UARTTX : public UART
 
 #ifndef DOXYGEN_IGNORE
             switch (this->m_parity) {
-                case UART::NO_PARITY:
+                case Parity::NO_PARITY:
                     __asm__ volatile (
                     FC_START("SendArrayStart%=", "SendArrayEnd%=")
                             // Prepare next word
@@ -132,7 +133,7 @@ class UARTTX : public UART
                     [_totalBits] "r"(this->m_totalBits),
                     [_stopBitMask] "r"(this->m_stopBitMask));
                     break;
-                case UART::ODD_PARITY:
+                case Parity::ODD_PARITY:
                     __asm__ volatile (
                     FC_START("SendArrayStart%=", "SendArrayEnd%=")
                             // Prepare next word
@@ -171,7 +172,7 @@ class UARTTX : public UART
                     [_dataMask] "r"(this->m_dataMask),
                     [_parityMask] "r"(this->m_parityMask));
                     break;
-                case UART::EVEN_PARITY:
+                case Parity::EVEN_PARITY:
                     __asm__ volatile (
                     FC_START("SendArrayStart%=", "SendArrayEnd%=")
                             // Prepare next word

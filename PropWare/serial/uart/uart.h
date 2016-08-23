@@ -85,11 +85,11 @@ namespace PropWare {
  */
 class UART {
     public:
-        typedef enum {
-            /** No parity */  NO_PARITY,
-            /** Even parity */EVEN_PARITY,
-            /** Odd parity */ ODD_PARITY
-        } Parity;
+        enum class Parity {
+                /** No parity */  NO_PARITY,
+                /** Even parity */EVEN_PARITY,
+                /** Odd parity */ ODD_PARITY
+        };
 
         /** Number of allocated error codes for UART */
 #define UART_ERRORS_LIMIT            16
@@ -111,9 +111,9 @@ class UART {
         } ErrorCode;
 
     public:
-        static const uint8_t      DEFAULT_DATA_WIDTH     = 8;
-        static const UART::Parity DEFAULT_PARITY         = NO_PARITY;
-        static const uint8_t      DEFAULT_STOP_BIT_WIDTH = 1;
+        static const uint8_t DEFAULT_DATA_WIDTH     = 8;
+        static const Parity  DEFAULT_PARITY         = Parity::NO_PARITY;
+        static const uint8_t DEFAULT_STOP_BIT_WIDTH = 1;
 
         static const int MAX_BAUD = 4413793;
 
@@ -200,7 +200,7 @@ class UART {
             // Shift the mask into position (taking into account the current
             // parity settings)
             this->m_stopBitMask <<= this->m_dataWidth;
-            if (UART::NO_PARITY != this->m_parity)
+            if (Parity::NO_PARITY != this->m_parity)
                 this->m_stopBitMask <<= 1;
         }
 
@@ -222,7 +222,7 @@ class UART {
             // Total bits = start + data + parity + stop bits
             this->m_totalBits = (uint8_t) (1 + this->m_dataWidth
                     + this->m_stopBitWidth);
-            if (UART::NO_PARITY != this->m_parity)
+            if (Parity::NO_PARITY != this->m_parity)
                 ++this->m_totalBits;
         }
 

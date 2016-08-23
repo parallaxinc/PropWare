@@ -39,15 +39,15 @@ class WS2812 {
         /**
          * @brief   Support both types of multicolor LEDs, RGB and GRB
          */
-        typedef enum {
+        enum class Type {
                                           RGB,
             /** for WS2812 and WS2812B */ GRB
-        } Type;
+        };
 
         /**
          * @brief   Provide some common color codes
          */
-        typedef enum {
+        enum class Color {
             BLACK      = 0x000000,
             RED        = 0xFF0000,
             GREEN      = 0x00FF00,
@@ -67,7 +67,7 @@ class WS2812 {
             MAROON     = 0x320010,
             BROWN      = 0x0E0600,
             CRIMSON    = 0xDC283C
-        } Color;
+        };
 
     public:
         /**
@@ -117,8 +117,8 @@ class WS2812 {
         /**
          * @brief       Send a series of colors to a series of LEDs
          *
-         * @param[in]   *buffer     Address where the color series starts
-         * @param[in]   length      Number of LEDs to be set
+         * @param[in]   buffer  Address where the color series starts
+         * @param[in]   length  Number of LEDs to be set
          */
         void send_array (const unsigned int *buffer, const size_t length) const {
             // Using local variables here saves 50 bytes relative to static class variables and even more compared to

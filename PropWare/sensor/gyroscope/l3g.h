@@ -49,11 +49,11 @@ class L3G {
         /**
          * Sensitivity measured in degrees per second
          */
-        typedef enum {
-            /** 250 degrees per second */ DPS_250  = 0x00,
-            /** 500 degrees per second */ DPS_500  = 0x10,
-            /** 2000 degrees per second */DPS_2000 = 0x20
-        } DPSMode;
+        enum class DPSMode {
+                /** 250 degrees per second */ DPS_250  = 0x00,
+                /** 500 degrees per second */ DPS_500  = 0x10,
+                /** 2000 degrees per second */DPS_2000 = 0x20
+        };
 
     public:
         static const uint8_t WHO_AM_I = 0x0F;
@@ -90,7 +90,7 @@ class L3G {
         /**
          * @brief       Construction requires an instance of the SPI module
          *
-         * @param[in]   *spi    Constructed SPI module
+         * @param[in]   spi     Constructed SPI module
          * @param[in]   cs      Chip select pin mask
          */
         L3G (SPI &spi, const PropWare::Port::Mask cs)
@@ -108,7 +108,7 @@ class L3G {
             this->m_spi->set_clock(PropWare::L3G::SPI_DEFAULT_FREQ);
 
             this->m_cs.set();
-            this->m_cs.set_dir(PropWare::Pin::OUT);
+            this->m_cs.set_dir_out();
 
             // NOTE L3G has high- and low-pass filters. Should they be enabled?
             // (Page 31)
@@ -135,7 +135,7 @@ class L3G {
          * @return      Returns 0 upon success, error code otherwise
          */
         int16_t read (const PropWare::L3G::Axis axis) const {
-            return this->read16(PropWare::L3G::OUT_X_L + (axis << 1));
+            return this->read16(PropWare::L3G::OUT_X_L + (static_cast<uint8_t>(axis) << 1));
         }
 
         /**
@@ -168,7 +168,7 @@ class L3G {
         /**
          * @brief       Read data from all three axes
          *
-         * @param[out]  *val    Starting address for data to be placed; 6 contiguous bytes of space are required for the
+         * @param[out]  val     Starting address for data to be placed; 6 contiguous bytes of space are required for the
          *                      read routine
          *
          * @return      Returns 0 upon success, error code otherwise
@@ -184,9 +184,9 @@ class L3G {
 
             this->m_cs.clear();
             this->m_spi->shift_out(8, addr);
-            val[PropWare::L3G::X] = (int16_t) this->m_spi->shift_in(16);
-            val[PropWare::L3G::Y] = (int16_t) this->m_spi->shift_in(16);
-            val[PropWare::L3G::Z] = (int16_t) this->m_spi->shift_in(16);
+            val[Axis::X] = (int16_t) this->m_spi->shift_in(16);
+            val[Axis::Y] = (int16_t) this->m_spi->shift_in(16);
+            val[Axis::Z] = (int16_t) this->m_spi->shift_in(16);
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary
@@ -214,7 +214,7 @@ class L3G {
 
             oldValue = this->read8(PropWare::L3G::CTRL_REG4);
             oldValue &= ~(BIT_5 | BIT_4);
-            oldValue |= dpsMode;
+            oldValue |= static_cast<uint8_t>(dpsMode);
             this->write8(PropWare::L3G::CTRL_REG4, oldValue);
         }
 
@@ -254,11 +254,11 @@ class L3G {
          */
         static float convert_to_dps (const int16_t rawValue, const PropWare::L3G::DPSMode dpsMode) {
             switch (dpsMode) {
-                case PropWare::L3G::DPS_250:
+                case DPSMode::DPS_250:
                     return (float) (rawValue * 0.00875);
-                case PropWare::L3G::DPS_500:
+                case DPSMode::DPS_500:
                     return (float) (rawValue * 0.01750);
-                case PropWare::L3G::DPS_2000:
+                case DPSMode::DPS_2000:
                     return (float) (rawValue * 0.07000);
             }
             return 0;
@@ -266,8 +266,8 @@ class L3G {
 
     private:
         static const uint32_t     SPI_DEFAULT_FREQ = 100000;
-        static const SPI::Mode    SPI_MODE         = SPI::MODE_3;
-        static const SPI::BitMode SPI_BITMODE      = SPI::MSB_FIRST;
+        static const SPI::Mode    SPI_MODE         = SPI::Mode::MODE_3;
+        static const SPI::BitMode SPI_BITMODE      = SPI::BitMode::MSB_FIRST;
 
     protected:
         /***********************************

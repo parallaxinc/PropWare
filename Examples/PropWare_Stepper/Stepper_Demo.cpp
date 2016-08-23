@@ -35,7 +35,8 @@
  * @include PropWare_Stepper/CMakeLists.txt
  */
 int main () {
-    PropWare::Stepper stepper(PropWare::Port::P1, PropWare::Port::P2, PropWare::Port::P3, PropWare::Port::P4);
+    PropWare::Stepper stepper(PropWare::Port::Mask::P1, PropWare::Port::Mask::P2, PropWare::Port::Mask::P3,
+                              PropWare::Port::Mask::P4);
 
     stepper.step_forward(10); // Step forward 10 steps
     stepper.step_reverse(15); // Step back 15 steps

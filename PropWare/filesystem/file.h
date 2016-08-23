@@ -42,13 +42,13 @@ class File {
             /** Invalid file name */    INVALID_FILENAME,
             /** File not opened */      FILE_NOT_OPEN,
             /** Final error code */     END_ERROR = FILE_NOT_OPEN
-        }    ErrorCode;
+        } ErrorCode;
 
-        typedef enum {
-            /** beginning of the stream */       BEG,
-            /** current position in the stream */CUR,
-            /** end of the stream */             END
-        }    SeekDir;
+        enum class SeekDir {
+                /** beginning of the stream */       BEG,
+                /** current position in the stream */CUR,
+                /** end of the stream */             END
+        };
 
         static const unsigned int MAX_FILENAME_LENGTH = 32;
 
@@ -112,14 +112,14 @@ class File {
         PropWare::ErrorCode seek (const int32_t offset, const SeekDir way) {
             int32_t absolute;
             switch (way) {
-                case BEG:
+                case SeekDir::BEG:
                     if (offset > this->m_length || 0 > offset)
                         return EOF_ERROR;
                     else {
                         this->m_ptr = offset;
                         break;
                     }
-                case CUR:
+                case SeekDir::CUR:
                     absolute = offset + this->m_ptr;
                     if (0 > offset || offset > this->m_length)
                         return EOF_ERROR;
@@ -127,7 +127,7 @@ class File {
                         this->m_ptr = (uint32_t) absolute;
                         break;
                     }
-                case END:
+                case SeekDir::END:
                     absolute = this->m_length - offset;
                     if (0 > offset || offset > this->m_length)
                         return EOF_ERROR;
@@ -226,7 +226,7 @@ class File {
         int32_t m_ptr;
 
         PropWare::ErrorCode m_error;
-        bool m_open;
+        bool                m_open;
 };
 
 }

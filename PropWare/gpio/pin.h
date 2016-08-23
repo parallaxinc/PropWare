@@ -35,10 +35,10 @@ namespace PropWare {
  */
 class Pin : public PropWare::Port {
     public:
-        typedef enum {
+        enum class Channel{
             A,
             B
-        } Channel;
+        } ;
 
     public:
         /**
@@ -49,7 +49,7 @@ class Pin : public PropWare::Port {
          * @param[in]   iterations  Number of times that the pin should flicker on and back off again
          */
         static void flash_pin (const Pin::Mask pinMask, const uint32_t iterations = 10) {
-            Port::flash_port(pinMask, iterations);
+            flash_port(static_cast<uint32_t>(pinMask), iterations);
         }
 
     public:
@@ -58,7 +58,7 @@ class Pin : public PropWare::Port {
          */
         Pin () :
                 Port(),
-                m_channel(A) {
+                m_channel(Channel::A) {
         }
 
         /**
@@ -66,25 +66,25 @@ class Pin : public PropWare::Port {
          *
          * @param[in]   mask    Bit-mask of pin; One of PropWare::Pin::Mask
          */
-        Pin (const PropWare::Port::Mask mask) :
-                PropWare::Port(mask),
-                m_channel(A) {
+        Pin (const PropWare::Pin::Mask mask) :
+                PropWare::Port(static_cast<uint32_t>(mask)),
+                m_channel(Channel::A) {
         }
 
         /**
          * @param[in]   mask        Bit-mask of pin; One of PropWare::Pin::Mask
          * @param[in]   direction   Direction to initialize pin; One of PropWare::Pin::Dir
          */
-        Pin (const PropWare::Port::Mask mask, const PropWare::Port::Dir direction) :
-                PropWare::Port(mask, direction),
-                m_channel(A) {
+        Pin (const PropWare::Pin::Mask mask, const PropWare::Pin::Dir direction) :
+                PropWare::Port(static_cast<uint32_t>(mask), direction),
+                m_channel(Channel::A) {
         }
 
         /**
          * @see PropWare::Port::set_mask()
          */
-        void set_mask (const PropWare::Port::Mask mask) {
-            this->PropWare::Port::set_mask(mask);
+        void set_mask (const PropWare::Pin::Mask mask) {
+            this->Port::set_mask(static_cast<uint32_t>(mask));
         }
 
         /**
@@ -94,13 +94,13 @@ class Pin : public PropWare::Port {
          */
         void set_pin_num (const uint8_t pinNum) {
             if (31 <= pinNum)
-                this->m_mask = Pin::NULL_PIN;
+                this->m_mask = static_cast<uint32_t>(Mask::NULL_PIN);
             else
                 this->m_mask = (uint32_t) (1 << pinNum);
         }
 
-        PropWare::Port::Mask get_mask () const {
-            return (PropWare::Port::Mask) this->m_mask;
+        PropWare::Pin::Mask get_mask () const {
+            return static_cast<PropWare::Pin::Mask>(this->m_mask);
         }
 
         Channel get_channel () const {
@@ -170,7 +170,7 @@ class Pin : public PropWare::Port {
          * @return      Returns 1 or 0 depending on whether the switch was pressed
          */
         bool is_switch_low (const uint16_t debounceDelayInMillis = 3) const {
-            this->set_dir(PropWare::Pin::IN);  // Set the pin as input
+            this->set_dir(Dir::IN);  // Set the pin as input
 
             if (!(this->read())) {   // If pin is grounded (aka, pressed)
                 waitcnt(debounceDelayInMillis * MILLISECOND + CNT);
@@ -205,23 +205,23 @@ if(iodt == 0)                               // If dt not initialized
   set_io_timeout(CLKFREQ/4);                // Set up timeout
 }
 */
-            uint32_t ctr = ((8 + ((!state & 1) * 4)) << 26);       // POS detector counter setup
-            ctr += Pin::convert(this->m_mask);                      // Add pin to setup
-            const uint32_t startTime = CNT;                                      // Mark current time
+            uint32_t ctr = ((8 + ((!state & 1) * 4)) << 26);                             // POS detector counter setup
+            ctr += static_cast<uint32_t>(Pin::convert(static_cast<Mask>(this->m_mask))); // Add pin to setup
+            const uint32_t startTime = CNT;                                              // Mark current time
             if (CTRA == 0) {
                 // If CTRA unused
-                CTRA = ctr;                                         // Configure CTRA
-                FRQA = 1;                                           // FRQA increments PHSA by 1
+                CTRA = ctr;                                                              // Configure CTRA
+                FRQA = 1;                                                                // FRQA increments PHSA by 1
                 this->set_dir_in();
-                PHSA = 0;                                           // Clear PHSA
+                PHSA = 0;                                                                // Clear PHSA
                 // Wait for decay or timeout
                 while (state == this->read() && (CNT - startTime <= timeout));
-                CTRA = 0;                                           // Stop the counter module
+                CTRA = 0;                                                                // Stop the counter module
                 return PHSA;
             }
             else if (CTRB == 0) {
                 // If CTRA used, try CTRB
-                CTRB = ctr;                                         // Same procedure as for CTRA
+                CTRB = ctr;                                                              // Same procedure as for CTRA
                 FRQB = 1;
                 this->set_dir_in();
                 PHSB = 0;
@@ -248,11 +248,11 @@ if(iodt == 0)                               // If dt not initialized
 
             const uint32_t frq = static_cast<uint32_t>((UINT32_MAX + 1ULL) * frequency / CLKFREQ);
             const uint32_t ctr = (4 << 26) | static_cast<uint32_t>(convert(static_cast<Mask>(this->m_mask)));
-            if (A == this->m_channel) {
+            if (Channel::A == this->m_channel) {
                 FRQA = frq;
                 PHSA = 0;
                 CTRA = ctr;
-            } else if (B == this->m_channel) {
+            } else if (Channel::B == this->m_channel) {
                 FRQB = frq;
                 PHSB = 0;
                 CTRB = ctr;
@@ -263,28 +263,11 @@ if(iodt == 0)                               // If dt not initialized
          * @brief   Stop the hardware counter
          */
         void stop_hardware_pwm () const {
-            if (A == this->m_channel) {
+            if (Channel::A == this->m_channel) {
                 CTRA = 0;
-            } else if (B == this->m_channel) {
+            } else if (Channel::B == this->m_channel) {
                 CTRB = 0;
             }
-        }
-
-    public:
-        /**
-         * @brief   Copy one pin object into another; Only copies pin mask, not
-         *          I/O direction
-         */
-        PropWare::Pin *operator= (const PropWare::Pin &rhs) {
-            this->m_mask = rhs.m_mask;
-            return this;
-        }
-
-        /**
-         * @brief   Compare the pin mask of two pin objects. Does not compare I/O direction
-         */
-        bool operator== (const PropWare::Pin &rhs) {
-            return this->m_mask == rhs.m_mask;
         }
 
     private:

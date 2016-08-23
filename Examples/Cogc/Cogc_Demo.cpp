@@ -38,7 +38,7 @@ int main () {
     extern unsigned int _load_start_blinky_cog[];
     cognew(_load_start_blinky_cog, NULL);
 
-    PropWare::Pin led(PropWare::Port::P16, PropWare::Port::OUT);
+    PropWare::Pin led(PropWare::Port::Mask::P16, PropWare::Port::Dir::OUT);
     while (1) {
         led.toggle();
         waitcnt(MILLISECOND * 100 + CNT);

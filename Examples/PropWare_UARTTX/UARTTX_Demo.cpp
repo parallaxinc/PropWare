@@ -67,7 +67,7 @@ int main () {
         error(err);
     if ((err = uart.set_stop_bit_width(1)))
         error(err);
-    uart.set_parity(PropWare::UART::NO_PARITY);
+    uart.set_parity(PropWare::UART::Parity::NO_PARITY);
 
     while (1) {
         // Test the number pattern
@@ -81,7 +81,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

@@ -126,7 +126,7 @@ class Printer {
          * @brief   Construct a Printer instance that will use the given
          *          `*printCapable` instance for sending each character
          *
-         * @param   *printCapable   The address of any initialized communication object such as a PropWare::UART
+         * @param   printCapable    The address of any initialized communication object such as a PropWare::UART
          * @param   cooked          True to turn cooked mode on, false to turn it off. See
          *                          PropWare::Printer::set_cooked for more information
          */
@@ -479,7 +479,7 @@ class Printer {
          *              require the use of separate `print` and `printi` methods, as Parallax's Simple library does.
          *
          *
-         * @param[in]   *fmt    Format string such as `Hello, %%s!` which can be
+         * @param[in]   fmt[]   Format string such as `Hello, %%s!` which can be
          *                      used to print anyone's name in place of `%%s`
          * @param[in]   ...     Variable number of arguments passed here. Continuing with the `Hello, %%s!` example, a
          *                      single argument could be passed such as:

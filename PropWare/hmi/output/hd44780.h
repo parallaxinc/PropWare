@@ -45,10 +45,10 @@ class HD44780 : public PrintCapable {
         /**
          * @brief   LCD databus width
          */
-        typedef enum {
-            /** 4-bit mode */WIDTH4 = 4,
-            /** 8-bit mode */WIDTH8 = 8,
-        } BusWidth;
+        enum class BusWidth {
+                /** 4-bit mode */WIDTH4 = 4,
+                /** 8-bit mode */WIDTH8 = 8,
+        };
 
         /**
          * @brief   Supported LCD dimensions; Used for determining cursor placement
@@ -59,22 +59,22 @@ class HD44780 : public PrintCapable {
          *          8-characters on each line; 16x1_2 places all 16 characters
          *          are a single line of DDRAM.
          */
-        typedef enum {
-            /** 8x1 */        DIM_8x1,
-            /** 8x2 */        DIM_8x2,
-            /** 8x2 */        DIM_8x4,
-            /** 16x1 mode 1 */DIM_16x1_1,
-            /** 16x1 mode 2 */DIM_16x1_2,
-            /** 16x2 */       DIM_16x2,
-            /** 16x2 */       DIM_16x4,
-            /** 20x1 */       DIM_20x1,
-            /** 20x2 */       DIM_20x2,
-            /** 20x2 */       DIM_20x4,
-            /** 24x1 */       DIM_24x1,
-            /** 24x2 */       DIM_24x2,
-            /** 40x1 */       DIM_40x1,
-            /** 40x2 */       DIM_40x2,
-        } Dimensions;
+        enum class Dimensions {
+                /** 8x1 */        DIM_8x1,
+                /** 8x2 */        DIM_8x2,
+                /** 8x2 */        DIM_8x4,
+                /** 16x1 mode 1 */DIM_16x1_1,
+                /** 16x1 mode 2 */DIM_16x1_2,
+                /** 16x2 */       DIM_16x2,
+                /** 16x2 */       DIM_16x4,
+                /** 20x1 */       DIM_20x1,
+                /** 20x2 */       DIM_20x2,
+                /** 20x2 */       DIM_20x4,
+                /** 24x1 */       DIM_24x1,
+                /** 24x2 */       DIM_24x2,
+                /** 40x1 */       DIM_40x1,
+                /** 40x2 */       DIM_40x2,
+        };
 
         /** Number of allocated error codes for HD44780 */
 #define HD44780_ERRORS_LIMIT            16
@@ -158,19 +158,52 @@ class HD44780 : public PrintCapable {
          * @name Function set arguments
          * @{
          */
-        static const uint8_t FUNC_8BIT_MODE  = BIT_4;  // 0 = 4-bit mode
-        static const uint8_t FUNC_2LINE_MODE = BIT_3;  // 0 = "1-line" mode - use 2-line mode for 2- and 4-line displays
-        static const uint8_t FUNC_5x10_CHAR  = BIT_2;  // 0 = 5x8 dot mode
+        /**
+         * 0 = 4-bit mode
+         */
+        static const uint8_t FUNC_8BIT_MODE  = BIT_4;
+        /**
+         * 0 = "1-line" mode - use 2-line mode for 2- and 4-line displays
+         */
+        static const uint8_t FUNC_2LINE_MODE = BIT_3;
+        /**
+         * 0 = 5x8 dot mode
+         */
+        static const uint8_t FUNC_5x10_CHAR  = BIT_2;
         /**@}*/
 
     public:
         /************************
          *** Public Functions ***
          ************************/
-        HD44780 () {
-            this->m_curPos      = &(this->m_bogus);
-            this->m_curPos->row = 0;
-            this->m_curPos->col = 0;
+        /**
+         * @brief       Construct an LCD object
+         *
+         * @param[in]   lsbDataPin  Pin mask for the least significant pin of the data port
+         * @param[in]   rs          Pin mask connected to the `register select` control pin of the LCD driver
+         * @param[in]   rw          Pin mask connected to the `read/write` control pin of the LCD driver
+         * @param[in]   en          Pin mask connected to the `enable` control pin of the LCD driver
+         * @param[in]   bitMode     Select between whether the parallel bus is using 4 or 8 pins
+         * @param[in]   dimensions  Dimensions of your LCD device. Most common is HD44780::DIM_16x2
+         */
+        HD44780 (const Pin::Mask lsbDataPin, const Pin::Mask rs, const Pin::Mask rw, const Pin::Mask en,
+                 const HD44780::BusWidth bitMode, const HD44780::Dimensions dimensions)
+                : m_dataPort(lsbDataPin, static_cast<uint8_t>(bitMode), Port::Dir::OUT),
+                  m_rs(rs, Pin::Dir::OUT),
+                  m_rw(rw, Pin::Dir::OUT),
+                  m_en(en, Pin::Dir::OUT),
+                  m_bitMode(bitMode),
+                  m_dimensions(dimensions) {
+            this->m_curPos.row = 0;
+            this->m_curPos.col = 0;
+
+            // Save all control signal pin masks
+            this->m_rs.clear();
+            this->m_rw.clear();
+            this->m_en.clear();
+
+            // Save the modes
+            this->generate_mem_map();
         }
 
         /**
@@ -179,45 +212,19 @@ class HD44780 : public PrintCapable {
          * @note        A 250 ms delay is called while the LCD does internal
          *              initialization
          *
-         * @param[in]   lsbDataPin  Pin mask for the least significant pin of the data port
-         * @param[in]   rs, rw, en  PropWare::Pin::Mask instances for each of the RS, RW, and EN signals
-         * @param[in]   bitmode     Select between HD44780::WIDTH4 and HD44780::WIDTH8 modes to determine whether you
-         *                          will need 4 data wires or 8 between the Propeller and your LCD device
-         * @param[in]   dimensions  Dimensions of your LCD device. Most common is HD44780::DIM_16x2
-         *
          * @return      Returns 0 upon success, otherwise error code
          */
-        void start (const PropWare::Pin::Mask lsbDataPin, const Pin rs, const Pin rw, const Pin en,
-                    const HD44780::BusWidth bitmode, const HD44780::Dimensions dimensions) {
+        void start () {
             uint8_t arg;
 
-            // Wait for a couple years until the LCD has done internal initialization
+            // Wait for a couple years until the LCD has finished internal initialization
             waitcnt(250 * MILLISECOND + CNT);
 
-            // Save all control signal pin masks
-            this->m_rs = rs;
-            this->m_rw = rw;
-            this->m_en = en;
-            this->m_rs.set_dir(PropWare::Pin::OUT);
-            this->m_rw.set_dir(PropWare::Pin::OUT);
-            this->m_en.set_dir(PropWare::Pin::OUT);
-            this->m_rs.clear();
-            this->m_rw.clear();
-            this->m_en.clear();
-
-            // Save data port
-            this->m_dataPort.set_mask(lsbDataPin, bitmode);
-            this->m_dataPort.set_dir(PropWare::Pin::OUT);
-
-            // Save the modes
-            this->generate_mem_map(dimensions);
-            this->m_bitmode = bitmode;
-
             // Begin init routine:
-            if (HD44780::WIDTH8 == bitmode)
+            if (BusWidth::WIDTH8 == this->m_bitMode)
                 arg = 0x30;
             else
-                /* Implied: "if (HD44780::WIDTH4 == bitmode)" */
+                /* Implied: "if (HD44780::WIDTH4 == this->m_bitMode)" */
                 arg = 0x3;
 
             this->m_dataPort.write(arg);
@@ -230,14 +237,14 @@ class HD44780 : public PrintCapable {
             this->clock_pulse();
             waitcnt(10 * MILLISECOND + CNT);
 
-            if (PropWare::HD44780::WIDTH4 == bitmode) {
+            if (BusWidth::WIDTH4 == this->m_bitMode) {
                 this->m_dataPort.write(0x2);
                 this->clock_pulse();
             }
 
             // Default functions during initialization
             arg = PropWare::HD44780::FUNCTION_SET;
-            if (PropWare::HD44780::WIDTH8 == bitmode)
+            if (BusWidth::WIDTH8 == this->m_bitMode)
                 arg |= PropWare::HD44780::FUNC_8BIT_MODE;
             arg |= PropWare::HD44780::FUNC_2LINE_MODE;
             this->cmd(arg);
@@ -265,8 +272,8 @@ class HD44780 : public PrintCapable {
          */
         void clear (void) {
             this->cmd(PropWare::HD44780::CLEAR);
-            this->m_curPos->row = 0;
-            this->m_curPos->col = 0;
+            this->m_curPos.row = 0;
+            this->m_curPos.col = 0;
             waitcnt(1530 * MICROSECOND + CNT);
         }
 
@@ -276,7 +283,7 @@ class HD44780 : public PrintCapable {
          * @param[in]   row     Zero-indexed row to place the cursor
          * @param[in]   col     Zero indexed column to place the cursor
          */
-        void move (const uint8_t row, const uint8_t col) const {
+        void move (const uint8_t row, const uint8_t col) {
             uint8_t ddramLine, addr = 0;
 
             // Handle weird special case where a single row LCD is split across
@@ -301,8 +308,8 @@ class HD44780 : public PrintCapable {
             }
 
             this->cmd(addr | PropWare::HD44780::SET_DDRAM_ADDR);
-            this->m_curPos->row = row;
-            this->m_curPos->col = col;
+            this->m_curPos.row = row;
+            this->m_curPos.col = col;
         }
 
         void puts (const char string[]) {
@@ -317,17 +324,17 @@ class HD44780 : public PrintCapable {
         void put_char (const char c) {
             // For manual new-line characters...
             if ('\n' == c) {
-                this->m_curPos->row++;
-                if (this->m_curPos->row == this->m_memMap.charRows)
-                    this->m_curPos->row = 0;
-                this->m_curPos->col     = 0;
-                this->move(this->m_curPos->row, this->m_curPos->col);
+                this->m_curPos.row++;
+                if (this->m_curPos.row == this->m_memMap.charRows)
+                    this->m_curPos.row = 0;
+                this->m_curPos.col     = 0;
+                this->move(this->m_curPos.row, this->m_curPos.col);
             } else if ('\t' == c) {
                 do {
                     this->put_char(' ');
-                } while (this->m_curPos->col % PropWare::HD44780::TAB_WIDTH);
+                } while (this->m_curPos.col % PropWare::HD44780::TAB_WIDTH);
             } else if ('\r' == c)
-                this->move(this->m_curPos->row, 0);
+                this->move(this->m_curPos.row, 0);
                 // And for everything else...
             else {
                 //set RS to data and RW to write
@@ -335,15 +342,15 @@ class HD44780 : public PrintCapable {
                 this->write((const uint8_t) c);
 
                 // Insert a line wrap if necessary
-                ++this->m_curPos->col;
-                if (this->m_memMap.charColumns == this->m_curPos->col)
+                ++this->m_curPos.col;
+                if (this->m_memMap.charColumns == this->m_curPos.col)
                     this->put_char('\n');
 
                 // Handle weird special case where a single row LCD is split
                 // across multiple DDRAM lines (i.e., 16x1 type 1)
                 if (this->m_memMap.ddramCharRowBreak
                         > this->m_memMap.ddramLineEnd)
-                    this->move(this->m_curPos->row, this->m_curPos->col);
+                    this->move(this->m_curPos.row, this->m_curPos.col);
             }
         }
 
@@ -358,18 +365,19 @@ class HD44780 : public PrintCapable {
             this->write(command);
         }
 
-        static void print_error_str (const Printer *printer, const HD44780::ErrorCode err) {
-            char str[] = "HD44780 Error %u: %s\n";
+        static void print_error_str (const Printer &printer, const HD44780::ErrorCode err) {
+            static const char str[] = "HD44780 Error ";
 
+            printer << str << err - PropWare::HD44780::BEG_ERROR << ": ";
             switch (err) {
                 case PropWare::HD44780::INVALID_CTRL_SGNL:
-                    printer->printf(str, err - PropWare::HD44780::BEG_ERROR, "invalid control signal");
+                    printer << "invalid control signal\n";
                     break;
                 case PropWare::HD44780::INVALID_DIMENSIONS:
-                    printer->printf(str, err - PropWare::HD44780::BEG_ERROR,
-                                    "invalid LCD dimension; please choose from the HD44780::Dimensions type");
+                    printer << "invalid LCD dimension; please choose from the HD44780::Dimensions type\n";
                     break;
                 default:
+                    printer << "unknown error code\n";
                     break;
             }
         }
@@ -387,7 +395,7 @@ class HD44780 : public PrintCapable {
             // Clear RW to signal write value
             this->m_rw.clear();
 
-            if (PropWare::HD44780::WIDTH4 == this->m_bitmode) {
+            if (BusWidth::WIDTH4 == this->m_bitMode) {
                 // shift out the high nibble
                 this->m_dataPort.write(val >> 4);
                 this->clock_pulse();
@@ -396,15 +404,14 @@ class HD44780 : public PrintCapable {
                 this->m_dataPort.write(val);
             }
                 // Shift remaining four bits out
-            else /* Implied: if (HD44780::8BIT == this->m_bitmode) */{
+            else /* Implied: if (HD44780::8BIT == this->m_bitMode) */{
                 this->m_dataPort.write(val);
             }
             this->clock_pulse();
         }
 
         /**
-         * @brief   Toggle the enable pin, inducing a write to the LCD's
-         *          register
+         * @brief   Toggle the enable pin, inducing a write to the LCD's register
          */
         void clock_pulse (void) const {
             this->m_en.set();
@@ -413,91 +420,90 @@ class HD44780 : public PrintCapable {
         }
 
         /**
-         * @brief   The memory map is used to determine where line wraps should
-         *          and shouldn't occur
+         * @brief   The memory map is used to determine where line wraps should and shouldn't occur
          */
-        void generate_mem_map (const HD44780::Dimensions dimensions) {
+        void generate_mem_map () {
             // TODO: Make this a look-up table instead of a switch-case
-            switch (dimensions) {
-                case PropWare::HD44780::DIM_8x1:
+            switch (this->m_dimensions) {
+                case Dimensions::DIM_8x1:
                     this->m_memMap.charRows          = 1;
                     this->m_memMap.charColumns       = 8;
                     this->m_memMap.ddramCharRowBreak = 8;
                     this->m_memMap.ddramLineEnd      = 8;
                     break;
-                case PropWare::HD44780::DIM_8x2:
+                case Dimensions::DIM_8x2:
                     this->m_memMap.charRows          = 2;
                     this->m_memMap.charColumns       = 8;
                     this->m_memMap.ddramCharRowBreak = 8;
                     this->m_memMap.ddramLineEnd      = 8;
                     break;
-                case PropWare::HD44780::DIM_8x4:
+                case Dimensions::DIM_8x4:
                     this->m_memMap.charRows          = 4;
                     this->m_memMap.charColumns       = 8;
                     this->m_memMap.ddramCharRowBreak = 8;
                     this->m_memMap.ddramLineEnd      = 16;
                     break;
-                case PropWare::HD44780::DIM_16x1_1:
+                case Dimensions::DIM_16x1_1:
                     this->m_memMap.charRows          = 1;
                     this->m_memMap.charColumns       = 16;
                     this->m_memMap.ddramCharRowBreak = 8;
                     this->m_memMap.ddramLineEnd      = 8;
                     break;
-                case PropWare::HD44780::DIM_16x1_2:
+                case Dimensions::DIM_16x1_2:
                     this->m_memMap.charRows          = 1;
                     this->m_memMap.charColumns       = 16;
                     this->m_memMap.ddramCharRowBreak = 16;
                     this->m_memMap.ddramLineEnd      = 16;
                     break;
-                case PropWare::HD44780::DIM_16x2:
+                case Dimensions::DIM_16x2:
                     this->m_memMap.charRows          = 2;
                     this->m_memMap.charColumns       = 16;
                     this->m_memMap.ddramCharRowBreak = 16;
                     this->m_memMap.ddramLineEnd      = 16;
                     break;
-                case PropWare::HD44780::DIM_16x4:
+                case Dimensions::DIM_16x4:
                     this->m_memMap.charRows          = 4;
                     this->m_memMap.charColumns       = 16;
                     this->m_memMap.ddramCharRowBreak = 16;
                     this->m_memMap.ddramLineEnd      = 32;
                     break;
-                case PropWare::HD44780::DIM_20x1:
+                case Dimensions::DIM_20x1:
                     this->m_memMap.charRows          = 1;
                     this->m_memMap.charColumns       = 20;
                     this->m_memMap.ddramCharRowBreak = 20;
                     this->m_memMap.ddramLineEnd      = 20;
                     break;
-                case PropWare::HD44780::DIM_20x2:
+                case Dimensions::DIM_20x2:
                     this->m_memMap.charRows          = 2;
                     this->m_memMap.charColumns       = 20;
                     this->m_memMap.ddramCharRowBreak = 20;
                     this->m_memMap.ddramLineEnd      = 20;
                     break;
-                case PropWare::HD44780::DIM_20x4:
+                case Dimensions::DIM_20x4:
                     this->m_memMap.charRows          = 4;
                     this->m_memMap.charColumns       = 20;
                     this->m_memMap.ddramCharRowBreak = 20;
                     this->m_memMap.ddramLineEnd      = 40;
                     break;
-                case PropWare::HD44780::DIM_24x1:
+                case Dimensions::DIM_24x1:
                     this->m_memMap.charRows          = 1;
                     this->m_memMap.charColumns       = 24;
                     this->m_memMap.ddramCharRowBreak = 24;
                     this->m_memMap.ddramLineEnd      = 24;
                     break;
-                case PropWare::HD44780::DIM_24x2:
+                case Dimensions::DIM_24x2:
                     this->m_memMap.charRows          = 2;
                     this->m_memMap.charColumns       = 24;
                     this->m_memMap.ddramCharRowBreak = 24;
                     this->m_memMap.ddramLineEnd      = 24;
                     break;
-                case PropWare::HD44780::DIM_40x1:
+                case Dimensions::DIM_40x1:
                     this->m_memMap.charRows          = 1;
                     this->m_memMap.charColumns       = 40;
                     this->m_memMap.ddramCharRowBreak = 40;
                     this->m_memMap.ddramLineEnd      = 40;
                     break;
-                case PropWare::HD44780::DIM_40x2:
+                case Dimensions::DIM_40x2:
                     this->m_memMap.charRows          = 2;
                     this->m_memMap.charColumns       = 40;
                     this->m_memMap.ddramCharRowBreak = 40;
@@ -516,12 +522,13 @@ class HD44780 : public PrintCapable {
         HD44780::MemMap m_memMap;
 
     private:
-        // Horrible bad hack so that methods can be const
-        Position         m_bogus;
-        Position         *m_curPos;
-        Pin              m_rs, m_rw, m_en;
-        SimplePort       m_dataPort;
-        HD44780::BusWidth m_bitmode;
+        const SimplePort m_dataPort;
+        const Pin        m_rs;
+        const Pin        m_rw;
+        const Pin        m_en;
+        const BusWidth   m_bitMode;
+        const Dimensions m_dimensions;
+        Position         m_curPos;
 };
 
 }

@@ -29,11 +29,11 @@
 
 using namespace PropWare;
 
-const Port::Mask MOSI         = Port::P0;
-const Port::Mask MISO         = Port::P1;
-const Port::Mask SCLK         = Port::P2;
-const Port::Mask CS           = Port::P7;
-const Port::Mask CLOCK_MASK   = Port::P8;
+const Port::Mask MOSI         = Port::Mask::P0;
+const Port::Mask MISO         = Port::Mask::P1;
+const Port::Mask SCLK         = Port::Mask::P2;
+const Port::Mask CS           = Port::Mask::P7;
+const Port::Mask CLOCK_MASK   = Port::Mask::P8;
 
 const uint8_t messages[][6] = {
         "Hello",
@@ -71,28 +71,28 @@ int main () {
     MCP2515   can(spi, CS);
 
     // We'll use the Propeller's hardware counters as a clock source for the MCP2515
-    const Pin clock(CLOCK_MASK, Pin::OUT);
+    const Pin clock(CLOCK_MASK, Pin::Dir::OUT);
     clock.start_hardware_pwm(8000000);
 
     // Start the MCP2515 running a 1 Mbaud and in "loopback" mode. This means that all messages "sent" will be
     // immediately looped back into the receive buffers. This is great for testing your configuration while still at
     // your desk, to ensure that the filters and masks have been correctly configured, along with any other
     // configuration. Once ready, remove the optional `mode` parameter and connect to your live system.
-    handle(can.start(MCP2515::BAUD_1000KBPS, MCP2515::LOOPBACK));
+    handle(can.start(MCP2515::BaudRate::BAUD_1000KBPS, MCP2515::Mode::LOOPBACK));
 
     // Set up the filters and masks so that only message ID 2 is allowed through
-    handle(can.set_mask(MCP2515::BUFFER_0, WORD_0));
-    handle(can.set_filter(MCP2515::FILTER_0, 2));
+    handle(can.set_mask(MCP2515::BufferNumber::BUFFER_0, WORD_0));
+    handle(can.set_filter(MCP2515::FilterNumber::FILTER_0, 2));
 
     pwOut << "Expected message received:\n";
     handle(can.send_message(2, 6, messages[0]));
-    read(can, MCP2515::BUFFER_0);
+    read(can, MCP2515::BufferNumber::BUFFER_0);
 
     pwOut << "Message should _not_ be received!\n";
     handle(can.send_message(3, 6, messages[1]));
-    read(can, MCP2515::BUFFER_0);
+    read(can, MCP2515::BufferNumber::BUFFER_0);
 
     pwOut << "Expected message received:\n";
     handle(can.send_message(2, 6, messages[2]));
-    read(can, MCP2515::BUFFER_0);
+    read(can, MCP2515::BufferNumber::BUFFER_0);
 }

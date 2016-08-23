@@ -54,10 +54,10 @@ TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
     setUp();
 
     ASSERT_EQ_MSG((unsigned int) &SPI::get_instance(), (unsigned int) testable->m_spi);
-    ASSERT_EQ_MSG(Port::P2, testable->m_spi->m_mosi.get_mask());
-    ASSERT_EQ_MSG(Port::P1, testable->m_spi->m_sclk.get_mask());
-    ASSERT_EQ_MSG(Port::P0, testable->m_spi->m_miso.get_mask());
-    ASSERT_EQ_MSG(Port::P3, testable->m_cs.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P2, (unsigned int) testable->m_spi->m_mosi.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P1, (unsigned int) testable->m_spi->m_sclk.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P0, (unsigned int) testable->m_spi->m_miso.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P3, (unsigned int) testable->m_cs.get_mask());
 
     tearDown();
 }

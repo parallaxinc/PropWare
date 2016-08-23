@@ -61,25 +61,22 @@ class SPI : public PrintCapable,
          * 2            1       0
          * 3            1       1
          */
-        typedef enum {
-            /** Mode 0 */MODE_0,
-            /** Mode 1 */MODE_1,
-            /** Mode 2 */MODE_2,
-            /** Mode 3 */MODE_3
-        } Mode;
+        enum class Mode {
+                /** Mode 0 */MODE_0,
+                /** Mode 1 */MODE_1,
+                /** Mode 2 */MODE_2,
+                /** Mode 3 */MODE_3
+        };
 
         /**
          * @brief   Determine if data is communicated with the LSB or MSB sent/received first
          *
          * @note    Initial value is SPI_MODES + 1 making them easily distinguishable
          */
-        typedef enum {
-            /**
-             * Start the enumeration where Mode left off; this ensures no overlap
-             */
-                    LSB_FIRST = MODE_3 + 1,
-                    MSB_FIRST
-        } BitMode;
+        enum class BitMode {
+                LSB_FIRST,
+                MSB_FIRST
+        };
 
         /**
          * Error codes - Proceeded by nothing
@@ -117,9 +114,9 @@ class SPI : public PrintCapable,
          * @param[in]   mode        Determines clock phase and polarity
          * @param[in]   bitmode     Determine if the MSB or LSB should be clocked out first
          */
-        SPI (const Port::Mask mosi = PropWare::Port::NULL_PIN, const Port::Mask miso = PropWare::Port::NULL_PIN,
-             const Port::Mask sclk = PropWare::Port::NULL_PIN, const int32_t frequency = DEFAULT_FREQUENCY,
-             const Mode mode = MODE_0, const BitMode bitmode = MSB_FIRST)
+        SPI (const Pin::Mask mosi = Pin::Mask::NULL_PIN, const Pin::Mask miso = Pin::Mask::NULL_PIN,
+             const Pin::Mask sclk = Pin::Mask::NULL_PIN, const int32_t frequency = DEFAULT_FREQUENCY,
+             const Mode mode = Mode::MODE_0, const BitMode bitmode = BitMode::MSB_FIRST)
                 : m_bitmode(bitmode) {
             this->set_mosi(mosi);
             this->set_miso(miso);
@@ -166,7 +163,7 @@ class SPI : public PrintCapable,
         void set_mode (const Mode mode) {
             this->m_mode = mode;
 
-            if (0x02 & mode)
+            if (0x02 & static_cast<unsigned int>(mode))
                 this->m_sclk.set();
             else
                 this->m_sclk.clear();
@@ -221,10 +218,10 @@ class SPI : public PrintCapable,
          */
         void shift_out (uint8_t bits, uint32_t value) const {
             switch (this->m_bitmode) {
-                case MSB_FIRST:
+                case BitMode::MSB_FIRST:
                     this->shift_out_msb_first(bits, value);
                     break;
-                case LSB_FIRST:
+                case BitMode::LSB_FIRST:
                     this->shift_out_lsb_first(bits, value);
                     break;
             }
@@ -238,23 +235,22 @@ class SPI : public PrintCapable,
          * @returns     Value from the data bus
          */
         uint32_t shift_in (const unsigned int bits) const {
-            const bool clockPhase = this->m_mode & 0x01;
+            const bool clockPhase = static_cast<bool>(static_cast<unsigned int>(this->m_mode) & 0x01);
             if (clockPhase) {
                 switch (this->m_bitmode) {
-                    case MSB_FIRST:
+                    case BitMode::MSB_FIRST:
                         return this->shift_in_msb_phs1(bits);
-                    case LSB_FIRST:
+                    case BitMode::LSB_FIRST:
                         return this->shift_in_lsb_phs1(bits);
                 }
             } else {
                 switch (this->m_bitmode) {
-                    case MSB_FIRST:
+                    case BitMode::MSB_FIRST:
                         return this->shift_in_msb_phs0(bits);
-                    case LSB_FIRST:
+                    case BitMode::LSB_FIRST:
                         return this->shift_in_lsb_phs0(bits);
                 }
             }
-            return (uint32_t) -1;
         }
 
         /**

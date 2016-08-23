@@ -29,13 +29,13 @@
 #include <PropWare/sensor/gyroscope/l3g.h>
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask MOSI = PropWare::Port::P0;
+const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask MISO = PropWare::Port::P1;
+const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask SCLK = PropWare::Port::P2;
+const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask CS   = PropWare::Port::P6;
+const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
 /** Frequency (in Hertz) to run the SPI protocol */
 const uint32_t             FREQ = 10000;
 
@@ -54,7 +54,7 @@ int main () {
     PropWare::L3G gyro(spi, CS);
 
     gyro.start();
-    gyro.set_dps(PropWare::L3G::DPS_500);
+    gyro.set_dps(PropWare::L3G::DPSMode::DPS_500);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
@@ -75,13 +75,11 @@ int main () {
 
         waitcnt(50*MILLISECOND + CNT);
     }
-
-    return 0;
 }
 
 void error (const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

@@ -31,7 +31,7 @@ unsigned int g_clockTicks;
 class MockPing: public PropWare::Ping {
     public:
         MockPing()
-            : Ping(PropWare::Pin::NULL_PIN) {
+            : Ping(PropWare::Pin::Mask::NULL_PIN) {
         }
 
         virtual unsigned int get_clock_ticks() const {

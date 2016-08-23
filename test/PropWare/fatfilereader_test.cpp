@@ -194,7 +194,7 @@ TEST(Seek) {
     srand(CNT);
     for (int i = 0; i < 128; ++i) {
         const int charIndex = rand() % (SEEK_ITERATIONS - 1);
-        err = testable->seek(charIndex, File::BEG);
+        err = testable->seek(charIndex, File::SeekDir::BEG);
         error_checker(err);
         ASSERT_EQ_MSG(0, err);
 

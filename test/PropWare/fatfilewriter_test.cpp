@@ -310,7 +310,7 @@ TEST(CopyFile) {
     MESSAGE("Writer deleted...")
 
     // Reset reader
-    ASSERT_EQ_MSG(0, reader.seek(0, File::BEG));
+    ASSERT_EQ_MSG(0, reader.seek(0, File::SeekDir::BEG));
 
     FatFileReader fileWriterChecker(g_fs, NEW_FILE_NAME);
     ASSERT_EQ_MSG(0, fileWriterChecker.open());

@@ -49,41 +49,41 @@ namespace PropWare {
 class MCP3xxx {
     public:
         /** Single-ended channels */
-        typedef enum {
-            /** Channel 0 */               CHANNEL_0,
-            /** Channel 1 */               CHANNEL_1,
-            /** Channel 2 */               CHANNEL_2,
-            /** Channel 3 */               CHANNEL_3,
-            /** Channel 4 (MCP3008 only) */CHANNEL_4,
-            /** Channel 5 (MCP3008 only) */CHANNEL_5,
-            /** Channel 6 (MCP3008 only) */CHANNEL_6,
-            /** Channel 7 (MCP3008 only) */CHANNEL_7,
-        } Channel;
+        enum class Channel {
+                /** Channel 0 */               CHANNEL_0,
+                /** Channel 1 */               CHANNEL_1,
+                /** Channel 2 */               CHANNEL_2,
+                /** Channel 3 */               CHANNEL_3,
+                /** Channel 4 (MCP3008 only) */CHANNEL_4,
+                /** Channel 5 (MCP3008 only) */CHANNEL_5,
+                /** Channel 6 (MCP3008 only) */CHANNEL_6,
+                /** Channel 7 (MCP3008 only) */CHANNEL_7,
+        };
 
         /** Pseudo-differential pair channels */
-        typedef enum {
-            /** CH0+, CH1- */               DIFF_0_1,
-            /** CH1+, CH0- */               DIFF_1_0,
-            /** CH2+, CH3- */               DIFF_2_3,
-            /** CH3+, CH2- */               DIFF_3_2,
-            /** CH4+, CH5- (MCP3008 only) */DIFF_4_5,
-            /** CH5+, CH4- (MCP3008 only) */DIFF_5_4,
-            /** CH6+, CH7- (MCP3008 only) */DIFF_6_7,
-            /** CH7+, CH6- (MCP3008 only) */DIFF_7_6
-        } ChannelDiff;
+        enum class ChannelDiff {
+                /** CH0+, CH1- */               DIFF_0_1,
+                /** CH1+, CH0- */               DIFF_1_0,
+                /** CH2+, CH3- */               DIFF_2_3,
+                /** CH3+, CH2- */               DIFF_3_2,
+                /** CH4+, CH5- (MCP3008 only) */DIFF_4_5,
+                /** CH5+, CH4- (MCP3008 only) */DIFF_5_4,
+                /** CH6+, CH7- (MCP3008 only) */DIFF_6_7,
+                /** CH7+, CH6- (MCP3008 only) */DIFF_7_6
+        };
 
         /** The part number determines the width of the data transfer */
-        typedef enum {
-            /** 10-bit ADC, includes MCP3002, MCP3004 and MCP3008 */MCP300x = 11,
-            /** 12-bit ADC, includes MCP3202, MCP3204 and MCP3208 */MCP320x = 13,
-            /** 13-bit ADC, includes MCP3302, MCP3304 and MCP3308 */MCP330x = 14
-        } PartNumber;
+        enum class PartNumber {
+                /** 10-bit ADC, includes MCP3002, MCP3004 and MCP3008 */MCP300x = 11,
+                /** 12-bit ADC, includes MCP3202, MCP3204 and MCP3208 */MCP320x = 13,
+                /** 13-bit ADC, includes MCP3302, MCP3304 and MCP3308 */MCP330x = 14
+        };
 
     public:
         /**
          * @brief       Construction requires an instance of the SPI module; the SPI module does not need to be started
          *
-         * @param[in]   *spi                Constructed SPI module
+         * @param[in]   spi                 Constructed SPI module
          * @param[in]   cs                  Pin mask used for chip select
          * @param[in]   partNumber          Determine bit-width of the ADC channels
          * @param[in]   alwaysSetSPIMode    Should every invocation of `read` or `read_diff` set the SPI mode. Setting
@@ -94,13 +94,13 @@ class MCP3xxx {
                  const bool alwaysSetSPIMode = false)
                 : m_spi(&spi),
                   m_alwaysSetMode(alwaysSetSPIMode),
-                  m_dataWidth(partNumber) {
+                  m_dataWidth(static_cast<uint8_t>(partNumber)) {
             this->m_spi->set_mode(SPI_MODE);
             this->m_spi->set_bit_mode(SPI_BITMODE);
 
             this->m_cs.set_mask(cs);
             this->m_cs.set();
-            this->m_cs.set_dir(PropWare::Pin::OUT);
+            this->m_cs.set_dir_out();
         }
 
         /**
@@ -125,7 +125,7 @@ class MCP3xxx {
             int8_t   options;
             uint16_t dat;
 
-            options = START | SINGLE_ENDED | channel;
+            options = START | static_cast<int8_t>(SINGLE_ENDED) | static_cast<int8_t>(channel);
 
             // Two dead bits between output and input - see page 19 of datasheet
             options <<= 2;
@@ -156,7 +156,7 @@ class MCP3xxx {
             int8_t   options;
             uint16_t dat;
 
-            options = START | DIFFERENTIAL | channels;
+            options = START | static_cast<int8_t>(DIFFERENTIAL) | static_cast<int8_t>(channels);
 
             // Two dead bits between output and input - see page 19 of datasheet
             options <<= 2;
@@ -175,8 +175,8 @@ class MCP3xxx {
         }
 
     private:
-        static const SPI::Mode    SPI_MODE    = SPI::MODE_2;
-        static const SPI::BitMode SPI_BITMODE = SPI::MSB_FIRST;
+        static const SPI::Mode    SPI_MODE    = SPI::Mode::MODE_2;
+        static const SPI::BitMode SPI_BITMODE = SPI::BitMode::MSB_FIRST;
 
         static const uint8_t START        = BIT_4;
         static const uint8_t SINGLE_ENDED = BIT_3;

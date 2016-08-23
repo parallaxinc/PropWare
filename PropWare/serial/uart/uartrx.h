@@ -57,9 +57,8 @@ class UARTRX : public UART
         }
 
         /**
-         * @brief       Initialize a UART module with both pin masks
+         * @brief       Initialize a UART receiver
          *
-         * @param[in]   tx  Pin mask for TX (transmit) pin
          * @param[in]   rx  Pin mask for RX (receive) pin
          */
         UARTRX (const Port::Mask rx) {
@@ -101,16 +100,17 @@ class UARTRX : public UART
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
 
-            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
-                                        this->m_msbMask);
+            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
+                                        static_cast<uint32_t>(this->m_pin.get_mask()),
+                                        static_cast<uint32_t>(this->m_msbMask));
 
-            if (this->m_parity && 0 != this->check_parity(rxVal))
+            if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
                 return (uint32_t) -1;
 
             return rxVal & wideDataMask;
         }
 
-        ErrorCode get_line (char *buffer, int32_t *length, const uint32_t delimiter = '\n') const {
+        ErrorCode get_line (char *buffer, int32_t *length, const char delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
@@ -124,7 +124,7 @@ class UARTRX : public UART
 
                 *length = this->shift_in_byte_array((uint32_t) buffer, *length, delimiter);
 
-                if (NO_PARITY != this->m_parity)
+                if (Parity::NO_PARITY != this->m_parity)
                     for (int32_t i = 0; i < *length; --i)
                         if (0 != this->check_parity((uint32_t) buffer[i]))
                             return UART::PARITY_ERROR;
@@ -157,7 +157,7 @@ class UARTRX : public UART
 
                 this->shift_in_byte_array(buffer, length);
 
-                if (NO_PARITY != this->m_parity)
+                if (Parity::NO_PARITY != this->m_parity)
                     for (uint32_t i = 0; i < length; --i)
                         if (0 != this->check_parity((uint32_t) buffer[i]))
                             return UART::PARITY_ERROR;
@@ -183,7 +183,7 @@ class UARTRX : public UART
          * newline is found, no null-terminator will be inserted
          *
          * @param[in]   string[]        Output buffer which should store the data
-         * @param[out]  *bufferSize     Address where the new length of the buffer will be written
+         * @param[out]  bufferSize      Address where the new length of the buffer will be written
          *
          * @returns     Zero upon success, error code otherwise
          */
@@ -209,7 +209,7 @@ class UARTRX : public UART
          *          0 - the start bit is not taken into account)
          */
         void set_msb_mask () {
-            if (this->m_parity)
+            if (static_cast<bool>(this->m_parity))
                 this->m_msbMask = (Port::Mask) (1 << this->m_dataWidth);
             else
                 this->m_msbMask = (Port::Mask) (1 << (this->m_dataWidth - 1));
@@ -220,7 +220,7 @@ class UARTRX : public UART
          *          parity selection
          */
         void set_receivable_bits () {
-            if (this->m_parity)
+            if (static_cast<bool>(this->m_parity))
                 this->m_receivableBits = (uint8_t) (this->m_dataWidth + 1);
             else
                 this->m_receivableBits = this->m_dataWidth;
@@ -433,7 +433,7 @@ class UARTRX : public UART
             [_dataMask] "r"(wideDataMask),
             [_parityMask] "r"(wideParityMask));
 
-            if (UART::ODD_PARITY == this->m_parity) {
+            if (Parity::ODD_PARITY == this->m_parity) {
                 if (evenParityResult != (rxVal & this->m_parityMask))
                     return UART::PARITY_ERROR;
             } else if (evenParityResult == (rxVal & this->m_parityMask))
