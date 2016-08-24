@@ -11,6 +11,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filewriter.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/pin.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/port.h
+    ${CMAKE_CURRENT_LIST_DIR}/gpio/simpleport.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scancapable.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scanner.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scanner.h
