@@ -30,3 +30,15 @@ Coding Style
   "VGA" or "SPI"
 * Class names use CamelCase, with the first letter capitalized
 * Constant variables should be in all caps, separated by underscores
+
+Coding Best Practices
+---------------------
+
+### enum class
+
+`enum class MyEnum {...};` should be preferred over `typedef enum {...} MyEnum;`. Exceptions to this rule are,
+however, frequent. `enum class` will be relegated to abstract concepts which are never or infrequently
+converted to their ordinal values. "color"s and "mode"s of operation are often good examples of a sufficiently
+abstract concept to use `enum class`. "Mode" would be a bad example, though, if the ordinal values represent
+specific bits in a register, and those bits need to be accessed frequently. The `enum class` is a method to _prevent
+automatic casting *down* to an `int`_. Remember that standard `enum`s already avoid automatic casting up to the enum. 
