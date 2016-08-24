@@ -251,6 +251,7 @@ class SPI : public PrintCapable,
                         return this->shift_in_lsb_phs0(bits);
                 }
             }
+            return 0;
         }
 
         /**

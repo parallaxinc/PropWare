@@ -100,9 +100,8 @@ class UARTRX : public UART
             uint32_t rxVal;
             uint32_t wideDataMask = this->m_dataMask;
 
-            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
-                                        static_cast<uint32_t>(this->m_pin.get_mask()),
-                                        static_cast<uint32_t>(this->m_msbMask));
+            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
+                                        this->m_msbMask);
 
             if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
                 return (uint32_t) -1;

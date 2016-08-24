@@ -89,8 +89,7 @@ class UARTTX : public UART
             // Add start bit
             wideData <<= 1;
 
-            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles,
-                                 static_cast<uint32_t>(this->m_pin.get_mask()));
+            this->shift_out_data(wideData, this->m_totalBits, this->m_bitCycles, this->m_pin.get_mask());
         }
 
         virtual void send_array (const char array[], uint32_t words) const {

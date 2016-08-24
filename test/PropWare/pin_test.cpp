@@ -33,7 +33,6 @@ static PropWare::Pin             *testable;
 static PropWare::Pin             *helper;
 static const uint8_t             TEST_PIN_NUM  = 12;
 static const PropWare::Pin::Mask TEST_MASK     = PropWare::Pin::Mask::P12;
-static const uint32_t            TEST_MASK_INT = static_cast<uint32_t>(TEST_MASK);
 static const PropWare::Pin::Mask CHECK_MASK    = PropWare::Pin::Mask::P13;
 
 void setUp (const PropWare::Pin::Dir dir = PropWare::Pin::Dir::OUT) {
@@ -123,7 +122,7 @@ TEST(Set) {
     setUp();
 
     testable->set();
-    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -132,7 +131,7 @@ TEST(High) {
     setUp();
 
     testable->high();
-    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -141,7 +140,7 @@ TEST(On) {
     setUp();
 
     testable->on();
-    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -150,7 +149,7 @@ TEST(Clear) {
     setUp();
 
     testable->clear();
-    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -159,7 +158,7 @@ TEST(Low) {
     setUp();
 
     testable->low();
-    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -168,7 +167,7 @@ TEST(Off) {
     setUp();
 
     testable->off();
-    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -177,11 +176,11 @@ TEST(Toggle) {
     setUp();
 
     testable->low();
-    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
     testable->toggle();
-    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
     testable->toggle();
-    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
 
     tearDown();
 }
@@ -190,11 +189,11 @@ TEST(Write) {
     setUp();
 
     testable->write(true);
-    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
     testable->write(false);
-    ASSERT_EQ(0, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(0, OUTA & TEST_MASK);
     testable->write(42); // Ensure no problems when an arbitrary value is passed
-    ASSERT_EQ(TEST_MASK_INT, OUTA & TEST_MASK_INT);
+    ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
     tearDown();
 }

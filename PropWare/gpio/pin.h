@@ -33,12 +33,12 @@ namespace PropWare {
 /**
  * @brief   Utility class to handle general purpose I/O pins
  */
-class Pin : public PropWare::Port {
+class Pin : public Port {
     public:
-        enum class Channel{
-            A,
-            B
-        } ;
+        enum class Channel {
+                A,
+                B
+        };
 
     public:
         /**
@@ -48,17 +48,17 @@ class Pin : public PropWare::Port {
          * @param[in]   pinMask     Pin that should be flashed
          * @param[in]   iterations  Number of times that the pin should flicker on and back off again
          */
-        static void flash_pin (const Pin::Mask pinMask, const uint32_t iterations = 10) {
-            flash_port(static_cast<uint32_t>(pinMask), iterations);
+        static void flash_pin (const Pin::Mask pinMask, const unsigned int iterations = 10) {
+            flash_port(pinMask, iterations);
         }
 
     public:
         /**
          * @brief   Initialize to a NULL pin mask
          */
-        Pin () :
-                Port(),
-                m_channel(Channel::A) {
+        Pin ()
+                : Port(),
+                  m_channel(Channel::A) {
         }
 
         /**
@@ -66,25 +66,25 @@ class Pin : public PropWare::Port {
          *
          * @param[in]   mask    Bit-mask of pin; One of PropWare::Pin::Mask
          */
-        Pin (const PropWare::Pin::Mask mask) :
-                PropWare::Port(static_cast<uint32_t>(mask)),
-                m_channel(Channel::A) {
+        Pin (const PropWare::Pin::Mask mask)
+                : Port(mask),
+                  m_channel(Channel::A) {
         }
 
         /**
          * @param[in]   mask        Bit-mask of pin; One of PropWare::Pin::Mask
          * @param[in]   direction   Direction to initialize pin; One of PropWare::Pin::Dir
          */
-        Pin (const PropWare::Pin::Mask mask, const PropWare::Pin::Dir direction) :
-                PropWare::Port(static_cast<uint32_t>(mask), direction),
-                m_channel(Channel::A) {
+        Pin (const Pin::Mask mask, const Pin::Dir direction)
+                : Port(mask, direction),
+                  m_channel(Channel::A) {
         }
 
         /**
          * @see PropWare::Port::set_mask()
          */
-        void set_mask (const PropWare::Pin::Mask mask) {
-            this->Port::set_mask(static_cast<uint32_t>(mask));
+        void set_mask (const Pin::Mask mask) {
+            this->Port::set_mask(mask);
         }
 
         /**
@@ -94,13 +94,13 @@ class Pin : public PropWare::Port {
          */
         void set_pin_num (const uint8_t pinNum) {
             if (31 <= pinNum)
-                this->m_mask = static_cast<uint32_t>(Mask::NULL_PIN);
+                this->m_mask = Mask::NULL_PIN;
             else
                 this->m_mask = (uint32_t) (1 << pinNum);
         }
 
-        PropWare::Pin::Mask get_mask () const {
-            return static_cast<PropWare::Pin::Mask>(this->m_mask);
+        Pin::Mask get_mask () const {
+            return static_cast<Pin::Mask>(this->m_mask);
         }
 
         Channel get_channel () const {
@@ -129,7 +129,7 @@ class Pin : public PropWare::Port {
          * @return  True if the pin is high, False if the pin is low
          */
         bool read () const {
-            return (bool) this->read_fast();
+            return static_cast<bool>(this->read_fast());
         }
 
         /**
@@ -205,8 +205,8 @@ if(iodt == 0)                               // If dt not initialized
   set_io_timeout(CLKFREQ/4);                // Set up timeout
 }
 */
-            uint32_t ctr = ((8 + ((!state & 1) * 4)) << 26);                             // POS detector counter setup
-            ctr += static_cast<uint32_t>(Pin::convert(static_cast<Mask>(this->m_mask))); // Add pin to setup
+            uint32_t ctr = static_cast<uint32_t>((8 + ((!state & 1) * 4)) << 26);        // POS detector counter setup
+            ctr += Pin::convert(static_cast<Mask>(this->m_mask));                        // Add pin to setup
             const uint32_t startTime = CNT;                                              // Mark current time
             if (CTRA == 0) {
                 // If CTRA unused
@@ -218,8 +218,7 @@ if(iodt == 0)                               // If dt not initialized
                 while (state == this->read() && (CNT - startTime <= timeout));
                 CTRA = 0;                                                                // Stop the counter module
                 return PHSA;
-            }
-            else if (CTRB == 0) {
+            } else if (CTRB == 0) {
                 // If CTRA used, try CTRB
                 CTRB = ctr;                                                              // Same procedure as for CTRA
                 FRQB = 1;
@@ -228,8 +227,7 @@ if(iodt == 0)                               // If dt not initialized
                 while (state == this->read() && (CNT - startTime <= timeout));
                 CTRB = 0;
                 return PHSB;
-            }
-            else {
+            } else {
                 // If CTRA & CTRB in use
                 return -1;
             }
@@ -290,7 +288,7 @@ if(iodt == 0)                               // If dt not initialized
          * Hide from user - should not be accessible within PropWare::Pin
          */
         uint32_t read_fast () const {
-            return this->PropWare::Port::read_fast();
+            return this->Port::read_fast();
         }
 
     private:

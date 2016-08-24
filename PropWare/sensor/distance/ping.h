@@ -129,11 +129,9 @@ class Ping {
             this->m_trigger.clear();
 
             this->m_echo.set_dir_in();
-            waitpeq(static_cast<uint32_t>(this->m_echo.get_mask()),
-                    static_cast<uint32_t>(this->m_echo.get_mask()));
+            waitpeq(this->m_echo.get_mask(), this->m_echo.get_mask());
             const uint32_t start = CNT;
-            waitpne(static_cast<uint32_t>(this->m_echo.get_mask()),
-                    static_cast<uint32_t>(this->m_echo.get_mask()));
+            waitpne(this->m_echo.get_mask(), this->m_echo.get_mask());
             return CNT - start;
         }
 

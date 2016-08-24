@@ -59,8 +59,8 @@ class MAX6675 {
          */
         MAX6675 (SPI &spi, const Port::Mask mosi, const Port::Mask miso, const Port::Mask sclk, const Port::Mask cs,
                  const bool alwaysSetMode = false)
-                : m_spi(&spi),
-                  m_cs(cs, Pin::Dir::OUT),
+                : m_cs(cs, Pin::Dir::OUT),
+                  m_spi(&spi),
                   m_alwaysSetMode(alwaysSetMode) {
             this->m_spi->set_mosi(mosi);
             this->m_spi->set_miso(miso);

@@ -173,23 +173,23 @@ class MCP2515 {
             MERRF = BIT_7
         } CANINTFBits;
 
-        enum class SPIInstructionSet {
-                WRITE       = 0x02,
-                READ        = 0x03,
-                BITMOD      = 0x05,
-                LOAD_TX0    = 0x40,
-                LOAD_TX1    = 0x42,
-                LOAD_TX2    = 0x44,
-                RTS_TX0     = 0x81,
-                RTS_TX1     = 0x82,
-                RTS_TX2     = 0x84,
-                RTS_ALL     = 0x87,
-                READ_RX0    = 0x90,
-                READ_RX1    = 0x94,
-                READ_STATUS = 0xA0,
-                RX_STATUS   = 0xB0,
-                RESET       = 0xC0
-        };
+        typedef enum {
+            WRITE       = 0x02,
+            READ        = 0x03,
+            BITMOD      = 0x05,
+            LOAD_TX0    = 0x40,
+            LOAD_TX1    = 0x42,
+            LOAD_TX2    = 0x44,
+            RTS_TX0     = 0x81,
+            RTS_TX1     = 0x82,
+            RTS_TX2     = 0x84,
+            RTS_ALL     = 0x87,
+            READ_RX0    = 0x90,
+            READ_RX1    = 0x94,
+            READ_STATUS = 0xA0,
+            RX_STATUS   = 0xB0,
+            RESET       = 0xC0
+        } SPIInstructionSet;
 
         enum class BufferNumber {
                 BUFFER_0,
@@ -205,14 +205,14 @@ class MCP2515 {
                 FILTER_5
         };
 
-        enum class Mode {
-                NORMAL     = 0,
-                SLEEP      = BIT_5,
-                LOOPBACK   = BIT_6,
-                LISTENONLY = BIT_6 | BIT_5,
-                CONFIG     = BIT_7,
-                POWERUP    = BIT_7 | BIT_6 | BIT_5
-        };
+        typedef enum {
+            NORMAL     = 0,
+            SLEEP      = BIT_5,
+            LOOPBACK   = BIT_6,
+            LISTENONLY = BIT_6 | BIT_5,
+            CONFIG     = BIT_7,
+            POWERUP    = BIT_7 | BIT_6 | BIT_5
+        } Mode;
 
         typedef enum {
             NO_ERROR,
@@ -525,7 +525,7 @@ class MCP2515 {
     private:
         void reset () const {
             this->m_cs.clear();
-            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::RESET));
+            this->m_spi->shift_out(8, SPIInstructionSet::RESET);
             this->m_cs.set();
             waitcnt(10 * MILLISECOND + CNT);
         }
@@ -534,7 +534,7 @@ class MCP2515 {
             uint8_t ret;
 
             this->m_cs.clear();
-            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::READ));
+            this->m_spi->shift_out(8, SPIInstructionSet::READ);
             this->m_spi->shift_out(8, address);
             ret = (uint8_t) this->m_spi->shift_in(8);
             this->m_cs.set();
@@ -543,7 +543,7 @@ class MCP2515 {
         }
 
         void read_registers (const uint8_t address, uint8_t *values, const uint8_t n) {
-            const uint32_t tmp          = static_cast<uint32_t>(SPIInstructionSet::READ) << 8;
+            const uint32_t tmp          = SPIInstructionSet::READ << 8;
             const uint32_t combinedBits = tmp | address;
             this->m_cs.clear();
             this->m_spi->shift_out(16, combinedBits);
@@ -553,16 +553,16 @@ class MCP2515 {
         }
 
         void set_register (const uint8_t address, const uint8_t value) const {
-            const uint32_t tmp          = static_cast<uint32_t>(SPIInstructionSet::WRITE) << 16;
-            const uint32_t combinedBits = static_cast<uint32_t>(tmp | (address << 8) | value);
+            const uint32_t tmp          = SPIInstructionSet::WRITE << 16;
+            const uint32_t combinedBits = tmp | (address << 8) | value;
             this->m_cs.clear();
             this->m_spi->shift_out(24, combinedBits);
             this->m_cs.set();
         }
 
         void set_registers (const uint8_t address, const uint8_t values[], const uint8_t n) const {
-            const uint32_t tmp          = static_cast<uint32_t>(SPIInstructionSet::WRITE) << 8;
-            const uint32_t combinedBits = static_cast<uint32_t>(tmp | address);
+            const uint32_t tmp          = SPIInstructionSet::WRITE << 8;
+            const uint32_t combinedBits = tmp | address;
             this->m_cs.clear();
             this->m_spi->shift_out(16, combinedBits);
             this->m_spi->shift_out_block_msb_first_fast(values, n);
@@ -606,7 +606,7 @@ class MCP2515 {
 
         void modify_register (const uint8_t address, const uint8_t mask, const uint8_t data) const {
             this->m_cs.clear();
-            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::BITMOD));
+            this->m_spi->shift_out(8, SPIInstructionSet::BITMOD);
             this->m_spi->shift_out(8, address);
             this->m_spi->shift_out(8, mask);
             this->m_spi->shift_out(8, data);
@@ -615,14 +615,14 @@ class MCP2515 {
 
         uint8_t read_status () const {
             this->m_cs.clear();
-            this->m_spi->shift_out(8, static_cast<uint8_t>(SPIInstructionSet::READ_STATUS));
-            const uint8_t i = static_cast<uint8_t>(this->m_spi->shift_in(8));
+            this->m_spi->shift_out(8, SPIInstructionSet::READ_STATUS);
+            const uint8_t i = this->m_spi->shift_in(8);
             this->m_cs.set();
             return i;
         }
 
         PropWare::ErrorCode set_control_mode (const Mode mode) const {
-            this->modify_register(CANCTRL, MODE_MASK, static_cast<uint8_t>(mode));
+            this->modify_register(CANCTRL, MODE_MASK, mode);
 
             const Mode actualMode = static_cast<Mode>(this->read_register(CANCTRL) & MODE_MASK);
             if (actualMode == mode)
@@ -795,7 +795,6 @@ class MCP2515 {
         }
 
         uint8_t set_message (const uint32_t id, const uint8_t length, const uint8_t data[], const bool extendedID) {
-            int i = 0;
             this->m_extendedID = extendedID;
             this->m_id         = id;
             this->m_dataLength = length;
