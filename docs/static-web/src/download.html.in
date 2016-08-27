@@ -1,0 +1,175 @@
+<div class="container">
+    <div class="row">
+        <h1>Download</h1>
+
+        <h2>SimpleIDE (Any Operating System)</h2>
+
+        <p>The following steps explain how to use PropWare’s libraries - including PropWare, Simple, and
+            libpropeller -
+            in a SimpleIDE project. Step 2 and onward must be repeated for every new project in SimpleIDE.</p>
+
+        <ol>
+            <li>Download the
+                <a href="http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-propware.zip?guest=1">libraries
+                    and header files</a>. Extract the contents to a known location on your disk - this location will
+                be referred to as <code>&lt;PROPWARE_PATH&gt;</code> throughout these steps.
+            </li>
+            <li>Set SimpleIDE to "Project view":
+                <ol>
+                    <li>Open the "Tools" menu and choose "Properties"</li>
+                    <li>Open the "General" tab and ensure "View Mode" is checked. Press "OK".</li>
+                    <li>Open the "Tools" menu and:<br/>
+                        If the first option is "Set Simple View", then ignore it and press anywhere to exit the
+                        menu.<br/>
+                        If the first option is "Set Project View", then press it.
+                    </li>
+                </ol>
+            </li>
+            <li>Ensure project source files end with <code>.cpp</code> not <code>.c</code>.</li>
+            <li>From the "Project" menu, choose "Add Include Path". Select <code>
+                &lt;PROPWARE_PATH&gt;/include</code>
+                and then press the "Open" button.
+            </li>
+            <li>From the "Project" menu, choose "Add Library Path". Select <code>&lt;PROPWARE_PATH&gt;/lib</code>
+                and
+                then press the "Open" button.
+            </li>
+            <li>Project Options
+                <ul>
+                    <li>"Compiler Type" = <code>C</code></li>
+                </ul>
+            </li>
+            <li>Compiler
+                <ul>
+                    <li>"Enable Pruning" = <code>True</code></li>
+                    <li>"Other Compiler Options" =
+                        <code>-std=gnu++0x -fno-rtti -fno-threadsafe-statics -fno-exceptions</code></li>
+                </ul>
+            </li>
+            <li>Linker
+                <ul>
+                    <li>"Other Linker Options" = <code>-lPropWare -lLibpropeller -lSimple -lLibPropelleruino</code>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h2>Microsoft Windows</h2>
+
+        <ol>
+            <li>Download
+                <a href="http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic.exe?guest=1">PropWare
+                    for Windows</a>.
+            </li>
+            <li>Execute the installer. The default installation path is recommended, but if it must be changed,
+                ensure
+                the installation path does not contain parenthesis (such as <code>C:\\Program Files (x86)</code>).
+            </li>
+            <li>Add CMake’s bin folder (located in <code>&lt;PROPWARE_PATH&gt;\PWCMake\bin</code>) to your PATH.
+                Excellent instructions for editing PATH exist
+                <a href="http://www.computerhope.com/issues/ch000549.htm">here</a>. For instance, if you installed
+                PropWare to <code>C:\PropWare</code> and PATH currently contains <code>C:\propgcc\bin</code>, the
+                new
+                value would be <code>C:\PropWare\PWCMake\bin;C:\propgcc\bin</code>.
+            </li>
+        </ol>
+
+        <h2>Linux (x86-64) - Debian/Ubuntu/Mint/etc</h2>
+
+        <ol>
+            <li>Download the
+                <a href="http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/propware_@VERSION@-1_amd64.deb?guest=1"><code>deb</code>
+                    package file</a>.
+            </li>
+            <li>Use <code>dpkg</code> to install the file with: <code>sudo dpkg -i
+                PropWare-@VERSION@-Generic.deb</code>.
+                If <code>cmake</code> is already installed, remove it with <code>sudo dpkg -r cmake</code>.
+            </li>
+            <li><code>make</code> is the recommended build tool to use with PropWare. If it is not already
+                installed,
+                install it with <code>sudo apt-get install make</code>.
+            </li>
+        </ol>
+
+        <h2>Linux (x86-64) - RedHat/Fedora/CentOS/etc</h2>
+
+        <ol>
+            <li>Download the
+                <a href="http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/propware-@VERSION@-1.x86_64.rpm?guest=1"><code>rpm</code>
+                    package file</a>.
+            </li>
+            <li>Use <code>rpm</code> to install the file with: <code>sudo rpm -i
+                propware-@VERSION@-1.x86_64.rpm</code>.
+                If <code>cmake</code> is already installed, remove it with <code>sudo rpm -e cmake</code>.
+            </li>
+            <li><code>make</code> is the recommended build tool to use with PropWare. If it is not already
+                installed,
+                install it with <code>sudo yum install make</code>.
+            </li>
+        </ol>
+
+        <h2>Linux (ARMv7/Raspberry Pi 2 &amp; 3) - Raspbian/Debian/Ubuntu/etc</h2>
+
+        <p>Raspberry Pis and other ARM platforms are not officially supported. I have run some basic and preliminary
+            tests with the following packages. The packages must be built manually and will therefore not be updated
+            with the same frequency as Windows, Linux x86-64, or Mac OSX packages.</p>
+
+        <ol>
+            <li>Download the <a href="http://david.zemon.name/downloads/PropWare-2.1.0-Generic.deb"><code>deb</code>
+                package file</a>.
+            </li>
+            <li>Use <code>dpkg</code> to install the file with: <code>sudo dpkg -i
+                propware_@VERSION@-1_amd64.deb</code>.
+                If <code>cmake</code> is already installed, remove it with <code>sudo dpkg -r cmake</code>.
+            </li>
+            <li><code>make</code> is the recommended build tool to use with PropWare. If it is not already
+                installed,
+                install it with <code>sudo apt-get install make</code>.
+            </li>
+        </ol>
+
+        <h2>Mac OSX</h2>
+
+        <p>I am unable to produce easy installation packages for Mac. My apologies. Please execute the following
+            lines
+            at the command line to install PropWare on your Mac:</p>
+
+        <pre><code hljs hljs-language="sh">wget http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-examples.zip?guest=1 -Oexamples.zip
+unzip cmake.zip
+unzip propware.zip
+unzip examples.zip
+sudo mv pwcmake.app /Applications
+sudo mv PropWare /Applications
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cmake /usr/local/bin/cmake
+sudo ln -s /Applications/pwcmake.app/Contents/bin/ccmake /usr/local/bin/ccmake
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cmake-gui /usr/local/bin/cmake-gui
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cpack /usr/local/bin/cpack
+sudo ln -s /Applications/pwcmake.app/Contents/bin/ctest /usr/local/bin/ctest
+sudo ln -s /Applications/pwcmake.app/Contents/bin/cmakexbuild /usr/local/bin/cmakexbuild</code></pre>
+
+        <p>To upgrade:</p>
+
+        <pre><code hljs hljs-language="sh">wget http://david.zemon.name:8111/repository/download/P@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/P@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/P@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-examples.zip?guest=1 -Oexamples.zip
+unzip cmake.zip
+unzip propware.zip
+unzip examples.zip
+sudo mv /Applications/pwcmake.app /Applications/pwcmake.app.bak
+sudo mv /Applications/PropWare /Applications/PropWare.bak
+sudo mv OSXCMake /Applications
+sudo mv PropWare /Applications</code></pre>
+
+        <p>Once you have confirmed that the new installation works as expected, remove the old one with the
+            following
+            two lines.<br/>
+            NOTE: A command that starts with <code>sudo rm -rf</code> has the potential to be <em>very</em>
+            dangerous! I
+            assume no responsibility if you corrupt your system. Be careful.</p>
+
+        <pre><code hljs hljs-language="sh">sudo rm -rf /Applications/pwcmake.app.bak
+sudo rm -rf /Applications/PropWare.bak</code></pre>
+    </div>
+</div>

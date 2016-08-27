@@ -1,0 +1,98 @@
+<div class="container">
+  <div class="row">
+    <h1>Getting Started</h1>
+
+    <h2>Learn PropWare</h2>
+
+    <ul>
+      <li>Read about the <a href="#/about">inspiration</a> behind PropWare and its goals going forward</li>
+      <li>Search the
+        <a tooltip-popup-delay='100' tooltip-popup-close-delay='300' uib-tooltip='See "API Docs" in the menu above'
+           tooltip-placement="right">API documentation</a> for classes and functions
+      </li>
+      <li>Browse example <a target="_blank" href="api-develop/examples.xhtml">projects</a></li>
+    </ul>
+
+    <h2>Install the PropWare Software</h2>
+
+    <p>Download and run the <a href="#/download">installer</a> for Windows or Linux.</p>
+
+    <h2>Say Hello</h2>
+
+    <div class="alert alert-info" role="alert">The content for this example can also be found in the installation
+      directory under <code>Examples/GettingStarted</code> and on this website
+      <a href="api-develop/GettingStarted_8cpp-example.xhtml" target="_blank" class="alert-link">here</a>.
+    </div>
+
+    <div class="alert alert-info" role="alert">The command prompt is the fastest way to get up and running and
+      requires the fewest dependencies. If you prefer to use an integrated development environment (IDE) or
+      graphical user interface (GUI), see <a class="alert-link"><!-- FIXME -->Using an IDE</a>.
+    </div>
+
+    <ol>
+      <li>Create a folder named <code>GettingStarted</code> which will hold your project files, such
+        <code>C:\Users\David\Documents\Propeller\GettingStarted</code>. Create two files in the directory,
+        the
+        first named <code>CMakeLists.txt</code> and the second named <code>GettingStarted.cpp</code>. Into
+        the first, copy the following configuration file:
+        <pre><code hljs hljs-language="cmake">@GETTING_STARTED_CMAKE_CONFIG@</code></pre>
+        and into the second, copy the following source code:
+        <pre><code hljs hljs-no-escape hljs-language="cpp">@GETTING_STARTED_CPP@</code></pre>
+      </li>
+      <li>Open a command prompt (type <code>cmd</code> into the Start Menu) and run these commands
+        <pre><code hljs hljs-no-escape hljs-language="sh">&gt; cd C:\Users\David\Documents\Propeller\GettingStarted
+&gt; mkdir bin
+&gt; cd bin</code></pre>
+        This will create a new folder named <code>bin</code> in your project.
+      </li>
+      <li>Connect your Propeller and run the following two commands. If it is the first time you have
+        connected
+        the Propeller to your computer, wait for any dialogue boxes to finish installing drivers.
+        <pre><code hljs hljs-no-escape hljs-language="sh">&gt; cmake -G "Unix Makefiles" ..
+&gt; make debug</code></pre>
+        This will compile your project, download it to the Propeller, and open a terminal for you to see the
+        program output.
+      </li>
+    </ol>
+
+    <h2>Starting a New Project</h2>
+
+    <ol>
+      <li>The defining piece of a PropWare project is the <code>CMakeLists.txt</code> file. It must be named
+        "CMakeLists.txt" as per CMake standards. Full details on CMake files in relation to PropWare are
+        documented under <a href="reference/build-system.html">Build System</a>, but a typical use case with four
+        source code files is provided below.
+        <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
+find_package(PropWare REQUIRED)
+
+project(Quadcopter C CXX ASM ECOGC)
+
+create_simple_executable(${PROJECT_NAME}
+    Quadcopter.cpp
+    motor_drivers.cpp
+    avionics.S
+    rf_transceiver.ecogc)</code></pre>
+      </li>
+      <li>Write your source code.</li>
+      <li>At the terminal, enter your project’s directory. Type <code>cmake -G &quot;Unix Makefiles&quot; .</code>.
+        This will generate a Makefile for you.
+      </li>
+      <li>Last step: choose between <code>make</code>, <code>make debug</code> and <code>make run</code>.</li>
+    </ol>
+    <ul>
+      <li><code>make</code>: Without any arguments, <code>make</code> will simply compile your executable - in
+        this case, <code>HelloWorld.elf</code>.
+      </li>
+      <li><code>make debug</code>: The <code>debug</code> target will load your program into RAM and then
+        start a
+        terminal to monitor and/or communicate with the Propeller.
+        <ul>
+          <li>Use your keyboard's escape key to exit the terminal.</li>
+        </ul>
+      </li>
+      <li><code>make run</code>: The <code>run</code> target will load your program to EEPROM and return to
+        command prompt.
+      </li>
+    </ul>
+  </div>
+</div>

@@ -25,27 +25,6 @@ add_subdirectory(PropWare)
 add_subdirectory(Examples)
 add_subdirectory(test)
 
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
-    set(TEAMCITY_BUILD_ID "$ENV{TEAMCITY_BUILD_ID}")
-    configure_file("${PROJECT_SOURCE_DIR}/docs/Download.md.in"
-        "${PROJECT_SOURCE_DIR}/docs/Download.md"
-        @ONLY)
-    configure_file("${PROJECT_SOURCE_DIR}/Doxyfile.in"
-        "${PROJECT_SOURCE_DIR}/Doxyfile"
-        @ONLY)
-
-    set(GENERATED_FILES_TO_CLEAN
-        "${PROJECT_SOURCE_DIR}/docs/Download.md"
-        "${PROJECT_SOURCE_DIR}/Doxyfile")
-    set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-        "${GENERATED_FILES_TO_CLEAN}")
-
-    add_custom_target(docs
-        "${DOXYGEN_EXECUTABLE}" Doxyfile
-        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
-endif ()
-
 option(PACKAGE_LINUX "Create complete package for Linux" OFF)
 option(PACKAGE_WIN32 "Create complete package for Windows" OFF)
 option(PACKAGE_OSX "Create complete package for Mac OSX" OFF)
@@ -57,3 +36,4 @@ include(./DownloadSpin2cpp.cmake)
 
 include(./CMakePropWareInstall.cmake)
 include(./CMakeCPack.cmake)
+include(./DocumentationConfig.cmake)

@@ -1,0 +1,225 @@
+<reference-nav></reference-nav>
+
+<div class="container">
+  <div class="row">
+    <h1>Build System</h1>
+
+    <p>Be sure to check out CMake's official documentation at <a
+      href="http://cmake.org/cmake/help/documentation.html">cmake.org</a>.
+      Remember that PropWare requires CMake 3.3+.</p>
+
+    <h2>Bare Minimum</h2>
+
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
+find_package(PropWare REQUIRED)
+
+project(MyFirstProject)
+
+create_simple_executable(HelloWorld main.cpp)</code></pre>
+
+    <ul>
+      <li>Note that the first two lines are boiler-plate, and should be at the top of all of your projects. The
+        first line is required by CMake, and the second line prepares PropWare's special CMake functions and configures
+        PropGCC as the compiler of choice.
+      </li>
+      <li>Next we name our project: <code>project(MyFirstProject)</code>. This name can be anything you'd like so
+        long as there is no whitespace.
+      </li>
+      <li>Finally, we need to tell CMake what files should be compiled: <code>create_simple_executable(${PROJECT_NAME}
+        main.cpp)</code>. The first parameter (<code>HelloWorld</code>) is the name of your executable.
+        You may notice some of the examples using <code>${PROJECT_NAME}</code> as the name of the executable because
+        it is an easy way to ensure the executables are named the same as the project (which is usually
+        desirable).<br />
+        Finally, list off each of the source files after the executable name. In this case, there is only one source:
+        <code>main.cpp</code>
+      </li>
+    </ul>
+
+    <h2>Typical Use Case</h2>
+
+    <p>Let's take the example of a phony project for a Quadcopter. We're using Parallax's Quickstart development
+      board, the compressed-memory-model, and our code must be compiled with size optimizations. Our project
+      consists of the following files:</p>
+    <ul>
+      <li>Quadcopter.cpp</li>
+      <li>motor_drivers.c</li>
+      <li>avionics.S</li>
+      <li>rf_transceiver.ecogc</li>
+    </ul>
+
+    <p>Our CMakeLists.txt file might look something like this:</p>
+
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
+find_package(PropWare REQUIRED)
+
+set(BOARD QUICKSTART)
+set(MODEL cmm)
+
+project(Quadcopter C CXX ASM ECOGC)
+
+create_simple_executable(Quadcopter
+    Quadcopter.cpp
+    motor_drivers.c
+    avionics.S
+    rf_transceiver.ecogc)</code></pre>
+
+    <h3>Common CMake variables in PropWare</h3>
+
+    <ul>
+      <li>BOARD: The <code>BOARD</code> variable can be used to identify your physical hardware. PropGCC uses
+        this
+        to determine how many bytes of EEPROM, default baud rate for RS232, and other functions. Any board
+        available in SimpleIDE is available here as well - they are reading from the same configuration pool
+        (<code>&lt;PropGCC root&gt;/propeller-load</code>).
+      </li>
+      <li>MODEL: [default: <code>lmm</code>] This option should be one of <code>cog</code>, <code>cmm</code>,
+        <code>lmm</code>, <code>xmm-single</code>, <code>xmm-split</code>, or <code>xmmc</code>. Read
+        more about PropGCC's memory models
+        <a href="https://code.google.com/p/propgcc/wiki/PropGccInDepth">here</a>.
+      </li>
+      <li>COMMON_FLAGS: Any options applied to the <code>COMMON_FLAGS</code> variable will be applied to
+        assembly,
+        C and C++ files. This includes <code>cogc</code>, <code>ecogc</code>, <code>cogcpp</code>, and
+        <code>ecogcpp</code> but not <code>Spin</code>.
+      </li>
+    </ul>
+
+    <h3>Project Languages</h3>
+
+    <p>CMake will default to enabling only C and C++ in your project. If your project uses more than these two
+      languages, you must add them with either the
+      <a href="https://www.cmake.org/cmake/help/v3.0/command/project.html#command:project">project</a> or
+      <a href="https://www.cmake.org/cmake/help/v3.0/command/enable_language.html#command:enable_language">enable_language</a>
+      function.</p>
+
+    <h3>Adding Source Files</h3>
+
+    <ul>
+      <li>All source files must be defined in the <code>create_simple_executable</code> function. It is a
+        wrapper
+        around <a href="http://www.cmake.org/cmake/help/v3.0/command/add_executable">add_executable</a> that
+        sets various configuration options for the Propeller and PropGCC build system. The parameters to
+        this
+        function match those of
+        <a href="http://www.cmake.org/cmake/help/v3.0/command/add_executable">add_executable</a>.
+      </li>
+      <li>Each source file is separated by any amount of whitespace</li>
+      <li>Normal C and C++ files do not need their extensions explicitly defined.</li>
+      <li>The various COG languages <em>do</em> need their extensions explicitly defined, as does assembly.
+      </li>
+    </ul>
+
+    <h2>Variables</h2>
+
+    <h3>COMMON_FLAGS</h3>
+
+    <p>Flags applied to all PropGCC languages</p>
+
+    <h3>COMMON_COG_FLAGS</h3>
+
+    <p>Flags applied to COGC, ECOGC, COGCXX, and ECOGXX</p>
+
+    <h3>&lt;LANG&gt;_FLAGS</h3>
+
+    <p>Compilation flags used for a specific language.</p>
+
+    <ul>
+      <li>Note that C_FLAGS will be applied to C, COGC, and ECOGC and likewise for CXX_FLAGS</li>
+      <li>Note that COGC_FLAGS will be applied after C_FLAGS and will therefore override any conflicting flags
+        in
+        the C_FLAGS variable (likewise for ECOGC, COGCXX, and ECOGCXX)
+      </li>
+    </ul>
+
+    <h3>MODEL</h3>
+
+    <p>[default: <code>lmm</code>]</p>
+
+    <p>This option should be one of <code>cog</code>, <code>cmm</code>, <code>lmm</code>,
+      <code>xmm-single</code>,
+      <code>xmm-split</code>, or <code>xmmc</code>. Read more about PropGCC's
+      memory models <a href="https://code.google.com/p/propgcc/wiki/PropGccInDepth">here</a>.</p>
+
+    <h3>BOARD</h3>
+
+    <p>Used to identify your physical hardware. PropGCC uses this to determine how many bytes of EEPROM, default
+      baud rate for RS232, and other functions. Any board available in SimpleIDE is available here as well -
+      they are reading from the same configuration pool (<code>&lt;PropGCC root&gt;/propeller-load</code>).
+    </p>
+
+    <h2>Options</h2>
+
+    <p>CMake options allow you to have fine-grain control over what compilation flags are used by default. Most
+      users will want to leave all options set to their default values, but those doing special projects or
+      using conflicting libraries can change the options to suit their needs.</p>
+
+    <h3>AUTO_OPTIMIZATION</h3>
+
+    <p>[default: ON]</p>
+
+    <p>Sets the optimization level for size. Equivalent to adding "-Os" to <code>COMMON_FLAGS</code>.</p>
+
+    <h3>WARN_ALL</h3>
+
+    <p>[default: ON]</p>
+
+    <p>Turns on all warnings from the compiler. Aids in writing clean, error-free code. Equivalent to adding
+      "-Wall"
+      to <code>COMMON_FLAGS</code>.</p>
+
+    <h3>32_BIT_DOUBLES</h3>
+
+    <p>[default: ON]</p>
+
+    <p>Sets all variables of type <code>double</code> to use IEEE 32-bit floating point instead of 64.
+      Equivalent to
+      adding "-m32bit-doubles" to <code>COMMON_FLAGS</code>. Required for compatibility with numerous
+      functions
+      in the Simple library.</p>
+
+    <h3>AUTO_C_STD</h3>
+
+    <p>[default: ON]</p>
+
+    <p>Sets the C standard to C99. Equivalent to adding "-std=c99" to <code>C_FLAGS</code></p>
+
+    <h3><a id="AUTO_CXX_STD_133"></a>AUTO_CXX_STD</h3>
+
+    <p>[default: ON]</p>
+
+    <p>Sets the C++ standard to the latest available for the compiler. This is <code>gnu++0x</code> in GCC 4.6.1
+      (current PropGCC) and <code>gnu++14</code> in GCC5 version of PropGCC. Equivalent to adding
+      "-std=&lt;standard&gt;" to <code>CXX_FLAGS</code>.</p>
+
+    <h2>Default Compile Flags</h2>
+
+    <p>With all options left at their defaults, the following flags will be used. There is currently no option
+      to
+      disable <code>-fno-threadsafe-statics -fno-rtti</code>. If such an option is required, let the
+      <a href="mailto:david@zemon.name">author</a> know and an option will be added. It is believed that these
+      flags will always be desired by Propeller users.</p>
+
+    <dl>
+      <dt>ASM</dt>
+      <dd>None</dd>
+      <dt>C</dt>
+      <dd><code>-Wall -Os -m32bit-doubles -std=c99</code></dd>
+      <dt>COGC</dt>
+      <dd><code>-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r</code></dd>
+      <dt>ECOGC</dt>
+      <dd><code>-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r</code></dd>
+      <dt>CXX</dt>
+      <dd><code>-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti</code></dd>
+      <dt>COGCXX</dt>
+      <dd><code>-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++-r</code>
+      </dd>
+      <dt>ECOGCXX</dt>
+      <dd><code>-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++-r</code>
+      </dd>
+      <dt>Linker</dt>
+      <dd>None</dd>
+      <dt>Archiver</dt>
+      <dd><code>cr</code></dd>
+    </dl>
+  </div>
+</div>

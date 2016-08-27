@@ -1,0 +1,78 @@
+<reference-nav></reference-nav>
+
+<div class="container">
+  <div class="row">
+    <h1>Using an IDE</h1>
+
+    <p>Ensure PropWare is installed on your system prior to using an IDE.</p>
+
+    <h2>JetBrain's CLion</h2>
+
+    <ol>
+      <li>Configure CLion to use PropWare's CMake distribution instead of the version embedded in CLion:
+        <ol>
+          <li><code>File</code> &rarr; <code>Settings...</code></li>
+          <li><code>Build, Execution, Deployment</code> &rarr; <code>Toolchains</code></li>
+          <li>For <code>CMake Executable</code>, choose "Use specified:" and then select
+            <code>/usr/bin/cmake</code> for Linux or <code>C:\PropWare\PWCMake\bin\cmake.exe</code> for
+            Windows.
+          </li>
+        </ol>
+      </li>
+      <li>Create your <a href="build-system.html">CMakeLists.txt file</a>.</li>
+      <li>Open CLion and choose <code>File</code> &rarr; <code>Open...</code>. Navigate to your CMakeLists.txt
+        file
+        and press <code>Ok</code>.
+      </li>
+    </ol>
+
+    <h2>Eclipse CDT (and other IDEs)</h2>
+
+    <ol>
+      <li>For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse
+        users,
+        find <code>Eclipse IDE for C/C++ Developers</code> <a href="http://www.eclipse.org/downloads/">here
+        </a> and download the appropriate package
+      </li>
+      <li>Create your <a href="build-system.html">CMakeLists.txt file</a>.</li>
+      <li>For any source file that does not yet exist, create an empty file in its place. CMake will throw
+        errors
+        if your CMakeLists.txt file references any non-existing source files.
+      </li>
+      <li>At the terminal, enter your project's directory and type <code>cmake -G &quot;Eclipse CDT4 - Unix
+        Makefiles&quot; .</code>. Notice that this time, we're adding a hook to tell CMake that we're using
+        Eclipse. If you prefer another IDE, chekc the
+        <a href="http://www.cmake.org/Wiki/CMake_Generator_Specific_Information">CMake Wiki</a> to see if it
+        is supported.
+      </li>
+      <li>Navigating the Eclipse import dialogue:</li>
+      <li>Open Eclipse. In the <code>File</code> menu, select <code>Import...</code>.</li>
+      <li>Under the <code>General</code> group should be an option <code>Existing Projects into
+        Workspace</code> -
+        select that option and choose <code>Next &gt;</code>.
+      </li>
+      <li>On the next page, ensure <code>Select root directory:</code> is selected at the top and then click
+        <code>Browse...</code>. Find the parent folder of your project (for example, if your project is
+        <code>C:\Users\David\Hello</code>, then choose <code>C:\Users\David</code>).
+      </li>
+      <li>At least one project should populate in the box below. Ensure your new PropWare project and only
+        your
+        new PropWare project is selected.
+      </li>
+      <li>Eclipse will import all necessary settings as soon as you click <code>Finish</code>. Compile flags,
+        include directories and required source files will all be ready to go.
+      </li>
+      <li>Compiling your program and loading to EEPROM can be done easily from within Eclipse. Compiling is as
+        simple as clicking the hammer icon or using <code>Control-B</code>. Writing to EEPROM requires
+        creating a new Run Configuration.
+      </li>
+    </ol>
+
+    <ul>
+      <li>I do not recommend attempting to create a Run Configuration for PropWare's <code>debug</code>
+        configuration. PropGCC's terminal does not play well with either Eclipse or JetBrains CLion. Use the
+        terminal for debugging, exactly as described in "Starting a New Project" step 4.
+      </li>
+    </ul>
+  </div>
+</div>

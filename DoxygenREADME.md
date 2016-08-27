@@ -1,4 +1,4 @@
-PropWare Documentation {#Home}
+PropWare Documentation
 ======================
 
 Key Features
@@ -9,6 +9,6 @@ Key Features
 * Active development
 * MIT license
 
-Start by installing the software from the [download](@ref Download) page, follow it up with the 
-[Getting Started](@ref GettingStarted) instructions, and then become a pro by familiarizing yourself with the 
-[API documentation](usergroup0.xhtml) and [reference material](usergroup1.xhtml).
+Start by installing the software from the [download](../index.html#download) page, follow it up with the 
+[Getting Started](../index.html#getting-started) instructions, and then become a pro by familiarizing yourself with the 
+[API documentation](namespaces.xhtml) and [reference material](../index.html#reference/build-system).

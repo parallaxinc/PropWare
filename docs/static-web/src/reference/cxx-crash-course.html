@@ -1,0 +1,188 @@
+<reference-nav></reference-nav>
+
+<div class="container">
+  <div class="row">
+    <h1>C++ Crash Course</h1>
+
+    <p>For those coming from a background in Parallax's Spin language, your only concern will be syntax: the
+      C-family of languages is wildly different. Don't worry - it's not hard.</p>
+
+    <p>For C developers with no background in Spin, the biggest hurdle will be learning about the famed
+      "object-oriented programming" (still not hard).</p>
+
+    <p>There are lots of code examples throughout PropWare and libpropeller's source code, so please feel free
+      to
+      peruse them. You should also take advantage of the example projects provided in the
+      <code>Examples</code>
+      directory.</p>
+
+    <h2>C-Family Syntax</h2>
+
+    <ul>
+      <li><a href="http://www.cprogramming.com/reference/">Complete syntax reference</a></li>
+      <li>Capitalization matters</li>
+      <li>Whitespace is not necessary except as a delimiter between words (you may format your code however
+        you
+        please)
+      </li>
+      <li>Every line of code must be terminated with <code>;</code></li>
+      <li>Assign variables with <code>=</code></li>
+      <li>Compare variables with <code>==</code>, <code>!=</code>, <code>&gt;=</code>, <code>&lt;=</code> and
+        <code>!</code></li>
+      <li>Append boolean expressions with <code>&amp;&amp;</code> for AND and <code>||</code> for OR</li>
+      <li>Use <code>&amp;</code>, <code>|</code>, and <code>^</code> for the bitwise operations AND, OR and
+        XOR
+        respectively
+      </li>
+      <li>Single line comments are marked with <code>//</code>
+        <pre><code hljs class="language-cpp">// This is a comment</code></pre>
+      </li>
+      <li>Multi-line comments are marked with <code>/*</code> and <code>*/</code>
+        <pre><code hljs class="language-cpp">/*
+ A multi-line comment!
+ */</code></pre>
+      </li>
+      <li>A variable must be declared before use, but could have an initializer tacked on
+        <pre><code hljs class="language-cpp">int x;      // Remember, capitalization matters!
+int X = 5;  // These are two different variables!</code></pre>
+      </li>
+      <li>A <code>block</code> of code is marked with <code>{</code> and <code>}</code>
+        <pre><code hljs class="language-cpp">if (x == y) {
+  // A block of code only executed if `x` is equal to `y`
+}</code></pre>
+      </li>
+      <li>A function must declare what type of variable will be returned (use <code>void</code> if no return)
+        <pre><code hljs class="language-cpp">// A function that takes no parameters and does not return a value
+void main () {
+  // Some code here
+}
+
+// C will prefer the above function slightly different - they both mean the same thing
+void main (void) {
+  // Some code here
+}
+
+// This function returns an integer of basic type `int`
+int get_x () {
+  int x = 5;
+  return x;
+}
+
+// A function that takes two parameters, `x` and `y` and returns the sum
+int add (int x, int y) {
+  return x + y;
+}</code></pre>
+      </li>
+      <li>Loops by example
+        <pre><code hljs class="language-cpp">// Basic while-loop
+while (x == y) {
+  // Do stuff
+}
+
+// C++ allows you to declare your index (`i`) within the for-loop
+for (int i = 0; i &lt; 10; i++) {
+  printf(&quot;The current value of `i`: d&quot;, i);
+}
+
+// C typically has (and sometimes requires) the index declared prior to the loop
+int i;
+for (i = 0; i &lt; 10; i++) {
+  printf(&quot;The current value of `i`: d&quot;, i);
+}
+
+// A simple do-while
+do {
+  // Some stuff
+} while (x == y);</code></pre>
+      </li>
+    </ul>
+
+    <h2>Object-Oriented Programming</h2>
+
+    <p>Classes. It's all about classes: organizing code into logical blocks. If you have 3 functions that all
+      deal
+      with a serial terminal, you might want to categorize them as <code>Serial</code>. That's all a
+      <code>class</code> is - a group of functions that belong together. This code might look something like
+    </p>
+
+    <pre><code hljs class="language-cpp">class Serial {
+  public:
+    void start (int baudrate) {
+      // Initialize the serial terminal
+    }
+
+    void send_character (char c) {
+      // Some code to send a character over the serial bus
+    }
+
+    char receive_character () {
+      char c;
+      // Some code to receive a character from the serial bus and store it in `c`
+      return c;
+    }
+}</code></pre>
+
+    <p>Notice that, just like Parallax's Spin, we have visibility keywords: <code>public</code> in this case.
+      This keyword marks everything beneath it as accessible to the outside world, just like Spin's
+      <code>PUB</code> keyword before a function.</p>
+
+    <p>Where Spin might have some code such as</p>
+
+    <pre><code hljs>Obj
+  pst : &quot;Parallax Serial Terminal&quot;
+
+
+PUB Main | receivedChar
+  pst.start(9600)
+  pst.Char('A')
+  receivedChar := pst.CharIn</code></pre>
+
+    <p>C++ would write this as</p>
+    <pre><code hljs class="language-cpp">int main () {
+  Serial pst;                                // Instantiation of the `Serial` object
+  char receivedChar;                         // Instantiation of the receivedChar variable
+
+  pst.start(9600);                           // Starting our Serial terminal at 9,600 baud
+  pst.send_character('A');                   // Send the single character, 'A', out the serial bus
+  receivedChar = pst.receive_character();    // Store a character from the serial bus into `receivedChar`
+
+  return 0;                                  // 0 typically represents successful completion of the program
+}</code></pre>
+
+    <h2>Namespaces</h2>
+
+    <p>The term "Serial" can be pretty generic. Maybe David's Serial object has a max baud of 115,000 but Bob's
+      Serial object has configurable pins (so you don't have to use the default RX and TX hardware pins). You
+      want to use BOTH Serial objects. In order to differentiate between David's <code>Serial</code> class and
+      Bob's <code>Serial</code> class, we prefix the class names with a <code>namespace</code>. This looks
+      like</p>
+
+    <pre><code hljs class="language-cpp">namespace PropWare {
+  class Serial {
+    // David's code here
+  }
+}
+
+namespace BobWare {
+  class Serial {
+    // Bob's code here
+  }
+}
+
+int main () {
+  PropWare::Serial davidSerial;
+  BobWare::Serial bobSerial;
+
+  davidSerial.call_function();
+  bobSerial.call_function();
+
+  return 0;
+}</code></pre>
+
+    <p>Now that both classes are surrounded by a namespace, our code can use both classes without conflict!</p>
+
+    <h2>Including Separate Files</h2>
+
+    <p>Coming soon!</p>
+  </div>
+</div>

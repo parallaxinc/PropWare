@@ -1,0 +1,30 @@
+<reference-nav></reference-nav>
+
+<div class="container">
+  <div class="row">
+    <h1>Troubleshooting FAQ</h1>
+
+    <p>C and C++ are not the simplest languages on the planet, and using them on an embedded system doesn't help.
+      Hopefully you'll be able to find answers to some of your problems on this page.</p>
+
+    <p>Can't find what you're looking for? Ask on the
+      <a href="http://forums.parallax.com/forumdisplay.php/65-Propeller-1-Multicore-Microcontroller">Parallax
+        forums</a> or
+      <a href="mailto:david@zemon.name">contact the author</a>.</p>
+
+    <h3>error: no matching function for call to &lsquo;PropWare::Printer::print(const PropWare::Printer&amp;,
+      PropWare::Printer::Format&amp;) const'</h3>
+
+    <p><code>PropWare::Printer::printf</code> only supports a select few parameters. The first argument must be a
+      string (character array), and all other arguments (if they exist) must be one of the following types:</p>
+
+    <ul>
+      <li>Any integer type (<code>uint8_t</code>, <code>int</code>, <code>unsigned int</code>, <code>long</code>,
+        <code>int32_t</code>, <code>size_t</code>, etc)
+      </li>
+      <li><code>float</code> or <code>double</code></li>
+      <li>Any pointer type (<code>int *</code>, <code>MyClass *</code>, etc). Note that <code>char *</code> will
+        be treated specially - as a string, not an <code>uint32_t</code></li>
+    </ul>
+  </div>
+</div>

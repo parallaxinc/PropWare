@@ -1,0 +1,133 @@
+<reference-nav></reference-nav>
+
+<div class="container">
+  <div class="row">
+    <h1>CMake &amp; Make Tutorial</h1>
+
+    <h2>What is CMake?</h2>
+
+    <p>CMake is a Makefile generator. CMake will scan your source code and, based on some predefined rules,
+      generate <code>Make</code> scripts. Using Cmake is a two-step process: first generate the Makefiles,
+      then
+      compile your code by executing the Makefiles. CMake documentation can be found on
+      <a href="http://cmake.org/cmake/help/documentation.html">cmake.org</a></p>
+
+    <h2>What is Make?</h2>
+
+    <p>Make is a much older tool that will, at its core, incrementally compile your code. This simply means that
+      if
+      you have a project with two files (<code>cat.c</code> and <code>dog.c</code>), and a change is made to
+      <code>cat.c</code>, then only <code>cat.c</code> will be re-compiled. Lots of different flavors of Make
+      have been developed over the years including GNU, MinGW, Ninja, and more - but we will focus on GNU
+      since
+      that is what ships with the Windows version of PropGCC and comes with most Linux operating systems.
+      GNU's
+      Make documentation can be found on
+      <a href="http://www.gnu.org/software/make/manual/html_node/index.html">gnu.org</a>.</p>
+
+    <h2>Getting Started</h2>
+
+    <p>Two command line instructions are all you need to get started:</p>
+
+    <pre><code hljs hljs-no-escape hljs-language="sh">cmake -G &quot;Unix Makefiles&quot; &lt;source directory&gt;
+make</code></pre>
+
+    <p>Breakdown:</p>
+
+    <ul>
+      <li>
+        <p><code>cmake -G &quot;Unix Makefiles&quot; &lt;source directory&gt;</code>: Here we perform the
+          first
+          step - generating the Makefiles. CMake will scan your source directory, read your source files
+          to
+          discover dependencies (like header files), and create one or more files named “Makefile”.</p>
+        <p>The first argument, <code>-G &quot;Unix Makefiles&quot;</code>, tells CMake exactly what flavor
+          of
+          Make we're using. As reasoned in the <code>What is Make?</code> section above, we will always be
+          using <code>Unix Makefiles</code> for PropWare projects.</p>
+        <p>The second argument is the source directory of your project. This directory must contain a
+          <code>CMakeLists.txt</code> file as described in step 1 of
+          <a href="#/rreference/build-system">Creating a PropWare
+            Application</a>. I prefer to run “out of source” builds - which means I create a new folder
+          within my project where all of my generated and compiled files will end up. Generally, I name
+          this
+          folder <code>bin</code>. With this simple case, the complete command to generate the Makefiles
+          would be <code>cmake -G &quot;Unix Makefiles&quot; ..</code>. The <code>..</code> is a
+          cross-platform way of saying “the directory above me”. For reference: <code>.</code> refers to
+          the current directory.</p>
+      </li>
+      <li>
+        <p><code>make</code>: Make is old, flexible, and great. CMake has done all the work though and no
+          extra
+          arguments are needed for this command. After successfully running CMake, simply type <code>make
+          </code> - character for character. When it completes successfully, your project will have been
+          compiled into its binary format, ready to be programmed to your Propeller. %PropWare provides
+          some extra “targets” to make your life even easier though. Try typing <code>make debug</code> to
+          write your program to RAM and open a terminal (like Parallax's PST) or <code>make run</code> to
+          write your program to EEPROM.</p>
+      </li>
+    </ul>
+
+    <h2>CMakeLists.txt</h2>
+
+    <p>As described in <a href="http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml">Chapter 4</a>,
+      the
+      CMakeLists.txt file is required for all CMake (and therefore %PropWare) applications. The file must be
+      named “CMakeLists.txt” - character for character.</p>
+
+    <p>The contents of the file are simple - many useful tips can be gleaned from both
+      <a href="http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml">Creating a PropWare
+        Application</a> and
+      <a href="http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml">CMake for PropWare</a>.
+    </p>
+
+    <h2>CMakeCache.txt</h2>
+
+    <p>I won't hold back - CMakeCache.txt can be a royal pain. CMake keeps track of your settings in this file
+      and,
+      a lot of times, you might change a setting without CMake taking notice. When this happens, just delete
+      the
+      <code>CMakeCache.txt</code> file and rerun your CMake command (as given above). As a bonus to using the
+      out-of-source build technique you can also just delete your entire build directory and start over - then
+      you know with 100% confidence that no leftover settings will linger around to haunt you.</p>
+
+    <h2>Curses CMake</h2>
+
+    <p>Curses is a library that provides a psuedo-graphical user interface at the command line. Curses CMake (or
+      ccmake) allows you to easily configure some options for your project before compiling it. Try running
+      <code>ccmake -G &quot;Unix Makefiles &lt;source directory&gt;</code> next time and take a look.</p>
+
+    <h2>Make Targets</h2>
+
+    <p>A make “target” is a set of commands that you would like Make to execute for you. If you run Make with no
+      arguments, a default target of “all” is chosen for you. Generally, the <code>all</code> target will
+      compile your code. On the rare off-chance that you made some changes to your code and Make hasn't picked
+      them up (and therefore is not recompiling them), giving Make the “clean” target will delete all compiled
+      objects and let you start over (<code>make clean</code>). You can remove old files and recompile new
+      ones
+      in a single step with <code>make clean all</code> (order matters).</p>
+
+    <p>PropWare provides two extra targets for your convenience.</p>
+
+    <ul>
+      <li>The <code>debug</code> target will compile your code, write it to your Propeller's HUB RAM and then
+        start a serial terminal to
+        aid in debugging your application. When you are finished, press any of the arrow keys on your
+        keyboard
+        (don't use
+        <code>Control-C</code> - it doesn't seem to like that) and you will be returned to your normal
+        command
+        prompt.
+      </li>
+      <li>The <code>run</code> target will compile your code and load it into your Propeller's EEPROM.</li>
+    </ul>
+
+    <h2>Debugging CMake Configurations</h2>
+
+    <p>After generating your Makefiles, try adding <code>VERBOSE=1</code> to your Make command. This will tell
+      Make
+      to print each command to the terminal before running it - rather than printing only a short summary of
+      what is being done. The output is very verbose and can be cumbersome to read - but it is invaluable when
+      determining what went wrong with your compilation. Full command: <code>make VERBOSE=1</code></p>
+  </div>
+</div>
