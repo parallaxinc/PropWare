@@ -138,7 +138,6 @@ class WS2812 {
                     "           add     %[_clock], CNT                                                          \n\t"
                     "           waitcnt %[_clock], #0                                                           \n\t"
 
-                    // NOTE: This assembly snippet adapted from Jon "JonnyMac" McPhalen's WS2812 driver
                     "frame_loop%=:                                                                              \n\t"
                     "		rdlong	%[_colorbits], %[_nextLed]                                              \n\t"
                     "		add	%[_nextLed], #4                                                         \n\t"
