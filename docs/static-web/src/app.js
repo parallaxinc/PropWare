@@ -16,6 +16,7 @@ angular.module('propware', [
   'propware.limitations',
   'propware.related-links',
   'propware.troubleshooting',
+  'propware.build-from-source',
   'propware.using-an-ide'
 ]).config([
   '$routeProvider',
@@ -140,6 +141,17 @@ angular.module('propware.troubleshooting', [
   function ($routeProvider) {
     $routeProvider.when('/reference/troubleshooting', {
       templateUrl: 'src/reference/troubleshooting.html'
+    });
+  }
+]);
+
+angular.module('propware.build-from-source', [
+  'ngRoute'
+]).config([
+  '$routeProvider',
+  function ($routeProvider) {
+    $routeProvider.when('/reference/build-from-source', {
+      templateUrl: 'src/reference/build-from-source.html'
     });
   }
 ]);
