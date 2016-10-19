@@ -1,95 +1,107 @@
 <reference-nav></reference-nav>
 
-<h1>Build PropWare from Source</h1>
+<div class="container">
+  <h1>Build PropWare from Source</h1>
 
-<h2>Prerequisites</h2>
+  <h2>Prerequisites</h2>
 
-<ul>
-  <li>PropGCC must be available on your system. PropWare will search for it in the following locations:
-    <ol>
-      <li><code>/opt/parallax/bin</code></li>
-      <li><code>C:\PropGCC\bin</code></li>
-      <li><code>C:\parallax\bin</code></li>
-      <li><code>bin</code> directory beneath the path specified by the <code>PROPGCC_PREFIX</code> CMake variable</li>
-      <li><code>bin</code> directory beneath the path specified by the <code>PROPGCC_PREFIX</code> environment
-        variable
-      </li>
-    </ol>
-  </li>
-  <li>CMake 3.3+ is required for compiling PropWare.</li>
-  <li>A Make-like build system supported by CMake, such as:
-    <ul>
-      <li>GNU Make (<code>gmake</code> or <code>make</code>)</li>
-      <li>Microsoft Program Maintenance Utility (<code>nmake</code>)</li>
-      <li>Ninja</li>
-    </ul>
-  </li>
-</ul>
+  <ul>
+    <li>PropGCC must be available on your system. PropWare will search for in the following locations, sequentially,
+      accepting the first one that contains <code>propeller-elf-gcc</code> (<code>propeller-elf-gcc.exe</code> for
+      Windows systems):
+      <ol>
+        <li>The <code>GCC_PATH</code> CMake variable</li>
+        <li>The <code>GCC_PATH</code> environment variable</li>
+        <li>The <code>bin</code> directory beneath the <code>PROPGCC_PREFIX</code> CMake variable</li>
+        <li>The <code>bin</code> directory beneath the <code>PROPGCC_PREFIX</code> environment variable</li>
+        <li><code>/opt/parallax/bin</code></li>
+        <li><code>C:\PropGCC\bin</code></li>
+        <li><code>C:\parallax\bin</code></li>
+        <li><code>C:\Program Files\SimpleIDE\propeller-gcc\bin</code></li>
+        <li><code>C:\Program Files (x86)\SimpleIDE\propeller-gcc\bin</code></li>
+      </ol>
+    </li>
+    <li>CMake 3.3+ is required for compiling PropWare.</li>
+    <li>A Make-like build system supported by CMake. Only GNU Make has been successfully tested with PropWare, though
+      others might (or might not) also work. CMake supports various Make utilities, such as:
+      <ul>
+        <li>GNU Make (<code>gmake</code> or <code>make</code>)</li>
+        <li>Microsoft Program Maintenance Utility (<code>nmake</code>)</li>
+        <li>Ninja</li>
+      </ul>
+    </li>
+  </ul>
 
-<h2>Downloading the Source & Compiling</h2>
+  <h2>Downloading the Source & Compiling</h2>
 
-<p>From a terminal, execute the following commands:</p>
-<ol>
-  <li>Download the source code: <code>git clone --recursive https://github.com/parallaxinc/PropWare.git</code></li>
-  <li>Create a directory to hold the binary output: <code>mkdir propware-bin</code></li>
-  <li>Enter your new build directory: <code>cd propware-bin</code></li>
-  <li>Generate the Makefiles: <code>cmake -G 'Unix Makefiles' ../PropWare</code>. Note: the value `Unix Makefiles` will
-    change based on which Makefile generator is installed on your system. See
-    <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html" target="_blank">CMake's documentation</a>
-    for detailed help selecting your Makefile generator.
-  </li>
-  <li>Execute your Make build system: <code>make</code>. Note: this, too, will change based on which Makefile
-    generator you are using.
-  </li>
-</ol>
+  <p>From a terminal, execute the following commands:</p>
+  <ol>
+    <li>Download the source code: <code>git clone --recursive https://github.com/parallaxinc/PropWare.git</code></li>
+    <li>Create a directory to hold the binary output: <code>mkdir propware-bin</code></li>
+    <li>Enter your new build directory: <code>cd propware-bin</code></li>
+    <li>Generate the Makefiles: <code>cmake -G 'Unix Makefiles' ../PropWare</code>. Note: the value
+      <code>'Unix Makefiles'</code> will change based on which Makefile generator is installed on your system. See
+      <a href="https://cmake.org/cmake/help/v3.0/manual/cmake-generators.7.html" target="_blank">CMake's
+        documentation</a> for detailed help selecting your Makefile generator.
+    </li>
+    <li>Execute your Make build system: <code>make</code>. Note: this, too, will change based on which Makefile
+      generator you are using.
+    </li>
+  </ol>
 
-<h2>Packaging</h2>
+  <h2>Packaging</h2>
 
-<p>PropWare makes use of the <code>CPack</code> plugin to build both source and binary packages. The following
-  sections describe how to enable and build these packages.
-</p>
+  <p>PropWare makes use of the <code>CPack</code> plugin to build both source and binary packages. The following
+    sections describe how to enable and build these packages.
+  </p>
 
-<h3>Packaging-Related CMake Options</h3>
+  <h3>Packaging-Related CMake Options</h3>
 
-<p>To optimize PropWare's build time, some packaging solutions are disabled by default. The following configure-time
-  options are provided to enable specific packaging options</p>
+  <p>To optimize PropWare's build time, some packaging solutions are disabled by default. The following configure-time
+    options are provided to enable specific packaging options</p>
 
-<dl>
-  <dt>PACKAGE_LINUX</dt>
-  <dd>Enable x86, 64-bit Debian <code>.deb</code> and RedHat <code>.rpm</code> binary distributions.</dd>
-  <dt>PACKAGE_OSX</dt>
-  <dd>Enable an extra ZIP file containing CMake for Apple operating systems that matches the OS X standard file
-    hierarchy.
-  </dd>
-  <dt>PACKAGE_PI2</dt>
-  <dd>Enable an ARMv7 Debian <code>.deb</code> binary distribution (can only successfully run from a Debian-based, ARMv7
-    computer, such as the Raspberry Pi 2).
-  </dd>
-  <dt>PACKAGE_WIN32</dt>
-  <dd>Enable an x86, 32-bit Windows <code>.exe</code> binary distribution.</dd>
-</dl>
+  <dl>
+    <dt>PACKAGE_LINUX</dt>
+    <dd>Enable x86, 64-bit Debian <code>.deb</code> and RedHat <code>.rpm</code> binary distributions.</dd>
+    <dt>PACKAGE_OSX</dt>
+    <dd>Enable an extra ZIP file containing CMake for Apple operating systems that matches the OS X standard file
+      hierarchy.
+    </dd>
+    <dt>PACKAGE_PI2</dt>
+    <dd>Enable an ARMv7 Debian <code>.deb</code> binary distribution (can only successfully run from a Debian-based,
+      ARMv7 computer, such as the Raspberry Pi 2).
+    </dd>
+    <dt>PACKAGE_WIN32</dt>
+    <dd>Enable an x86, 32-bit Windows <code>.exe</code> binary distribution.</dd>
+  </dl>
 
-<p>To enable any one of these options, such as <code>PACKAGE_WIN32</code>, run CMake again with
-  <code>-DPACKAGE_WIN32=ON</code> such as <code>cmake -DPACKAGE_WIN32=ON ../PropWare</code>. Multiple options can be
-  provided simultaneously, such as <code>cmake -DPACKAGE_WIN32=ON -DPACKAGE_LINUX=ON ../PropWare</code></p>
+  <p>To enable any one of these options, such as <code>PACKAGE_WIN32</code>, run CMake again with
+    <code>-DPACKAGE_WIN32=ON</code> such as <code>cmake -DPACKAGE_WIN32=ON ../PropWare</code>. Multiple options can be
+    provided simultaneously, such as <code>cmake -DPACKAGE_WIN32=ON -DPACKAGE_LINUX=ON ../PropWare</code></p>
 
-<h3>Creating Packages</h3>
+  <h3>Creating Packages</h3>
 
-<p>To build all enabled distribution packages, execute the <code>package</code> target with <code>make
-  package</code>. If you are building for your own personal computer, this is likely to build many more packages
-  than necessary. Invoking CPack directly with the <code>-G</code> argument will rectify this issue by building
-  <i>only</i> the specifically requested packages. However, CPack is not connected to the Makefile generator's
-  dependency system, so be sure to run <code>make</code> prior to invoking CPack.</p>
+  <p>To build all enabled distribution packages, execute the <code>package</code> target with <code>make
+    package</code>. If you are building for your own personal computer, this is likely to build many more packages
+    than necessary. Invoking CPack directly with the <code>-G</code> argument will rectify this issue by building
+    <i>only</i> the specifically requested packages.</p>
 
-<p>To build only a specific distribution format use <code>cpack -G &lt;FORMAT&gt;</code> where
-  <code>&lt;FORMAT&gt;</code> is any one of the following:</p>
-<dl>
-  <dt>DEB</dt>
-  <dd>Debian's <code>.deb</code></dd>
-  <dt>RPM</dt>
-  <dd>RedHat's <code>.rpm</code></dd>
-  <dt>NSIS</dt>
-  <dd>Microsoft's <code>.exe</code></dd>
-  <dt>ZIP</dt>
-  <dd>Standalone archive files using ZIP compression.</dd>
-</dl>
+  <div class="alert alert-warning" role="alert"><b>Warning</b> Be sure to enable the appropriate
+    packaging-related CMake options as described above. Invoking CPack's DEB target without enabling the
+    <code>PACKAGE_LINUX</code> CMake option will result in a <code>.deb</code> binary that does not contain
+    PropWare's CMake distribution or special CMake configuration files.
+  </div>
+
+  <p>To build only a specific distribution format use <code>cpack -G &lt;FORMAT&gt;</code> where
+    <code>&lt;FORMAT&gt;</code> is any one of the following:</p>
+  <dl>
+    <dt>DEB</dt>
+    <dd>Debian's <code>.deb</code></dd>
+    <dt>RPM</dt>
+    <dd>RedHat's <code>.rpm</code></dd>
+    <dt>NSIS</dt>
+    <dd>Microsoft's <code>.exe</code></dd>
+    <dt>ZIP</dt>
+    <dd>Standalone archive files using ZIP compression.</dd>
+  </dl>
+</div>

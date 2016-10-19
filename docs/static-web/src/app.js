@@ -5,15 +5,15 @@ angular.module('propware', [
   'angulartics.google.analytics',
   'hljs',
   'ui.bootstrap',
-  'propware.reference-nav',
   'propware.about',
-  'propware.build-system',
-  'propware.cmake-tutorial',
+  'propware.cmake-reference',
+  'propware.cmake-overview',
   'propware.contribute',
   'propware.cxx-crash-course',
   'propware.download',
   'propware.getting-started',
   'propware.limitations',
+  'propware.cmake-by-example',
   'propware.related-links',
   'propware.troubleshooting',
   'propware.build-from-source',
@@ -27,10 +27,33 @@ angular.module('propware', [
   }
 ]);
 
-angular.module('propware.reference-nav', []).directive('referenceNav', function () {
-  return {
-    templateUrl: 'src/reference-nav.html'
-  };
+angular.module('propware').constant('REFERENCE_PAGES', {
+  '#/reference/cmake-overview': 'CMake Overview',
+  '#/reference/cmake-by-example': 'CMake by Example',
+  '#/reference/cmake-reference': 'CMake Reference',
+  '#/reference/using-an-ide': 'Using an IDE',
+  '#/reference/cxx-crash-course': 'C++ Crash Course',
+  '#/reference/limitations': 'Limitations',
+  '#/reference/build-from-source': 'Build from Source',
+  '#/reference/troubleshooting': 'Troubleshooting'
+});
+
+angular.module('propware').directive('referenceNav', function () {
+    return {
+      templateUrl: 'src/reference/nav.html'
+    };
+  });
+
+angular.module('propware').run(function ($rootScope, $location, $anchorScroll, REFERENCE_PAGES) {
+  //when the route is changed scroll to the proper element.
+  $rootScope.$on('$routeChangeSuccess', function () {
+    if ($location.hash()) {
+      $anchorScroll();
+    }
+  });
+
+  // Provide the list of reference pages to all HTML pages
+  $rootScope.REFERENCE_PAGES = REFERENCE_PAGES;
 });
 
 angular.module('propware.about', [
@@ -79,24 +102,24 @@ angular.module('propware.related-links', [
 
 // Reference
 
-angular.module('propware.build-system', [
+angular.module('propware.cmake-reference', [
   'ngRoute'
 ]).config([
   '$routeProvider',
   function ($routeProvider) {
-    $routeProvider.when('/reference/build-system', {
-      templateUrl: 'src/reference/build-system.html'
+    $routeProvider.when('/reference/cmake-reference', {
+      templateUrl: 'src/reference/cmake-reference.html'
     });
   }
 ]);
 
-angular.module('propware.cmake-tutorial', [
+angular.module('propware.cmake-overview', [
   'ngRoute'
 ]).config([
   '$routeProvider',
   function ($routeProvider) {
-    $routeProvider.when('/reference/cmake-tutorial', {
-      templateUrl: 'src/reference/cmake-tutorial.html'
+    $routeProvider.when('/reference/cmake-overview', {
+      templateUrl: 'src/reference/cmake-overview.html'
     });
   }
 ]);
@@ -130,6 +153,17 @@ angular.module('propware.limitations', [
   function ($routeProvider) {
     $routeProvider.when('/reference/limitations', {
       templateUrl: 'src/reference/limitations.html'
+    });
+  }
+]);
+
+angular.module('propware.cmake-by-example', [
+  'ngRoute'
+]).config([
+  '$routeProvider',
+  function ($routeProvider) {
+    $routeProvider.when('/reference/cmake-by-example', {
+      templateUrl: 'src/reference/cmake-by-example.html'
     });
   }
 ]);

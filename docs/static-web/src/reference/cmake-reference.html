@@ -2,89 +2,16 @@
 
 <div class="container">
   <div class="row">
-    <h1>Build System</h1>
+    <h1>CMake Reference</h1>
 
-    <p>Be sure to check out CMake's official documentation at <a
-      href="http://cmake.org/cmake/help/documentation.html">cmake.org</a>.
-      Remember that PropWare requires CMake 3.3+.</p>
+    <h2>Introduction</h2>
 
-    <h2>Bare Minimum</h2>
+    <p>This is a quick-reference guide for all CMake variables, functions and macros provided by PropWare's build
+      system, as well as some frequently used parts of the standard CMake build system. Be sure to also check out
+      CMake's official documentation at <a target="_blank" href="http://cmake.org/cmake/help/documentation.html">
+        cmake.org</a>. Remember that PropWare requires CMake 3.3+.</p>
 
-    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
-find_package(PropWare REQUIRED)
-
-project(MyFirstProject)
-
-create_simple_executable(HelloWorld main.cpp)</code></pre>
-
-    <ul>
-      <li>Note that the first two lines are boiler-plate, and should be at the top of all of your projects. The
-        first line is required by CMake, and the second line prepares PropWare's special CMake functions and configures
-        PropGCC as the compiler of choice.
-      </li>
-      <li>Next we name our project: <code>project(MyFirstProject)</code>. This name can be anything you'd like so
-        long as there is no whitespace.
-      </li>
-      <li>Finally, we need to tell CMake what files should be compiled: <code>create_simple_executable(${PROJECT_NAME}
-        main.cpp)</code>. The first parameter (<code>HelloWorld</code>) is the name of your executable.
-        You may notice some of the examples using <code>${PROJECT_NAME}</code> as the name of the executable because
-        it is an easy way to ensure the executables are named the same as the project (which is usually
-        desirable).<br />
-        Finally, list off each of the source files after the executable name. In this case, there is only one source:
-        <code>main.cpp</code>
-      </li>
-    </ul>
-
-    <h2>Typical Use Case</h2>
-
-    <p>Let's take the example of a phony project for a Quadcopter. We're using Parallax's Quickstart development
-      board, the compressed-memory-model, and our code must be compiled with size optimizations. Our project
-      consists of the following files:</p>
-    <ul>
-      <li>Quadcopter.cpp</li>
-      <li>motor_drivers.c</li>
-      <li>avionics.S</li>
-      <li>rf_transceiver.ecogc</li>
-    </ul>
-
-    <p>Our CMakeLists.txt file might look something like this:</p>
-
-    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
-find_package(PropWare REQUIRED)
-
-set(BOARD QUICKSTART)
-set(MODEL cmm)
-
-project(Quadcopter C CXX ASM ECOGC)
-
-create_simple_executable(Quadcopter
-    Quadcopter.cpp
-    motor_drivers.c
-    avionics.S
-    rf_transceiver.ecogc)</code></pre>
-
-    <h3>Common CMake variables in PropWare</h3>
-
-    <ul>
-      <li>BOARD: The <code>BOARD</code> variable can be used to identify your physical hardware. PropGCC uses
-        this
-        to determine how many bytes of EEPROM, default baud rate for RS232, and other functions. Any board
-        available in SimpleIDE is available here as well - they are reading from the same configuration pool
-        (<code>&lt;PropGCC root&gt;/propeller-load</code>).
-      </li>
-      <li>MODEL: [default: <code>lmm</code>] This option should be one of <code>cog</code>, <code>cmm</code>,
-        <code>lmm</code>, <code>xmm-single</code>, <code>xmm-split</code>, or <code>xmmc</code>. Read
-        more about PropGCC's memory models
-        <a href="https://code.google.com/p/propgcc/wiki/PropGccInDepth">here</a>.
-      </li>
-      <li>COMMON_FLAGS: Any options applied to the <code>COMMON_FLAGS</code> variable will be applied to
-        assembly,
-        C and C++ files. This includes <code>cogc</code>, <code>ecogc</code>, <code>cogcpp</code>, and
-        <code>ecogcpp</code> but not <code>Spin</code>.
-      </li>
-    </ul>
-
-    <h3>Project Languages</h3>
+    <h2>Project Languages</h2>
 
     <p>CMake will default to enabling only C and C++ in your project. If your project uses more than these two
       languages, you must add them with either the
@@ -92,34 +19,66 @@ create_simple_executable(Quadcopter
       <a href="https://www.cmake.org/cmake/help/v3.0/command/enable_language.html#command:enable_language">enable_language</a>
       function.</p>
 
-    <h3>Adding Source Files</h3>
+    <h2>Functions</h2>
+
+    <h3><code>create_simple_executable</code></h3>
+
+    <p>Add an executable to the project using the specified source files. Signature matches CMake's built-in
+      <a href="https://cmake.org/cmake/help/v3.3/command/add_executable" target="_blank"><code>add_executable</code></a>.
+    </p>
+
+    <pre><code hljs hljs-language="cmake" hljs-no-escape>add_executable(&lt;name&gt; [WIN32] [MACOSX_BUNDLE]
+               [EXCLUDE_FROM_ALL]
+               source1 [source2 ...])</code></pre>
 
     <ul>
-      <li>All source files must be defined in the <code>create_simple_executable</code> function. It is a
-        wrapper
-        around <a href="http://www.cmake.org/cmake/help/v3.0/command/add_executable">add_executable</a> that
-        sets various configuration options for the Propeller and PropGCC build system. The parameters to
-        this
-        function match those of
-        <a href="http://www.cmake.org/cmake/help/v3.0/command/add_executable">add_executable</a>.
+      <li>All source files must be defined in the <code>create_simple_executable</code> function.
       </li>
       <li>Each source file is separated by any amount of whitespace</li>
       <li>Normal C and C++ files do not need their extensions explicitly defined.</li>
-      <li>The various COG languages <em>do</em> need their extensions explicitly defined, as does assembly.
+      <li>The various COG languages <em>do</em> need their extensions explicitly defined, as does assembly.</li>
+      <li>The following PropWare-specific targets will be created:
+        <ul>
+          <li><code>run</code>: Load the executable to EEPROM and execute the code.</li>
+          <li><code>run-ram</code>: Load the executable to HUB RAM and execute the code.</li>
+          <li><code>run-sd-loader</code>: Load the executable to SD card, and execute the code.</li>
+          <li><code>run-sd-cache</code>: Load the executable to SD card, use it as a cache, and execute the code</li>
+          <li><code>debug</code>: Load the executable to HUB RAM, execute the code, and open an interactive serial
+            terminal
+          </li>
+          <li><code>debug-eeprom</code>: Load the executable to EEPROM, execute the code, and open an interactive serial
+            terminal
+          </li>
+          <li><code>debug-sd-loader</code>: Load the executable to SD card, execute the code, and open an interactive
+            serial terminal
+          </li>
+          <li><code>debug-sd-cache</code>: Load the executable to SD card, use it as a cache, execute the code, and open
+            an interactive serial terminal
+          </li>
+          <li><code>gdb</code>: Load the executable to HUB RAM and start GDB</li>
+        </ul>
       </li>
     </ul>
 
-    <h2>Variables</h2>
+    <h3><code>create_executable</code></h3>
 
-    <h3>COMMON_FLAGS</h3>
+    <p>Exactly the same as <code>create_simple_executable</code>, except each target will be suffixed with
+      <code>-EXECUTABLE_NAME</code>, allowing multiple executables in a single project. For instance,
+      <code>create_executable(MyExe MySource.cpp)</code> would result in creating the target <code>run-MyExe</code>.</p>
+
+    <h3><code>create_library</code></h3>
+
+    <h2>PropWare CMake Variables</h2>
+
+    <h3 id="common_flags">COMMON_FLAGS</h3>
 
     <p>Flags applied to all PropGCC languages</p>
 
-    <h3>COMMON_COG_FLAGS</h3>
+    <h3 id="common_cog_flags">COMMON_COG_FLAGS</h3>
 
     <p>Flags applied to COGC, ECOGC, COGCXX, and ECOGXX</p>
 
-    <h3>&lt;LANG&gt;_FLAGS</h3>
+    <h3 id="lang_flags">&lt;LANG&gt;_FLAGS</h3>
 
     <p>Compilation flags used for a specific language.</p>
 
@@ -131,7 +90,7 @@ create_simple_executable(Quadcopter
       </li>
     </ul>
 
-    <h3>MODEL</h3>
+    <h3 id="model">MODEL</h3>
 
     <p>[default: <code>lmm</code>]</p>
 
@@ -140,7 +99,7 @@ create_simple_executable(Quadcopter
       <code>xmm-split</code>, or <code>xmmc</code>. Read more about PropGCC's
       memory models <a href="https://code.google.com/p/propgcc/wiki/PropGccInDepth">here</a>.</p>
 
-    <h3>BOARD</h3>
+    <h3 id="board">BOARD</h3>
 
     <p>Used to identify your physical hardware. PropGCC uses this to determine how many bytes of EEPROM, default
       baud rate for RS232, and other functions. Any board available in SimpleIDE is available here as well -
@@ -163,9 +122,8 @@ create_simple_executable(Quadcopter
 
     <p>[default: ON]</p>
 
-    <p>Turns on all warnings from the compiler. Aids in writing clean, error-free code. Equivalent to adding
-      "-Wall"
-      to <code>COMMON_FLAGS</code>.</p>
+    <p>Turns on many common warnings from the compiler. Aids in writing clean, error-free code. Equivalent to adding
+      "-Wall" to <code>COMMON_FLAGS</code>.</p>
 
     <h3>32_BIT_DOUBLES</h3>
 

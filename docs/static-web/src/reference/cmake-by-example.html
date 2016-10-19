@@ -1,0 +1,107 @@
+<reference-nav></reference-nav>
+
+<div class="container">
+  <div class="row">
+    <h1>CMake by Example</h1>
+
+    <h2>Example 1</h2>
+
+    <p>We'll start with a simple project - it contains a single executable. We want to use PropWare to build an
+      application named "MyFirstProject" and we expect the binary to be named <code>HelloWorld</code>. That binary
+      will be built from a single source file, <code>main.cpp</code>. The resulting CMake configuration file
+      (<code>CMakeLists.txt</code>) would contain the following:</p>
+
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required(VERSION 3.3)
+find_package(PropWare REQUIRED)
+
+project(MyFirstProject)
+
+create_simple_executable(HelloWorld main.cpp)</code></pre>
+
+    <p>We'll break this into three sections. The first is boilerplate and should be at the top of all of your
+      CMake configuration files:</p>
+
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
+find_package(PropWare REQUIRED)</code></pre>
+
+    <p>The first line is required by CMake, and the second line defines special CMake functions for the Propeller and
+      configures PropGCC as the compiler of choice.</p>
+
+    <p>Following that, we declare our project's name and, in more complex projects, which languages will be used in the
+      project. For our simple exmaple, the default languages (C and C++) will do just fine, so we won't provide any
+      extra arguments to the <code>project()</code> function.</p>
+
+    <pre><code hljs hljs-language="cmake">project(MyFirstProject)</code></pre>
+
+    <p>The name of our project can be anything you'd like so long as there is no whitespace.</p>
+
+    <p>And finally, we need to tell CMake what files should be compiled:</p>
+
+    <pre><code hljs hljs-language="cmake">create_simple_executable(HelloWorld main.cpp)</code></pre>
+
+    <p>This function, <code>create_simple_executable()</code>, is provided by PropWare, so you won't find it documented
+      on the official CMake pages. It is a wrapper around <code>add_executable()</code> and the parameters are
+      identical. You can and should therefore reference the official documentation
+      <a href="https://cmake.org/cmake/help/v3.3/command/add_executable.html" target="_blank">here</a>. The first
+      parameter (<code>HelloWorld</code>) is the name of our executable. All remaining parameters are the list of
+      source files which should be compiled into the executable. In this case, there is only one source file:
+      <code>main.cpp</code>.</p>
+
+    <h2>Example 2</h2>
+
+    <p>Let's take the example of a phony project for a Quadcopter. We're using Parallax's Quickstart development
+      board, the compressed-memory-model, and our code must be compiled with size optimizations. Our project
+      consists of the following files:</p>
+    <ul>
+      <li><code>Quadcopter.cpp</code></li>
+      <li><code>motor_drivers.c</code></li>
+      <li><code>avionics.S</code></li>
+      <li><code>rf_transceiver.ecogc</code></li>
+    </ul>
+
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
+find_package(PropWare REQUIRED)
+
+set(BOARD QUICKSTART)
+set(MODEL cmm)
+
+project(Quadcopter C CXX ASM ECOGC)
+
+create_simple_executable(${PROJECT_NAME}
+    Quadcopter.cpp
+    motor_drivers.c
+    avionics.S
+    rf_transceiver.ecogc)</code></pre>
+
+    <p>Our first two lines remain the same. To reiterate, these lines should remain at the top of every PropWare
+      project you create.</p>
+
+    <p>The next two lines set PropWare-specific variables related to how the project is compiled and loaded onto a
+      board. The <a href="#/reference/tutorial#board"><code>BOARD</code></a> variable defines what
+      propeller-load
+      configuration file should be used,
+      and the <a><code>MODEL</code></a> allows us to select between PropGCC's many compilation modes.</p>
+
+    <h2>Common CMake Variables in PropWare</h2>
+
+    <p>Here are three of the most common CMake variables you might use in your own projects.</p>
+
+    <ul>
+      <li>BOARD: The <code>BOARD</code> variable can be used to identify your physical hardware.
+        <code>propelle-load</code> uses this to determine how many bytes of EEPROM, the default baud rate used by for
+        PC <-> Propeller communication, and other functions. Any board available in SimpleIDE is available here as well
+        - they are reading from the same configuration pool (<code>&lt;PropGCC root&gt;/propeller-load</code>).
+      </li>
+      <li>MODEL: [default: <code>lmm</code>] This option should be one of <code>cog</code>, <code>cmm</code>,
+        <code>lmm</code>, <code>xmm-single</code>, <code>xmm-split</code>, or <code>xmmc</code>. Read
+        more about PropGCC's memory models
+        <a href="https://code.google.com/p/propgcc/wiki/PropGccInDepth">here</a>.
+      </li>
+      <li>COMMON_FLAGS: Any options applied to the <code>COMMON_FLAGS</code> variable will be applied to
+        assembly,
+        C and C++ files. This includes <code>cogc</code>, <code>ecogc</code>, <code>cogcpp</code>, and
+        <code>ecogcpp</code> but not <code>Spin</code>.
+      </li>
+    </ul>
+  </div>
+</div>
