@@ -102,7 +102,7 @@ class L3G {
         /**
          * @brief       Initialize an L3G module
          */
-        void start () {
+        void start () const {
             this->m_spi->set_mode(PropWare::L3G::SPI_MODE);
             this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE);
             this->m_spi->set_clock(PropWare::L3G::SPI_DEFAULT_FREQ);

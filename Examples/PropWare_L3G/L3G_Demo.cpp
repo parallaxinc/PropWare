@@ -39,7 +39,7 @@ const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
 /** Frequency (in Hertz) to run the SPI protocol */
 const uint32_t             FREQ = 10000;
 
-void error (const PropWare::ErrorCode err);
+void error(const PropWare::ErrorCode err);
 
 /**
  * @example     L3G_Demo.cpp
@@ -48,9 +48,14 @@ void error (const PropWare::ErrorCode err);
  *
  * @include PropWare_L3G/CMakeLists.txt
  */
-int main () {
-    int16_t       gyroValues[3];
+int main() {
+    int16_t rawGyroValues[3];
+    float   gyroValues[3];
+
     PropWare::SPI spi = PropWare::SPI::get_instance();
+    spi.set_mosi(MOSI);
+    spi.set_miso(MISO);
+    spi.set_sclk(SCLK);
     PropWare::L3G gyro(spi, CS);
 
     gyro.start();
@@ -64,22 +69,23 @@ int main () {
     gyro.always_set_spi_mode(1);
 
     while (1) {
-        gyro.read_all(gyroValues);
-        //pwOut << "Gyro vals DPS... X: " << gyro.convert_to_dps(gyroValues[PropWare::L3G::X])
-        //        << "\tY: " << gyro.convert_to_dps(gyroValues[PropWare::L3G::Y])
-        //        << "\tZ: " << gyro.convert_to_dps(gyroValues[PropWare::L3G::Z]) << '\n';
+        gyro.read_all(rawGyroValues);
 
-        pwOut << "Gyro vals DPS... X: " << gyroValues[PropWare::L3G::X]
-                << "\tY: " << gyroValues[PropWare::L3G::Y]
-                << "\tZ: " << gyroValues[PropWare::L3G::Z] << '\n';
+        gyroValues[PropWare::L3G::X] = gyro.convert_to_dps(rawGyroValues[PropWare::L3G::X]);
+        gyroValues[PropWare::L3G::Y] = gyro.convert_to_dps(rawGyroValues[PropWare::L3G::Y]);
+        gyroValues[PropWare::L3G::Z] = gyro.convert_to_dps(rawGyroValues[PropWare::L3G::Z]);
 
-        waitcnt(50*MILLISECOND + CNT);
+        pwOut << "X: " << gyroValues[PropWare::L3G::X] << '\t'
+              << "Y: " << gyroValues[PropWare::L3G::Y] << '\t'
+              << "Z: " << gyroValues[PropWare::L3G::Z] << '\n';
+
+        waitcnt(100 * MILLISECOND + CNT);
     }
 }
 
-void error (const PropWare::ErrorCode err) {
+void error(const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
+    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::Dir::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);
