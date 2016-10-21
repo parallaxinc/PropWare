@@ -19,17 +19,84 @@
       <a href="https://www.cmake.org/cmake/help/v3.0/command/enable_language.html#command:enable_language">enable_language</a>
       function.</p>
 
+    <p>To fit best into CMake's project model, PropWare defines numerous "languages" for the Propeller. The list
+      below provides the mapping between the human-readable name (such as "C++") and the name used by CMake (such as
+      "CXX"):</p>
+
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Language</th>
+        <th>CMake Name</th>
+        <th>Common Extensions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>Assembly (PASM)</td>
+        <td>ASM</td>
+        <td>.s, .S</td>
+      </tr>
+      <tr>
+        <td>C</td>
+        <td>C</td>
+        <td>.c, .i</td>
+      </tr>
+      <tr>
+        <td>C++</td>
+        <td>CXX</td>
+        <td>.cpp, .C, .cxx, .cc, .ii</td>
+      </tr>
+      <tr>
+        <td>C file compiled as a <a href="https://github.com/parallaxinc/propgcc-docs/blob/master/doc/InDepth.md">cogc
+          object</a></td>
+        <td>COGC</td>
+        <td>.cogc</td>
+      </tr>
+      <tr>
+        <td>C++ file compiled as a <a href="https://github.com/parallaxinc/propgcc-docs/blob/master/doc/InDepth.md">cogc
+          object</a></td>
+        <td>COGCXX</td>
+        <td>.cogcxx</td>
+      </tr>
+      <tr>
+        <td>C file compiled as a <a href="https://github.com/parallaxinc/propgcc-docs/blob/master/doc/InDepth.md">cogc
+          object</a> and stored in upper EEPROM
+        </td>
+        <td>ECOGC</td>
+        <td>.ecogc</td>
+      </tr>
+      <tr>
+        <td>C++ file compiled as a <a href="https://github.com/parallaxinc/propgcc-docs/blob/master/doc/InDepth.md">cogc
+          object</a> and stored in upper EEPROM
+        </td>
+        <td>ECOGCXX</td>
+        <td>.ecogcxx</td>
+      </tr>
+      <tr>
+        <td>Pre-compiled, binary data that can be included in an executable</td>
+        <td>DAT</td>
+        <td>.dat</td>
+      </tr>
+      <tr>
+        <td>Spin (PASM content extracted and compiled into a <code>.dat</code> file)</td>
+        <td>SPIN2DAT</td>
+        <td>.spin</td>
+      </tr>
+      </tbody>
+    </table>
+
     <h2>Functions</h2>
 
-    <h3><code>create_simple_executable</code></h3>
+    <h3 id="create_simple_executable"><code>create_simple_executable</code></h3>
 
     <p>Add an executable to the project using the specified source files. Signature matches CMake's built-in
       <a href="https://cmake.org/cmake/help/v3.3/command/add_executable" target="_blank"><code>add_executable</code></a>.
     </p>
 
-    <pre><code hljs hljs-language="cmake" hljs-no-escape>add_executable(&lt;name&gt; [WIN32] [MACOSX_BUNDLE]
-               [EXCLUDE_FROM_ALL]
-               source1 [source2 ...])</code></pre>
+    <pre><code hljs hljs-language="cmake" hljs-no-escape>create_simple_executable(&lt;name&gt;
+                         [EXCLUDE_FROM_ALL]
+                         source1 [source2 ...])</code></pre>
 
     <ul>
       <li>All source files must be defined in the <code>create_simple_executable</code> function.
@@ -60,25 +127,88 @@
       </li>
     </ul>
 
-    <h3><code>create_executable</code></h3>
+    <h3 id="create_executable"><code>create_executable</code></h3>
+
+    <p>Add an executable to the project using the specified source files. Signature matches CMake's built-in
+      <a href="https://cmake.org/cmake/help/v3.3/command/add_executable" target="_blank"><code>add_executable</code></a>.
+    </p>
+
+    <pre><code hljs hljs-language="cmake" hljs-no-escape>create_executable(&lt;name&gt;
+                  [EXCLUDE_FROM_ALL]
+                  source1 [source2 ...])</code></pre>
 
     <p>Exactly the same as <code>create_simple_executable</code>, except each target will be suffixed with
-      <code>-EXECUTABLE_NAME</code>, allowing multiple executables in a single project. For instance,
+      <code>-NAME</code>, allowing multiple executables in a single project. For instance,
       <code>create_executable(MyExe MySource.cpp)</code> would result in creating the target <code>run-MyExe</code>.</p>
 
-    <h3><code>create_library</code></h3>
+    <h3 id="create_library"><code>create_library</code></h3>
+
+    <p>Add a library to the project using the specified source files. Signature matches CMake's built-in
+      <a href="https://cmake.org/cmake/help/v3.3/command/add_library" target="_blank"><code>add_library</code></a>,
+      except that <code>STATIC</code> is automatically and explicitly selected.</p>
+
+    <pre><code hljs hljs-language="cmake" hljs-no-escape>create_library(&lt;name&gt;
+               [EXCLUDE_FROM_ALL]
+               source1 [source2 ...])</code></pre>
+
+    <h3 id="create_test"><code>create_test</code></h3>
+
+    <p>Create a unit test executable and add the necessary CMake targets to easily execute the test.</p>
+
+    <pre><code hljs hljs-language="cmake" hljs-no-escape>create_test(&lt;name&gt;
+            [EXCLUDE_FROM_ALL]
+            source1 [source2 ...])</code></pre>
+
+    <p>Many new targets will be created from this command. The first thing that happens is that the
+      <code>create_executable</code> function is invoked. All targets that would be created via
+      <code>create_executable</code> will therefore also be created by invoking <code>create_test</code>. A new
+      target by the name of <code>test-NAME</code> will be created, which will execute your unit test out of HUB
+      RAM using <code>propeller-load</code>'s <code>-q</code> argument to return when complete. CMake's
+      <a href="https://cmake.org/cmake/help/v3.3/command/add_test" target="_blank"><code>add_test</code></a> is invoked,
+      providing compatibility with CMake's
+      <a href="https://cmake.org/cmake/help/v3.3/manual/ctest.1.html" target="_blank"><code>ctest</code></a> plugin.</p>
+
+    <p>A dependency to build the unit test executable is added to the <code>test-all</code> target.</p>
+
+    <h3 id="spin2cpp"><code>spin2cpp</code></h3>
+
+    <p>Convert the provided Spin file to C++ and export a variable containing the converted C++ source and header file
+      paths.</p>
+
+    <pre><code hljs hljs-language="cmake" hljs-no-escape>spin2cpp(&lt;name&gt; source output_variable_name)</code></pre>
+
+    <p>Following invocation of this method, a new variable will be available to your CMake script. Its name is
+      specified by the third parameter. Its value will be a list of two files, one source and one header, for the
+      translated C++ code. This output variable can then be used directly by <code>create_simple_executable</code>,
+      <code>create_executable</code>, or <code>create_library</code>.</p>
+
+    <h2>Common Targets</h2>
+
+    <h3 id="all"><code>all</code></h3>
+
+    <p>This is the default target when no target is provided. In general, it will compile all libraries and
+      executables. This target is provided natively by CMake.</p>
+
+    <h3 id="clean"><code>clean</code></h3>
+
+    <p>Delete all generated files, such as <code>.o</code> object files, libraries, executables. This target is provided
+      natively by CMake, but modified by PropWare to included Spin2cpp's generated files.</p>
+
+    <h3 id="test-all"><code>test-all</code></h3>
+
+    <p>Build and run all unit tests in project.</p>
 
     <h2>PropWare CMake Variables</h2>
 
-    <h3 id="common_flags">COMMON_FLAGS</h3>
+    <h3 id="common_flags"><code>COMMON_FLAGS</code></h3>
 
     <p>Flags applied to all PropGCC languages</p>
 
-    <h3 id="common_cog_flags">COMMON_COG_FLAGS</h3>
+    <h3 id="common_cog_flags"><code>COMMON_COG_FLAGS</code></h3>
 
     <p>Flags applied to COGC, ECOGC, COGCXX, and ECOGXX</p>
 
-    <h3 id="lang_flags">&lt;LANG&gt;_FLAGS</h3>
+    <h3 id="lang_flags"><code>&lt;LANG&gt;_FLAGS</code></h3>
 
     <p>Compilation flags used for a specific language.</p>
 
@@ -90,7 +220,7 @@
       </li>
     </ul>
 
-    <h3 id="model">MODEL</h3>
+    <h3 id="model"><code>MODEL</code></h3>
 
     <p>[default: <code>lmm</code>]</p>
 
@@ -99,7 +229,7 @@
       <code>xmm-split</code>, or <code>xmmc</code>. Read more about PropGCC's
       memory models <a href="https://code.google.com/p/propgcc/wiki/PropGccInDepth">here</a>.</p>
 
-    <h3 id="board">BOARD</h3>
+    <h3 id="board"><code>BOARD</code></h3>
 
     <p>Used to identify your physical hardware. PropGCC uses this to determine how many bytes of EEPROM, default
       baud rate for RS232, and other functions. Any board available in SimpleIDE is available here as well -
@@ -112,20 +242,20 @@
       users will want to leave all options set to their default values, but those doing special projects or
       using conflicting libraries can change the options to suit their needs.</p>
 
-    <h3>AUTO_OPTIMIZATION</h3>
+    <h3 id="AUTO_OPTIMIZATION"><code>AUTO_OPTIMIZATION</code></h3>
 
     <p>[default: ON]</p>
 
     <p>Sets the optimization level for size. Equivalent to adding "-Os" to <code>COMMON_FLAGS</code>.</p>
 
-    <h3>WARN_ALL</h3>
+    <h3 id="WARN_ALL"><code>WARN_ALL</code></h3>
 
     <p>[default: ON]</p>
 
     <p>Turns on many common warnings from the compiler. Aids in writing clean, error-free code. Equivalent to adding
       "-Wall" to <code>COMMON_FLAGS</code>.</p>
 
-    <h3>32_BIT_DOUBLES</h3>
+    <h3 id="32_BIT_DOUBLES"><code>32_BIT_DOUBLES</code></h3>
 
     <p>[default: ON]</p>
 
@@ -135,13 +265,13 @@
       functions
       in the Simple library.</p>
 
-    <h3>AUTO_C_STD</h3>
+    <h3 id="AUTO_C_STD"><code>AUTO_C_STD</code></h3>
 
     <p>[default: ON]</p>
 
     <p>Sets the C standard to C99. Equivalent to adding "-std=c99" to <code>C_FLAGS</code></p>
 
-    <h3><a id="AUTO_CXX_STD_133"></a>AUTO_CXX_STD</h3>
+    <h3 id="AUTO_CXX_STD"><code>AUTO_CXX_STD</code></h3>
 
     <p>[default: ON]</p>
 
