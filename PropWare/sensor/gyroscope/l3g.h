@@ -49,13 +49,15 @@ class L3G {
         /**
          * Sensitivity measured in degrees per second
          */
-        enum class DPSMode {
-                /** 250 degrees per second */ DPS_250  = 0x00,
-                /** 500 degrees per second */ DPS_500  = 0x10,
-                /** 2000 degrees per second */DPS_2000 = 0x20
-        };
+        typedef enum {
+            /** 250 degrees per second */ DPS_250  = 0x00,
+            /** 500 degrees per second */ DPS_500  = 0x10,
+            /** 2000 degrees per second */DPS_2000 = 0x20
+        } DPSMode;
 
     public:
+        static const DPSMode DEFAULT_DPS = DPS_250;
+
         static const uint8_t WHO_AM_I = 0x0F;
 
         static const uint8_t CTRL_REG1  = 0x20;
@@ -88,32 +90,32 @@ class L3G {
 
     public:
         /**
-         * @brief       Construction requires an instance of the SPI module
-         *
-         * @param[in]   spi     Constructed SPI module
-         * @param[in]   cs      Chip select pin mask
+         * @param[in]   spi             SPI bus used for communication with the L3G device
+         * @param[in]   cs              Chip select pin mask
+         * @param[in]   dpsMode         Precision to be used, measured in degrees per second
+         * @param[in]   alwaysSetMode   When set, the SPI object will always have its mode reset, before every read
+         *                              or write operation
          */
-        L3G (SPI &spi, const PropWare::Port::Mask cs)
-                : m_spi(&spi),
-                  m_alwaysSetMode(false) {
-            this->m_cs.set_mask(cs);
+        L3G(SPI &spi, const PropWare::Port::Mask cs, const PropWare::L3G::DPSMode dpsMode = DEFAULT_DPS,
+            const bool alwaysSetMode = false)
+            : m_spi(&spi),
+              m_cs(cs, PropWare::Pin::Dir::OUT),
+              m_dpsMode(dpsMode),
+              m_alwaysSetMode(alwaysSetMode) {
+            this->m_cs.set();
         }
 
         /**
          * @brief       Initialize an L3G module
          */
-        void start () const {
+        void start() const {
             this->m_spi->set_mode(PropWare::L3G::SPI_MODE);
             this->m_spi->set_bit_mode(PropWare::L3G::SPI_BITMODE);
-            this->m_spi->set_clock(PropWare::L3G::SPI_DEFAULT_FREQ);
-
-            this->m_cs.set();
-            this->m_cs.set_dir_out();
 
             // NOTE L3G has high- and low-pass filters. Should they be enabled?
             // (Page 31)
             this->write8(PropWare::L3G::CTRL_REG1, NIBBLE_0);
-            this->write8(PropWare::L3G::CTRL_REG4, BIT_7);
+            this->write8(PropWare::L3G::CTRL_REG4, BIT_7 | this->m_dpsMode);
         }
 
         /**
@@ -123,7 +125,7 @@ class L3G {
          * @param[in]   alwaysSetMode   For any non-zero value, the SPI modes will always be set before a read or write
          *                              routine
          */
-        void always_set_spi_mode (const bool alwaysSetMode) {
+        void always_set_spi_mode(const bool alwaysSetMode) {
             this->m_alwaysSetMode = alwaysSetMode;
         }
 
@@ -134,7 +136,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read (const PropWare::L3G::Axis axis) const {
+        int16_t read(const PropWare::L3G::Axis axis) const {
             return this->read16(PropWare::L3G::OUT_X_L + (static_cast<uint8_t>(axis) << 1));
         }
 
@@ -143,7 +145,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read_x () const {
+        int16_t read_x() const {
             return this->read16(PropWare::L3G::OUT_X_L);
         }
 
@@ -152,7 +154,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read_y () const {
+        int16_t read_y() const {
             return this->read16(PropWare::L3G::OUT_Y_L);
         }
 
@@ -161,7 +163,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read_z () const {
+        int16_t read_z() const {
             return this->read16(PropWare::L3G::OUT_Z_L);
         }
 
@@ -173,7 +175,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        void read_all (int16_t *val) const {
+        void read_all(int16_t *val) const {
             uint8_t i;
 
             uint8_t addr = PropWare::L3G::OUT_X_L;
@@ -206,7 +208,7 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        void set_dps (const PropWare::L3G::DPSMode dpsMode) {
+        void set_dps(const PropWare::L3G::DPSMode dpsMode) {
             uint8_t oldValue;
 
             this->m_dpsMode = dpsMode;
@@ -223,7 +225,7 @@ class L3G {
          *
          * @return  Returns what the L3G module is using for DPS mode
          */
-        PropWare::L3G::DPSMode get_dps () const {
+        PropWare::L3G::DPSMode get_dps() const {
             return this->m_dpsMode;
         }
 
@@ -240,7 +242,7 @@ class L3G {
          *
          * @return      Returns the rotational value in degrees-per-second
          */
-        float convert_to_dps (const int16_t rawValue) const {
+        float convert_to_dps(const int16_t rawValue) const {
             return PropWare::L3G::convert_to_dps(rawValue, this->m_dpsMode);
         }
 
@@ -252,7 +254,7 @@ class L3G {
          *
          * @return      Returns the rotational value in degrees-per-second
          */
-        static float convert_to_dps (const int16_t rawValue, const PropWare::L3G::DPSMode dpsMode) {
+        static float convert_to_dps(const int16_t rawValue, const PropWare::L3G::DPSMode dpsMode) {
             switch (dpsMode) {
                 case DPSMode::DPS_250:
                     return (float) (rawValue * 0.00875);
@@ -265,9 +267,8 @@ class L3G {
         }
 
     private:
-        static const uint32_t     SPI_DEFAULT_FREQ = 100000;
-        static const SPI::Mode    SPI_MODE         = SPI::Mode::MODE_3;
-        static const SPI::BitMode SPI_BITMODE      = SPI::BitMode::MSB_FIRST;
+        static const SPI::Mode    SPI_MODE    = SPI::Mode::MODE_3;
+        static const SPI::BitMode SPI_BITMODE = SPI::BitMode::MSB_FIRST;
 
     protected:
         /***********************************
@@ -276,43 +277,43 @@ class L3G {
         /**
          * @brief       Write one byte to the L3G module
          *
-         * @param[in]   addr    Destination register address
-         * @param[in]   dat     Data to be written to the destination register
+         * @param[in]   registerAddress    Destination register address
+         * @param[in]   registerValue     Data to be written to the destination register
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        void write8 (uint8_t addr, const uint8_t dat) const {
-            uint16_t outputValue;
+        void write8(uint8_t registerAddress, const uint8_t registerValue) const {
+            uint16_t combinedWord;
 
-            addr &= ~BIT_7;  // Clear the RW bit (write mode)
+            registerAddress &= ~BIT_7;  // Clear the RW bit (write mode)
 
-            outputValue = ((uint16_t) addr) << 8;
-            outputValue |= dat;
+            combinedWord = ((uint16_t) registerAddress) << 8;
+            combinedWord |= registerValue;
 
             this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            this->m_spi->shift_out(16, outputValue);
+            this->m_spi->shift_out(16, combinedWord);
             this->m_cs.set();
         }
 
         /**
          * @brief       Write one byte to the L3G module
          *
-         * @param[in]   addr    Destination register address
-         * @param[in]   dat     Data to be written to the destination register
+         * @param[in]   registerAddress    Destination register address
+         * @param[in]   registerValue     Data to be written to the destination register
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        void write16 (uint8_t addr, const uint16_t dat) const {
+        void write16(uint8_t registerAddress, const uint16_t registerValue) const {
             uint16_t outputValue;
 
-            addr &= ~BIT_7;  // Clear the RW bit (write mode)
-            addr |= BIT_6;  // Enable address auto-increment
+            registerAddress &= ~BIT_7;  // Clear the RW bit (write mode)
+            registerAddress |= BIT_6;  // Enable address auto-increment
 
-            outputValue = ((uint16_t) addr) << 16;
-            outputValue |= ((uint16_t) ((uint8_t) dat)) << 8;
-            outputValue |= (uint8_t) (dat >> 8);
+            outputValue = ((uint16_t) registerAddress) << 16;
+            outputValue |= ((uint16_t) ((uint8_t) registerValue)) << 8;
+            outputValue |= (uint8_t) (registerValue >> 8);
 
             this->maybe_set_spi_mode();
 
@@ -324,53 +325,53 @@ class L3G {
         /**
          * @brief       Read one byte from the L3G module
          *
-         * @param[in]   addr    Origin register address
+         * @param[in]   registerAddress    Origin register address
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        uint8_t read8 (uint8_t addr) const {
-            uint8_t dat;
+        uint8_t read8(uint8_t registerAddress) const {
+            uint8_t registerValue;
 
-            addr |= BIT_7;  // Set RW bit (
-            addr |= BIT_6;  // Enable address auto-increment
+            registerAddress |= BIT_7;  // Set RW bit (
+            registerAddress |= BIT_6;  // Enable address auto-increment
 
             this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            this->m_spi->shift_out(8, addr);
-            dat = (int8_t) this->m_spi->shift_in(8);
+            this->m_spi->shift_out(8, registerAddress);
+            registerValue = (int8_t) this->m_spi->shift_in(8);
             this->m_cs.set();
 
-            return dat;
+            return registerValue;
         }
 
         /**
          * @brief       Read two bytes from the L3G module
          *
-         * @param[in]   addr    Origin register address
+         * @param[in]   registerAddress    Origin register address
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        int16_t read16 (uint8_t addr) const {
-            uint32_t dat;
+        int16_t read16(uint8_t registerAddress) const {
+            uint32_t registerValue;
 
 
-            addr |= BIT_7;  // Set RW bit (
-            addr |= BIT_6;  // Enable address auto-increment
+            registerAddress |= BIT_7;  // Set RW bit (
+            registerAddress |= BIT_6;  // Enable address auto-increment
 
             this->maybe_set_spi_mode();
 
             this->m_cs.clear();
-            this->m_spi->shift_out(8, addr);
-            dat = (int16_t) this->m_spi->shift_in(16);
+            this->m_spi->shift_out(8, registerAddress);
+            registerValue = (int16_t) this->m_spi->shift_in(16);
             this->m_cs.set();
 
             // err is useless at this point and will be used as a temporary
             // 8-bit variable
             int temp;
-            temp = dat >> 8;
-            dat <<= 8;
-            return (int16_t) (dat | temp);
+            temp = registerValue >> 8;
+            registerValue <<= 8;
+            return (int16_t) (registerValue | temp);
         }
 
         /**
@@ -378,7 +379,7 @@ class L3G {
          *
          * @return  Returns 0 upon success, error code otherwise
          */
-        void maybe_set_spi_mode () const {
+        void maybe_set_spi_mode() const {
             if (this->m_alwaysSetMode) {
                 this->m_spi->set_mode(L3G::SPI_MODE);
                 this->m_spi->set_bit_mode(L3G::SPI_BITMODE);
@@ -387,7 +388,7 @@ class L3G {
 
     private:
         SPI                    *m_spi;
-        PropWare::Pin          m_cs;
+        const PropWare::Pin    m_cs;
         PropWare::L3G::DPSMode m_dpsMode;
         bool                   m_alwaysSetMode;
 };

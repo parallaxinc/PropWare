@@ -29,15 +29,13 @@
 #include <PropWare/sensor/gyroscope/l3g.h>
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
-/** Frequency (in Hertz) to run the SPI protocol */
-const uint32_t             FREQ = 10000;
+static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
 
 void error(const PropWare::ErrorCode err);
 
@@ -59,7 +57,6 @@ int main() {
     PropWare::L3G gyro(spi, CS);
 
     gyro.start();
-    gyro.set_dps(PropWare::L3G::DPSMode::DPS_500);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the
