@@ -98,33 +98,25 @@
                          [EXCLUDE_FROM_ALL]
                          source1 [source2 ...])</code></pre>
 
+    <p>The following PropWare-specific targets will be created:</p>
     <ul>
-      <li>All source files must be defined in the <code>create_simple_executable</code> function.
+      <li><code>run</code>: Load the executable to EEPROM and execute the code.</li>
+      <li><code>run-ram</code>: Load the executable to HUB RAM and execute the code.</li>
+      <li><code>run-sd-loader</code>: Load the executable to SD card, and execute the code.</li>
+      <li><code>run-sd-cache</code>: Load the executable to SD card, use it as a cache, and execute the code</li>
+      <li><code>debug</code>: Load the executable to HUB RAM, execute the code, and open an interactive serial
+        terminal
       </li>
-      <li>Each source file is separated by any amount of whitespace</li>
-      <li>Normal C and C++ files do not need their extensions explicitly defined.</li>
-      <li>The various COG languages <em>do</em> need their extensions explicitly defined, as does assembly.</li>
-      <li>The following PropWare-specific targets will be created:
-        <ul>
-          <li><code>run</code>: Load the executable to EEPROM and execute the code.</li>
-          <li><code>run-ram</code>: Load the executable to HUB RAM and execute the code.</li>
-          <li><code>run-sd-loader</code>: Load the executable to SD card, and execute the code.</li>
-          <li><code>run-sd-cache</code>: Load the executable to SD card, use it as a cache, and execute the code</li>
-          <li><code>debug</code>: Load the executable to HUB RAM, execute the code, and open an interactive serial
-            terminal
-          </li>
-          <li><code>debug-eeprom</code>: Load the executable to EEPROM, execute the code, and open an interactive serial
-            terminal
-          </li>
-          <li><code>debug-sd-loader</code>: Load the executable to SD card, execute the code, and open an interactive
-            serial terminal
-          </li>
-          <li><code>debug-sd-cache</code>: Load the executable to SD card, use it as a cache, execute the code, and open
-            an interactive serial terminal
-          </li>
-          <li><code>gdb</code>: Load the executable to HUB RAM and start GDB</li>
-        </ul>
+      <li><code>debug-eeprom</code>: Load the executable to EEPROM, execute the code, and open an interactive serial
+        terminal
       </li>
+      <li><code>debug-sd-loader</code>: Load the executable to SD card, execute the code, and open an interactive
+        serial terminal
+      </li>
+      <li><code>debug-sd-cache</code>: Load the executable to SD card, use it as a cache, execute the code, and open
+        an interactive serial terminal
+      </li>
+      <li><code>gdb</code>: Load the executable to HUB RAM and start GDB</li>
     </ul>
 
     <h3 id="create_executable"><code>create_executable</code></h3>
