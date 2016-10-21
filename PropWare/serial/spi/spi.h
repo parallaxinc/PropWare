@@ -46,9 +46,11 @@ class SPI : public PrintCapable,
         /**
          * @brief   Descriptor for SPI signal as defined by Motorola modes
          *
+         * These modes control whether data is shifted in and out on the rising or falling edge of the data clock signal
+         * (called the clock phase), and whether the clock is idle when high or low (called the clock polarity).
          * CPOL 0 refers to a low polarity (where the clock idles in the low state) and CPOL 1 is for high polarity.
+         * CPHA 0 refers to falling edge clock phase and CPHA 1 refers to rising edge.
          *
-         * TODO: Describe phase
          * <table><tr><td>SPI Mode</td><td>CPOL</td><td>CPHA</td></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr>
          * <td>1</td><td>0</td><td>1</td></tr><tr><td>2</td><td>1</td><td>0</td></tr><tr><td>3</td><td>1</td><td>1</td>
          * </tr></table>

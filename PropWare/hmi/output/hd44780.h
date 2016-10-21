@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/hd44780.h
+ * @file        PropWare/hmi/output/hd44780.h
  *
  * @author      David Zemon
  * @author      Collin Winans
