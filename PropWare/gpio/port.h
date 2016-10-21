@@ -140,16 +140,9 @@ class Port {
 
     public:
         /**
-         * @brief   Instantiate a NULL instance
-         */
-        Port () {
-            this->m_mask = Mask::NULL_PIN;
-        }
-
-        /**
          * @param[in]   portMask    Each bit set high represents a Pin on the port
          */
-        Port (const uint32_t portMask) {
+        Port (const uint32_t portMask = Mask::NULL_PIN) {
             this->m_mask = portMask;
         }
 

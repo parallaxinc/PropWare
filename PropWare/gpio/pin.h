@@ -54,19 +54,11 @@ class Pin : public Port {
 
     public:
         /**
-         * @brief   Initialize to a NULL pin mask
-         */
-        Pin ()
-                : Port(),
-                  m_channel(Channel::A) {
-        }
-
-        /**
          * @brief       Create a Pin variable
          *
          * @param[in]   mask    Bit-mask of pin; One of PropWare::Pin::Mask
          */
-        Pin (const PropWare::Pin::Mask mask)
+        Pin (const PropWare::Pin::Mask mask = NULL_PIN)
                 : Port(mask),
                   m_channel(Channel::A) {
         }
