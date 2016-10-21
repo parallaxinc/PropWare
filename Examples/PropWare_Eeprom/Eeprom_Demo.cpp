@@ -23,11 +23,11 @@
 #include <PropWare/memory/eeprom.h>
 #include <PropWare/hmi/input/scanner.h>
 
-const uint8_t  MAGIC_ARRAY_1[] = "DCBA0";
-const size_t   ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
-const char     MAGIC_ARRAY_2[] = "Hello, world!";
-const size_t   ARRAY_SIZE_2    = sizeof(MAGIC_ARRAY_2);
-const uint16_t TEST_ADDRESS    = 32 * 1024; // Place the data immediately above the first 32k of data
+static const uint8_t  MAGIC_ARRAY_1[] = "DCBA0";
+static const size_t   ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
+static const char     MAGIC_ARRAY_2[] = "Hello, world!";
+static const size_t   ARRAY_SIZE_2    = sizeof(MAGIC_ARRAY_2);
+static const uint16_t TEST_ADDRESS    = 32 * 1024; // Place the data immediately above the first 32k of data
 
 /**
  * @example     PropWareEeprom_Demo.cpp

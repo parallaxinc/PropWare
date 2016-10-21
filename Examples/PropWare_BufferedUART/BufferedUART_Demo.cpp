@@ -29,9 +29,9 @@
 
 static const size_t BUFFER_SIZE = 256;
 
-void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
+static void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
 
-bool isAnswerNo (char const userInput[]);
+static bool isAnswerNo (char const userInput[]);
 
 /**
  * @example     BufferedUART_Demo.cpp

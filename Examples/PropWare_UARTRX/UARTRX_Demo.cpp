@@ -31,13 +31,13 @@
 #include <PropWare/hmi/output/synchronousprinter.h>
 
 // Create the test string - useful when testing with a terminal
-const char                   TEST_STRING[] = "Hello, world!\n";
-const uint32_t               BAUD_RATE     = 115200;
-const PropWare::Port::Mask   TX_PIN        = PropWare::Port::Mask::P12;
-const PropWare::Port::Mask   RX_PIN        = PropWare::Port::Mask::P13;
-const PropWare::UART::Parity PARITY        = PropWare::UART::Parity::NO_PARITY;
+static const char                   TEST_STRING[] = "Hello, world!\n";
+static const uint32_t               BAUD_RATE     = 115200;
+static const PropWare::Port::Mask   TX_PIN        = PropWare::Port::Mask::P12;
+static const PropWare::Port::Mask   RX_PIN        = PropWare::Port::Mask::P13;
+static const PropWare::UART::Parity PARITY        = PropWare::UART::Parity::NO_PARITY;
 
-void error (const PropWare::ErrorCode err);
+static void error (const PropWare::ErrorCode err);
 
 class Listener : public PropWare::Runnable {
     public:

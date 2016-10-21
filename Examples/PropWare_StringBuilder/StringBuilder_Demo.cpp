@@ -31,13 +31,13 @@
 
 using namespace PropWare;
 
-unsigned int next_fibonacci (const bool clear = false);
+static unsigned int next_fibonacci (const bool clear = false);
 
-unsigned int run_buffered (const int iterations);
+static unsigned int run_buffered (const int iterations);
 
-unsigned int run_static_buffered (const int iterations);
+static unsigned int run_static_buffered (const int iterations);
 
-unsigned int run_unbuffered (const int iterations);
+static unsigned int run_unbuffered (const int iterations);
 
 /**
  * @example     StringBuilder_Demo.cpp

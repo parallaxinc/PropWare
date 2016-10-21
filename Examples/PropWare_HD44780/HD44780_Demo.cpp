@@ -28,14 +28,14 @@
 #include <PropWare/hmi/output/hd44780.h>
 
 // Control pins
-const PropWare::Port::Mask RS = PropWare::Port::Mask::P16;
-const PropWare::Port::Mask RW = PropWare::Port::Mask::P17;
-const PropWare::Port::Mask EN = PropWare::Port::Mask::P18;
+static const PropWare::Port::Mask RS = PropWare::Port::Mask::P16;
+static const PropWare::Port::Mask RW = PropWare::Port::Mask::P17;
+static const PropWare::Port::Mask EN = PropWare::Port::Mask::P18;
 
 // Data pins
-const PropWare::Pin::Mask           FIRST_DATA_PIN = PropWare::Pin::Mask::P19;
-const PropWare::HD44780::BusWidth   BITMODE        = PropWare::HD44780::BusWidth::WIDTH8;
-const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::Dimensions::DIM_16x2;
+static const PropWare::Pin::Mask           FIRST_DATA_PIN = PropWare::Pin::Mask::P19;
+static const PropWare::HD44780::BusWidth   BITMODE        = PropWare::HD44780::BusWidth::WIDTH8;
+static const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::Dimensions::DIM_16x2;
 
 /**
  * @example     HD44780_Demo.cpp

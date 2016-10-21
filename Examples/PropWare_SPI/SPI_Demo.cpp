@@ -29,20 +29,20 @@
 #include <PropWare/serial/spi/spi.h>
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
+static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
 
 /** Frequency (in hertz) to run the SPI module */
-const uint32_t               FREQ    = 100000;
+static const uint32_t               FREQ    = 100000;
 /** The SPI mode to run */
-const PropWare::SPI::Mode    MODE    = PropWare::SPI::Mode::MODE_0;
+static const PropWare::SPI::Mode    MODE    = PropWare::SPI::Mode::MODE_0;
 /** Determine if the LSB or MSB should be sent first for each byte */
-const PropWare::SPI::BitMode BITMODE = PropWare::SPI::BitMode::MSB_FIRST;
+static const PropWare::SPI::BitMode BITMODE = PropWare::SPI::BitMode::MSB_FIRST;
 
 /**
  * @example     SPI_Demo.cpp

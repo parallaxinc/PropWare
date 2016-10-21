@@ -29,19 +29,19 @@
 
 using namespace PropWare;
 
-const Port::Mask MOSI         = Port::Mask::P0;
-const Port::Mask MISO         = Port::Mask::P1;
-const Port::Mask SCLK         = Port::Mask::P2;
-const Port::Mask CS           = Port::Mask::P7;
-const Port::Mask CLOCK_MASK   = Port::Mask::P8;
+static const Port::Mask MOSI       = Port::Mask::P0;
+static const Port::Mask MISO       = Port::Mask::P1;
+static const Port::Mask SCLK       = Port::Mask::P2;
+static const Port::Mask CS         = Port::Mask::P7;
+static const Port::Mask CLOCK_MASK = Port::Mask::P8;
 
-const uint8_t messages[][6] = {
-        "Hello",
-        "David",
-        "Katie"
+static const uint8_t messages[][6] = {
+    "Hello",
+    "David",
+    "Katie"
 };
 
-void handle (const ErrorCode err) {
+void handle(const ErrorCode err) {
     if (err) {
         pwOut.printf("ERROR!!! %d\n", err);
         while (1)
@@ -49,7 +49,7 @@ void handle (const ErrorCode err) {
     }
 }
 
-void read (MCP2515 &can, const MCP2515::BufferNumber bufferNumber) {
+void read(MCP2515 &can, const MCP2515::BufferNumber bufferNumber) {
     if (can.check_receive_buffer(bufferNumber)) {
         uint8_t buffer[MCP2515::MAX_DATA_BYTES];
         uint8_t bytesRead;
@@ -65,7 +65,7 @@ void read (MCP2515 &can, const MCP2515::BufferNumber bufferNumber) {
  *
  * @include     PropWare_MCP2515/CMakeLists.txt
  */
-int main () {
+int main() {
     // Instantiate the SPI bus and CAN controller instances
     const SPI spi(MOSI, MISO, SCLK);
     MCP2515   can(spi, CS);

@@ -29,17 +29,17 @@
 #include <PropWare/sensor/analog/mcp3xxx.h>
 
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
-const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::PartNumber::MCP300x;
-const PropWare::MCP3xxx::Channel    CHANNEL     = PropWare::MCP3xxx::Channel::CHANNEL_1;
+static const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::PartNumber::MCP300x;
+static const PropWare::MCP3xxx::Channel    CHANNEL     = PropWare::MCP3xxx::Channel::CHANNEL_1;
 
 /** Pin number for MOSI (master out - slave in) */
-const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
 /** Pin number for the clock signal */
-const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
 /** Pin number for chip select */
-const PropWare::Port::Mask CS   = PropWare::Port::Mask::P3;
+static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P3;
 
 /**
  * @example     MCP3xxx_Demo.cpp

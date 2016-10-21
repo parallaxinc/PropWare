@@ -27,9 +27,9 @@
 #include <PropWare/hmi/input/scanner.h>
 #include <PropWare/serial/uart/fullduplexserial.h>
 
-void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
+static void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
 
-bool isAnswerNo (char const userInput[]);
+static bool isAnswerNo (char const userInput[]);
 
 /**
  * @example FullDuplexSerial_Demo.cpp

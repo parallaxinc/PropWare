@@ -25,7 +25,7 @@
 
 #include <Arduino.h>
 
-const int led = 16;
+static const int led = 16;
 
 void init () {
     pinMode(led, OUTPUT);

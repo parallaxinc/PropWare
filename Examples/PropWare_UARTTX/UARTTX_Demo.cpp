@@ -29,10 +29,10 @@
 #include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/printer.h>
 
-void error (const PropWare::ErrorCode err);
+static void error (const PropWare::ErrorCode err);
 
-const int32_t BAUD_RATE = 115200;
-const int32_t DELAY     = 200;
+static const int32_t BAUD_RATE = 115200;
+static const int32_t DELAY     = 200;
 
 /**
  * @example     SimplexUART_Demo.cpp

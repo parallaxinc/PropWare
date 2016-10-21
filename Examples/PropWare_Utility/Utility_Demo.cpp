@@ -28,9 +28,9 @@
 #include <PropWare/utility/utility.h>
 #include <PropWare/hmi/output/printer.h>
 
-void sampleCountBits ();
-void sampleTimeMeasurement ();
-void sampleFreeMemory ();
+static void sampleCountBits ();
+static void sampleTimeMeasurement ();
+static void sampleFreeMemory ();
 
 /**
  * @example     Utility_Demo.cpp

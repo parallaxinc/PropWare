@@ -23,11 +23,11 @@
 #include <PropWare/hmi/output/printer.h>
 #include <simpletools.h>
 
-const uint8_t MAGIC_ARRAY_1[] = "DCBA0";
-const size_t  ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
+static const uint8_t MAGIC_ARRAY_1[] = "DCBA0";
+static const size_t  ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
 
-const uint8_t  SHIFTED_DEVICE_ADDR = EEPROM_ADDR << 1;
-const uint16_t TEST_ADDRESS        = 32 * 1024; // Place the data immediately above the first 32k of data
+static const uint8_t  SHIFTED_DEVICE_ADDR = EEPROM_ADDR << 1;
+static const uint16_t TEST_ADDRESS        = 32 * 1024; // Place the data immediately above the first 32k of data
 
 /**
  * @example     PropWareI2C_Demo.cpp

@@ -9,10 +9,10 @@
 #include <PropWare/hmi/output/synchronousprinter.h>
 #include <PropWare/gpio/pin.h>
 
-const uint16_t     COGS             = 8;
-const uint16_t     STACK_SIZE       = 128;
-const unsigned int DELAY_IN_SECONDS = 2;
-const uint32_t     WAIT_TIME        = DELAY_IN_SECONDS * SECOND;
+static const uint16_t     COGS             = 8;
+static const uint16_t     STACK_SIZE       = 128;
+static const unsigned int DELAY_IN_SECONDS = 2;
+static const uint32_t     WAIT_TIME        = DELAY_IN_SECONDS * SECOND;
 
 class SyncedPrinterCog: public PropWare::Runnable {
     public:

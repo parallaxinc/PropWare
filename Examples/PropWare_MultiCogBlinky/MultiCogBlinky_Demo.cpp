@@ -34,16 +34,16 @@
 *
 * @param[in]   arg     pin number to toggle
 */
-void run_cog(void *arg);
+static void run_cog(void *arg);
 
-const uint16_t         COGS       = 8;
-const uint16_t         STACK_SIZE = 16;
+static const uint16_t         COGS       = 8;
+static const uint16_t         STACK_SIZE = 16;
 static uint32_t        cog_stack[STACK_SIZE][COGS];
 static _thread_state_t thread_data;
 
-volatile uint32_t wait_time;
-volatile uint32_t startCnt;
-volatile int8_t   syncStart;
+static volatile uint32_t wait_time;
+static volatile uint32_t startCnt;
+static volatile int8_t   syncStart;
 
 /**
  * @example     MultiCogBlinky_Demo.cpp

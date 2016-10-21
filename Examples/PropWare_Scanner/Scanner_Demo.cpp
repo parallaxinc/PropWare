@@ -25,14 +25,10 @@
 
 // Includes
 #include <PropWare/PropWare.h>
-#include <PropWare/utility/utility.h>
-#include <PropWare/gpio/simpleport.h>
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/input/scanner.h>
 
-bool isAnswerNo (char const userInput[]);
-
-void error (const PropWare::ErrorCode err);
+static bool isAnswerNo (char const userInput[]);
 
 /**
  * @example     Scanner_Demo.cpp
@@ -68,15 +64,4 @@ int main () {
 
 bool isAnswerNo (char const userInput[]) {
     return 0 == strcmp("n", userInput) || 0 == strcmp("no", userInput);
-}
-
-void error (const PropWare::ErrorCode err) {
-    const PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Port::Dir::OUT);
-
-    while (1) {
-        debugLEDs.write((uint32_t) err);
-        waitcnt(100 * MILLISECOND);
-        debugLEDs.write(0);
-        waitcnt(100 * MILLISECOND);
-    }
 }
