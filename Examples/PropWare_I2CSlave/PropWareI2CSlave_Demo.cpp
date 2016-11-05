@@ -20,18 +20,6 @@
  */
 
 #include <PropWare/serial/i2c/i2c.h>
-#include <PropWare/hmi/output/printer.h>
-#include <simpletools.h>
-
-static const uint8_t MAGIC_ARRAY_1[] = "DCBA0";
-static const size_t  ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
-
-static const uint8_t  SHIFTED_DEVICE_ADDR = EEPROM_ADDR << 1;
-static const uint16_t TEST_ADDRESS        = 32 * 1024; // Place the data immediately above the first 32k of data
-
-
-
-
 
 /**
  * @brief	Callback fired, when the master requests data from us (the slave).
