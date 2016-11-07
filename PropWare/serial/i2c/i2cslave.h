@@ -125,11 +125,14 @@ class I2CSlave: public Runnable {
             this->m_scl.clear();
             this->m_sda.clear();
 
+			//store slave address locally to get a bit more performance
+			const uint32_t slaveAddress = this->m_slaveAddress;
+			
             while (true) { // start loop
                 this->await_start();
                 while (true) { //restart loop
-                    const uint8_t address = this->read_address();
-                    if ((address >> 1) == this->m_slaveAddress) { // Master is talking to us
+                    const uint32_t address = this->read_address();
+                    if ((address >> 1) == slaveAddress) { // Master is talking to us
                         this->send_ack(); // Tell master we are there
                         if (address & BIT_0) { // Master wants us to speak
                             this->m_requestEnded = false;
@@ -231,7 +234,7 @@ class I2CSlave: public Runnable {
         /**
          * @brief   Read one byte from the bus without sending any response.
          */
-        uint8_t read_address() const {
+        uint32_t read_address() const {
             uint32_t result;
             uint32_t bitCounter;
 
@@ -251,7 +254,7 @@ class I2CSlave: public Runnable {
             : [_SDAMask] "r"(this->m_sda.get_mask()),
             [_SCLMask] "r"(this->m_scl.get_mask())
             );
-            return (uint8_t) result;
+            return result;
         }
 
         /**
@@ -347,7 +350,7 @@ class I2CSlave: public Runnable {
         }
 
     private:
-        const uint8_t m_slaveAddress;
+        const uint32_t m_slaveAddress;
         const Pin     m_scl;
         const Pin     m_sda;
 
