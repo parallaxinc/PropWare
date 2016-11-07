@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <PropWare/serial/i2c/i2c.h>
+#include <PropWare/serial/i2c/i2cmaster.h>
 
 namespace PropWare {
 
@@ -68,7 +68,7 @@ class PCF8591 {
          * @param[in]   i2cBus          I2C instance that should be used for communication; Usually the default bus
          *                              will be satisfactory
          */
-        PCF8591 (const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS, const I2C &i2cBus = pwI2c)
+        PCF8591 (const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS, const I2CMaster &i2cBus = pwI2c)
                 : m_i2c(&i2cBus),
                   m_deviceAddress(deviceAddress),
                   m_currentProgram(0) {
@@ -217,7 +217,7 @@ class PCF8591 {
         }
 
     private:
-        const I2C     *m_i2c;
+        const I2CMaster     *m_i2c;
         const uint8_t m_deviceAddress;
 
         uint8_t m_currentProgram;

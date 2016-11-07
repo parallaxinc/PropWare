@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <PropWare/serial/i2c/i2c.h>
+#include <PropWare/serial/i2c/i2cmaster.h>
 #include <PropWare/hmi/output/printcapable.h>
 #include <PropWare/hmi/input/scancapable.h>
 
@@ -51,7 +51,7 @@ class Eeprom: public PrintCapable,
          *                                      reading and writing bytes from and to the EEPROM, similar to
          *                                      reading/writing files
          */
-        Eeprom(const I2C &driver = pwI2c,
+        Eeprom(const I2CMaster &driver = pwI2c,
                const uint16_t initialMemoryAddress = DEFAULT_INITIAL_MEMORY_ADDRESS,
                const uint8_t deviceAddress = DEFAULT_DEVICE_ADDRESS,
                const bool autoIncrement = true)
@@ -202,7 +202,7 @@ class Eeprom: public PrintCapable,
         }
 
     private:
-        const I2C     *m_driver;
+        const I2CMaster     *m_driver;
         uint16_t      m_memoryAddress;
         const uint8_t m_deviceAddress;
         bool          m_autoIncrement;

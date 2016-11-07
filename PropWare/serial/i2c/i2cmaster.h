@@ -1,5 +1,5 @@
 /**
- * @file        PropWare/serial/i2c/i2c.h
+ * @file        PropWare/serial/i2c/i2cmaster.h
  *
  * @author      SRLM
  * @author      David Zemon
@@ -61,7 +61,7 @@ namespace PropWare {
  * (the MSb to 1) in order to turn on the auto-increment function (see datasheet for L3GD20 for example). This is not
  * done automatically by this library.
  */
-class I2C {
+class I2CMaster {
     public:
         static const Pin::Mask    DEFAULT_SCL_MASK  = Pin::Mask::P28;
         static const Pin::Mask    DEFAULT_SDA_MASK  = Pin::Mask::P29;
@@ -75,7 +75,7 @@ class I2C {
          * @param[in]   sdaMask     Pin mask for the SDA pin (default value uses the EEPROM SDA line)
          * @param[in]   frequency   Frequency to run the bus (default is highest standard I2C frequency of 400 kHz)
          */
-        I2C (const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK,
+        I2CMaster (const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK,
              const unsigned int frequency = DEFAULT_FREQUENCY)
                 : m_scl(sclMask, Pin::Dir::IN),
                   m_sda(sdaMask, Pin::Dir::IN) {
@@ -486,4 +486,4 @@ class I2C {
 /**
  * @brief   Global I2C instance for easy and shared use by Propeller applications (not thread safe!)
  */
-extern PropWare::I2C pwI2c;
+extern PropWare::I2CMaster pwI2c;

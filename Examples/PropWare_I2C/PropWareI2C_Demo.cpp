@@ -19,7 +19,7 @@
  * IN THE SOFTWARE.
  */
 
-#include <PropWare/serial/i2c/i2c.h>
+#include <PropWare/serial/i2c/i2cmaster.h>
 #include <PropWare/hmi/output/printer.h>
 #include <simpletools.h>
 
@@ -37,7 +37,7 @@ static const uint16_t TEST_ADDRESS        = 32 * 1024; // Place the data immedia
  * @include PropWare_I2C/CMakeLists.txt
  */
 int main () {
-    const PropWare::I2C pwI2C;
+    const PropWare::I2CMaster pwI2C;
     pwOut << "EEPROM ack = " << pwI2C.ping(SHIFTED_DEVICE_ADDR) << '\n';
 
     bool success = pwI2C.put(SHIFTED_DEVICE_ADDR, TEST_ADDRESS, MAGIC_ARRAY_1, ARRAY_SIZE_1);

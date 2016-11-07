@@ -25,7 +25,7 @@
 
 
 #ifndef __PROPELLER_COG__
-#include <PropWare/serial/i2c/i2c.h>
+#include <PropWare/serial/i2c/i2cmaster.h>
 
-PropWare::I2C pwI2c;
+PropWare::I2CMaster pwI2c;
 #endif

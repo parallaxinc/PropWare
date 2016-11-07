@@ -32,8 +32,9 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/sensor/gyroscope/l3g.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/temperature/max6675.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/can/mcp2515.h
-    ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2c.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2c.h
+    ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2cmaster.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2cmaster.h
+    ${CMAKE_CURRENT_LIST_DIR}/serial/i2c/i2cslave.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/spi/spi.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/shareduarttx.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uart.h

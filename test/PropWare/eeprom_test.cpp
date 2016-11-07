@@ -55,7 +55,7 @@ TEST(Constructor_DefaultArguments) {
 }
 
 TEST(Constructor_NonDefaultArguments) {
-    I2C    bogus;
+    I2CMaster    bogus;
     Eeprom localTestable(bogus, 1, 2, false);
 
     ASSERT_EQ_MSG((unsigned int) &bogus, (unsigned int) localTestable.m_driver);
