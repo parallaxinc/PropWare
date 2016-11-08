@@ -99,27 +99,30 @@ class I2CMaster {
          * @brief   Output a start condition on the I2C bus
          */
         void start () const {
-            //Set pins as output
+            this->m_scl.set();
+            this->m_sda.set();
+
             this->m_scl.set_dir_out();
             this->m_sda.set_dir_out();
 
-            this->m_scl.set();
-            this->m_sda.set();
-#ifndef __PROPELLER_CMM_
-            __asm__ volatile("nop");
-#endif
-            this->m_sda.toggle();
-            this->m_scl.toggle();
-        }
+            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->m_sda.clear();
+            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->m_scl.clear();
+		}
 
         /**
          * @brief   Output a stop condition on the I2C bus
          */
-        void stop () const {
-            //Set pins to input
+		void stop () const {
+            this->m_sda.clear();
+            this->m_scl.clear();
+
+            asm volatile("nop; nop; nop; nop; nop; nop;");
             this->m_scl.set_dir_in();
+            asm volatile("nop; nop; nop; nop; nop; nop;");
             this->m_sda.set_dir_in();
-        }
+		}
 
         /**
          * @brief   Output a byte on the I2C bus.
