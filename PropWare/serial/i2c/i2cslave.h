@@ -277,12 +277,14 @@ class I2CSlave: public Runnable {
          * @return  `true` if a restart condition was received, `false` if a stop condition was received
          */
         bool read_to_end() {
-            volatile uint32_t isRestart = BIT_1;
-            while (BIT_1 == isRestart) {
-                volatile uint32_t result     = 0;
-                uint32_t          bitCounter = 7;
-
+            uint32_t result;
+            uint32_t bitCounter;
+            uint32_t isRestart;
+            while (true) {
                 __asm__ volatile(
+                    "       mov         %[_isRestart],       #2                 \n\t"
+                    "       mov         %[_bitCounter],      #7                 \n\t"
+                    "       mov         %[_result],          #0                 \n\t"
                     "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to be low first
                     "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to go high
                     "       test        %[_SDAMask],         ina         wc     \n\t" // Read bit and...
@@ -322,13 +324,13 @@ class I2CSlave: public Runnable {
                 [_SDAMask] "r"(this->m_sda.get_mask()),
                 [_SCLMask] "r"(this->m_scl.get_mask()));
 
-                if (BIT_1 == isRestart) {
+                if (2 == isRestart) {
                     this->send_ack();
                     this->append_receive_buffer(static_cast<uint8_t>(result));
+                } else {
+                    return static_cast<bool>(isRestart);
                 }
             }
-
-            return static_cast<bool>(isRestart);
         }
 
         /**
