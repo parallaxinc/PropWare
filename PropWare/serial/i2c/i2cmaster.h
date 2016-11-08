@@ -99,29 +99,29 @@ class I2CMaster {
          * @brief   Output a start condition on the I2C bus
          */
         void start () const {
-			this->m_scl.set();
-			this->m_sda.set();
+            this->m_scl.set();
+            this->m_sda.set();
 
-			this->m_scl.set_dir_out();
-			this->m_sda.set_dir_out();
+            this->m_scl.set_dir_out();
+            this->m_sda.set_dir_out();
 
-			asm volatile("nop; nop; nop; nop; nop; nop;");
-			this->m_sda.clear();
-			asm volatile("nop; nop; nop; nop; nop; nop;");
-			this->m_scl.clear();
+            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->m_sda.clear();
+            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->m_scl.clear();
 		}
 
         /**
          * @brief   Output a stop condition on the I2C bus
          */
 		void stop () const {
-			this->m_sda.clear();
-			this->m_scl.clear();
+            this->m_sda.clear();
+            this->m_scl.clear();
 
-			asm volatile("nop; nop; nop; nop; nop; nop;");
-			this->m_scl.set_dir_in();
-			asm volatile("nop; nop; nop; nop; nop; nop;");
-			this->m_sda.set_dir_in();
+            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->m_scl.set_dir_in();
+            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->m_sda.set_dir_in();
 		}
 
         /**
