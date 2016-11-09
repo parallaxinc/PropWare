@@ -47,7 +47,7 @@ void error(const PropWare::ErrorCode err) {
  *
  * In this method, you should answer the master through the slave's write() method
  */
-void onRequest(PropWare::I2CSlave &slave) {
+void onRequest(PropWare::I2CSlave &slave, void* userPtr) {
     uint8_t sum = 0;
     while (!queue.is_empty())
         sum += queue.dequeue();
@@ -59,7 +59,7 @@ void onRequest(PropWare::I2CSlave &slave) {
  *
  * In this method, you should take the data received from the master out of the receive buffer.
  */
-void onReceive(PropWare::I2CSlave &slave) {
+void onReceive(PropWare::I2CSlave &slave, void* userPtr) {
     while (slave.available()) {
         const int result = slave.read();
         if (-1 == result)
