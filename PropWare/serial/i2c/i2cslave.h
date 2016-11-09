@@ -264,8 +264,8 @@ class I2CSlave: public Runnable {
                 "        rcl        %[_result],      #1                                              \n\t" // ... and store in result
                 "        djnz       %[_bitCounter],  #" FC_ADDR("nextBit%=", "ReadAddressStart") "    \n\t"
                 FC_END("ReadAddressEnd")
-                : [_result]     "=&r" (result),
-                  [_bitCounter] "=&r" (bitCounter)
+                : [_result]     "+r" (result),
+                  [_bitCounter] "+r" (bitCounter)
                 : [_SDAMask] "r" (this->m_sda.get_mask()),
                   [_SCLMask] "r" (this->m_scl.get_mask())
             );
@@ -301,39 +301,38 @@ class I2CSlave: public Runnable {
 
             while(true) {
                 __asm__ volatile(
-                    "       mov         %[_isRestart],        #2                             \n\t"
-                    "       mov         %[_bitCounter],       #7                             \n\t"
-                    "       mov         %[_result],           #0                             \n\t"
-
-                    "       waitpne     %[_SCLMask],          %[_SCLMask]                    \n\t" // Wait for scl to be low first
-                    "       waitpeq     %[_SCLMask],          %[_SCLMask]                    \n\t" // Wait for scl to go high
-                    "       test        %[_SDAMask],          ina                  wc        \n\t" // Read bit and...
-                    "       rcl         %[_result],           #1                             \n\t" // ... store in result
-                    "if_c   brs         #DetectRestart%=                                     \n\t" // The first bit of a received byte may be b7, or a stop / restart
-                                                                                              // If sda was high, it can only be a restart
+                    "       mov         %[_isRestart],       #2                 \n\t"
+                    "       mov         %[_bitCounter],      #7                 \n\t"
+                    "       mov         %[_result],          #0                 \n\t"
+                    "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to be low first
+                    "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to go high
+                    "       test        %[_SDAMask],         ina         wc     \n\t" // Read bit and...
+                    "       rcl         %[_result],          #1                 \n\t" // ... store in result
+                    "if_c   brs         #DetectRestart%=                        \n\t" // The first bit of a received byte may be b7, or a stop / restart
+                    // If sda was high, it can only be a restart
                     "DetectStop%=: "
-                    "       test        %[_SCLMask],          ina                  wz        \n\t" // scl went low -> no chance for a stop-condition to be detected ...
-                    "if_z   brs         #loop%=                                              \n\t" // ... continue receiving data bits
-                    "       test        %[_SDAMask],          ina                  wz        \n\t"
-                    "if_nz  mov         %[_isRestart],        #0                             \n\t" // stop detected. Set is_restart to false ...
-                    "if_nz  brs         #ReceiveEnd%=                                        \n\t" // ... and exit
-                    "       brs         #DetectStop%=                                        \n\t"
+                    "       test        %[_SCLMask],         ina         wz     \n\t" // scl went low -> no chance for a stop-condition to be detected ...
+                    "if_z   brs         #loop%=                                 \n\t" // ... continue receiving data bits
+                    "       test        %[_SDAMask],         ina         wz     \n\t"
+                    "if_nz  mov         %[_isRestart],       #0                 \n\t" // stop detected. Set isRestart to false ...
+                    "if_nz  brs         #ReceiveEnd%=                           \n\t" // ... and exit
+                    "       brs         #DetectStop%=                           \n\t"
 
                     "DetectRestart%=: "
-                    "       test        %[_SCLMask],          ina                  wz        \n\t" // scl went low -> no chance for a (re)start-condition to be detected ...
-                    "if_z   brs         #loop%=                                              \n\t" // ... continue receiving data bits
-                    "       test        %[_SDAMask],          ina                  wz        \n\t"
-                    "if_z   mov         %[_isRestart],        #1                             \n\t" // restart detected. Set is_restart to true...
-                    "if_z   brs         #ReceiveEnd%=                                        \n\t" // ... and exit
-                    "       brs         #DetectRestart%=                                     \n\t"
+                    "       test        %[_SCLMask],         ina         wz     \n\t" // scl went low -> no chance for a (re)start-condition to be detected ...
+                    "if_z   brs         #loop%=                                 \n\t" // ... continue receiving data bits
+                    "       test        %[_SDAMask],         ina         wz     \n\t"
+                    "if_z   mov         %[_isRestart],       #1                 \n\t" // restart detected. Set isRestart to true...
+                    "if_z   brs         #ReceiveEnd%=                           \n\t" // ... and exit
+                    "       brs         #DetectRestart%=                        \n\t"
 
-                    "loop%=: "                                                                  // for(int i = 0; i < 8; ++i) {
-                    "       waitpne     %[_SCLMask],          %[_SCLMask]                    \n\t"        // Wait for ...
-                    "       waitpeq     %[_SCLMask],          %[_SCLMask]                    \n\t"        // ... next clock
-                    "       test        %[_SDAMask],          ina                  wc        \n\t"        // Read bit and...
-                    "       rcl         %[_result],           #1                             \n\t"        // ... store in result
-                    "       sub         %[_bitCounter],       #1                   wz        \n\t"
-                    "if_nz  brs         #loop%=                                              \n\t" // }
+                    "loop%=: "                                                        // for(int i = 0; i < 8; ++i) {
+                    "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t"        // Wait for ...
+                    "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t"        // ... next clock
+                    "       test        %[_SDAMask],         ina         wc     \n\t"        // Read bit and...
+                    "       rcl         %[_result],          #1                 \n\t"        // ... store in result
+                    "       sub         %[_bitCounter],      #1          wz     \n\t"
+                    "if_nz  brs         #loop%=                                 \n\t" // }
 
                     "ReceiveEnd%=: "
                 : // Outputs
