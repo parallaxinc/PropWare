@@ -42,21 +42,24 @@ namespace PropWare {
  * @warning    If the timeslot between start & restart, restart & restart, or stop and start is too small (depending on
  *             the master), a transmission might be completely lost, due to the onReceive callback taking too much time.
  */
+template<class UserDataType>
 class I2CSlave: public Runnable {
     public:
         static const Pin::Mask DEFAULT_SCL_MASK = Pin::Mask::P28;
         static const Pin::Mask DEFAULT_SDA_MASK = Pin::Mask::P29;
-        typedef void(*I2CCallback) (I2CSlave &, void* m_userPtr);
+        typedef void(*I2CCallback) (I2CSlave<UserDataType> &, UserDataType);
 
     public:
         /**
          * @brief       Create an I2CSlave object (requires static allocation of buffer and stack)
          *
-         * @param[in]   address     Address to join the bus as slave with
-         * @param[in]   sclMask     Pin mask for the SCL pin
-         * @param[in]   sdaMask     Pin mask for the SDA pin
-         * @param[in]   buffer      Receive buffer to store messages as they arrive
-         * @param[in]   stack       Reserved stack space that can be used for a new cog to execute the `run()` method
+         * @param[in]   address         Address to join the bus as slave with
+         * @param[in]   sclMask         Pin mask for the SCL pin
+         * @param[in]   sdaMask         Pin mask for the SDA pin
+         * @param[in]   buffer          Receive buffer to store messages as they arrive
+         * @param[in]   stack           Reserved stack space that can be used for a new cog to execute the `run()` method
+         * 
+         * @param       <UserDataType>  Type of the userData that can be set and is then passed to all callback functions
          *
          * @warning     Providing a `buffer` that is too small will lead to received messages being truncated.
          */
@@ -120,9 +123,9 @@ class I2CSlave: public Runnable {
         /**
          * @brief       Set a custom user-data object stored internally and passed to all callbacks.
          *
-         * @param[in]   userData   Pointer to an object that should be passed to all callbacks.
+         * @param[in]   userData   Userdata to store internally and pass to every callback.
          */
-        void set_user_data (void* userData) {
+        void set_user_data (UserDataType userData) {
 			this->m_userPtr = userData;
         }
 
@@ -146,11 +149,11 @@ class I2CSlave: public Runnable {
                         this->send_ack(); // Tell master we are there
                         if (address & BIT_0) { // Master wants us to speak
                             this->m_requestEnded = false;
-                            this->m_onRequest(*this, this->m_userPtr);
+                            this->m_onRequest(*this, this->m_userData);
                             break;
                         } else { // Master wants us to listen
                             bool restart = this->read_to_end();
-                            this->m_onReceive(*this, this->m_userPtr);
+                            this->m_onReceive(*this, this->m_userData);
                             this->reset_receive_buffer(); // Throw away bytes that the user did not fetch
                             if (!restart)
                                 break; // received stop, go back to outer loop and await new start
@@ -392,7 +395,7 @@ class I2CSlave: public Runnable {
         /**
          * Custom pointer that can be set and is then passed to all I2CCallbacks.
          */
-        void*          m_userPtr;
+        UserDataType   m_userData;
 };
 
 }
