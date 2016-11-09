@@ -1,7 +1,7 @@
 /**
  * @file        PropWare/serial/i2c/i2cslave.h
  *
- * @author        Markus Ebner
+ * @author      Markus Ebner
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -46,7 +46,7 @@ class I2CSlave: public Runnable {
     public:
         static const Pin::Mask DEFAULT_SCL_MASK = Pin::Mask::P28;
         static const Pin::Mask DEFAULT_SDA_MASK = Pin::Mask::P29;
-        typedef void(*I2CCallback)(I2CSlave &);
+        typedef void(*I2CCallback) (I2CSlave &);
 
     public:
         /**
@@ -61,8 +61,8 @@ class I2CSlave: public Runnable {
          * @warning     Providing a `buffer` that is too small will lead to received messages being truncated.
          */
         template<size_t BUFFER_SIZE, size_t STACK_SIZE>
-        I2CSlave(const uint8_t address, uint8_t (&buffer)[BUFFER_SIZE], const uint32_t (&stack)[STACK_SIZE],
-                 const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK)
+        I2CSlave (const uint8_t address, uint8_t (&buffer)[BUFFER_SIZE], const uint32_t (&stack)[STACK_SIZE],
+                  const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK)
             : Runnable(stack),
               m_slaveAddress(address),
               m_scl(sclMask),
@@ -86,9 +86,9 @@ class I2CSlave: public Runnable {
          *
          * @warning     Providing a `buffer` that is too small will lead to received messages being truncated.
          */
-        I2CSlave(const uint8_t address, uint8_t *buffer, const size_t bufferSize, const uint32_t *stack,
-                 const size_t stackSize, const Pin::Mask sclMask = DEFAULT_SCL_MASK,
-                 const Pin::Mask sdaMask = DEFAULT_SDA_MASK)
+        I2CSlave (const uint8_t address, uint8_t *buffer, const size_t bufferSize, const uint32_t *stack,
+                  const size_t stackSize, const Pin::Mask sclMask = DEFAULT_SCL_MASK,
+                  const Pin::Mask sdaMask = DEFAULT_SDA_MASK)
             : Runnable(stack, stackSize),
               m_slaveAddress(address),
               m_scl(sclMask),
@@ -103,7 +103,7 @@ class I2CSlave: public Runnable {
          *
          * @warning     If the execution of this delegates takes too long, data on the bus might be missed.
          */
-        void set_on_receive(const I2CCallback onReceive) {
+        void set_on_receive (const I2CCallback onReceive) {
             this->m_onReceive = onReceive;
         }
 
@@ -112,14 +112,14 @@ class I2CSlave: public Runnable {
          *
          * @warning     This method should have the data to send on the bus prepared. Taking too long before transmit starts could mess the i2c state machines state up.
          */
-        void set_on_request(const I2CCallback onRequest) {
+        void set_on_request (const I2CCallback onRequest) {
             this->m_onRequest = onRequest;
         }
 
         /**
          * @brief   Enter the loop that will watch and operate the bus.
          */
-        void run() {
+        void run () {
             this->m_scl.set_dir_in();
             this->m_sda.set_dir_in();
             this->m_scl.clear();
@@ -156,7 +156,7 @@ class I2CSlave: public Runnable {
          *
          * @return  The amount of bytes in the receive buffer
          */
-        uint32_t available() const {
+        uint32_t available () const {
             return this->m_bufferUpperBound - this->m_bufferPtr + 1;
         }
 
@@ -165,7 +165,7 @@ class I2CSlave: public Runnable {
          *
          * @return  The next byte from the receiveBuffer
          */
-        int read() {
+        int read () {
             if (this->m_bufferPtr <= this->m_bufferUpperBound)
                 return this->m_buffer[this->m_bufferPtr++];
             else
@@ -179,7 +179,7 @@ class I2CSlave: public Runnable {
          *
          * @warning     Calling this method too late may result in a defective state of the i2c state machine.
          */
-        void write(const uint8_t data) {
+        void write (const uint8_t data) {
             if (this->m_requestEnded)
                 return;
             else {
@@ -217,7 +217,7 @@ class I2CSlave: public Runnable {
         /**
          * @brief   Wait for a start / restart condition on the bus.
          */
-        void await_start() {
+        void await_start () {
             __asm__ volatile(
                 "loop%=:                                                \n\t"
                 "       waitpeq     %[_SDAMask],    %[_SDAMask]         \n\t" // Wait for sda to be high
@@ -233,7 +233,7 @@ class I2CSlave: public Runnable {
         /**
          * @brief   Read one byte from the bus without sending any response.
          */
-        uint_fast8_t read_address() const {
+        uint_fast8_t read_address () const {
             uint32_t result;
             uint32_t bitCounter;
 
@@ -259,7 +259,7 @@ class I2CSlave: public Runnable {
         /**
          * @brief   Wait for the next clock and pull the data line down to signal the master an ACK
          */
-        inline __attribute((always_inline)) void send_ack() const {
+        inline __attribute((always_inline)) void send_ack () const {
             //The code does not work anymore when removing inline and attribute always_inline. Why is this?
             __asm__ volatile(
                 "       waitpne     %[_SCLMask],    %[_SCLMask]      \n\t" // Wait for SCL to be low first
@@ -278,7 +278,7 @@ class I2CSlave: public Runnable {
          *
          * @return  `true` if a restart condition was received, `false` if a stop condition was received
          */
-        bool read_to_end() {
+        bool read_to_end () {
             uint32_t result;
             uint32_t bitCounter;
             uint32_t isRestart;
@@ -317,7 +317,7 @@ class I2CSlave: public Runnable {
                     "       sub         %[_bitCounter],      #1          wz     \n\t"
                     "if_nz  brs         #loop%=                                 \n\t" // }
 
-                    "ReceiveEnd%=:                                              \n\t"
+                    "ReceiveEnd%=: "
                 : // Outputs
                 [_result]        "+r"(result),
                 [_bitCounter]    "+r"(bitCounter),
@@ -338,7 +338,7 @@ class I2CSlave: public Runnable {
         /**
          * @brief   Add a byte to the receive buffer that the user can then later fetch from it in the onReceive handler.
          */
-        void append_receive_buffer(const uint8_t data) {
+        void append_receive_buffer (const uint8_t data) {
             if (this->m_bufferPtr)
                 this->m_buffer[--this->m_bufferPtr] = data;
         }
@@ -346,14 +346,14 @@ class I2CSlave: public Runnable {
         /**
          * @brief   Reset the receiveBuffer's state for the next message. This throws away bytes that the user did not fetch in the handler.
          */
-        void reset_receive_buffer() {
+        void reset_receive_buffer () {
             this->m_bufferPtr = this->m_bufferUpperBound + 1;
         }
 
     private:
-        const uint8_t	m_slaveAddress;
-        const Pin		m_scl;
-        const Pin		m_sda;
+        const uint8_t m_slaveAddress;
+        const Pin     m_scl;
+        const Pin     m_sda;
 
         /**
          * Buffer storing the received messages
