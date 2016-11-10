@@ -2,6 +2,7 @@
  * @file        PropWare/serial/i2c/i2cslave.h
  *
  * @author      Markus Ebner
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
