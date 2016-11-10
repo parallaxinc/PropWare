@@ -27,8 +27,6 @@
 
 static const int                SLAVE_ADDRESS         = 42;
 static const int                SHIFTED_SLAVE_ADDRESS = SLAVE_ADDRESS << 1;
-static uint8_t                  queueBuffer[32];
-static PropWare::Queue<uint8_t> queue(queueBuffer);
 
 void error(const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
@@ -47,7 +45,7 @@ void error(const PropWare::ErrorCode err) {
  *
  * In this method, you should answer the master through the slave's write() method
  */
-void onRequest(PropWare::I2CSlave &slave) {
+void onRequest(PropWare::I2CSlave<PropWare::Queue<uint8_t>&> &slave, PropWare::Queue<uint8_t> &queue) {
     uint8_t sum = 0;
     while (!queue.is_empty())
         sum += queue.dequeue();
@@ -59,7 +57,7 @@ void onRequest(PropWare::I2CSlave &slave) {
  *
  * In this method, you should take the data received from the master out of the receive buffer.
  */
-void onReceive(PropWare::I2CSlave &slave) {
+void onReceive(PropWare::I2CSlave<PropWare::Queue<uint8_t>&> &slave, PropWare::Queue<uint8_t> &queue) {
     while (slave.available()) {
         const int result = slave.read();
         if (-1 == result)
@@ -77,13 +75,17 @@ void onReceive(PropWare::I2CSlave &slave) {
  * @include PropWare_I2CSlave/CMakeLists.txt
  */
 int main() {
-    uint8_t            buffer[32];
-    uint32_t           stack[64];
-    PropWare::I2CSlave slave(SLAVE_ADDRESS, buffer, stack);
+    uint8_t                  queueBuffer[32];
+    PropWare::Queue<uint8_t> queue(queueBuffer);
+
+    uint8_t                                      buffer[32];
+    uint32_t                                     stack[64];
+    PropWare::I2CSlave<PropWare::Queue<uint8_t>&> slave(SLAVE_ADDRESS, buffer, stack);
 
     // register the bus callbacks that will be fired on incoming requests or data
     slave.set_on_request(onRequest);
     slave.set_on_receive(onReceive);
+    slave.set_user_data(queue);
 
     // Start a new cog to monitor the I2C bus and respond to events
     PropWare::Runnable::invoke(slave);
