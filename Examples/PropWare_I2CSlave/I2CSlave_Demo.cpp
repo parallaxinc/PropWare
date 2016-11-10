@@ -54,10 +54,9 @@ void error (const PropWare::ErrorCode err) {
  * In this method, you should answer the master through the slave's write() method
  */
 void onRequest (I2CSlave<Queue<uint8_t>> &slave, Queue<uint8_t> &queue) {
-    uint8_t sum = 0;
+    static uint8_t sum = 0;
     while (!queue.is_empty())
         sum += queue.dequeue();
-
     slave.write(sum);
 }
 
@@ -102,13 +101,21 @@ int main () {
 
     // Run the master
     I2CMaster master;
-    master.set_frequency(1000);
+
+    // Set the master to a very low frequency. The onRequest() and onReceive() methods in this sample are not optimized
+    // for high speed communications, and extreme optimizations may be necessary in order to run a synchronous serial
+    // bus like I2C in slave mode. Those types of optimizations are beyond the scope of this demo, so we will simply
+    // set the frequency low enough that they are unnecessary.
+    master.set_frequency(10000);
+
     if (master.ping(SHIFTED_SLAVE_ADDRESS)) {
         pwOut << "ACK received!\n";
 
-        pwOut << "Should echo address 0: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(0)) << '\n';
-        pwOut << "Should echo address 1: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(1)) << '\n';
-        pwOut << "Should echo address 2: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(2)) << '\n';
+        pwOut << "Expecting  0: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(0)) << '\n';
+        pwOut << "Expecting  1: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(1)) << '\n';
+        pwOut << "Expecting  3: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(2)) << '\n';
+        pwOut << "Expecting  6: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(3)) << '\n';
+        pwOut << "Expecting 10: " << master.get(SHIFTED_SLAVE_ADDRESS, static_cast<uint8_t>(4)) << '\n';
     } else
         pwOut << "No ack! :(\n I guess we're done.\n";
 }

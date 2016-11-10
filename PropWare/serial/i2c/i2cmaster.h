@@ -76,9 +76,9 @@ class I2CMaster {
          * @param[in]   frequency   Frequency to run the bus (default is highest standard I2C frequency of 400 kHz)
          */
         I2CMaster (const Pin::Mask sclMask = DEFAULT_SCL_MASK, const Pin::Mask sdaMask = DEFAULT_SDA_MASK,
-             const unsigned int frequency = DEFAULT_FREQUENCY)
-                : m_scl(sclMask, Pin::Dir::IN),
-                  m_sda(sdaMask, Pin::Dir::IN) {
+                   const unsigned int frequency = DEFAULT_FREQUENCY)
+            : m_scl(sclMask, Pin::Dir::IN),
+              m_sda(sdaMask, Pin::Dir::IN) {
             this->set_frequency(frequency);
 
             //Set outputs low
@@ -99,30 +99,30 @@ class I2CMaster {
          * @brief   Output a start condition on the I2C bus
          */
         void start () const {
+            this->half_clock();
             this->m_scl.set();
             this->m_sda.set();
-
             this->m_scl.set_dir_out();
             this->m_sda.set_dir_out();
 
-            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->half_clock();
             this->m_sda.clear();
-            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->half_clock();
             this->m_scl.clear();
-		}
+        }
 
         /**
          * @brief   Output a stop condition on the I2C bus
          */
-		void stop () const {
+        void stop () const {
             this->m_sda.clear();
             this->m_scl.clear();
 
-            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->half_clock();
             this->m_scl.set_dir_in();
-            asm volatile("nop; nop; nop; nop; nop; nop;");
+            this->half_clock();
             this->m_sda.set_dir_in();
-		}
+        }
 
         /**
          * @brief   Output a byte on the I2C bus.
@@ -133,56 +133,56 @@ class I2CMaster {
          */
         bool send_byte (const uint8_t byte) const {
             int result   = 0;
-            int datamask = 0;
-            int nextCNT  = 0;
+            int dataMask = 0;
+            int nextCnt  = 0;
             int temp     = 0;
 
             __asm__ volatile(
             FC_START("PutByteStart", "PutByteEnd")
-                    /* Setup for transmit loop */
-                    "         mov %[datamask], #256          \n\t" /* 0x100 */
-                    "         mov %[result],   #0            \n\t"
-                    "         mov %[nextCNT],  cnt           \n\t"
-                    "         add %[nextCNT],  %[clockDelay] \n\t"
+                /* Setup for transmit loop */
+                "         mov       %[_dataMask],   #256                \n\t" /* 0x100 */
+                "         mov       %[_result],     #0                  \n\t"
+                "         mov       %[_nextCnt],    cnt                 \n\t"
+                "         add       %[_nextCnt],    %[_clockDelay]      \n\t"
 
-                    /* Transmit Loop (8x) */
-                    //Output bit of byte
-                    "PutByteLoop%=: "
-                    "         shr  %[datamask], #1                \n\t" // Set up mask
-                    "         and  %[datamask], %[databyte] wz,nr \n\t" // Move the bit into Z flag
-                    "         muxz dira,        %[SDAMask]        \n\t"
+                /* Transmit Loop (8x) */
+                //Output bit of byte
+                "PutByteLoop%=: "
+                "         shr       %[_dataMask],   #1                  \n\t" // Set up mask
+                "         and       %[_dataMask],   %[_dataByte] wz,nr  \n\t" // Move the bit into Z flag
+                "         muxz      dira,           %[_SDAMask]         \n\t"
 
-                    //Pulse clock
-                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
-                    "         andn    dira,       %[SCLMask]    \n\t" // Set SCL high
-                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
-                    "         or      dira,       %[SCLMask]    \n\t" // Set SCL low
+                //Pulse clock
+                "         waitcnt   %[_nextCnt],    %[_clockDelay]      \n\t"
+                "         andn      dira,           %[_SCLMask]         \n\t" // Set SCL high
+                "         waitcnt   %[_nextCnt],    %[_clockDelay]      \n\t"
+                "         or        dira,           %[_SCLMask]         \n\t" // Set SCL low
 
-                    //Return for more bits
-                    "         djnz %[datamask], #" FC_ADDR("PutByteLoop%=", "PutByteStart") " nr \n\t"
+                //Return for more bits
+                "         djnz      %[_dataMask],   #" FC_ADDR("PutByteLoop%=", "PutByteStart") " nr \n\t"
 
-                    // Get ACK
-                    "         andn    dira,       %[SDAMask]    \n\t" // Float SDA high (release SDA)
-                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
-                    "         andn    dira,       %[SCLMask]    \n\t" // SCL high (by float)
-                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
-                    "         mov     %[temp],    ina           \n\t" //Sample input
-                    "         and     %[SDAMask], %[temp] wz,nr \n\t" // If != 0, ack'd, else nack
-                    "         muxz    %[result],  #1            \n\t" // Set result to equal to Z flag (aka, 1 if ack'd)
-                    "         or      dira,       %[SCLMask]    \n\t" // Set scl low
-                    "         or      dira,       %[SDAMask]    \n\t" // Set sda low
+                // Get ACK
+                "         andn      dira,           %[_SDAMask]         \n\t" // Float SDA high (release SDA)
+                "         waitcnt   %[_nextCnt],    %[_clockDelay]      \n\t"
+                "         andn      dira,           %[_SCLMask]         \n\t" // SCL high (by float)
+                "         waitcnt   %[_nextCnt],    %[_clockDelay]      \n\t"
+                "         mov       %[_temp],       ina                 \n\t" //Sample input
+                "         and       %[_SDAMask],    %[_temp] wz,nr      \n\t" // If != 0, ack'd, else nack
+                "         muxz      %[_result],     #1                  \n\t" // Set result to equal to Z flag (aka, 1 if ack'd)
+                "         or        dira,           %[_SCLMask]         \n\t" // Set scl low
+                "         or        dira,           %[_SDAMask]         \n\t" // Set sda low
 
-                    FC_END("PutByteEnd")
+                FC_END("PutByteEnd")
             : // Outputs
-            [datamask] "=&r"(datamask),
-            [result] "=&r"(result),
-            [nextCNT] "=&r"(nextCNT),
-            [temp] "=&r"(temp)
+            [_dataMask] "=&r"(dataMask),
+            [_result] "=&r"(result),
+            [_nextCnt] "=&r"(nextCnt),
+            [_temp] "=&r"(temp)
             : // Inputs
-            [SDAMask] "r"(this->m_sda.get_mask()),
-            [SCLMask] "r"(this->m_scl.get_mask()),
-            [databyte] "r"(byte),
-            [clockDelay] "r"(m_clockDelay));
+            [_SDAMask] "r"(this->m_sda.get_mask()),
+            [_SCLMask] "r"(this->m_scl.get_mask()),
+            [_dataByte] "r"(byte),
+            [_clockDelay] "r"(m_clockDelay));
 
             return (bool) result;
         }
@@ -195,59 +195,61 @@ class I2CMaster {
          * @return      Byte clocked in from the bus
          */
         uint8_t read_byte (const bool acknowledge) const {
-            int result = 0;
-            int datamask, nextCNT, temp;
+            uint32_t result;
+            uint32_t dataMask;
+            uint32_t nextCnt;
+            uint32_t temp;
 
             __asm__ volatile(
-            FC_START("GetByteStart", "GetByteEnd")
-                    // Setup for receive loop
-                    "         andn dira,        %[SDAMask]    \n\t"
-                    "         mov  %[datamask], #256          \n\t" /* 0x100 */
-                    "         mov  %[result],   #0            \n\t"
-                    "         mov  %[nextCNT],  cnt           \n\t"
-                    "         add  %[nextCNT],  %[clockDelay] \n\t"
+                FC_START("GetByteStart", "GetByteEnd")
+                // Setup for receive loop
+                "         andn      dira,               %[_SDAMask]         \n\t"
+                "         mov       %[_dataMask],       #256                \n\t" /* 0x100 */
+                "         mov       %[_result],         #0                  \n\t"
+                "         mov       %[_nextCnt],        cnt                 \n\t"
+                "         add       %[_nextCnt],        %[_clockDelay]       \n\t"
 
-                    // Recieve Loop (8x)
-                    //Get bit of byte
-                    "GetByteLoop%=: "
+                // Receive Loop (8x)
+                //Get bit of byte
+                "GetByteLoop%=: "
 
-                    "         waitcnt %[nextCNT],  %[clockDelay] \n\t"
-                    "         shr     %[datamask], #1            \n\t" // Set up mask
+                "         waitcnt   %[_nextCnt],        %[_clockDelay]       \n\t"
+                "         shr       %[_dataMask],       #1                  \n\t" // Set up mask
 
-                    //Pulse clock
-                    "         andn    dira,       %[SCLMask]       \n\t" // Set SCL high
-                    "         waitcnt %[nextCNT], %[clockDelay]    \n\t"
-                    "         mov     %[temp],    ina              \n\t" //Sample the input
-                    "         and     %[temp],    %[SDAMask] nr,wz \n\t"
-                    "         muxnz   %[result],  %[datamask]      \n\t"
-                    "         or      dira,       %[SCLMask]       \n\t" // Set SCL low
+                //Pulse clock
+                "         andn      dira,               %[_SCLMask]         \n\t" // Set SCL high
+                "         waitcnt   %[_nextCnt],        %[_clockDelay]       \n\t"
+                "         mov       %[_temp],           ina                 \n\t" //Sample the input
+                "         and       %[_temp],           %[_SDAMask] nr,wz   \n\t"
+                "         muxnz     %[_result],         %[_dataMask]        \n\t"
+                "         or        dira,               %[_SCLMask]         \n\t" // Set SCL low
 
-                    //Return for more bits
-                    "         djnz %[datamask], #" FC_ADDR("GetByteLoop%=", "GetByteStart") " nr \n\t"
+                //Return for more bits
+                "         djnz %[_dataMask], #" FC_ADDR("GetByteLoop%=", "GetByteStart") " nr \n\t"
 
-                    // Put ACK
+                // Put ACK
 
-                    "         and     %[acknowledge], #1 nr,wz  \n\t" //Output ACK
+                "         and       %[_acknowledge],    #1 nr,wz            \n\t" //Output ACK
 
-                    "         muxnz   dira,       %[SDAMask]    \n\t"
-                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
-                    "         andn    dira,       %[SCLMask]    \n\t" // SCL high (by float)
-                    "         waitcnt %[nextCNT], %[clockDelay] \n\t"
+                "         muxnz     dira,               %[_SDAMask]         \n\t"
+                "         waitcnt   %[_nextCnt],        %[_clockDelay]       \n\t"
+                "         andn      dira,               %[_SCLMask]         \n\t" // SCL high (by float)
+                "         waitcnt   %[_nextCnt],        %[_clockDelay]       \n\t"
 
-                    "         or   dira, %[SCLMask]       \n\t" // Set scl low
-                    "         or   dira, %[SDAMask]       \n\t" // Set sda low
-                    FC_END("GetByteEnd")
+                "         or        dira,               %[_SCLMask]         \n\t" // Set scl low
+                "         or        dira,               %[_SDAMask]         \n\t" // Set sda low
+                FC_END("GetByteEnd")
             : // Outputs
-            [datamask] "=&r"(datamask),
-            [result] "=&r"(result),
-            [temp] "=&r"(temp),
-            [nextCNT] "=&r"(nextCNT)
+            [_dataMask] "=&r"(dataMask),
+            [_result] "=&r"(result),
+            [_temp] "=&r"(temp),
+            [_nextCnt] "=&r"(nextCnt)
 
             : // Inputs
-            [SDAMask] "r"(this->m_sda.get_mask()),
-            [SCLMask] "r"(this->m_scl.get_mask()),
-            [acknowledge] "r"(acknowledge),
-            [clockDelay] "r"(m_clockDelay));
+            [_SDAMask] "r"(this->m_sda.get_mask()),
+            [_SCLMask] "r"(this->m_scl.get_mask()),
+            [_acknowledge] "r"(acknowledge),
+            [_clockDelay] "r"(m_clockDelay));
 
             return (uint8_t) result;
 
@@ -296,10 +298,13 @@ class I2CMaster {
 
             this->start();
             result = this->send_byte(device);
-            result &= this->send_address(address);
-            result &= this->send_byte(byte);
-            this->stop();
+            if (result) {
+                result     = this->send_address(address);
+                if (result)
+                    result = this->send_byte(byte);
+            }
 
+            this->stop();
             return result;
         }
 
@@ -320,15 +325,22 @@ class I2CMaster {
          */
         template<typename T>
         uint8_t get (const uint8_t device, const T address) const {
-            bool result;
+            bool    result;
+            uint8_t dataByte = static_cast<uint8_t>(-1);
 
             this->start();
             result = this->send_byte(device);
-            result &= this->send_address(address);
+            if (result) {
+                result &= this->send_address(address);
+                if (result) {
+                    this->start();
+                    result &= this->send_byte((uint8_t) (device | BIT_0)); //Set read bit
 
-            this->start();
-            result &= this->send_byte((uint8_t) (device | 0x01)); //Set read bit
-            uint8_t dataByte = this->read_byte(false);
+                    if (result)
+                        dataByte = this->read_byte(false);
+                }
+            }
+
             this->stop();
             return dataByte;
         }
@@ -356,13 +368,19 @@ class I2CMaster {
             bool result;
             this->start();
             result = this->send_byte(device);
-            result &= this->send_address(address);
+            if (result) {
+                result = this->send_address(address);
 
-            for (unsigned int i = 0; i < size; ++i)
-                result &= this->send_byte(bytes[i]);
+                for (unsigned int i = 0; i < size; ++i) {
+                    result = this->send_byte(bytes[i]);
+                    if (!result) {
+                        this->stop();
+                        return false;
+                    }
+                };
+            }
 
             this->stop();
-
             return result;
         }
 
@@ -391,14 +409,20 @@ class I2CMaster {
             bool result;
             this->start();
             result = this->send_byte(device);
-            result &= this->send_address(address);
-            this->start();
-            result &= this->send_byte((uint8_t) (device | 0x01));
+            if (result) {
+                result = this->send_address(address);
+                if (result) {
+                    this->start();
+                    result = this->send_byte((uint8_t) (device | 0x01));
 
-            unsigned int i = 0;
-            for (; i < size - 1; ++i)
-                bytes[i] = this->read_byte(true); //Send true to keep on reading bytes
-            bytes[i]     = this->read_byte(false); //Trailing NAK
+                    if (result) {
+                        unsigned int i = 0;
+                        for (; i < size - 1; ++i)
+                            bytes[i] = this->read_byte(true); //Send true to keep on reading bytes
+                        bytes[i]     = this->read_byte(false); //Trailing NAK
+                    }
+                }
+            }
 
             this->stop();
             return result;
@@ -429,7 +453,8 @@ class I2CMaster {
 
             this->start();
             bool result = this->send_byte(device);
-            result &= this->send_byte(byte);
+            if (result)
+                result = this->send_byte(byte);
             this->stop();
 
             return result;
@@ -469,13 +494,37 @@ class I2CMaster {
         }
 
     private:
+        /**
+         * @see PropWare::I2CMaster::send_byte
+         */
         bool send_address (const uint8_t address) const {
             return this->send_byte(address);
         }
 
+        /**
+         * Invoke PropWare::I2CMaster::send_byte twice
+         */
         bool send_address (const uint16_t address) const {
             bool result = this->send_byte((const uint8_t) (address >> 8));
             return result && this->send_byte((const uint8_t) address);
+        }
+
+        /**
+         * @brief   Wait for half of one clock period, or the minimum waiting period
+         *
+         * When compiled with the compact memory model (CMM), it is easily possible that half of the waiting period
+         * is less time than it takes to execute the waitcnt() function. Therefore, this will either wait for half of
+         * the clock's period or a single `nop` instruction may be run if the clock is too fast.
+         */
+        void half_clock () const {
+#ifdef __PROPELLER_CMM__
+            if (500 > m_clockDelay)
+                __asm__ volatile ("nop;");
+            else
+                waitcnt(m_clockDelay + CNT);
+#else
+            waitcnt(this->m_clockDelay + CNT);
+#endif
         }
 
     private:
