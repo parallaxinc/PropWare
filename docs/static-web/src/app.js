@@ -35,7 +35,8 @@ angular.module('propware').constant('REFERENCE_PAGES', {
   '#/reference/cxx-crash-course': 'C++ Crash Course',
   '#/reference/limitations': 'Limitations',
   '#/reference/build-from-source': 'Build from Source',
-  '#/reference/troubleshooting': 'Troubleshooting'
+  '#/reference/troubleshooting': 'Troubleshooting',
+  '#/reference/contribute': 'Contribute'
 });
 
 angular.module('propware').directive('referenceNav', function () {

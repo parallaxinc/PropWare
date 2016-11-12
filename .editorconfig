@@ -3,17 +3,16 @@
 # top-most EditorConfig file
 root = true
 
-# Unix-style newlines with a newline ending every file
 [*]
-end_of_line = lf
-insert_final_newline = true
-charset = utf-8
-indent_style = space
-indent_size = 4
+end_of_line=lf
+trim_trailing_whitespace=true
+insert_final_newline=true
+charset=utf-8
+indent_style=space
+indent_size=4
 
-# I like two spaces for some languages
-[*.{js,json,xml,html,html.in}]
-indent_size = 2
+[*.{js,json,xml,html,html.in,jshintrc,yml,yaml}]
+indent_size=2
 
 # Makefiles must use tabs
 [Makefile]

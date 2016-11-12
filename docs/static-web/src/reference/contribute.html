@@ -9,43 +9,72 @@
       perusing the <a href="https://github.com/parallaxinc/PropWare/issues/">issue tracker</a> and finding
       something that piques your interest.</p>
 
-    <p>Before submitting your pull request, please be sure to read the following guidelines for %PropWare's
+    <p>Before submitting your pull request, please be sure to read the following guidelines for PropWare's
       codebase.</p>
 
     <h2>Coding Style</h2>
 
-    <h3>Whitespace &amp; Brackets</h3>
+    <h3>Whitespace</h3>
 
     <ul>
       <li>Indentation is 4 spaces</li>
       <li>No indentation within <code>namespace</code></li>
       <li>One indentation for visibility keywords in a class</li>
       <li>One indentation relative to visibility keyword for members and methods of a class</li>
+      <li>One empty line should separate every method in a class and every function definition.</li>
       <li>Members and methods of basic <code>struct</code>s with no visibility keywords are indented once
         relative
         to class declaration
       </li>
-      <li>Open bracket is placed on the same line</li>
-      <li>Closing bracket is placed on the next line</li>
-      <li>Single-line statements should not use brackets</li>
+      <li>No empty line following visibility keywords.</li>
+      <li>Variable declarations without empty lines between them should be aligned. An example of
+        aligning variables looks like this:
+        <pre><code hljs hljs-language="c++">const int     myInt = 0;
+unsigned char myChar;</code></pre>
+      </li>
+      <li>Use of empty lines between blocks of variable declarations is encouraged only when a logical distinction
+        is being made between the blocks.
+      </li>
+      <li>Once empty line above and below a namespace declaration (including its closing brace).</li>
+      <li>Never leave trailing whitespace</li>
+      <li>Newlines are represented Unix-style, with a single newline (<code>\n</code>) character and no carriage return
+        (<code>\r</code>).
+      </li>
+      <li>All files end with exactly one newline character (no excessive empty lines).</li>
     </ul>
 
-    <h3>Coding Conventions</h3>
+    <h3>Brackets</h3>
+
+    <ul>
+      <li>Open bracket is placed on the same line</li>
+      <li>Closing bracket is placed on the next line</li>
+      <li>Once space before opening bracket</li>
+      <li>Single-line control statements (for, if, etc) should not use brackets</li>
+    </ul>
+
+    <h3>Naming Conventions</h3>
 
     <ul>
       <li>Use of methods and member variables should be prefixed with <code>this-&gt;</code></li>
-      <li>Method names use underscore, not camelCase</li>
+      <li>Method names use underscore, not camel case (<code>my_method</code>, not <code>myMethod</code>)</li>
       <li>Member variables are prefixed with <code>m_</code> and use camelCase (such as
         <code>m_myVariable</code>)
       </li>
-      <li>Names are never abbreviated unless the name is excessively long or the acronym is only used
-        colloquially, such as“VGA” or “SPI”
+      <li>Names are never abbreviated unless the name is excessively long or the only colloquial use is the acronym,
+        such as “VGA” or “I2C”
       </li>
-      <li>Class names use CamelCase, with the first letter capitalized</li>
-      <li>Constant variables should be in all caps, separated by underscores</li>
+      <li>Class names use camel case, with the first letter capitalized (<code>MyClass</code>)</li>
+      <li>Constant variables should be in all caps, separated by underscores (<code>MY_CONSTANT</code>)</li>
     </ul>
 
     <h2>Coding Best Practices</h2>
+
+    <h3>Pass by Reference</h3>
+
+    <p>Whenever feasible, choose pass-by-reference over pass-by-address. This helps to avoid the pointer syntax
+      troubles that many programmers struggle with. It also helps to avoid the need for writing overridden equals
+      operators. Pass-by-reference is not a good solution for optional parameters with default values of
+      <code>NULL</code> in a method, such as the optional logger that can be provided to the filesystem classes.</p>
 
     <h3>enum class</h3>
 
@@ -58,5 +87,27 @@
       method to <em>prevent automatic casting <em>down</em> to an <code>int</code></em>. Remember that
       standard
       <code>enum</code>s already avoid automatic casting up to the enum.</p>
+
+    <h3>Memory Allocation: Static v. Dynamic</h3>
+
+    <p>Dynamic memory allocation should be avoided at all costs - it is often an unnecessary complication in a
+      program, and heavily inflates the size of a binary. Classes that require buffers (such as
+      <code>PropWare::Runnable</code>) should use pass-by-reference combined with C++ templates to provide an easy
+      way to pass statically allocated buffers:</p>
+
+    <pre><code hljs hljs-language="c++" hljs-no-escape>template&lt;size_t N&gt;
+Runnable(const uint32_t (&stack)[N])
+    : m_stackPointer(stack),
+      m_stackSizeInBytes(N * sizeof(uint32_t)) {
+}</code></pre>
+
+    <p>The above method only works for statically allocated memory. Any time this method is used, an overloaded
+      version of the method should also be provided which accepts the address and size of the array as separate
+      arguments:</p>
+
+    <pre><code hljs hljs-language="c++" hljs-no-escape>Runnable(const uint32_t *stack, const size_t stackLength)
+    : m_stackPointer(stack),
+      m_stackSizeInBytes(stackLength * sizeof(size_t)) {
+}</code></pre>
   </div>
 </div>
