@@ -21,7 +21,6 @@ set(CPACK_PACKAGE_VENDOR                        "David Zemon")
 set(CPACK_PACKAGE_CONTACT                       "David Zemon <david@zemon.name>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY           "C++ objects and CMake build system for Parallax Propeller")
 set(CPACK_RESOURCE_FILE_README                  "${PROJECT_SOURCE_DIR}/README.md")
-set(CPACK_CMAKE_GENERATOR                       "Unix Makefiles")
 set(CPACK_PACKAGE_VERSION_MAJOR                 ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR                 ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH                 ${PROJECT_VERSION_PATCH})
@@ -30,6 +29,7 @@ set(CPACK_PACKAGE_VERSION
 if (PROJECT_VERSION_TWEAK)
     set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}.${PROJECT_VERSION_TWEAK})
 endif ()
+set(CPACK_PACKAGE_RELOCATABLE                   ON)
 
 # NSIS Specific
 set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL  ON)
@@ -60,8 +60,9 @@ set(CPACK_DEBIAN_FILE_NAME                      DEB-DEFAULT)
 set(CPACK_RPM_PACKAGE_URL                       "${CPACK_PROJECT_URL}")
 set(CPACK_RPM_PACKAGE_SUGGESTS                  "make")
 set(CPACK_RPM_PACKAGE_OBSOLETES                 "cmake")
-set(CPACK_PACKAGE_RELOCATABLE                   ON)
 set(CPACK_RPM_FILE_NAME                         RPM-DEFAULT)
+set(CPACK_RPM_PACKAGE_LICENSE                   MIT)
+set(CPACK_RPM_RELOCATION_PATHS                  /)
 
 # Components
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
