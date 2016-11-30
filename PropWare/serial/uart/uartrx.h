@@ -230,14 +230,13 @@ class UARTRX : public UART
                 // Set RX as input
                 __asm__ volatile ("andn dira, %0" : : "r" (this->m_pin.get_mask()));
 
-                if(!this->shift_in_byte_array(buffer, length, timeout)) {
-					return (ErrorCode) 42;
-                }
+                if(!this->shift_in_byte_array(buffer, length, timeout))
+					return TIMEOUT_ERROR;
 
                 if (Parity::NO_PARITY != this->m_parity)
                     for (uint32_t i = 0; i < length; --i)
                         if (0 != this->check_parity((uint32_t) buffer[i]))
-                            return UART::PARITY_ERROR;
+                            return PARITY_ERROR;
             }
                 // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
                 // improvement - it is only here for user convenience)
@@ -245,7 +244,7 @@ class UARTRX : public UART
                 uint32_t      temp;
                 for (uint32_t i = 0; i < length; ++i) {
                     if (((uint32_t) -1) == (temp = this->receive()))
-                        return UART::PARITY_ERROR;
+                        return PARITY_ERROR;
                     buffer[i] = (char) temp;
                 }
             }
