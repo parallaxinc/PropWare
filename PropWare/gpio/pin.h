@@ -61,6 +61,7 @@ class Pin : public Port {
         Pin (const PropWare::Pin::Mask mask = NULL_PIN)
                 : Port(mask),
                   m_channel(Channel::A) {
+			update_pin_number();
         }
 
         /**
@@ -77,11 +78,7 @@ class Pin : public Port {
          */
         void set_mask (const Pin::Mask mask) {
             this->Port::set_mask(mask);
-            
-            uint32_t pinNumber;
-            for (pinNumber = 31; x > 0; pinNumber--)
-                x <<= 1;
-            this->m_pinNumber = pinNumber;
+            update_pin_number();
         }
 
         /**
@@ -273,6 +270,15 @@ if(iodt == 0)                               // If dt not initialized
         }
 
     private:
+    	void update_pin_number() {
+            uint32_t pinNumber;
+            uint32_t pinMask = m_mask;
+            for (pinNumber = 32; pinMask > 0; pinNumber--)
+                pinMask <<= 1;
+            this->m_pinNumber = pinNumber;
+    	}
+
+
         /****************************************
          *** Nonsensical functions for a pin ***
          ****************************************/
