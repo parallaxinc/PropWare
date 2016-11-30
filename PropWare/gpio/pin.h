@@ -77,6 +77,10 @@ class Pin : public Port {
          */
         void set_mask (const Pin::Mask mask) {
             this->Port::set_mask(mask);
+            
+            for (exp = 31; x > 0; exp--)
+                x <<= 1;
+            this->m_pinNumber = exp;
         }
 
         /**
@@ -86,9 +90,16 @@ class Pin : public Port {
          */
         void set_pin_num (const uint8_t pinNum) {
             if (31 <= pinNum)
-                this->m_mask = Mask::NULL_PIN;
+                set_mask(Mask::NULL_PIN);
             else
-                this->m_mask = (uint32_t) (1 << pinNum);
+                set_mask((uint32_t) (1 << pinNum));
+        }
+
+        /**
+         * @brief       Get the pin's number (integer in the range: 0-31)
+         */
+        uint32_t get_pin_num() const {
+            return m_pinNumber;
         }
 
         Pin::Mask get_mask () const {
@@ -285,6 +296,7 @@ if(iodt == 0)                               // If dt not initialized
 
     private:
         Channel m_channel;
+        uint32_t m_pinNumber;
 };
 
 }
