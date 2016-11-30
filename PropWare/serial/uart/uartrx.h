@@ -27,7 +27,7 @@
 
 #include <PropWare/hmi/input/scancapable.h>
 #include <PropWare/serial/uart/uart.h>
-#include <PropWare/gpio/pin.h>
+#include "pin.h"
 
 namespace PropWare {
 
@@ -110,28 +110,46 @@ class UARTRX : public UART
         }
 
         /**
-         * @brief       Receive one byte from the uart and abort when the given timeout passed.
+         * @brief        Receive one byte from the uart. This blocks until the byte was received.
          *
-         * @param[in]   Timeout after which the function will exit without having received a byte.
-         * @return      The received byte when successful, -1 on parity error, -2 if receiving timed out.
+         * @param[out]   data   The byte that was read.
          *
-         * @warning     If this method is used for multiple consecutive bytes, the baudrate should be lower
-         *              or equal to 56000. If this method is used only for the first byte of a multi-byte transmission,
-         *              normal max. baudrate can be expected to work.
+         * @return       An ErrorCode that specifies if something went wrong, and what.
          */
-		uint32_t receive (const uint32_t timeout) const {
-            uint32_t rxVal;
-            uint32_t wideDataMask = this->m_dataMask;
-
-            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
-                                        this->m_msbMask, timeout);
-			if(-1 == rxVal) //timed out
-                return (uint32_t) -2;
+        ErrorCode receive (uint32_t& data) const {
+            uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
+									             this->m_pin.get_mask(), this->m_msbMask);
 
             if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
-                return (uint32_t) -1;
+                return PARITY_ERROR;
 
-            return rxVal & wideDataMask;
+			data = rxVal & this->m_dataMask;
+            return NO_ERROR;
+        }
+
+        /**
+         * @brief        Receive one byte from the uart. This blocks until either the byte was received or the timeout triggered.
+         *
+         * @param[out]   data      The byte that was read.
+         * @param[in]    timeout   Timeout after which the function will exit without having received a byte.
+         *
+         * @return       An ErrorCode that specifies if something went wrong, and what.
+         *
+         * @warning      If this method is used for multiple consecutive bytes, the baudrate should be lower
+         *               or equal to 56000. If this method is used only for the first byte of a multi-byte transmission,
+         *               normal max. baudrate can be expected to work.
+         */
+        ErrorCode receive (uint32_t& data, uint32_t timeout) const {
+            uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
+                                        this->m_msbMask, timeout);
+			if(-1 == rxVal)
+				return TIMEOUT_ERROR;
+
+            if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
+                return PARITY_ERROR;
+
+			data = rxVal & this->m_dataMask;
+            return NO_ERROR;
         }
 
         ErrorCode get_line (char *buffer, int32_t *length, const char delimiter = '\n') const {
@@ -202,9 +220,9 @@ class UARTRX : public UART
 
 		/**
 		 * @brief       Reads multiple bytes into the given buffer.
-		 * @param[in]   
-         * @param[in]   timeout     Amount of clock cycles after which the function will stop waiting
-         *                          for a new byte to start. This timeout is not for all bytes read here.
+		 * @param[in]
+         * @param[in]   timeout   Amount of clock cycles after which the function will stop waiting
+         *                        for a new byte to start. This timeout is not for all bytes read here.
 		 */
         ErrorCode receive_array (uint8_t *buffer, uint32_t length, uint32_t timeout) const {
             // Check if the total receivable bits can fit within a byte
@@ -213,7 +231,7 @@ class UARTRX : public UART
                 __asm__ volatile ("andn dira, %0" : : "r" (this->m_pin.get_mask()));
 
                 if(!this->shift_in_byte_array(buffer, length, timeout)) {
-					return TIMEOUT_ERROR;
+					return (ErrorCode) 42;
                 }
 
                 if (Parity::NO_PARITY != this->m_parity)
