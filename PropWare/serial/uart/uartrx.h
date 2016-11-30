@@ -27,7 +27,7 @@
 
 #include <PropWare/hmi/input/scancapable.h>
 #include <PropWare/serial/uart/uart.h>
-#include "pin.h"
+#include <PropWare/gpio/pin.h>
 
 namespace PropWare {
 
