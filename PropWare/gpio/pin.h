@@ -61,7 +61,7 @@ class Pin : public Port {
         Pin (const PropWare::Pin::Mask mask = NULL_PIN)
                 : Port(mask),
                   m_channel(Channel::A) {
-			update_pin_number();
+			this->update_pin_number();
         }
 
         /**
@@ -78,7 +78,7 @@ class Pin : public Port {
          */
         void set_mask (const Pin::Mask mask) {
             this->Port::set_mask(mask);
-            update_pin_number();
+            this->update_pin_number();
         }
 
         /**
@@ -87,10 +87,7 @@ class Pin : public Port {
          * @param[in]   pinNum  An integer 0-31 representing GPIO pins P0-P31
          */
         void set_pin_num (const uint8_t pinNum) {
-            if (31 <= pinNum)
-                set_mask(Mask::NULL_PIN);
-            else
-                set_mask((uint32_t) (1 << pinNum));
+			set_mask(Pin::convert(pinNum));
         }
 
         /**
@@ -207,7 +204,7 @@ if(iodt == 0)                               // If dt not initialized
 }
 */
             uint32_t ctr = static_cast<uint32_t>((8 + ((!state & 1) * 4)) << 26);        // POS detector counter setup
-            ctr += Pin::convert(static_cast<Mask>(this->m_mask));                        // Add pin to setup
+            ctr += get_pin_num();                                                        // Add pin to setup
             const uint32_t startTime = CNT;                                              // Mark current time
             if (CTRA == 0) {
                 // If CTRA unused
@@ -246,7 +243,7 @@ if(iodt == 0)                               // If dt not initialized
             this->stop_hardware_pwm();
 
             const uint32_t frq = static_cast<uint32_t>((UINT32_MAX + 1ULL) * frequency / CLKFREQ);
-            const uint32_t ctr = (4 << 26) | static_cast<uint32_t>(convert(static_cast<Mask>(this->m_mask)));
+            const uint32_t ctr = (4 << 26) | get_pin_num();
             if (Channel::A == this->m_channel) {
                 FRQA = frq;
                 PHSA = 0;
@@ -271,11 +268,7 @@ if(iodt == 0)                               // If dt not initialized
 
     private:
     	void update_pin_number() {
-            uint32_t pinNumber;
-            uint32_t pinMask = m_mask;
-            for (pinNumber = 32; pinMask > 0; pinNumber--)
-                pinMask <<= 1;
-            this->m_pinNumber = pinNumber;
+    		this->m_pinNumber = Pin::convert(static_cast<Mask>(m_mask));
     	}
 
 
