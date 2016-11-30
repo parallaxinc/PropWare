@@ -86,14 +86,14 @@ class Pin : public Port {
          *
          * @param[in]   pinNum  An integer 0-31 representing GPIO pins P0-P31
          */
-        void set_pin_number (const uint8_t pinNum) {
+        void set_pin_number (const uint_fast8_t pinNum) {
 			set_mask(Pin::convert(pinNum));
         }
 
         /**
          * @brief       Get the pin's number (integer in the range: 0-31)
          */
-        uint32_t get_pin_number() const {
+        uint_fast8_t get_pin_number() const {
             return m_pinNumber;
         }
 
@@ -295,8 +295,8 @@ if(iodt == 0)                               // If dt not initialized
         }
 
     private:
-        Channel m_channel;
-        uint32_t m_pinNumber;
+        Channel      m_channel;
+        uint_fast8_t m_pinNumber;
 };
 
 }
