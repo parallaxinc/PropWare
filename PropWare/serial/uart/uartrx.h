@@ -109,6 +109,30 @@ class UARTRX : public UART
             return rxVal & wideDataMask;
         }
 
+        /**
+         * @brief       Receive one byte from the uart and abort when the given timeout passed prior to that.
+         *
+         * @param[in]   Timeout after which the function will exit without having received a byte.
+         * @return      The received byte when successful, -1 on parity error, -2 if receiving timed out.
+         *
+         * @warning     This method only works correctly with baudrates of up to 56000 when reading multiple consecutive
+         *              bytes with timeout, and up to 57600 when reading only the first byte with a timeout.
+         */
+		uint32_t receive (const uint32_t timeout) const {
+            uint32_t rxVal;
+            uint32_t wideDataMask = this->m_dataMask;
+
+            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
+                                        this->m_msbMask, timeout);
+			if(-1 == rxVal) //timed out
+                return (uint32_t) -2;
+
+            if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
+                return (uint32_t) -1;
+
+            return rxVal & wideDataMask;
+        }
+
         ErrorCode get_line (char *buffer, int32_t *length, const char delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
@@ -256,6 +280,54 @@ class UARTRX : public UART
             [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
             [_bits] "+r"(bits)
+            :// Inputs
+            [_rxMask] "r"(rxMask),
+            [_msbMask] "r"(msbMask),
+            [_bitCycles] "r"(bitCycles));
+#endif
+
+            return data;
+        }
+
+        /**
+         * Shift in one word of data (FCache function)
+         */
+        uint32_t shift_in_data (uint_fast8_t bits, const uint32_t bitCycles, const uint32_t rxMask,
+                                const uint32_t msbMask, uint32_t timeoutCycles) const {
+            volatile uint32_t data       = -1;
+            volatile uint32_t waitCycles = bitCycles;
+
+            timeoutCycles /= 8; //the instructions that do the polling need 8 cycles per pass
+
+#ifndef DOXYGEN_IGNORE
+            __asm__ volatile (
+            FC_START("ShiftInDataStart%=", "ShiftInDataEnd%=")
+                    "       shr %[_waitCycles], #1                                          \n\t"
+                    "       add %[_waitCycles], %[_bitCycles]                               \n\t"
+
+                    "awaitStart%=: "
+                    "       test %[_rxMask],   ina                                 wz             \n\t"
+                    " if_nz djnz %[_timeout],  #" FC_ADDR("awaitStart%=", "ShiftInDataStart%=") " \n\t"
+					"       add %[_waitCycles], CNT                                               \n\t"
+                    " if_nz  jmp  #" FC_ADDR("end%=", "ShiftInDataStart%=") "                     \n\t" //timed out
+
+                    // Receive a word
+                    "loop%=:                                                                \n\t"
+                    "       waitcnt %[_waitCycles], %[_bitCycles]                           \n\t"
+                    "       shr %[_data],# 1                                                \n\t"
+                    "       test %[_rxMask],ina wz                                          \n\t"
+                    "       muxnz %[_data], %[_msbMask]                                     \n\t"
+                    "       djnz %[_bits], #" FC_ADDR("loop%=", "ShiftInDataStart%=") "     \n\t"
+
+                    // Wait for a stop bit
+                    "       waitpeq %[_rxMask], %[_rxMask]                                  \n\t"
+                    "end%=: "
+                    FC_END("ShiftInDataEnd%=")
+            :// Outputs
+            [_data] "+r"(data),
+            [_waitCycles] "+r"(waitCycles),
+            [_bits] "+r"(bits),
+			[_timeout] "+r"(timeoutCycles)
             :// Inputs
             [_rxMask] "r"(rxMask),
             [_msbMask] "r"(msbMask),
