@@ -78,9 +78,10 @@ class Pin : public Port {
         void set_mask (const Pin::Mask mask) {
             this->Port::set_mask(mask);
             
-            for (exp = 31; x > 0; exp--)
+            uint32_t pinNumber;
+            for (pinNumber = 31; x > 0; pinNumber--)
                 x <<= 1;
-            this->m_pinNumber = exp;
+            this->m_pinNumber = pinNumber;
         }
 
         /**
