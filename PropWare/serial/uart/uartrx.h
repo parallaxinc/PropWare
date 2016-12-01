@@ -433,9 +433,11 @@ class UARTRX : public UART
             [_parityMask] "r"(wideParityMask));
 
             if (Parity::ODD_PARITY == this->m_parity) {
-                if (evenParityResult != (rxVal & this->m_parityMask))
+                //if using odd parity, the result should be different from evenParity
+                if (evenParityResult == (rxVal & this->m_parityMask))
                     return UART::PARITY_ERROR;
-            } else if (evenParityResult == (rxVal & this->m_parityMask))
+            } else if (evenParityResult != (rxVal & this->m_parityMask))
+                //if using even parity, the result should be that of evenParity
                 return UART::PARITY_ERROR;
 
             return UART::NO_ERROR;
