@@ -97,16 +97,13 @@ class UARTRX : public UART
         }
 
         uint32_t receive () const {
-            uint32_t rxVal;
-            uint32_t wideDataMask = this->m_dataMask;
-
-            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
-                                        this->m_msbMask);
+            uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
+												 this->m_pin.get_mask(), this->m_msbMask);
 
             if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
                 return (uint32_t) -1;
 
-            return rxVal & wideDataMask;
+            return rxVal & this->m_dataMask;
         }
 
         /**
@@ -116,7 +113,7 @@ class UARTRX : public UART
          *
          * @return       An ErrorCode that specifies if something went wrong, and what.
          */
-        ErrorCode receive (uint32_t& data) const {
+        ErrorCode receive (uint8_t& data) const {
             uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
 									             this->m_pin.get_mask(), this->m_msbMask);
 
@@ -139,7 +136,7 @@ class UARTRX : public UART
          *               or equal to 56000. If this method is used only for the first byte of a multi-byte transmission,
          *               normal max. baudrate can be expected to work.
          */
-        ErrorCode receive (uint32_t& data, uint32_t timeout) const {
+        ErrorCode receive (uint8_t& data, uint32_t timeout) const {
             uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
                                         this->m_msbMask, timeout);
 			if(-1 == rxVal)
@@ -241,11 +238,10 @@ class UARTRX : public UART
                 // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
                 // improvement - it is only here for user convenience)
             else {
-                uint32_t      temp;
+                ErrorCode temp;
                 for (uint32_t i = 0; i < length; ++i) {
-                    if (((uint32_t) -1) == (temp = this->receive()))
-                        return PARITY_ERROR;
-                    buffer[i] = (char) temp;
+					if(NO_ERROR != (temp = this->receive(buffer[i], timeout)))
+						return temp;
                 }
             }
 
@@ -361,8 +357,8 @@ class UARTRX : public UART
                     "awaitStart%=: "
                     "       test %[_rxMask],   ina                                 wz             \n\t"
                     " if_nz djnz %[_timeout],  #" FC_ADDR("awaitStart%=", "ShiftInDataStart%=") " \n\t"
-					"       add %[_waitCycles], CNT                                               \n\t"
-                    " if_nz  jmp  #" FC_ADDR("end%=", "ShiftInDataStart%=") "                     \n\t" //timed out
+					"       add  %[_waitCycles], CNT                                              \n\t"
+                    " if_nz  jmp #" FC_ADDR("end%=", "ShiftInDataStart%=") "                      \n\t" //timed out
 
                     // Receive a word
                     "loop%=:                                                                \n\t"
@@ -633,16 +629,14 @@ class UARTRX : public UART
          */
         ErrorCode check_parity (uint32_t rxVal) const {
             uint32_t evenParityResult;
-            uint32_t wideParityMask = this->m_parityMask;
-            uint32_t wideDataMask   = this->m_dataMask;
 
             evenParityResult = 0;
             __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                     "muxc %[_parityResult], %[_parityMask]"
             : [_parityResult] "+r"(evenParityResult)
             : [_data] "r"(rxVal),
-            [_dataMask] "r"(wideDataMask),
-            [_parityMask] "r"(wideParityMask));
+            [_dataMask] "r"(this->m_dataMask),
+            [_parityMask] "r"(this->m_parityMask));
 
             if (Parity::ODD_PARITY == this->m_parity) {
                 if (evenParityResult != (rxVal & this->m_parityMask))
