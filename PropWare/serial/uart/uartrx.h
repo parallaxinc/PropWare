@@ -113,7 +113,7 @@ class UARTRX : public UART
          *
          * @return       An ErrorCode that specifies if something went wrong, and what.
          */
-        ErrorCode receive (uint8_t& data) const {
+        ErrorCode receive (uint32_t& data) const {
             uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
 									             this->m_pin.get_mask(), this->m_msbMask);
 
@@ -136,10 +136,10 @@ class UARTRX : public UART
          *               or equal to 56000. If this method is used only for the first byte of a multi-byte transmission,
          *               normal max. baudrate can be expected to work.
          */
-        ErrorCode receive (uint8_t& data, uint32_t timeout) const {
+        ErrorCode receive (uint32_t& data, uint32_t timeout) const {
             uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
                                         this->m_msbMask, timeout);
-			if(-1 == rxVal)
+			if(static_cast<uint32_t>(-1) == rxVal)
 				return TIMEOUT_ERROR;
 
             if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
@@ -238,10 +238,13 @@ class UARTRX : public UART
                 // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
                 // improvement - it is only here for user convenience)
             else {
-                ErrorCode temp;
+                ErrorCode err;
+                uint32_t temp;
                 for (uint32_t i = 0; i < length; ++i) {
-					if(NO_ERROR != (temp = this->receive(buffer[i], timeout)))
-						return temp;
+					if(NO_ERROR != (err = this->receive(temp, timeout)))
+						return err;
+					else
+						buffer[i] = temp;
                 }
             }
 
