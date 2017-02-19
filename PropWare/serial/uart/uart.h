@@ -108,7 +108,7 @@ class UART {
             /** The requested stop bit width is not between 1 and 14 (inclusive) */INVALID_STOP_BIT_WIDTH,
             /** Null pointer was passed as an argument */                          NULL_POINTER,
             /** Reading from the serial connection timed out */                    TIMEOUT_ERROR,
-            /** Last error code used by PropWare::UART */                          END_ERROR     = UART::NULL_POINTER
+            /** Last error code used by PropWare::UART */                          END_ERROR     = UART::TIMEOUT_ERROR
         } ErrorCode;
 
     public:

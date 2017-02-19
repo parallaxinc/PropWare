@@ -66,7 +66,6 @@ class Listener : public PropWare::Runnable {
             this->m_listener.set_rx_mask(RX_PIN);
             this->m_listener.set_baud_rate(BAUD_RATE);
             this->m_listener.set_parity(PARITY);
-            //memset(m_buffer, 0, sizeof(m_buffer));
 
             // A very short wait to ensure the main cog has finished printing its "I'm ready" statement before we start
             // printing ours
