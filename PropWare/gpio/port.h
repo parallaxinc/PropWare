@@ -95,7 +95,7 @@ class Port {
          *
          * @return      Return the pin number of pin
          */
-        static uint8_t convert (const Mask mask) {
+        static uint8_t from_mask (const Mask mask) {
             uint8_t  retVal  = 0;
             uint32_t maskInt = mask;
 
@@ -112,8 +112,8 @@ class Port {
          *
          * @return      Bit mask representing the requested pin. If pinNum > 31, Mask::NULL_PIN is returned
          */
-        static Mask convert (const uint8_t pinNum) {
-            if (31 > pinNum)
+        static Mask to_mask (const uint8_t pinNum) {
+            if (31 < pinNum)
                 return Mask::NULL_PIN;
             else
                 return static_cast<Mask>(1 << pinNum);
