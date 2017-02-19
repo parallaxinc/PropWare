@@ -96,20 +96,83 @@ class UARTRX : public UART
             this->set_receivable_bits();
         }
 
+        /**
+         * @brief   Retrieve a single word from the bus
+         *
+         * @return  Either the word is returned from the bus, or -1 if a parity error occurs.
+         */
         uint32_t receive () const {
-            uint32_t rxVal;
-            uint32_t wideDataMask = this->m_dataMask;
+            uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
+                                                 this->m_msbMask);
 
-            rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles, this->m_pin.get_mask(),
-                                        this->m_msbMask);
-
-            if (static_cast<bool>(this->m_parity) && 0 != this->check_parity(rxVal))
-                return (uint32_t) -1;
-
-            return rxVal & wideDataMask;
+            if (static_cast<bool>(this->m_parity) && this->check_parity(rxVal))
+                return static_cast<uint32_t>(-1);
+            else
+                return rxVal & this->m_dataMask;
         }
 
-        ErrorCode get_line (char *buffer, int32_t *length, const char delimiter = '\n') const {
+        /**
+         * @brief       Receive one byte from the uart. This blocks until the byte is received.
+         *
+         * @param[out]  data    The byte that was read.
+         *
+         * @return      An ErrorCode that specifies if something went wrong, and what.
+         */
+        PropWare::ErrorCode receive (uint32_t &data) const {
+            const uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
+                                                       this->m_pin.get_mask(), this->m_msbMask);
+
+            if (static_cast<bool>(this->m_parity) && this->check_parity(rxVal))
+                return PARITY_ERROR;
+            else {
+                data = rxVal & this->m_dataMask;
+                return NO_ERROR;
+            }
+        }
+
+        /**
+         * @brief       Receive one byte from the uart. This blocks until either the byte was received or the timeout
+         *              triggered.
+         *
+         * @param[out]  data        The byte that was read.
+         * @param[in]   timeout     Timeout after which the function will exit without having received a byte.
+         *
+         * @return      An ErrorCode that specifies if something went wrong, and what.
+         *
+         * @warning     If this method is used for multiple consecutive bytes, the baud rate should be no greater than
+         *              56000. If this method is used only for the first byte of a multi-byte transmission,
+         *              then the standard maximum baud rate is acceptable.
+         */
+        PropWare::ErrorCode receive (uint32_t &data, const uint32_t timeout) const {
+            const uint32_t rxVal = this->shift_in_data(this->m_receivableBits, this->m_bitCycles,
+                                                       this->m_pin.get_mask(), this->m_msbMask, timeout);
+            if (static_cast<uint32_t>(-1) == rxVal)
+                return TIMEOUT_ERROR;
+            else if (static_cast<bool>(this->m_parity) && this->check_parity(rxVal))
+                return PARITY_ERROR;
+            else {
+                data = rxVal & this->m_dataMask;
+                return NO_ERROR;
+            }
+        }
+
+        /**
+         * @brief       Read bytes until the provided delimiter is read or max length is reached.
+         *
+         * If the delimiter is read before hitting the max length, then the delimiter will be inserted into the buffer
+         * and the function will return. At the point that the max length is hit, the function will immediately return.
+         *
+         * @post        The input buffer will contain data read in and the length parameter will contain the number of
+         *              characters received.
+         *
+         * @param[out]  buffer*     Area in memory will data can be stored
+         * @param[in]   length*     Maximum number of characters to read from the bus. Upon returning, the number of
+         *                          characters actually received will be stored here.
+         * @param[in]   delimiter   Read from the bus until this character is received.
+         *
+         * @return      0 upon success, error code otherwise.
+         */
+        PropWare::ErrorCode get_line (char *buffer, int32_t *length, const char delimiter = '\n') const {
             if (NULL == length)
                 return NULL_POINTER;
             else if (0 == *length)
@@ -125,22 +188,24 @@ class UARTRX : public UART
 
                 if (Parity::NO_PARITY != this->m_parity)
                     for (int32_t i = 0; i < *length; --i)
-                        if (0 != this->check_parity((uint32_t) buffer[i]))
+                        if (this->check_parity(static_cast<uint32_t>(buffer[i])))
                             return UART::PARITY_ERROR;
             }
                 // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
                 // improvement - it is only here for user convenience)
             else {
-                uint32_t temp;
+                uint32_t rxVal;
 
                 do {
-                    if (((uint32_t) -1) == (temp = this->receive()))
+                    rxVal = this->receive();
+                    if (static_cast<uint32_t>(-1) == rxVal)
                         return UART::PARITY_ERROR;
-
-                    *buffer = (char) temp;
-                    ++buffer;
-                    ++wordCnt;
-                } while (temp != delimiter && wordCnt < *length);
+                    else {
+                        *buffer = (char) rxVal;
+                        ++buffer;
+                        ++wordCnt;
+                    }
+                } while (rxVal != delimiter && wordCnt < *length);
 
                 *length = wordCnt;
             }
@@ -148,7 +213,18 @@ class UARTRX : public UART
             return NO_ERROR;
         }
 
-        ErrorCode receive_array (uint8_t *buffer, uint32_t length) const {
+        /**
+         * @brief       Reads multiple bytes into the given buffer. This blocks until requested number of words have
+         *              been received
+         *
+         * @param[in]   buffer*     Area in memory where received data can be stored
+         * @param[in]   length      Number of bytes to read
+         *
+         * @return      An ErrorCode that specifies if something went wrong, and what.
+         */
+        PropWare::ErrorCode receive_array (uint8_t *buffer, uint32_t length) const {
+            PropWare::ErrorCode err;
+
             // Check if the total receivable bits can fit within a byte
             if (8 >= this->m_receivableBits) {
                 // Set RX as input
@@ -158,17 +234,54 @@ class UARTRX : public UART
 
                 if (Parity::NO_PARITY != this->m_parity)
                     for (uint32_t i = 0; i < length; --i)
-                        if (0 != this->check_parity((uint32_t) buffer[i]))
-                            return UART::PARITY_ERROR;
+                        check_errors(this->check_parity(buffer[i]));
             }
-                // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
-                // improvement - it is only here for user convenience)
+            // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
+            // improvement - it is only here for user convenience)
             else {
                 uint32_t      temp;
                 for (uint32_t i = 0; i < length; ++i) {
-                    if (((uint32_t) -1) == (temp = this->receive()))
+                    if (static_cast<uint32_t>(-1) == (temp = this->receive()))
                         return UART::PARITY_ERROR;
-                    buffer[i] = (char) temp;
+                    else
+                        buffer[i] = (char) temp;
+                }
+            }
+
+            return NO_ERROR;
+        }
+
+        /**
+         * @brief      Reads multiple bytes into the given buffer. This blocks until either the
+         *
+         * @param[in]   buffer*     Area in memory where received data can be stored
+         * @param[in]   length      Number of bytes to read
+         * @param[in]   timeout     Amount of clock cycles after which the function will stop waiting for a new byte
+         *                          to start. This timeout is not for all bytes read here.
+         *
+         * @return      An ErrorCode that specifies if something went wrong, and what.
+         */
+        PropWare::ErrorCode receive_array (uint8_t *buffer, uint32_t length, const uint32_t timeout) const {
+            PropWare::ErrorCode err;
+
+            // Check if the total receivable bits can fit within a byte
+            if (8 >= this->m_receivableBits) {
+                // Set RX as input
+                __asm__ volatile ("andn dira, %0" : : "r" (this->m_pin.get_mask()));
+
+                if (!this->shift_in_byte_array(buffer, length, timeout))
+                    return TIMEOUT_ERROR;
+                else if (Parity::NO_PARITY != this->m_parity)
+                    for (uint32_t i = 0; i < length; --i)
+                        check_errors(this->check_parity(buffer[i]));
+            }
+            // If total receivable bits does not fit within a byte, shift in one word at a time (this offers no speed
+            // improvement - it is only here for user convenience)
+            else {
+                uint32_t      rxVal;
+                for (uint32_t i = 0; i < length; ++i) {
+                    check_errors(this->receive(rxVal, timeout));
+                    buffer[i] = static_cast<uint8_t>(rxVal);
                 }
             }
 
@@ -182,7 +295,7 @@ class UARTRX : public UART
          * newline is found, no null-terminator will be inserted
          *
          * @param[in]   string[]        Output buffer which should store the data
-         * @param[out]  bufferSize      Address where the new length of the buffer will be written
+         * @param[out]  bufferSize*     Address where the new length of the buffer will be written
          *
          * @returns     Zero upon success, error code otherwise
          */
@@ -256,6 +369,54 @@ class UARTRX : public UART
             [_data] "+r"(data),
             [_waitCycles] "+r"(waitCycles),
             [_bits] "+r"(bits)
+            :// Inputs
+            [_rxMask] "r"(rxMask),
+            [_msbMask] "r"(msbMask),
+            [_bitCycles] "r"(bitCycles));
+#endif
+
+            return data;
+        }
+
+        /**
+         * Shift in one word of data (FCache function)
+         */
+        uint32_t shift_in_data (uint_fast8_t bits, const uint32_t bitCycles, const uint32_t rxMask,
+                                const uint32_t msbMask, uint32_t timeoutCycles) const {
+            volatile uint32_t data       = -1;
+            volatile uint32_t waitCycles = bitCycles;
+
+            timeoutCycles /= 8; //the instruction that decrements the timeoutCounter needs 4 clock cycles
+
+#ifndef DOXYGEN_IGNORE
+            __asm__ volatile (
+            FC_START("ShiftInDataStart%=", "ShiftInDataEnd%=")
+                    "       shr %[_waitCycles], #1                                                  \n\t"
+                    "       add %[_waitCycles], %[_bitCycles]                                       \n\t"
+
+                    "awaitStart%=: "
+                    "       test %[_rxMask],   ina                                 wz               \n\t"
+                    " if_nz djnz %[_timeout],  #" FC_ADDR("awaitStart%=", "ShiftInDataStart%=") "   \n\t"
+                    "       add  %[_waitCycles], CNT                                                \n\t"
+                    " if_nz  jmp #" FC_ADDR("end%=", "ShiftInDataStart%=") "                        \n\t" //timed out
+
+                    // Receive a word
+                    "loop%=:                                                                        \n\t"
+                    "       waitcnt %[_waitCycles], %[_bitCycles]                                   \n\t"
+                    "       shr %[_data],# 1                                                        \n\t"
+                    "       test %[_rxMask],ina wz                                                  \n\t"
+                    "       muxnz %[_data], %[_msbMask]                                             \n\t"
+                    "       djnz %[_bits], #" FC_ADDR("loop%=", "ShiftInDataStart%=") "             \n\t"
+
+                    // Wait for a stop bit
+                    "       waitpeq %[_rxMask], %[_rxMask]                                          \n\t"
+                    "end%=: "
+                    FC_END("ShiftInDataEnd%=")
+            :// Outputs
+            [_data] "+r"(data),
+            [_waitCycles] "+r"(waitCycles),
+            [_bits] "+r"(bits),
+            [_timeout] "+r"(timeoutCycles)
             :// Inputs
             [_rxMask] "r"(rxMask),
             [_msbMask] "r"(msbMask),
@@ -411,26 +572,113 @@ class UARTRX : public UART
 #endif
         }
 
+
+        /**
+         * @brief       Shift in an array of data (FCache function)
+         *
+         * @param[out]  buffer*     Buffer where data can be stored
+         * @param[in]   length      Number of bytes that should be read from the port
+         * @param[in]   timeout     Amount of clock cycles after which the function will stop waiting
+         *                          for a new byte to start. This timeout is not for all bytes read here.
+         *
+         * @return      True upon success; False upon timeout.
+         */
+        bool shift_in_byte_array (uint8_t *buffer, unsigned int length, uint32_t timeout) const {
+            uint32_t          initWaitCycles = (this->m_bitCycles >> 1) + this->m_bitCycles;
+            volatile uint32_t timeLeft       = 0;
+
+            timeout /= 8; //the instruction that decrements the timeoutCounter needs 4 clock cycles
+
+#ifndef DOXYGEN_IGNORE
+            // Initialize variables
+            __asm__ volatile (
+#define ASMVAR(name) FC_ADDR(#name "%=", "ShiftInArrayDataStart%=")
+            FC_START("ShiftInArrayDataStart%=", "ShiftInArrayDataEnd%=")
+                    "       jmp #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart%=") "                          \n\t"
+
+                    // Temporary variables
+                    "bitIdx%=:                                                                                  \n\t"
+                    "       nop                                                                                 \n\t"
+                    "waitCycles%=:                                                                              \n\t"
+                    "       nop                                                                                 \n\t"
+                    "data%=:                                                                                    \n\t"
+                    "       nop                                                                                 \n\t"
+                    "       mov " ASMVAR(data) ", #0                                                            \n\t"
+
+                    "outerLoop%=:                                                                               \n\t"
+                    // Initialize the index variable
+                    "       mov " ASMVAR(bitIdx) ", %[_bits]                                                    \n\t"
+                    // Re-initialize the timer
+                    "       mov " ASMVAR(waitCycles) ", %[_initWaitCycles]                                      \n\t"
+
+                    //reset timeout and wait for startBit
+                    "       mov    %[_timeLeft],   %[_timeout]                                                  \n\t"
+                    "awaitStart%=: "
+                    "       test   %[_rxMask],     ina  wz                                                      \n\t"
+                    " if_nz djnz   %[_timeLeft],   #" FC_ADDR("awaitStart%=", "ShiftInArrayDataStart%=") "      \n\t"
+                    // Begin the timer (even if we just timed out - for performance reasons)
+                    "       add " ASMVAR(waitCycles) ", CNT                                                     \n\t"
+                    //timed out, jump to the end (timeLeft is 0 now)
+                    " if_nz  jmp   #" FC_ADDR("end%=", "ShiftInArrayDataStart%=") "                             \n\t"
+
+                    "innerLoop%=:                                                                               \n\t"
+                    // Wait for the next bit
+                    "       waitcnt " ASMVAR(waitCycles) ", %[_bitCycles]                                       \n\t"
+                    "       shr " ASMVAR(data) ", #1                                                            \n\t"
+                    "       test %[_rxMask], ina wz                                                             \n\t"
+                    "       muxnz " ASMVAR(data) ", %[_msbMask]                                                 \n\t"
+                    "       djnz " ASMVAR(bitIdx) ", #" FC_ADDR("innerLoop%=", "ShiftInArrayDataStart%=") "     \n\t"
+
+                    // Write the word back to the buffer in HUB memory
+                    "       wrbyte " ASMVAR(data) ", %[_bufAdr]                                                 \n\t"
+
+                    // Clear the data register
+                    "       mov " ASMVAR(data) ", #0                                                            \n\t"
+                    // Increment the buffer address
+                    "       add %[_bufAdr], #1                                                                  \n\t"
+
+                    // Wait for the stop bits and the loop back
+                    "       waitpeq %[_rxMask], %[_rxMask]                                                      \n\t"
+                    "       djnz %[_length], #" FC_ADDR("outerLoop%=", "ShiftInArrayDataStart%=") "             \n\t"
+
+                    "end%=: "
+                    FC_END("ShiftInArrayDataEnd%=")
+#undef ASMVAR
+            :// Outputs
+            [_bufAdr] "+r"(buffer),
+            [_length] "+r"(length),
+            [_timeLeft] "+r"(timeLeft)
+            :// Inputs
+            [_rxMask] "r"(this->m_pin.get_mask()),
+            [_bits] "r"(this->m_receivableBits),
+            [_bitCycles] "r"(this->m_bitCycles),
+            [_initWaitCycles] "r"(initWaitCycles),
+            [_msbMask] "r"(this->m_msbMask),
+            [_timeout] "r"(timeout));
+#endif
+
+            return 0 != timeLeft;
+        }
+
+
         /**
          * @brief       Check parity for a received value
          *
          * @param[in]   rxVal   Received value with parity bit exactly as
          *                      received
          *
-         * @return      0 for proper parity; -1 for parity error
+         * @return      0 for proper parity; error code otherwise
          */
-        ErrorCode check_parity (uint32_t rxVal) const {
+        PropWare::ErrorCode check_parity (uint32_t rxVal) const {
             uint32_t evenParityResult;
-            uint32_t wideParityMask = this->m_parityMask;
-            uint32_t wideDataMask   = this->m_dataMask;
 
             evenParityResult = 0;
             __asm__ volatile("test %[_data], %[_dataMask] wc \n\t"
                     "muxc %[_parityResult], %[_parityMask]"
             : [_parityResult] "+r"(evenParityResult)
             : [_data] "r"(rxVal),
-            [_dataMask] "r"(wideDataMask),
-            [_parityMask] "r"(wideParityMask));
+            [_dataMask] "r"(this->m_dataMask),
+            [_parityMask] "r"(this->m_parityMask));
 
             if (Parity::ODD_PARITY == this->m_parity) {
                 //if using odd parity, the result should be different from evenParity
