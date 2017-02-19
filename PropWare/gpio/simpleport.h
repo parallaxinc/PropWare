@@ -87,7 +87,7 @@ class SimplePort : public Port {
          */
         void set_mask (const PropWare::Port::Mask firstPin, uint8_t portWidth) {
             this->m_mask        = static_cast<uint32_t>(firstPin);
-            this->m_firstPinNum = PropWare::Port::convert(firstPin);
+            this->m_firstPinNum = PropWare::Port::from_mask(firstPin);
 
             // For every pin in the port...
             while (--portWidth)

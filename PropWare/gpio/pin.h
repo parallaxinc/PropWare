@@ -33,7 +33,7 @@ namespace PropWare {
 /**
  * @brief   Utility class to handle general purpose I/O pins
  */
-class Pin : public Port {
+class Pin: public Port {
     public:
         enum class Channel {
                 A,
@@ -59,9 +59,9 @@ class Pin : public Port {
          * @param[in]   mask    Bit-mask of pin; One of PropWare::Pin::Mask
          */
         Pin (const PropWare::Pin::Mask mask = NULL_PIN)
-                : Port(mask),
-                  m_channel(Channel::A) {
-			update_pin_number();
+            : Port(mask),
+              m_channel(Channel::A) {
+            this->update_pin_number();
         }
 
         /**
@@ -69,8 +69,8 @@ class Pin : public Port {
          * @param[in]   direction   Direction to initialize pin; One of PropWare::Pin::Dir
          */
         Pin (const Pin::Mask mask, const Pin::Dir direction)
-                : Port(mask, direction),
-                  m_channel(Channel::A) {
+            : Port(mask, direction),
+              m_channel(Channel::A) {
         }
 
         /**
@@ -78,7 +78,7 @@ class Pin : public Port {
          */
         void set_mask (const Pin::Mask mask) {
             this->Port::set_mask(mask);
-            update_pin_number();
+            this->update_pin_number();
         }
 
         /**
@@ -86,15 +86,15 @@ class Pin : public Port {
          *
          * @param[in]   pinNum  An integer 0-31 representing GPIO pins P0-P31
          */
-        void set_pin_number (const uint_fast8_t pinNum) {
-			set_mask(Pin::convert(pinNum));
+        void set_pin_number (const uint8_t pinNum) {
+            this->set_mask(Pin::to_mask(pinNum));
         }
 
         /**
-         * @brief       Get the pin's number (integer in the range: 0-31)
+         * @brief       Get the pin's number (an integer, 0 through 31)
          */
-        uint_fast8_t get_pin_number() const {
-            return m_pinNumber;
+        uint_fast8_t get_pin_number () const {
+            return this->m_pinNumber;
         }
 
         Pin::Mask get_mask () const {
@@ -197,14 +197,14 @@ class Pin : public Port {
         int rc_time (const bool state, const uint32_t timeout = SECOND / 4) {
             // Taken from Simple's rc_time(int pin, int state) in rcTime.C
             /*
-if(iodt == 0)                               // If dt not initialized
-{
-  set_io_dt(CLKFREQ/1000000);               // Set up timed I/O time increment
-  set_io_timeout(CLKFREQ/4);                // Set up timeout
-}
-*/
+            if(iodt == 0)                               // If dt not initialized
+            {
+              set_io_dt(CLKFREQ/1000000);               // Set up timed I/O time increment
+              set_io_timeout(CLKFREQ/4);                // Set up timeout
+            }
+            */
             uint32_t ctr = static_cast<uint32_t>((8 + ((!state & 1) * 4)) << 26);        // POS detector counter setup
-            ctr += get_pin_number();                                                        // Add pin to setup
+            ctr += this->m_pinNumber;                                                    // Add pin to setup
             const uint32_t startTime = CNT;                                              // Mark current time
             if (CTRA == 0) {
                 // If CTRA unused
@@ -243,7 +243,7 @@ if(iodt == 0)                               // If dt not initialized
             this->stop_hardware_pwm();
 
             const uint32_t frq = static_cast<uint32_t>((UINT32_MAX + 1ULL) * frequency / CLKFREQ);
-            const uint32_t ctr = (4 << 26) | get_pin_number();
+            const uint32_t ctr = (4 << 26) | this->m_pinNumber;
             if (Channel::A == this->m_channel) {
                 FRQA = frq;
                 PHSA = 0;
@@ -267,9 +267,9 @@ if(iodt == 0)                               // If dt not initialized
         }
 
     private:
-    	void update_pin_number() {
-    		this->m_pinNumber = Pin::convert(static_cast<Mask>(m_mask));
-    	}
+        void update_pin_number () {
+            this->m_pinNumber = Pin::from_mask(static_cast<Mask>(this->m_mask));
+        }
 
 
         /****************************************

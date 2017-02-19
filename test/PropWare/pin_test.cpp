@@ -86,8 +86,8 @@ TEST(SetPinNum) {
     testable = new PropWare::Pin();
 
     testable->set_pin_number(TEST_PIN_NUM);
-    ASSERT_EQ(TEST_MASK, testable->get_mask());
-    ASSERT_EQ(TEST_PIN_NUM, testable->get_pin_number());
+    ASSERT_EQ_MSG(TEST_MASK, testable->get_mask());
+    ASSERT_EQ_MSG(TEST_PIN_NUM, testable->get_pin_number());
 
     tearDown();
 }
