@@ -27,7 +27,10 @@
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/serial/can/mcp2515.h>
 
-using namespace PropWare;
+using PropWare::Port;
+using PropWare::Pin;
+using PropWare::MCP2515;
+using PropWare::SPI;
 
 static const Port::Mask MOSI       = Port::Mask::P0;
 static const Port::Mask MISO       = Port::Mask::P1;
@@ -41,7 +44,7 @@ static const uint8_t messages[][6] = {
     "Katie"
 };
 
-void handle(const ErrorCode err) {
+void handle(const PropWare::ErrorCode err) {
     if (err) {
         pwOut.printf("ERROR!!! %d\n", err);
         while (1)
@@ -81,7 +84,7 @@ int main() {
     handle(can.start(MCP2515::BaudRate::BAUD_1000KBPS, MCP2515::Mode::LOOPBACK));
 
     // Set up the filters and masks so that only message ID 2 is allowed through
-    handle(can.set_mask(MCP2515::BufferNumber::BUFFER_0, WORD_0));
+    handle(can.set_mask(MCP2515::BufferNumber::BUFFER_0, PropWare::WORD_0));
     handle(can.set_filter(MCP2515::FilterNumber::FILTER_0, 2));
 
     pwOut << "Expected message received:\n";

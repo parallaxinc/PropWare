@@ -35,12 +35,14 @@
 #include <PropWare/memory/sd.h>
 #include <PropWare/filesystem/fat/fatfs.h>
 
-using namespace PropWare;
+using PropWare::SD;
+using PropWare::FatFS;
+using PropWare::SPI;
 
 static SD    g_driver;
 static FatFS *testable;
 
-void error_checker (const ErrorCode err) {
+void error_checker (const PropWare::ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance().print_error_str(pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
@@ -66,7 +68,7 @@ TEST(Constructor) {
 TEST(ReadMasterBootRecord) {
     setUp();
 
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     err = testable->m_driver->start();
     error_checker(err);
@@ -87,7 +89,7 @@ TEST(ReadMasterBootRecord) {
 TEST(Mount_defaultParameters) {
     setUp();
 
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     err = testable->mount();
     error_checker(err);
@@ -101,7 +103,7 @@ TEST(Mount_defaultParameters) {
 TEST(Mount_withParameter0) {
     setUp();
 
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     err = testable->mount(0);
     error_checker(err);
@@ -113,7 +115,7 @@ TEST(Mount_withParameter0) {
 TEST(Mount_withParameter1) {
     setUp();
 
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     err = testable->mount(1);
     error_checker(err);
@@ -125,7 +127,7 @@ TEST(Mount_withParameter1) {
 TEST(Mount_withParameter4) {
     setUp();
 
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     err = testable->mount(4);
     ASSERT_EQ_MSG(FatFS::UNSUPPORTED_FILESYSTEM, err);

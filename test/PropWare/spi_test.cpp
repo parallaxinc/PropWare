@@ -29,18 +29,21 @@
 #include "PropWareTests.h"
 #include <PropWare/serial/spi/spi.h>
 
-const PropWare::Pin::Mask MOSI_MASK = PropWare::Port::Mask::P0;
-const PropWare::Pin::Mask MISO_MASK = PropWare::Port::Mask::P1;
-const PropWare::Pin::Mask SCLK_MASK = PropWare::Port::Mask::P2;
-const PropWare::Pin       CS(PropWare::Port::Mask::P3, PropWare::Pin::Dir::OUT);
+using PropWare::Pin;
+using PropWare::Port;
+using PropWare::SPI;
+
+const Pin::Mask MOSI_MASK = Port::P0;
+const Pin::Mask MISO_MASK = Port::P1;
+const Pin::Mask SCLK_MASK = Port::P2;
+const Pin       CS(Port::P3, Pin::Dir::OUT);
 
 const unsigned int FREQUENCY = 900000;
 
-PropWare::SPI *testable;
+SPI *testable;
 
 SETUP {
-    testable = new PropWare::SPI(MOSI_MASK, MISO_MASK, SCLK_MASK, FREQUENCY, PropWare::SPI::Mode::MODE_0,
-                                 PropWare::SPI::BitMode::MSB_FIRST);
+    testable = new SPI(MOSI_MASK, MISO_MASK, SCLK_MASK, FREQUENCY, SPI::Mode::MODE_0, SPI::BitMode::MSB_FIRST);
     CS.clear();
 };
 
@@ -65,7 +68,7 @@ TEST(ShiftOut_MsbFirst) {
 TEST(ShiftOut_LsbFirst) {
     setUp();
 
-    testable->set_bit_mode(PropWare::SPI::BitMode::LSB_FIRST);
+    testable->set_bit_mode(SPI::BitMode::LSB_FIRST);
 
     testable->shift_out(8, 0xAA);
     testable->shift_out(8, 0xAA);

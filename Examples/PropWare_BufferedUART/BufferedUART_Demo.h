@@ -28,7 +28,9 @@
 #include <PropWare/utility/collection/charqueue.h>
 #define STACK_SIZE 64
 
+using PropWare::CharQueue;
+
 typedef struct {
     unsigned int        stack[STACK_SIZE];
-    volatile PropWare::CharQueue *queue;
+    volatile CharQueue *queue;
 } BufferedUARTMailbox;

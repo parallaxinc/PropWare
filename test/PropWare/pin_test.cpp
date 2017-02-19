@@ -29,19 +29,21 @@
 #include <PropWare/gpio/pin.h>
 #include "PropWareTests.h"
 
-static PropWare::Pin             *testable;
-static PropWare::Pin             *helper;
-static const uint8_t             TEST_PIN_NUM  = 12;
-static const PropWare::Pin::Mask TEST_MASK     = PropWare::Pin::Mask::P12;
-static const PropWare::Pin::Mask CHECK_MASK    = PropWare::Pin::Mask::P13;
+using PropWare::Pin;
 
-void setUp (const PropWare::Pin::Dir dir = PropWare::Pin::Dir::OUT) {
-    testable = new PropWare::Pin(TEST_MASK, dir);
+static Pin             *testable;
+static Pin             *helper;
+static const uint8_t   TEST_PIN_NUM = 12;
+static const Pin::Mask TEST_MASK    = Pin::Mask::P12;
+static const Pin::Mask CHECK_MASK   = Pin::Mask::P13;
 
-    if (PropWare::Pin::Dir::OUT == dir)
-        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::Dir::IN);
+void setUp (const Pin::Dir dir = Pin::Dir::OUT) {
+    testable = new Pin(TEST_MASK, dir);
+
+    if (Pin::Dir::OUT == dir)
+        helper = new Pin(CHECK_MASK, Pin::Dir::IN);
     else
-        helper = new PropWare::Pin(CHECK_MASK, PropWare::Pin::Dir::OUT);
+        helper = new Pin(CHECK_MASK, Pin::Dir::OUT);
 }
 
 TEARDOWN {
@@ -49,15 +51,15 @@ TEARDOWN {
 }
 
 TEST(Constructor_ShouldSetNullPin) {
-    testable = new PropWare::Pin();
+    testable = new Pin();
 
-    ASSERT_EQ(PropWare::Pin::Mask::NULL_PIN, testable->get_mask());
+    ASSERT_EQ(Pin::Mask::NULL_PIN, testable->get_mask());
 
     tearDown();
 }
 
 TEST(Constructor_ShouldSetMask) {
-    testable = new PropWare::Pin(TEST_MASK);
+    testable = new Pin(TEST_MASK);
 
     ASSERT_EQ(TEST_MASK, testable->get_mask());
 
@@ -65,16 +67,16 @@ TEST(Constructor_ShouldSetMask) {
 }
 
 TEST(Constructor_ShouldSetMaskAndDir) {
-    testable = new PropWare::Pin(TEST_MASK, PropWare::Pin::Dir::OUT);
+    testable = new Pin(TEST_MASK, Pin::Dir::OUT);
 
     ASSERT_EQ(TEST_MASK, testable->get_mask());
-    ASSERT_EQ(PropWare::Pin::Dir::OUT, testable->get_dir());
+    ASSERT_EQ(Pin::Dir::OUT, testable->get_dir());
 
     tearDown();
 }
 
 TEST(SetMask) {
-    testable = new PropWare::Pin();
+    testable = new Pin();
 
     testable->set_mask(TEST_MASK);
     ASSERT_EQ(TEST_MASK, testable->get_mask());
@@ -83,7 +85,7 @@ TEST(SetMask) {
 }
 
 TEST(SetPinNum) {
-    testable = new PropWare::Pin();
+    testable = new Pin();
 
     testable->set_pin_number(TEST_PIN_NUM);
     ASSERT_EQ_MSG(TEST_MASK, testable->get_mask());
@@ -93,28 +95,28 @@ TEST(SetPinNum) {
 }
 
 TEST(SetDir) {
-    testable = new PropWare::Pin(TEST_MASK);
+    testable = new Pin(TEST_MASK);
 
-    testable->set_dir(PropWare::Pin::Dir::OUT);
-    ASSERT_EQ(PropWare::Pin::Dir::OUT, testable->get_dir());
+    testable->set_dir(Pin::Dir::OUT);
+    ASSERT_EQ(Pin::Dir::OUT, testable->get_dir());
 
     tearDown();
 }
 
 TEST(SetDirOut) {
-    testable = new PropWare::Pin(TEST_MASK);
+    testable = new Pin(TEST_MASK);
 
     testable->set_dir_out();
-    ASSERT_EQ(PropWare::Pin::Dir::OUT, testable->get_dir());
+    ASSERT_EQ(Pin::Dir::OUT, testable->get_dir());
 
     tearDown();
 }
 
 TEST(SetDirIn) {
-    testable = new PropWare::Pin(TEST_MASK);
+    testable = new Pin(TEST_MASK);
 
     testable->set_dir_in();
-    ASSERT_EQ(PropWare::Pin::Dir::IN, testable->get_dir());
+    ASSERT_EQ(Pin::Dir::IN, testable->get_dir());
 
     tearDown();
 }
@@ -200,7 +202,7 @@ TEST(Write) {
 }
 
 TEST(Read) {
-    setUp(PropWare::Pin::Dir::IN);
+    setUp(Pin::Dir::IN);
 
     helper->set();
     ASSERT_TRUE(testable->read());

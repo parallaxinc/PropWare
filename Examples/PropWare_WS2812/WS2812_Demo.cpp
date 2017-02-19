@@ -25,8 +25,11 @@
 
 #include <PropWare/hmi/output/ws2812.h>
 
-static const PropWare::Pin::Mask    LED_TX_PIN_MASK = PropWare::Pin::Mask::P0;
-static const PropWare::WS2812::Type LED_TYPE        = PropWare::WS2812::Type::GRB;
+using PropWare::Pin;
+using PropWare::WS2812;
+
+static const Pin::Mask    LED_TX_PIN_MASK = Pin::Mask::P0;
+static const WS2812::Type LED_TYPE        = WS2812::Type::GRB;
 static const unsigned int           MAX_BRIGHTNESS  = 0x0C0C0C;
 
 /**
@@ -37,7 +40,7 @@ static const unsigned int           MAX_BRIGHTNESS  = 0x0C0C0C;
  * @include PropWare_WS2812/CMakeLists.txt
  */
 int main() {
-    const PropWare::WS2812 led(LED_TX_PIN_MASK, LED_TYPE);
+    const WS2812 led(LED_TX_PIN_MASK, LED_TYPE);
 
     const int delay = 40 * MILLISECOND;
     while (1) {

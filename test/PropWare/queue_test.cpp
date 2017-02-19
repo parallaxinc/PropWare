@@ -26,12 +26,14 @@
 #include "PropWareTests.h"
 #include <PropWare/utility/collection/queue.h>
 
+using PropWare::Queue;
+
 static const size_t         SIZE = 8;
 static int                  array[SIZE];
-static PropWare::Queue<int> *testable;
+static Queue<int> *testable;
 
 SETUP {
-    testable = new PropWare::Queue<int>(array);
+    testable = new Queue<int>(array);
 };
 
 TEARDOWN {

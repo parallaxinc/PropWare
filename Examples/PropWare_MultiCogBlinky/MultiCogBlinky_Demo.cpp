@@ -29,6 +29,8 @@
 #include <PropWare/gpio/pin.h>
 #include <PropWare/hmi/output/printer.h>
 
+using PropWare::Pin;
+
 /**
 * @brief       Toggle thread function gets started in an LMM COG.
 *
@@ -57,17 +59,17 @@ static volatile int8_t   syncStart;
 int main(int argc, char *argv[]) {
     int8_t              n;
     int8_t              cog;
-    PropWare::Pin       pin;
+    Pin       pin;
     uint32_t            nextCnt;
-    PropWare::Pin::Mask pins[] = {
-        PropWare::Pin::Mask::P16,
-        PropWare::Pin::Mask::P17,
-        PropWare::Pin::Mask::P18,
-        PropWare::Pin::Mask::P19,
-        PropWare::Pin::Mask::P20,
-        PropWare::Pin::Mask::P21,
-        PropWare::Pin::Mask::P22,
-        PropWare::Pin::Mask::P23
+    const Pin::Mask pins[] = {
+        Pin::P16,
+        Pin::P17,
+        Pin::P18,
+        Pin::P19,
+        Pin::P20,
+        Pin::P21,
+        Pin::P22,
+        Pin::P23
     };
 
     wait_time = 50 * MILLISECOND;
@@ -94,10 +96,10 @@ int main(int argc, char *argv[]) {
 }
 
 void run_cog(void *arg) {
-    PropWare::Pin pin;
+    Pin pin;
     uint32_t      nextCnt;
 
-    pin.set_mask(*(PropWare::Pin::Mask *) arg);
+    pin.set_mask(*(Pin::Mask *) arg);
     pin.set_dir_out();
 
     // wait for start signal from main cog

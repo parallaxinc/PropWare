@@ -29,6 +29,12 @@
 #include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/printer.h>
 
+using PropWare::UARTTX;
+using PropWare::UART;
+using PropWare::SimplePort;
+using PropWare::Port;
+using PropWare::Pin;
+
 static void error (const PropWare::ErrorCode err);
 
 static const int32_t BAUD_RATE = 115200;
@@ -43,7 +49,7 @@ static const int32_t DELAY     = 200;
  */
 int main () {
     PropWare::ErrorCode err;
-    PropWare::UARTTX uart;
+    UARTTX uart;
 
     // Create an easy-to-test number pattern - useful when testing with a logic
     // analyzer
@@ -67,7 +73,7 @@ int main () {
         error(err);
     if ((err = uart.set_stop_bit_width(1)))
         error(err);
-    uart.set_parity(PropWare::UART::Parity::NO_PARITY);
+    uart.set_parity(UART::Parity::NO_PARITY);
 
     while (1) {
         // Test the number pattern
@@ -81,7 +87,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
+    SimplePort debugLEDs(Port::P16, 8, Pin::Dir::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

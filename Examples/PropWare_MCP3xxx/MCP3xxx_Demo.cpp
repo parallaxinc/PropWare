@@ -28,18 +28,24 @@
 #include <PropWare/gpio/simpleport.h>
 #include <PropWare/sensor/analog/mcp3xxx.h>
 
+using PropWare::MCP3xxx;
+using PropWare::Port;
+using PropWare::SPI;
+using PropWare::SimplePort;
+using PropWare::Pin;
+
 /** Used for determining the bit-width of the ADC channel (10, 12, or 13 bit) */
-static const PropWare::MCP3xxx::PartNumber PART_NUMBER = PropWare::MCP3xxx::PartNumber::MCP300x;
-static const PropWare::MCP3xxx::Channel    CHANNEL     = PropWare::MCP3xxx::Channel::CHANNEL_1;
+static const MCP3xxx::PartNumber PART_NUMBER = MCP3xxx::PartNumber::MCP300x;
+static const MCP3xxx::Channel    CHANNEL     = MCP3xxx::Channel::CHANNEL_1;
 
 /** Pin number for MOSI (master out - slave in) */
-static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const Port::Mask MOSI = Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const Port::Mask MISO = Port::Mask::P1;
 /** Pin number for the clock signal */
-static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const Port::Mask SCLK = Port::Mask::P2;
 /** Pin number for chip select */
-static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P3;
+static const Port::Mask CS   = Port::Mask::P3;
 
 /**
  * @example     MCP3xxx_Demo.cpp
@@ -54,11 +60,11 @@ int main () {
     uint32_t          loopCounter;
     uint8_t           scaledValue, i;
     uint32_t          ledOutput;
-    PropWare::SPI     spi(MOSI, MISO, SCLK);
-    PropWare::MCP3xxx adc(spi, CS, PART_NUMBER);
+    SPI     spi(MOSI, MISO, SCLK);
+    MCP3xxx adc(spi, CS, PART_NUMBER);
 
     // Set the Quickstart LEDs for output (used as a secondary display)
-    PropWare::SimplePort scale(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
+    SimplePort scale(Port::P16, 8, Pin::Dir::OUT);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the

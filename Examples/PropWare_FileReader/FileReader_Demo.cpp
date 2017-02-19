@@ -29,7 +29,9 @@
 #include <PropWare/filesystem/fat/fatfs.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 
-using namespace PropWare;
+using PropWare::SD;
+using PropWare::FatFS;
+using PropWare::FatFileReader;
 
 /**
  * @example     FileReader_Demo.cpp

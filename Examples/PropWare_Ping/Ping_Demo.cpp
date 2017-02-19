@@ -26,6 +26,8 @@
 #include <PropWare/sensor/distance/ping.h>
 #include <PropWare/hmi/output/printer.h>
 
+using PropWare::Port;
+
 /**
  * @example     Ping_Demo.cpp
  *
@@ -34,7 +36,7 @@
  * @include PropWare_Blinky/CMakeLists.txt
  */
 int main () {
-    const PropWare::Ping ping(PropWare::Port::Mask::P14, PropWare::Port::Mask::P15);
+    const PropWare::Ping ping(Port::P14, Port::P15);
 
     while (1) {
         pwOut << "Millimeters: " << ping.get_millimeters() << '\n';

@@ -27,9 +27,12 @@
 #include <PropWare/hmi/input/scanner.h>
 #include "BufferedUART_Demo.h"
 
+using PropWare::Printer;
+using PropWare::Scanner;
+
 static const size_t BUFFER_SIZE = 256;
 
-static void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
+static void runScannerDemo (Printer &queuePrinter, Scanner &queueScanner);
 
 static bool isAnswerNo (char const userInput[]);
 
@@ -47,20 +50,20 @@ static bool isAnswerNo (char const userInput[]);
  */
 int main () {
     char                transmitBuffer[BUFFER_SIZE];
-    PropWare::CharQueue transmitQueue(transmitBuffer, BUFFER_SIZE, locknew());
+    CharQueue transmitQueue(transmitBuffer, BUFFER_SIZE, locknew());
     BufferedUARTMailbox transmitMailbox;
     transmitMailbox.queue = &transmitQueue;
     extern unsigned int _load_start_buffereduarttx_cog[];
     cognew(_load_start_buffereduarttx_cog, &transmitMailbox.queue);
-    PropWare::Printer queuePrinter(transmitQueue);
+    Printer queuePrinter(transmitQueue);
 
     char                receiveBuffer[BUFFER_SIZE];
-    PropWare::CharQueue receiveQueue(receiveBuffer);
+    CharQueue receiveQueue(receiveBuffer);
     BufferedUARTMailbox receiveMailbox;
     receiveMailbox.queue = &receiveQueue;
     extern unsigned int _load_start_buffereduartrx_cog[];
     cognew(_load_start_buffereduartrx_cog, &receiveMailbox.queue);
-    PropWare::Scanner queueScanner(receiveQueue, &queuePrinter);
+    Scanner queueScanner(receiveQueue, &queuePrinter);
 
     // This should look very familiar - it is the same code as Examples/PropWare_Scanner/Scanner_Demo.cpp
     runScannerDemo(queuePrinter, queueScanner);
@@ -68,7 +71,7 @@ int main () {
     while (1);
 }
 
-void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner) {
+void runScannerDemo (Printer &queuePrinter, Scanner &queueScanner) {
     // A nice big buffer that can hold up to 63 characters from the user (the
     // 64th is used by the null-terminator)
     char         userInput[64];

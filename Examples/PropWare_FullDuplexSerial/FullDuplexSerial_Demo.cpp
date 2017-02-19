@@ -27,7 +27,11 @@
 #include <PropWare/hmi/input/scanner.h>
 #include <PropWare/serial/uart/fullduplexserial.h>
 
-static void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner);
+using PropWare::Printer;
+using PropWare::Scanner;
+using PropWare::FullDuplexSerial;
+
+static void runScannerDemo (Printer &queuePrinter, Scanner &queueScanner);
 
 static bool isAnswerNo (char const userInput[]);
 
@@ -41,11 +45,11 @@ static bool isAnswerNo (char const userInput[]);
  * @include Examples/PropWare_FullDuplexSerial/CMakeLists.txt
  */
 int main () {
-    PropWare::FullDuplexSerial serial;
+    FullDuplexSerial serial;
     serial.start();
 
-    PropWare::Printer printer(serial);
-    PropWare::Scanner scanner(serial, &printer);
+    Printer printer(serial);
+    Scanner scanner(serial, &printer);
 
     // This should look very familiar - it is the same code as Examples/PropWare_Scanner/Scanner_Demo.cpp
     runScannerDemo(printer, scanner);
@@ -53,7 +57,7 @@ int main () {
     while (1);
 }
 
-void runScannerDemo (PropWare::Printer &queuePrinter, PropWare::Scanner &queueScanner) {
+void runScannerDemo (Printer &queuePrinter, Scanner &queueScanner) {
     // A nice big buffer that can hold up to 63 characters from the user (the
     // 64th is used by the null-terminator)
     char         userInput[64];

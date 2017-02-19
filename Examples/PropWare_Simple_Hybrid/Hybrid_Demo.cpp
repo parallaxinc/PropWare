@@ -13,7 +13,10 @@
 #include <PropWare/hmi/output/printer.h>
 #include <simpletext.h>
 
-class SimplePrinter : public PropWare::PrintCapable {
+using PropWare::PrintCapable;
+using PropWare::Printer;
+
+class SimplePrinter : public PrintCapable {
     public:
         SimplePrinter () {}
 
@@ -36,7 +39,7 @@ class SimplePrinter : public PropWare::PrintCapable {
  */
 int main () {
     SimplePrinter           mySimpleCompatiblePrinter;
-    const PropWare::Printer myPrinter(mySimpleCompatiblePrinter);
+    const Printer myPrinter(mySimpleCompatiblePrinter);
 
     putStr("Hello from the Simple function!\n");
     myPrinter.puts("Hello from PropWare's Printer!\n");

@@ -26,6 +26,8 @@
 #include <PropWare/sensor/analog/pcf8591.h>
 #include <PropWare/hmi/output/printer.h>
 
+using PropWare::PCF8591;
+
 /**
  * @example     PCF8591_Demo.cpp
  *
@@ -34,17 +36,17 @@
  * @include PropWare_PCF8591/CMakeLists.txt
  */
 int main () {
-    PropWare::PCF8591 pcf8591;
+    PCF8591 pcf8591;
 
     bool pingSuccess = pcf8591.ping();
     pwOut << "PCF8591 ping = " << pingSuccess << '\n';
 
     if (pingSuccess) {
-        uint8_t value = pcf8591.read_channel(PropWare::PCF8591::ADCChannel::CHANNEL_0);
+        uint8_t value = pcf8591.read_channel(PCF8591::ADCChannel::CHANNEL_0);
         while (1) {
             pwOut << "PCF: " << value << '\n';
             waitcnt(250 * MILLISECOND + CNT);
-            value = pcf8591.read_channel(PropWare::PCF8591::ADCChannel::CHANNEL_0);
+            value = pcf8591.read_channel(PCF8591::ADCChannel::CHANNEL_0);
         }
     }
 

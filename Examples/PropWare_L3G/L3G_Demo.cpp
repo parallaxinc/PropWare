@@ -28,14 +28,20 @@
 #include <PropWare/gpio/simpleport.h>
 #include <PropWare/sensor/gyroscope/l3g.h>
 
+using PropWare::Port;
+using PropWare::Pin;
+using PropWare::SPI;
+using PropWare::L3G;
+using PropWare::SimplePort;
+
 /** Pin number for MOSI (master out - slave in) */
-static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const Port::Mask MOSI = Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const Port::Mask MISO = Port::Mask::P1;
 /** Pin number for the clock signal */
-static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const Port::Mask SCLK = Port::Mask::P2;
 /** Pin number for chip select */
-static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
+static const Port::Mask CS   = Port::Mask::P6;
 
 void error(const PropWare::ErrorCode err);
 
@@ -50,11 +56,11 @@ int main() {
     int16_t rawGyroValues[3];
     float   gyroValues[3];
 
-    PropWare::SPI spi = PropWare::SPI::get_instance();
+    SPI spi = SPI::get_instance();
     spi.set_mosi(MOSI);
     spi.set_miso(MISO);
     spi.set_sclk(SCLK);
-    PropWare::L3G gyro(spi, CS);
+    L3G gyro(spi, CS);
 
     gyro.start();
 
@@ -68,13 +74,13 @@ int main() {
     while (1) {
         gyro.read_all(rawGyroValues);
 
-        gyroValues[PropWare::L3G::X] = gyro.convert_to_dps(rawGyroValues[PropWare::L3G::X]);
-        gyroValues[PropWare::L3G::Y] = gyro.convert_to_dps(rawGyroValues[PropWare::L3G::Y]);
-        gyroValues[PropWare::L3G::Z] = gyro.convert_to_dps(rawGyroValues[PropWare::L3G::Z]);
+        gyroValues[L3G::X] = gyro.convert_to_dps(rawGyroValues[L3G::X]);
+        gyroValues[L3G::Y] = gyro.convert_to_dps(rawGyroValues[L3G::Y]);
+        gyroValues[L3G::Z] = gyro.convert_to_dps(rawGyroValues[L3G::Z]);
 
-        pwOut << "X: " << gyroValues[PropWare::L3G::X] << '\t'
-              << "Y: " << gyroValues[PropWare::L3G::Y] << '\t'
-              << "Z: " << gyroValues[PropWare::L3G::Z] << '\n';
+        pwOut << "X: " << gyroValues[L3G::X] << '\t'
+              << "Y: " << gyroValues[L3G::Y] << '\t'
+              << "Z: " << gyroValues[L3G::Z] << '\n';
 
         waitcnt(100 * MILLISECOND + CNT);
     }
@@ -82,7 +88,7 @@ int main() {
 
 void error(const PropWare::ErrorCode err) {
     // Set the Quickstart LEDs for output (used to display the error code)
-    PropWare::SimplePort debugLEDs(PropWare::Port::P16, 8, PropWare::Pin::Dir::OUT);
+    SimplePort debugLEDs(Port::P16, 8, Pin::Dir::OUT);
 
     while (1) {
         debugLEDs.write((uint32_t) err);

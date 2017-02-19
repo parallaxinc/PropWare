@@ -27,6 +27,9 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/motor/stepper.h>
 
+using PropWare::Stepper;
+using PropWare::Port;
+
 /**
  * @example     Stepper_Demo.cpp
  *
@@ -35,12 +38,11 @@
  * @include PropWare_Stepper/CMakeLists.txt
  */
 int main () {
-    PropWare::Stepper stepper(PropWare::Port::Mask::P1, PropWare::Port::Mask::P2, PropWare::Port::Mask::P3,
-                              PropWare::Port::Mask::P4);
+    Stepper stepper(Port::P1, Port::P2, Port::P3, Port::P4);
 
     stepper.step_forward(10); // Step forward 10 steps
     stepper.step_reverse(15); // Step back 15 steps
-    stepper.step_forward(5, PropWare::Stepper::DEFAULT_DELAY / 2); // Step forward 5 steps, but do it twice as fast
+    stepper.step_forward(5, Stepper::DEFAULT_DELAY / 2); // Step forward 5 steps, but do it twice as fast
 
     return 0;
 }

@@ -29,7 +29,10 @@
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/input/scanner.h>
 
-using namespace PropWare;
+using PropWare::StringBuilder;
+using PropWare::StaticStringBuilder;
+using PropWare::Utility;
+using PropWare::Printer;
 
 static unsigned int next_fibonacci (const bool clear = false);
 

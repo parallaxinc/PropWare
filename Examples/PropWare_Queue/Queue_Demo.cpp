@@ -9,6 +9,8 @@
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/input/scanner.h>
 
+using PropWare::Queue;
+
 static const size_t ARRAY_SIZE_1 = 4;
 
 /**
@@ -20,7 +22,7 @@ static const size_t ARRAY_SIZE_1 = 4;
  */
 int main () {
     int array[ARRAY_SIZE_1];
-    PropWare::Queue<int> buffer(array);
+    Queue<int> buffer(array);
 
     pwOut.printf("Please enter a number at each of the following six prompts:\n");
     for (int i = 0; i < 6; ++i) {

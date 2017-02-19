@@ -29,7 +29,11 @@
 #include <PropWare/filesystem/fat/fatfilewriter.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 
-using namespace PropWare;
+using PropWare::SD;
+using PropWare::FatFS;
+using PropWare::BlockStorage;
+using PropWare::FatFileReader;
+using PropWare::FatFileWriter;
 
 /**
  * @example     FileWriter_Demo.cpp

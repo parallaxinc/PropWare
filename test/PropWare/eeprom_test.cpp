@@ -29,7 +29,8 @@
 #include "PropWareTests.h"
 #include <PropWare/memory/eeprom.h>
 
-using namespace PropWare;
+using PropWare::Eeprom;
+using PropWare::I2CMaster;
 
 Eeprom *testable;
 

@@ -25,6 +25,8 @@
 
 #include "libpropeller/pwm32/pwm32.h"
 
+using libpropeller::PWM32;
+
 /**
  * @example     PWM32_Demo.cpp
  *
@@ -33,7 +35,7 @@
  * @include Libpropeller_Pwm32/CMakeLists.txt
  */
 int main() {
-    libpropeller::PWM32 pwm;
+    PWM32 pwm;
     pwm.Start();
 
     pwm.Servo(16, 1);

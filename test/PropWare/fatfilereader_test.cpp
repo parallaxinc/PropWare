@@ -38,7 +38,15 @@
 #include <PropWare/filesystem/fat/fatfilereader.h>
 #include <PropWare/string/staticstringbuilder.h>
 
-using namespace PropWare;
+using PropWare::SD;
+using PropWare::BlockStorage;
+using PropWare::Filesystem;
+using PropWare::SPI;
+using PropWare::FatFS;
+using PropWare::FatFileReader;
+using PropWare::File;
+using PropWare::FatFile;
+using PropWare::StaticStringBuilder;
 
 static const char    FILE_NAME[]       = "fat_test.txt";
 static const char    FILE_NAME_UPPER[] = "FAT_TEST.TXT";
@@ -47,7 +55,7 @@ static SD            g_driver;
 static FatFS         g_fs(g_driver);
 static FatFileReader *testable;
 
-void error_checker (const ErrorCode err) {
+void error_checker (const PropWare::ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance().print_error_str(pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
@@ -122,7 +130,7 @@ TEST(Exists_doeesNotExist) {
 }
 
 TEST(OpenClose) {
-    ErrorCode err;
+    PropWare::ErrorCode err;
     testable = new FatFileReader(g_fs, FILE_NAME);
 
     err = testable->open();

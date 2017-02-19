@@ -27,7 +27,6 @@
 //#define TEST_PROPWARE_UART_PRINTF
 //#define TEST_PROPWARE_FDS
 //#define TEST_PROPWARE_FDS_PRINTF
-//#define TEST_PROPWARE_PRINTF
 //#define TEST_SIMPLE
 //#define TEST_TINYSTREAM
 //#define TEST_TINYIO
@@ -40,7 +39,9 @@
 #if (defined TEST_PROPWARE_UART || defined TEST_PROPWARE_UART_PRINTF || \
  defined TEST_PROPWARE_FDS || defined TEST_PROPWARE_FDS_PRINTF)
 #include <PropWare/hmi/output/printer.h>
-using namespace PropWare;
+#include <PropWare/serial/uart/fullduplexserial.h>
+using PropWare::FullDuplexSerial;
+using PropWare::Printer;
 #else
 int _cfg_rxpin    = -1;
 int _cfg_txpin    = -1;
@@ -75,9 +76,9 @@ int main () {
     uint32_t i = 0;
 
 #if defined TEST_PROPWARE_FDS || defined TEST_PROPWARE_FDS_PRINTF
-    PropWare::FullDuplexSerial serial;
+    FullDuplexSerial serial;
     serial.start();
-    PropWare::Printer printer(serial);
+    Printer printer(serial);
 #elif defined TEST_FDSERIAL
     fdserial *serial = fdserial_open(_cfg_rxpin, _cfg_txpin, 0, _cfg_baudrate);
 #elif defined TEST_LIBPROPELLER

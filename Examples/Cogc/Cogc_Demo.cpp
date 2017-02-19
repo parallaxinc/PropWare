@@ -25,6 +25,9 @@
 
 #include <PropWare/gpio/pin.h>
 
+using PropWare::Pin;
+using PropWare::Port;
+
 /**
  * @example Cogc_Demo.cpp
  *
@@ -38,7 +41,7 @@ int main () {
     extern unsigned int _load_start_blinky_cog[];
     cognew(_load_start_blinky_cog, NULL);
 
-    PropWare::Pin led(PropWare::Port::Mask::P16, PropWare::Port::Dir::OUT);
+    Pin led(Port::P16, Pin::Dir::OUT);
     while (1) {
         led.toggle();
         waitcnt(MILLISECOND * 100 + CNT);

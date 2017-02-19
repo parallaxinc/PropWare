@@ -23,6 +23,8 @@
 #include <PropWare/hmi/output/printer.h>
 #include <simpletools.h>
 
+using PropWare::I2CMaster;
+
 static const uint8_t MAGIC_ARRAY_1[] = "DCBA0";
 static const size_t  ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
 
@@ -37,7 +39,7 @@ static const uint16_t TEST_ADDRESS        = 32 * 1024; // Place the data immedia
  * @include PropWare_I2C/CMakeLists.txt
  */
 int main () {
-    const PropWare::I2CMaster pwI2C;
+    const I2CMaster pwI2C;
     pwOut << "EEPROM ack = " << pwI2C.ping(SHIFTED_DEVICE_ADDR) << '\n';
 
     bool success = pwI2C.put(SHIFTED_DEVICE_ADDR, TEST_ADDRESS, MAGIC_ARRAY_1, ARRAY_SIZE_1);

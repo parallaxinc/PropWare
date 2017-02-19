@@ -23,6 +23,10 @@
 #include <PropWare/memory/eeprom.h>
 #include <PropWare/hmi/input/scanner.h>
 
+using PropWare::Eeprom;
+using PropWare::Printer;
+using PropWare::Scanner;
+
 static const uint8_t  MAGIC_ARRAY_1[] = "DCBA0";
 static const size_t   ARRAY_SIZE_1    = sizeof(MAGIC_ARRAY_1);
 static const char     MAGIC_ARRAY_2[] = "Hello, world!";
@@ -37,7 +41,7 @@ static const uint16_t TEST_ADDRESS    = 32 * 1024; // Place the data immediately
  * @include PropWare_Eeprom/CMakeLists.txt
  */
 int main() {
-    PropWare::Eeprom eeprom;
+    Eeprom eeprom;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Here we have some core access of the EEPROM, passing it the address with every call. This is great for non-ASCII
@@ -62,8 +66,8 @@ int main() {
         "and PropWare::Scanner objects for reading and writing.\n";
 
 
-    PropWare::Printer eepromPrinter(eeprom);
-    PropWare::Scanner eepromScanner(eeprom);
+    Printer eepromPrinter(eeprom);
+    Scanner eepromScanner(eeprom);
 
     // Reset the EEPROM address
     eeprom.set_memory_address(TEST_ADDRESS);

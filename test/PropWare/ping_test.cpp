@@ -26,12 +26,15 @@
 #include "PropWareTests.h"
 #include <PropWare/sensor/distance/ping.h>
 
+using PropWare::Ping;
+using PropWare::Pin;
+
 unsigned int g_clockTicks;
 
-class MockPing: public PropWare::Ping {
+class MockPing: public Ping {
     public:
         MockPing()
-            : Ping(PropWare::Pin::Mask::NULL_PIN) {
+            : Ping(Pin::Mask::NULL_PIN) {
         }
 
         virtual unsigned int get_clock_ticks() const {

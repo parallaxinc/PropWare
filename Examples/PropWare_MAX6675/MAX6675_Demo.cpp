@@ -26,15 +26,18 @@
 #include <PropWare/PropWare.h>
 #include <PropWare/sensor/temperature/max6675.h>
 
+using PropWare::Port;
+using PropWare::SPI;
+using PropWare::MAX6675;
+
 /** Pin number for MOSI (master out - slave in) */
-static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const Port::Mask MOSI = Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const Port::Mask MISO = Port::Mask::P1;
 /** Pin number for the clock signal */
-static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const Port::Mask SCLK = Port::Mask::P2;
 /** Pin number for chip select */
-static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P5;
-static const uint32_t             FREQ = 10000;
+static const Port::Mask CS   = Port::Mask::P5;
 
 /**
  * @example     MAX6675_Demo.cpp
@@ -44,8 +47,8 @@ static const uint32_t             FREQ = 10000;
  * @include PropWare_MAX6675/CMakeLists.txt
  */
 int main() {
-    PropWare::SPI     spi = PropWare::SPI::get_instance();
-    PropWare::MAX6675 thermo(spi, MOSI, MISO, SCLK, CS);
+    SPI     spi = SPI::get_instance();
+    MAX6675 thermo(spi, MOSI, MISO, SCLK, CS);
 
     // Though this functional call is not necessary (default value is 0), I
     // want to bring attention to this function. It will determine whether the

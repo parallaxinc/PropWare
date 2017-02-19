@@ -29,7 +29,7 @@
 #include "PropWareTests.h"
 #include <PropWare/string/stringbuilder.h>
 
-using namespace PropWare;
+using PropWare::StringBuilder;
 
 static StringBuilder *testable;
 

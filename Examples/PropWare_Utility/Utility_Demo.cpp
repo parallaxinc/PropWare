@@ -28,6 +28,8 @@
 #include <PropWare/utility/utility.h>
 #include <PropWare/hmi/output/printer.h>
 
+using PropWare::Utility;
+
 static void sampleCountBits ();
 static void sampleTimeMeasurement ();
 static void sampleFreeMemory ();
@@ -53,7 +55,7 @@ void sampleTimeMeasurement () {
     unsigned int start = CNT;
     pwOut.println("\n/*** Timing Events ***/");
     pwOut.println("But how long does it take to send each of these messages?");
-    uint32_t timeInMicros = PropWare::Utility::measure_time_interval(start);
+    uint32_t timeInMicros = Utility::measure_time_interval(start);
     pwOut.printf("Well that previous message took precisely %u microseconds.\n", timeInMicros);
 }
 
@@ -61,11 +63,11 @@ void sampleCountBits () {
     int bits = 0x42;
     pwOut.println("\n/*** Counting Bits in a Variable ***/");
     pwOut.printf("How many bits are set in 0x%02X?\n", bits);
-    pwOut.printf("\tThe answer is... %u\n", PropWare::Utility::count_bits(bits));
+    pwOut.printf("\tThe answer is... %u\n", Utility::count_bits(bits));
 }
 
 void sampleFreeMemory () {
     pwOut.println("\n/*** Free Memory Determination ***/");
     pwOut.printf("The largest contiguous block of free memory is %u bytes\n",
-                 PropWare::Utility::get_largest_free_block_size());
+                 Utility::get_largest_free_block_size());
 }

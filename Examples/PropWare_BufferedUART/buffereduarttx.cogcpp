@@ -26,10 +26,12 @@
 #include <PropWare/serial/uart/uarttx.h>
 #include "BufferedUART_Demo.h"
 
-_NATIVE int main () {
-    PropWare::CharQueue *buffer = *reinterpret_cast<PropWare::CharQueue **>(PAR);
+using PropWare::UARTTX;
 
-    const PropWare::UARTTX tx;
+_NATIVE int main () {
+    CharQueue *buffer = *reinterpret_cast<CharQueue **>(PAR);
+
+    const UARTTX tx;
 
     while (1) {
         while (buffer->is_empty());

@@ -30,16 +30,24 @@
 #include <PropWare/serial/uart/uarttx.h>
 #include <PropWare/hmi/output/synchronousprinter.h>
 
+using PropWare::Port;
+using PropWare::Pin;
+using PropWare::UART;
+using PropWare::Runnable;
+using PropWare::UARTTX;
+using PropWare::UARTRX;
+using PropWare::SimplePort;
+
 // Create the test string - useful when testing with a terminal
 static const char                   TEST_STRING[] = "Hello, world!\n";
 static const uint32_t               BAUD_RATE     = 115200;
-static const PropWare::Port::Mask   TX_PIN        = PropWare::Port::Mask::P12;
-static const PropWare::Port::Mask   RX_PIN        = PropWare::Port::Mask::P13;
-static const PropWare::UART::Parity PARITY        = PropWare::UART::Parity::NO_PARITY;
+static const Port::Mask   TX_PIN        = Port::Mask::P12;
+static const Port::Mask   RX_PIN        = Port::Mask::P13;
+static const UART::Parity PARITY        = UART::Parity::NO_PARITY;
 
 static void error (const PropWare::ErrorCode err);
 
-class Listener : public PropWare::Runnable {
+class Listener : public Runnable {
     public:
         template<size_t N>
         Listener (const uint32_t (&stack)[N])
@@ -73,7 +81,7 @@ class Listener : public PropWare::Runnable {
         }
 
     private:
-        PropWare::UARTRX m_listener;
+        UARTRX m_listener;
         char             m_buffer[sizeof(TEST_STRING)];
 };
 
@@ -87,12 +95,12 @@ class Listener : public PropWare::Runnable {
 int main () {
     uint32_t         threadStack[256];
     Listener         listener(threadStack);
-    PropWare::UARTTX speaker(TX_PIN);
+    UARTTX speaker(TX_PIN);
 
     // Start our new cog and initialize the speaking UART
     speaker.set_baud_rate(BAUD_RATE);
     speaker.set_parity(PARITY);
-    pwSyncOut.printf("New cog ID: %d. Ready to send!!!\n", PropWare::Runnable::invoke(listener));
+    pwSyncOut.printf("New cog ID: %d. Ready to send!!!\n", Runnable::invoke(listener));
 
     while (1) {
         waitcnt(200 * MILLISECOND + CNT);
@@ -101,7 +109,7 @@ int main () {
 }
 
 void error (const PropWare::ErrorCode err) {
-    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
+    SimplePort debugLEDs(Port::P16, 8, Pin::Dir::OUT);
 
     pwSyncOut.printf("Unknown error: %u\n", err);
 

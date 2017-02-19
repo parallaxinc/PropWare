@@ -33,11 +33,13 @@
 #include "PropWareTests.h"
 #include <PropWare/memory/sd.h>
 
-using namespace PropWare;
+using PropWare::SD;
+using PropWare::SPI;
+using PropWare::Port;
 
 SD *testable;
 
-void sd_error_checker (const ErrorCode err) {
+void sd_error_checker (const PropWare::ErrorCode err) {
     if (err)
         testable->print_error_str(pwOut, (SD::ErrorCode) err);
 }
@@ -65,7 +67,7 @@ TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
 TEST(Start) {
     setUp();
 
-    ErrorCode err = testable->start();
+    PropWare::ErrorCode err = testable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
 
@@ -77,7 +79,7 @@ TEST(ReadDataBlock) {
 
     uint8_t buffer[SD::SECTOR_SIZE];
 
-    ErrorCode err = testable->start();
+    PropWare::ErrorCode err = testable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
@@ -108,7 +110,7 @@ TEST(WriteDataBlock) {
     const uint8_t *myData     = 0;
     const uint8_t sdBlockAddr = 0;
 
-    ErrorCode err = testable->start();
+    PropWare::ErrorCode err = testable->start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 

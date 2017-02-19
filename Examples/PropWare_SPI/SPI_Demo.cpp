@@ -28,21 +28,26 @@
 #include <PropWare/gpio/simpleport.h>
 #include <PropWare/serial/spi/spi.h>
 
+using PropWare::Port;
+using PropWare::SPI;
+using PropWare::Pin;
+using PropWare::SimplePort;
+
 /** Pin number for MOSI (master out - slave in) */
-static const PropWare::Port::Mask MOSI = PropWare::Port::Mask::P0;
+static const Port::Mask MOSI = Port::Mask::P0;
 /** Pin number for MISO (master in - slave out) */
-static const PropWare::Port::Mask MISO = PropWare::Port::Mask::P1;
+static const Port::Mask MISO = Port::Mask::P1;
 /** Pin number for the clock signal */
-static const PropWare::Port::Mask SCLK = PropWare::Port::Mask::P2;
+static const Port::Mask SCLK = Port::Mask::P2;
 /** Pin number for chip select */
-static const PropWare::Port::Mask CS   = PropWare::Port::Mask::P6;
+static const Port::Mask CS   = Port::Mask::P6;
 
 /** Frequency (in hertz) to run the SPI module */
 static const uint32_t               FREQ    = 100000;
 /** The SPI mode to run */
-static const PropWare::SPI::Mode    MODE    = PropWare::SPI::Mode::MODE_0;
+static const SPI::Mode    MODE    = SPI::Mode::MODE_0;
 /** Determine if the LSB or MSB should be sent first for each byte */
-static const PropWare::SPI::BitMode BITMODE = PropWare::SPI::BitMode::MSB_FIRST;
+static const SPI::BitMode BITMODE = SPI::BitMode::MSB_FIRST;
 
 /**
  * @example     SPI_Demo.cpp
@@ -55,7 +60,7 @@ int main () {
     char string[] = "Hello world!\n";  // Create the test string
     char *s;    // Create a pointer variable that can be incremented in a loop
     char in;    // Create an input variable to store received values from SPI
-    PropWare::SPI spi = PropWare::SPI::get_instance();
+    SPI spi = SPI::get_instance();
 
     // Initialize SPI module, giving it pin masks for the physical pins,
     // frequency for the clock, mode of SPI, and bitmode
@@ -68,9 +73,9 @@ int main () {
 
     // Set chip select as an output (Note: the SPI module does not control chip
     // select)
-    PropWare::Pin cs(CS, PropWare::Pin::Dir::OUT);
+    Pin cs(CS, Pin::Dir::OUT);
 
-    PropWare::SimplePort debugLEDs(PropWare::Port::Mask::P16, 8, PropWare::Pin::Dir::OUT);
+    SimplePort debugLEDs(Port::P16, 8, Pin::Dir::OUT);
 
     while (1) {
         s = string;         // Set the pointer to the beginning of the string

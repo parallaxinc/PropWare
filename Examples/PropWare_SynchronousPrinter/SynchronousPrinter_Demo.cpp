@@ -9,12 +9,16 @@
 #include <PropWare/hmi/output/synchronousprinter.h>
 #include <PropWare/gpio/pin.h>
 
+using PropWare::Runnable;
+using PropWare::Port;
+using PropWare::Pin;
+
 static const uint16_t     COGS             = 8;
 static const uint16_t     STACK_SIZE       = 128;
 static const unsigned int DELAY_IN_SECONDS = 2;
 static const uint32_t     WAIT_TIME        = DELAY_IN_SECONDS * SECOND;
 
-class SyncedPrinterCog: public PropWare::Runnable {
+class SyncedPrinterCog: public Runnable {
     public:
         template<size_t N>
         SyncedPrinterCog(const uint32_t (&stack)[N])
@@ -23,13 +27,13 @@ class SyncedPrinterCog: public PropWare::Runnable {
 
 
         virtual void run() {
-            const PropWare::Port::Mask pinMaskOfCogId = (PropWare::Port::Mask) (1 << (cogid() + 16));
+            const Port::Mask pinMaskOfCogId = (Port::Mask) (1 << (cogid() + 16));
             uint32_t                   nextCnt;
 
             nextCnt = WAIT_TIME + CNT;
             while (1) {
                 // Visual recognition that the cog is running
-                PropWare::Pin::flash_pin(pinMaskOfCogId, 3);
+                Pin::flash_pin(pinMaskOfCogId, 3);
 
                 pwSyncOut.printf("Hello from cog %d\n", cogid());
                 nextCnt = waitcnt2(nextCnt, WAIT_TIME);
@@ -60,10 +64,10 @@ int main(int argc, char *argv[]) {
     // If the comm port was not initialized successfully, just sit here and complain
     if (!pwSyncOut.has_lock())
         while (1)
-            PropWare::Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
+            Port::flash_port(PropWare::BYTE_2, PropWare::BYTE_2);
 
     for (uint8_t n = 1; n < COGS; n++)
-        PropWare::Runnable::invoke(syncedPrinterCogs[n]);
+        Runnable::invoke(syncedPrinterCogs[n]);
 
     syncedPrinterCogs[0].run();
 }

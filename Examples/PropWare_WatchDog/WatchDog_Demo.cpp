@@ -27,6 +27,9 @@
 #include <PropWare/concurrent/watchdog.h>
 #include <PropWare/hmi/output/printer.h>
 
+using PropWare::WatchDog;
+using PropWare::Runnable;
+
 static uint32_t watchDogStack[96];
 
 /**
@@ -38,8 +41,8 @@ static uint32_t watchDogStack[96];
  * @include PropWare_WatchDog/CMakeLists.txt
  */
 int main () {
-    PropWare::WatchDog watchDog(watchDogStack, 1 * SECOND);
-    PropWare::Runnable::invoke(watchDog);
+    WatchDog watchDog(watchDogStack, 1 * SECOND);
+    Runnable::invoke(watchDog);
 
     for (int i = 0; i < 5; ++i) {
         pwOut.printf("Resetting timer: %d\n", i);

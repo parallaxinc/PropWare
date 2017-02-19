@@ -27,15 +27,20 @@
 #include <PropWare/hmi/output/printer.h>
 #include <PropWare/hmi/output/hd44780.h>
 
+using PropWare::Port;
+using PropWare::Pin;
+using PropWare::HD44780;
+using PropWare::Printer;
+
 // Control pins
-static const PropWare::Port::Mask RS = PropWare::Port::Mask::P16;
-static const PropWare::Port::Mask RW = PropWare::Port::Mask::P17;
-static const PropWare::Port::Mask EN = PropWare::Port::Mask::P18;
+static const Port::Mask RS = Port::Mask::P16;
+static const Port::Mask RW = Port::Mask::P17;
+static const Port::Mask EN = Port::Mask::P18;
 
 // Data pins
-static const PropWare::Pin::Mask           FIRST_DATA_PIN = PropWare::Pin::Mask::P19;
-static const PropWare::HD44780::BusWidth   BITMODE        = PropWare::HD44780::BusWidth::WIDTH8;
-static const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::Dimensions::DIM_16x2;
+static const Pin::Mask           FIRST_DATA_PIN = Pin::Mask::P19;
+static const HD44780::BusWidth   BITMODE        = HD44780::BusWidth::WIDTH8;
+static const HD44780::Dimensions DIMENSIONS     = HD44780::Dimensions::DIM_16x2;
 
 /**
  * @example     HD44780_Demo.cpp
@@ -46,11 +51,11 @@ static const PropWare::HD44780::Dimensions DIMENSIONS     = PropWare::HD44780::D
  */
 int main () {
     // Create and initialize our LCD object
-    PropWare::HD44780 lcd(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
+    HD44780 lcd(FIRST_DATA_PIN, RS, RW, EN, BITMODE, DIMENSIONS);
     lcd.start();
 
     // Create a printer for easy, formatted writing to the LCD
-    PropWare::Printer lcdPrinter(lcd);
+    Printer lcdPrinter(lcd);
 
     // Print to the LCD (exactly 32 characters so that we fill up both lines)
     lcdPrinter.printf("%u %s%d 0x%07X", 123456789, "Hello!", -12345, 0xabcdef);

@@ -38,7 +38,14 @@
 #include <PropWare/filesystem/fat/fatfilewriter.h>
 #include <PropWare/filesystem/fat/fatfilereader.h>
 
-using namespace PropWare;
+using PropWare::SD;
+using PropWare::SPI;
+using PropWare::Filesystem;
+using PropWare::FatFS;
+using PropWare::FatFileWriter;
+using PropWare::FatFileReader;
+using PropWare::BlockStorage;
+using PropWare::File;
 
 static const char    EXISTING_FILE[]       = "fat_test.txt";
 static const char    EXISTING_FILE_UPPER[] = "FAT_TEST.TXT";
@@ -47,7 +54,7 @@ static SD            g_driver;
 static FatFS         g_fs(g_driver);
 static FatFileWriter *testable;
 
-void error_checker (const ErrorCode err) {
+void error_checker (const PropWare::ErrorCode err) {
     if (err) {
         if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
             SPI::get_instance().print_error_str(pwOut, (const SPI::ErrorCode) err);
@@ -127,7 +134,7 @@ TEST(Exists_doesExist) {
 }
 
 TEST(OpenClose_ExistingFile) {
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     testable = new FatFileWriter(g_fs, EXISTING_FILE);
 
@@ -145,7 +152,7 @@ TEST(OpenClose_ExistingFile) {
 }
 
 TEST(OpenCloseDelete_NonExistingFile) {
-    ErrorCode err;
+    PropWare::ErrorCode err;
 
     testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
 
