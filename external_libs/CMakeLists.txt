@@ -35,105 +35,23 @@ set(LIBPROPELLERUINO_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libArduino/libPropelleru
 ####################################################################
 
 ####################################################################
+include(./ParseSimpleIDEMetaData.cmake)
+
 # Find Simple sources
 set(SIMPLE_ROOT "${PROJECT_SOURCE_DIR}/Simple-Libraries/Learn/Simple Libraries")
 
-set(SOURCE_FILE_EXTENSIONS
-    *.c
-    *.C
-    *.cpp
-    *.cxx
-    *.cc
-    *.s
-    *.S
-    *.dat
-    *.cogc
-    *.cogcxx
-    *.cogcpp
-    *.ecogc
-    *.ecogcxx
-    *.ecogcpp
-    *.spin)
-set(HEADER_FILE_EXTENSIONS
-    *.h
-    *.H
-    *.hpp
-    *.HPP
-    *.Hpp)
+# Find SimpleIDE project files
+file(GLOB_RECURSE SIMPLE_IDE_PROJECT_FILES "${SIMPLE_ROOT}/*.side")
 
-function(subdirlist result curdir)
-    file(GLOB children RELATIVE "${curdir}" "${curdir}/*")
-    set(dirlist "")
-    foreach (child IN LISTS children)
-        if (IS_DIRECTORY "${curdir}/${child}")
-            list(APPEND dirlist "${child}")
-        endif ()
-    endforeach ()
-    set(${result} ${dirlist} PARENT_SCOPE)
-endfunction()
+# Find Simple's header files
+file(GLOB_RECURSE SIMPLE_HEADERS "${SIMPLE_ROOT}/*.h")
 
-function(compute_demo_filenames result library)
-    set(cdf_FILES "")
-    get_filename_component(library_name "${library}" NAME)
-    foreach (extension ".c" ".h")
-        list(APPEND cdf_FILES "${library}/${library_name}${extension}")
-    endforeach ()
-    set(${result} ${cdf_FILES} PARENT_SCOPE)
-endfunction()
-
-# Get most categories
-subdirlist(CATEGORIES "${SIMPLE_ROOT}")
-
-# Add all the robots
-list(REMOVE_ITEM CATEGORIES Robotics)
-subdirlist(ROBOTS "${SIMPLE_ROOT}/Robotics")
-foreach (robot IN LISTS ROBOTS)
-    list(APPEND CATEGORIES "Robotics/${robot}")
-endforeach ()
-
-# Find the libraries in each category
-foreach (category IN LISTS CATEGORIES)
-    set(category "${SIMPLE_ROOT}/${category}")
-    subdirlist(CATEGORY_LIBRARIES ${category})
-    foreach (new_library IN LISTS CATEGORY_LIBRARIES)
-        list(APPEND SIMPLE_LIBRARIES "${category}/${new_library}")
-    endforeach ()
-endforeach ()
-
-# Manually add simpletools
-list(APPEND SIMPLE_LIBRARIES "${SIMPLE_ROOT}/Utility/libsimpletools/source")
-
-foreach (library IN LISTS SIMPLE_LIBRARIES)
-    compute_demo_filenames(DEMO_FILES "${library}")
-
-    set(GLOB_PATTERNS "")
-    foreach (extension IN LISTS SOURCE_FILE_EXTENSIONS)
-        list(APPEND GLOB_PATTERNS "${library}/*${extension}")
-    endforeach ()
-    file(GLOB ALL_SOURCE_FILES_IN_LIB ${GLOB_PATTERNS})
-    foreach (file IN LISTS ALL_SOURCE_FILES_IN_LIB)
-        if (NOT "${file}" IN_LIST DEMO_FILES)
-            list(APPEND SIMPLE_OBJECTS "${file}")
-        endif ()
-    endforeach ()
-
-    set(GLOB_PATTERNS "")
-    foreach (extension IN LISTS HEADER_FILE_EXTENSIONS)
-        list(APPEND GLOB_PATTERNS "${library}/*${extension}")
-    endforeach ()
-    file(GLOB ALL_HEADER_FILES_IN_LIB ${GLOB_PATTERNS})
-    foreach (file IN LISTS ALL_HEADER_FILES_IN_LIB)
-        if (NOT "${file}" IN_LIST DEMO_FILES)
-            list(APPEND SIMPLE_HEADERS "${file}")
-            list(APPEND SIMPLE_OBJECTS "${file}") # Not necessary, but provides better help in CLion
-        endif ()
-    endforeach ()
-endforeach ()
-
-list(SORT SIMPLE_OBJECTS)
-
-# Add simpletools.h to the list of libraries, which now works as our list of include directories
-list(APPEND SIMPLE_LIBRARIES "${SIMPLE_ROOT}/Utility/libsimpletools")
+# Find include directories
+set(SIMPLE_INCLUDE_DIRS "")
+foreach(project_file IN LISTS SIMPLE_IDE_PROJECT_FILES)
+    get_filename_component(LIBRARY_ROOT "${project_file}" DIRECTORY)
+    list(APPEND SIMPLE_INCLUDE_DIRS "${LIBRARY_ROOT}")
+endforeach()
 
 install(FILES ${SIMPLE_HEADERS}
     DESTINATION PropWare/include
@@ -142,7 +60,7 @@ install(FILES ${SIMPLE_HEADERS}
 
 # Ensure the include directories are added for examples and unit tests too. This is done twice because the
 # "PARENT_SCOPE" option _only_ sets the variable in the parent scope (it ignores the current scope)
-set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} ${SIMPLE_LIBRARIES} "${LIBPROPELLERUINO_INCLUDE_DIR}")
+set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} ${SIMPLE_INCLUDE_DIRS} "${LIBPROPELLERUINO_INCLUDE_DIR}")
 set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} PARENT_SCOPE)
 
 add_subdirectory(cog)
