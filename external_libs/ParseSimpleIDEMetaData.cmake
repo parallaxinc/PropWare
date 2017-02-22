@@ -29,11 +29,25 @@ function(add_simple_sources root_dir file_contents target_name)
     list(REMOVE_AT FILE_LINES 0)
 
     set(NEW_SOURCES "")
+    set(COMPILER_FLAGS "")
     foreach (line ${FILE_LINES})
         starts_with("${line}" ">" IS_NOT_SOURCE_FILE)  # If the line doesn't start with a '>', then it's source code
         if (IS_NOT_SOURCE_FILE)
+            # Various compiler flags are declared via the project files, so let's parse those now...
+
+            # Optimization...
             if (line MATCHES ">optimize=")
                 string(REPLACE ">optimize=" "" OPTIMIZATION_LEVEL "${line}")
+                list(APPEND COMPILER_FLAGS "${OPTIMIZATION_LEVEL}")
+            elseif (line MATCHES ">defs::")
+                string(REPLACE ">defs::" "" temp "${line}")
+                string(REPLACE " " ";" temp "${temp}")
+                list(APPEND COMPILER_FLAGS ${temp})
+            elseif (line MATCHES ">-l" OR line MATCHES ">-create_library")
+                # Skip linker lines, and obviously "-create_library" is not a GCC argument
+            elseif (line MATCHES ">-")
+                string(REPLACE ">" "" NEW_FLAG "${line}")
+                list(APPEND COMPILER_FLAGS "${NEW_FLAG}")
             endif ()
         else ()
             remove_link_symbol("${line}" relativeFilepath)
@@ -44,9 +58,10 @@ function(add_simple_sources root_dir file_contents target_name)
         endif ()
     endforeach ()
 
-    # Set the appropriate optimization level
+    # Set all of the compiler flags for these sources
     foreach (source_file ${NEW_SOURCES})
-        set_source_files_properties("${source_file}" PROPERTIES COMPILE_FLAGS "${OPTIMIZATION_LEVEL}")
+        string(REPLACE ";" " " COMPILER_FLAGS_STRING "${COMPILER_FLAGS}")
+        set_source_files_properties("${source_file}" PROPERTIES COMPILE_FLAGS "${COMPILER_FLAGS_STRING}")
     endforeach ()
 
     # Add the sources
