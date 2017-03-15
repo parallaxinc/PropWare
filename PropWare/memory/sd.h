@@ -609,7 +609,12 @@ class SD : public BlockStorage {
 
         static void unpack_sd_pins (uint32_t pins[]) {
             __asm__ volatile (
-            "       brw #skipVars          \n\t"
+#ifdef __PROPELLER_COG__
+                    "       jmp #skipVars          \n\t"
+#else
+                    "       brw #skipVars          \n\t"
+#endif
+
                     "       .compress off          \n"
                     "__cfg_sdspi_config1           \n\t"
                     "       nop                    \n"
