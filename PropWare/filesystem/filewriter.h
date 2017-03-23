@@ -70,8 +70,9 @@ class FileWriter : virtual public File, public PrintCapable {
             PropWare::ErrorCode err;
 
             char *s = (char *) string;
-            while (*s++) {
+            while (*s) {
                 check_errors(this->safe_put_char(*s));
+                s++;
             }
 
             return NO_ERROR;
