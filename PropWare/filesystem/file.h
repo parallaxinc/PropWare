@@ -153,19 +153,15 @@ class File {
         /**
          * Files can only be created by their respective Filesystems
          */
-        File (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
+        File (Filesystem &fs, const char name[], BlockStorage::Buffer &buffer, const Printer &logger = pwOut)
                 : m_logger(&logger),
                   m_driver(fs.get_driver()),
+                  m_buf(&buffer),
                   m_fsBufMeta(&fs.m_dirMeta),
                   m_length(-1),
                   m_ptr(0),
                   m_error(NO_ERROR),
                   m_open(false) {
-            if (NULL == buffer)
-                this->m_buf = &fs.m_buf;
-            else
-                this->m_buf = buffer;
-
             this->m_contentMeta.name = name;
         }
 

@@ -56,11 +56,12 @@ class Filesystem {
          * @brief       Prepare a filesystem for use; All filesystems must be mounted before files can be listed or
          *              opened
          *
+         * @param[in]   buffer      Scratch buffer where data can be temporarily stored during mounting
          * @param[in]   partition   If multiple partitions are supported, the partition number can be specified here
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        virtual PropWare::ErrorCode mount (const uint8_t partition = 0) = 0;
+        virtual PropWare::ErrorCode mount (uint8_t buffer[], const uint8_t partition = 0) = 0;
 
         /**
          * @brief   Unmounting will ensure that any changes are saved back to the physical device
@@ -91,8 +92,6 @@ class Filesystem {
                   m_sectorSize(driver.get_sector_size()),
                   m_mounted(false),
                   m_nextFileId(0) {
-            this->m_buf.buf  = NULL;
-            this->m_buf.meta = &m_dirMeta;
         }
 
         const BlockStorage *get_driver () const {
@@ -105,10 +104,6 @@ class Filesystem {
             return this->m_nextFileId++;
         }
 
-        BlockStorage::Buffer *get_buffer () {
-            return &this->m_buf;
-        }
-
         uint8_t get_tier1s_per_tier2_shift () {
             return this->m_tier1sPerTier2Shift;
         }
@@ -119,10 +114,9 @@ class Filesystem {
         const uint16_t     m_sectorSize;
         uint8_t            m_tier1sPerTier2Shift;  // Used as a quick multiply/divide; Stores log_2(Sectors per Cluster)
 
-        bool                   m_mounted;
-        BlockStorage::Buffer   m_buf;
         BlockStorage::MetaData m_dirMeta;
-        int                    m_nextFileId;
+        bool m_mounted;
+        int  m_nextFileId;
 };
 
 }

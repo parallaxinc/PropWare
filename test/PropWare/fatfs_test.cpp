@@ -74,9 +74,9 @@ TEST(ReadMasterBootRecord) {
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
-    testable->m_buf.buf = (uint8_t *) malloc(testable->m_driver->get_sector_size());
+    uint8_t buffer[testable->m_driver->get_sector_size()];
 
-    err = testable->read_boot_sector(0);
+    err = testable->read_boot_sector(0, buffer);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
@@ -90,8 +90,9 @@ TEST(Mount_defaultParameters) {
     setUp();
 
     PropWare::ErrorCode err;
+    uint8_t buffer[testable->m_driver->get_sector_size()];
 
-    err = testable->mount();
+    err = testable->mount(buffer);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
     // This test is meant to be run with a FAT32 filesystem
@@ -100,36 +101,39 @@ TEST(Mount_defaultParameters) {
     tearDown();
 }
 
-TEST(Mount_withParameter0) {
+TEST(Mount_partition0) {
     setUp();
 
     PropWare::ErrorCode err;
+    uint8_t buffer[testable->m_driver->get_sector_size()];
 
-    err = testable->mount(0);
+    err = testable->mount(buffer, 0);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     tearDown();
 }
 
-TEST(Mount_withParameter1) {
+TEST(Mount_partition1) {
     setUp();
 
     PropWare::ErrorCode err;
+    uint8_t buffer[testable->m_driver->get_sector_size()];
 
-    err = testable->mount(1);
+    err = testable->mount(buffer, 1);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     tearDown();
 }
 
-TEST(Mount_withParameter4) {
+TEST(Mount_partition4) {
     setUp();
 
     PropWare::ErrorCode err;
+    uint8_t buffer[testable->m_driver->get_sector_size()];
 
-    err = testable->mount(4);
+    err = testable->mount(buffer, 4);
     ASSERT_EQ_MSG(FatFS::UNSUPPORTED_FILESYSTEM, err);
 
     tearDown();
@@ -147,9 +151,9 @@ int main () {
     RUN_TEST(Constructor);
     RUN_TEST(ReadMasterBootRecord);
     RUN_TEST(Mount_defaultParameters);
-    RUN_TEST(Mount_withParameter0);
-    RUN_TEST(Mount_withParameter1);
-    RUN_TEST(Mount_withParameter4);
+    RUN_TEST(Mount_partition0);
+    RUN_TEST(Mount_partition1);
+    RUN_TEST(Mount_partition4);
 
     COMPLETE();
 }

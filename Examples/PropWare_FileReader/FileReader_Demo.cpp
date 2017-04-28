@@ -32,6 +32,7 @@
 using PropWare::SD;
 using PropWare::FatFS;
 using PropWare::FatFileReader;
+using PropWare::BlockStorage;
 
 /**
  * @example     FileReader_Demo.cpp
@@ -43,9 +44,15 @@ using PropWare::FatFileReader;
 int main() {
     const SD driver;
     FatFS    filesystem(driver);
-    filesystem.mount();
+    uint8_t dataBuffer[driver.get_sector_size()];
+    filesystem.mount(dataBuffer);
 
-    FatFileReader reader(filesystem, "fat_test.txt");
+    BlockStorage::MetaData bufferMetaData;
+    BlockStorage::Buffer buffer = {
+            buf: dataBuffer,
+            meta: &bufferMetaData
+    };
+    FatFileReader reader(filesystem, "fat_test.txt", buffer);
     reader.open();
 
     while (!reader.eof())

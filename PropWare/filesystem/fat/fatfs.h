@@ -81,9 +81,6 @@ class FatFS : public Filesystem {
         ~FatFS () {
             this->unmount();
 
-            if (NULL != this->m_buf.buf)
-                free(this->m_buf.buf);
-
             if (NULL != this->m_fat)
                 free(this->m_fat);
         }
@@ -91,7 +88,7 @@ class FatFS : public Filesystem {
         /**
          * @see PropWare::Filesystem::mount
          */
-        PropWare::ErrorCode mount (const uint8_t partition = 0) {
+        PropWare::ErrorCode mount (uint8_t buffer[], const uint8_t partition = 0) {
             PropWare::ErrorCode err;
 
             if (this->m_mounted)
@@ -104,23 +101,20 @@ class FatFS : public Filesystem {
             this->m_fatMod     = false;
             this->m_nextFileId = 0;
 
-            // Allocate the buffers
-            if (NULL == this->m_buf.buf)
-                this->m_buf.buf        = (uint8_t *) malloc(this->m_sectorSize);
+            // Allocate buffer for the FAT
             if (NULL == this->m_fat)
                 this->m_fat            = (uint8_t *) malloc(this->m_sectorSize);
-            if (Utility::empty(this->m_buf.meta->name))
-                this->m_buf.meta->name = "FAT shared buffer";
+            this->m_dirMeta.name = "Current working directory";
 
             // Excellent information on determining FAT type can be found on page 14 of the following document,
             // starting with the section "FAT Type Determination"
             // https://staff.washington.edu/dittrich/misc/fatgen103.pdf
-            check_errors(this->read_boot_sector(partition));
-            check_errors(this->common_boot_sector_parser());
-            this->partition_info_parser();
+            check_errors(this->read_boot_sector(partition, buffer));
+            check_errors(this->common_boot_sector_parser(buffer));
+            this->partition_info_parser(buffer);
             check_errors(this->determine_fat_type());
-            this->store_root_info();
-            check_errors(this->read_fat_and_root_sectors());
+            this->store_root_info(buffer);
+            check_errors(this->read_fat_and_root_sectors(buffer));
 
             this->m_mounted = true;
 
@@ -133,12 +127,6 @@ class FatFS : public Filesystem {
         PropWare::ErrorCode unmount () {
             if (this->m_mounted) {
                 PropWare::ErrorCode err;
-
-                if (NULL != this->m_buf.buf) {
-                    check_errors(this->m_driver->flush(&this->m_buf));
-                    free(this->m_buf.buf);
-                    this->m_buf.buf = NULL;
-                }
 
                 if (NULL != this->m_fat) {
                     check_errors(this->flush_fat());
@@ -214,12 +202,12 @@ class FatFS : public Filesystem {
          *
          * @return 0 upon success, error code otherwise
          */
-        inline PropWare::ErrorCode read_boot_sector (const uint8_t partition) {
+        inline PropWare::ErrorCode read_boot_sector (const uint8_t partition, uint8_t buffer[]) {
             PropWare::ErrorCode err;
 
             // Read first sector into the default buffer
-            check_errors(this->m_driver->read_data_block(0, this->m_buf.buf));
-            const uint8_t bootSectorId = this->m_driver->get_byte(BOOT_SECTOR_ID_ADDR, this->m_buf.buf);
+            check_errors(this->m_driver->read_data_block(0, buffer));
+            const uint8_t bootSectorId = this->m_driver->get_byte(BOOT_SECTOR_ID_ADDR, buffer);
 
             // If we don't have a master boot record, the job is simple...
             if (BOOT_SECTOR_ID == bootSectorId) {
@@ -233,10 +221,9 @@ class FatFS : public Filesystem {
                 // Sector 0 is the master boot record - great. Parse the partition table and read in the boot sector
             else {
                 const uint16_t partitionRow = PARTITION_TABLE_START + (partition << 4);
-                check_errors(this->is_fat_volume(this->m_buf.buf[partitionRow + PARTITION_ID_OFFSET]));
-                this->m_initFatInfo.bootSector = this->m_driver->get_long(partitionRow + PARTITION_START_OFFSET,
-                                                                          this->m_buf.buf);
-                check_errors(this->m_driver->read_data_block(this->m_initFatInfo.bootSector, this->m_buf.buf));
+                check_errors(this->is_fat_volume(buffer[partitionRow + PARTITION_ID_OFFSET]));
+                this->m_initFatInfo.bootSector = this->m_driver->get_long(partitionRow + PARTITION_START_OFFSET, buffer);
+                check_errors(this->m_driver->read_data_block(this->m_initFatInfo.bootSector, buffer));
             }
 
             return 0;
@@ -254,29 +241,29 @@ class FatFS : public Filesystem {
             return UNSUPPORTED_FILESYSTEM;
         }
 
-        inline PropWare::ErrorCode common_boot_sector_parser () {
+        inline PropWare::ErrorCode common_boot_sector_parser (uint8_t buffer[]) {
             // This makes the code much easier to read
             InitFATInfo *i = &this->m_initFatInfo;
 
             // Number of entries in the root directory
-            i->rootEntryCount = this->m_driver->get_short(ROOT_ENTRY_CNT_ADDR, this->m_buf.buf);
+            i->rootEntryCount = this->m_driver->get_short(ROOT_ENTRY_CNT_ADDR, buffer);
 
             // Number of sectors in the root directory
             i->rootDirSectors = (i->rootEntryCount * 32 + this->m_driver->get_sector_size() - 1) >>
                     this->m_driver->get_sector_size_shift();
 
             // Get the reserved sector count
-            i->rsvdSectorCount = this->m_driver->get_short(RSVD_SCTR_CNT_ADDR, this->m_buf.buf);
+            i->rsvdSectorCount = this->m_driver->get_short(RSVD_SCTR_CNT_ADDR, buffer);
 
             // Total number of FATs
-            i->numFATs = this->m_driver->get_byte(NUM_FATS_ADDR, this->m_buf.buf);
+            i->numFATs = this->m_driver->get_byte(NUM_FATS_ADDR, buffer);
             if (2 != i->numFATs)
                 return TOO_MANY_FATS;
 
-            memcpy(this->m_label, &this->m_buf.buf[LABEL_ADDR], 8);
+            memcpy(this->m_label, &buffer[LABEL_ADDR], 8);
             this->m_label[8] = '\0';
 
-            uint8_t sectorsPerCluster = this->m_driver->get_byte(SEC_PER_CLSTR_ADDR, this->m_buf.buf);
+            uint8_t sectorsPerCluster = this->m_driver->get_byte(SEC_PER_CLSTR_ADDR, buffer);
             switch (sectorsPerCluster) {
                 case 1:
                     this->m_tier1sPerTier2Shift = 0;
@@ -310,20 +297,20 @@ class FatFS : public Filesystem {
             return 0;
         }
 
-        inline void partition_info_parser () {
+        inline void partition_info_parser (uint8_t buffer[]) {
             // This makes the code much easier to read
             InitFATInfo *i = &this->m_initFatInfo;
 
             // Check if FAT size is valid in 16- or 32-bit location
-            uint32_t fatSize = this->m_driver->get_short(FAT_SIZE_16_ADDR, this->m_buf.buf);
+            uint32_t fatSize = this->m_driver->get_short(FAT_SIZE_16_ADDR, buffer);
             if (!fatSize)
-                fatSize = this->m_driver->get_long(FAT_SIZE_32_ADDR, this->m_buf.buf);
+                fatSize = this->m_driver->get_long(FAT_SIZE_32_ADDR, buffer);
             i->FATSize = fatSize;
 
             // Check if FAT16 total sectors is valid
-            uint32_t totalSectors = this->m_driver->get_short(TOT_SCTR_16_ADDR, this->m_buf.buf);
+            uint32_t totalSectors = this->m_driver->get_short(TOT_SCTR_16_ADDR, buffer);
             if (!totalSectors)
-                totalSectors = this->m_driver->get_long(TOT_SCTR_32_ADDR, this->m_buf.buf);
+                totalSectors = this->m_driver->get_long(TOT_SCTR_32_ADDR, buffer);
             i->totalSectors = totalSectors;
 
 
@@ -349,7 +336,7 @@ class FatFS : public Filesystem {
             return 0;
         }
 
-        inline void store_root_info () {
+        inline void store_root_info (uint8_t buffer[]) {
             // Create some variables for legibility's sake
             const uint_fast32_t bootSector      = this->m_initFatInfo.bootSector;
             const uint_fast32_t reservedSectors = this->m_initFatInfo.rsvdSectorCount;
@@ -367,13 +354,13 @@ class FatFS : public Filesystem {
                     this->m_firstDataAddr += this->m_rootDirSectors;
                     break;
                 case FAT_32:
-                    this->m_rootCluster = this->m_driver->get_long(ROOT_CLUSTER_ADDR, this->m_buf.buf);
+                    this->m_rootCluster = this->m_driver->get_long(ROOT_CLUSTER_ADDR, buffer);
                     this->m_rootAddr    = this->compute_tier1_from_tier2(this->m_rootCluster);
                     break;
             }
         }
 
-        inline PropWare::ErrorCode read_fat_and_root_sectors () {
+        inline PropWare::ErrorCode read_fat_and_root_sectors (uint8_t buffer[]) {
             PropWare::ErrorCode err;
 
             // Store the first sector of the FAT
@@ -381,17 +368,17 @@ class FatFS : public Filesystem {
             this->m_curFatSector = 0;
 
             // Read in the root directory, set root as current
-            check_errors(this->m_driver->read_data_block(this->m_rootAddr, this->m_buf.buf));
-            this->m_buf.meta->curTier2Addr = this->m_rootAddr;
+            check_errors(this->m_driver->read_data_block(this->m_rootAddr, buffer));
+            this->m_dirMeta.curTier2Addr = this->m_rootAddr;
             if (FAT_16 == this->m_filesystem) {
                 this->m_dir_firstCluster   = (uint32_t) -1;
-                this->m_buf.meta->curTier2 = (uint32_t) -1;
+                this->m_dirMeta.curTier2 = (uint32_t) -1;
             } else {
-                this->m_buf.meta->curTier2 = this->m_dir_firstCluster = this->m_rootCluster;
-                check_errors(this->get_fat_value(this->m_buf.meta->curTier2, &this->m_buf.meta->nextTier2));
+                this->m_dirMeta.curTier2 = this->m_dir_firstCluster = this->m_rootCluster;
+                check_errors(this->get_fat_value(this->m_dirMeta.curTier2, &this->m_dirMeta.nextTier2));
             }
-            this->m_buf.meta->curTier2Addr   = this->m_rootAddr;
-            this->m_buf.meta->curTier1Offset = 0;
+            this->m_dirMeta.curTier2Addr   = this->m_rootAddr;
+            this->m_dirMeta.curTier1Offset = 0;
 
             return 0;
         }
@@ -460,10 +447,10 @@ class FatFS : public Filesystem {
         }
 
         /**
-         * @brief   Enlarge the current directory
+         * @brief   Add more sectors to the directory to allow for new file and directory entries
          */
         PropWare::ErrorCode extend_current_directory () {
-            return this->extend_fat(this->m_buf.meta);
+            return this->extend_fat(&this->m_dirMeta);
         }
 
         /**
@@ -488,10 +475,10 @@ class FatFS : public Filesystem {
 
             // This function should only be called when a file or directory has
             // reached the end of its cluster chain
-            uint16_t entriesPerFatSector = (uint16_t) (1 << this->m_entriesPerFatSector_Shift);
-            uint16_t allocUnitOffset     = (uint16_t) (bufferMetadata->curTier2 % entriesPerFatSector);
-            uint16_t fatPointerAddress   = allocUnitOffset * this->m_filesystem;
-            uint32_t nextSector          = this->m_driver->get_long(fatPointerAddress, this->m_fat);
+            const uint16_t entriesPerFatSector = (uint16_t) (1 << this->m_entriesPerFatSector_Shift);
+            const uint16_t allocUnitOffset     = (uint16_t) (bufferMetadata->curTier2 % entriesPerFatSector);
+            const uint16_t fatPointerAddress   = allocUnitOffset * this->m_filesystem;
+            const uint32_t nextSector          = this->m_driver->get_long(fatPointerAddress, this->m_fat);
             if (!this->is_eoc(nextSector))
                 return INVALID_FAT_APPEND;
 
@@ -701,38 +688,33 @@ class FatFS : public Filesystem {
                 this->m_logger->println();
             }
 
-            this->m_logger->println("Common Buffer");
-            this->m_logger->println("=============");
-            if (this->m_buf.buf == NULL)
-                this->m_logger->println("\tEmpty");
-            else {
-                BlockStorage::MetaData *bufMeta = this->m_buf.meta;
-                this->m_logger->printf("\tID: %d\n", bufMeta->id);
-                this->m_logger->printf("\tModdified: %s\n", Utility::to_string(bufMeta->mod));
-                this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", bufMeta->curTier2Addr,
-                                       bufMeta->curTier2Addr);
-                this->m_logger->printf("\tCur. sector offset from cluster start: %u\n", bufMeta->curTier1Offset);
-                this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", bufMeta->curTier2, bufMeta->curTier2);
-                this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", bufMeta->nextTier2, bufMeta->nextTier2);
-                if (printBlocks)
-                    BlockStorage::print_block(*this->m_logger, this->m_buf, this->m_sectorSize);
-            }
+            this->m_logger->println("Current working directory");
+            this->m_logger->println("=========================");
+            this->m_logger->printf("\tID: %d\n", this->m_dirMeta.id);
+            this->m_logger->printf("\tModified: %s\n", Utility::to_string(this->m_dirMeta.mod));
+            this->m_logger->printf("\tCur. cluster's start sector: 0x%08X/%u\n", this->m_dirMeta.curTier2Addr,
+                                   this->m_dirMeta.curTier2Addr);
+            this->m_logger->printf("\tCur. sector offset from cluster start: %u\n", this->m_dirMeta.curTier1Offset);
+            this->m_logger->printf("\tCurrent allocation unit: 0x%08X/%u\n", this->m_dirMeta.curTier2, (&this->m_dirMeta)
+                    ->curTier2);
+            this->m_logger->printf("\tNext allocation unit: 0x%08X/%u\n", this->m_dirMeta.nextTier2, (&this->m_dirMeta)
+                    ->nextTier2);
             this->m_logger->println();
         }
 
     private:
-        InitFATInfo m_initFatInfo;
-        uint8_t     m_filesystem;  // File system type - one of FAT_16 or FAT_32
-        char        m_label[9]; // Filesystem label
-        uint32_t    m_fatStart;  // Starting block address of the FAT
-        uint32_t    m_rootCluster;  // Cluster of root directory/first data sector (FAT32 only)
-        uint32_t    m_rootAddr;  // Starting block address of the root directory
-        uint32_t    m_rootDirSectors;  // Number of sectors for the root directory
-        uint32_t    m_firstDataAddr;  // Starting block address of the first data cluster
-        uint32_t    m_fatSize;
-        uint16_t    m_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
-        uint8_t     *m_fat;  // Buffer for FAT entries only
-        bool m_fatMod;
+        InitFATInfo            m_initFatInfo;
+        uint8_t                m_filesystem;  // File system type - one of FAT_16 or FAT_32
+        char                   m_label[9]; // Filesystem label
+        uint32_t               m_fatStart;  // Starting block address of the FAT
+        uint32_t               m_rootCluster;  // Cluster of root directory/first data sector (FAT32 only)
+        uint32_t               m_rootAddr;  // Starting block address of the root directory
+        uint32_t               m_rootDirSectors;  // Number of sectors for the root directory
+        uint32_t               m_firstDataAddr;  // Starting block address of the first data cluster
+        uint32_t               m_fatSize;
+        uint16_t               m_entriesPerFatSector_Shift;  // How many FAT entries are in a single sector of the FAT
+        uint8_t                *m_fat;  // Buffer for FAT entries only
+        bool                   m_fatMod;
 
         uint32_t m_curFatSector;  // Store the current FAT sector loaded into m_fat
         uint32_t m_dir_firstCluster;  // Store the current directory's starting cluster

@@ -46,7 +46,7 @@ class FatFileWriter : public virtual FatFile, public virtual FileWriter {
          * @param[in]   logger      This is only used for printing debug statements. Use of the logger is limited
          *                          such that all references will be optimized out in normal application code
          */
-        FatFileWriter (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
+        FatFileWriter (FatFS &fs, const char name[], BlockStorage::Buffer &buffer, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
                   FileWriter(fs, name, buffer, logger) {

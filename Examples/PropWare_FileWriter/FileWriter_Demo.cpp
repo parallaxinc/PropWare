@@ -48,16 +48,23 @@ int main() {
     const SD  driver;
     FatFS     filesystem(driver);
 
-    BlockStorage::Buffer   writeBuffer;
+    uint8_t                readBufferData[driver.get_sector_size()];
+    BlockStorage::MetaData readMetaData;
+    BlockStorage::Buffer   readBuffer = {
+            buf: readBufferData,
+            meta: &readMetaData
+    };
+    uint8_t                writeBufferData[driver.get_sector_size()];
     BlockStorage::MetaData writeMetaData;
-    uint8_t                bufferData[driver.get_sector_size()];
-    writeBuffer.buf  = bufferData;
-    writeBuffer.meta = &writeMetaData;
+    BlockStorage::Buffer   writeBuffer = {
+            buf: writeBufferData,
+            meta: &writeMetaData
+    };
 
-    filesystem.mount();
+    filesystem.mount(readBufferData);
 
-    FatFileReader reader(filesystem, "fat_test.txt");
-    FatFileWriter writer(filesystem, "new2.txt", &writeBuffer);
+    FatFileReader reader(filesystem, "fat_test.txt", readBuffer);
+    FatFileWriter writer(filesystem, "new2.txt", writeBuffer);
 
     reader.open();
     writer.open();

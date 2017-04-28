@@ -47,12 +47,15 @@ using PropWare::FatFileReader;
 using PropWare::BlockStorage;
 using PropWare::File;
 
-static const char    EXISTING_FILE[]       = "fat_test.txt";
-static const char    EXISTING_FILE_UPPER[] = "FAT_TEST.TXT";
-static const char    NEW_FILE_NAME[]       = "new_test.txt";
-static SD            g_driver;
-static FatFS         g_fs(g_driver);
-static FatFileWriter *testable;
+static const char             EXISTING_FILE[]       = "fat_test.txt";
+static const char             EXISTING_FILE_UPPER[] = "FAT_TEST.TXT";
+static const char             NEW_FILE_NAME[]       = "new_test.txt";
+static SD                     g_driver;
+static FatFS                  g_fs(g_driver);
+static FatFileWriter          *testable;
+static uint8_t                *dataBuffer;
+static BlockStorage::Buffer   buffer;
+static BlockStorage::MetaData bufferMeta;
 
 void error_checker (const PropWare::ErrorCode err) {
     if (err) {
@@ -82,7 +85,10 @@ void clear_buffer (File *file) {
 
 SETUP {
     PropWare::ErrorCode err;
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
+    dataBuffer = new uint8_t[g_driver.get_sector_size()];
+    buffer.buf = dataBuffer;
+    buffer.meta = &bufferMeta;
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
     err      = testable->open();
     if (err) {
         MESSAGE("Setup failed!");
@@ -97,6 +103,10 @@ TEARDOWN {
         delete testable;
         testable = NULL;
     }
+    if (NULL != dataBuffer) {
+        delete dataBuffer;
+        dataBuffer = NULL;
+    }
     g_fs.flush_fat();
 }
 
@@ -104,12 +114,12 @@ TEST(ConstructorDestructor) {
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
     ASSERT_NEQ_MSG(0, strcmp(EXISTING_FILE, EXISTING_FILE_UPPER));
 
-    testable = new FatFileWriter(g_fs, EXISTING_FILE);
+    testable = new FatFileWriter(g_fs, EXISTING_FILE, buffer);
 
     ASSERT_EQ_MSG(0, strcmp(EXISTING_FILE_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_driver);
-    ASSERT_EQ_MSG((unsigned int) &g_fs.m_buf, (unsigned int) testable->m_buf);
+    ASSERT_EQ_MSG((unsigned int) &buffer, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) &g_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
     ASSERT_EQ_MSG(false, testable->m_fileMetadataModified);
@@ -118,13 +128,13 @@ TEST(ConstructorDestructor) {
 }
 
 TEST(Exists_doesNotExist) {
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
     ASSERT_FALSE(testable->exists());
     tearDown();
 }
 
 TEST(Exists_doesExist) {
-    testable                   = new FatFileWriter(g_fs, EXISTING_FILE);
+    testable                   = new FatFileWriter(g_fs, EXISTING_FILE, buffer);
 
     PropWare::ErrorCode err;
     const bool          exists = testable->exists(err);
@@ -136,7 +146,7 @@ TEST(Exists_doesExist) {
 TEST(OpenClose_ExistingFile) {
     PropWare::ErrorCode err;
 
-    testable = new FatFileWriter(g_fs, EXISTING_FILE);
+    testable = new FatFileWriter(g_fs, EXISTING_FILE, buffer);
 
     err = testable->open();
     error_checker(err);
@@ -154,7 +164,7 @@ TEST(OpenClose_ExistingFile) {
 TEST(OpenCloseDelete_NonExistingFile) {
     PropWare::ErrorCode err;
 
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
 
     ASSERT_FALSE(testable->exists());
 
@@ -214,13 +224,13 @@ TEST(SafePutChar_singleChar) {
         clear_buffer(driver, buffer);
     }
 
-    FatFileReader reader(g_fs, NEW_FILE_NAME);
+    FatFileReader reader(g_fs, NEW_FILE_NAME, buffer);
     ASSERT_EQ_MSG(0, reader.open());
     ASSERT_EQ_MSG(1, reader.get_length()); // Reader opens file after write
     ASSERT_EQ_MSG(sampleChar, reader.get_char());
     reader.close();
 
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
     err      = testable->remove();
     error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->remove()
@@ -260,14 +270,14 @@ TEST(SafePutChar_MultiLine) {
         clear_buffer(driver, buffer);
     }
 
-    FatFileReader reader(g_fs, NEW_FILE_NAME);
+    FatFileReader reader(g_fs, NEW_FILE_NAME, buffer);
     ASSERT_EQ_MSG(0, reader.open());
     ASSERT_EQ_MSG(sizeof(testString), reader.get_length());
     for (unsigned int i = 0; i < sizeof(testString); ++i)
         ASSERT_EQ_MSG(testString[i], reader.get_char());
     reader.close();
 
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
     err      = testable->remove();
     error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->remove()
@@ -285,10 +295,10 @@ TEST(CopyFile) {
     PropWare::ErrorCode err;
     setUp();
 
-    uint8_t                rawBuffer[SD::SECTOR_SIZE];
+    uint8_t                rawBuffer[g_driver.get_sector_size()];
     BlockStorage::MetaData bufferMeta;
     BlockStorage::Buffer   readBuffer = {rawBuffer, &bufferMeta};
-    FatFileReader          reader(g_fs, EXISTING_FILE, &readBuffer);
+    FatFileReader          reader(g_fs, EXISTING_FILE, readBuffer);
     ASSERT_EQ_MSG(0, reader.open());
 
     MESSAGE("Files opened...");
@@ -319,7 +329,7 @@ TEST(CopyFile) {
     // Reset reader
     ASSERT_EQ_MSG(0, reader.seek(0, File::SeekDir::BEG));
 
-    FatFileReader fileWriterChecker(g_fs, NEW_FILE_NAME);
+    FatFileReader fileWriterChecker(g_fs, NEW_FILE_NAME, buffer);
     ASSERT_EQ_MSG(0, fileWriterChecker.open());
     ASSERT_EQ_MSG(reader.get_length(), fileWriterChecker.get_length());
 
@@ -339,7 +349,7 @@ TEST(CopyFile) {
 
     fileWriterChecker.close();
 
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
     err      = testable->remove();
     error_checker(err);
     ASSERT_EQ_MSG(0, err); // testable->remove()
@@ -358,11 +368,13 @@ int main () {
 
     START(FatFileReaderTest);
 
-    if ((err = g_fs.mount(1))) {
+    uint8_t *tempBuffer = new uint8_t[g_driver.get_sector_size()];
+    if ((err = g_fs.mount(tempBuffer, 1))) {
         error_checker(err);
         failures = (uint8_t) -1;
         COMPLETE();
     }
+    delete tempBuffer;
 
     RUN_TEST(ConstructorDestructor);
     RUN_TEST(Exists_doesNotExist);

@@ -4,12 +4,22 @@
   <div class="row">
     <h1>Using an IDE</h1>
 
-    <p>Ensure PropWare is installed on your system prior to using an IDE.</p>
+    <p>Ensure PropWare and PropGCC are installed on your system prior to starting your IDE.</p>
 
     <h2>JetBrain's CLion</h2>
 
+    <h3>Creating a New Project</h3>
+
     <ol>
-      <li>Configure CLion to use PropWare's CMake distribution instead of the version embedded in CLion:
+      <li>Select <code>New Project</code>, either from the splash screen or the <code>File</code> menu.</li>
+      <li>Accept the default value for </li>
+    </ol>
+
+    <h3>Opening an Existing Project</h3>
+
+    <ol>
+      <li>If PropWare has been installed to a shared directory (as opposed to being installed in the project
+        directory), then configure CLion to use PropWare's CMake distribution instead of the version embedded in CLion:
         <ol>
           <li><code>File</code> &rarr; <code>Settings...</code></li>
           <li><code>Build, Execution, Deployment</code> &rarr; <code>Toolchains</code></li>
@@ -21,12 +31,11 @@
       </li>
       <li>Create your <a href="build-system.html">CMakeLists.txt file</a>.</li>
       <li>Open CLion and choose <code>File</code> &rarr; <code>Open...</code>. Navigate to your CMakeLists.txt
-        file
-        and press <code>Ok</code>.
+        file and press <code>Ok</code>.
       </li>
     </ol>
 
-    <h2>Eclipse CDT (and other IDEs)</h2>
+    <h2>Eclipse CDT</h2>
 
     <ol>
       <li>For Eclipse users, ensure the C/C++ Developer Tools (CDT) plugin is installed; For new Eclipse

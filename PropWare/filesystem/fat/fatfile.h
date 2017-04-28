@@ -77,7 +77,7 @@ class FatFile : virtual public File {
 
     protected:
 
-        FatFile (FatFS &fs, const char name[], BlockStorage::Buffer *buffer = NULL, const Printer &logger = pwOut)
+        FatFile (FatFS &fs, const char name[], BlockStorage::Buffer &buffer, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   m_fs(&fs) {
             strcpy(this->m_name, name);

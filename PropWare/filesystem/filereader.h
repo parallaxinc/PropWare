@@ -118,8 +118,7 @@ class FileReader : virtual public File, virtual public ScanCapable {
 
     protected:
 
-        FileReader (Filesystem &fs, const char name[], BlockStorage::Buffer *buffer = NULL,
-                    const Printer &logger = pwOut)
+        FileReader (Filesystem &fs, const char name[], BlockStorage::Buffer &buffer, const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger) {
         }
 };
