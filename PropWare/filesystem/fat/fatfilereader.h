@@ -30,6 +30,8 @@
 
 namespace PropWare {
 
+extern BlockStorage::Buffer SHARED_BUFFER;
+
 /**
  * @brief   Read a file on a FAT 16 or FAT 32 storage device
  *
@@ -88,7 +90,8 @@ class FatFileReader : virtual public FatFile, virtual public FileReader {
          * @param[in]   logger      This is only used for printing debug statements. Use of the logger is limited
          *                          such that all references will be optimized out in normal application code
          */
-        FatFileReader (FatFS &fs, const char name[], BlockStorage::Buffer &buffer, const Printer &logger = pwOut)
+        FatFileReader (FatFS &fs, const char name[], BlockStorage::Buffer &buffer = SHARED_BUFFER,
+                       const Printer &logger = pwOut)
                 : File(fs, name, buffer, logger),
                   FatFile(fs, name, buffer, logger),
                   FileReader(fs, name, buffer, logger) {

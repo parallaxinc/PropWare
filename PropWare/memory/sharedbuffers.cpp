@@ -1,7 +1,7 @@
 /**
- * @file    FileReader_Demo.cpp
+ * @file        PropWare/memory/sd.cpp
  *
- * @author  David Zemon
+ * @author      David Zemon
  *
  * @copyright
  * The MIT License (MIT)<br>
@@ -24,33 +24,18 @@
  */
 
 #include <PropWare/PropWare.h>
-#include <PropWare/hmi/output/printer.h>
-#include <PropWare/memory/sd.h>
-#include <PropWare/filesystem/fat/fatfs.h>
-#include <PropWare/filesystem/fat/fatfilereader.h>
+#include <PropWare/memory/blockstorage.h>
 
-using PropWare::SD;
-using PropWare::FatFS;
-using PropWare::FatFileReader;
 using PropWare::BlockStorage;
 
-/**
- * @example     FileReader_Demo.cpp
- *
- * Echo a text file to the terminal
- *
- * @include PropWare_FileReader/CMakeLists.txt
- */
-int main() {
-    const SD driver;
-    FatFS    filesystem(driver);
-    filesystem.mount();
+namespace PropWare {
 
-    FatFileReader reader(filesystem, "fat_test.txt");
-    reader.open();
+uint8_t                HALF_K_DATA_BUFFER1[512];
+uint8_t                HALF_K_DATA_BUFFER2[512];
+BlockStorage::MetaData SHARED_BUFFER_METADATA;
+BlockStorage::Buffer   SHARED_BUFFER = {
+        buf: HALF_K_DATA_BUFFER2,
+        meta: &SHARED_BUFFER_METADATA
+};
 
-    while (!reader.eof())
-        pwOut << reader.get_char();
-
-    return 0;
 }

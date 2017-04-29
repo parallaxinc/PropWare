@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.3)
 find_package(PropWare REQUIRED)
 
 set(BOARD activityboard)
-set(MODEL cmm)
 
 project(FileWriter_Demo)
 

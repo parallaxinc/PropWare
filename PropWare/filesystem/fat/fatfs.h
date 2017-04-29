@@ -34,6 +34,9 @@
 
 namespace PropWare {
 
+extern uint8_t HALF_K_DATA_BUFFER1[];
+extern uint8_t HALF_K_DATA_BUFFER2[];
+
 /**
  * FAT 16/32 filesystem driver - can be used with SD cards or any other PropWare::BlockStorage device
  */
@@ -62,16 +65,22 @@ class FatFS : public Filesystem {
         /**
          * @brief       Constructor
          *
-         * @param[in]   *driver     Address of a the driver which is capable of reading the physical hardware. Commonly,
-         *                          this would be an instance of PropWare::SD, but one could potentially write a driver
-         *                          for a floppy disk or CD driver or any other block storage device
-         * @param[in]   *logger     Useful for debugging, a logger can be given to help determine when something goes
-         *                          wrong. All code using the logger will be optimized out by GCC so long as you only
-         *                          call public method
+         * @param[in]   *driver         Address of a the driver which is capable of reading the physical hardware.
+         *                              Commonly, this would be an instance of PropWare::SD, but one could
+         *                              potentially write a driver for a floppy disk or CD driver or any other block
+         *                              storage device
+         * @param[in]   fatBuffer[]     Byte array that can be used to store blocks of the file allocation table (FAT)
+         *                              used during mounting, file searching, and file expansion.
+         * @param[in]   *logger         Useful for debugging, a logger can be given to help determine when something
+         *                              goes wrong. All code using the logger will be optimized out by GCC so long as
+         *                              you only call public method
+         *
+         * @warning     The default value for the `buffer[]` parameter is only valid when using a SD card or other
+         *              `PropWare::BlockStorage` driver with a block size of 512-bytes or less.
          */
-        FatFS (const BlockStorage &driver, const Printer &logger = pwOut)
+        FatFS (const BlockStorage &driver, uint8_t fatBuffer[] = HALF_K_DATA_BUFFER1, const Printer &logger = pwOut)
                 : Filesystem(driver, logger),
-                  m_fat(NULL),
+                  m_fat(fatBuffer),
                   m_fatMod(false) {
         }
 
@@ -87,8 +96,11 @@ class FatFS : public Filesystem {
 
         /**
          * @see PropWare::Filesystem::mount
+         *
+         * @warning     The default value for the `buffer[]` parameter is only valid when using a SD card or other
+         *              `PropWare::BlockStorage` driver with a block size of 512-bytes or less.
          */
-        PropWare::ErrorCode mount (uint8_t buffer[], const uint8_t partition = 0) {
+        PropWare::ErrorCode mount (uint8_t buffer[] = HALF_K_DATA_BUFFER2, const uint8_t partition = 0) {
             PropWare::ErrorCode err;
 
             if (this->m_mounted)
@@ -101,9 +113,6 @@ class FatFS : public Filesystem {
             this->m_fatMod     = false;
             this->m_nextFileId = 0;
 
-            // Allocate buffer for the FAT
-            if (NULL == this->m_fat)
-                this->m_fat            = (uint8_t *) malloc(this->m_sectorSize);
             this->m_dirMeta.name = "Current working directory";
 
             // Excellent information on determining FAT type can be found on page 14 of the following document,
@@ -125,17 +134,10 @@ class FatFS : public Filesystem {
          * @see PropWare::Filesystem::unmount
          */
         PropWare::ErrorCode unmount () {
-            if (this->m_mounted) {
-                PropWare::ErrorCode err;
-
-                if (NULL != this->m_fat) {
-                    check_errors(this->flush_fat());
-                    free(this->m_fat);
-                    this->m_fat = NULL;
-                }
-            }
-
-            return NO_ERROR;
+            if (this->m_mounted)
+                return this->flush_fat();
+            else
+                return NO_ERROR;
         }
 
         /**
