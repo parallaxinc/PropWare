@@ -114,12 +114,12 @@ TEST(ConstructorDestructor) {
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
     ASSERT_NEQ_MSG(0, strcmp(EXISTING_FILE, EXISTING_FILE_UPPER));
 
-    testable = new FatFileWriter(g_fs, EXISTING_FILE, buffer);
+    testable = new FatFileWriter(g_fs, EXISTING_FILE);
 
     ASSERT_EQ_MSG(0, strcmp(EXISTING_FILE_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_driver);
-    ASSERT_EQ_MSG((unsigned int) &buffer, (unsigned int) testable->m_buf);
+    ASSERT_EQ_MSG((unsigned int) &PropWare::SHARED_BUFFER, (unsigned int) testable->m_buf);
     ASSERT_EQ_MSG((unsigned int) testable->m_fs, (unsigned int) &g_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
     ASSERT_EQ_MSG(false, testable->m_fileMetadataModified);
@@ -128,13 +128,13 @@ TEST(ConstructorDestructor) {
 }
 
 TEST(Exists_doesNotExist) {
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
     ASSERT_FALSE(testable->exists());
     tearDown();
 }
 
 TEST(Exists_doesExist) {
-    testable                   = new FatFileWriter(g_fs, EXISTING_FILE, buffer);
+    testable                   = new FatFileWriter(g_fs, EXISTING_FILE);
 
     PropWare::ErrorCode err;
     const bool          exists = testable->exists(err);
@@ -146,7 +146,7 @@ TEST(Exists_doesExist) {
 TEST(OpenClose_ExistingFile) {
     PropWare::ErrorCode err;
 
-    testable = new FatFileWriter(g_fs, EXISTING_FILE, buffer);
+    testable = new FatFileWriter(g_fs, EXISTING_FILE);
 
     err = testable->open();
     error_checker(err);
@@ -164,7 +164,7 @@ TEST(OpenClose_ExistingFile) {
 TEST(OpenCloseDelete_NonExistingFile) {
     PropWare::ErrorCode err;
 
-    testable = new FatFileWriter(g_fs, NEW_FILE_NAME, buffer);
+    testable = new FatFileWriter(g_fs, NEW_FILE_NAME);
 
     ASSERT_FALSE(testable->exists());
 

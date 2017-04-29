@@ -106,7 +106,7 @@ TEARDOWN {
 }
 
 TEST(ConstructorDestructor) {
-    testable = new FatFileReader(g_fs, FILE_NAME, buffer);
+    testable = new FatFileReader(g_fs, FILE_NAME);
 
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
     ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, FILE_NAME_UPPER));
@@ -114,8 +114,8 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG(0, strcmp(FILE_NAME_UPPER, testable->get_name()));
     ASSERT_EQ_MSG((unsigned int) &pwOut, (unsigned int) testable->m_logger);
     ASSERT_EQ_MSG((unsigned int) g_fs.get_driver(), (unsigned int) testable->m_driver);
-    ASSERT_EQ_MSG((unsigned int) &buffer, (unsigned int) testable->m_buf);
-    ASSERT_NEQ_MSG((unsigned int) NULL, (unsigned int) testable->m_buf->buf);
+    ASSERT_EQ_MSG((unsigned int) &PropWare::SHARED_BUFFER, (unsigned int) testable->m_buf);
+    ASSERT_EQ_MSG((unsigned int) PropWare::SHARED_BUFFER.buf, (unsigned int) testable->m_buf->buf);
     ASSERT_EQ_MSG((unsigned int) &g_fs.m_dirMeta, (unsigned int) testable->m_fsBufMeta);
     ASSERT_EQ_MSG((unsigned int) &g_fs, (unsigned int) testable->m_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
@@ -124,7 +124,7 @@ TEST(ConstructorDestructor) {
 }
 
 TEST(Exists_doesExist) {
-    testable                   = new FatFileReader(g_fs, FILE_NAME, buffer);
+    testable                   = new FatFileReader(g_fs, FILE_NAME);
 
     PropWare::ErrorCode err;
     const bool          exists = testable->exists(err);
@@ -134,14 +134,14 @@ TEST(Exists_doesExist) {
 }
 
 TEST(Exists_doeesNotExist) {
-    testable = new FatFileReader(g_fs, BOGUS_FILE_NAME, buffer);
+    testable = new FatFileReader(g_fs, BOGUS_FILE_NAME);
     ASSERT_FALSE(testable->exists());
     tearDown();
 }
 
 TEST(OpenClose) {
     PropWare::ErrorCode err;
-    testable = new FatFileReader(g_fs, FILE_NAME, buffer);
+    testable = new FatFileReader(g_fs, FILE_NAME);
 
     err = testable->open();
     error_checker(err);
@@ -159,7 +159,7 @@ TEST(OpenClose) {
 }
 
 TEST(Open_NonExistantFile) {
-    testable = new FatFileReader(g_fs, BOGUS_FILE_NAME, buffer);
+    testable = new FatFileReader(g_fs, BOGUS_FILE_NAME);
     ASSERT_EQ_MSG(FatFile::FILENAME_NOT_FOUND, testable->open());
 
     tearDown();
