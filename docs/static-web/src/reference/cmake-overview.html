@@ -7,7 +7,7 @@
     <h2>What is CMake?</h2>
 
     <p>CMake is a Makefile generator. CMake will scan your source code and, based on some predefined rules,
-      generate <code>Make</code> scripts. Using Cmake is a two-step process: first generate the Makefiles,
+      generate <code>Make</code> scripts. Using CMake is a two-step process: first generate the Makefiles,
       then compile your code by invoking <code>Make</code> on the Makefiles. CMake documentation can be
       found on <a href="http://cmake.org/cmake/help/documentation.html">cmake.org</a></p>
 
@@ -60,7 +60,7 @@ make</code></pre>
           extra
           arguments are needed for this command. After successfully running CMake, simply type <code>make
           </code> - character for character. When it completes successfully, your project will have been
-          compiled into its binary format, ready to be programmed to your Propeller. %PropWare provides
+          compiled into its binary format, ready to be programmed to your Propeller. PropWare provides
           some extra “targets” to make your life even easier though. Try typing <code>make debug</code> to
           write your program to RAM and open a terminal (like Parallax's PST) or <code>make run</code> to
           write your program to EEPROM.</p>
@@ -69,10 +69,8 @@ make</code></pre>
 
     <h2>CMakeLists.txt</h2>
 
-    <p>As described in <a href="http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml">Chapter 4</a>,
-      the
-      CMakeLists.txt file is required for all CMake (and therefore %PropWare) applications. The file must be
-      named “CMakeLists.txt” - character for character.</p>
+    <p>This file should reside at the root of our project and contains a technical description of your project. The
+       rules for compiling your program are provided via this file.</p>
 
     <p>The contents of the file are simple - many useful tips can be gleaned from both
       <a href="http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml">Creating a PropWare
@@ -106,26 +104,21 @@ make</code></pre>
       ones
       in a single step with <code>make clean all</code> (order matters).</p>
 
-    <p>PropWare provides two extra targets for your convenience.</p>
+    <p>PropWare provides numerous extra targets for your convenience, most of which are undocumented at this time.
+       The two most common targets are:</p>
 
     <ul>
       <li>The <code>debug</code> target will compile your code, write it to your Propeller's HUB RAM and then
-        start a serial terminal to
-        aid in debugging your application. When you are finished, press any of the arrow keys on your
-        keyboard
-        (don't use
-        <code>Control-C</code> - it doesn't seem to like that) and you will be returned to your normal
-        command
-        prompt.
+        start a serial terminal to aid in debugging your application. When you are finished, press the escape key and
+        you will be returned to your normal command prompt.
       </li>
       <li>The <code>run</code> target will compile your code and load it into your Propeller's EEPROM.</li>
     </ul>
 
     <h2>Debugging CMake Configurations</h2>
 
-    <p>After generating your Makefiles, try adding <code>VERBOSE=1</code> to your Make command. This will tell
-      Make
-      to print each command to the terminal before running it - rather than printing only a short summary of
+    <p>After generating your Makefiles, try adding <code>VERBOSE=1</code> to your Make command. This will force Make
+      to echo each command to the terminal before running it - rather than printing only a short summary of
       what is being done. The output is very verbose and can be cumbersome to read - but it is invaluable when
       determining what went wrong with your compilation. Full command: <code>make VERBOSE=1</code></p>
   </div>
