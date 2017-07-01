@@ -30,7 +30,7 @@
 namespace PropWare {
 
 /**
- * @brief   4-phase stepper motor driver
+ * @brief   4-phase, unipolar stepper motor driver
  *
  * This driver always runs in full-torque, full-step mode. An excellent animated GIF of
  * how 4-phase stepper motors work can be found here: http://www.piclist.com/images/www/hobby_elec/gif/step_motor1_2.gif
@@ -95,7 +95,7 @@ class Stepper {
                 const unsigned int stepNumber = static_cast<unsigned int>(this->m_currentStep) + 1;
                 this->m_currentStep = static_cast<Step>(stepNumber % 4);
                 this->set_full_step();
-                waitcnt(usDelay * MICROSECOND);
+                waitcnt(usDelay * MICROSECOND + CNT);
             }
         }
 
@@ -110,7 +110,7 @@ class Stepper {
                 const unsigned int stepNumber = static_cast<unsigned int>(this->m_currentStep) + 3;
                 this->m_currentStep = static_cast<Step>(stepNumber % 4);
                 this->set_full_step();
-                waitcnt(usDelay * MILLISECOND);
+                waitcnt(usDelay * MICROSECOND + CNT);
             }
         }
 
