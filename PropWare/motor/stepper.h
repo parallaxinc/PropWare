@@ -30,7 +30,7 @@
 namespace PropWare {
 
 /**
- * @brief   4-phase, unipolar stepper motor driver
+ * @brief   4-phase, bipolar stepper motor driver
  *
  * This driver always runs in full-torque, full-step mode. An excellent animated GIF of
  * how 4-phase stepper motors work can be found here: http://www.piclist.com/images/www/hobby_elec/gif/step_motor1_2.gif
