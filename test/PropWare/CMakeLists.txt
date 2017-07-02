@@ -13,6 +13,7 @@ create_test(utility_test            utility_test)
 create_test(spi_test                spi_test)
 create_test(eeprom_test             eeprom_test)
 create_test(ping_test               ping_test)
+create_test(stepper_test            stepper_test)
 
 set_tests_properties(
     sample_test
@@ -21,6 +22,7 @@ set_tests_properties(
     utility_test
     eeprom_test
     ping_test
+    stepper_test
     PROPERTIES LABELS hardware-independent)
 
 install(FILES PropWareTests.h
