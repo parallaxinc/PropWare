@@ -80,49 +80,58 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 
 #define ASSERT(actual) \
     if (!(actual)) { \
-        pwOut << "#\t\t`ASSERT(" << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Assertion failed: `ASSERT(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_TRUE(actual) \
     if (true == !(actual)) { \
-        pwOut << "#\t\t`ASSERT_TRUE(" << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected true, got false: `ASSERT_TRUE(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_FALSE(actual) \
     if (false == !(actual)) { \
-        pwOut << "#\t\t`ASSERT_FALSE(" << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected false, got true: `ASSERT_FALSE(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NULL(actual) \
     if (NULL != (actual)) { \
-        pwOut << "#\t\t`ASSERT_NULL(" << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected null, got " << (void *) actual << ": `ASSERT_NULL(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NOT_NULL(actual) \
     if (NULL == (actual)) { \
-        pwOut << "#\t\t`ASSERT_NULL(" << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected not-null, got null: `ASSERT_NOT_NULL(" << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_EQ(expected, actual) \
     if ((expected) != (actual)) { \
-        pwOut << "#\t\t`ASSERT_EQ(" << #expected << ", " << #actual << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected values to be equal, but they do not match: "; \
+        pwOut << "`ASSERT_EQ(" << #expected << ", " << #actual << ")`\n"; \
         _tearDown(); \
         return false; \
     }
 
 #define ASSERT_NEQ(lhs, rhs) \
     if ((lhs) == (rhs)) { \
-        pwOut << "#\t\t`ASSERT_NEQ(" << #lhs << ", " << #rhs << ")`\n"; \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected values to different, but they match: "; \
+        pwOut << "`ASSERT_NEQ(" << #lhs << ", " << #rhs << ")`\n"; \
         _tearDown(); \
         return false; \
     }
@@ -130,7 +139,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
-        pwOut << "Expected: `" << expected << "`; Acutal: `" << actual << "`\n"; \
+        pwOut << "Expected `" << expected << "`, got `" << actual << "`: "; \
+        pwOut << "`ASSERT_EQ_MSG(" << #expected << ", " #actual ")`\n"; \
         _tearDown(); \
         return false; \
     }
@@ -138,7 +148,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define ASSERT_NEQ_MSG(lhs, rhs) \
     if ((lhs) == (rhs)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
-        pwOut << "Expected mismatch. Got: `" << lhs << "` == `" << rhs << "`\n"; \
+        pwOut << "Expected mismatch, but both sides are `" << lhs << "`:"; \
+        pwOut << "`ASSERT_NEQ_MSG(" << #lhs << ", " << #rhs << ")`\n"; \
         _tearDown(); \
         return false; \
     }
