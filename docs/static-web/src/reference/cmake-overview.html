@@ -9,20 +9,16 @@
     <p>CMake is a Makefile generator. CMake will scan your source code and, based on some predefined rules,
       generate <code>Make</code> scripts. Using CMake is a two-step process: first generate the Makefiles,
       then compile your code by invoking <code>Make</code> on the Makefiles. CMake documentation can be
-      found on <a href="http://cmake.org/cmake/help/documentation.html">cmake.org</a></p>
+      found on <a href="http://cmake.org/cmake/help/documentation.html" target="_blank">cmake.org</a></p>
 
     <h2>What is Make?</h2>
 
     <p>Make is a much older tool that will, at its core, incrementally compile your code. This simply means that
-      if
-      you have a project with two files (<code>cat.c</code> and <code>dog.c</code>), and a change is made to
-      <code>cat.c</code>, then only <code>cat.c</code> will be re-compiled. Lots of different flavors of Make
-      have been developed over the years including GNU, MinGW, Ninja, and more - but we will focus on GNU
-      since
-      that is what ships with the Windows version of PropGCC and comes with most Linux operating systems.
-      GNU's
-      Make documentation can be found on
-      <a href="http://www.gnu.org/software/make/manual/html_node/index.html">gnu.org</a>.</p>
+      if you have a project with two files (<code>cat.c</code> and <code>dog.c</code>), and a change is made to
+      <code>cat.c</code>, then only <code>cat.c</code> will be re-compiled. Lots of different flavors of Make have been
+      developed over the years including GNU, MinGW, Ninja, and more - but we will focus on GNU since that is what ships
+      with the Windows version of PropGCC and comes with most Linux operating systems. GNU's Make documentation can be
+      found on <a href="http://www.gnu.org/software/make/manual/html_node/index.html" target="_blank">gnu.org</a>.</p>
 
     <h2>Getting Started</h2>
 
@@ -45,48 +41,38 @@ make</code></pre>
           Make we're using. As reasoned in the <code>What is Make?</code> section above, we will always be
           using <code>Unix Makefiles</code> for PropWare projects.</p>
         <p>The second argument is the source directory of your project. This directory must contain a
-          <code>CMakeLists.txt</code> file as described in step 1 of
-          <a href="#/rreference/build-system">Creating a PropWare
-            Application</a>. I prefer to run “out of source” builds - which means I create a new folder
-          within my project where all of my generated and compiled files will end up. Generally, I name
-          this
-          folder <code>bin</code>. With this simple case, the complete command to generate the Makefiles
-          would be <code>cmake -G &quot;Unix Makefiles&quot; ..</code>. The <code>..</code> is a
-          cross-platform way of saying “the directory above me”. For reference: <code>.</code> refers to
-          the current directory.</p>
+          <code>CMakeLists.txt</code> file to be defined as a CMake project. I prefer to run “out of source” builds -
+          which means I create a new folder within my project where all of my generated and compiled files will end up.
+          Generally, I name this folder <code>bin</code>, but you may see it also referred to as <code>build</code>.
+          With this simple case, the complete command to generate the Makefiles would be <code>cmake -G &quot;Unix
+          Makefiles&quot; ..</code>. The <code>..</code> is a cross-platform way of saying “the directory above me”. For
+          reference: <code>.</code> refers to the current directory.</p>
       </li>
       <li>
         <p><code>make</code>: Make is old, flexible, and great. CMake has done all the work though and no
-          extra
-          arguments are needed for this command. After successfully running CMake, simply type <code>make
-          </code> - character for character. When it completes successfully, your project will have been
-          compiled into its binary format, ready to be programmed to your Propeller. PropWare provides
-          some extra “targets” to make your life even easier though. Try typing <code>make debug</code> to
-          write your program to RAM and open a terminal (like Parallax's PST) or <code>make run</code> to
-          write your program to EEPROM.</p>
+          extra arguments are needed for this command. After successfully running CMake, simply type <code>make</code>
+          - character for character. When it completes successfully, your project will have been compiled into its
+          binary format, ready to be programmed to your Propeller. %PropWare provides some extra “targets” to make your
+          life even easier though. Try typing <code>make debug</code> to write your program to RAM and open a terminal
+          (like Parallax's PST) or <code>make run</code> to write your program to EEPROM.</p>
       </li>
     </ul>
 
     <h2>CMakeLists.txt</h2>
 
     <p>This file should reside at the root of our project and contains a technical description of your project. The
-       rules for compiling your program are provided via this file.</p>
-
-    <p>The contents of the file are simple - many useful tips can be gleaned from both
-      <a href="http://david.zemon.name/PropWare/md_docs_Ch4AppDeployment.xhtml">Creating a PropWare
-        Application</a> and
-      <a href="http://david.zemon.name/PropWare/md_docs_AppACMakeForPropware.xhtml">CMake for PropWare</a>.
-    </p>
+      rules for compiling your program are provided via this file. The file must be named “CMakeLists.txt” -
+      character for character, including capitalization. This file marks the project and being managed by CMake. The
+      contents of the file are reasonably straight-forward, and examples can be found
+      <a href="#/reference/cmake-by-example">here</a>.</p>
 
     <h2>CMakeCache.txt</h2>
 
-    <p>I won't hold back - CMakeCache.txt can be a royal pain. CMake keeps track of your settings in this file
-      and,
-      a lot of times, you might change a setting without CMake taking notice. When this happens, just delete
-      the
-      <code>CMakeCache.txt</code> file and rerun your CMake command (as given above). As a bonus to using the
-      out-of-source build technique you can also just delete your entire build directory and start over - then
-      you know with 100% confidence that no leftover settings will linger around to haunt you.</p>
+    <p>CMake keeps track of your settings in this file and, at rare times, you might change a setting without CMake
+      taking notice. When this happens, delete the <code>CMakeCache.txt</code> file and rerun your CMake command (as
+      given above). As a bonus to using the out-of-source build technique you can also just delete your entire build
+      directory and start over - then you know with 100% confidence that no leftover settings will linger around to
+      haunt you.</p>
 
     <h2>Curses CMake</h2>
 

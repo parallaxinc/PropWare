@@ -60,7 +60,7 @@
     <ol>
       <li>The defining piece of a PropWare project is the <code>CMakeLists.txt</code> file. It must be named
         "CMakeLists.txt" as per CMake standards. Full details on CMake files in relation to PropWare are
-        documented under <a href="reference/build-system.html">Build System</a>, but a typical use case with four
+        documented under <a href="#/reference/cmake-reference">Build System</a>, but a typical use case with four
         source code files is provided below.
         <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
 find_package(PropWare REQUIRED)
