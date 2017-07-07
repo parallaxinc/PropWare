@@ -8,30 +8,164 @@
 
     <h2>JetBrain's CLion</h2>
 
+    <h3>First-Time Setup of CLion</h3>
+
+    <p>CLion comes bundled with its own CMake package. This is great for most users, but PropWare requires extra files
+      in the CMake installation directory. The following steps will configure CLion to always use PropWare's CMake
+      installation. This only needs to be done once, but should be done prior to opening any PropWare projects. This
+      step can be skipped by advanced users who have manually added PropWare's CMake scripts to the CMake search
+      path.</p>
+
+    <ol>
+      <li>
+        Open <code>File</code> &rarr; <code>Settings</code> &rarr; <code>Build, Execution, Deployment</code> &rarr;
+        <code>Toolchains</code>.
+      </li>
+      <li>
+        Change the <code>CMake executable:</code> from <code>Bundled CMake X.Y.Z</code> to <code>Custom:</code> and
+        use the file dialogue to select the CMake executable shipped with PropWare. This can typically be found in
+        <code>/usr/bin/cmake</code> in Mac and Linux or <code>C:\Program Files\PropWare\bin\cmake.exe</code> in
+        Windows.
+      </li>
+      <li>
+        You can be confident that your CMake selection works when, after closing the file dialogue, CLion shows the
+        version of CMake beneath the text box, such as <code>CMake version: 3.7.0</code>.
+      </li>
+      <li>Click <code>OK</code> to close the settings dialogue.</li>
+    </ol>
+
     <h3>Creating a New Project</h3>
 
     <ol>
       <li>Select <code>New Project</code>, either from the splash screen or the <code>File</code> menu.</li>
-      <li>Accept the default value for </li>
+      <li>
+        Select "C++ Executable" as the project template (should be selected as the default) and give your new
+        project a location. The language standard box can be ignored.
+      </li>
+      <li>
+        Once the project template is created, open the <code>CMakeLists.txt</code> file and add a new line above
+        the <code>project(...)</code> invocation: <code>find_package(PropWare REQUIRED)</code>. This will pull in the
+        necessary CMake configuration for PropWare-based projects. Be sure to add this line <i>above</i> the
+        <code>project(...)</code> invocation.
+      </li>
+      <li>
+        Once the line is added and the file is saved (saving files is automatic by default in CLion), CLion will
+        prompt you to reload CMake. "Enable Auto-Reload" is recommended for PropWare-based projects.
+      </li>
+      <li>
+        With CMake now aware of PropWare and CLion now updated with CMake's new settings, change the CMake build
+        configuration from the default <code>Debug</code> to <code>None</code>:
+        <ol>
+          <li>
+            Open <code>File</code> &rarr; <code>Settings</code> &rarr; <code>Build, Execution, Deployment</code> &rarr;
+            <code>CMake</code>.
+          </li>
+          <li>
+            Change the <code>Configuration:</code> to <code>None</code> and click <code>OK</code> to close the settings
+            dialogue.
+          </li>
+          <li>
+            A new folder will be created named <code>cmake-build-none</code>; this folder will be used for generated
+            files such as object files and your executable. You can customize the name of this directory by providing a
+            value to the <code>Generation path:</code> setting in the <code>CMake</code> options seen in the previous
+            dialogue.
+          </li>
+        </ol>
+      </li>
+      <li>
+        When you are done changing the settings for CMake, delete any unused folders in your project, such as
+        <code>cmake-build-debug</code>. The one currently being used by your project will show up as as red folder
+        with a yellow background - this color pattern shows you that CLion is not indexing any files in that
+        directory.
+      </li>
     </ol>
 
     <h3>Opening an Existing Project</h3>
 
     <ol>
-      <li>If PropWare has been installed to a shared directory (as opposed to being installed in the project
-        directory), then configure CLion to use PropWare's CMake distribution instead of the version embedded in CLion:
+      <li>
+        To open an existing PropWare project, consider using CMake to generate Makefiles at least once prior to
+        opening the project with CLion (that means create the build directory, <code>bin</code>, and run
+        <code>cmake -G "Unix Makefiles" ..</code>). This can be done from within CLion, but may be easier on the
+        command-line.
+      </li>
+      <li>
+        Select <code>Open...</code> from the <code>File</code> menu or <code>Open Project</code> from the splash
+        screen.
+      </li>
+      <li>Navigate to the <code>CMakeCache.txt</code> file in the build directory and click <code>OK</code>.</li>
+      <li>
+        Select <code>Open as Project</code> at the following prompt. This option gives the best possible import, as
+        CLion is able to read all of the settings that PropWare has already configured for the project.
+      </li>
+      <li>
+        Change the CMake build configuration from the default <code>Debug</code> to <code>None</code>:
         <ol>
-          <li><code>File</code> &rarr; <code>Settings...</code></li>
-          <li><code>Build, Execution, Deployment</code> &rarr; <code>Toolchains</code></li>
-          <li>For <code>CMake Executable</code>, choose "Use specified:" and then select
-            <code>/usr/bin/cmake</code> for Linux or <code>C:\PropWare\PWCMake\bin\cmake.exe</code> for
-            Windows.
+          <li>
+            Open <code>File</code> &rarr; <code>Settings</code> &rarr; <code>Build, Execution, Deployment</code> &rarr;
+            <code>CMake</code>.
+          </li>
+          <li>
+            Change the <code>Configuration:</code> to <code>None</code> and click <code>OK</code> to close the settings
+            dialogue.
+          </li>
+          <li>
+            A new folder will be created named <code>cmake-build-none</code>; this folder will be used for generated
+            files such as object files and your executable. You can customize the name of this directory by providing a
+            value to the <code>Generation path:</code> setting in the <code>CMake</code> options seen in the previous
+            dialogue.
           </li>
         </ol>
       </li>
-      <li>Create your <a href="build-system.html">CMakeLists.txt file</a>.</li>
-      <li>Open CLion and choose <code>File</code> &rarr; <code>Open...</code>. Navigate to your CMakeLists.txt
-        file and press <code>Ok</code>.
+      <li>
+        When you are done changing the settings for CMake, delete any unused folders in your project, such as
+        <code>cmake-build-debug</code>. The one currently being used by your project will show up as as red folder
+        with a yellow background - this color pattern shows you that CLion is not indexing any files in that
+        directory.
+      </li>
+    </ol>
+
+    <h3>Preparing a PropWare Run Configuration</h3>
+
+    <p>CLion does not yet have an inherent concept of embedded systems. It assumes that all executables in your
+      project can be executed directly on the host system. Changes will need to be made to the auto-populated run
+      configurations so that they execute via <code>propeller-load</code> rather than locally on the host.</p>
+
+    <div class="alert alert-warning" role="alert"><b>Warning</b> CLion's run console is buffered and there is no
+      way to switch to an unbuffered console. For that reason, it is not well-suited to running Propeller
+      applications that use an interactive console. It is recommended that you use CLion's built-in terminal (or
+      your favorite terminal outside of CLion) to invoke PropWare's various Make targets such as
+      <code>debug</code> to run any application on the Propeller that requires reading user input over a UART
+      connection.</div>
+
+      <ol>
+      <li>Select <code>Edit Configurations...</code> from the drop-down in the top right of the project window.</li>
+      <li>
+        Select one of the configurations (there ought to be one which matches the name of your executable, and
+        that is a fine one to start with) and choose <code>Select other...</code> from the <code>Executable:</code>
+        dropdown list.
+      </li>
+      <li>
+        The <code>Executable:</code> dropdown needs to be changed. The very bottom of the dropdown box will be an
+        option named <code>Select other...</code>; choose it. A file dialogue will open and allow you to select
+        <code>propeller-load</code>, which can typically be found in <code>/opt/parallax/bin/propeller-load</code> on
+        Linux and Mac or <code>C:\PropGCC\bin</code> on Windows.
+      </li>
+      <li>
+        For <code>Program arguments:</code>, enter <code>-b &lt;YOUR BOARD&gt; &lt;YOUR EXECUTABLE&gt; -r -t</code> where
+        <code>&lt;YOUR BOARD&gt;</code> is the Propeller board you are using (see the
+        <a ng-href="#/reference/cmake-reference#board">BOARD</a> variable in PropWare documentation) and <code>&lt;YOUR
+        EXECUTABLE&gt;</code> is the file name of your executable. Typically, it is the first argument of your <code>
+        create_simple_executable(...)</code> or <code>create_executable(...)</code>. An example of this might look
+        like <code>-b activityboard Blinky_Demo -r -t</code>.
+      </li>
+      <li>
+        The <code>Working directory:</code> should also be set. Use the file dialogue to the right of the text box to
+        select your project's build directory, such as <code>bin</code> or <code>cmake-build-none</code>.
+      </li>
+      <li>At the top-right of the window, ensure <code>Single instance only</code> is checked.</li>
+      <li>
+        Close the dialogue by clicking the <code>OK</code> button and press the play button in the top-right of CLion.
       </li>
     </ol>
 
