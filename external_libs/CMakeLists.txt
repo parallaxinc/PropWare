@@ -58,6 +58,12 @@ install(FILES ${SIMPLE_HEADERS}
     COMPONENT propware)
 ####################################################################
 
+####################################################################
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/ArduinoJson/src/
+    DESTINATION PropWare/include
+    COMPONENT propware)
+####################################################################
+
 # Ensure the include directories are added for examples and unit tests too. This is done twice because the
 # "PARENT_SCOPE" option _only_ sets the variable in the parent scope (it ignores the current scope)
 set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} ${SIMPLE_INCLUDE_DIRS} "${LIBPROPELLERUINO_INCLUDE_DIR}")

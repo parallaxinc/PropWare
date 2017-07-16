@@ -13,3 +13,6 @@
 [submodule "Simple-Libraries"]
 	path = Simple-Libraries
 	url = https://github.com/parallaxinc/Simple-Libraries
+[submodule "ArduinoJson"]
+	path = ArduinoJson
+	url = https://github.com/bblanchon/ArduinoJson.git

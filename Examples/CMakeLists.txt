@@ -1,5 +1,6 @@
 set(BOARD activityboard)
 
+add_subdirectory(ArduinoJson)
 add_subdirectory(Cogc)
 add_subdirectory(GettingStarted)
 add_subdirectory(Hello)
