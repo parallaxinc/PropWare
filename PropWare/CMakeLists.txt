@@ -16,6 +16,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scanner.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hmi/input/scanner.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/hd44780.h
+    ${CMAKE_CURRENT_LIST_DIR}/hmi/output/max72xx.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/printcapable.h
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/printer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hmi/output/printer.h
