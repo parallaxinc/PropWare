@@ -34,7 +34,7 @@ static const size_t   ARRAY_SIZE_2    = sizeof(MAGIC_ARRAY_2);
 static const uint16_t TEST_ADDRESS    = 32 * 1024; // Place the data immediately above the first 32k of data
 
 /**
- * @example     PropWareEeprom_Demo.cpp
+ * @example     Eeprom_Demo.cpp
  *
  * Read from and write to the EEPROM that comes with your Propeller
  *

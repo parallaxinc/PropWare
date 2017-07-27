@@ -41,7 +41,7 @@ static const int32_t BAUD_RATE = 115200;
 static const int32_t DELAY     = 200;
 
 /**
- * @example     SimplexUART_Demo.cpp
+ * @example     UARTTX_Demo.cpp
  *
  * Write "Hello world!" out via UART protocol
  *
