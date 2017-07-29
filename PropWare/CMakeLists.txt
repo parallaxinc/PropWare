@@ -28,6 +28,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/memory/sd.h
     ${CMAKE_CURRENT_LIST_DIR}/memory/sharedbuffers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/motor/stepper.h
+    ${CMAKE_CURRENT_LIST_DIR}/sensor/accelerometer/adxl345.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/analog/mcp3xxx.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/analog/pcf8591.h
     ${CMAKE_CURRENT_LIST_DIR}/sensor/distance/ping.h
