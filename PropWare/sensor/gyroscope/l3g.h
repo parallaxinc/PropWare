@@ -56,7 +56,6 @@ class L3G {
         } DPSMode;
 
     public:
-        static const DPSMode      DEFAULT_DPS = DPS_250;
         static const SPI::Mode    SPI_MODE    = SPI::Mode::MODE_3;
         static const SPI::BitMode SPI_BITMODE = SPI::BitMode::MSB_FIRST;
 
@@ -98,7 +97,7 @@ class L3G {
          *
          * @return      Returns the rotational value in degrees-per-second
          */
-        static float convert_to_dps (const int rawValue, const DPSMode dpsMode) {
+        static float to_dps (const int rawValue, const DPSMode dpsMode) {
             switch (dpsMode) {
                 case DPSMode::DPS_250:
                     return (float) (rawValue * 0.00875);
@@ -118,11 +117,9 @@ class L3G {
          * @param[in]   alwaysSetMode   When set, the SPI object will always have its mode reset, before every read
          *                              or write operation
          */
-        L3G (SPI &spi, const Port::Mask cs, const DPSMode dpsMode = DEFAULT_DPS,
-             const bool alwaysSetMode = false)
+        L3G (SPI &spi, const Port::Mask cs, const bool alwaysSetMode = false)
             : m_spi(&spi),
               m_cs(cs, Pin::Dir::OUT),
-              m_dpsMode(dpsMode),
               m_alwaysSetMode(alwaysSetMode) {
             this->m_cs.set();
         }
@@ -213,42 +210,13 @@ class L3G {
          *
          * @return      Returns 0 upon success, error code otherwise
          */
-        void set_dps (const DPSMode dpsMode) {
-            uint8_t oldValue;
-
-            this->m_dpsMode = dpsMode;
+        void set_dps (const DPSMode dpsMode) const {
             this->maybe_set_spi_mode();
 
-            oldValue = this->read(Register::CTRL_REG4);
-            oldValue &= ~(BIT_5 | BIT_4);
-            oldValue |= static_cast<uint8_t>(dpsMode);
-            this->write(Register::CTRL_REG4, oldValue);
-        }
-
-        /**
-         * @brief   Retrieve the current DPS setting
-         *
-         * @return  Returns what the L3G module is using for DPS mode
-         */
-        DPSMode get_dps () const {
-            return this->m_dpsMode;
-        }
-
-        /**
-         * @brief       Convert the raw, integer value from the gyro into units of degrees-per-second
-         *
-         *
-         * @pre         Input value must have been read in when the DPS setting was set to the same value as it is
-         *              during this function execution. If the input value was read with a different DPS setting, use
-         *              `convert_to_dps(const int16_t rawValue, const DPSMode dpsMode)`
-         *              to specify the correct DPS setting
-         *
-         * @param[in]   rawValue    Value from the gyroscope
-         *
-         * @return      Returns the rotational value in degrees-per-second
-         */
-        float convert_to_dps (const int rawValue) const {
-            return convert_to_dps(rawValue, this->m_dpsMode);
+            uint8_t registerValue = this->read(Register::CTRL_REG4);
+            registerValue &= ~(BIT_5 | BIT_4);
+            registerValue |= dpsMode;
+            this->write(Register::CTRL_REG4, registerValue);
         }
 
         /**
@@ -358,7 +326,6 @@ class L3G {
     private:
         SPI       *m_spi;
         const Pin m_cs;
-        DPSMode   m_dpsMode;
         bool      m_alwaysSetMode;
 };
 

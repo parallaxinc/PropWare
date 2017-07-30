@@ -32,13 +32,14 @@ using PropWare::L3G;
 
 static const unsigned int AVERAGING_BUFFER_LENGTH = 16;
 static const int          PRINT_LOOP_FREQUENCY    = 40;
+static const L3G::DPSMode DEGREES_PER_SECOND      = L3G::DPS_250;
+static const unsigned int PERIOD                  = SECOND / PRINT_LOOP_FREQUENCY;
 
 static const Port::Mask SCLK = Port::P0;
 static const Port::Mask MOSI = Port::P1;
 static const Port::Mask MISO = Port::P2;
 static const Port::Mask CS   = Port::P4;
 
-static const unsigned int PERIOD = SECOND / PRINT_LOOP_FREQUENCY;
 
 void read_average (const L3G &gyro, float *result);
 
@@ -61,7 +62,7 @@ int main () {
     L3G gyro(spi, CS);
 
     // Select a reasonable configuration for playing with a gyro on your desk.
-    gyro.set_dps(L3G::DPS_250);
+    gyro.set_dps(DEGREES_PER_SECOND);
     gyro.write(L3G::Register::CTRL_REG1, 0b11001111); // Data rate = 760 Hz, Low-pass filter = 30 Hz
     gyro.write(L3G::Register::CTRL_REG2, 6); // High-pass filter = 0.9 Hz
     gyro.write(L3G::Register::CTRL_REG5, PropWare::BIT_6 | PropWare::BIT_4); // Enable FIFO & high-pass filter
@@ -90,7 +91,7 @@ void read_average (const L3G &gyro, float *result) {
             totals[axis] += buffer[i][axis];
 
     for (unsigned int axis = 0; axis < L3G::AXES; ++axis)
-        result[axis] = gyro.convert_to_dps(totals[axis]) / AVERAGING_BUFFER_LENGTH;
+        result[axis] = L3G::to_dps(totals[axis], DEGREES_PER_SECOND) / AVERAGING_BUFFER_LENGTH;
 }
 
 void print_graph (const int markerIndex) {
