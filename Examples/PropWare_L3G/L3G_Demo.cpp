@@ -24,76 +24,86 @@
  */
 
 // Includes
-#include <PropWare/PropWare.h>
-#include <PropWare/gpio/simpleport.h>
 #include <PropWare/sensor/gyroscope/l3g.h>
 
 using PropWare::Port;
-using PropWare::Pin;
 using PropWare::SPI;
 using PropWare::L3G;
-using PropWare::SimplePort;
 
-/** Pin number for MOSI (master out - slave in) */
-static const Port::Mask MOSI = Port::Mask::P0;
-/** Pin number for MISO (master in - slave out) */
-static const Port::Mask MISO = Port::Mask::P1;
-/** Pin number for the clock signal */
-static const Port::Mask SCLK = Port::Mask::P2;
-/** Pin number for chip select */
-static const Port::Mask CS   = Port::Mask::P6;
+static const unsigned int AVERAGING_BUFFER_LENGTH = 16;
+static const int          PRINT_LOOP_FREQUENCY    = 40;
 
-void error(const PropWare::ErrorCode err);
+static const Port::Mask SCLK = Port::P0;
+static const Port::Mask MOSI = Port::P1;
+static const Port::Mask MISO = Port::P2;
+static const Port::Mask CS   = Port::P4;
+
+static const unsigned int PERIOD = SECOND / PRINT_LOOP_FREQUENCY;
+
+void read_average (const L3G &gyro, float *result);
+
+void print_graph (const int markerIndex);
 
 /**
  * @example     L3G_Demo.cpp
  *
- * Read the gyrometer data and print it to the terminal
+ * Print a simple graph of the rotational speed along a single axis
  *
  * @include PropWare_L3G/CMakeLists.txt
  */
-int main() {
-    int16_t rawGyroValues[3];
-    float   gyroValues[3];
-
+int main () {
     SPI spi = SPI::get_instance();
     spi.set_mosi(MOSI);
     spi.set_miso(MISO);
     spi.set_sclk(SCLK);
+    spi.set_mode(L3G::SPI_MODE);
+    spi.set_bit_mode(L3G::SPI_BITMODE);
     L3G gyro(spi, CS);
 
-    gyro.start();
+    // Select a reasonable configuration for playing with a gyro on your desk.
+    gyro.set_dps(L3G::DPS_250);
+    gyro.write(L3G::Register::CTRL_REG1, 0b11001111); // Data rate = 760 Hz, Low-pass filter = 30 Hz
+    gyro.write(L3G::Register::CTRL_REG2, 6); // High-pass filter = 0.9 Hz
+    gyro.write(L3G::Register::CTRL_REG5, PropWare::BIT_6 | PropWare::BIT_4); // Enable FIFO & high-pass filter
+    gyro.write(L3G::Register::FIFO_CTRL_REG, PropWare::BIT_6); // Set FIFO for stream mode
 
-    // Though this functional call is not necessary (default value is 0), I
-    // want to bring attention to this function. It will determine whether the
-    // l3g_read* functions will always explicitly set the SPI modes before
-    // each call, or assume that the SPI driver is still running in the proper
-    // configuration
-    gyro.always_set_spi_mode(1);
-
+    auto timer = CNT + PERIOD;
     while (1) {
-        gyro.read_all(rawGyroValues);
-
-        gyroValues[L3G::X] = gyro.convert_to_dps(rawGyroValues[L3G::X]);
-        gyroValues[L3G::Y] = gyro.convert_to_dps(rawGyroValues[L3G::Y]);
-        gyroValues[L3G::Z] = gyro.convert_to_dps(rawGyroValues[L3G::Z]);
-
-        pwOut << "X: " << gyroValues[L3G::X] << '\t'
-              << "Y: " << gyroValues[L3G::Y] << '\t'
-              << "Z: " << gyroValues[L3G::Z] << '\n';
-
-        waitcnt(100 * MILLISECOND + CNT);
+        float values[L3G::AXES];
+        read_average(gyro, values);
+        print_graph(static_cast<const int>(values[L3G::X]));
+        timer = waitcnt2(timer, PERIOD);
     }
 }
 
-void error(const PropWare::ErrorCode err) {
-    // Set the Quickstart LEDs for output (used to display the error code)
-    SimplePort debugLEDs(Port::P16, 8, Pin::Dir::OUT);
+void read_average (const L3G &gyro, float *result) {
+    int16_t buffer[AVERAGING_BUFFER_LENGTH][L3G::AXES];
+    int32_t totals[] = {0, 0, 0};
 
-    while (1) {
-        debugLEDs.write((uint32_t) err);
-        waitcnt(CLKFREQ / 5 + CNT);
-        debugLEDs.write(0);
-        waitcnt(CLKFREQ / 5 + CNT);
+    // Read the most recent entries
+    for (unsigned int i = 0; i < AVERAGING_BUFFER_LENGTH; ++i)
+        gyro.read(buffer[i]);
+
+    // Create an average for each axis
+    for (unsigned int i = 0; i < AVERAGING_BUFFER_LENGTH; ++i)
+        for (unsigned int axis = 0; axis < L3G::AXES; ++axis)
+            totals[axis] += buffer[i][axis];
+
+    for (unsigned int axis = 0; axis < L3G::AXES; ++axis)
+        result[axis] = gyro.convert_to_dps(totals[axis]) / AVERAGING_BUFFER_LENGTH;
+}
+
+void print_graph (const int markerIndex) {
+    pwOut << '|';
+    for (int i = -50; i <= 50; ++i) {
+        if (i == markerIndex)
+            pwOut << '*';
+        else if (i < 0)
+            pwOut << ' ';
+        else if (i == 0)
+            pwOut << '|';
+        else
+            pwOut << ' ';
     }
+    pwOut << '|' << '\n';
 }
