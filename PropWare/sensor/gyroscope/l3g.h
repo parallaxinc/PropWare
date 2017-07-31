@@ -97,14 +97,14 @@ class L3G {
          *
          * @return      Returns the rotational value in degrees-per-second
          */
-        static float to_dps (const int rawValue, const DPSMode dpsMode) {
+        static double to_dps (const int rawValue, const DPSMode dpsMode) {
             switch (dpsMode) {
                 case DPSMode::DPS_250:
-                    return (float) (rawValue * 0.00875);
+                    return rawValue * 0.00875;
                 case DPSMode::DPS_500:
-                    return (float) (rawValue * 0.01750);
+                    return rawValue * 0.01750;
                 case DPSMode::DPS_2000:
-                    return (float) (rawValue * 0.07000);
+                    return rawValue * 0.07000;
             }
             return 0;
         }

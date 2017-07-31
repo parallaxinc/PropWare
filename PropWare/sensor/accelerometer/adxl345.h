@@ -600,7 +600,7 @@ class ADXL345 {
          *
          * @return      Human-readable acceleration value for the requested axis
          */
-        static float scale (const int value, const Range range) {
+        static double scale (const int value, const Range range) {
             return value * (1 << range) * FULL_RESOLUTION_SCALE;
         }
 
