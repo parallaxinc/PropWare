@@ -117,9 +117,10 @@ class SPI : public PrintCapable,
          * @param[in]   bitmode     Determine if the MSB or LSB should be clocked out first
          */
         SPI (const Pin::Mask mosi = Pin::Mask::NULL_PIN, const Pin::Mask miso = Pin::Mask::NULL_PIN,
-             const Pin::Mask sclk = Pin::Mask::NULL_PIN, const int32_t frequency = DEFAULT_FREQUENCY,
+             const Pin::Mask sclk = Pin::Mask::NULL_PIN, const uint32_t frequency = DEFAULT_FREQUENCY,
              const Mode mode = Mode::MODE_0, const BitMode bitmode = BitMode::MSB_FIRST)
-                : m_bitmode(bitmode) {
+                : m_mode(mode),
+                  m_bitmode(bitmode) {
             this->set_mosi(mosi);
             this->set_miso(miso);
             this->set_sclk(sclk);
@@ -184,17 +185,19 @@ class SPI : public PrintCapable,
         /**
          * @brief       Change the SPI module's clock frequency
          *
-         * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/4 (for 80 MHz,
+         * @param[in]   frequency   Frequency, in Hz, to run the SPI clock; Must be less than CLKFREQ/20 (for 80 MHz,
          *                          900 kHz is the fastest I've tested successfully)
          *
          * @return      Returns 0 upon success, otherwise error code
          */
-        PropWare::ErrorCode set_clock (const int32_t frequency) {
-            static const int32_t MAX_CLOCK = CLKFREQ / 80;
-            if (MAX_CLOCK <= frequency || 0 > frequency)
+        PropWare::ErrorCode set_clock (const uint32_t frequency) {
+            const uint32_t MAX_CLOCK = CLKFREQ / 20;
+            if (MAX_CLOCK < frequency)
                 return INVALID_FREQ;
-            this->m_clkDelay = (CLKFREQ / frequency) >> 1;
-            return NO_ERROR;
+            else {
+                this->m_clkDelay = (CLKFREQ / frequency) >> 1;
+                return NO_ERROR;
+            }
         }
 
         /**
