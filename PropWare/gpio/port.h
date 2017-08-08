@@ -208,7 +208,7 @@ class Port {
          * @brief   Set the port for output
          */
         inline void set_dir_out () const {
-            DIRA |= this->m_mask;
+            __asm__ volatile ("or dira, %0" : : "r" (this->m_mask));
         }
 
         /**
@@ -224,7 +224,7 @@ class Port {
          * @pre     If port is not set as output, statement will have no affect
          */
         void set () const {
-            OUTA |= this->m_mask;
+            __asm__ volatile ("or outa, %0" : : "r" (this->m_mask));
         }
 
         /**
@@ -270,7 +270,7 @@ class Port {
          * @pre     If port is not set as output, statement will have no affect
          */
         void toggle () const {
-            OUTA ^= this->m_mask;
+            __asm__ volatile ("xor outa, %0" : : "r" (this->m_mask));
         }
 
         /**
