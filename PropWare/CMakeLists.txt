@@ -9,6 +9,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filereader.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filesystem.h
     ${CMAKE_CURRENT_LIST_DIR}/filesystem/filewriter.h
+    ${CMAKE_CURRENT_LIST_DIR}/gpio/dualpwm.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/pin.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/port.h
     ${CMAKE_CURRENT_LIST_DIR}/gpio/simpleport.h
