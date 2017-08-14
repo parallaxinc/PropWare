@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <PropWare/hmi/output/printer.h>
 #include <PropWare/gpio/pin.h>
 
 namespace PropWare {
@@ -272,7 +273,7 @@ class I2CMaster {
         bool ping (const uint8_t device) const {
             this->start();
             bool result = this->send_byte(device);
-            this->stop();
+            //this->stop();
             return result;
         }
 

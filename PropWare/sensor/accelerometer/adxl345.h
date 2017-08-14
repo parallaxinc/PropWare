@@ -369,7 +369,7 @@ class ADXL345 {
                 /**
                  * Set the data polling rate.
                  */
-                DataRate     dataRate: 3;
+                DataRate     dataRate: 4;
                 /**
                  * Enable or disable low-power mode. Low power mode has a somewhat higher noise but reduces power
                  * consumption. True to enable low power mode, false for normal operation.
