@@ -16,9 +16,19 @@ if (DOXYGEN_FOUND)
     list(APPEND GENERATED_FILES_TO_CLEAN
         "${PROJECT_SOURCE_DIR}/Doxyfile")
 
-    add_custom_target(docs
-        "${DOXYGEN_EXECUTABLE}" Doxyfile
-        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+    find_program(FIND_EXE find)
+    find_program(SED_EXE sed)
+    if (FIND_EXE AND SED_EXE)
+        # Fix for https://bugzilla.gnome.org/show_bug.cgi?id=776870
+        add_custom_target(docs
+            COMMAND "${DOXYGEN_EXECUTABLE}" Doxyfile
+            COMMAND "${FIND_EXE}" docs/static-web/api-develop/ -type f -exec "${SED_EXE}" -i "'s/span>operator<</span>operator\\&lt\\;\\&lt\\;/g'" "{}" "\;"
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+    else ()
+        add_custom_target(docs
+            COMMAND "${DOXYGEN_EXECUTABLE}" Doxyfile
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
+    endif ()
 endif ()
 
 configure_file("${PROJECT_SOURCE_DIR}/docs/static-web/src/download.html.in"
