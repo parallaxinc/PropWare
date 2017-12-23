@@ -151,9 +151,9 @@ sudo ln -s /Applications/pwcmake.app/Contents/bin/cmakexbuild /usr/local/bin/cma
 
         <p>To upgrade:</p>
 
-        <pre><code hljs hljs-language="sh">wget http://david.zemon.name:8111/repository/download/P@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
-wget http://david.zemon.name:8111/repository/download/P@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-propware.zip?guest=1 -Opropware.zip
-wget http://david.zemon.name:8111/repository/download/P@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-examples.zip?guest=1 -Oexamples.zip
+        <pre><code hljs hljs-language="sh">wget http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-osx_cmake.zip?guest=1 -Ocmake.zip
+wget http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-propware.zip?guest=1 -Opropware.zip
+wget http://david.zemon.name:8111/repository/download/@TEAMCITY_BUILD_ID@/.lastSuccessful/PropWare-@VERSION@-Generic-examples.zip?guest=1 -Oexamples.zip
 unzip cmake.zip
 unzip propware.zip
 unzip examples.zip
