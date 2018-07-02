@@ -28,6 +28,7 @@
 
 #include <PropWare/gpio/pin.h>
 #include <PropWare/concurrent/runnable.h>
+#include <PropWare/gpio/simpleport.h>
 
 namespace PropWare {
 
@@ -43,12 +44,10 @@ namespace PropWare {
  * @warning    If the timeslot between start & restart, restart & restart, or stop and start is too small (depending on
  *             the master), a transmission might be completely lost, due to the onReceive callback taking too much time.
  */
-template<class UserDataType>
 class I2CSlave: public Runnable {
     public:
         static const Pin::Mask DEFAULT_SCL_MASK = Pin::Mask::P28;
         static const Pin::Mask DEFAULT_SDA_MASK = Pin::Mask::P29;
-        typedef void(*I2CCallback) (I2CSlave<UserDataType> &, UserDataType &);
 
     public:
         /**
@@ -103,34 +102,6 @@ class I2CSlave: public Runnable {
         }
 
         /**
-         * @brief       Give the I2CSlave a callback to notify the user about an incomming transmission
-         *
-         * @warning     If the execution of this delegates takes too long, data on the bus might be missed.
-         */
-        void set_on_receive (const I2CCallback onReceive) {
-            this->m_onReceive = onReceive;
-        }
-
-        /**
-         * @brief       Give the I2CSlave a callback to notify the user about an ancomming request
-         *
-         * @warning     This method should have the data to send on the bus prepared.
-         *              Taking too long before transmit starts could mess the i2c state machines state up.
-         */
-        void set_on_request (const I2CCallback onRequest) {
-            this->m_onRequest = onRequest;
-        }
-
-        /**
-         * @brief       Set a custom user-data object stored internally and passed to all callbacks.
-         *
-         * @param[in]   userData   Userdata to store internally and pass to every callback.
-         */
-        void set_user_data (UserDataType &userData) {
-            this->m_userData = &userData;
-        }
-
-        /**
          * @brief   Enter the loop that will watch and operate the bus.
          */
         void run () {
@@ -140,22 +111,21 @@ class I2CSlave: public Runnable {
             this->m_sda.clear();
 
             const uint_fast8_t slaveAddress = this->m_slaveAddress;
-            UserDataType       *userData    = this->m_userData;
 
-            while (true) { // start loop
+            while (true) {
                 this->await_start();
-                while (true) { //restart loop
+                while (true) {
                     const uint_fast8_t address = this->read_address();
                     if ((address >> 1) == slaveAddress) { // Master is talking to us
                         this->send_ack(); // Tell master we are there
                         if (address & BIT_0) { // Master wants us to speak
                             this->m_requestEnded = false;
-                            this->m_onRequest(*this, *userData);
+                            this->on_request();
                             break;
                         } else { // Master wants us to listen
-                            bool restart = this->read_to_end();
-                            this->m_onReceive(*this, *userData);
-                            this->reset_receive_buffer(); // Throw away bytes that the user did not fetch
+                            const bool restart = this->read_to_end();
+                            this->on_receive();
+                            this->reset_receive_buffer();
                             if (!restart)
                                 break; // received stop, go back to outer loop and await new start
                         }
@@ -171,7 +141,7 @@ class I2CSlave: public Runnable {
          *
          * @return  The amount of bytes in the receive buffer
          */
-        uint32_t available () const {
+        size_t available () const {
             return this->m_bufferUpperBound - this->m_bufferPtr + 1;
         }
 
@@ -199,50 +169,69 @@ class I2CSlave: public Runnable {
                 uint32_t dataMask; //Initialized by setting BIT_7 in asm below
 
                 __asm__ volatile(
-                    "       mov            %[_dataMask],       #128                   \n\t" // Initialize the mask that specifies the bit from the byte to send
-                    "       waitpne        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the clock to be low first
-                    "       or             dira,               %[_SDAMask]            \n\t" // Take SDA >after< clock is low (master has sda, since he is sending an ACK)
+                "       mov            %[_dataMask],       #128                   \n\t" // Initialize the mask that specifies the bit from the byte to send
+                "       waitpne        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the clock to be low first
+                "       or             dira,               %[_SDAMask]            \n\t" // Take SDA >after< clock is low (master has sda, since he is sending an ACK)
 
-                    "loop%=: "
-                    "       test           %[_data],           %[_dataMask]     wz    \n\t" // Test whether bit to send is 0 or 1
-                    "       muxnz          outa,               %[_SDAMask]            \n\t" // Set the bit on the bus while the clock is low
-                    "       waitpeq        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the next clock cycle to start
-                    "       shr            %[_dataMask],       #1               wz    \n\t" // Shift the mask one down to select the next lower bit
-                    "       waitpne        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the clock cycle to end
-                    "if_nz  brs            #loop%=                                    \n\t" // Continue until dataMask is 0 (no bit left)
+                "loop%=: "
+                "       test           %[_data],           %[_dataMask]     wz    \n\t" // Test whether bit to send is 0 or 1
+                "       muxnz          outa,               %[_SDAMask]            \n\t" // Set the bit on the bus while the clock is low
+                "       waitpeq        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the next clock cycle to start
+                "       shr            %[_dataMask],       #1               wz    \n\t" // Shift the mask one down to select the next lower bit
+                "       waitpne        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the clock cycle to end
+                "if_nz  brs            #loop%=                                    \n\t" // Continue until dataMask is 0 (no bit left)
 
-                    //wait for ack
-                    "       andn           dira,               %[_SDAMask]            \n\t" // Set SDA to input, because master has to pull it down
-                    "       waitpeq        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the ACK-Clock to begin
-                    "       test           %[_SDAMask],        ina              wz    \n\t" // Test whether master pulled SDA down or not
-                    "if_z   mov            %[_requestEnded],   #0                     \n\t" // SDA low -> ACK
-                    "if_nz  mov            %[_requestEnded],   #1                     \n\t" // SDA high -> NAK
+                //wait for ack
+                "       andn           dira,               %[_SDAMask]            \n\t" // Set SDA to input, because master has to pull it down
+                "       waitpeq        %[_SCLMask],        %[_SCLMask]            \n\t" // Wait for the ACK-Clock to begin
+                "       test           %[_SDAMask],        ina              wz    \n\t" // Test whether master pulled SDA down or not
+                "if_z   mov            %[_requestEnded],   #0                     \n\t" // SDA low -> ACK
+                "if_nz  mov            %[_requestEnded],   #1                     \n\t" // SDA high -> NAK
                 : // Output
-                [_dataMask]     "+r" (dataMask),
-                [_requestEnded] "+r" (this->m_requestEnded)
+                [_dataMask]     "+r"(dataMask),
+                [_requestEnded] "+r"(this->m_requestEnded)
                 : // Input
-                [_SDAMask] "r" (this->m_sda.get_mask()),
-                [_SCLMask] "r" (this->m_scl.get_mask()),
-                [_data]    "r" (data));
+                [_SDAMask] "r"(this->m_sda.get_mask()),
+                [_SCLMask] "r"(this->m_scl.get_mask()),
+                [_data]    "r"(data));
             }
         }
 
-    private:
+    protected:
+        /**
+         * @brief       Invoked when a request for data is received from the I2C master
+         *
+         * Data should be transmitted via I2CSlave::write()
+         *
+         * @warning     This method should have the data to send on the bus prepared.
+         *              Taking too long before transmit starts could corrupt the I2C state machines.
+         */
+        virtual void on_request () = 0;
 
+        /**
+         * @brief       Invoked when data has been received from the I2C master
+         *
+         * Data should be retrieved via calls to I2CSlave::read()
+         *
+         * @warning     If the execution of this takes too long, data on the bus might be missed.
+         */
+        virtual void on_receive () = 0;
+
+    private:
         /**
          * @brief   Wait for a start / restart condition on the bus.
          */
         void await_start () const {
             __asm__ volatile(
-                "loop%=: "
-                "       waitpeq     %[_SDAMask],    %[_SDAMask]         \n\t" // Wait for sda to be high
-                "       waitpne     %[_SDAMask],    %[_SDAMask]         \n\t" // Wait for sda to get low
-                "       test        %[_SCLMask],    ina             wz  \n\t" // If scl was high while sda got low...
-                "if_z   brs         #loop%=                             \n\t" // ... return, otherwise: start anew
+            "loop%=: "
+            "       waitpeq     %[_SDAMask],    %[_SDAMask]         \n\t" // Wait for sda to be high
+            "       waitpne     %[_SDAMask],    %[_SDAMask]         \n\t" // Wait for sda to get low
+            "       test        %[_SCLMask],    ina             wz  \n\t" // If scl was high while sda got low...
+            "if_z   brs         #loop%=                             \n\t" // ... return, otherwise: start anew
             : // Output
             : // Input
-            [_SDAMask] "r" (this->m_sda.get_mask()),
-            [_SCLMask] "r" (this->m_scl.get_mask()));
+            [_SDAMask] "r"(this->m_sda.get_mask()),
+            [_SCLMask] "r"(this->m_scl.get_mask()));
         }
 
         /**
@@ -254,19 +243,19 @@ class I2CSlave: public Runnable {
 
             __asm__ volatile(
             FC_START("ReadAddressStart", "ReadAddressEnd")
-                "        mov        %[_result],      #0                                              \n\t"
-                "        mov        %[_bitCounter],  #8                                              \n\t"
-                "nextBit%=: "
-                "        waitpne    %[_SCLMask],     %[_SCLMask]                                     \n\t" // Wait for clock to get low (should already be low at this time)
-                "        waitpeq    %[_SCLMask],     %[_SCLMask]                                     \n\t" // Wait for clock to get high
-                "        test       %[_SDAMask],     ina          wc                                 \n\t" // Read bit from bus ...
-                "        rcl        %[_result],      #1                                              \n\t" // ... and store in result
-                "        djnz       %[_bitCounter],  #" FC_ADDR("nextBit%=", "ReadAddressStart") "    \n\t"
-                FC_END("ReadAddressEnd")
-                : [_result]     "+r" (result),
-                  [_bitCounter] "+r" (bitCounter)
-                : [_SDAMask] "r" (this->m_sda.get_mask()),
-                  [_SCLMask] "r" (this->m_scl.get_mask())
+            "        mov        %[_result],      #0                                              \n\t"
+            "        mov        %[_bitCounter],  #8                                              \n\t"
+            "nextBit%=: "
+            "        waitpne    %[_SCLMask],     %[_SCLMask]                                     \n\t" // Wait for clock to get low (should already be low at this time)
+            "        waitpeq    %[_SCLMask],     %[_SCLMask]                                     \n\t" // Wait for clock to get high
+            "        test       %[_SDAMask],     ina          wc                                 \n\t" // Read bit from bus ...
+            "        rcl        %[_result],      #1                                              \n\t" // ... and store in result
+            "        djnz       %[_bitCounter],  #" FC_ADDR("nextBit%=", "ReadAddressStart") "    \n\t"
+            FC_END("ReadAddressEnd")
+            :[_result]     "+r"(result),
+            [_bitCounter] "+r"(bitCounter)
+            :[_SDAMask] "r"(this->m_sda.get_mask()),
+            [_SCLMask] "r"(this->m_scl.get_mask())
             );
             return result;
         }
@@ -277,15 +266,15 @@ class I2CSlave: public Runnable {
         inline __attribute__((always_inline)) void send_ack () const {
             //The code does not work anymore when removing inline and attribute always_inline. Why is this?
             __asm__ volatile(
-                "       waitpne     %[_SCLMask],    %[_SCLMask]      \n\t" // Wait for SCL to be low first
-                "       or          dira,           %[_SDAMask]      \n\t" // Take SDA and ...
-                "       andn        outa,           %[_SDAMask]      \n\t" // ... pull it down
-                "       waitpeq     %[_SCLMask],    %[_SCLMask]      \n\t" // Wait for SCL to go high ...
-                "       waitpne     %[_SCLMask],    %[_SCLMask]      \n\t" // ... and wait for it to go low again
-                "       andn        dira,           %[_SDAMask]      \n\t" // Let go of SDA again (high by float)
+            "       waitpne     %[_SCLMask],    %[_SCLMask]      \n\t" // Wait for SCL to be low first
+            "       or          dira,           %[_SDAMask]      \n\t" // Take SDA and ...
+            "       andn        outa,           %[_SDAMask]      \n\t" // ... pull it down
+            "       waitpeq     %[_SCLMask],    %[_SCLMask]      \n\t" // Wait for SCL to go high ...
+            "       waitpne     %[_SCLMask],    %[_SCLMask]      \n\t" // ... and wait for it to go low again
+            "       andn        dira,           %[_SDAMask]      \n\t" // Let go of SDA again (high by float)
             : : // Inputs
-            [_SDAMask] "r" (this->m_sda.get_mask()),
-            [_SCLMask] "r" (this->m_scl.get_mask()));
+            [_SDAMask] "r"(this->m_sda.get_mask()),
+            [_SCLMask] "r"(this->m_scl.get_mask()));
         }
 
         /**
@@ -298,49 +287,49 @@ class I2CSlave: public Runnable {
             uint32_t bitCounter;
             uint32_t isRestart;
 
-            while(true) {
+            while (true) {
                 __asm__ volatile(
-                    "       mov         %[_isRestart],       #2                 \n\t"
-                    "       mov         %[_bitCounter],      #7                 \n\t"
-                    "       mov         %[_result],          #0                 \n\t"
-                    "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to be low first
-                    "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to go high
-                    "       test        %[_SDAMask],         ina         wc     \n\t" // Read bit and...
-                    "       rcl         %[_result],          #1                 \n\t" // ... store in result
-                    "if_c   brs         #DetectRestart%=                        \n\t" // The first bit of a received byte may be b7, or a stop / restart
-                    // If sda was high, it can only be a restart
-                    "DetectStop%=: "
-                    "       test        %[_SCLMask],         ina         wz     \n\t" // scl went low -> no chance for a stop-condition to be detected ...
-                    "if_z   brs         #loop%=                                 \n\t" // ... continue receiving data bits
-                    "       test        %[_SDAMask],         ina         wz     \n\t"
-                    "if_nz  mov         %[_isRestart],       #0                 \n\t" // stop detected. Set isRestart to false ...
-                    "if_nz  brs         #ReceiveEnd%=                           \n\t" // ... and exit
-                    "       brs         #DetectStop%=                           \n\t"
+                "       mov         %[_isRestart],       #2                 \n\t"
+                "       mov         %[_bitCounter],      #7                 \n\t"
+                "       mov         %[_result],          #0                 \n\t"
+                "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to be low first
+                "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t" // Wait for scl to go high
+                "       test        %[_SDAMask],         ina         wc     \n\t" // Read bit and...
+                "       rcl         %[_result],          #1                 \n\t" // ... store in result
+                "if_c   brs         #DetectRestart%=                        \n\t" // The first bit of a received byte may be b7, or a stop / restart
+                // If sda was high, it can only be a restart
+                "DetectStop%=: "
+                "       test        %[_SCLMask],         ina         wz     \n\t" // scl went low -> no chance for a stop-condition to be detected ...
+                "if_z   brs         #loop%=                                 \n\t" // ... continue receiving data bits
+                "       test        %[_SDAMask],         ina         wz     \n\t"
+                "if_nz  mov         %[_isRestart],       #0                 \n\t" // stop detected. Set isRestart to false ...
+                "if_nz  brs         #ReceiveEnd%=                           \n\t" // ... and exit
+                "       brs         #DetectStop%=                           \n\t"
 
-                    "DetectRestart%=: "
-                    "       test        %[_SCLMask],         ina         wz     \n\t" // scl went low -> no chance for a (re)start-condition to be detected ...
-                    "if_z   brs         #loop%=                                 \n\t" // ... continue receiving data bits
-                    "       test        %[_SDAMask],         ina         wz     \n\t"
-                    "if_z   mov         %[_isRestart],       #1                 \n\t" // restart detected. Set isRestart to true...
-                    "if_z   brs         #ReceiveEnd%=                           \n\t" // ... and exit
-                    "       brs         #DetectRestart%=                        \n\t"
+                "DetectRestart%=: "
+                "       test        %[_SCLMask],         ina         wz     \n\t" // scl went low -> no chance for a (re)start-condition to be detected ...
+                "if_z   brs         #loop%=                                 \n\t" // ... continue receiving data bits
+                "       test        %[_SDAMask],         ina         wz     \n\t"
+                "if_z   mov         %[_isRestart],       #1                 \n\t" // restart detected. Set isRestart to true...
+                "if_z   brs         #ReceiveEnd%=                           \n\t" // ... and exit
+                "       brs         #DetectRestart%=                        \n\t"
 
-                    "loop%=: "                                                        // for(int i = 0; i < 8; ++i) {
-                    "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t"        // Wait for ...
-                    "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t"        // ... next clock
-                    "       test        %[_SDAMask],         ina         wc     \n\t"        // Read bit and...
-                    "       rcl         %[_result],          #1                 \n\t"        // ... store in result
-                    "       sub         %[_bitCounter],      #1          wz     \n\t"
-                    "if_nz  brs         #loop%=                                 \n\t" // }
+                "loop%=: "                                                        // for(int i = 0; i < 8; ++i) {
+                "       waitpne     %[_SCLMask],         %[_SCLMask]        \n\t"        // Wait for ...
+                "       waitpeq     %[_SCLMask],         %[_SCLMask]        \n\t"        // ... next clock
+                "       test        %[_SDAMask],         ina         wc     \n\t"        // Read bit and...
+                "       rcl         %[_result],          #1                 \n\t"        // ... store in result
+                "       sub         %[_bitCounter],      #1          wz     \n\t"
+                "if_nz  brs         #loop%=                                 \n\t" // }
 
-                    "ReceiveEnd%=: "
+                "ReceiveEnd%=: "
                 : // Outputs
-                [_result]     "+r" (result),
-                [_bitCounter] "+r" (bitCounter),
-                [_isRestart]  "+r" (isRestart)
+                [_result]     "+r"(result),
+                [_bitCounter] "+r"(bitCounter),
+                [_isRestart]  "+r"(isRestart)
                 : // Inputs
-                [_SDAMask] "r" (this->m_sda.get_mask()),
-                [_SCLMask] "r" (this->m_scl.get_mask()));
+                [_SDAMask] "r"(this->m_sda.get_mask()),
+                [_SCLMask] "r"(this->m_scl.get_mask()));
 
                 if (2 == isRestart) {
                     this->send_ack();
@@ -367,31 +356,23 @@ class I2CSlave: public Runnable {
         }
 
     private:
-        const uint8_t  m_slaveAddress;
-        const Pin      m_scl;
-        const Pin      m_sda;
+        const uint8_t m_slaveAddress;
+        const Pin     m_scl;
+        const Pin     m_sda;
 
         /**
          * Buffer storing the received messages
          */
-        uint8_t*       m_buffer;
+        uint8_t     *m_buffer;
         /**
          * receiveBufferSize - 1
          */
-        uint32_t       m_bufferUpperBound;
+        uint32_t    m_bufferUpperBound;
         /**
          * Index always pointing to the last written element in the receiveBuffer (= receive_buffer_size when empty)
          */
-        uint32_t       m_bufferPtr;
-        I2CCallback    m_onReceive;
-
-        bool           m_requestEnded;
-        I2CCallback    m_onRequest;
-
-        /**
-         * Custom pointer that can be set and is then passed to all I2CCallbacks.
-         */
-        UserDataType   *m_userData;
+        uint32_t    m_bufferPtr;
+        bool        m_requestEnded;
 };
 
 }
