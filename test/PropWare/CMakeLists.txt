@@ -28,5 +28,5 @@ set_tests_properties(
     PROPERTIES LABELS hardware-independent)
 
 install(FILES PropWareTests.h
-    DESTINATION PropWare/include/PropWare
+    DESTINATION share/PropWare/include/PropWare
     COMPONENT propware)

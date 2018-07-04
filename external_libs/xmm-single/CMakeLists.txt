@@ -7,7 +7,7 @@ set_target_properties(Libpropeller_${MODEL} PROPERTIES OUTPUT_NAME Libpropeller)
 set_target_properties(Simple_${MODEL} PROPERTIES OUTPUT_NAME Simple)
 set_target_properties(LibPropelleruino_${MODEL} PROPERTIES OUTPUT_NAME LibPropelleruino)
 install(TARGETS Libpropeller_${MODEL} Simple_${MODEL} LibPropelleruino_${MODEL}
-    DESTINATION PropWare/lib/${MODEL}
+    DESTINATION share/PropWare/lib/${MODEL}
     COMPONENT propware
     EXPORT PropWare-targets)
 

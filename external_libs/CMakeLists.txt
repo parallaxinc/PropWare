@@ -54,13 +54,13 @@ foreach(project_file IN LISTS SIMPLE_IDE_PROJECT_FILES)
 endforeach()
 
 install(FILES ${SIMPLE_HEADERS}
-    DESTINATION PropWare/include
+    DESTINATION share/PropWare/include
     COMPONENT propware)
 ####################################################################
 
 ####################################################################
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/ArduinoJson/src/
-    DESTINATION PropWare/include
+    DESTINATION share/PropWare/include
     COMPONENT propware)
 ####################################################################
 
