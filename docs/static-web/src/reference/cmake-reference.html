@@ -301,5 +301,97 @@
       <dt>Archiver</dt>
       <dd><code>cr</code></dd>
     </dl>
+
+    <h2>Path Discovery</h2>
+
+    <p>PropWare's build system has many ways to discover Propeller-related components on your system. It uses a
+      combination of environment variables, CMake variables, and default paths. The list of variables and default
+      values as well as their order of precedence is documented below.</p>
+
+    <h3>PropGCC</h3>
+
+    <p>PropGCC's path is selected by searching for <code>propeller-elf-gcc</code> (on Linux/Mac) or
+      <code>propeller-elf-gcc.exe</code> (on Windows). It searches in the following order:</p>
+
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Variable name or path</th>
+        <th>Type</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><code>GCC_PATH</code></td>
+        <td>CMake variable</td>
+      </tr>
+      <tr>
+        <td><code>GCC_PATH</code></td>
+        <td>Environment variable</td>
+      </tr>
+      <tr>
+        <td><code>&lt;PROPGCC_PREFIX&gt;/bin</code></td>
+        <td>CMake variable followed by <code>bin</code> default search path</td>
+      </tr>
+      <tr>
+        <td><code>&lt;PROPGCC_PREFIX&gt;/bin</code></td>
+        <td>Environment variable followed by <code>bin</code> default search path</td>
+      </tr>
+      <tr>
+        <td><code>PATH</code></td>
+        <td>Environment variable (handled specially because it can be a list of paths)</td>
+      </tr>
+      <tr>
+        <td><code>/opt/parallax/bin</code></td>
+        <td>Default search path</td>
+      </tr>
+      <tr>
+        <td><code>C:\PropGCC\bin</code></td>
+        <td>Default search path</td>
+      </tr>
+      <tr>
+        <td><code>C:\parallax\bin</code></td>
+        <td>Default search path</td>
+      </tr>
+      <tr>
+        <td><code>C:\Program Files\SimpleIDE\propeller-gcc\bin</code></td>
+        <td>Default search path</td>
+      </tr>
+      <tr>
+        <td><code>C:\Program Files (x86)\SimpleIDE\propeller-gcc\bin</code></td>
+        <td>Default search path</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h3>Libraries and Headers</h3>
+
+    <p>The root path of PropWare's libraries and headers (including Simple, libpropeller, et al.) is defined by the
+      the existence of <code>lib/PropWare-targets.cmake</code>, a file that further defines the path for each
+      library.</p>
+
+    <table class="table">
+      <thead>
+      <tr>
+        <th>Variable name or path</th>
+        <th>Type</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><code>PROPWARE_PATH</code></td>
+        <td>CMake variable</td>
+      </tr>
+      <tr>
+        <td><code>PROPWARE_PATH</code></td>
+        <td>Environment variable</td>
+      </tr>
+      <tr>
+        <td><code>&lt;CMAKE_ROOT&gt;/../PropWare</code></td>
+        <td>Directory holding CMake executable followed by <code>../PropWare</code> default search path</td>
+      </tr>
+      </tbody>
+    </table>
+
   </div>
 </div>

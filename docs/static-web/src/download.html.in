@@ -63,15 +63,26 @@
             </li>
             <li>Execute the installer. The default installation path is recommended, but if it must be changed,
                 ensure
-                the installation path does not contain parenthesis (such as <code>C:\\Program Files (x86)</code>).
+                the installation path does not contain parenthesis (such as <code>C:\Program Files (x86)</code>).
             </li>
-            <li>Add CMake’s bin folder (located in <code>&lt;PROPWARE_PATH&gt;\PWCMake\bin</code>) to your PATH.
+            <li>Add PropWare’s bin folder (located in <code>&lt;PROPWARE_PATH&gt;\bin</code>) to your PATH.
                 Excellent instructions for editing PATH exist
                 <a href="http://www.computerhope.com/issues/ch000549.htm">here</a>. For instance, if you installed
                 PropWare to <code>C:\PropWare</code> and PATH currently contains <code>C:\propgcc\bin</code>, the
-                new
-                value would be <code>C:\PropWare\PWCMake\bin;C:\propgcc\bin</code>.
+                new value would be <code>C:\PropWare\bin;C:\propgcc\bin</code>.
             </li>
+            <li>Download
+                <a href="http://david.zemon.name:8111/repository/download/PropGCC5_Gcc4win32/.lastSuccessful/propellergcc-alpha_v1_9_0-gcc4-win32.zip?guest=1">PropGCC
+                    for Windows</a>
+            </li>
+            <li>Extract PropGCC somewhere on your computer, such as <code>C:\</code>. Note that the PropGCC
+                archive contains a root directory, "parallax", so the PropGCC executable will end up in
+                <code>C:\parallax\bin</code>. For users without administrative access to the machine,
+                <code>C:\Users\&lt;YOUR USERNAME&gt;</code> will work well.</li>
+          <li>The <a href="#/reference/cmake-reference">CMake Reference</a> page provides PropWare's search order for
+              PropGCC, including the list of default search paths. If your PropGCC installation is not
+              <code>C:\parallax\bin</code>, take a look at <a href="#/reference/cmake-reference">CMake Reference</a> to
+              learn how PropWare can be informed of the correct PropGCC path.</li>
         </ol>
 
         <h2>Linux (x86-64) - Debian/Ubuntu/Mint/etc</h2>
