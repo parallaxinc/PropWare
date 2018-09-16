@@ -208,6 +208,31 @@ TEST(Read) {
     delete testable;
 }
 
+TEST(PwmA) {
+    const Pin testable(Pin::P16);
+    testable.start_hardware_pwm(4);
+
+    ASSERT_EQ_MSG(214, FRQA);
+    ASSERT_EQ_MSG(CTRA, 0x10000010);
+
+    testable.stop_hardware_pwm();
+
+    ASSERT_EQ_MSG(0, CTRA);
+}
+
+TEST(PwmB) {
+    Pin testable(Pin::P16);
+    testable.set_channel(Pin::Channel::B);
+    testable.start_hardware_pwm(4);
+
+    ASSERT_EQ_MSG(214, FRQB);
+    ASSERT_EQ_MSG(CTRB, 0x10000010);
+
+    testable.stop_hardware_pwm();
+
+    ASSERT_EQ_MSG(0, CTRB);
+}
+
 int main () {
     START(PinTest);
 
@@ -228,6 +253,8 @@ int main () {
     RUN_TEST(Toggle);
     RUN_TEST(Write);
     RUN_TEST(Read);
+    RUN_TEST(PwmA);
+    RUN_TEST(PwmB);
 
     // TODO: Test wait_until_* and is_switch_* methods as well
 

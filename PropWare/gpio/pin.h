@@ -71,6 +71,7 @@ class Pin: public Port {
         Pin (const Pin::Mask mask, const Pin::Dir direction)
             : Port(mask, direction),
               m_channel(Channel::A) {
+            this->update_pin_number();
         }
 
         /**
