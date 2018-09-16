@@ -46,16 +46,12 @@ void setUp (const Pin::Dir dir = Pin::Dir::OUT) {
         helper = new Pin(CHECK_MASK, Pin::Dir::OUT);
 }
 
-TEARDOWN {
-    delete testable;
-}
-
 TEST(Constructor_ShouldSetNullPin) {
     testable = new Pin();
 
     ASSERT_EQ(Pin::Mask::NULL_PIN, testable->get_mask());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Constructor_ShouldSetMask) {
@@ -63,7 +59,7 @@ TEST(Constructor_ShouldSetMask) {
 
     ASSERT_EQ(TEST_MASK, testable->get_mask());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Constructor_ShouldSetMaskAndDir) {
@@ -72,7 +68,7 @@ TEST(Constructor_ShouldSetMaskAndDir) {
     ASSERT_EQ(TEST_MASK, testable->get_mask());
     ASSERT_EQ(Pin::Dir::OUT, testable->get_dir());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(SetMask) {
@@ -81,7 +77,7 @@ TEST(SetMask) {
     testable->set_mask(TEST_MASK);
     ASSERT_EQ(TEST_MASK, testable->get_mask());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(SetPinNum) {
@@ -91,7 +87,7 @@ TEST(SetPinNum) {
     ASSERT_EQ_MSG(TEST_MASK, testable->get_mask());
     ASSERT_EQ_MSG(TEST_PIN_NUM, testable->get_pin_number());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(SetDir) {
@@ -100,7 +96,7 @@ TEST(SetDir) {
     testable->set_dir(Pin::Dir::OUT);
     ASSERT_EQ(Pin::Dir::OUT, testable->get_dir());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(SetDirOut) {
@@ -109,7 +105,7 @@ TEST(SetDirOut) {
     testable->set_dir_out();
     ASSERT_EQ(Pin::Dir::OUT, testable->get_dir());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(SetDirIn) {
@@ -118,7 +114,7 @@ TEST(SetDirIn) {
     testable->set_dir_in();
     ASSERT_EQ(Pin::Dir::IN, testable->get_dir());
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Set) {
@@ -127,7 +123,7 @@ TEST(Set) {
     testable->set();
     ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(High) {
@@ -136,7 +132,7 @@ TEST(High) {
     testable->high();
     ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(On) {
@@ -145,7 +141,7 @@ TEST(On) {
     testable->on();
     ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Clear) {
@@ -154,7 +150,7 @@ TEST(Clear) {
     testable->clear();
     ASSERT_EQ(0, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Low) {
@@ -163,7 +159,7 @@ TEST(Low) {
     testable->low();
     ASSERT_EQ(0, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Off) {
@@ -172,7 +168,7 @@ TEST(Off) {
     testable->off();
     ASSERT_EQ(0, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Toggle) {
@@ -185,7 +181,7 @@ TEST(Toggle) {
     testable->toggle();
     ASSERT_EQ(0, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Write) {
@@ -198,7 +194,7 @@ TEST(Write) {
     testable->write(42); // Ensure no problems when an arbitrary value is passed
     ASSERT_EQ(TEST_MASK, OUTA & TEST_MASK);
 
-    tearDown();
+    delete testable;
 }
 
 TEST(Read) {
@@ -209,7 +205,7 @@ TEST(Read) {
     helper->clear();
     ASSERT_FALSE(testable->read());
 
-    tearDown();
+    delete testable;
 }
 
 int main () {

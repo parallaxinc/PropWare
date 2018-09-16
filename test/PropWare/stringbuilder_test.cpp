@@ -31,195 +31,149 @@
 
 using PropWare::StringBuilder;
 
-static StringBuilder *testable;
+class StringBuilderTest {
+    public:
+        StringBuilder testable;
+};
 
-void setUp () {
-    testable = new StringBuilder();
+TEST_F(StringBuilderTest, ConstructorDestructor) {
+    ASSERT_NEQ_MSG(NULL, (unsigned int) testable.m_string);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
+    ASSERT_EQ_MSG(0, testable.m_size);
+    ASSERT_EQ_MSG(0, strlen(testable.to_string()));
 }
 
-TEARDOWN {
-    delete testable;
-}
-
-TEST(ConstructorDestructor) {
-    testable = new StringBuilder();
-
-    ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-    ASSERT_EQ_MSG(0, testable->m_size);
-    ASSERT_EQ_MSG(0, strlen(testable->to_string()));
-
-    tearDown();
-}
-
-TEST(PutChar_one) {
+TEST_F(StringBuilderTest, PutChar_one) {
     const char testChar = 'a';
 
-    testable->put_char(testChar);
+    testable.put_char(testChar);
 
-    ASSERT_EQ_MSG(1, testable->get_size());
-    ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG(testChar, testable->to_string()[0]);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-
-    tearDown();
+    ASSERT_EQ_MSG(1, testable.get_size());
+    ASSERT_EQ_MSG(strlen(testable.to_string()), testable.get_size());
+    ASSERT_EQ_MSG(testChar, testable.to_string()[0]);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
 }
 
-TEST(PutChar_two) {
-    setUp();
+TEST_F(StringBuilderTest, PutChar_two) {
+    testable.put_char('a');
+    testable.put_char('b');
 
-    testable->put_char('a');
-    testable->put_char('b');
-
-    ASSERT_EQ_MSG(2, testable->get_size());
-    ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG('a', testable->to_string()[0]);
-    ASSERT_EQ_MSG('b', testable->to_string()[1]);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-
-    tearDown();
+    ASSERT_EQ_MSG(2, testable.get_size());
+    ASSERT_EQ_MSG(strlen(testable.to_string()), testable.get_size());
+    ASSERT_EQ_MSG('a', testable.to_string()[0]);
+    ASSERT_EQ_MSG('b', testable.to_string()[1]);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
 }
 
-TEST(PutChar_three) {
-    setUp();
+TEST_F(StringBuilderTest, PutChar_three) {
+    testable.put_char('a');
+    testable.put_char('b');
+    testable.put_char('c');
 
-    testable->put_char('a');
-    testable->put_char('b');
-    testable->put_char('c');
-
-    ASSERT_EQ_MSG(3, testable->get_size());
-    ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG('a', testable->to_string()[0]);
-    ASSERT_EQ_MSG('b', testable->to_string()[1]);
-    ASSERT_EQ_MSG('c', testable->to_string()[2]);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-
-    tearDown();
+    ASSERT_EQ_MSG(3, testable.get_size());
+    ASSERT_EQ_MSG(strlen(testable.to_string()), testable.get_size());
+    ASSERT_EQ_MSG('a', testable.to_string()[0]);
+    ASSERT_EQ_MSG('b', testable.to_string()[1]);
+    ASSERT_EQ_MSG('c', testable.to_string()[2]);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
 }
 
-TEST(PutChar_ExactlyFull_SpaceShouldDouble) {
-    setUp();
-
+TEST_F(StringBuilderTest, PutChar_ExactlyFull_SpaceShouldDouble) {
     for (int i = 0; i < StringBuilder::DEFAULT_SPACE_ALLOCATED - 1; ++i)
-        testable->put_char('a' + i);
+        testable.put_char('a' + i);
 
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED - 1, testable->get_size());
-    ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED << 1, testable->m_currentSpace);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED - 1, testable.get_size());
+    ASSERT_EQ_MSG(strlen(testable.to_string()), testable.get_size());
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED << 1, testable.m_currentSpace);
     for (int i = 0; i < StringBuilder::DEFAULT_SPACE_ALLOCATED - 1; ++i)
-        ASSERT_EQ_MSG('a' + i, testable->to_string()[i]);
-
-    tearDown();
+        ASSERT_EQ_MSG('a' + i, testable.to_string()[i]);
 }
 
-TEST(PutChar_FirstNewAlloc) {
-    setUp();
-
-    const unsigned int originalStringAddr = (unsigned int) testable->to_string();
+TEST_F(StringBuilderTest, PutChar_FirstNewAlloc) {
+    const unsigned int originalStringAddr = (unsigned int) testable.to_string();
 
     for (int i = 0; i < StringBuilder::DEFAULT_SPACE_ALLOCATED; ++i)
-        testable->put_char('a' + i);
+        testable.put_char('a' + i);
 
-    ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable->to_string());
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->get_size());
-    ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED * 2, testable->m_currentSpace);
+    ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable.to_string());
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.get_size());
+    ASSERT_EQ_MSG(strlen(testable.to_string()), testable.get_size());
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED * 2, testable.m_currentSpace);
     for (int i = 0; i < StringBuilder::DEFAULT_SPACE_ALLOCATED; ++i)
-        ASSERT_EQ_MSG('a' + i, testable->to_string()[i]);
-
-    tearDown();
+        ASSERT_EQ_MSG('a' + i, testable.to_string()[i]);
 }
 
-TEST(PutChar_HugeString) {
-    setUp();
-
-    const unsigned int originalStringAddr = (unsigned int) testable->to_string();
+TEST_F(StringBuilderTest, PutChar_HugeString) {
+    const unsigned int originalStringAddr = (unsigned int) testable.to_string();
 
     const int STRING_SIZE = 0x1000 - 1;
     for (int  i           = 0; i < STRING_SIZE; ++i)
-        testable->put_char('a');
+        testable.put_char('a');
 
-    ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable->to_string());
-    ASSERT_EQ_MSG(STRING_SIZE, testable->get_size());
-    ASSERT_EQ_MSG(strlen(testable->to_string()), testable->get_size());
-    ASSERT_EQ_MSG((STRING_SIZE + 1) << 1, testable->m_currentSpace);
+    ASSERT_NEQ_MSG(originalStringAddr, (unsigned int) testable.to_string());
+    ASSERT_EQ_MSG(STRING_SIZE, testable.get_size());
+    ASSERT_EQ_MSG(strlen(testable.to_string()), testable.get_size());
+    ASSERT_EQ_MSG((STRING_SIZE + 1) << 1, testable.m_currentSpace);
     for (int i = 0; i < STRING_SIZE; ++i)
-        ASSERT_EQ_MSG('a', testable->to_string()[i]);
-
-    tearDown();
+        ASSERT_EQ_MSG('a', testable.to_string()[i]);
 }
 
-TEST(Clear_empty) {
-    setUp();
+TEST_F(StringBuilderTest, Clear_empty) {
+    testable.clear();
 
-    testable->clear();
-
-    ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-    ASSERT_EQ_MSG(0, testable->m_size);
-    ASSERT_EQ_MSG(0, strlen(testable->to_string()));
-
-    tearDown();
+    ASSERT_NEQ_MSG(NULL, (unsigned int) testable.m_string);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
+    ASSERT_EQ_MSG(0, testable.m_size);
+    ASSERT_EQ_MSG(0, strlen(testable.to_string()));
 }
 
-TEST(Clear_OneChar) {
-    setUp();
+TEST_F(StringBuilderTest, Clear_OneChar) {
+    testable.put_char('a');
+    testable.clear();
 
-    testable->put_char('a');
-    testable->clear();
-
-    ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-    ASSERT_EQ_MSG(0, testable->m_size);
-    ASSERT_EQ_MSG(0, strlen(testable->to_string()));
-
-    tearDown();
+    ASSERT_NEQ_MSG(NULL, (unsigned int) testable.m_string);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
+    ASSERT_EQ_MSG(0, testable.m_size);
+    ASSERT_EQ_MSG(0, strlen(testable.to_string()));
 }
 
-TEST(Clear_HugeString) {
-    setUp();
-
+TEST_F(StringBuilderTest, Clear_HugeString) {
     const int STRING_SIZE = 0x1000 - 1;
     for (int  i           = 0; i < STRING_SIZE; ++i)
-        testable->put_char('a');
+        testable.put_char('a');
 
-    testable->clear();
+    testable.clear();
 
-    ASSERT_NEQ_MSG(NULL, (unsigned int) testable->m_string);
-    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable->m_currentSpace);
-    ASSERT_EQ_MSG(0, testable->m_size);
-    ASSERT_EQ_MSG(0, strlen(testable->to_string()));
-
-    tearDown();
+    ASSERT_NEQ_MSG(NULL, (unsigned int) testable.m_string);
+    ASSERT_EQ_MSG(StringBuilder::DEFAULT_SPACE_ALLOCATED, testable.m_currentSpace);
+    ASSERT_EQ_MSG(0, testable.m_size);
+    ASSERT_EQ_MSG(0, strlen(testable.to_string()));
 }
 
-TEST(Puts) {
+TEST_F(StringBuilderTest, Puts) {
     const char testString[] = "Hello, world! My name is David Zemon. This my super long sentence.";
-    setUp();
 
-    testable->puts(testString);
+    testable.puts(testString);
 
-    ASSERT_NEQ_MSG(NULL, (unsigned int) testable->to_string());
-    ASSERT_EQ_MSG(sizeof(testString) - 1, testable->get_size());
-    ASSERT_EQ_MSG(0, strcmp(testString, testable->to_string()));
-
-    tearDown();
+    ASSERT_NEQ_MSG(NULL, (unsigned int) testable.to_string());
+    ASSERT_EQ_MSG(sizeof(testString) - 1, testable.get_size());
+    ASSERT_EQ_MSG(0, strcmp(testString, testable.to_string()));
 }
 
 int main () {
     START(StringBuilderTest);
 
-    RUN_TEST(ConstructorDestructor);
-    RUN_TEST(PutChar_one);
-    RUN_TEST(PutChar_two);
-    RUN_TEST(PutChar_three);
-    RUN_TEST(PutChar_ExactlyFull_SpaceShouldDouble);
-    RUN_TEST(PutChar_FirstNewAlloc);
-    RUN_TEST(PutChar_HugeString);
-    RUN_TEST(Clear_empty);
-    RUN_TEST(Clear_OneChar);
-    RUN_TEST(Clear_HugeString);
-    RUN_TEST(Puts);
+    RUN_TEST_F(StringBuilderTest, ConstructorDestructor);
+    RUN_TEST_F(StringBuilderTest, PutChar_one);
+    RUN_TEST_F(StringBuilderTest, PutChar_two);
+    RUN_TEST_F(StringBuilderTest, PutChar_three);
+    RUN_TEST_F(StringBuilderTest, PutChar_ExactlyFull_SpaceShouldDouble);
+    RUN_TEST_F(StringBuilderTest, PutChar_FirstNewAlloc);
+    RUN_TEST_F(StringBuilderTest, PutChar_HugeString);
+    RUN_TEST_F(StringBuilderTest, Clear_empty);
+    RUN_TEST_F(StringBuilderTest, Clear_OneChar);
+    RUN_TEST_F(StringBuilderTest, Clear_HugeString);
+    RUN_TEST_F(StringBuilderTest, Puts);
 
     COMPLETE();
 }

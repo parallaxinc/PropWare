@@ -28,87 +28,60 @@
 
 using PropWare::Queue;
 
-static const size_t         SIZE = 8;
-static int                  array[SIZE];
-static Queue<int> *testable;
+static const size_t SIZE = 8;
 
-SETUP {
-    testable = new Queue<int>(array);
+class QueueTest {
+    public:
+        QueueTest () {
+            testable = new Queue<int>(this->array);
+        }
+
+    public:
+        int        array[SIZE];
+        Queue<int> *testable;
 };
 
-TEARDOWN {
-    delete testable;
-};
-
-TEST(Constructor) {
-    setUp();
-    tearDown();
-}
-
-TEST(Size_whenEmpty) {
-    setUp();
-
+TEST_F(QueueTest, Size_whenEmpty) {
     ASSERT_EQ_MSG(0, testable->size());
-
-    tearDown();
 }
 
-TEST(IsEmpty) {
-    setUp();
-
+TEST_F(QueueTest, IsEmpty) {
     ASSERT_TRUE(testable->is_empty());
     testable->enqueue(1);
     ASSERT_FALSE(testable->is_empty());
-
-    tearDown();
 }
 
-TEST(enqueue_firstElement) {
+TEST_F(QueueTest, enqueue_firstElement) {
     const int value = 42;
-    setUp();
 
     testable->enqueue(value);
     ASSERT_EQ_MSG(1, testable->size());
     ASSERT_EQ_MSG(value, testable->peek());
-
-    tearDown();
 }
 
-TEST(Clear_whenEmpty) {
-    setUp();
-
+TEST_F(QueueTest, Clear_whenEmpty) {
     testable->clear();
-
-    tearDown();
 }
 
-TEST(Clear_withOneElement) {
-    setUp();
-
+TEST_F(QueueTest, Clear_withOneElement) {
     testable->insert(42);
     testable->clear();
     ASSERT_TRUE(testable->is_empty());
-
-    tearDown();
 }
 
-TEST(Peek_doesNotRemoveElement) {
+TEST_F(QueueTest, Peek_doesNotRemoveElement) {
     const int value = 42;
-    setUp();
 
     testable->enqueue(value);
     ASSERT_EQ_MSG(1, testable->size());
     ASSERT_EQ_MSG(value, testable->peek());
     ASSERT_EQ_MSG(1, testable->size());
     ASSERT_EQ_MSG(value, testable->peek());
-
-    tearDown();
 }
 
-TEST(enqueue_twoElements) {
+TEST_F(QueueTest, enqueue_twoElements) {
     const int first  = 42;
     const int second = 13;
-    setUp();
 
     testable->enqueue(first);
     ASSERT_EQ_MSG(1, testable->size());
@@ -117,13 +90,9 @@ TEST(enqueue_twoElements) {
     testable->enqueue(second);
     ASSERT_EQ_MSG(2, testable->size());
     ASSERT_EQ_MSG(second, testable->m_array[1]);
-
-    tearDown();
 }
 
-TEST(Deque_singleElement) {
-    setUp();
-
+TEST_F(QueueTest, Deque_singleElement) {
     const int value = 42;
 
     testable->enqueue(value);
@@ -134,13 +103,9 @@ TEST(Deque_singleElement) {
     ASSERT_EQ_MSG(value, actual);
 
     ASSERT_EQ_MSG(0, testable->size());
-
-    tearDown();
 }
 
-TEST(Deque_twoElements) {
-    setUp();
-
+TEST_F(QueueTest, Deque_twoElements) {
     const int first  = 42;
     const int second = 13;
 
@@ -154,13 +119,9 @@ TEST(Deque_twoElements) {
     ASSERT_EQ_MSG(second, testable->dequeue());
 
     ASSERT_EQ_MSG(0, testable->size());
-
-    tearDown();
 }
 
-TEST(Deque_multipleElements) {
-    setUp();
-
+TEST_F(QueueTest, Deque_multipleElements) {
     for (int i = 0; i < 4; ++i)
         testable->enqueue(i);
 
@@ -171,13 +132,9 @@ TEST(Deque_multipleElements) {
 
     for (int i = 0; i < 4; ++i)
         ASSERT_EQ_MSG(i, testable->dequeue());
-
-    tearDown();
 }
 
-TEST(ManyElements) {
-    setUp();
-
+TEST_F(QueueTest, ManyElements) {
     // Insert many elements
     const size_t      TEST_SIZE = SIZE * 2 + 1;
     for (unsigned int i         = 0; i < TEST_SIZE; ++i) {
@@ -195,25 +152,22 @@ TEST(ManyElements) {
     for (unsigned int i                  = DEQUEUE_LOOP_START; i < TEST_SIZE; ++i) {
         ASSERT_EQ_MSG((int) i, testable->dequeue());
     }
-
-    tearDown();
 }
 
 int main () {
     START(CircularBuffer);
 
-    RUN_TEST(Constructor);
-    RUN_TEST(Size_whenEmpty);
-    RUN_TEST(IsEmpty);
-    RUN_TEST(enqueue_firstElement);
-    RUN_TEST(Clear_whenEmpty);
-    RUN_TEST(Clear_withOneElement);
-    RUN_TEST(Peek_doesNotRemoveElement);
-    RUN_TEST(enqueue_twoElements);
-    RUN_TEST(Deque_singleElement);
-    RUN_TEST(Deque_twoElements);
-    RUN_TEST(Deque_multipleElements);
-    RUN_TEST(ManyElements);
+    RUN_TEST_F(QueueTest, Size_whenEmpty);
+    RUN_TEST_F(QueueTest, IsEmpty);
+    RUN_TEST_F(QueueTest, enqueue_firstElement);
+    RUN_TEST_F(QueueTest, Clear_whenEmpty);
+    RUN_TEST_F(QueueTest, Clear_withOneElement);
+    RUN_TEST_F(QueueTest, Peek_doesNotRemoveElement);
+    RUN_TEST_F(QueueTest, enqueue_twoElements);
+    RUN_TEST_F(QueueTest, Deque_singleElement);
+    RUN_TEST_F(QueueTest, Deque_twoElements);
+    RUN_TEST_F(QueueTest, Deque_multipleElements);
+    RUN_TEST_F(QueueTest, ManyElements);
 
     COMPLETE();
 }

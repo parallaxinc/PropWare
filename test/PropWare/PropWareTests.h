@@ -32,16 +32,6 @@
 #define protected public
 #define private   public
 
-void _runPropWareUnitTest (bool (*test) (void), const char testName[],
-                           const bool expectValue, uint8_t *failures) {
-    if (expectValue == test())
-        pwOut << "#\tSUCCESS: " << testName << '\n';
-    else {
-        pwOut << "#\t***FAIL: " << testName << '\n';
-        ++(*failures);
-    }
-}
-
 #define MESSAGE(...) \
     pwOut.printf("#\t- " __VA_ARGS__); \
     pwOut << '\n';
@@ -64,8 +54,10 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
     pwOut << (char) 0xff << (char) 0x00 << (char) failures; \
     return failures
 
+/* Procedural tests */
+
 #define TEST(testName) \
-    bool testName ()
+    void testName (bool &_pwTest_status)
 
 #define RUN_TEST(testName) \
     _runPropWareUnitTest(testName, #testName, true, &failures)
@@ -73,49 +65,103 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
 #define EXPECT_FAIL(testName) \
     _runPropWareUnitTest(testName, #testName, false, &failures)
 
+void _runPropWareUnitTest (void (*test) (bool &), const char testName[], const bool expectValue, uint8_t *failures) {
+    bool result = true;
+    test(result);
+    if (expectValue == result)
+        pwOut << "#\tSUCCESS: " << testName << '\n';
+    else {
+        pwOut << "#\t***FAIL: " << testName << '\n';
+        ++(*failures);
+    }
+}
+
+/* Test fixtures */
+
+#define TEST_F(clazz, testName) \
+    class clazz ## testName : public clazz { \
+        public: \
+            clazz ## testName () : clazz(), _pwTest_status(true) { } \
+            void testName (); \
+        public: \
+            bool _pwTest_status; \
+    }; \
+    bool clazz ## _ ## testName () { \
+        clazz ## testName testable; \
+        testable.testName(); \
+        return testable._pwTest_status; \
+    } \
+    void clazz ## testName::testName ()
+
+#define RUN_TEST_F(clazz, testName) \
+    _runPropWareUnitTestFixture(clazz ## _ ## testName, #clazz "." #testName, true, &failures)
+
+#define EXPECT_FAIL_F(clazz, testName) \
+    _runPropWareUnitTestFixture(clazz ## _ ## testName, #clazz "." #testName, false, &failures)
+
+void _runPropWareUnitTestFixture (bool (*test) (void), const char testName[], const bool expectValue,
+                                  uint8_t *failures) {
+    if (expectValue == test())
+        pwOut << "#\tSUCCESS: " << testName << '\n';
+    else {
+        pwOut << "#\t***FAIL: " << testName << '\n';
+        ++(*failures);
+    }
+}
+
+/* Assertions */
+
 #define FAIL(...) \
     MESSAGE(__VA_ARGS__) \
-    _tearDown(); \
-    return false
+    _pwTest_status = false; \
+    return; \
 
 #define ASSERT(actual) \
     if (!(actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Assertion failed: `ASSERT(" << #actual << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT(actual) \
+    if (!(actual)) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Assertion failed: `ASSERT(" << #actual << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_TRUE(actual) \
     if (true == !(actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected true, got false: `ASSERT_TRUE(" << #actual << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_FALSE(actual) \
     if (false == !(actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected false, got true: `ASSERT_FALSE(" << #actual << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_NULL(actual) \
     if (NULL != (actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected null, got " << (void *) actual << ": `ASSERT_NULL(" << #actual << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_NOT_NULL(actual) \
     if (NULL == (actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected not-null, got null: `ASSERT_NOT_NULL(" << #actual << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_EQ(expected, actual) \
@@ -123,8 +169,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected values to be equal, but they do not match: "; \
         pwOut << "`ASSERT_EQ(" << #expected << ", " << #actual << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_NEQ(lhs, rhs) \
@@ -132,8 +178,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected values to different, but they match: "; \
         pwOut << "`ASSERT_NEQ(" << #lhs << ", " << #rhs << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_EQ_MSG(expected, actual) \
@@ -141,8 +187,8 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
         pwOut << "Expected `" << expected << "`, got `" << actual << "`: "; \
         pwOut << "`ASSERT_EQ_MSG(" << #expected << ", " #actual ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
 
 #define ASSERT_NEQ_MSG(lhs, rhs) \
@@ -150,16 +196,6 @@ void _runPropWareUnitTest (bool (*test) (void), const char testName[],
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
         pwOut << "Expected mismatch, but both sides are `" << lhs << "`:"; \
         pwOut << "`ASSERT_NEQ_MSG(" << #lhs << ", " << #rhs << ")`\n"; \
-        _tearDown(); \
-        return false; \
+        _pwTest_status = false; \
+        return; \
     }
-
-#define SETUP \
-    void setUp ()
-
-#define TEARDOWN \
-    void _tearDown ()
-
-#define tearDown() \
-    _tearDown(); \
-    return true

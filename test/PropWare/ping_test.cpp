@@ -42,50 +42,42 @@ class MockPing: public Ping {
         }
 };
 
-MockPing testable;
+class PingTest {
+    public:
+        MockPing testable;
+};
 
-TEARDOWN {
-}
-
-TEST(GetMicroseconds) {
+TEST_F(PingTest, GetMicroseconds) {
     g_clockTicks = 10*MICROSECOND;
 
-    ASSERT_EQ_MSG(10, testable.get_microseconds());
-
-    tearDown();
+    ASSERT_EQ_MSG(10, this->testable.get_microseconds());
 }
 
-TEST(GetMillimeters) {
+TEST_F(PingTest, GetMillimeters) {
     g_clockTicks = MICROSECOND;
 
-    ASSERT_EQ_MSG(17, testable.get_millimeters());
-
-    tearDown();
+    ASSERT_EQ_MSG(17, this->testable.get_millimeters());
 }
 
-TEST(GetCentimeters) {
+TEST_F(PingTest, GetCentimeters) {
     g_clockTicks = 1000*MICROSECOND;
 
-    ASSERT_EQ_MSG(17, testable.get_centimeters());
-
-    tearDown();
+    ASSERT_EQ_MSG(17, this->testable.get_centimeters());
 }
 
-TEST(GetInches) {
+TEST_F(PingTest, GetInches) {
     g_clockTicks = 1480*MICROSECOND;
 
-    ASSERT_EQ_MSG(10, testable.get_inches());
-
-    tearDown();
+    ASSERT_EQ_MSG(10, this->testable.get_inches());
 }
 
 int main() {
     START(PingTest);
 
-    RUN_TEST(GetMicroseconds);
-    RUN_TEST(GetMillimeters);
-    RUN_TEST(GetCentimeters);
-    RUN_TEST(GetInches);
+    RUN_TEST_F(PingTest, GetMicroseconds);
+    RUN_TEST_F(PingTest, GetMillimeters);
+    RUN_TEST_F(PingTest, GetCentimeters);
+    RUN_TEST_F(PingTest, GetInches);
 
     COMPLETE();
 }

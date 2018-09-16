@@ -31,9 +31,6 @@
 
 using PropWare::Utility;
 
-TEARDOWN {
-}
-
 TEST(CountBits) {
     ASSERT_EQ_MSG(0, Utility::count_bits(0));
     ASSERT_EQ_MSG(1, Utility::count_bits(PropWare::BIT_0));
@@ -87,8 +84,6 @@ TEST(CountBits) {
     ASSERT_EQ_MSG(16, Utility::count_bits(PropWare::WORD_1));
 
     ASSERT_EQ_MSG(5, Utility::count_bits(0x1234))
-
-    tearDown();
 }
 
 TEST(ToLower) {
@@ -97,8 +92,6 @@ TEST(ToLower) {
 
     Utility::to_lower(actual);
     ASSERT_EQ_MSG(0, strcmp(expected, actual));
-
-    tearDown();
 }
 
 TEST(ToLower_DoesNotFailOnEmpty) {
@@ -106,8 +99,6 @@ TEST(ToLower_DoesNotFailOnEmpty) {
 
     Utility::to_lower(actual);
     ASSERT_EQ_MSG(0, strlen(actual));
-
-    tearDown();
 }
 
 TEST(ToUpper) {
@@ -116,8 +107,6 @@ TEST(ToUpper) {
 
     Utility::to_upper(actual);
     ASSERT_EQ_MSG(0, strcmp(expected, actual));
-
-    tearDown();
 }
 
 TEST(ToUpper_DoesNotFailOnEmpty) {
@@ -125,15 +114,11 @@ TEST(ToUpper_DoesNotFailOnEmpty) {
 
     Utility::to_upper(actual);
     ASSERT_EQ_MSG(0, strlen(actual));
-
-    tearDown();
 }
 
 TEST(ToString) {
     ASSERT_EQ_MSG(0, strcmp("true", Utility::to_string(true)));
     ASSERT_EQ_MSG(0, strcmp("false", Utility::to_string(false)));
-
-    tearDown();
 }
 
 TEST(RomLog) {
@@ -154,8 +139,6 @@ TEST(RomLog) {
     const double difference  = fabs(actual - expected) / expected;
     const bool   withinRange = 0.0001 > difference;
     ASSERT_TRUE(withinRange);
-
-    tearDown();
 }
 
 TEST(MeasureTimeInterval) {
@@ -165,8 +148,6 @@ TEST(MeasureTimeInterval) {
     waitcnt(expected * MILLISECOND + CNT);
     unsigned int actual = Utility::measure_time_interval(start) / 1000;
     ASSERT_EQ_MSG(expected, actual);
-
-    tearDown();
 }
 
 TEST(BitRead) {
@@ -183,8 +164,6 @@ TEST(BitRead) {
     ASSERT_FALSE(Utility::bit_read(z, PropWare::BIT_1));
     ASSERT_TRUE(Utility::bit_read(z, PropWare::BIT_16));
     ASSERT_TRUE(Utility::bit_read(z, PropWare::BIT_31));
-
-    tearDown();
 }
 
 TEST(BitWrite) {
@@ -207,8 +186,6 @@ TEST(BitWrite) {
 
     Utility::bit_write(x, PropWare::BIT_31, false);
     ASSERT_EQ(0, x);
-
-    tearDown();
 }
 
 int main () {

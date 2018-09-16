@@ -32,201 +32,152 @@
 using PropWare::Eeprom;
 using PropWare::I2CMaster;
 
-Eeprom *testable;
-
-SETUP {
-    testable = new Eeprom();
+class EepromTest {
+    public:
+        Eeprom testable;
 };
 
-TEARDOWN {
-    if (testable)
-        delete testable;
-    testable = NULL;
-};
-
-TEST(Constructor_DefaultArguments) {
-    setUp();
-
-    ASSERT_EQ_MSG(&pwI2c, testable->m_driver);
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_DEVICE_ADDRESS, testable->m_deviceAddress);
-    ASSERT_TRUE(testable->m_autoIncrement);
-
-    tearDown();
+TEST_F(EepromTest, Constructor_DefaultArguments) {
+    ASSERT_EQ_MSG(&pwI2c, testable.m_driver);
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_DEVICE_ADDRESS, testable.m_deviceAddress);
+    ASSERT_TRUE(testable.m_autoIncrement);
 }
 
-TEST(Constructor_NonDefaultArguments) {
-    I2CMaster    bogus;
-    Eeprom localTestable(bogus, 1, 2, false);
+TEST_F(EepromTest, Constructor_NonDefaultArguments) {
+    I2CMaster bogus;
+    Eeprom    localTestable(bogus, 1, 2, false);
 
     ASSERT_EQ_MSG((unsigned int) &bogus, (unsigned int) localTestable.m_driver);
     ASSERT_EQ_MSG(1, localTestable.get_memory_address());
     ASSERT_EQ_MSG(2, localTestable.m_deviceAddress);
     ASSERT_FALSE(localTestable.m_autoIncrement);
-
-    tearDown();
 }
 
-TEST(GetSetMemoryAddress) {
-    setUp();
+TEST_F(EepromTest, GetSetMemoryAddress) {
+    testable.set_memory_address(0x1234);
+    ASSERT_EQ_MSG(0x1234, testable.m_memoryAddress);
+    ASSERT_EQ_MSG(0x1234, testable.get_memory_address());
 
-    testable->set_memory_address(0x1234);
-    ASSERT_EQ_MSG(0x1234, testable->m_memoryAddress);
-    ASSERT_EQ_MSG(0x1234, testable->get_memory_address());
-
-    testable->set_memory_address(0x4321);
-    ASSERT_EQ_MSG(0x4321, testable->m_memoryAddress);
-    ASSERT_EQ_MSG(0x4321, testable->get_memory_address());
-
-    tearDown();
+    testable.set_memory_address(0x4321);
+    ASSERT_EQ_MSG(0x4321, testable.m_memoryAddress);
+    ASSERT_EQ_MSG(0x4321, testable.get_memory_address());
 }
 
-TEST(GetSetAutoIncrement) {
-    setUp();
+TEST_F(EepromTest, GetSetAutoIncrement) {
+    testable.set_auto_increment(false);
+    ASSERT_FALSE(testable.m_autoIncrement);
+    ASSERT_FALSE(testable.is_auto_increment());
 
-    testable->set_auto_increment(false);
-    ASSERT_FALSE(testable->m_autoIncrement);
-    ASSERT_FALSE(testable->is_auto_increment());
-
-    testable->set_auto_increment(true);
-    ASSERT_TRUE(testable->m_autoIncrement);
-    ASSERT_TRUE(testable->is_auto_increment());
-
-    tearDown();
+    testable.set_auto_increment(true);
+    ASSERT_TRUE(testable.m_autoIncrement);
+    ASSERT_TRUE(testable.is_auto_increment());
 }
 
-TEST(Ping) {
-    setUp();
-
-    ASSERT_TRUE(testable->ping());
-
-    tearDown();
+TEST_F(EepromTest, Ping) {
+    ASSERT_TRUE(testable.ping());
 }
 
-TEST(PutGet_SingleByte) {
-    setUp();
-
+TEST_F(EepromTest, PutGet_SingleByte) {
     const uint8_t sampleByte1 = 0x5A;
 
-    ASSERT_TRUE(testable->put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleByte1));
-    ASSERT_EQ_MSG(sampleByte1, testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
+    ASSERT_TRUE(testable.put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleByte1));
+    ASSERT_EQ_MSG(sampleByte1, testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
 
     const uint8_t sampleByte2 = 0xA5;
 
-    ASSERT_TRUE(testable->put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleByte2));
-    ASSERT_EQ_MSG(sampleByte2, testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
-
-    tearDown();
+    ASSERT_TRUE(testable.put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleByte2));
+    ASSERT_EQ_MSG(sampleByte2, testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
 }
 
-TEST(PutGet_Array) {
-    setUp();
-
+TEST_F(EepromTest, PutGet_Array) {
     uint8_t       buffer[64];
     const uint8_t sampleBytes1[] = "Hello";
 
-    ASSERT_TRUE(testable->put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleBytes1, sizeof(sampleBytes1)));
-    ASSERT_TRUE(testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, buffer, sizeof(sampleBytes1)));
+    ASSERT_TRUE(testable.put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleBytes1, sizeof(sampleBytes1)));
+    ASSERT_TRUE(testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, buffer, sizeof(sampleBytes1)));
     ASSERT_EQ_MSG(0, strcmp((char *) sampleBytes1, (char *) buffer));
 
     const uint8_t sampleBytes2[] = "Goodbye";
 
-    ASSERT_TRUE(testable->put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleBytes2, sizeof(sampleBytes2)));
-    ASSERT_TRUE(testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, buffer, sizeof(sampleBytes2)));
+    ASSERT_TRUE(testable.put(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, sampleBytes2, sizeof(sampleBytes2)));
+    ASSERT_TRUE(testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, buffer, sizeof(sampleBytes2)));
     ASSERT_EQ_MSG(0, strcmp((char *) sampleBytes2, (char *) buffer));
-
-    tearDown();
 }
 
-TEST(PutChar_IncrementEnabled) {
-    setUp();
+TEST_F(EepromTest, PutChar_IncrementEnabled) {
+    testable.set_auto_increment(true);
 
-    testable->set_auto_increment(true);
+    testable.put_char('H');
+    testable.put_char('e');
+    testable.put_char('l');
+    testable.put_char('l');
+    testable.put_char('o');
 
-    testable->put_char('H');
-    testable->put_char('e');
-    testable->put_char('l');
-    testable->put_char('l');
-    testable->put_char('o');
+    testable.set_memory_address(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS);
 
-    testable->set_memory_address(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS);
-
-    ASSERT_EQ_MSG('H', testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
-    ASSERT_EQ_MSG('e', testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 1));
-    ASSERT_EQ_MSG('l', testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 2));
-    ASSERT_EQ_MSG('l', testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 3));
-    ASSERT_EQ_MSG('o', testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 4));
-
-    tearDown();
+    ASSERT_EQ_MSG('H', testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
+    ASSERT_EQ_MSG('e', testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 1));
+    ASSERT_EQ_MSG('l', testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 2));
+    ASSERT_EQ_MSG('l', testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 3));
+    ASSERT_EQ_MSG('o', testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS + 4));
 }
 
-TEST(PutChar_IncrementDisabled) {
-    setUp();
+TEST_F(EepromTest, PutChar_IncrementDisabled) {
+    testable.set_auto_increment(false);
 
-    testable->set_auto_increment(false);
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    testable.put_char('H');
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    testable.put_char('e');
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    testable.put_char('l');
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    testable.put_char('l');
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    testable.put_char('o');
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
 
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    testable->put_char('H');
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    testable->put_char('e');
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    testable->put_char('l');
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    testable->put_char('l');
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    testable->put_char('o');
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-
-    ASSERT_EQ_MSG('o', testable->get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
-
-    tearDown();
+    ASSERT_EQ_MSG('o', testable.get(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS));
 }
 
-TEST(GetChar_IncrementEnabled) {
-    setUp();
+TEST_F(EepromTest, GetChar_IncrementEnabled) {
+    testable.set_auto_increment(true);
+    testable.puts("Hello");
+    testable.set_memory_address(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS);
 
-    testable->set_auto_increment(true);
-    testable->puts("Hello");
-    testable->set_memory_address(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS);
-
-    ASSERT_EQ_MSG('H', testable->get_char());
-    ASSERT_EQ_MSG('e', testable->get_char());
-    ASSERT_EQ_MSG('l', testable->get_char());
-    ASSERT_EQ_MSG('l', testable->get_char());
-    ASSERT_EQ_MSG('o', testable->get_char());
-
-    tearDown();
+    ASSERT_EQ_MSG('H', testable.get_char());
+    ASSERT_EQ_MSG('e', testable.get_char());
+    ASSERT_EQ_MSG('l', testable.get_char());
+    ASSERT_EQ_MSG('l', testable.get_char());
+    ASSERT_EQ_MSG('o', testable.get_char());
 }
 
-TEST(GetChar_IncrementDisabled) {
-    setUp();
+TEST_F(EepromTest, GetChar_IncrementDisabled) {
+    testable.set_auto_increment(false);
+    testable.puts("Hello");
 
-    testable->set_auto_increment(false);
-    testable->puts("Hello");
-
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    ASSERT_EQ_MSG('H', testable->get_char());
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-    ASSERT_EQ_MSG('H', testable->get_char());
-    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable->get_memory_address());
-
-    tearDown();
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    ASSERT_EQ_MSG('H', testable.get_char());
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
+    ASSERT_EQ_MSG('H', testable.get_char());
+    ASSERT_EQ_MSG(Eeprom::DEFAULT_INITIAL_MEMORY_ADDRESS, testable.get_memory_address());
 }
 
-int main() {
+int main () {
     START(EEPROM);
 
-    RUN_TEST(Constructor_DefaultArguments);
-    RUN_TEST(Constructor_NonDefaultArguments);
-    RUN_TEST(GetSetMemoryAddress);
-    RUN_TEST(GetSetAutoIncrement);
-    RUN_TEST(Ping);
-    RUN_TEST(PutGet_SingleByte);
-    RUN_TEST(PutGet_Array);
-    RUN_TEST(PutChar_IncrementEnabled);
-    RUN_TEST(PutChar_IncrementDisabled);
-    RUN_TEST(GetChar_IncrementEnabled);
-    RUN_TEST(GetChar_IncrementDisabled);
+    RUN_TEST_F(EepromTest, Constructor_DefaultArguments);
+    RUN_TEST_F(EepromTest, Constructor_NonDefaultArguments);
+    RUN_TEST_F(EepromTest, GetSetMemoryAddress);
+    RUN_TEST_F(EepromTest, GetSetAutoIncrement);
+    RUN_TEST_F(EepromTest, Ping);
+    RUN_TEST_F(EepromTest, PutGet_SingleByte);
+    RUN_TEST_F(EepromTest, PutGet_Array);
+    RUN_TEST_F(EepromTest, PutChar_IncrementEnabled);
+    RUN_TEST_F(EepromTest, PutChar_IncrementDisabled);
+    RUN_TEST_F(EepromTest, GetChar_IncrementEnabled);
+    RUN_TEST_F(EepromTest, GetChar_IncrementDisabled);
 
     COMPLETE();
 }

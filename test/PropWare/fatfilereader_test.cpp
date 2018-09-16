@@ -48,15 +48,12 @@ using PropWare::File;
 using PropWare::FatFile;
 using PropWare::StaticStringBuilder;
 
-static const char             FILE_NAME[]       = "fat_test.txt";
-static const char             FILE_NAME_UPPER[] = "FAT_TEST.TXT";
-static const char             BOGUS_FILE_NAME[] = "bogus.txt";
-static SD                     g_driver;
-static FatFS                  g_fs(g_driver);
-static FatFileReader          *testable;
-static uint8_t                *dataBuffer;
-static BlockStorage::Buffer   buffer;
-static BlockStorage::MetaData bufferMeta;
+static const char FILE_NAME[]       = "fat_test.txt";
+static const char FILE_NAME_UPPER[] = "FAT_TEST.TXT";
+static const char BOGUS_FILE_NAME[] = "bogus.txt";
+
+static SD    g_driver;
+static FatFS g_fs(g_driver);
 
 void error_checker (const PropWare::ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
@@ -71,42 +68,32 @@ void error_checker (const PropWare::ErrorCode err) {
         pwOut << "Unknown error: " << err << '\n';
 }
 
-void clear_buffer (File *file) {
-    BlockStorage::Buffer *buffer = file->m_buf;
-    file->m_driver->flush(buffer);
-    for (unsigned int i = 0; i < file->m_driver->get_sector_size(); ++i)
-        buffer->buf[i] = 0;
-    buffer->meta = NULL;
-}
+class FatFileReaderTest {
+    public:
+        FatFileReaderTest () {
+            this->m_buffer.buf  = new uint8_t[g_driver.get_sector_size()];
+            this->m_buffer.meta = &m_bufferMeta;
+        }
 
-SETUP {
-    PropWare::ErrorCode err;
-    dataBuffer = new uint8_t[g_driver.get_sector_size()];
-    buffer.buf = dataBuffer;
-    buffer.meta = &bufferMeta;
-    testable = new FatFileReader(g_fs, FILE_NAME, buffer);
-    err      = testable->open();
-    if (err) {
-        MESSAGE("Setup failed!");
-        error_checker(err);
-    }
-}
+        ~FatFileReaderTest () {
+            if (NULL != this->testable) {
+                this->testable->close();
+                delete this->testable;
+            }
+            g_driver.flush(&this->m_buffer);
+            memset(this->m_buffer.buf, 0, g_driver.get_sector_size());
+            delete this->m_buffer.buf;
+        }
 
-TEARDOWN {
-    if (NULL != testable) {
-        testable->close();
-        clear_buffer(testable);
-        delete testable;
-        testable = NULL;
-    }
-    if (NULL != dataBuffer) {
-        delete dataBuffer;
-        dataBuffer = NULL;
-    }
-}
+    public:
+        BlockStorage::Buffer   m_buffer;
+        BlockStorage::MetaData m_bufferMeta;
+        FatFileReader          *testable;
+};
 
-TEST(ConstructorDestructor) {
+TEST_F(FatFileReaderTest, ConstructorDestructor) {
     testable = new FatFileReader(g_fs, FILE_NAME);
+    ASSERT_EQ(0, testable->open());
 
     // Ensure the requested filename was not all upper case (that wouldn't be a very good test if it were)
     ASSERT_NEQ_MSG(0, strcmp(FILE_NAME, FILE_NAME_UPPER));
@@ -119,31 +106,27 @@ TEST(ConstructorDestructor) {
     ASSERT_EQ_MSG((unsigned int) &g_fs.m_dirMeta, (unsigned int) testable->m_fsBufMeta);
     ASSERT_EQ_MSG((unsigned int) &g_fs, (unsigned int) testable->m_fs);
     ASSERT_EQ_MSG(-1, testable->get_length());
-
-    tearDown();
 }
 
-TEST(Exists_doesExist) {
-    testable                   = new FatFileReader(g_fs, FILE_NAME);
-
+TEST_F(FatFileReaderTest, Exists_doesExist) {
     PropWare::ErrorCode err;
-    const bool          exists = testable->exists(err);
+
+    testable = new FatFileReader(g_fs, FILE_NAME);
+    const bool exists = testable->exists(err);
     error_checker(err);
     ASSERT_TRUE(exists)
-    tearDown();
 }
 
-TEST(Exists_doeesNotExist) {
+TEST_F(FatFileReaderTest, Exists_doeesNotExist) {
     testable = new FatFileReader(g_fs, BOGUS_FILE_NAME);
     ASSERT_FALSE(testable->exists());
-    tearDown();
 }
 
-TEST(OpenClose) {
+TEST_F(FatFileReaderTest, OpenClose) {
     PropWare::ErrorCode err;
-    testable = new FatFileReader(g_fs, FILE_NAME);
 
-    err = testable->open();
+    testable = new FatFileReader(g_fs, FILE_NAME);
+    err      = testable->open();
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
@@ -154,33 +137,35 @@ TEST(OpenClose) {
     err = testable->close();
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
-
-    tearDown();
 }
 
-TEST(Open_NonExistantFile) {
+TEST_F(FatFileReaderTest, Open_NonExistantFile) {
     testable = new FatFileReader(g_fs, BOGUS_FILE_NAME);
     ASSERT_EQ_MSG(FatFile::FILENAME_NOT_FOUND, testable->open());
-
-    tearDown();
 }
 
-TEST(SafeGetChar) {
+TEST_F(FatFileReaderTest, SafeGetChar) {
     PropWare::ErrorCode err;
-    setUp();
+
+    testable = new FatFileReader(g_fs, FILE_NAME);
+    err      = testable->open();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
 
     char c;
     err = testable->safe_get_char(c);
     error_checker(err);
     ASSERT_EQ_MSG(0, err);
     ASSERT_EQ_MSG('/', c);
-
-    tearDown();
 }
 
-TEST(Tell) {
+TEST_F(FatFileReaderTest, Tell) {
     PropWare::ErrorCode err;
-    setUp();
+
+    testable = new FatFileReader(g_fs, FILE_NAME);
+    err      = testable->open();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
 
     for (int i = 0; i < 1024; ++i) {
         char c;
@@ -190,16 +175,18 @@ TEST(Tell) {
 
         ASSERT_EQ_MSG(i + 1, testable->tell());
     }
-
-    tearDown();
 }
 
-TEST(Seek) {
+TEST_F(FatFileReaderTest, Seek) {
     const int           SEEK_ITERATIONS = 2048;
     char                stringBuffer[SEEK_ITERATIONS];
     StaticStringBuilder stringBuilder(stringBuffer);
     PropWare::ErrorCode err;
-    setUp();
+
+    testable = new FatFileReader(g_fs, FILE_NAME);
+    err      = testable->open();
+    error_checker(err);
+    ASSERT_EQ_MSG(0, err);
 
     for (int i = 0; i < SEEK_ITERATIONS - 1; ++i) {
         char c;
@@ -222,8 +209,6 @@ TEST(Seek) {
         ASSERT_EQ_MSG(0, err);
         ASSERT_EQ_MSG(stringBuilder.to_string()[charIndex], actual);
     }
-
-    tearDown();
 }
 
 int main () {
@@ -239,14 +224,14 @@ int main () {
     }
     delete tempBuffer;
 
-    RUN_TEST(ConstructorDestructor);
-    RUN_TEST(Exists_doesExist);
-    RUN_TEST(Exists_doeesNotExist);
-    RUN_TEST(OpenClose);
-    RUN_TEST(Open_NonExistantFile);
-    RUN_TEST(SafeGetChar);
-    RUN_TEST(Tell);
-    RUN_TEST(Seek);
+    RUN_TEST_F(FatFileReaderTest, ConstructorDestructor);
+    RUN_TEST_F(FatFileReaderTest, Exists_doesExist);
+    RUN_TEST_F(FatFileReaderTest, Exists_doeesNotExist);
+    RUN_TEST_F(FatFileReaderTest, OpenClose);
+    RUN_TEST_F(FatFileReaderTest, Open_NonExistantFile);
+    RUN_TEST_F(FatFileReaderTest, SafeGetChar);
+    RUN_TEST_F(FatFileReaderTest, Tell);
+    RUN_TEST_F(FatFileReaderTest, Seek);
 
     COMPLETE();
 }

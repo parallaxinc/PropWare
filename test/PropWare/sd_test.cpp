@@ -37,49 +37,35 @@ using PropWare::SD;
 using PropWare::SPI;
 using PropWare::Port;
 
-SD *testable;
+class SdTest {
+    public:
+        void sd_error_checker (const PropWare::ErrorCode err) {
+            if (err)
+                this->testable.print_error_str(pwOut, (SD::ErrorCode) err);
+        }
 
-void sd_error_checker (const PropWare::ErrorCode err) {
-    if (err)
-        testable->print_error_str(pwOut, (SD::ErrorCode) err);
-}
-
-SETUP {
-    testable = new SD();
+    public:
+        SD testable;
 };
 
-TEARDOWN {
-    delete testable;
+TEST_F(SdTest, DefaultConstructor_RELIES_ON_DNA_BOARD) {
+    ASSERT_EQ_MSG((unsigned int) &SPI::get_instance(), (unsigned int) testable.m_spi);
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P2, (unsigned int) testable.m_spi->m_mosi.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P1, (unsigned int) testable.m_spi->m_sclk.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P0, (unsigned int) testable.m_spi->m_miso.get_mask());
+    ASSERT_EQ_MSG((unsigned int) Port::Mask::P3, (unsigned int) testable.m_cs.get_mask());
 }
 
-TEST(DefaultConstructor_RELIES_ON_DNA_BOARD) {
-    setUp();
-
-    ASSERT_EQ_MSG((unsigned int) &SPI::get_instance(), (unsigned int) testable->m_spi);
-    ASSERT_EQ_MSG((unsigned int) Port::Mask::P2, (unsigned int) testable->m_spi->m_mosi.get_mask());
-    ASSERT_EQ_MSG((unsigned int) Port::Mask::P1, (unsigned int) testable->m_spi->m_sclk.get_mask());
-    ASSERT_EQ_MSG((unsigned int) Port::Mask::P0, (unsigned int) testable->m_spi->m_miso.get_mask());
-    ASSERT_EQ_MSG((unsigned int) Port::Mask::P3, (unsigned int) testable->m_cs.get_mask());
-
-    tearDown();
-}
-
-TEST(Start) {
-    setUp();
-
-    PropWare::ErrorCode err = testable->start();
+TEST_F(SdTest, Start) {
+    PropWare::ErrorCode err = testable.start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
-
-    tearDown();
 }
 
-TEST(ReadDataBlock) {
-    setUp();
-
+TEST_F(SdTest, ReadDataBlock) {
     uint8_t buffer[SD::SECTOR_SIZE];
 
-    PropWare::ErrorCode err = testable->start();
+    PropWare::ErrorCode err = testable.start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
@@ -87,7 +73,7 @@ TEST(ReadDataBlock) {
     memset(buffer, 0, sizeof(buffer));
 
     // Read in a block...
-    err = testable->read_data_block(0, buffer);
+    err = testable.read_data_block(0, buffer);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
 
@@ -98,36 +84,32 @@ TEST(ReadDataBlock) {
             success = true;
 
     ASSERT_TRUE(success);
-
-    tearDown();
 }
 
-TEST(WriteDataBlock) {
-    setUp();
-
+TEST_F(SdTest, WriteDataBlock) {
     uint8_t       originalBlock[SD::SECTOR_SIZE];
     uint8_t       moddedBlock[SD::SECTOR_SIZE];
     const uint8_t *myData     = 0;
     const uint8_t sdBlockAddr = 0;
 
-    PropWare::ErrorCode err = testable->start();
+    PropWare::ErrorCode err = testable.start();
     sd_error_checker(err);
     ASSERT_EQ_MSG(0, err);
 
     // Read in a block...
-    err = testable->read_data_block(sdBlockAddr, originalBlock);
+    err = testable.read_data_block(sdBlockAddr, originalBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Original block read in");
 
     // Try writing a random block of memory
-    err = testable->write_data_block(sdBlockAddr, myData);
+    err = testable.write_data_block(sdBlockAddr, myData);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Random block written");
 
     // Read the block back in to a new buffer. Make sure it matches the data written.
-    err = testable->read_data_block(sdBlockAddr, moddedBlock);
+    err = testable.read_data_block(sdBlockAddr, moddedBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Modded block read");
@@ -135,29 +117,27 @@ TEST(WriteDataBlock) {
     MESSAGE("WriteBlock: Modded block equals random block");
 
     // Write the original block back to the SD card
-    err = testable->write_data_block(sdBlockAddr, originalBlock);
+    err = testable.write_data_block(sdBlockAddr, originalBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Original block written back");
 
     // Read the block back in to a new buffer. Make sure it matches the data written.
-    err = testable->read_data_block(sdBlockAddr, moddedBlock);
+    err = testable.read_data_block(sdBlockAddr, moddedBlock);
     sd_error_checker(err);
     ASSERT_EQ_MSG(SD::NO_ERROR, err);
     MESSAGE("WriteBlock: Modded block read again");
     ASSERT_EQ_MSG(0, memcmp(originalBlock, moddedBlock, SD::SECTOR_SIZE));
     MESSAGE("WriteBlock: Modded block matches original");
-
-    tearDown();
 }
 
 int main () {
     START(SDTest);
 
-    RUN_TEST(DefaultConstructor_RELIES_ON_DNA_BOARD);
-    RUN_TEST(Start);
-    RUN_TEST(ReadDataBlock);
-    RUN_TEST(WriteDataBlock);
+    RUN_TEST_F(SdTest, DefaultConstructor_RELIES_ON_DNA_BOARD);
+    RUN_TEST_F(SdTest, Start);
+    RUN_TEST_F(SdTest, ReadDataBlock);
+    RUN_TEST_F(SdTest, WriteDataBlock);
 
     COMPLETE();
 }

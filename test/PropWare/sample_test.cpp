@@ -25,11 +25,7 @@
 
 #include "PropWareTests.h"
 
-TEARDOWN {
-}
-
 TEST(CheckEmpty) {
-    return true;
 }
 
 TEST(CheckFail_SimpleMessage) {
@@ -42,38 +38,26 @@ TEST(CheckFail_ComplexMessage) {
 
 TEST(CheckAssert) {
     ASSERT(true);
-
-    return true;
 }
 
 TEST(CheckAssert_ExpectFailure) {
     ASSERT(false);
-
-    return true;
 }
 
 TEST(CheckAssertTrue) {
     ASSERT_TRUE(true);
-
-    return true;
 }
 
 TEST(CheckAssertTrue_ExpectFailure) {
     ASSERT_TRUE(false);
-
-    return true;
 }
 
 TEST(CheckAssertFalse) {
     ASSERT_FALSE(false);
-
-    return true;
 }
 
 TEST(CheckAssertFalse_ExpectFailure) {
     ASSERT_FALSE(true);
-
-    return true;
 }
 
 TEST(CheckAssertEq) {
@@ -82,8 +66,6 @@ TEST(CheckAssertEq) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_EQ(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertEq_ExpectFailure) {
@@ -92,8 +74,6 @@ TEST(CheckAssertEq_ExpectFailure) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_EQ(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertEqMsg) {
@@ -102,8 +82,6 @@ TEST(CheckAssertEqMsg) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_EQ_MSG(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertEqMsg_ExpectFailure) {
@@ -112,8 +90,6 @@ TEST(CheckAssertEqMsg_ExpectFailure) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_EQ_MSG(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertNeq) {
@@ -122,8 +98,6 @@ TEST(CheckAssertNeq) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_NEQ(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertNeq_ExpectFailure) {
@@ -132,8 +106,6 @@ TEST(CheckAssertNeq_ExpectFailure) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_NEQ(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertNeqMsg) {
@@ -142,8 +114,6 @@ TEST(CheckAssertNeqMsg) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_NEQ_MSG(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertNeqMsg_ExpectFailure) {
@@ -152,8 +122,6 @@ TEST(CheckAssertNeqMsg_ExpectFailure) {
     int expected = 7;
     int actual   = x + y;
     ASSERT_NEQ_MSG(expected, actual);
-
-    return true;
 }
 
 TEST(CheckAssertNull) {
@@ -161,20 +129,14 @@ TEST(CheckAssertNull) {
 
     int *p = NULL;
     ASSERT_NULL(p);
-
-    return true;
 }
 
 TEST(CheckAssertNull_1_ExpectFailure) {
     ASSERT_NULL(1);
-
-    return true;
 }
 
 TEST(CheckAssertNull_Neg1_ExpectFailure) {
     ASSERT_NULL(-1);
-
-    return true;
 }
 
 TEST(CheckAssertNotNull) {
@@ -183,26 +145,39 @@ TEST(CheckAssertNotNull) {
     int y  = 4;
     int *p = &y;
     ASSERT_NOT_NULL(p);
-
-    return true;
 }
 
 TEST(CheckAssertNotNull_ExpectFailure) {
     ASSERT_NOT_NULL(NULL);
-
-    return true;
 }
 
 TEST(PrintUserMessage) {
     MESSAGE("Hello, this is a simple message.");
     MESSAGE("My name is %s!", "David");
+}
 
-    return true;
+class SampleFixture {
+    public:
+        SampleFixture ()
+            : m_constructorInvoked(42) {
+        }
+
+    public:
+        int m_constructorInvoked;
+};
+
+TEST_F(SampleFixture, SetupShouldBeInvoked) {
+    ASSERT_EQ_MSG(42, this->m_constructorInvoked);
+}
+
+TEST_F(SampleFixture, ExpectFailure) {
+    ASSERT_TRUE(false);
 }
 
 int main () {
     START(SampleTest);
 
+    // Procedural
     RUN_TEST(CheckEmpty);
     EXPECT_FAIL(CheckFail_SimpleMessage);
     EXPECT_FAIL(CheckFail_ComplexMessage);
@@ -226,6 +201,8 @@ int main () {
     RUN_TEST(CheckAssertNotNull);
     EXPECT_FAIL(CheckAssertNotNull_ExpectFailure);
     RUN_TEST(PrintUserMessage);
+    RUN_TEST_F(SampleFixture, SetupShouldBeInvoked);
+    EXPECT_FAIL_F(SampleFixture, ExpectFailure);
 
     COMPLETE();
 }

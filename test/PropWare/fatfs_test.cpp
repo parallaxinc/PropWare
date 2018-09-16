@@ -39,121 +39,93 @@ using PropWare::SD;
 using PropWare::FatFS;
 using PropWare::SPI;
 
-static SD    g_driver;
-static FatFS *testable;
+static SD g_driver;
 
 void error_checker (const PropWare::ErrorCode err) {
     if (SPI::BEG_ERROR <= err && err <= SPI::END_ERROR)
         SPI::get_instance().print_error_str(pwOut, (const SPI::ErrorCode) err);
     else if (SD::BEG_ERROR <= err && err <= SD::END_ERROR)
-        ((SD *) testable->m_driver)->print_error_str(pwOut, (const SD::ErrorCode) err);
+        g_driver.print_error_str(pwOut, (const SD::ErrorCode) err);
     else if (FatFS::BEG_ERROR <= err && err <= FatFS::END_ERROR)
         pwOut.printf("No print string yet for FatFS's error #%d (raw = %d)\n", err - FatFS::BEG_ERROR, err);
 }
 
-SETUP {
-    testable = new FatFS(g_driver);
-}
+class FatFsTest {
+    public:
+        FatFsTest ()
+            : testable(g_driver) {
+        }
 
-TEARDOWN {
-    delete testable;
-}
+    public:
+        FatFS testable;
+};
 
-TEST(Constructor) {
-    setUp();
-
-    tearDown();
-}
-
-TEST(ReadMasterBootRecord) {
-    setUp();
-
+TEST_F(FatFsTest, ReadMasterBootRecord) {
     PropWare::ErrorCode err;
 
-    err = testable->m_driver->start();
+    err = g_driver.start();
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
-    uint8_t buffer[testable->m_driver->get_sector_size()];
+    uint8_t buffer[g_driver.get_sector_size()];
 
-    err = testable->read_boot_sector(0, buffer);
+    err = testable.read_boot_sector(0, buffer);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
 
     // We're just going to assume the boot sector is not at sector 0
-    ASSERT_NEQ_MSG(0, testable->m_initFatInfo.bootSector);
-
-    tearDown();
+    ASSERT_NEQ_MSG(0, testable.m_initFatInfo.bootSector);
 }
 
-TEST(Mount_defaultParameters) {
-    setUp();
-
+TEST_F(FatFsTest, Mount_defaultParameters) {
     PropWare::ErrorCode err;
-    uint8_t buffer[testable->m_driver->get_sector_size()];
+    uint8_t             buffer[g_driver.get_sector_size()];
 
-    err = testable->mount(buffer);
+    err = testable.mount(buffer);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
     // This test is meant to be run with a FAT32 filesystem
-    ASSERT_EQ_MSG(FatFS::FAT_32, testable->m_filesystem);
-
-    tearDown();
+    ASSERT_EQ_MSG(FatFS::FAT_32, testable.m_filesystem);
 }
 
-TEST(Mount_partition0) {
-    setUp();
-
+TEST_F(FatFsTest, Mount_partition0) {
     PropWare::ErrorCode err;
-    uint8_t buffer[testable->m_driver->get_sector_size()];
+    uint8_t             buffer[g_driver.get_sector_size()];
 
-    err = testable->mount(buffer, 0);
+    err = testable.mount(buffer, 0);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
-
-    tearDown();
 }
 
-TEST(Mount_partition1) {
-    setUp();
-
+TEST_F(FatFsTest, Mount_partition1) {
     PropWare::ErrorCode err;
-    uint8_t buffer[testable->m_driver->get_sector_size()];
+    uint8_t             buffer[g_driver.get_sector_size()];
 
-    err = testable->mount(buffer, 1);
+    err = testable.mount(buffer, 1);
     error_checker(err);
     ASSERT_EQ_MSG(FatFS::NO_ERROR, err);
-
-    tearDown();
 }
 
-TEST(Mount_partition4) {
-    setUp();
-
+TEST_F(FatFsTest, Mount_partition4) {
     PropWare::ErrorCode err;
-    uint8_t buffer[testable->m_driver->get_sector_size()];
+    uint8_t             buffer[g_driver.get_sector_size()];
 
-    err = testable->mount(buffer, 4);
+    err = testable.mount(buffer, 4);
     ASSERT_EQ_MSG(FatFS::UNSUPPORTED_FILESYSTEM, err);
-
-    tearDown();
 }
 
-TEST(ClearChain) {
+TEST_F(FatFsTest, ClearChain) {
     // TODO: Write test (and don't forget to invoke it in main)
-
-    tearDown();
 }
 
 int main () {
     START(FatFSTest);
 
-    RUN_TEST(Constructor);
-    RUN_TEST(ReadMasterBootRecord);
-    RUN_TEST(Mount_defaultParameters);
-    RUN_TEST(Mount_partition0);
-    RUN_TEST(Mount_partition1);
-    RUN_TEST(Mount_partition4);
+    RUN_TEST_F(FatFsTest, ReadMasterBootRecord);
+    RUN_TEST_F(FatFsTest, Mount_defaultParameters);
+    RUN_TEST_F(FatFsTest, Mount_partition0);
+    RUN_TEST_F(FatFsTest, Mount_partition1);
+    RUN_TEST_F(FatFsTest, Mount_partition4);
 
     COMPLETE();
 }

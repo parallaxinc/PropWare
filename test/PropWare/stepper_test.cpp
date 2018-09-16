@@ -56,43 +56,41 @@ class MockStepper: public Stepper {
 
 static MockStepper *testable;
 
-Stepper::Step operator+(const Stepper::Step step, const unsigned int increment) {
+Stepper::Step operator+ (const Stepper::Step step, const unsigned int increment) {
     return static_cast<Stepper::Step>((static_cast<uint32_t>(step) + increment) % 8);
 }
 
-Stepper::Step operator+(const unsigned int increment, const Stepper::Step step) {
+Stepper::Step operator+ (const unsigned int increment, const Stepper::Step step) {
     return step + increment;
 }
 
-Stepper::Step operator-(const Stepper::Step step, const unsigned int decrement) {
+Stepper::Step operator- (const Stepper::Step step, const unsigned int decrement) {
     return static_cast<Stepper::Step>((static_cast<uint32_t>(step) + (8 - decrement)) % 8);
 }
 
-Stepper::Step operator-(const unsigned int decrement, const Stepper::Step step) {
+Stepper::Step operator- (const unsigned int decrement, const Stepper::Step step) {
     return step - decrement;
 }
 
-SETUP {
-    testable = new MockStepper();
+class StepperTest {
+    public:
+        StepperTest () {
+            DIRA = INITIAL_DIRA;
+            OUTA = INITIAL_OUTA;
+        }
+
+    public:
+        MockStepper testable;
 };
 
-TEARDOWN {
-    if (NULL != testable) {
-        delete testable;
-        testable = NULL;
-    }
-    DIRA = INITIAL_DIRA;
-    OUTA = INITIAL_OUTA;
-};
-
-TEST(Constructor_ShouldSetPinsAndStep) {
+TEST_F(StepperTest, Constructor_ShouldSetPinsAndStep) {
     const auto      startStep = Stepper::Step::ONE;
     const Pin::Mask pin0      = Pin::P0;
     const Pin::Mask pin1      = Pin::P1;
     const Pin::Mask pin2      = Pin::P2;
     const Pin::Mask pin3      = Pin::P3;
 
-    testable = new MockStepper(startStep, pin0, pin1, pin2, pin3);
+    MockStepper localTestable(startStep, pin0, pin1, pin2, pin3);
 
     ASSERT_TRUE(DIRA & pin0);
     ASSERT_TRUE(DIRA & pin1);
@@ -104,244 +102,174 @@ TEST(Constructor_ShouldSetPinsAndStep) {
     ASSERT_FALSE(OUTA & pin2);
     ASSERT_FALSE(OUTA & pin3);
 
-    ASSERT_EQ(startStep, testable->m_currentStep)
-
-    tearDown();
+    ASSERT_EQ(startStep, localTestable.m_currentStep)
 }
 
-TEST(SetStep) {
-    setUp();
+TEST_F(StepperTest, SetStep) {
+    testable.step_to(Stepper::Step::ONE_AND_A_HALF);
 
-    testable->step_to(Stepper::Step::ONE_AND_A_HALF);
-
-    ASSERT_EQ(Stepper::Step::ONE_AND_A_HALF, testable->m_currentStep);
-    ASSERT_EQ_MSG(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::Step::ONE_AND_A_HALF, testable->m_stepsTaken[0]);
-
-    tearDown();
+    ASSERT_EQ(Stepper::Step::ONE_AND_A_HALF, testable.m_currentStep);
+    ASSERT_EQ_MSG(1, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::Step::ONE_AND_A_HALF, testable.m_stepsTaken[0]);
 }
 
-TEST(GetStep) {
-    setUp();
+TEST_F(StepperTest, GetStep) {
+    testable.m_currentStep = Stepper::Step::THREE_AND_A_HALF;
 
-    testable->m_currentStep = Stepper::Step::THREE_AND_A_HALF;
-
-    ASSERT_EQ(Stepper::Step::THREE_AND_A_HALF, testable->get_current_step());
-    ASSERT_EQ_MSG(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_EQ(Stepper::Step::THREE_AND_A_HALF, testable.get_current_step());
+    ASSERT_EQ_MSG(0, testable.m_stepsTaken.size());
 }
 
-TEST(FullPowerHold_noMove) {
-    testable = new MockStepper(Stepper::Step::HALF);
+TEST_F(StepperTest, FullPowerHold_noMove) {
+    MockStepper localTestable(Stepper::Step::HALF);
 
-    ASSERT_FALSE(testable->full_power_hold(true));
-    ASSERT_EQ(Stepper::Step::HALF, testable->m_currentStep);
-    ASSERT_EQ_MSG(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_FALSE(localTestable.full_power_hold(true));
+    ASSERT_EQ(Stepper::Step::HALF, localTestable.m_currentStep);
+    ASSERT_EQ_MSG(0, localTestable.m_stepsTaken.size());
 }
 
-TEST(FullPowerHold_moveForward) {
-    testable = new MockStepper(Stepper::Step::FOUR);
+TEST_F(StepperTest, FullPowerHold_moveForward) {
+    MockStepper localTestable(Stepper::Step::FOUR);
 
-    ASSERT_TRUE(testable->full_power_hold(true));
-    ASSERT_EQ(Stepper::Step::HALF, testable->m_currentStep);
-    ASSERT_EQ_MSG(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::Step::HALF, testable->m_stepsTaken[0]);
-
-    tearDown();
+    ASSERT_TRUE(localTestable.full_power_hold(true));
+    ASSERT_EQ(Stepper::Step::HALF, localTestable.m_currentStep);
+    ASSERT_EQ_MSG(1, localTestable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::Step::HALF, localTestable.m_stepsTaken[0]);
 }
 
-TEST(FullPowerHold_moveBackward) {
-    testable = new MockStepper(Stepper::Step::ONE);
+TEST_F(StepperTest, FullPowerHold_moveBackward) {
+    MockStepper localTestable(Stepper::Step::ONE);
 
-    ASSERT_TRUE(testable->full_power_hold(false));
-    ASSERT_EQ(Stepper::Step::HALF, testable->m_currentStep);
-    ASSERT_EQ_MSG(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::Step::HALF, testable->m_stepsTaken[0]);
-
-    tearDown();
+    ASSERT_TRUE(localTestable.full_power_hold(false));
+    ASSERT_EQ(Stepper::Step::HALF, localTestable.m_currentStep);
+    ASSERT_EQ_MSG(1, localTestable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::Step::HALF, localTestable.m_stepsTaken[0]);
 }
 
-TEST(HalfPowerHold_noMove) {
-    testable = new MockStepper(Stepper::Step::ONE);
+TEST_F(StepperTest, HalfPowerHold_noMove) {
+    MockStepper localTestable(Stepper::Step::ONE);
 
-    ASSERT_FALSE(testable->half_power_hold(true));
-    ASSERT_EQ(Stepper::Step::ONE, testable->m_currentStep);
-    ASSERT_EQ_MSG(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_FALSE(localTestable.half_power_hold(true));
+    ASSERT_EQ(Stepper::Step::ONE, localTestable.m_currentStep);
+    ASSERT_EQ_MSG(0, localTestable.m_stepsTaken.size());
 }
 
-TEST(HalfPowerHold_moveForward) {
-    testable = new MockStepper(Stepper::Step::HALF);
+TEST_F(StepperTest, HalfPowerHold_moveForward) {
+    MockStepper localTestable(Stepper::Step::HALF);
 
-    ASSERT_TRUE(testable->half_power_hold(true));
-    ASSERT_EQ(Stepper::Step::ONE, testable->m_currentStep);
-    ASSERT_EQ_MSG(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::Step::ONE, testable->m_stepsTaken[0]);
-
-    tearDown();
+    ASSERT_TRUE(localTestable.half_power_hold(true));
+    ASSERT_EQ(Stepper::Step::ONE, localTestable.m_currentStep);
+    ASSERT_EQ_MSG(1, localTestable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::Step::ONE, localTestable.m_stepsTaken[0]);
 }
 
-TEST(HalfPowerHold_moveBackward) {
-    testable = new MockStepper(Stepper::Step::ONE_AND_A_HALF);
+TEST_F(StepperTest, HalfPowerHold_moveBackward) {
+    MockStepper localTestable(Stepper::Step::ONE_AND_A_HALF);
 
-    ASSERT_TRUE(testable->half_power_hold(false));
-    ASSERT_EQ(Stepper::Step::ONE, testable->m_currentStep);
-    ASSERT_EQ_MSG(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::Step::ONE, testable->m_stepsTaken[0]);
-
-    tearDown();
+    ASSERT_TRUE(localTestable.half_power_hold(false));
+    ASSERT_EQ(Stepper::Step::ONE, localTestable.m_currentStep);
+    ASSERT_EQ_MSG(1, localTestable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::Step::ONE, localTestable.m_stepsTaken[0]);
 }
 
-TEST(StepForward_ZeroShouldBeAllowed) {
-    setUp();
+TEST_F(StepperTest, StepForward_ZeroShouldBeAllowed) {
+    testable.step_forward(0);
 
-    testable->step_forward(0);
-
-    ASSERT_EQ(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_EQ(0, testable.m_stepsTaken.size());
 }
 
-TEST(StepForward_OneStep) {
-    setUp();
+TEST_F(StepperTest, StepForward_OneStep) {
+    testable.step_forward(1);
 
-    testable->step_forward(1);
-
-    ASSERT_EQ(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(1, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable.m_currentStep);
 }
 
-TEST(StepForward_FourSteps) {
-    setUp();
+TEST_F(StepperTest, StepForward_FourSteps) {
+    testable.step_forward(4);
 
-    testable->step_forward(4);
-
-    ASSERT_EQ(4, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 4, testable->m_stepsTaken[1]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 6, testable->m_stepsTaken[2]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable->m_stepsTaken[3]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(4, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 4, testable.m_stepsTaken[1]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 6, testable.m_stepsTaken[2]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable.m_stepsTaken[3]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable.m_currentStep);
 }
 
-TEST(StepReverse_ZeroShouldBeAllowed) {
-    setUp();
+TEST_F(StepperTest, StepReverse_ZeroShouldBeAllowed) {
+    testable.step_reverse(0);
 
-    testable->step_reverse(0);
-
-    ASSERT_EQ(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_EQ(0, testable.m_stepsTaken.size());
 }
 
-TEST(StepReverse_OneStep) {
-    setUp();
+TEST_F(StepperTest, StepReverse_OneStep) {
+    testable.step_reverse(1);
 
-    testable->step_reverse(1);
-
-    ASSERT_EQ(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(1, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable.m_currentStep);
 }
 
-TEST(StepReverse_FourSteps) {
-    setUp();
+TEST_F(StepperTest, StepReverse_FourSteps) {
+    testable.step_reverse(4);
 
-    testable->step_reverse(4);
-
-    ASSERT_EQ(4, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 4, testable->m_stepsTaken[1]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 6, testable->m_stepsTaken[2]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable->m_stepsTaken[3]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(4, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 4, testable.m_stepsTaken[1]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 6, testable.m_stepsTaken[2]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable.m_stepsTaken[3]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP, testable.m_currentStep);
 }
 
-TEST(HalfForward_ZeroShouldBeAllowed) {
-    setUp();
+TEST_F(StepperTest, HalfForward_ZeroShouldBeAllowed) {
+    testable.half_forward(0);
 
-    testable->half_forward(0);
-
-    ASSERT_EQ(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_EQ(0, testable.m_stepsTaken.size());
 }
 
-TEST(HalfForward_OneStep) {
-    setUp();
+TEST_F(StepperTest, HalfForward_OneStep) {
+    testable.half_forward(1);
 
-    testable->half_forward(1);
-
-    ASSERT_EQ(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 1, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 1, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(1, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 1, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 1, testable.m_currentStep);
 }
 
-TEST(HalfForward_FourSteps) {
-    setUp();
+TEST_F(StepperTest, HalfForward_FourSteps) {
+    testable.half_forward(4);
 
-    testable->half_forward(4);
-
-    ASSERT_EQ(4, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 1, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable->m_stepsTaken[1]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 3, testable->m_stepsTaken[2]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 4, testable->m_stepsTaken[3]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 4, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(4, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 1, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 2, testable.m_stepsTaken[1]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 3, testable.m_stepsTaken[2]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 4, testable.m_stepsTaken[3]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP + 4, testable.m_currentStep);
 }
 
-TEST(HalfReverse_ZeroShouldBeAllowed) {
-    setUp();
+TEST_F(StepperTest, HalfReverse_ZeroShouldBeAllowed) {
+    testable.half_reverse(0);
 
-    testable->half_reverse(0);
-
-    ASSERT_EQ(0, testable->m_stepsTaken.size());
-
-    tearDown();
+    ASSERT_EQ(0, testable.m_stepsTaken.size());
 }
 
-TEST(HalfReverse_OneStep) {
-    setUp();
+TEST_F(StepperTest, HalfReverse_OneStep) {
+    testable.half_reverse(1);
 
-    testable->half_reverse(1);
-
-    ASSERT_EQ(1, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 1, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 1, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(1, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 1, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 1, testable.m_currentStep);
 }
 
-TEST(HalfReverse_FourSteps) {
-    setUp();
+TEST_F(StepperTest, HalfReverse_FourSteps) {
+    testable.half_reverse(4);
 
-    testable->half_reverse(4);
-
-    ASSERT_EQ(4, testable->m_stepsTaken.size());
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 1, testable->m_stepsTaken[0]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable->m_stepsTaken[1]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 3, testable->m_stepsTaken[2]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 4, testable->m_stepsTaken[3]);
-    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 4, testable->m_currentStep);
-
-    tearDown();
+    ASSERT_EQ(4, testable.m_stepsTaken.size());
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 1, testable.m_stepsTaken[0]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 2, testable.m_stepsTaken[1]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 3, testable.m_stepsTaken[2]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 4, testable.m_stepsTaken[3]);
+    ASSERT_EQ(Stepper::DEFAULT_START_STEP - 4, testable.m_currentStep);
 }
 
 int main () {
@@ -350,27 +278,27 @@ int main () {
     INITIAL_DIRA = DIRA;
     INITIAL_OUTA = OUTA;
 
-    RUN_TEST(Constructor_ShouldSetPinsAndStep);
-    RUN_TEST(SetStep);
-    RUN_TEST(GetStep);
-    RUN_TEST(FullPowerHold_noMove);
-    RUN_TEST(FullPowerHold_moveForward);
-    RUN_TEST(FullPowerHold_moveBackward);
-    RUN_TEST(HalfPowerHold_noMove);
-    RUN_TEST(HalfPowerHold_moveForward);
-    RUN_TEST(HalfPowerHold_moveBackward);
-    RUN_TEST(StepForward_ZeroShouldBeAllowed);
-    RUN_TEST(StepForward_OneStep);
-    RUN_TEST(StepForward_FourSteps);
-    RUN_TEST(StepReverse_ZeroShouldBeAllowed);
-    RUN_TEST(StepReverse_OneStep);
-    RUN_TEST(StepReverse_FourSteps);
-    RUN_TEST(HalfForward_ZeroShouldBeAllowed);
-    RUN_TEST(HalfForward_OneStep);
-    RUN_TEST(HalfForward_FourSteps);
-    RUN_TEST(HalfReverse_ZeroShouldBeAllowed);
-    RUN_TEST(HalfReverse_OneStep);
-    RUN_TEST(HalfReverse_FourSteps);
+    RUN_TEST_F(StepperTest, Constructor_ShouldSetPinsAndStep);
+    RUN_TEST_F(StepperTest, SetStep);
+    RUN_TEST_F(StepperTest, GetStep);
+    RUN_TEST_F(StepperTest, FullPowerHold_noMove);
+    RUN_TEST_F(StepperTest, FullPowerHold_moveForward);
+    RUN_TEST_F(StepperTest, FullPowerHold_moveBackward);
+    RUN_TEST_F(StepperTest, HalfPowerHold_noMove);
+    RUN_TEST_F(StepperTest, HalfPowerHold_moveForward);
+    RUN_TEST_F(StepperTest, HalfPowerHold_moveBackward);
+    RUN_TEST_F(StepperTest, StepForward_ZeroShouldBeAllowed);
+    RUN_TEST_F(StepperTest, StepForward_OneStep);
+    RUN_TEST_F(StepperTest, StepForward_FourSteps);
+    RUN_TEST_F(StepperTest, StepReverse_ZeroShouldBeAllowed);
+    RUN_TEST_F(StepperTest, StepReverse_OneStep);
+    RUN_TEST_F(StepperTest, StepReverse_FourSteps);
+    RUN_TEST_F(StepperTest, HalfForward_ZeroShouldBeAllowed);
+    RUN_TEST_F(StepperTest, HalfForward_OneStep);
+    RUN_TEST_F(StepperTest, HalfForward_FourSteps);
+    RUN_TEST_F(StepperTest, HalfReverse_ZeroShouldBeAllowed);
+    RUN_TEST_F(StepperTest, HalfReverse_OneStep);
+    RUN_TEST_F(StepperTest, HalfReverse_FourSteps);
 
     COMPLETE();
 }

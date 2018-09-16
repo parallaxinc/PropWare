@@ -38,9 +38,9 @@ uint8_t  slaveBuffer[32];
 uint8_t  queueBuffer[32];
 uint32_t slaveStack[128];
 
-class I2CSlaveTest: public I2CSlave {
+class I2CSlaveTester: public I2CSlave {
     public:
-        I2CSlaveTest (const uint8_t address)
+        I2CSlaveTester (const uint8_t address)
             : I2CSlave(address, slaveBuffer, slaveStack),
               m_queue(queueBuffer),
               m_sum(0) {
@@ -63,13 +63,15 @@ class I2CSlaveTest: public I2CSlave {
         uint8_t        m_sum;
 };
 
-TEARDOWN {
+void setUp() {
     memset(slaveBuffer, 32, 0);
     memset(queueBuffer, 32, 0);
     memset(slaveStack, 128*sizeof(slaveBuffer[0]), 0);
 }
 
 TEST(Master_Constructor_shouldSetDefaults) {
+    setUp();
+
     I2CMaster testable;
 
     ASSERT_EQ(Pin::Mask::P28, testable.m_scl.get_mask());
@@ -77,14 +79,14 @@ TEST(Master_Constructor_shouldSetDefaults) {
 
     ASSERT_EQ(Pin::Dir::IN, testable.m_scl.get_dir());
     ASSERT_EQ(Pin::Dir::IN, testable.m_sda.get_dir());
-
-    tearDown();
 }
 
 TEST(Slave_Constructor_shouldSetDefaults) {
+    setUp();
+
     const uint8_t expectedSlaveAddress = 0x12;
 
-    I2CSlaveTest testable(expectedSlaveAddress);
+    I2CSlaveTester testable(expectedSlaveAddress);
 
     ASSERT_EQ(Pin::Mask::P28, testable.m_scl.get_mask());
     ASSERT_EQ(Pin::Mask::P29, testable.m_sda.get_mask());
@@ -95,14 +97,14 @@ TEST(Slave_Constructor_shouldSetDefaults) {
     ASSERT_EQ(expectedSlaveAddress, testable.m_slaveAddress);
     ASSERT_EQ(slaveBuffer, testable.m_buffer);
     ASSERT_EQ(31, testable.m_bufferUpperBound)
-
-    tearDown();
 }
 
 TEST(MasterSlaveCommunication) {
+    setUp();
+
     const uint8_t slaveAddress = 0x12;
     const uint8_t shiftedSlaveAddress = slaveAddress << 1;
-    I2CSlaveTest  slave(slaveAddress);
+    I2CSlaveTester  slave(slaveAddress);
     Runnable::invoke(slave);
 
     I2CMaster master;
@@ -116,8 +118,6 @@ TEST(MasterSlaveCommunication) {
     ASSERT_EQ_MSG(6, master.get(shiftedSlaveAddress, static_cast<uint8_t>(3)));
     ASSERT_EQ_MSG(10, master.get(shiftedSlaveAddress, static_cast<uint8_t>(4)));
     ASSERT_EQ_MSG(80, master.get(shiftedSlaveAddress, static_cast<uint16_t>(0x1234)));
-
-    tearDown();
 }
 
 int main () {

@@ -40,63 +40,54 @@ const Pin       CS(Port::P3, Pin::Dir::OUT);
 
 const unsigned int FREQUENCY = 900000;
 
-SPI *testable;
+class SpiTest {
+    public:
+        SpiTest () {
+            this->testable = new SPI(MOSI_MASK, MISO_MASK, SCLK_MASK, FREQUENCY, SPI::Mode::MODE_0,
+                                     SPI::BitMode::MSB_FIRST);
+            CS.clear();
+        }
 
-SETUP {
-    testable = new SPI(MOSI_MASK, MISO_MASK, SCLK_MASK, FREQUENCY, SPI::Mode::MODE_0, SPI::BitMode::MSB_FIRST);
-    CS.clear();
+        ~SpiTest () {
+            CS.set();
+        }
+
+    public:
+        SPI *testable;
 };
 
-TEARDOWN {
-    CS.set();
-    if (NULL != testable) {
-        delete testable;
-        testable = NULL;
-    }
-};
 
-TEST(ShiftOut_MsbFirst) {
-    setUp();
-
+TEST_F(SpiTest, ShiftOut_MsbFirst) {
     testable->shift_out(8, 0x55);
     testable->shift_out(8, 0x55);
     testable->shift_out(8, 0x55);
-
-    tearDown();
 }
 
-TEST(ShiftOut_LsbFirst) {
-    setUp();
-
+TEST_F(SpiTest, ShiftOut_LsbFirst) {
     testable->set_bit_mode(SPI::BitMode::LSB_FIRST);
 
     testable->shift_out(8, 0xAA);
     testable->shift_out(8, 0xAA);
     testable->shift_out(8, 0xAA);
-
-    tearDown();
 }
 
-TEST(ShiftOutBlock) {
+TEST_F(SpiTest, ShiftOutBlock) {
     const int BUFFER_SIZE = 16;
-    setUp();
 
     uint8_t      buffer[BUFFER_SIZE];
     for (uint8_t i        = 0; i < BUFFER_SIZE; ++i)
         buffer[i] = i;
 
     testable->shift_out_block_msb_first_fast(buffer, sizeof(buffer));
-
-    tearDown();
 }
 
 int main () {
     CS.set();
     START(SPITest_MUST_USE_LOGIC_ANALYZER);
 
-    RUN_TEST(ShiftOut_MsbFirst);
-    RUN_TEST(ShiftOut_LsbFirst);
-    RUN_TEST(ShiftOutBlock);
+    RUN_TEST_F(SpiTest, ShiftOut_MsbFirst);
+    RUN_TEST_F(SpiTest, ShiftOut_LsbFirst);
+    RUN_TEST_F(SpiTest, ShiftOutBlock);
 
     COMPLETE();
 }
