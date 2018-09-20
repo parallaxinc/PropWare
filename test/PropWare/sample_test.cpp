@@ -151,6 +151,198 @@ TEST(CheckAssertNotNull_ExpectFailure) {
     ASSERT_NOT_NULL(NULL);
 }
 
+TEST(CheckGt) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 8;
+    int rightHand = x + y;
+    ASSERT_GT(leftHand, rightHand);
+}
+
+TEST(CheckGt_ExpectFailure_WhenEqual) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 7;
+    int rightHand = x + y;
+    ASSERT_GT(leftHand, rightHand);
+}
+
+TEST(CheckGt_ExpectFailure_WhenGreater) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 6;
+    int rightHand = x + y;
+    ASSERT_GT(leftHand, rightHand);
+}
+
+TEST(CheckGtMsg) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 8;
+    int rightHand = x + y;
+    ASSERT_GT_MSG(leftHand, rightHand);
+}
+
+TEST(CheckGtMsg_ExpectFailure_WhenEqual) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 7;
+    int rightHand = x + y;
+    ASSERT_GT_MSG(leftHand, rightHand);
+}
+
+TEST(CheckGtMsg_ExpectFailure_WhenGreater) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 6;
+    int rightHand = x + y;
+    ASSERT_GT_MSG(leftHand, rightHand);
+}
+
+TEST(CheckLt) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 6;
+    int rightHand = x + y;
+    ASSERT_LT(leftHand, rightHand);
+}
+
+TEST(CheckLt_ExpectFailure_WhenEqual) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 7;
+    int rightHand = x + y;
+    ASSERT_LT(leftHand, rightHand);
+}
+
+TEST(CheckLt_ExpectFailure_WhenGreater) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 8;
+    int rightHand = x + y;
+    ASSERT_LT(leftHand, rightHand);
+}
+
+TEST(CheckLtMsg) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 6;
+    int rightHand = x + y;
+    ASSERT_LT_MSG(leftHand, rightHand);
+}
+
+TEST(CheckLtMsg_ExpectFailure_WhenEqual) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 7;
+    int rightHand = x + y;
+    ASSERT_LT_MSG(leftHand, rightHand);
+}
+
+TEST(CheckLtMsg_ExpectFailure_WhenGreater) {
+    int x         = 3;
+    int y         = 4;
+    int leftHand  = 8;
+    int rightHand = x + y;
+    ASSERT_LT_MSG(leftHand, rightHand);
+}
+
+TEST(CheckAtMost_IsLess_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int maximum = 8;
+    int actual  = x + y;
+    ASSERT_AT_MOST(maximum, actual);
+}
+
+TEST(CheckAtMost_IsEqual_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int maximum = 7;
+    int actual  = x + y;
+    ASSERT_AT_MOST(maximum, actual);
+}
+
+TEST(CheckAtMost_IsGreater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int maximum = 6;
+    int actual  = x + y;
+    ASSERT_AT_MOST(maximum, actual);
+}
+
+TEST(CheckAtMostMsg_IsLess_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int maximum = 8;
+    int actual  = x + y;
+    ASSERT_AT_MOST_MSG(maximum, actual);
+}
+
+TEST(CheckAtMostMsg_IsEqual_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int maximum = 7;
+    int actual  = x + y;
+    ASSERT_AT_MOST_MSG(maximum, actual);
+}
+
+TEST(CheckAtMostMsg_IsGreater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int maximum = 6;
+    int actual  = x + y;
+    ASSERT_AT_MOST_MSG(maximum, actual);
+}
+
+TEST(CheckAtLeast_IsGreater_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 6;
+    int actual  = x + y;
+    ASSERT_AT_LEAST(minimum, actual);
+}
+
+TEST(CheckAtLeast_IsEqual_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 7;
+    int actual  = x + y;
+    ASSERT_AT_LEAST(minimum, actual);
+}
+
+TEST(CheckAtLeast_IsLess_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 8;
+    int actual  = x + y;
+    ASSERT_AT_LEAST(minimum, actual);
+}
+
+TEST(CheckAtLeastMsg_IsGreater_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 6;
+    int actual  = x + y;
+    ASSERT_AT_LEAST_MSG(minimum, actual);
+}
+
+TEST(CheckAtLeastMsg_IsEqual_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 7;
+    int actual  = x + y;
+    ASSERT_AT_LEAST_MSG(minimum, actual);
+}
+
+TEST(CheckAtLeastMsg_IsLess_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 8;
+    int actual  = x + y;
+    ASSERT_AT_LEAST_MSG(minimum, actual);
+}
+
 TEST(PrintUserMessage) {
     MESSAGE("Hello, this is a simple message.");
     MESSAGE("My name is %s!", "David");
@@ -201,6 +393,30 @@ int main () {
     RUN_TEST(CheckAssertNotNull);
     EXPECT_FAIL(CheckAssertNotNull_ExpectFailure);
     RUN_TEST(PrintUserMessage);
+    RUN_TEST(CheckLt);
+    EXPECT_FAIL(CheckLt_ExpectFailure_WhenEqual);
+    EXPECT_FAIL(CheckLt_ExpectFailure_WhenGreater);
+    RUN_TEST(CheckLtMsg);
+    EXPECT_FAIL(CheckLtMsg_ExpectFailure_WhenEqual);
+    EXPECT_FAIL(CheckLtMsg_ExpectFailure_WhenGreater);
+    RUN_TEST(CheckGt);
+    EXPECT_FAIL(CheckGt_ExpectFailure_WhenEqual);
+    EXPECT_FAIL(CheckGt_ExpectFailure_WhenGreater);
+    RUN_TEST(CheckGtMsg);
+    EXPECT_FAIL(CheckGtMsg_ExpectFailure_WhenEqual);
+    EXPECT_FAIL(CheckGtMsg_ExpectFailure_WhenGreater);
+    RUN_TEST(CheckAtMost_IsLess_ShouldPass);
+    RUN_TEST(CheckAtMost_IsEqual_ShouldPass);
+    EXPECT_FAIL(CheckAtMost_IsGreater_ShouldFail);
+    RUN_TEST(CheckAtMostMsg_IsLess_ShouldPass);
+    RUN_TEST(CheckAtMostMsg_IsEqual_ShouldPass);
+    EXPECT_FAIL(CheckAtMostMsg_IsGreater_ShouldFail);
+    RUN_TEST(CheckAtLeast_IsGreater_ShouldPass);
+    RUN_TEST(CheckAtLeast_IsEqual_ShouldPass);
+    EXPECT_FAIL(CheckAtLeast_IsLess_ShouldFail);
+    RUN_TEST(CheckAtLeastMsg_IsGreater_ShouldPass);
+    RUN_TEST(CheckAtLeastMsg_IsEqual_ShouldPass);
+    EXPECT_FAIL(CheckAtLeastMsg_IsLess_ShouldFail);
     RUN_TEST_F(SampleFixture, SetupShouldBeInvoked);
     EXPECT_FAIL_F(SampleFixture, ExpectFailure);
 

@@ -124,14 +124,6 @@ void _runPropWareUnitTestFixture (bool (*test) (void), const char testName[], co
         return; \
     }
 
-#define ASSERT(actual) \
-    if (!(actual)) { \
-        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
-        pwOut << "Assertion failed: `ASSERT(" << #actual << ")`\n"; \
-        _pwTest_status = false; \
-        return; \
-    }
-
 #define ASSERT_TRUE(actual) \
     if (true == !(actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
@@ -182,6 +174,42 @@ void _runPropWareUnitTestFixture (bool (*test) (void), const char testName[], co
         return; \
     }
 
+#define ASSERT_GT(greater, lesser) \
+    if (!((greater) > (lesser))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected left-hand to be greater than right-hand, but was not: "; \
+        pwOut << "`ASSERT_GT(" << #greater << ", " << #lesser << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_LT(lesser, greater) \
+    if (!((lesser) < (greater))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected left-hand to be less than right-hand, but was not: "; \
+        pwOut << "`ASSERT_LT(" << #lesser << ", " << #greater << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_AT_MOST(maximum, actual) \
+    if (!((maximum) >= (actual))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected right-hand to be at most as much as left-hand, but was not: "; \
+        pwOut << "`ASSERT_AT_MOST(" << #maximum << ", " << #actual << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_AT_LEAST(minimum, actual) \
+    if (!((minimum) <= (actual))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected right-hand to be at least as much as left-hand, but was not: "; \
+        pwOut << "`ASSERT_AT_LEAST(" << #minimum << ", " << #actual << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
@@ -196,6 +224,42 @@ void _runPropWareUnitTestFixture (bool (*test) (void), const char testName[], co
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
         pwOut << "Expected mismatch, but both sides are `" << lhs << "`:"; \
         pwOut << "`ASSERT_NEQ_MSG(" << #lhs << ", " << #rhs << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_GT_MSG(greater, lesser) \
+    if (!((greater) > (lesser))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected `" << greater << "` > `" << lesser << "`: "; \
+        pwOut << "`ASSERT_GT_MSG(" << #greater << ", " #lesser ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_LT_MSG(lesser, greater) \
+    if (!((lesser) < (greater))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected `" << lesser << "` < `" << greater << "`: "; \
+        pwOut << "`ASSERT_LT_MSG(" << #lesser << ", " #greater ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_AT_LEAST_MSG(minimum, actual) \
+    if (!((minimum) <= (actual))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected `" << minimum << "` <= `" << actual << "`: "; \
+        pwOut << "`ASSERT_AT_LEAST_MSG(" << #minimum << ", " << #actual << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_AT_MOST_MSG(maximum, actual) \
+    if (!((maximum) >= (actual))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected `" << maximum << "` >= `" << actual << "`: "; \
+        pwOut << "`ASSERT_AT_MOST_MSG(" << #maximum << ", " << #actual << ")`\n"; \
         _pwTest_status = false; \
         return; \
     }
