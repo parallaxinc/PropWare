@@ -343,6 +343,186 @@ TEST(CheckAtLeastMsg_IsLess_ShouldFail) {
     ASSERT_AT_LEAST_MSG(minimum, actual);
 }
 
+TEST(CheckBetweenExc_Less_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 8;
+    int maximum = 10;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExc_EqualLesser_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 7;
+    int maximum = 9;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExc_Between_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 6;
+    int maximum = 8;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExc_EqualGreater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 5;
+    int maximum = 7;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExc_Greater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 4;
+    int maximum = 6;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExcMsg_Less_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 8;
+    int maximum = 10;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExcMsg_EqualLesser_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 7;
+    int maximum = 9;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExcMsg_Between_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 6;
+    int maximum = 8;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExcMsg_EqualGreater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 5;
+    int maximum = 7;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenExcMsg_Greater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 4;
+    int maximum = 6;
+    int actual  = x + y;
+    ASSERT_BETWEEN_EXC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenInc_Less_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 8;
+    int maximum = 10;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenInc_EqualLesser_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 7;
+    int maximum = 9;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenInc_Between_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 6;
+    int maximum = 8;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenInc_EqualGreater_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 5;
+    int maximum = 7;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenInc_Greater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 4;
+    int maximum = 6;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenIncMsg_Less_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 8;
+    int maximum = 10;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenIncMsg_EqualLesser_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 7;
+    int maximum = 9;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenIncMsg_Between_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 6;
+    int maximum = 8;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenIncMsg_EqualGreater_ShouldPass) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 5;
+    int maximum = 7;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC_MSG(minimum, actual, maximum);
+}
+
+TEST(CheckBetweenIncMsg_Greater_ShouldFail) {
+    int x       = 3;
+    int y       = 4;
+    int minimum = 4;
+    int maximum = 6;
+    int actual  = x + y;
+    ASSERT_BETWEEN_INC_MSG(minimum, actual, maximum);
+}
+
 TEST(PrintUserMessage) {
     MESSAGE("Hello, this is a simple message.");
     MESSAGE("My name is %s!", "David");
@@ -417,6 +597,26 @@ int main () {
     RUN_TEST(CheckAtLeastMsg_IsGreater_ShouldPass);
     RUN_TEST(CheckAtLeastMsg_IsEqual_ShouldPass);
     EXPECT_FAIL(CheckAtLeastMsg_IsLess_ShouldFail);
+    EXPECT_FAIL(CheckBetweenExc_Less_ShouldFail);
+    EXPECT_FAIL(CheckBetweenExc_EqualLesser_ShouldFail);
+    RUN_TEST(CheckBetweenExc_Between_ShouldPass);
+    EXPECT_FAIL(CheckBetweenExc_EqualGreater_ShouldFail);
+    EXPECT_FAIL(CheckBetweenExc_Greater_ShouldFail);
+    EXPECT_FAIL(CheckBetweenExcMsg_Less_ShouldFail);
+    EXPECT_FAIL(CheckBetweenExcMsg_EqualLesser_ShouldFail);
+    RUN_TEST(CheckBetweenExcMsg_Between_ShouldPass);
+    EXPECT_FAIL(CheckBetweenExcMsg_EqualGreater_ShouldFail);
+    EXPECT_FAIL(CheckBetweenExcMsg_Greater_ShouldFail);
+    EXPECT_FAIL(CheckBetweenInc_Less_ShouldFail);
+    RUN_TEST(CheckBetweenInc_EqualLesser_ShouldPass);
+    RUN_TEST(CheckBetweenInc_Between_ShouldPass);
+    RUN_TEST(CheckBetweenInc_EqualGreater_ShouldPass);
+    EXPECT_FAIL(CheckBetweenInc_Greater_ShouldFail);
+    EXPECT_FAIL(CheckBetweenIncMsg_Less_ShouldFail);
+    RUN_TEST(CheckBetweenIncMsg_EqualLesser_ShouldPass);
+    RUN_TEST(CheckBetweenIncMsg_Between_ShouldPass);
+    RUN_TEST(CheckBetweenIncMsg_EqualGreater_ShouldPass);
+    EXPECT_FAIL(CheckBetweenIncMsg_Greater_ShouldFail);
     RUN_TEST_F(SampleFixture, SetupShouldBeInvoked);
     EXPECT_FAIL_F(SampleFixture, ExpectFailure);
 

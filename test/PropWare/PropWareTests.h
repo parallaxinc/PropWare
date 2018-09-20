@@ -210,6 +210,24 @@ void _runPropWareUnitTestFixture (bool (*test) (void), const char testName[], co
         return; \
     }
 
+#define ASSERT_BETWEEN_EXC(minimum, actual, maximum) \
+    if (!(((minimum) < (actual)) && ((actual) < (maximum)))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected actual to be at between minimum and maximum (exclusive), but was not: "; \
+        pwOut << "`ASSERT_BETWEEN_EXC(" << #minimum << ", " << #actual << ", " << #maximum << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_BETWEEN_INC(minimum, actual, maximum) \
+    if (!(((minimum) <= (actual)) && ((actual) <= (maximum)))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected actual to be at between minimum and maximum (inclusive), but was not: "; \
+        pwOut << "`ASSERT_BETWEEN_INC(" << #minimum << ", " << #actual << ", " << #maximum << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
 #define ASSERT_EQ_MSG(expected, actual) \
     if ((expected) != (actual)) { \
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]\t"; \
@@ -260,6 +278,24 @@ void _runPropWareUnitTestFixture (bool (*test) (void), const char testName[], co
         pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
         pwOut << "Expected `" << maximum << "` >= `" << actual << "`: "; \
         pwOut << "`ASSERT_AT_MOST_MSG(" << #maximum << ", " << #actual << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_BETWEEN_EXC_MSG(minimum, actual, maximum) \
+    if (!(((minimum) < (actual)) && ((actual) < (maximum)))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected `" << minimum << "` < `" << actual << "` < `" << maximum << "`: "; \
+        pwOut << "`ASSERT_BETWEEN_EXC_MSG(" << #minimum << ", " << #actual << ", " << #maximum << ")`\n"; \
+        _pwTest_status = false; \
+        return; \
+    }
+
+#define ASSERT_BETWEEN_INC_MSG(minimum, actual, maximum) \
+    if (!(((minimum) <= (actual)) && ((actual) <= (maximum)))) { \
+        pwOut << "#\t[" << __FILE__ << ':' << __LINE__ << "]: "; \
+        pwOut << "Expected `" << minimum << "` <= `" << actual << "` <= `" << maximum << "`: "; \
+        pwOut << "`ASSERT_BETWEEN_INC_MSG(" << #minimum << ", " << #actual << ", " << #maximum << ")`\n"; \
         _pwTest_status = false; \
         return; \
     }
