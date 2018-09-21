@@ -92,11 +92,17 @@ class DualPWM: public Runnable {
         }
 
         void run () {
-            CTRA = 0b00100 << 26 | static_cast<unsigned int>(Pin::from_mask(this->m_mask1));
-            CTRB = 0b00100 << 26 | static_cast<unsigned int>(Pin::from_mask(this->m_mask2));
-            FRQA = 1;
-            FRQB = 1;
-            DIRA = this->m_mask1 | this->m_mask2;
+            if (this->m_mask1) {
+                CTRA = 0b00100 << 26 | static_cast<unsigned int>(Pin::from_mask(this->m_mask1));
+                FRQA = 1;
+                DIRA |= this->m_mask1;
+            }
+
+            if (this->m_mask2) {
+                CTRB = 0b00100 << 26 | static_cast<unsigned int>(Pin::from_mask(this->m_mask2));
+                FRQB = 1;
+                DIRA |= this->m_mask2;
+            }
 
             const register unsigned int period = this->m_period;
 
