@@ -174,7 +174,7 @@ class MCP3xxx {
             return dat;
         }
 
-    private:
+    protected:
         static const SPI::Mode    SPI_MODE    = SPI::Mode::MODE_2;
         static const SPI::BitMode SPI_BITMODE = SPI::BitMode::MSB_FIRST;
 
@@ -183,7 +183,7 @@ class MCP3xxx {
         static const uint8_t DIFFERENTIAL = 0;
         static const uint8_t OPTION_WIDTH = 7;
 
-    private:
+    protected:
         SPI           *m_spi;
         PropWare::Pin m_cs;
         bool          m_alwaysSetMode;
