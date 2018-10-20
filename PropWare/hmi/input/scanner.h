@@ -50,7 +50,8 @@ class Scanner {
         } ErrorCode;
 
     public:
-        static const char DEFAULT_DELIMITER = '\n';
+        static const char DEFAULT_DELIMITER  = '\n';
+        static const char WHITESPACE_CHARS[]; ///< Set of all standard whitespace
 
     public:
         /**
@@ -61,8 +62,8 @@ class Scanner {
          * @param   *printer        If non-null, scanned characters will be echoed out this printer
          */
         Scanner (ScanCapable &scanCapable, const Printer *printer = NULL)
-                : m_scanCapable(&scanCapable),
-                  m_printer(printer) {
+            : m_scanCapable(&scanCapable),
+              m_printer(printer) {
         }
 
         /**
@@ -76,7 +77,16 @@ class Scanner {
         }
 
         /**
-         * @see PropWare::ScanCapable::fgets
+         * @brief   Read words from the bus until the delimiter is received
+         *
+         * If found, the delimiter will be replaced with a null-terminator. If the buffer is filled before a
+         * delimiter is found, no null-terminator will be inserted
+         *
+         * @param[in]   string[]    Output buffer which should store the data
+         * @param[in]   length      Maximum number of characters to read
+         * @param[in]   delimiter   Character which should be considered as the stop point for the reader
+         *
+         * @returns     Zero upon success, error code otherwise
          */
         ErrorCode gets (char string[], int32_t length, const char delimiter = DEFAULT_DELIMITER) {
             char *buf = string;
@@ -97,11 +107,53 @@ class Scanner {
                 if (NULL != this->m_printer) {
                     this->m_printer->put_char(ch);
 
-                    if ('\r' == ch)
+                    if ('\n' == delimiter && '\r' == ch)
                         this->m_printer->put_char('\n');
                 }
 
-                if ('\r' == ch || '\n' == ch)
+                if (!ch || delimiter == ch || ('\n' == delimiter && '\r' == ch))
+                    break;
+                else
+                    *(buf++) = ch;
+            }
+            *buf      = 0;
+
+            return NO_ERROR;
+        }
+
+        /**
+         * @brief   Read characters from the bus until the any one of the given delimiters is received
+         *
+         * If found, the delimiter will be replaced with a null-terminator. If the buffer is filled before a
+         * delimiter is found, no null-terminator will be inserted
+         *
+         * @param[in]   string[]    Output buffer which should store the data
+         * @param[in]   delimiters  Set of characters (null-terminated), any of which will be considered as the stop
+         *                          point for the reader
+         *
+         * @returns     Zero upon success, error code otherwise
+         */
+        ErrorCode get_token (char string[], int32_t length, const char *delimiters = WHITESPACE_CHARS) {
+            char *buf = string;
+            while (0 < --length) {
+                const char ch = this->m_scanCapable->get_char();
+
+                if (ch == 8 || ch == 127) {
+                    if (buf > string) {
+                        if (NULL != this->m_printer)
+                            this->m_printer->puts("\010 \010");
+                        ++length;
+                        --buf;
+                    }
+                    length += 1;
+                    continue;
+                }
+
+                if (NULL != this->m_printer) {
+                    this->m_printer->put_char(ch);
+                }
+
+                if (!ch || strchr(delimiters, ch))
                     break;
                 else
                     *(buf++) = ch;
@@ -119,7 +171,7 @@ class Scanner {
          * @returns     The Scanner object (`*this`)
          */
         template<typename T>
-        const Scanner &operator>> (T &c) {
+        Scanner &operator>> (T &c) {
             this->get(c);
             return *this;
         }
@@ -134,11 +186,27 @@ class Scanner {
         const ErrorCode get (char &c) {
             ErrorCode err;
             char      userInput[2];
-            check_errors(this->gets(userInput, sizeof(userInput)));
+            check_errors(this->get_token(userInput, sizeof(userInput)));
             if ('\0' == c)
                 return BAD_INPUT;
             else {
                 c = userInput[0];
+                return NO_ERROR;
+            }
+        }
+
+        /**
+         * @overload
+         */
+        const ErrorCode get (uint8_t &x) {
+            ErrorCode err;
+            char      userInput[32];
+            check_errors(this->get_token(userInput, sizeof(userInput)));
+            int tmp;
+            if (0 == _scanf_getl(userInput, &tmp, 10, 11, false))
+                return BAD_INPUT;
+            else {
+                x = static_cast<uint8_t>(tmp);
                 return NO_ERROR;
             }
         }
@@ -151,10 +219,43 @@ class Scanner {
         /**
          * @overload
          */
+        const ErrorCode get (uint16_t &x) {
+            ErrorCode err;
+            char      userInput[32];
+            check_errors(this->get_token(userInput, sizeof(userInput)));
+            int tmp;
+            if (0 == _scanf_getl(userInput, &tmp, 10, 11, false))
+                return BAD_INPUT;
+            else {
+                x = static_cast<uint16_t>(tmp);
+                return NO_ERROR;
+            }
+        }
+
+        /**
+         * @overload
+         */
+        const ErrorCode get (int16_t &x) {
+            ErrorCode err;
+            char      userInput[32];
+
+            check_errors(this->get_token(userInput, sizeof(userInput)));
+            int tmp;
+            if (0 == _scanf_getl(userInput, &tmp, 10, 11, false))
+                return BAD_INPUT;
+            else {
+                x = static_cast<int16_t>(tmp);
+                return NO_ERROR;
+            }
+        }
+
+        /**
+         * @overload
+         */
         const ErrorCode get (uint32_t &x) {
             ErrorCode err;
             char      userInput[32];
-            check_errors(this->gets(userInput, sizeof(userInput)));
+            check_errors(this->get_token(userInput, sizeof(userInput)));
             if (0 == _scanf_getl(userInput, (int *) &x, 10, 11, false))
                 return BAD_INPUT;
             else
@@ -167,7 +268,7 @@ class Scanner {
         const ErrorCode get (int32_t &x) {
             ErrorCode err;
             char      userInput[32];
-            check_errors(this->gets(userInput, sizeof(userInput)));
+            check_errors(this->get_token(userInput, sizeof(userInput)));
             if (0 == _scanf_getl(userInput, &x, 10, 11, false))
                 return BAD_INPUT;
             else
@@ -180,7 +281,7 @@ class Scanner {
         const ErrorCode get (float &f) {
             ErrorCode err;
             char      userInput[32];
-            check_errors(this->gets(userInput, sizeof(userInput)));
+            check_errors(this->get_token(userInput, sizeof(userInput)));
             if (0 == _scanf_getf(userInput, &f))
                 return BAD_INPUT;
             else

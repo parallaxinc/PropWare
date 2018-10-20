@@ -30,3 +30,5 @@
 PropWare::UARTRX  _g_uartrx;
 PropWare::Scanner pwIn(_g_uartrx, &pwOut);
 #endif
+
+const char PropWare::Scanner::WHITESPACE_CHARS[] = "\r\n\t ";
