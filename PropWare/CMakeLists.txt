@@ -53,6 +53,7 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utility/collection/queue.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.h
+    ${CMAKE_CURRENT_LIST_DIR}/utility/scannablestring.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/utility.h
     ${CMAKE_CURRENT_LIST_DIR}/c++allocate.h
     ${CMAKE_CURRENT_LIST_DIR}/PropWare.cpp
