@@ -47,13 +47,13 @@ set(PROPWARE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/uarttx.h
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/fullduplexserial.cpp
     ${CMAKE_CURRENT_LIST_DIR}/serial/uart/fullduplexserial.h
+    ${CMAKE_CURRENT_LIST_DIR}/string/scannablestring.h
     ${CMAKE_CURRENT_LIST_DIR}/string/staticstringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/string/stringbuilder.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/collection/charqueue.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/collection/queue.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utility/comparator.h
-    ${CMAKE_CURRENT_LIST_DIR}/utility/scannablestring.h
     ${CMAKE_CURRENT_LIST_DIR}/utility/utility.h
     ${CMAKE_CURRENT_LIST_DIR}/c++allocate.h
     ${CMAKE_CURRENT_LIST_DIR}/PropWare.cpp
