@@ -146,7 +146,7 @@ class Eeprom: public PrintCapable,
          *
          * @returns     True if successful, false otherwise
          */
-        bool get(const uint16_t address, uint8_t *buffer, const size_t length) {
+        bool get(const uint16_t address, uint8_t *buffer, const size_t length) const {
             // Wait for any current operation to finish
             while (!this->ping());
 
