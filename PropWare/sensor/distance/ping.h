@@ -23,6 +23,8 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #include <PropWare/gpio/pin.h>
 #include <PropWare/utility/utility.h>
 
