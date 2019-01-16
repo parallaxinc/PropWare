@@ -240,6 +240,13 @@
 
     <p>Sets the optimization level for size. Equivalent to adding "-Os" to <code>COMMON_FLAGS</code>.</p>
 
+    <h3 id="AUTO_CUT_SECTIONS"><code>AUTO_CUT_SECTIONS</code></h3>
+
+    <p>[default: ON]</p>
+
+    <p>Enables sectioning of functions and data via `-ffunction-sections` and `-fdata-sections`, allowing the linker
+       to prune unused sections and produce the smallest possible binary size via `-Wl,--gc-sections`.</p>
+
     <h3 id="WARN_ALL"><code>WARN_ALL</code></h3>
 
     <p>[default: ON]</p>
@@ -274,8 +281,7 @@
     <h2>Default Compile Flags</h2>
 
     <p>With all options left at their defaults, the following flags will be used. There is currently no option
-      to
-      disable <code>-fno-threadsafe-statics -fno-rtti</code>. If such an option is required, let the
+      to disable <code>-fno-threadsafe-statics -fno-rtti</code>. If such an option is required, let the
       <a href="mailto:david@zemon.name">author</a> know and an option will be added. It is believed that these
       flags will always be desired by Propeller users.</p>
 
@@ -283,21 +289,21 @@
       <dt>ASM</dt>
       <dd>None</dd>
       <dt>C</dt>
-      <dd><code>-Wall -Os -m32bit-doubles -std=c99</code></dd>
+      <dd><code>-Wall -Os -m32bit-doubles -ffunction-sections -fdata-sections -std=c99</code></dd>
       <dt>COGC</dt>
-      <dd><code>-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r</code></dd>
+      <dd><code>-Wall -Os -m32bit-doubles -ffunction-sections -fdata-sections -std=c99 -mcog -xc -r</code></dd>
       <dt>ECOGC</dt>
-      <dd><code>-Wall -Os -m32bit-doubles -std=c99 -mcog -xc -r</code></dd>
+      <dd><code>-Wall -Os -m32bit-doubles -ffunction-sections -fdata-sections -std=c99 -mcog -xc -r</code></dd>
       <dt>CXX</dt>
-      <dd><code>-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti</code></dd>
+      <dd><code>-Wall -Os -m32bit-doubles -ffunction-sections -fdata-sections -std=gnu++0x -fno-threadsafe-statics -fno-rtti</code></dd>
       <dt>COGCXX</dt>
-      <dd><code>-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++-r</code>
+      <dd><code>-Wall -Os -m32bit-doubles -ffunction-sections -fdata-sections -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++-r</code>
       </dd>
       <dt>ECOGCXX</dt>
-      <dd><code>-Wall -Os -m32bit-doubles -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++-r</code>
+      <dd><code>-Wall -Os -m32bit-doubles -ffunction-sections -fdata-sections -std=gnu++0x -fno-threadsafe-statics -fno-rtti -mcog -xc++-r</code>
       </dd>
       <dt>Linker</dt>
-      <dd>None</dd>
+      <dd>-Wl,--gc-sections</dd>
       <dt>Archiver</dt>
       <dd><code>cr</code></dd>
     </dl>
