@@ -8,7 +8,10 @@ if (PACKAGE_LINUX)
 endif ()
 
 if (PACKAGE_WIN32)
-    install(DIRECTORY CMakeModules
+    install(DIRECTORY CMakeModules/
+        DESTINATION share/cmake-${CMAKE_BINARY_SHORT_VERSION}/Modules
+        COMPONENT win_cmake)
+    install(DIRECTORY "${CMAKE_BINARY_INSTALLABLE_DIRECTORY}/"
         DESTINATION .
         COMPONENT win_cmake)
     install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Windows/spin2cpp.exe

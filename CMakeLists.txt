@@ -27,6 +27,7 @@ option(PACKAGE_PI2 "Create complete package for Raspberry Pi 2" OFF)
 
 include(./PropWareSources.cmake)
 include(./DownloadSpin2cpp.cmake)
+include(./DownloadCMake.cmake)
 include(./PropWareInstall.cmake)
 include(./PropWareCPack.cmake)
 include(./DocumentationConfig.cmake)
