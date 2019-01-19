@@ -43,28 +43,28 @@ set(CPACK_NSIS_INSTALL_ROOT                     C:)
 set(CPACK_PACKAGE_INSTALL_DIRECTORY             PropWare) # Required because default contains spaces and version number
 set(CPACK_NSIS_EXECUTABLES_DIRECTORY            .)
 set(CPACK_PACKAGE_EXECUTABLES
-    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake" CMake
-    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI"
-    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\ctest" CTest
-    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cpack" CPack)
+    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\spin2cpp.exe" Spin2Cpp)
 
 # Debian Specific
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE               "${CPACK_PROJECT_URL}")
-set(CPACK_DEBIAN_PACKAGE_SECTION                devel)
-set(CPACK_DEBIAN_PACKAGE_PRIORITY               optional)
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS              ON)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS                "make")
-set(CPACK_DEBIAN_PACKAGE_REPLACES               "cmake")
-set(CPACK_DEBIAN_PACKAGE_RELEASE                1)
-set(CPACK_DEBIAN_FILE_NAME                      DEB-DEFAULT)
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE                   "${CPACK_PROJECT_URL}")
+set(CPACK_DEBIAN_PACKAGE_SECTION                    devel)
+set(CPACK_DEBIAN_PACKAGE_PRIORITY                   optional)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS                  ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS                    "make, cmake (>= 3.3)")
+set(CPACK_DEBIAN_PACKAGE_RELEASE                    1)
+set(CPACK_DEBIAN_FILE_NAME                          DEB-DEFAULT)
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA              "${PROJECT_SOURCE_DIR}/packaging/postinst"
+                                                    "${PROJECT_SOURCE_DIR}/packaging/prerm")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION  ON)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_URL                       "${CPACK_PROJECT_URL}")
-set(CPACK_RPM_PACKAGE_REQUIRES                  "make")
-set(CPACK_RPM_PACKAGE_OBSOLETES                 "cmake")
+set(CPACK_RPM_PACKAGE_REQUIRES                  "make, cmake >= 3.3")
 set(CPACK_RPM_FILE_NAME                         RPM-DEFAULT)
 set(CPACK_RPM_PACKAGE_LICENSE                   MIT)
 set(CPACK_RPM_RELOCATION_PATHS                  /)
+set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE          "${PROJECT_SOURCE_DIR}/packaging/postinst")
+set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE        "${PROJECT_SOURCE_DIR}/packaging/prerm")
 
 # Components
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
@@ -74,18 +74,12 @@ set(CPACK_NSIS_COMPONENT_INSTALL ON)
 
 set(CPACK_COMPONENT_PROPWARE_DISPLAY_NAME           "Headers/Libraries")
 set(CPACK_COMPONENT_PROPWARE_DESCRIPTION            "Headers and static libraries for PropWare, Simple and libpropeller")
-set(CPACK_COMPONENT_CMAKE_DISPLAY_NAME              "CMake")
-set(CPACK_COMPONENT_CMAKE_DESCRIPTION               "Complete CMake installation with additional files for easy Propeller development")
 set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME           "Examples")
 set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION            "Examples projects for each of PropWare, Simple and libpropeller using the PropWare build system")
-set(CPACK_COMPONENT_WIN_CMAKE_DISPLAY_NAME          "${CPACK_COMPONENT_CMAKE_DISPLAY_NAME}")
-set(CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION           "${CPACK_COMPONENT_CMAKE_DESCRIPTION}")
 set(CPACK_COMPONENT_LINUX_SPIN2CPP_DISPLAY_NAME     "Spin2Cpp")
 set(CPACK_COMPONENT_LINUX_SPIN2CPP_DESCRIPTION      "Compile Spin files for use in C/C++ projects")
 set(CPACK_COMPONENT_WIN_SPIN2CPP_DISPLAY_NAME       "${CPACK_COMPONENT_LINUX_SPIN2CPP_DISPLAY_NAME}")
 set(CPACK_COMPONENT_WIN_SPIN2CPP_DESCRIPTION        "${CPACK_COMPONENT_LINUX_SPIN2CPP_DESCRIPTION}")
 
-configure_file("${PROJECT_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
-    "${PROJECT_BINARY_DIR}/CMakeCPackOptions.cmake" @ONLY)
-set(CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/CMakeCPackOptions.cmake")
+set(CPACK_PROJECT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/PropWareCPackOptions.cmake")
 include(CPack)

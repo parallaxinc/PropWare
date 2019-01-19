@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+for cmake_relative_root in $(ls /usr/share | grep '^cmake') ; do
+    cmake_installs=$(find /usr/share/${cmake_relative_root} -maxdepth 1 -name Modules -type d)
+    for d in ${cmake_installs} ; do
+        ln -s "/usr/share/PropWare/CMakeModules/FindPropWare.cmake" "${d}"
+    done
+done

@@ -1,25 +1,29 @@
-if (PACKAGE_LINUX OR PACKAGE_WIN32 OR PACKAGE_PI2)
-    # Build the make line
-    set(MAKES )
-    if (PACKAGE_LINUX)
-        list(APPEND MAKES make)
-    endif ()
-    if (PACKAGE_WIN32)
-        list(APPEND MAKES "make CROSS=win32")
-    endif ()
-    if (PACKAGE_PI2)
-        list(APPEND MAKES "make CROSS=rpi")
-    endif ()
+set(DOWNLOAD_PREFIX http://david.zemon.name:8111/repository/download/Spin2Cpp_)
 
-    string(REPLACE ";" " && " BUILD_COMMAND "${MAKES}")
-    string(REPLACE " " ";" BUILD_COMMAND "${BUILD_COMMAND}")
+if (PACKAGE_LINUX AND NOT EXISTS "${CMAKE_BINARY_DIR}/Spin2Cpp/Linux/spin2cpp")
+    file(DOWNLOAD ${DOWNLOAD_PREFIX}Linux/:lastSuccessful/spin2cpp.tar.gz!/spin2cpp
+        "${CMAKE_BINARY_DIR}/Spin2Cpp/Linux/spin2cpp"
+        SHOW_PROGRESS
+    )
+endif ()
 
-    externalproject_add(Spin2Cpp
-        PREFIX Spin2Cpp
-        BINARY_DIR Spin2Cpp/src/Spin2Cpp
-        GIT_REPOSITORY https://github.com/totalspectrum/spin2cpp.git
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo_append
-        BUILD_COMMAND ${BUILD_COMMAND}
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E echo_append
-        )
+if (PACKAGE_WIN32)
+    file(DOWNLOAD ${DOWNLOAD_PREFIX}Windows/:lastSuccessful/spin2cpp.zip!/spin2cpp.exe
+        "${CMAKE_BINARY_DIR}/Spin2Cpp/Windows/spin2cpp.exe"
+        SHOW_PROGRESS
+    )
+endif ()
+
+if (PACKAGE_RPI)
+    file(DOWNLOAD ${DOWNLOAD_PREFIX}RaspberryPi/:lastSuccessful/spin2cpp.tar.gz!/spin2cpp
+        "${CMAKE_BINARY_DIR}/Spin2Cpp/Rpi/spin2cpp"
+        SHOW_PROGRESS
+    )
+endif ()
+
+if (PACKAGE_OSX)
+    file(DOWNLOAD ${DOWNLOAD_PREFIX}MacOS/:lastSuccessful/spin2cpp.tar.gz!/spin2cpp
+        "${CMAKE_BINARY_DIR}/Spin2Cpp/Macosx/spin2cpp"
+        SHOW_PROGRESS
+    )
 endif ()

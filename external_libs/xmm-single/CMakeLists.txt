@@ -1,13 +1,13 @@
 set(MODEL xmm-single)
-
 parse_simpleide_project_files(Simple_${MODEL} "${SIMPLE_IDE_PROJECT_FILES}")
-create_library(Libpropeller_${MODEL} STATIC ${LIBPROPELLER_OBJECTS})
-create_library(LibPropelleruino_${MODEL} STATIC ${LIBPROPELLERUINO_OBJECTS})
-set_target_properties(Libpropeller_${MODEL} PROPERTIES OUTPUT_NAME Libpropeller)
-set_target_properties(Simple_${MODEL} PROPERTIES OUTPUT_NAME Simple)
-set_target_properties(LibPropelleruino_${MODEL} PROPERTIES OUTPUT_NAME LibPropelleruino)
-install(TARGETS Libpropeller_${MODEL} Simple_${MODEL} LibPropelleruino_${MODEL}
-    DESTINATION share/PropWare/lib/${MODEL}
-    COMPONENT propware
-    EXPORT PropWare-targets)
-
+create_pw_lib(LIB_NAME Simple MODEL ${MODEL} C_ONLY
+    EXTRA_INCLUDE_DIRS ${SIMPLE_INCLUDE_DIRS}
+)
+create_pw_lib(LIB_NAME Libpropeller MODEL ${MODEL}
+    EXTRA_INCLUDE_DIRS "${LIBPROPELLER_INCLUDE_DIR}"
+    SOURCES ${LIBPROPELLER_OBJECTS}
+)
+create_pw_lib(LIB_NAME LibPropelleruino MODEL ${MODEL}
+    EXTRA_INCLUDE_DIRS "${LIBPROPELLERUINO_INCLUDE_DIR}"
+    SOURCES ${LIBPROPELLERUINO_OBJECTS}
+)

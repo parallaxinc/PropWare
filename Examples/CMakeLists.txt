@@ -1,5 +1,7 @@
 set(BOARD activityboard)
 
+include_directories(${PROJECT_SOURCE_DIR}/ArduinoJson/src)
+
 add_subdirectory(ArduinoJson)
 add_subdirectory(Cogc)
 add_subdirectory(GettingStarted)

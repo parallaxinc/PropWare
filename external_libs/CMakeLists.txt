@@ -13,6 +13,8 @@ foreach (file IN LISTS LIBPROPELLER_OBJECTS_WITH_DUPS)
         list(APPEND LIBPROPELLER_OBJECTS "${file}")
     endif ()
 endforeach ()
+
+set(LIBPROPELLER_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/libpropeller")
 ####################################################################
 
 ####################################################################
@@ -47,7 +49,7 @@ file(GLOB_RECURSE SIMPLE_IDE_PROJECT_FILES "${SIMPLE_ROOT}/*.side")
 file(GLOB_RECURSE SIMPLE_HEADERS "${SIMPLE_ROOT}/*.h")
 
 # Find include directories
-set(SIMPLE_INCLUDE_DIRS "")
+set(SIMPLE_INCLUDE_DIRS )
 foreach(project_file IN LISTS SIMPLE_IDE_PROJECT_FILES)
     get_filename_component(LIBRARY_ROOT "${project_file}" DIRECTORY)
     list(APPEND SIMPLE_INCLUDE_DIRS "${LIBRARY_ROOT}")
@@ -60,14 +62,9 @@ install(FILES ${SIMPLE_HEADERS}
 
 ####################################################################
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/ArduinoJson/src/
-    DESTINATION share/PropWare/include
+    DESTINATION share/PropWare/include/c++
     COMPONENT propware)
 ####################################################################
-
-# Ensure the include directories are added for examples and unit tests too. This is done twice because the
-# "PARENT_SCOPE" option _only_ sets the variable in the parent scope (it ignores the current scope)
-set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} ${SIMPLE_INCLUDE_DIRS} "${LIBPROPELLERUINO_INCLUDE_DIR}")
-set(PropWare_INCLUDE_DIR ${PropWare_INCLUDE_DIR} PARENT_SCOPE)
 
 add_subdirectory(cog)
 add_subdirectory(cmm)
