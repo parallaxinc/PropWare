@@ -19,6 +19,7 @@ set(CPACK_INSTALL_CMAKE_PROJECTS
     ALL
     /
 )
+set(CPACK_PACKAGE_FILE_NAME                     ${PROJECT_NAME}-${PROJECT_VERSION}) # Remove "Generic" from filename
 set(CPACK_PROJECT_URL                           "http://david.zemon.name/PropWare")
 set(CPACK_PACKAGE_VENDOR                        "David Zemon")
 set(CPACK_PACKAGE_CONTACT                       "David Zemon <david@zemon.name>")
@@ -44,9 +45,9 @@ set(CPACK_NSIS_MUI_ICON                         "${PROJECT_SOURCE_DIR}/docs/stat
 set(CPACK_NSIS_MUI_UNIICON                      "${PROJECT_SOURCE_DIR}/docs/static-web/images/PropWare_Logo.ico")
 set(CPACK_NSIS_INSTALL_ROOT                     C:)
 set(CPACK_PACKAGE_INSTALL_DIRECTORY             PropWare) # Required because default contains spaces and version number
-set(CPACK_NSIS_EXECUTABLES_DIRECTORY            .)
+set(CPACK_NSIS_MODIFY_PATH                      ON)
 set(CPACK_PACKAGE_EXECUTABLES
-    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\spin2cpp.exe" Spin2Cpp)
+    "${CUSTOM_WIN32_CMAKE_INSTALL_DIR}\\\\bin\\\\cmake-gui" "CMake GUI")
 
 # Debian Specific
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE                   "${CPACK_PROJECT_URL}")
@@ -73,9 +74,9 @@ set(CPACK_RPM_PACKAGE_ARCHITECTURE              noarch)
 
 # Components
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
-set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_RPM_COMPONENT_INSTALL ON)
-set(CPACK_NSIS_COMPONENT_INSTALL ON)
+set(CPACK_DEB_COMPONENT_INSTALL     ON)
+set(CPACK_RPM_COMPONENT_INSTALL     ON)
+set(CPACK_NSIS_COMPONENT_INSTALL    ON)
 
 set(CPACK_COMPONENT_PROPWARE_DISPLAY_NAME           "Headers/Libraries")
 set(CPACK_COMPONENT_PROPWARE_DESCRIPTION            "Headers and static libraries for PropWare, Simple and libpropeller")
@@ -83,8 +84,6 @@ set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME           "Examples")
 set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION            "Examples projects for each of PropWare, Simple and libpropeller using the PropWare build system")
 set(CPACK_COMPONENT_WIN_CMAKE_DISPLAY_NAME          "CMake")
 set(CPACK_COMPONENT_WIN_CMAKE_DESCRIPTION           "Complete CMake installation with additional files for easy Propeller development")
-set(CPACK_COMPONENT_LINUX_SPIN2CPP_DISPLAY_NAME     "Spin2Cpp")
-set(CPACK_COMPONENT_LINUX_SPIN2CPP_DESCRIPTION      "Compile Spin files for use in C/C++ projects")
 set(CPACK_COMPONENT_WIN_SPIN2CPP_DISPLAY_NAME       "${CPACK_COMPONENT_LINUX_SPIN2CPP_DISPLAY_NAME}")
 set(CPACK_COMPONENT_WIN_SPIN2CPP_DESCRIPTION        "${CPACK_COMPONENT_LINUX_SPIN2CPP_DESCRIPTION}")
 

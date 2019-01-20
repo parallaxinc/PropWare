@@ -31,6 +31,7 @@ if (DOXYGEN_FOUND)
     endif ()
 endif ()
 
+set(TC_PW_DL_BASE "http://david.zemon.name:8111/repository/download/${TEAMCITY_BUILD_ID}/.lastSuccessful")
 configure_file("${PROJECT_SOURCE_DIR}/docs/static-web/src/download.html.in"
     "${PROJECT_SOURCE_DIR}/docs/static-web/src/download.html"
     @ONLY)

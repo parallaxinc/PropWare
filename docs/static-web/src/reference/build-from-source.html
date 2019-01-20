@@ -62,17 +62,16 @@
 
   <dl>
     <dt>PACKAGE_LINUX</dt>
-    <dd>Enable x86, 64-bit Debian <code>.deb</code> and RedHat <code>.rpm</code> binary distributions.</dd>
-    <dt>PACKAGE_OSX</dt>
-    <dd>Enable an extra ZIP file containing CMake for Apple operating systems that matches the OS X standard file
-      hierarchy.
+    <dd>Enable Debian <code>.deb</code> and RedHat <code>.rpm</code> binary distributions. Results will be
+      architecture-independent and can be installed on Raspbrry Pis as well as x86 PCs.
     </dd>
-    <dt>PACKAGE_PI2</dt>
-    <dd>Enable an ARMv7 Debian <code>.deb</code> binary distribution (can only successfully run from a Debian-based,
-      ARMv7 computer, such as the Raspberry Pi 2).
+    <dt>PACKAGE_OSX</dt>
+    <dd>Enable PackageMaker (untested) for Mac OSX installations.
     </dd>
     <dt>PACKAGE_WIN32</dt>
-    <dd>Enable an x86, 32-bit Windows <code>.exe</code> binary distribution.</dd>
+    <dd>Enable an x86, 32-bit Windows <code>.exe</code> binary distribution. The Windows package is special in that
+      it includes a complete CMake installation as well as Spin2Cpp in the installation directory.
+    </dd>
   </dl>
 
   <p>To enable any one of these options, such as <code>PACKAGE_WIN32</code>, run CMake again with
@@ -89,7 +88,7 @@
   <div class="alert alert-warning" role="alert"><b>Warning</b> Be sure to enable the appropriate
     packaging-related CMake options as described above. Invoking CPack's DEB target without enabling the
     <code>PACKAGE_LINUX</code> CMake option will result in a <code>.deb</code> binary that does not contain
-    PropWare's CMake distribution or special CMake configuration files.
+    critical PropWare-related files.
   </div>
 
   <p>To build only a specific distribution format use <code>cpack -G &lt;FORMAT&gt;</code> where
