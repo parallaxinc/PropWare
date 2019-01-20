@@ -1,10 +1,19 @@
 if (PACKAGE_LINUX)
-    install(DIRECTORY CMakeModules/
-        DESTINATION share/PropWare/CMakeModules
-        COMPONENT cmakemodules)
     install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Linux/spin2cpp
         DESTINATION bin
         COMPONENT linux_spin2cpp)
+endif ()
+
+if (PACKAGE_PI2)
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Rpi/spin2cpp
+        DESTINATION .
+        COMPONENT rpi_spin2cpp)
+endif ()
+
+if (PACKAGE_PI2 OR PACKAGE_LINUX)
+    install(DIRECTORY CMakeModules/
+        DESTINATION share/PropWare/CMakeModules
+        COMPONENT linux_cmakemodules)
 endif ()
 
 if (PACKAGE_WIN32)
@@ -22,19 +31,10 @@ endif ()
 if (PACKAGE_OSX)
     install(DIRECTORY CMakeModules/
         DESTINATION pwcmake.app/Contents/CMakeModules
-        COMPONENT cmakemodules)
+        COMPONENT macosx_cmakemodules)
     install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Macosx/spin2cpp
         DESTINATION pwcmake.app/Contents/bin
-        COMPONENT linux_spin2cpp)
-endif ()
-
-if (PACKAGE_PI2)
-    install(DIRECTORY CMakeModules/
-        DESTINATION share/PropWare/CMakeModules
-        COMPONENT cmakemodules)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Rpi/spin2cpp
-        DESTINATION .
-        COMPONENT rpi_spin2cpp)
+        COMPONENT macosx_spin2cpp)
 endif ()
 
 if (PACKAGE_OSX)
