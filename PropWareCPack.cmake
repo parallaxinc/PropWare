@@ -63,7 +63,7 @@ set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE               all)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_URL                       "${CPACK_PROJECT_URL}")
-set(CPACK_RPM_PACKAGE_REQUIRES                  "make, cmake >= 3.3")
+set(CPACK_RPM_PACKAGE_REQUIRES                  "make, cmake >= 3.3, findutils")
 set(CPACK_RPM_FILE_NAME                         RPM-DEFAULT)
 set(CPACK_RPM_PACKAGE_LICENSE                   MIT)
 set(CPACK_RPM_RELOCATION_PATHS                  /)
