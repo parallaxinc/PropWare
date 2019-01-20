@@ -1,8 +1,22 @@
 #!/bin/bash
 set -e
-for cmake_relative_root in $(ls /usr/share | grep '^cmake') ; do
-    cmake_installs=$(find /usr/share/${cmake_relative_root} -maxdepth 1 -name Modules -type d)
+
+create_links () {
+    root="${1}"
+    subdirectory="${2}"
+
+    cmake_installs=$(find ${root}/${subdirectory} -maxdepth 1 -name Modules -type d)
     for d in ${cmake_installs} ; do
         ln -s "/usr/share/PropWare/CMakeModules/FindPropWare.cmake" "${d}"
     done
-done
+}
+
+do_stuff () {
+    root="${1}"
+    for cmake_relative_root in $(ls "${root}" | grep '^cmake') ; do
+        create_links "${root}" "${cmake_relative_root}"
+    done
+}
+
+do_stuff /usr/share
+do_stuff /usr/local/share

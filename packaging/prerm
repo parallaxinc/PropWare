@@ -1,3 +1,4 @@
 #!/bin/bash
 set -e
 find /usr/share -name 'FindPropWare.cmake' -type l -delete
+find /usr/local/share -name 'FindPropWare.cmake' -type l -delete
