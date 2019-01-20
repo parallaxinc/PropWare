@@ -24,4 +24,11 @@ if (PACKAGE_WIN32)
         DEPENDS "${CMAKE_BIN_FILE}" "${CMAKE_UNZIP_DIR}"
         WORKING_DIRECTORY "${CMAKE_UNZIP_DIR}"
     )
+
+    set(DOWNLOAD_SPIN2CPP_PREFIX http://david.zemon.name:8111/repository/download/Spin2Cpp_)
+    set(DOWNLOAD_SPIN2CPP_WIN_BINARY "${CMAKE_BINARY_DIR}/Spin2Cpp/spin2cpp.exe")
+    file(DOWNLOAD ${DOWNLOAD_SPIN2CPP_PREFIX}Windows/:lastSuccessful/spin2cpp.zip!/spin2cpp.exe
+        "${DOWNLOAD_SPIN2CPP_WIN_BINARY}"
+        SHOW_PROGRESS
+    )
 endif ()

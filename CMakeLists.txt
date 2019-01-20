@@ -23,11 +23,9 @@ project(PropWare
 option(PACKAGE_LINUX "Create complete package for Linux" OFF)
 option(PACKAGE_WIN32 "Create complete package for Windows" OFF)
 option(PACKAGE_OSX "Create complete package for Mac OSX" OFF)
-option(PACKAGE_PI2 "Create complete package for Raspberry Pi 2" OFF)
 
 include(./PropWareSources.cmake)
-include(./DownloadSpin2cpp.cmake)
-include(./DownloadCMake.cmake)
+include(./DownloadWindowsBinaries.cmake)
 include(./PropWareInstall.cmake)
 include(./PropWareCPack.cmake)
 include(./DocumentationConfig.cmake)

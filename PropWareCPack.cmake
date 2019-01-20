@@ -59,6 +59,7 @@ set(CPACK_DEBIAN_FILE_NAME                          DEB-DEFAULT)
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA              "${PROJECT_SOURCE_DIR}/packaging/postinst"
                                                     "${PROJECT_SOURCE_DIR}/packaging/prerm")
 set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION  ON)
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE               all)
 
 # RPM Specific
 set(CPACK_RPM_PACKAGE_URL                       "${CPACK_PROJECT_URL}")
@@ -68,6 +69,7 @@ set(CPACK_RPM_PACKAGE_LICENSE                   MIT)
 set(CPACK_RPM_RELOCATION_PATHS                  /)
 set(CPACK_RPM_POST_INSTALL_SCRIPT_FILE          "${PROJECT_SOURCE_DIR}/packaging/postinst")
 set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE        "${PROJECT_SOURCE_DIR}/packaging/prerm")
+set(CPACK_RPM_PACKAGE_ARCHITECTURE              noarch)
 
 # Components
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)

@@ -1,16 +1,4 @@
 if (PACKAGE_LINUX)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Linux/spin2cpp
-        DESTINATION bin
-        COMPONENT linux_spin2cpp)
-endif ()
-
-if (PACKAGE_PI2)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Rpi/spin2cpp
-        DESTINATION .
-        COMPONENT rpi_spin2cpp)
-endif ()
-
-if (PACKAGE_PI2 OR PACKAGE_LINUX)
     install(DIRECTORY CMakeModules/
         DESTINATION share/PropWare/CMakeModules
         COMPONENT linux_cmakemodules)
@@ -23,7 +11,7 @@ if (PACKAGE_WIN32)
     install(DIRECTORY "${CMAKE_BINARY_INSTALLABLE_DIRECTORY}/"
         DESTINATION .
         COMPONENT win_cmake)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Windows/spin2cpp.exe
+    install(PROGRAMS "${DOWNLOAD_SPIN2CPP_WIN_BINARY}"
         DESTINATION bin
         COMPONENT win_spin2cpp)
 endif ()
@@ -32,15 +20,6 @@ if (PACKAGE_OSX)
     install(DIRECTORY CMakeModules/
         DESTINATION pwcmake.app/Contents/CMakeModules
         COMPONENT macosx_cmakemodules)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Macosx/spin2cpp
-        DESTINATION pwcmake.app/Contents/bin
-        COMPONENT macosx_spin2cpp)
-endif ()
-
-if (PACKAGE_OSX)
-    install(PROGRAMS ${CMAKE_BINARY_DIR}/Spin2Cpp/Macosx/spin2cpp
-        DESTINATION bin
-        COMPONENT macosx_spin2cpp)
 endif ()
 
 # PropWare & libpropeller includes
