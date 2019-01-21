@@ -84,9 +84,8 @@ class BlockStorage {
          */
         static void print_block (const Printer &printer, const Buffer &buffer, const size_t words = 512,
                                  const uint8_t wordsPerLine = 16) {
-            if (!Utility::empty(buffer.meta->name)) {
-                printer.printf("Name = %s\n", buffer.meta->name);
-            }
+            if (!Utility::empty(buffer.meta->name))
+                printer << "Name = " << buffer.meta->name << '\n';
             print_block(printer, buffer.buf, words, wordsPerLine);
         }
 
@@ -108,20 +107,24 @@ class BlockStorage {
             printer << "         0 ";
             for (uint_fast8_t i = 1; i < wordsPerLine; ++i) {
                 if (8 == i)
-                    printer.print("  ");
-                printer.printf("%2X ", i);
+                    printer << ' ' << ' ';
+                printer.put_int(i, 16, 2);
+                printer << ' ';
             }
             printer << '\n';
 
             for (uint_fast16_t line = 0; line < lines; ++line) {
                 const uint_fast16_t baseAddress = line * wordsPerLine;
-                printer.printf("0x%04X: ", baseAddress);
+                printer << '0' << 'x';
+                printer.put_int(baseAddress, 16, 4, '0');
+                printer << ':' << ' ';
 
                 // Print hex values
                 for (uint_fast8_t offset = 0; offset < wordsPerLine; ++offset) {
                     if (8 == offset)
-                        printer.print("- ");
-                    printer.printf("%02X ", (unsigned int) data[baseAddress + offset]);
+                        printer << '-' << ' ';
+                    printer.put_int((unsigned int) data[baseAddress + offset], 16, 2, '0');
+                    printer << ' ';
                 }
 
                 // Print ASCII values
