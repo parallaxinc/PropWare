@@ -22,16 +22,28 @@ if (PACKAGE_OSX)
         COMPONENT macosx_cmakemodules)
 endif ()
 
-# PropWare & libpropeller includes
+# PropWare includes
 install(DIRECTORY
         "${PROJECT_SOURCE_DIR}/PropWare"
+    DESTINATION share/PropWare/include/PropWare
+    COMPONENT propware
+    FILES_MATCHING PATTERN *.h)
+
+# libpropeller includes
+install(DIRECTORY
         "${PROJECT_SOURCE_DIR}/libpropeller/libpropeller"
-        "${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/"
-    DESTINATION share/PropWare/include/c++
+    DESTINATION share/PropWare/include/Libpropeller
     COMPONENT propware
     FILES_MATCHING PATTERN *.h
     PATTERN libpropeller/libpropeller/compile_tools EXCLUDE
     PATTERN libpropeller/libpropeller/unity_tools/asmsrc EXCLUDE)
+
+# libPropelleruino includes
+install(DIRECTORY
+        "${PROJECT_SOURCE_DIR}/libArduino/libPropelleruino/"
+    DESTINATION share/PropWare/include/LibPropelleruino
+    COMPONENT propware
+    FILES_MATCHING PATTERN *.h)
 
 # Version file
 file(WRITE "${PROJECT_BINARY_DIR}/version.txt" "${PROJECT_VERSION}")

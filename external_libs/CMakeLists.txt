@@ -56,13 +56,18 @@ foreach(project_file IN LISTS SIMPLE_IDE_PROJECT_FILES)
 endforeach()
 
 install(FILES ${SIMPLE_HEADERS}
-    DESTINATION share/PropWare/include
+    DESTINATION share/PropWare/include/Simple
     COMPONENT propware)
 ####################################################################
 
 ####################################################################
+add_library(ArduinoJson INTERFACE)
+target_include_directories(ArduinoJson INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/ArduinoJson/src>
+    $<INSTALL_INTERFACE:share/PropWare/include/ArduinoJson>
+)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/ArduinoJson/src/
-    DESTINATION share/PropWare/include/c++
+    DESTINATION share/PropWare/include/ArduinoJson
     COMPONENT propware)
 ####################################################################
 

@@ -1,6 +1,6 @@
 set(MODEL cog)
 parse_simpleide_project_files(Simple_${MODEL} "${SIMPLE_IDE_PROJECT_FILES}")
-create_pw_lib(LIB_NAME Simple MODEL ${MODEL} C_ONLY
+create_pw_lib(LIB_NAME Simple MODEL ${MODEL}
     EXTRA_INCLUDE_DIRS ${SIMPLE_INCLUDE_DIRS}
 )
 create_pw_lib(LIB_NAME Libpropeller MODEL ${MODEL}

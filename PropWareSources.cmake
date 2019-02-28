@@ -1,5 +1,5 @@
 function(create_pw_lib)
-    set(options C_ONLY)
+    set(options )
     set(oneValueArgs LIB_NAME MODEL)
     set(multiValueArgs EXTRA_INCLUDE_DIRS SOURCES)
     cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -12,17 +12,18 @@ function(create_pw_lib)
     set_compile_flags(${TARGET} ${ARGS_MODEL})
     if (NOT LIB_NAME STREQUAL "PropWare")
         target_compile_options(${TARGET} PRIVATE -w)
-    endif ()
-    if (ARGS_C_ONLY)
-        set(SYSTEM_ARG SYSTEM)
-        target_include_directories(${TARGET} SYSTEM PUBLIC $<INSTALL_INTERFACE:share/PropWare/include>)
-    else ()
-        target_include_directories(${TARGET} PUBLIC $<INSTALL_INTERFACE:share/PropWare/include/c++>)
+        if (LIB_NAME STREQUAL "Simple")
+            set(SYSTEM_ARG SYSTEM)
+        endif ()
     endif ()
     foreach(d IN LISTS ARGS_EXTRA_INCLUDE_DIRS)
         list(APPEND BUILD_INTERFACE_DIRS $<BUILD_INTERFACE:${d}>)
     endforeach()
-    target_include_directories(${TARGET} ${SYSTEM_ARG} PUBLIC ${BUILD_INTERFACE_DIRS})
+    target_include_directories(${TARGET} ${SYSTEM_ARG}
+        PUBLIC
+            ${BUILD_INTERFACE_DIRS}
+            $<INSTALL_INTERFACE:share/PropWare/include/${ARGS_LIB_NAME}>
+    )
     set_linker(${TARGET})
     set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${ARGS_LIB_NAME})
     install(TARGETS ${TARGET}
