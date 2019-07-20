@@ -61,7 +61,7 @@
         ensure the installation path does not contain parenthesis (such as <code>C:\Program Files (x86)</code>).
       </li>
       <li>Download
-        <a href="http://david.zemon.name:8111/repository/download/PropGCC5_Gcc4win32/.lastSuccessful/propellergcc-alpha_v1_9_0-gcc4-win32.zip?guest=1">
+        <a href="https://ci.zemon.name/repository/download/PropGCC5_Gcc4win32/.lastSuccessful/propellergcc-alpha_v1_9_0-gcc4-win32.zip?guest=1">
           PropGCC for Windows</a>
       </li>
       <li>Extract PropGCC somewhere on your computer, such as <code>C:\</code>. Note that the PropGCC archive
