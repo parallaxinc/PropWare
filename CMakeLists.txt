@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.12)
 
 set(PROPWARE_MAIN_PACKAGE TRUE)
 set(CMAKE_ERROR_DEPRECATED TRUE)

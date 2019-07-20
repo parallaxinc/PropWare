@@ -11,7 +11,7 @@
       will be built from a single source file, <code>main.cpp</code>. The resulting CMake configuration file
       (<code>CMakeLists.txt</code>) would contain the following:</p>
 
-    <pre><code hljs hljs-language="cmake">cmake_minimum_required(VERSION 3.3)
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required(VERSION 3.12)
 find_package(PropWare REQUIRED)
 
 project(MyFirstProject)
@@ -21,7 +21,7 @@ create_simple_executable(HelloWorld main.cpp)</code></pre>
     <p>We'll break this into three sections. The first is boilerplate and should be at the top of all of your
       CMake configuration files:</p>
 
-    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.3)
+    <pre><code hljs hljs-language="cmake">cmake_minimum_required (VERSION 3.12)
 find_package(PropWare REQUIRED)</code></pre>
 
     <p>The first line is required by CMake, and the second line defines special CMake functions for the Propeller and

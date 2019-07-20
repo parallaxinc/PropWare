@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.12)
 
 # Spin2Cpp is a PropWare 2.1 veature, so you must have at least PropWare 2.1
 find_package(PropWare 2.1 REQUIRED)
