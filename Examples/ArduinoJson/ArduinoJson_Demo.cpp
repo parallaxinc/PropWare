@@ -29,19 +29,19 @@
 
 using PropWare::Pin;
 using PropWare::Port;
-using ArduinoJson::StaticJsonBuffer;
+using ArduinoJson::StaticJsonDocument;
 using ArduinoJson::JsonObject;
 
 int main () {
-    char json[]                 = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+    const char json[]             = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
 
-    StaticJsonBuffer<200> jsonBuffer;
-    const JsonObject      &root = jsonBuffer.parseObject(json);
+    StaticJsonDocument<200> jsonDocument;
+    deserializeJson(jsonDocument, json);
 
-    const char   *sensor   = root["sensor"];
-    unsigned int time      = root["time"];
-    double       latitude  = root["data"][0];
-    double       longitude = root["data"][1];
+    const char   *sensor   = jsonDocument["sensor"];
+    unsigned int time      = jsonDocument["time"];
+    double       latitude  = jsonDocument["data"][0];
+    double       longitude = jsonDocument["data"][1];
 
     pwOut << "Sensor: " << sensor << "\n";
     pwOut << "Time: " << time << "\n";
