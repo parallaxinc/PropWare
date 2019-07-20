@@ -13,6 +13,7 @@ endif ()
 
 # Load special modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
+set(SAVE_TEMPS OFF CACHE BOOL "Must be turned off to prevent build failures in Simple during parallel compilation.")
 find_package(PropWare REQUIRED)
 
 # Set the project, version number and all languages used

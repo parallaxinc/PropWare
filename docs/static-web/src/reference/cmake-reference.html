@@ -278,6 +278,14 @@
       (current PropGCC) and <code>gnu++14</code> in GCC5 version of PropGCC. Equivalent to adding
       "-std=&lt;standard&gt;" to <code>CXX_FLAGS</code>.</p>
 
+    <h3 id="SAVE_TEMPS"><code>SAVE_TEMPS</code></h3>
+
+    <p>[default: ON]</p>
+
+    <p>For each C and C++ file, save the preprocessed (.i and .ii) file and generated assembly code. Helpful when
+      debugging tight loops or tracking down performance improvements and timing oddities. Equivalent to adding
+      "-save-temps" to <code>COMMON_FLAGS</code>.</p>
+
     <h2>Default Compile Flags</h2>
 
     <p>With all options left at their defaults, the following flags will be used. There is currently no option
