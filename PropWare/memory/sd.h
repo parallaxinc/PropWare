@@ -217,7 +217,7 @@ class SD : public BlockStorage {
          * @param[in]   printer     Printer used for logging the message
          * @param[in]   err         Error number used to determine error string
          */
-        void print_error_str (const Printer &printer, const ErrorCode err) {
+        static void print_error_str (const Printer &printer, const ErrorCode err) {
             const uint8_t relativeError = err - BEG_ERROR;
 
             switch (err) {
@@ -233,7 +233,7 @@ class SD : public BlockStorage {
                 case INVALID_RESPONSE:
                     printer << "SD Error " << relativeError << ": Invalid first-byte response\n";
                     printer << "\tReceived: " << _sd_firstByteResponse << '\n';
-                    this->first_byte_expansion(printer);
+                    SD::first_byte_expansion(printer);
                     break;
                 case INVALID_INIT:
                     printer << "SD Error " << relativeError << ": Invalid response during initialization\n";
@@ -329,35 +329,29 @@ class SD : public BlockStorage {
         }
 
         inline PropWare::ErrorCode activate (uint8_t response[]) const {
-            PropWare::ErrorCode err;
-            uint32_t            timeout;
-            uint8_t             firstByte;
-            uint32_t            longWiggleRoom = 3 * MILLISECOND;
-            bool                stageCleared   = false;
+            const uint32_t wiggleRoom = 3 * MILLISECOND;
+            uint32_t       timeout;
 
             // Attempt to send active
-            timeout = SEND_ACTIVE_TIMEOUT + CNT;  //
+            timeout = SEND_ACTIVE_TIMEOUT + CNT;
             do {
+                PropWare::ErrorCode err;
+                uint8_t             firstByte;
+
                 // Send the application-specific pre-command
                 this->send_command(CMD_APP, 0, CRC_ACMD_PREP);
                 check_errors(this->get_response(RESPONSE_LEN_R1, firstByte, response));
 
                 // Request that the SD card go active!
-                this->send_command(CMD_WR_OP, BIT_30, 0);
+                this->send_command(CMD_WR_OP, BIT_30, 0x77);
                 check_errors(this->get_response(RESPONSE_LEN_R1, firstByte, response));
 
                 // If the card ACKed with the active state, we're all good!
                 if (RESPONSE_ACTIVE == firstByte)
-                    stageCleared = true;
+                    return NO_ERROR;
+            } while ((timeout - CNT) > wiggleRoom);
 
-                // Check for timeout
-                if (abs(timeout - CNT) < longWiggleRoom)
-                    return READ_TIMEOUT;
-
-                // Wait until we have received the active response
-            } while (!stageCleared);
-
-            return NO_ERROR;
+            return READ_TIMEOUT;
         }
 
         /**
@@ -586,7 +580,7 @@ class SD : public BlockStorage {
             return NO_ERROR;
         }
 
-        void first_byte_expansion (const Printer &printer) {
+        static void first_byte_expansion (const Printer &printer) {
             if (BIT_0 & _sd_firstByteResponse)
                 printer.puts("\t0: Idle\n");
             if (BIT_1 & _sd_firstByteResponse)
@@ -663,7 +657,7 @@ class SD : public BlockStorage {
         // SD Arguments
         static const uint32_t HOST_VOLTAGE_3V3 = 0x01;
         static const uint32_t R7_CHECK_PATTERN = 0xAA;
-        static const uint32_t ARG_CMD8         = ((HOST_VOLTAGE_3V3 << 8) | R7_CHECK_PATTERN);
+        static const uint32_t ARG_CMD8         = ((HOST_VOLTAGE_3V3 << 8U) | R7_CHECK_PATTERN);
         static const uint32_t ARG_LEN          = 5;
 
         // SD CRCs
@@ -681,9 +675,9 @@ class SD : public BlockStorage {
         static const uint8_t RESPONSE_LEN_R3 = 5;
         static const uint8_t RESPONSE_LEN_R7 = 5;
         static const uint8_t RSPNS_TKN_BITS  = 0x0f;
-        static const uint8_t RSPNS_TKN_ACCPT = (0x02 << 1) | 1;
-        static const uint8_t RSPNS_TKN_CRC   = (0x05 << 1) | 1;
-        static const uint8_t RSPNS_TKN_WR    = (0x06 << 1) | 1;
+        static const uint8_t RSPNS_TKN_ACCPT = (0x02U << 1U) | 1U;
+        static const uint8_t RSPNS_TKN_CRC   = (0x05U << 1U) | 1U;
+        static const uint8_t RSPNS_TKN_WR    = (0x06U << 1U) | 1U;
 
     private:
         /*******************************

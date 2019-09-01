@@ -54,8 +54,6 @@ class MockStepper: public Stepper {
         std::vector<Stepper::Step> m_stepsTaken;
 };
 
-static MockStepper *testable;
-
 Stepper::Step operator+ (const Stepper::Step step, const unsigned int increment) {
     return static_cast<Stepper::Step>((static_cast<uint32_t>(step) + increment) % 8);
 }

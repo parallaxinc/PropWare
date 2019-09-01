@@ -139,14 +139,14 @@ class SPI : public PrintCapable,
          * @brief   Release the current MOSI pin as a floating input and set the new one as output
          */
         void set_mosi (const Port::Mask mask) {
-            this->reset_pin_mask(this->m_mosi, mask);
+            SPI::reset_pin_mask(this->m_mosi, mask);
         }
 
         /**
          * @brief   Set the new pin as input
          */
         void set_miso (const Port::Mask mask) {
-            this->reset_pin_mask(this->m_miso, mask);
+            SPI::reset_pin_mask(this->m_miso, mask);
             this->m_miso.set_dir_in();
         }
 
@@ -154,7 +154,7 @@ class SPI : public PrintCapable,
          * @brief   Release the current SCLK pin as a floating input and set the new one as output
          */
         void set_sclk (const Port::Mask mask) {
-            this->reset_pin_mask(this->m_sclk, mask);
+            SPI::reset_pin_mask(this->m_sclk, mask);
             this->set_mode(this->m_mode);
         }
 
@@ -166,7 +166,7 @@ class SPI : public PrintCapable,
         void set_mode (const Mode mode) {
             this->m_mode = mode;
 
-            if (0x02 & static_cast<unsigned int>(mode))
+            if (0x02U & static_cast<unsigned int>(mode))
                 this->m_sclk.set();
             else
                 this->m_sclk.clear();
@@ -195,7 +195,7 @@ class SPI : public PrintCapable,
             if (MAX_CLOCK < frequency)
                 return INVALID_FREQ;
             else {
-                this->m_clkDelay = (CLKFREQ / frequency) >> 1;
+                this->m_clkDelay = (CLKFREQ / frequency) >> 1U;
                 return NO_ERROR;
             }
         }
@@ -206,7 +206,7 @@ class SPI : public PrintCapable,
          * @return      Returns 0 upon success, otherwise error code
          */
         int32_t get_clock () const {
-            return CLKFREQ / (this->m_clkDelay << 1);
+            return CLKFREQ / (this->m_clkDelay << 1U);
         }
 
         /**
@@ -240,7 +240,7 @@ class SPI : public PrintCapable,
          * @returns     Value from the data bus
          */
         uint32_t shift_in (const unsigned int bits) const {
-            const bool clockPhase = static_cast<bool>(static_cast<unsigned int>(this->m_mode) & 0x01);
+            const bool clockPhase = static_cast<bool>(static_cast<unsigned int>(this->m_mode) & 0x01U);
             if (clockPhase) {
                 switch (this->m_bitmode) {
                     case BitMode::MSB_FIRST:
@@ -314,7 +314,7 @@ class SPI : public PrintCapable,
          * @param[out]  buffer          Address to store data
          * @param[in]   numberOfBytes   Number of bytes to receive
          */
-        void shift_in_block_mode0_msb_first_fast (uint8_t *buffer, size_t numberOfBytes) const {
+        void shift_in_block_mode0_msb_first_fast (const uint8_t *buffer, size_t numberOfBytes) const {
             __asm__ volatile (
 #define ASMVAR(name) FC_ADDR(#name "%=", "SpiBlockReadStart%=")
             FC_START("SpiBlockReadStart%=", "SpiBlockReadEnd%=")
