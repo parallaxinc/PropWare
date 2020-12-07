@@ -51,6 +51,12 @@ function(add_simple_sources root_dir file_contents target_name)
             endif ()
         else ()
             remove_link_symbol("${line}" relativeFilepath)
+
+            # FIXME: https://github.com/parallaxinc/Simple-Libraries/pull/204
+            if (relativeFilepath STREQUAL "imu_gryoAvailable.c")
+                set(relativeFilepath imu_gyroAvailable.c)
+            endif ()
+
             set(source_filepath "${root_dir}/${relativeFilepath}")
             if (NOT FILE_HAS_MAIN)
                 list(APPEND NEW_SOURCES "${source_filepath}")
