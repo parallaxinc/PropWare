@@ -14,6 +14,7 @@ RUN apt-get update \
         graphviz \
         make \
         nsis \
+        pdf2svg \
         rpm \
         wget
 

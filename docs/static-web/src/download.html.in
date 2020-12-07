@@ -79,10 +79,10 @@
     <h2>Linux - Debian/Ubuntu/Mint/Raspbian/etc</h2>
 
     <ol>
-      <li>Download the <a href="@TC_PW_DL_BASE@/propware_@VERSION@-1_any.deb?guest=1"><code>deb</code> package file</a>.
+      <li>Download the <a href="@TC_PW_DL_BASE@/propware_@VERSION@-1_all.deb?guest=1"><code>deb</code> package file</a>.
       </li>
       <li>Use <code>dpkg</code> to install the file with: <code>sudo dpkg -i
-        propware_@VERSION@-1_any.deb</code>.
+        propware_@VERSION@-1_all.deb</code>.
       </li>
       <li>An "error" such as the following is perfectly normal if you do not have <code>make</code> or
         <code>cmake</code> installed on your system.
